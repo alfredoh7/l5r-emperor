@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Primitive P11: card-restriction store (no-attack/defend/challenge/attach/dishonor/pair/entry-from-province/act-while-bowed/assign-while-bowed/spell-limit), static restrictions and generalised target bars with forced targets, in CardRestrictions.cs with consult points in Assign, IssueChallenge, attach legality, Dishonor, QuotePurchase/QuoteOverlay, ResolveCelestial, StartTurn, RequireNotBarredFromTargeting and the performer switches. Engine only; no card wired. Shared-file edits are one to three lines each (listed in docs/decisions/2026-10-06-p11-card-restrictions.md).",
+  "validation": "New card-restrictions Core suite 10/10; full check.sh --skip-client result recorded in the PR; format and comment-swallow lint clean.",
+  "remaining": "Cards that use it are wired in a later wave; restrictions are not carried across an Experienced overlay; keyword-scoped bars are judged at announcement only.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/684",
+  "branch": "claude/684-p11-card-restrictions",
+  "updated": "2026-10-06T18:04:15.468379+00:00"
+}

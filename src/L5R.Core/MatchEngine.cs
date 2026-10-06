@@ -684,6 +684,7 @@ public sealed partial class MatchEngine
     {
         if (playerId is < 0 or > 1 || !_state.Cards.TryGetValue(cardId, out var card) || !_state.Cards.TryGetValue(targetId, out var target))
             return new(cardId, targetId, 0, 0, "Unknown card, target, or player.");
+        if (ProvinceEntryLockError(card) is { } overlayLocked) return new(cardId, targetId, 0, 0, overlayLocked); // P11 (CardRestrictions.cs)
         var higherLevel = ExperienceLevel(card);
         var lowerLevel = ExperienceLevel(target);
         string? error = null;
@@ -920,6 +921,7 @@ public sealed partial class MatchEngine
         // fromDynastyDeck (Emperor Edition remaining-cards pass, group C, issue #492: Sacrifice of Pawns's search): one of the player's own Dynasty deck, priced like a province card.
         if (fromDeadPile ? card.OwnerId != playerId && !anyOwnerPile || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : fromDynastyDeck ? card.OwnerId != playerId || card.Zone != Zone.DynastyDeck : card.OwnerId != playerId || card.Zone != Zone.Province || !card.FaceUp)
             return new(cardId, 0, clanDiscount, clanAllegiance, false, fromDeadPile ? "Choose one of your own dead Personalities." : "Choose your face-up province card.", []);
+        if (ProvinceEntryLockError(card) is { } entryLocked) return new(cardId, 0, clanDiscount, clanAllegiance, false, entryLocked, []); // P11 (CardRestrictions.cs): "cards will not enter play from the province" -- every province entry asks QuotePurchase
         string? error = null;
         var inClan = def.Type == CardType.Personality && ClanAlignments(card).Contains(player.Clan);
         if (fromDeadPile ? def.Type is not (CardType.Personality or CardType.Holding) : def.Type is not (CardType.Personality or CardType.Holding)) error = fromDeadPile ? "Only a Personality or a Holding can be recruited from a discard pile." : "This card cannot be purchased."; // a Holding too (issue #653: Govern the Land, Re-fortification)
@@ -1335,6 +1337,8 @@ public sealed partial class MatchEngine
             RequireHoteiMayAssign(card, isDefender); // Hotei's Contentment (issue #503)
             RequireDelayedArrivalMayAssign(card, isDefender); // Delayed Arrival (issue #492, group F): "may not be assigned to attack you until your next turn begins".
             RequireStarCrossedMayAssign(card, assignment.Value, command.Assignments!);
+            Require(!RestrictionBarsAssignment(card, isDefender), $"{Definition(card).Name} may not {(isDefender ? "defend" : "attack")}."); // P11 (CardRestrictions.cs): "may not attack" / "may not defend"
+            RequireRestrictionPairsMayAssign(card, assignment.Value, command.Assignments!); // P11: "may not be assigned to the same battlefield as"
             card.Zone = Zone.Battlefield; card.ProvinceIndex = assignment.Value;
             _state.AssignedThisCommand.Add(card.Id); // Chrysanthemum Blossom (issue #492 group G).
             NoteIvoryAssignment(card, assignment.Value); // Back to the Front (issue #622): the battlefields he was assigned to this turn.
@@ -2142,6 +2146,7 @@ public sealed partial class MatchEngine
     private bool AttachmentAllowed(CardInstance attachment, CardInstance target)
     {
         if (HostRefusesAttachment(attachment, target)) return false; // The Shadow's Embrace pass (issue #476), batch 2: "Will not attach cards" / "Will not attach Followers or Items".
+        if (RestrictionRefusesAttachment(Definition(attachment), target)) return false; // P11 (CardRestrictions.cs): a stored or static "will not attach ..."
         if (WillNotAttachItems(Definition(attachment), target)) return false; // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): "Will not attach Items."
         if (Keyword(attachment, "Armor")) return !Attachments(target.Id).Any(c => Keyword(c, "Armor"));
         if (Keyword(attachment, "Weapon"))
@@ -2172,6 +2177,7 @@ public sealed partial class MatchEngine
     // checked together wherever a legal target is decided (Equip's own Require and the offered-action
     // legal-targets filter both call this, so they can never disagree).
     private bool AttachmentLegalTarget(CardDefinition attachmentDef, CardInstance target) =>
+        !RestrictionRefusesAttachment(attachmentDef, target) && // P11 (CardRestrictions.cs)
         !WillNotAttachItems(attachmentDef, target) && // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): "Will not attach Items."
         (attachmentDef.AttachRequiresKeyword is null || KeywordOrHuman(target, attachmentDef.AttachRequiresKeyword)) &&
         (attachmentDef.AttachExcludesKeyword is null || !KeywordOrHuman(target, attachmentDef.AttachExcludesKeyword)) &&
@@ -2586,6 +2592,7 @@ public sealed partial class MatchEngine
         if (Delay(card, DelayedKinds.Dishonor, byPlayerId)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (JiYunNegatesDishonor(card, byPlayerId)) return;
         if (SuikihimeRefusesDishonor(card)) return; // Otomo Suikihime (issue #503): will not become dishonorable.
+        if (RestrictionRefusesDishonor(card)) return; // P11 (CardRestrictions.cs): a stored or static "will not become dishonorable"
         var wasDishonorable = card.Dishonorable;
         card.Dishonorable = true;
         if (!wasDishonorable) AfterPersonalityDishonored(card, byPlayerId); // Successful Bounty (issue #492, group F).
@@ -2872,6 +2879,7 @@ public sealed partial class MatchEngine
         { Win(player.Id, "Enlightenment victory"); return; }
         player.TurnsTaken++;
         PromoTurnBegins(player); // issue #653 (PromoEmperorEvents.cs): Losing the Way
+        RestrictionsTurnBegin(); // P11 (CardRestrictions.cs): delayed Celestial entries, expired restrictions
         MechDTurnBegins(player); // Issue #501, mechanics group D (EmperorMechD.cs): "remove ... from the game when your next turn begins" (Amazing Feat).
         player.MayNotAttackThisTurn = false;
         player.FavorActionsThisTurn = 0;
@@ -3169,6 +3177,7 @@ public sealed partial class MatchEngine
     // removes it.
     private void ResolveCelestial(PlayerState player, ProvinceState province, CardInstance card)
     {
+        if (RestrictionDelaysCelestial(player, province, card)) return; // P11 (CardRestrictions.cs): a locked province's Celestial enters when the next turn begins
         province.CardId = null; card.ProvinceIndex = null;
         EnterCelestialPlay(player, card);
         Refill(player, province);

@@ -39,6 +39,7 @@ public sealed partial class MatchEngine
     {
         RequireNotBarredByLegionOfPain(command, ability); // Emperor Edition remaining-cards pass (issue #492), group G: Legion of Pain's static bar.
         RequireSuikihimeNotPoliticallyTargeted(command, ability); // Otomo Suikihime (issue #503, EmperorP6.cs).
+        RequireRestrictionRulesAllow(command, ability); // P11 (CardRestrictions.cs): generalised bars, forced targets, spell limits.
         if (!_state.Cards.Values.Any(c => c.TargetBars.Count > 0)) return;
         var actor = PerformingCard(command, ability);
         if (actor is null) return;
@@ -58,6 +59,7 @@ public sealed partial class MatchEngine
     private void RequireTargetNotBarred(CardInstance? actor, CardInstance target)
     {
         if (actor is null) return;
+        RequireTargetNotBarredByRules(actor, target); // P11 (CardRestrictions.cs)
         Require(!target.TargetBars.Any(b => b.ActorCardId == actor.Id && TargetBarHolds(target, b)),
             $"{Definition(target).Name} may not be targeted by {Definition(actor).Name}'s actions this turn.");
     }

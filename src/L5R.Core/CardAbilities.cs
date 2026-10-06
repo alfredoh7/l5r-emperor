@@ -5896,7 +5896,7 @@ public sealed partial class MatchEngine
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
             Require(performer.OwnerId == player.Id && (InPlay(performer) || ability.Performer == "own-dead-personality-with-keyword" && performer.Zone == Zone.Dead), "Choose your own card to perform."); // Oyo's Second Lesson (issue #492): a dead Henshin performs it
-            Require(ability.Performer switch
+            Require(WithActWhileBowed(performer, ability, () => ability.Performer switch // P11 (CardRestrictions.cs): a card that may act while bowed is judged unbowed here; bow COSTS are still paid against the real state
             {
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
@@ -6103,7 +6103,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-personality-with-any-keyword-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)) && (!actingAsBattle || AtBattle(performer)),
                 _ => RegisteredPerformerAllows(ability, performer, actingAsBattle)
-            }, "That card does not meet this ability's performer requirement.");
+            }), "That card does not meet this ability's performer requirement.");
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
         // "May not perform actions" (issue #336): the performer of this action -- whoever it is -- must be free to act.
@@ -7378,6 +7378,7 @@ public sealed partial class MatchEngine
         // Issue #501, mechanics group D (EmperorMechD.cs): Narizane's per-turn Recon-action counter. Counted only here, where the action's effects resolve (partially negated ones included);
         // a wholly negated action (ResolveNegatedAction / AbortActionForBlockedCost) never reaches this point and does not count (Mendon's ruling).
         CountReconActionTaken(ability, command, source);
+        NoteRestrictionAction(ability, command); // P11 (CardRestrictions.cs): a Spell action counts against a spell limit
         CountP1TacticalAction(ability, command, source); // Issue #503 (EmperorP1.cs): the per-Tactician cap.
         NoteP2Performers(ability, command, source); // issue #503 (EmperorP2.cs): who performed the action (The Agony of Her Gaze)
         RecordP5ActionTaken(ability, command, source); // Issue #503 (EmperorP5.cs): Daigotsu Yutaka's "you have taken a Dark Virtue action this phase".
@@ -11115,7 +11116,7 @@ public sealed partial class MatchEngine
                 foreach (var option in OwnProvinceSetOptions(id, ability, source, playerId)) yield return option;
                 continue;
             }
-            string?[] performers = ability.Performer switch
+            string?[] performers = WithActWhileBowedUnbowed<string?[]>(playerId, ability, () => ability.Performer switch // P11 (CardRestrictions.cs): the same for the offered performers
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
@@ -11203,7 +11204,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k)) && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 _ => RegisteredPerformerCandidates(ability, playerId, actingAsBattle) ?? [null]
-            };
+            });
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
             // performer -- see the generic fallback below), Equip (Battle) is not offered at all
             // without an eligible Shugenja or a Spell/Reserve card in hand: it is a standing player

@@ -32,6 +32,7 @@ public sealed partial class MatchEngine
     private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable, CardInstance? source = null)
     {
         var challenger = Card(challengerId); var challenged = Card(challengedId);
+        if (RestrictionBarsChallenge(challenger)) { Emit("challengeRefused", $"{Definition(challenger).Name} will not challenge.", challengerPlayerId, challengerId); return; } // P11 (CardRestrictions.cs): "will not challenge" -- the duel is not issued
         // Kitsuki Yataku (issue #477 batch 6): "The Samurai's controller may not choose to refuse any challenge created by the action."
         if (refusable && !ChallengeMayBeRefused(challengedId)) { refusable = false; Emit("refusalForbidden", $"{Definition(challenged).Name} may not refuse this challenge.", challenged.OwnerId, challengedId); }
         _state.PendingDuel = new PendingDuel
