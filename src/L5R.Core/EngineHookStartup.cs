@@ -42,6 +42,8 @@ internal static partial class EngineHooks
         _ = PersonalityChi.Items;
         _ = ArmyForce.Items;
         _ = StatTerms.Items;
+        _ = EntryCostTerms.Items;
+        _ = AbilityCostTerms.Items;
         return true;
     }
 

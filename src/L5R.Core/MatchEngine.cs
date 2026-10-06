@@ -962,7 +962,9 @@ public sealed partial class MatchEngine
         // the price: CardGoldCost is the printed cost plus every GoldCost modifier (none survives a card's return to a province or a recruit from a dead pile).
         var goldCost = CardGoldCost(card);
         var rawCost = goldCost - prosperous - reserveDiscount - ashikoDiscount - (entryDiscount?.Amount ?? 0) - keywordDiscount - holdingDiscount - roninDiscount - nagaDiscount + (clanAllegiance ? 2 : 0) - (clanDiscount ? 2 : 0);
-        var cost = Math.Max(0, rawCost);
+        // Registered entry cost terms (issue #682, CostTerms.cs): the generic place a card prints a price term -- a waiver, a surcharge, a discount keyed on a Ring, the Defender or the opponent's Clan.
+        var entryTerms = SumEntryCostTerms(card, playerId, viaReserve ? EntryCostKind.Reserve : EntryCostKind.Recruit);
+        var cost = entryTerms.Ignore ? 0 : Math.Max(0, rawCost + entryTerms.Adjustment);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis = $"{def.Name} cost {goldCost}" + (prosperous > 0 ? $" − {prosperous} (controlled Personalities)" : "") + (reserveDiscount > 0 ? $" − {reserveDiscount} (Reserve while defending)" : "")
             + (ashikoDiscount > 0 ? $" − {ashikoDiscount} (outnumbered)" : "")
@@ -971,7 +973,7 @@ public sealed partial class MatchEngine
             + (holdingDiscount > 0 ? $" − {holdingDiscount} (Yasuki Makoto)" : "")
             + (roninDiscount > 0 ? $" − {roninDiscount} (Palace of the Breaking Dawn)" : "")
             + (nagaDiscount > 0 ? $" − {nagaDiscount} ({nagaTerm})" : "")
-            + (clanAllegiance ? " + 2 (Clan allegiance)" : "") + (clanDiscount ? " − 2 (Clan discount)" : "") + (rawCost < 0 ? " (min 0)" : "");
+            + (clanAllegiance ? " + 2 (Clan allegiance)" : "") + (clanDiscount ? " − 2 (Clan discount)" : "") + entryTerms.Basis + (!entryTerms.Ignore && rawCost + entryTerms.Adjustment < 0 ? " (min 0)" : "");
         if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(playerId, def.Name)) error = $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.";
         error ??= AdditionalEntryCostUnpayable(card, playerId); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play he cannot pay bars the recruit.
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
@@ -2047,7 +2049,7 @@ public sealed partial class MatchEngine
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
-        if (def.GoldCost > 0) Pay(command.PlayerId, card, def.GoldCost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Play));
+        if (def.GoldCost > 0 && StrategyPlayCost(command.PlayerId, card).Cost is > 0 and var strategyCost) Pay(command.PlayerId, card, strategyCost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Play)); // issue #682: after the registered ability cost terms
         // Terrain (core rules Glossary): the printed effects only apply at the battlefield where it was
         // played -- itself just stays there as a card, not a target for a Personality-shaped effect --
         // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
