@@ -4021,12 +4021,12 @@ public sealed partial class MatchEngine
         if (BakishiShieldNegates(card) && !(kind is "bow" or "destroy" or "move" && HiromiUnnegatable() || CurrentActionUnnegatable())) return true; // Hida Bakishi (issue #503, EmperorP1.cs)
         if (_state.NegatedEffects.Count == 0) return false;
         if (kind is "bow" or "destroy" or "move" && HiromiUnnegatable() || CurrentActionUnnegatable()) return false; // Yoritomo Hiromi (Emperor Edition Personality pass, issue #477): her Battle actions' bowing, destruction and movement; Suitengu's Torch (issue #486): every effect of the protected action.
-        if (_state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == "all")) return true;
+        if (_state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == "all") is { } allEntry) return !(kind == "move" && MovementNegationBarred(card, allEntry.ByPlayer)); // Winter Sled (issue #667, PerformersSled.cs)
         if (kind == "destroy" && OverlayInsteadOfDestruction(card)) return true; // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): overlaid instead of destroyed.
         var match = _state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == kind);
         if (match is null) return false;
         _state.NegatedEffects.Remove(match);
-        return true;
+        return !(kind == "move" && MovementNegationBarred(card, match.ByPlayer)); // Winter Sled (issue #667, PerformersSled.cs)
     }
     // Stalwart (core rules, issue #184): "the first time on a turn an enemy's effect would bow a card
     // with this keyword, the bowing (and only the bowing) is negated" -- a targeted ability's OWN
@@ -5316,6 +5316,7 @@ public sealed partial class MatchEngine
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
         P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
+        : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)
         : ability.Attach?.Card == AttachSource.Self ? (ability.FromDiscard ? source.Zone == Zone.FateDiscard && source.OwnerId == player.Id : source.Zone == Zone.Hand && player.Hand.Contains(source.Id)) // Blade of Perfection (issue #492): attached from the discard pile
@@ -7253,7 +7254,7 @@ public sealed partial class MatchEngine
         _runningCommand = command;
         var p3BowedBefore = P3BowedPersonalityIds(); // Hida Defenders (issue #503): the Personalities bowed before the action
         try { RunAbilityEffects(command, consumedGrant); }
-        finally { _runningCommand = runningBefore; }
+        finally { _runningCommand = runningBefore; StampNegatedBy(command.PlayerId); } // issue #667 (PerformersSled.cs): who set each negation
         if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); issued.BowedBefore = p3BowedBefore; }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
@@ -9766,7 +9767,7 @@ public sealed partial class MatchEngine
                     MoveHome(target!, false);
                     if (_state.CurrentBattleProvince is int battlefield)
                     {
-                        target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.ToBattlefield, WhileCardAtBattlefield: source.Id, Battlefield: battlefield));
+                        target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.ToBattlefield, WhileCardAtBattlefield: source.Id, Battlefield: battlefield, ByPlayer: source.OwnerId));
                         Emit("movementLocked", $"{Definition(target).Name}'s movement to this battlefield is negated while {Definition(source).Name} is there.", target.OwnerId, target.Id);
                     }
                     GainHonor(player.Id, -1, "Moksha Patam", source);

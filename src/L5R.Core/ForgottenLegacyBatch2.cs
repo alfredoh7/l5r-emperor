@@ -34,7 +34,7 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (Definition(target!).Type == CardType.Personality)
                 {
-                    target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.Home | MovementKinds.ToBattlefield, NextOnly: true));
+                    target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.Home | MovementKinds.ToBattlefield, NextOnly: true, ByPlayer: source.OwnerId));
                     Emit("movementLocked", $"{Definition(target).Name}'s next movement this turn is negated ({Definition(source).Name}).", target.OwnerId, target.Id);
                 }
                 return false;

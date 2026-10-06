@@ -112,6 +112,8 @@ public sealed partial class MatchEngine
     /// <summary>A capture armed for one card: what it delays (<see cref="Kinds"/>, null for every kind), until when, for which action (the ability and player) or duel outcome.</summary>
     private sealed record DelayScope(string CardId, string Until, string? Kinds, string? AbilityId, int? PlayerId, string Reason)
     {
+        /// <summary>The player whose card set the delay (issue #667: Winter Sled), stamped on the entry that holds it; null: unknown.</summary>
+        public int? ByPlayer { get; init; }
         public bool Covers(string kind) => Kinds is null || Kinds.Split(',').Contains(kind);
         public string Encode() => $"{DelayEntryPrefix}{Until}|{Kinds ?? "*"}|{AbilityId}|{PlayerId}|{Reason}";
         public static DelayScope? Decode(NegatedEffect entry)
@@ -119,7 +121,7 @@ public sealed partial class MatchEngine
             if (!entry.Kind.StartsWith(DelayEntryPrefix, StringComparison.Ordinal)) return null;
             var parts = entry.Kind[DelayEntryPrefix.Length..].Split('|', 5);
             if (parts.Length < 5) return null;
-            return new(entry.CardId, parts[0], parts[1] == "*" ? null : parts[1], parts[2], int.TryParse(parts[3], out var player) ? player : null, parts[4]);
+            return new DelayScope(entry.CardId, parts[0], parts[1] == "*" ? null : parts[1], parts[2], int.TryParse(parts[3], out var player) ? player : null, parts[4]) { ByPlayer = entry.ByPlayer };
         }
     }
 
@@ -142,7 +144,7 @@ public sealed partial class MatchEngine
     /// <summary>Runs <paramref name="apply"/> with every kind of effect on <paramref name="cardIds"/> captured (a duel's outcome).</summary>
     private void WithDelayScope(IEnumerable<string> cardIds, string until, int? playerId, string reason, Action apply)
     {
-        var added = cardIds.Select(id => new DelayScope(id, until, null, null, playerId, reason)).ToList();
+        var added = cardIds.Select(id => new DelayScope(id, until, null, null, playerId, reason) { ByPlayer = playerId }).ToList();
         _delayScopes.AddRange(added);
         try { apply(); }
         finally { foreach (var scope in added) _delayScopes.Remove(scope); }
@@ -179,6 +181,7 @@ public sealed partial class MatchEngine
     {
         if (_applyingDelayed || _state.NegatedEffects.Count == 0 && _delayScopes.Count == 0) return false;
         if (ActiveDelay(card, kind) is not { } scope || CannotBeDelayed(kind)) return false;
+        if (kind is DelayedKinds.MoveHome or DelayedKinds.MoveToBattlefield && MovementNegationBarred(card, scope.ByPlayer)) return false; // Winter Sled (issue #667): a delay is another card's negation too
         var actor = playerId ?? _runningCommand?.PlayerId ?? _attackCommandInResolution?.PlayerId ?? scope.PlayerId;
         Record(new DelayedEffect { Kind = kind, Until = scope.Until, CardId = card.Id, PlayerId = actor, SourceId = sourceId ?? _runningCommand?.CardId, Reason = scope.Reason, Stat = stat, Amount = amount, Arg = arg, Text = text });
         var name = Definition(card).Name;
@@ -297,15 +300,15 @@ public sealed partial class MatchEngine
                 MoveHome(card, effect.Arg == "bow");
                 break;
             case DelayedKinds.MoveToBattlefield:
-            {
-                var destination = int.Parse(effect.Arg!);
-                if (card.Zone != Zone.Battlefield) { NegateDelayedEffect(effect, card, "he is not at a battlefield"); break; }
-                if (card.ProvinceIndex == destination) { NegateDelayedEffect(effect, card, "he is there already"); break; }
-                if (_state.CurrentBattleProvince != destination && !_state.UnresolvedBattlefields.Contains(destination)) { NegateDelayedEffect(effect, card, "that battlefield is no longer open"); break; }
-                Emit("delayedEffectApplied", $"{name} is moved to the battlefield, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
-                TryMoveToBattlefield(card, destination);
-                break;
-            }
+                {
+                    var destination = int.Parse(effect.Arg!);
+                    if (card.Zone != Zone.Battlefield) { NegateDelayedEffect(effect, card, "he is not at a battlefield"); break; }
+                    if (card.ProvinceIndex == destination) { NegateDelayedEffect(effect, card, "he is there already"); break; }
+                    if (_state.CurrentBattleProvince != destination && !_state.UnresolvedBattlefields.Contains(destination)) { NegateDelayedEffect(effect, card, "that battlefield is no longer open"); break; }
+                    Emit("delayedEffectApplied", $"{name} is moved to the battlefield, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
+                    TryMoveToBattlefield(card, destination);
+                    break;
+                }
             case DelayedKinds.Modifier:
                 Emit("delayedEffectApplied", $"{name} gets {(effect.Amount >= 0 ? "+" : "")}{effect.Amount} {effect.Stat}, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
                 ApplyModifier(card, effect.SourceId ?? "delayed-effect", effect.Text ?? "delayed-effect", effect.Stat!, effect.Amount);
@@ -319,19 +322,19 @@ public sealed partial class MatchEngine
                 CreateToken(card, effect.Text ?? "Delayed", effect.SourceId ?? "delayed-effect", effect.Stat, effect.Amount);
                 break;
             case DelayedKinds.Keyword:
-            {
-                var parts = effect.Arg!.Split('/', 2);
-                Emit("delayedEffectApplied", $"{name} gains {parts[0]}, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
-                GrantKeyword(card, parts[0], effect.SourceId ?? "delayed-effect", parts.Length > 1 ? parts[1] : GrantDuration.Turn);
-                break;
-            }
+                {
+                    var parts = effect.Arg!.Split('/', 2);
+                    Emit("delayedEffectApplied", $"{name} gains {parts[0]}, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
+                    GrantKeyword(card, parts[0], effect.SourceId ?? "delayed-effect", parts.Length > 1 ? parts[1] : GrantDuration.Turn);
+                    break;
+                }
             case DelayedKinds.Ability:
-            {
-                var parts = effect.Arg!.Split('/', 2);
-                Emit("delayedEffectApplied", $"{name} gains an ability, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
-                GrantAbility(card, parts[0], effect.SourceId ?? "delayed-effect", parts.Length > 1 ? parts[1] : GrantDuration.Turn);
-                break;
-            }
+                {
+                    var parts = effect.Arg!.Split('/', 2);
+                    Emit("delayedEffectApplied", $"{name} gains an ability, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
+                    GrantAbility(card, parts[0], effect.SourceId ?? "delayed-effect", parts.Length > 1 ? parts[1] : GrantDuration.Turn);
+                    break;
+                }
         }
     }
 

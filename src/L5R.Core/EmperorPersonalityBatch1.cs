@@ -29,7 +29,7 @@ public sealed partial class MatchEngine
     {
         if (Definition(card).Type != CardType.Personality || !KeywordOrHuman(card, "Human")) return false;
         var ugulu = _state.Cards.Values.FirstOrDefault(c => c.Id != card.Id && c.Zone == Zone.Battlefield && c.ProvinceIndex == province && Definition(c).Effect == UguluNegatesHumanMovementEffect);
-        if (ugulu is null) return false;
+        if (ugulu is null || MovementNegationBarred(card, ugulu.OwnerId)) return false; // Winter Sled (issue #667): the negating card is Ugulu's.
         Emit("moveNegated", $"{Definition(card).Name}'s movement to {Definition(ugulu).Name}'s battlefield was negated.", card.OwnerId, card.Id);
         return true;
     }

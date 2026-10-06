@@ -130,8 +130,9 @@ public sealed record AppliedModifier(string Source, string Effect, string Stat, 
 
 /// <summary>One negation a "before an action resolves" reaction has set on a card for the deferred command:
 /// Kind is "destroy", "move", "straighten", "bow" (each consumed by its first match) or "all" (Champion of
-/// Thunder: every effect the action applies to that card, live for the whole re-invocation).</summary>
-public sealed record NegatedEffect(string Kind, string CardId);
+/// Thunder: every effect the action applies to that card, live for the whole re-invocation). ByPlayer (issue #667, PerformersSled.cs): the player whose Reaction set it, stamped when that
+/// Reaction's effects finish (Winter Sled: other players' cards' effects will not negate the Personality's movement).</summary>
+public sealed record NegatedEffect(string Kind, string CardId, int? ByPlayer = null);
 
 /// <summary>A reaction window set aside while a Reaction played inside it (an action, like any other) has a window of its own to deal
 /// with -- a before-action window, a forced discard, Unimpeachable Name, an "after this action" window. PendingChoice holds one window,
