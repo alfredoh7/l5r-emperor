@@ -418,26 +418,28 @@ public sealed partial class MatchEngine
         {
             // Capturing the Soul: the Spell was removed from the game and the Shugenja bowed as costs; the wielder (the named performer) and each chosen Shugenja add their Chi.
             case "capturing-soul-remove":
-            {
-                var wielder = Card(command.PerformerId!);
-                var performing = SlotCards(command, "others").Prepend(wielder).ToArray();
-                var victim = SlotCards(command, "target").Single();
-                var total = performing.Sum(PersonalityChi); var needed = 3 * PersonalityChi(victim);
-                if (total > needed && InPlay(victim)) RemoveUnitFromGame(victim, Definition(source!).Name);
-                else Emit("effectFailed", $"Capturing the Soul: the performing Shugenja's total Chi ({total}) is not higher than three times {Definition(victim).Name}'s Chi ({needed}).", player.Id, victim.Id);
-                return false;
-            }
-            case "cleansing-path-attack": case "thunders-favor-attack": case "akodo-guidance-melee":
+                {
+                    var wielder = Card(command.PerformerId!);
+                    var performing = SlotCards(command, "others").Prepend(wielder).ToArray();
+                    var victim = SlotCards(command, "target").Single();
+                    var total = performing.Sum(PersonalityChi); var needed = 3 * PersonalityChi(victim);
+                    if (total > needed && InPlay(victim)) RemoveUnitFromGame(victim, Definition(source!).Name);
+                    else Emit("effectFailed", $"Capturing the Soul: the performing Shugenja's total Chi ({total}) is not higher than three times {Definition(victim).Name}'s Chi ({needed}).", player.Id, victim.Id);
+                    return false;
+                }
+            case "cleansing-path-attack":
+            case "thunders-favor-attack":
+            case "akodo-guidance-melee":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             // Consecration.
             case "consecration-watch":
-            {
-                var chosen = (command.Provinces ?? (command.Province is int single ? [single] : [])).Distinct().Order().ToArray();
-                _state.ConsecrationWatches.RemoveAll(w => w.Turn != _state.TurnNumber);
-                _state.ConsecrationWatches.Add(new(player.Id, chosen, _state.TurnNumber, source!.Id));
-                Emit("watchSet", $"{Definition(source).Name}: after the first time this turn a Personality assigns or moves to an attacking army at province {string.Join(" or ", chosen.Select(p => p + 1))}'s battlefield, {player.Name} gains 2 Honor.", player.Id, source.Id);
-                return false;
-            }
+                {
+                    var chosen = (command.Provinces ?? (command.Province is int single ? [single] : [])).Distinct().Order().ToArray();
+                    _state.ConsecrationWatches.RemoveAll(w => w.Turn != _state.TurnNumber);
+                    _state.ConsecrationWatches.Add(new(player.Id, chosen, _state.TurnNumber, source!.Id));
+                    Emit("watchSet", $"{Definition(source).Name}: after the first time this turn a Personality assigns or moves to an attacking army at province {string.Join(" or ", chosen.Select(p => p + 1))}'s battlefield, {player.Name} gains 2 Honor.", player.Id, source.Id);
+                    return false;
+                }
             case "contemplate-void-draw":
                 for (var i = 0; i < 4; i++) Draw(player);
                 return false;
@@ -447,44 +449,44 @@ public sealed partial class MatchEngine
                 return false;
             // I Give You My Name: the Human was destroyed as a cost; the search (its ceiling, and the Honor loss owed however it ends) opens and the action finishes when it does.
             case "i-give-you-my-name-search":
-            {
-                BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction);
-                var search = _state.PendingSearch!;
-                search.GoldLimit = _humanGoldCostForSearch + PersonalityChi(Card(command.PerformerId!));
-                search.HonorLossOnFinish = 2;
-                return true;
-            }
+                {
+                    BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction);
+                    var search = _state.PendingSearch!;
+                    search.GoldLimit = _humanGoldCostForSearch + PersonalityChi(Card(command.PerformerId!));
+                    search.HonorLossOnFinish = 2;
+                    return true;
+                }
             case "obscured-pathways-move":
                 MoveHome(target!, false);
                 return false;
             // The Kami's Blessing: the Shugenja's Chi, as it is now.
             case "kami-blessing-self":
-            {
-                var wielder = WielderOf(source!)!;
-                ApplyModifier(wielder, source!.Id, id, "Force", PersonalityChi(wielder));
-                return false;
-            }
+                {
+                    var wielder = WielderOf(source!)!;
+                    ApplyModifier(wielder, source!.Id, id, "Force", PersonalityChi(wielder));
+                    return false;
+                }
             case "kami-blessing-samurai":
-            {
-                var chi = PersonalityChi(WielderOf(source!)!);
-                foreach (var samurai in SlotCards(command, "samurai").ToArray()) ApplyModifier(samurai, source!.Id, id, "Force", chi);
-                return false;
-            }
+                {
+                    var chi = PersonalityChi(WielderOf(source!)!);
+                    foreach (var samurai in SlotCards(command, "samurai").ToArray()) ApplyModifier(samurai, source!.Id, id, "Force", chi);
+                    return false;
+                }
             // Unnatural Flood: "this movement will not be negated" while its Shugenja is Water (the mark holds for the movement alone; the bow that follows can still be negated).
             case "unnatural-flood-move":
-            {
-                var previousKey = _state.UnnegatableActionKey;
-                if (WielderOf(source!) is { } floodShugenja && Keyword(floodShugenja, "Water")) _state.UnnegatableActionKey = ActionKey(command);
-                var zoneBefore = target!.Zone;
-                try { MoveHome(target, false); }
-                finally { _state.UnnegatableActionKey = previousKey; }
-                if (zoneBefore == Zone.Battlefield && target.Zone == Zone.Home)
                 {
-                    if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
-                    LockMovement(target, Definition(source!).Name, MovementKinds.Home | MovementKinds.ToBattlefield);
+                    var previousKey = _state.UnnegatableActionKey;
+                    if (WielderOf(source!) is { } floodShugenja && Keyword(floodShugenja, "Water")) _state.UnnegatableActionKey = ActionKey(command);
+                    var zoneBefore = target!.Zone;
+                    try { MoveHome(target, false); }
+                    finally { _state.UnnegatableActionKey = previousKey; }
+                    if (zoneBefore == Zone.Battlefield && target.Zone == Zone.Home)
+                    {
+                        if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                        LockMovement(target, Definition(source!).Name, MovementKinds.Home | MovementKinds.ToBattlefield);
+                    }
+                    return false;
                 }
-                return false;
-            }
             // ---- Celestials ----
             case "bayushi-guidance-return": BayushisGuidanceReturn(command, source!); return false;
             case "daigotsu-guidance-destroy":
@@ -493,17 +495,19 @@ public sealed partial class MatchEngine
                 else foreach (var bowedAttachment in Attachments(target.Id).Where(a => a.Bowed).ToArray()) if (bowedAttachment.Zone == Zone.Attached) DestroyTargetCard(bowedAttachment, player.Id);
                 if (InPlay(target)) BowUnitByEffect(target, player.Id);
                 return false;
-            case "dojis-guidance-return": case "shibas-guidance-return":
+            case "dojis-guidance-return":
+            case "shibas-guidance-return":
                 ReturnToHand(target!);
                 return false;
             case "hidas-guidance-bow":
-            {
-                var attacking = IsAttacking(target!); // as he stands when the action resolves, before he is bowed
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (attacking) BowUnitByEffect(target!, player.Id, except: target!.Id); // his unit: the rest of its cards bow (the Personality already did or was prevented)
-                return false;
-            }
-            case "shinjos-guidance-search": case "togashis-guidance-ring-search":
+                {
+                    var attacking = IsAttacking(target!); // as he stands when the action resolves, before he is bowed
+                    if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                    if (attacking) BowUnitByEffect(target!, player.Id, except: target!.Id); // his unit: the rest of its cards bow (the Personality already did or was prevented)
+                    return false;
+                }
+            case "shinjos-guidance-search":
+            case "togashis-guidance-ring-search":
                 BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction);
                 return true;
             // Togashi's Guidance: a Ring in the hand is put into play (by this card's text, not its own: it does not count for Enlightenment).
@@ -517,12 +521,12 @@ public sealed partial class MatchEngine
                 return false;
             // Yoritomo's Guidance: the discarded Port Holding enters play bowed (its Gold, 2 less, was paid as the action's cost).
             case "yoritomos-guidance-port":
-            {
-                ResetCardState(target!);
-                target!.Zone = Zone.Home; target.ProvinceIndex = null; target.FaceUp = true; target.Bowed = true;
-                Emit("cardEnteredPlay", $"{player.Name} put {Definition(target).Name} into play bowed (Yoritomo's Guidance).", player.Id, target.Id);
-                return OpenEntryReactionWindow(player.Id, target, 1 - player.Id) || OpenOverconfidentDrawWindow(1 - player.Id);
-            }
+                {
+                    ResetCardState(target!);
+                    target!.Zone = Zone.Home; target.ProvinceIndex = null; target.FaceUp = true; target.Bowed = true;
+                    Emit("cardEnteredPlay", $"{player.Name} put {Definition(target).Name} into play bowed (Yoritomo's Guidance).", player.Id, target.Id);
+                    return OpenEntryReactionWindow(player.Id, target, 1 - player.Id) || OpenOverconfidentDrawWindow(1 - player.Id);
+                }
             default:
                 return null;
         }

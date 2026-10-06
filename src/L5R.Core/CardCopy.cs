@@ -83,7 +83,7 @@ public sealed partial class MatchEngine
     // the Yogo: "Each of your Scorpion Clan Personalities has the ability ..." -- StaticAbilityGrants.cs). The ONE place a granted ability is joined
     // to the printed ones; every scan of "the abilities this card has" goes through it.
     private IEnumerable<string> AbilityIdsOf(CardInstance card) => RemovedAbilitiesFilter(card, P5AbilitiesRemoved(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
-        // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
+                                                                                                                                // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
         (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal)); // issue #667 (AbilityRemoval.cs): permanently removed abilities are left out.
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
@@ -134,8 +134,16 @@ public sealed partial class MatchEngine
     {
         var copy = new PendingCopy
         {
-            PlayerId = playerId, ReceiverId = receiver.Id, ActionCardId = receiver.Id, CopierAbilityId = copierAbilityId, Duration = duration,
-            SourceDefinitionId = source.DefinitionId, SourceName = Definition(source).Name, Steps = steps.ToList(), Origin = origin, BowedBefore = bowedBefore?.ToList()
+            PlayerId = playerId,
+            ReceiverId = receiver.Id,
+            ActionCardId = receiver.Id,
+            CopierAbilityId = copierAbilityId,
+            Duration = duration,
+            SourceDefinitionId = source.DefinitionId,
+            SourceName = Definition(source).Name,
+            Steps = steps.ToList(),
+            Origin = origin,
+            BowedBefore = bowedBefore?.ToList()
         };
         // The previous copies end first, so the snapshot is taken against the receiver as it will stand: a keyword or ability the old
         // copy provided is not "already had" and may be chosen again.

@@ -209,8 +209,14 @@ public sealed partial class MatchEngine
         }
         _state.PendingEffectChoice = new()
         {
-            Command = command, PlayerId = command.PlayerId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant,
-            PlayedFromDiscard = playedFromDiscard, OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList()
+            Command = command,
+            PlayerId = command.PlayerId,
+            Negated = _state.NegatedEffects.ToList(),
+            ConsumedGrant = consumedGrant,
+            PlayedFromDiscard = playedFromDiscard,
+            OpponentHonorBefore = opponentHonorBefore,
+            BowedBefore = bowedBefore.ToList(),
+            PreExistingGrants = preExistingGrants.ToList()
         };
         _state.PendingChoice = new("effectChoice", command.PlayerId, source.Id,
             $"{Definition(source).Name}: choose one — {string.Join("; ", branch.Options.Select(o => o.Label))}.");

@@ -5,131 +5,131 @@ namespace L5R.Client;
 /// <summary>Native presentation contract/input fixtures; no production turn timing changes.</summary>
 public partial class PhaseTrackProbe : Control
 {
-    private PhaseTrack _track=null!;
-    private MatchView _view=null!;
-    private string _output="/tmp/six-phases";
-    private int _stage,_phase;
+    private PhaseTrack _track = null!;
+    private MatchView _view = null!;
+    private string _output = "/tmp/six-phases";
+    private int _stage, _phase;
     private float _clock;
     private byte[]? _still;
-    private static readonly string[] DynastyFirst=["Straighten","Events","Action","Dynasty","Attack","End"];
-    private static readonly Phase[] Ordered=[Phase.Straighten,Phase.Events,Phase.Action,Phase.AttackDeclaration,Phase.Dynasty,Phase.End];
+    private static readonly string[] DynastyFirst = ["Straighten", "Events", "Action", "Dynasty", "Attack", "End"];
+    private static readonly Phase[] Ordered = [Phase.Straighten, Phase.Events, Phase.Action, Phase.AttackDeclaration, Phase.Dynasty, Phase.End];
     public override void _Ready()
     {
-        foreach(var arg in OS.GetCmdlineUserArgs())if(arg.StartsWith("--output="))_output=arg[9..];
+        foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--output=")) _output = arg[9..];
         System.IO.Directory.CreateDirectory(_output);
-        Theme=Palette.MakeTheme();GetWindow().GrabFocus();_clock=-.8f;
-        var screen=GetViewportRect().Size;
-        AddChild(new TextureRect {Texture=GD.Load<Texture2D>("res://Art/navy-mat-v4.png"),Size=screen,ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCovered,MouseFilter=MouseFilterEnum.Ignore});
-        var label=Palette.Text("Approved A artwork · Native six-phase rail",26,Palette.Gold);label.Position=new Vector2(40,25);AddChild(label);
-        var width=Math.Min(screen.X-80,1294);
-        AddChild(new PhaseReferencePlate{Position=new Vector2((screen.X-width)/2,85),Size=new Vector2(width-34,(width-34)*154/1774),MouseFilter=MouseFilterEnum.Ignore});
-        _track=new PhaseTrack{Position=new Vector2((screen.X-width)/2,270),Size=new Vector2(width,150),ReducedMotion=true};AddChild(_track);
-        if(OS.GetCmdlineUserArgs().Contains("--scaled")) { _track.Scale=Vector2.One*.66f; _track.Size=new Vector2(width/.66f,150); }
-        _view=MatchEngine.CreateStarterMatch().GetView(0);
-        _track.Present(_view with{Phase=Ordered[0]});_track.PresentActions(_view,[],false);
-        foreach(var phase in Enum.GetValues<Phase>())
+        Theme = Palette.MakeTheme(); GetWindow().GrabFocus(); _clock = -.8f;
+        var screen = GetViewportRect().Size;
+        AddChild(new TextureRect { Texture = GD.Load<Texture2D>("res://Art/navy-mat-v4.png"), Size = screen, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, MouseFilter = MouseFilterEnum.Ignore });
+        var label = Palette.Text("Approved A artwork · Native six-phase rail", 26, Palette.Gold); label.Position = new Vector2(40, 25); AddChild(label);
+        var width = Math.Min(screen.X - 80, 1294);
+        AddChild(new PhaseReferencePlate { Position = new Vector2((screen.X - width) / 2, 85), Size = new Vector2(width - 34, (width - 34) * 154 / 1774), MouseFilter = MouseFilterEnum.Ignore });
+        _track = new PhaseTrack { Position = new Vector2((screen.X - width) / 2, 270), Size = new Vector2(width, 150), ReducedMotion = true }; AddChild(_track);
+        if (OS.GetCmdlineUserArgs().Contains("--scaled")) { _track.Scale = Vector2.One * .66f; _track.Size = new Vector2(width / .66f, 150); }
+        _view = MatchEngine.CreateStarterMatch().GetView(0);
+        _track.Present(_view with { Phase = Ordered[0] }); _track.PresentActions(_view, [], false);
+        foreach (var phase in Enum.GetValues<Phase>())
         {
-            var expected=phase switch {Phase.Straighten=>0,Phase.Events=>1,Phase.Action=>2,Phase.Dynasty or Phase.DynastyDiscard=>4,Phase.End=>5,Phase.Finished=>-1,_=>3};
-            if(PhaseTrack.SegmentFor(phase)!=expected)throw new Exception("Wrong phase contract: "+phase);
+            var expected = phase switch { Phase.Straighten => 0, Phase.Events => 1, Phase.Action => 2, Phase.Dynasty or Phase.DynastyDiscard => 4, Phase.End => 5, Phase.Finished => -1, _ => 3 };
+            if (PhaseTrack.SegmentFor(phase) != expected) throw new Exception("Wrong phase contract: " + phase);
         }
     }
-    private void KeyEvent(Key key){Input.ParseInputEvent(new InputEventKey{Keycode=key,Pressed=true});Input.ParseInputEvent(new InputEventKey{Keycode=key,Pressed=false});}
-    private void Save(string name){RenderingServer.ForceDraw();GetViewport().GetTexture().GetImage().SavePng(_output+"/"+name+".png");}
+    private void KeyEvent(Key key) { Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = false }); }
+    private void Save(string name) { RenderingServer.ForceDraw(); GetViewport().GetTexture().GetImage().SavePng(_output + "/" + name + ".png"); }
     public override void _Process(double delta)
     {
-        _clock+=(float)delta;if(_clock<.65f)return;_clock=0;
+        _clock += (float)delta; if (_clock < .65f) return; _clock = 0;
         try
         {
-            if(_stage==0)
+            if (_stage == 0)
             {
-                if(_track.HelpRegions.Count!=6)throw new Exception("Missing help regions");
-                var area=_track.HelpRegions[1];GetWindow().GrabFocus();Input.WarpMouse(area.GetGlobalRect().GetCenter());Input.ParseInputEvent(new InputEventMouseMotion{Position=area.GetGlobalRect().GetCenter()});_stage++;return;
+                if (_track.HelpRegions.Count != 6) throw new Exception("Missing help regions");
+                var area = _track.HelpRegions[1]; GetWindow().GrabFocus(); Input.WarpMouse(area.GetGlobalRect().GetCenter()); Input.ParseInputEvent(new InputEventMouseMotion { Position = area.GetGlobalRect().GetCenter() }); _stage++; return;
             }
-            if(_stage==1)
+            if (_stage == 1)
             {
-                if(!_track.HelpText.Contains("Events-phase"))throw new Exception("Events hover help missing: "+_track.HelpText+" hovered="+GetViewport().GuiGetHoveredControl()?.GetPath()+" area="+_track.HelpRegions[1].GetGlobalRect());
-                _track.HelpRegions[1].GrabFocus();Save("hover-events");
+                if (!_track.HelpText.Contains("Events-phase")) throw new Exception("Events hover help missing: " + _track.HelpText + " hovered=" + GetViewport().GuiGetHoveredControl()?.GetPath() + " area=" + _track.HelpRegions[1].GetGlobalRect());
+                _track.HelpRegions[1].GrabFocus(); Save("hover-events");
                 // Keep the native cursor and injected motion aligned; otherwise a
                 // later OS motion can re-enter Events and reopen the hover help.
-                Input.WarpMouse(Vector2.One*5);Input.ParseInputEvent(new InputEventMouseMotion{Position=Vector2.One*5});_track.HelpRegions[0].GrabFocus();KeyEvent(Key.Right);_stage++;return;
+                Input.WarpMouse(Vector2.One * 5); Input.ParseInputEvent(new InputEventMouseMotion { Position = Vector2.One * 5 }); _track.HelpRegions[0].GrabFocus(); KeyEvent(Key.Right); _stage++; return;
             }
-            if(_stage==2)
+            if (_stage == 2)
             {
-                if(!_track.HelpRegions[1].HasFocus()||!_track.HelpVisible)throw new Exception("Keyboard help navigation failed");
-                KeyEvent(Key.Escape);_stage++;return;
+                if (!_track.HelpRegions[1].HasFocus() || !_track.HelpVisible) throw new Exception("Keyboard help navigation failed");
+                KeyEvent(Key.Escape); _stage++; return;
             }
-            if(_stage==3)
+            if (_stage == 3)
             {
-                if(_track.HelpVisible)throw new Exception("Help dismissal failed");
-                _track.Present(_view with{Phase=Ordered[_phase]});_track.PresentLight(0,false);_stage++;return;
+                if (_track.HelpVisible) throw new Exception("Help dismissal failed");
+                _track.Present(_view with { Phase = Ordered[_phase] }); _track.PresentLight(0, false); _stage++; return;
             }
-            if(_stage==4)
+            if (_stage == 4)
             {
-                if(_track.ActiveSegment!=_phase)throw new Exception("Active phase mismatch");
-                foreach(var area in _track.HelpRegions)if(!GetViewportRect().Encloses(area.GetGlobalRect()))throw new Exception("Clipped phase target");
+                if (_track.ActiveSegment != _phase) throw new Exception("Active phase mismatch");
+                foreach (var area in _track.HelpRegions) if (!GetViewportRect().Encloses(area.GetGlobalRect())) throw new Exception("Clipped phase target");
                 Save(Ordered[_phase].ToString());
-                if(++_phase<6){_stage=3;return;}
-                _still=GetViewport().GetTexture().GetImage().GetData();_track.PresentLight(9,false);_stage++;return;
+                if (++_phase < 6) { _stage = 3; return; }
+                _still = GetViewport().GetTexture().GetImage().GetData(); _track.PresentLight(9, false); _stage++; return;
             }
-            if(_stage==5)
+            if (_stage == 5)
             {
-                RenderingServer.ForceDraw();if(!_still!.SequenceEqual(GetViewport().GetTexture().GetImage().GetData()))throw new Exception("Reduced motion changed pixels");
-                _stage++;return;
+                RenderingServer.ForceDraw(); if (!_still!.SequenceEqual(GetViewport().GetTexture().GetImage().GetData())) throw new Exception("Reduced motion changed pixels");
+                _stage++; return;
             }
             // Issue #667: the phase-order marker. A card put the Dynasty Phase before the Attack Phase for this turn: the names slide to their new slots, then slide back when the engine resets the order.
-            if(_stage==6)
+            if (_stage == 6)
             {
-                if(!_track.LabelsSettled||_track.PhaseAtSlot(3)!="ATTACK"||_track.PhaseAtSlot(4)!="DYNASTY")throw new Exception("The default order is not in the default slots");
-                _track.ReducedMotion=false;_track.Present(_view with{Phase=Phase.Action,PhaseOrder=DynastyFirst});
-                if(_track.PhaseAtSlot(3)!="DYNASTY"||_track.PhaseAtSlot(4)!="ATTACK")throw new Exception("The reorder did not put Dynasty before Attack");
-                if(_track.LabelsSettled)throw new Exception("The reorder did not animate");
-                _stage++;return;
+                if (!_track.LabelsSettled || _track.PhaseAtSlot(3) != "ATTACK" || _track.PhaseAtSlot(4) != "DYNASTY") throw new Exception("The default order is not in the default slots");
+                _track.ReducedMotion = false; _track.Present(_view with { Phase = Phase.Action, PhaseOrder = DynastyFirst });
+                if (_track.PhaseAtSlot(3) != "DYNASTY" || _track.PhaseAtSlot(4) != "ATTACK") throw new Exception("The reorder did not put Dynasty before Attack");
+                if (_track.LabelsSettled) throw new Exception("The reorder did not animate");
+                _stage++; return;
             }
-            if(_stage==7)
+            if (_stage == 7)
             {
-                if(!_track.LabelsSettled)throw new Exception("The reorder animation did not finish");
+                if (!_track.LabelsSettled) throw new Exception("The reorder animation did not finish");
                 Save("reordered-action");
-                _track.Present(_view with{Phase=Phase.Dynasty,PhaseOrder=DynastyFirst});
-                if(_track.ActiveSegment!=4||_track.ActiveSlot!=3)throw new Exception("The Dynasty Phase must light the slot it now occupies");
-                foreach(var area in _track.HelpRegions)if(!GetViewportRect().Encloses(area.GetGlobalRect()))throw new Exception("Clipped phase target");
-                _track.HelpRegions[3].GrabFocus();if(!_track.HelpVisible)throw new Exception("The third slot has no help");
+                _track.Present(_view with { Phase = Phase.Dynasty, PhaseOrder = DynastyFirst });
+                if (_track.ActiveSegment != 4 || _track.ActiveSlot != 3) throw new Exception("The Dynasty Phase must light the slot it now occupies");
+                foreach (var area in _track.HelpRegions) if (!GetViewportRect().Encloses(area.GetGlobalRect())) throw new Exception("Clipped phase target");
+                _track.HelpRegions[3].GrabFocus(); if (!_track.HelpVisible) throw new Exception("The third slot has no help");
                 _track.HelpRegions[3].ReleaseFocus();
-                _stage++;return;
+                _stage++; return;
             }
-            if(_stage==8)
+            if (_stage == 8)
             {
                 Save("reordered-dynasty");
-                _track.Present(_view with{Phase=Phase.AttackDeclaration,PhaseOrder=DynastyFirst});
-                if(_track.ActiveSegment!=3||_track.ActiveSlot!=4)throw new Exception("The Attack Phase must light the slot it now occupies");
+                _track.Present(_view with { Phase = Phase.AttackDeclaration, PhaseOrder = DynastyFirst });
+                if (_track.ActiveSegment != 3 || _track.ActiveSlot != 4) throw new Exception("The Attack Phase must light the slot it now occupies");
                 // The turn is done: the engine's view carries no order again and the names slide back.
-                _track.Present(_view with{Phase=Phase.End,PhaseOrder=null});
-                if(_track.PhaseAtSlot(3)!="ATTACK"||_track.PhaseAtSlot(4)!="DYNASTY")throw new Exception("The reset did not restore the default order");
-                if(_track.LabelsSettled)throw new Exception("The reset did not animate");
-                _stage++;return;
+                _track.Present(_view with { Phase = Phase.End, PhaseOrder = null });
+                if (_track.PhaseAtSlot(3) != "ATTACK" || _track.PhaseAtSlot(4) != "DYNASTY") throw new Exception("The reset did not restore the default order");
+                if (_track.LabelsSettled) throw new Exception("The reset did not animate");
+                _stage++; return;
             }
-            if(_stage==9)
+            if (_stage == 9)
             {
-                if(!_track.LabelsSettled)throw new Exception("The reset animation did not finish");
+                if (!_track.LabelsSettled) throw new Exception("The reset animation did not finish");
                 Save("reset");
                 // Reduced motion: the names are in place at once, no animation.
-                _track.ReducedMotion=true;_track.Present(_view with{Phase=Phase.Action,PhaseOrder=DynastyFirst});
-                if(!_track.LabelsSettled||_track.PhaseAtSlot(3)!="DYNASTY")throw new Exception("Reduced motion must change the order at once");
-                _track.Present(_view with{Phase=Phase.Action,PhaseOrder=null});
-                if(!_track.LabelsSettled||_track.PhaseAtSlot(3)!="ATTACK")throw new Exception("Reduced motion must reset the order at once");
+                _track.ReducedMotion = true; _track.Present(_view with { Phase = Phase.Action, PhaseOrder = DynastyFirst });
+                if (!_track.LabelsSettled || _track.PhaseAtSlot(3) != "DYNASTY") throw new Exception("Reduced motion must change the order at once");
+                _track.Present(_view with { Phase = Phase.Action, PhaseOrder = null });
+                if (!_track.LabelsSettled || _track.PhaseAtSlot(3) != "ATTACK") throw new Exception("Reduced motion must reset the order at once");
                 // A malformed order is the usual order.
-                _track.Present(_view with{Phase=Phase.Action,PhaseOrder=["Straighten","Events","Action","Attack","Attack","End"]});
-                if(_track.PhaseAtSlot(3)!="ATTACK"||_track.PhaseAtSlot(4)!="DYNASTY")throw new Exception("A malformed order must not scramble the rail");
-                _track.Present(_view with{Phase=Phase.Finished});_stage++;return;
+                _track.Present(_view with { Phase = Phase.Action, PhaseOrder = ["Straighten", "Events", "Action", "Attack", "Attack", "End"] });
+                if (_track.PhaseAtSlot(3) != "ATTACK" || _track.PhaseAtSlot(4) != "DYNASTY") throw new Exception("A malformed order must not scramble the rail");
+                _track.Present(_view with { Phase = Phase.Finished }); _stage++; return;
             }
-            if(_track.ActiveSegment!=-1||!_track.HelpButton.Disabled)throw new Exception("Finished match highlights a playable phase");
+            if (_track.ActiveSegment != -1 || !_track.HelpButton.Disabled) throw new Exception("Finished match highlights a playable phase");
             GD.Print("SIX_PHASE_PASS: all enum mappings, six native states, hover Events help, keyboard arrows/Escape, no Pass dispatch, viewport fit, pixel-stable reduced motion, Finished unlit.");
-            GD.Print("PHASE_ORDER_PASS: Dynasty-before-Attack slides the names into their new slots and lights the slot each phase occupies, the reset slides them back, reduced motion is immediate, a malformed order is ignored.");GetTree().Quit();
+            GD.Print("PHASE_ORDER_PASS: Dynasty-before-Attack slides the names into their new slots and lights the slot each phase occupies, the reset slides them back, reduced motion is immediate, a malformed order is ignored."); GetTree().Quit();
         }
-        catch(Exception e){GD.PushError(e.ToString());Save("failure");GetTree().Quit(1);}
+        catch (Exception e) { GD.PushError(e.ToString()); Save("failure"); GetTree().Quit(1); }
     }
 }
 
 public partial class PhaseReferencePlate : Control
 {
-    public override void _Draw()=>DrawTextureRectRegion(GD.Load<Texture2D>("res://Art/six-phase-reference.png"),new Rect2(Vector2.Zero,Size),new Rect2(0,188,1774,154));
+    public override void _Draw() => DrawTextureRectRegion(GD.Load<Texture2D>("res://Art/six-phase-reference.png"), new Rect2(Vector2.Zero, Size), new Rect2(0, 188, 1774, 154));
 }
