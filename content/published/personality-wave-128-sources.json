@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10437",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10437",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10437-printing-1-image-1.webp",
+    "image_sha256": "9a48b505440bc3cc9c286e03f6207c5596e6423ac4d58251cafdcf15628c5229"
+  },
+  {
+    "card_id": "oracle-l5r-10469",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10469",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10469-printing-1-image-1.webp",
+    "image_sha256": "62be1571af0ab34ee6f2abd2fc0f62768c70cf229cd27e5dbe195325761114d1"
+  }
+]

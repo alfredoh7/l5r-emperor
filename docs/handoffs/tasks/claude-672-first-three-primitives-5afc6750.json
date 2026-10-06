@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "First three primitives from the #668 plan, with 16 demonstration cards (inventory 1749 wired). P23: ExperiencedCoM is Experienced level 1 and 'X - inexperienced' shares X's base title (Hida O-Ushi, Tsuruchi inexperienced). P16: Tireless and Home as AbilityDefinition flags, Home grantable as a keyword (Goju Obayashi, Moshi Sasako exp, Shinjo Kinto exp, Daigotsu Kanpeki exp2, My Ancestor's Steed, Koan's Scroll Satchel). P9: stat-term registry with new additive hooks FollowerForce, PersonalityChi, ArmyForce and a contribution multiplier (Tochiko, Toku Saiga, Hiruma Ogata, Matsu Sango, Bayushi Manami exp, Moto Daiken, Moto Ogaru, Yoritomo Toganin). Also fixes Field Messenger/Communion validating their transfer only at resolution, which stalled the bot soak. Shared edits are one-line hook calls in CardAbilities.cs, MatchEngine.cs, EngineHookStartup.cs, ShadowsEmbraceBatch1.cs, EmperorRulingR4.cs and Experienced.cs.",
+  "validation": "bash tools/check.sh --skip-client: exit 0, 2771 of 2771 tests, bot soak stall=0. Content tests 165 OK. check_format and lint_comment_swallow clean. Art pack catalogue-art-issue672-20261006-r1 (4196 images, 16 new) verified with ensure_catalogue_art --archive and --verify-only. No Godot or native client run.",
+  "remaining": "Readings for Mendon in the three 2026-10-06-672-*.md decision docs (notably: Inexperienced is level 0, so plain Bayushi Nitoshi cannot overlay his inexperienced version). Not built: StatCap, new modifier durations, ComputedBonus, TimingOverrides, PresenceGrants; Tireless is honoured for actions, not Reactions. Unwired: The Sorrow, Bayushi Nitoshi exp. Client: My Collection shows two 'Base' buttons for a title with an inexperienced version; no .import sidecars generated for the 16 new scans.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/672",
+  "branch": "claude/672-first-three-primitives",
+  "updated": "2026-10-06T14:04:31.768030+00:00"
+}

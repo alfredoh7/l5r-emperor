@@ -1,0 +1,134 @@
+{
+  "Profile": "personality-wave-129",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10877",
+      "Name": "Goju Obayashi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Obayashi enters play, lose 2 Honor.\nNinja Tireless Battle: Move Obayashi home. (You may use Tireless abilities even if bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10877.jpg",
+      "Keywords": [
+        "Ninja",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "obayashi-move-home"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10643",
+      "Name": "Moshi Sasako",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tireless Battle: Straighten Sasako. (Tireless actions may be taken while bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10643.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Naval",
+        "Unique",
+        "Experienced",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sasako-exp-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10674",
+      "Name": "Shinjo Kinto",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Battle: Move Kinto home or, if he would be opposed, to the current battlefield. (Home actions may be taken from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10674.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Commander",
+        "Commander of the 9th Legion",
+        "Experienced",
+        "Imperial",
+        "Samurai",
+        "Scout",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kinto-exp-move-home",
+        "kinto-exp-move-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10876",
+      "Name": "Daigotsu Kanpeki",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 14,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tireless Open: Take the Imperial Favor. (You may use Tireless abilities even if bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10876.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Experienced 2",
+        "Kensai",
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Monk",
+        "Paragon",
+        "Samurai",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kanpeki-exp2-favor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

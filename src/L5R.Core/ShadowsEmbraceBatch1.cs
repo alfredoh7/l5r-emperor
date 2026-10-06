@@ -134,25 +134,25 @@ public sealed partial class MatchEngine
                 return false;
             // Chuda Hitaka: Hitaka was destroyed as the cost; the Oni enters at home (a Limited action has no battlefield), priced by the TargetRecruit rule.
             case "hitaka-recruit-oni":
-            {
-                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
-                Require(quote.Error is null, quote.Error ?? "");
-                return BringDeadPersonalityIntoPlay(player, target, name, null);
-            }
+                {
+                    var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
+                    Require(quote.Error is null, quote.Error ?? "");
+                    return BringDeadPersonalityIntoPlay(player, target, name, null);
+                }
             // Daidoji Sosuke: his whole unit if he is Mantis Clan; otherwise the acting player chooses the card without attachments in his unit (Asako Kaitoko's reading:
             // him when he has none, else one of his Followers without attachments).
             case "sosuke-tariffs":
-            {
-                if (HasClanAffiliation(target!, "Mantis"))
                 {
-                    BowUnitByEffect(target!, player.Id);
-                    return false;
+                    if (HasClanAffiliation(target!, "Mantis"))
+                    {
+                        BowUnitByEffect(target!, player.Id);
+                        return false;
+                    }
+                    var candidates = UnitCardsWithoutAttachments(target!); // Makito's reading (issue #498): any card of the unit without attachments, not only Followers.
+                    var options = candidates.Select(c => new EffectOption(c.Id, $"Bow {Definition(c).Name}", [Se1BowCardEffect + c.Id])).ToArray();
+                    return BeginShadowsEmbraceBatch1Choice(command, options, $"{name}: choose the card without attachments in {Definition(target!).Name}'s unit to bow.",
+                        consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
                 }
-                var candidates = UnitCardsWithoutAttachments(target!); // Makito's reading (issue #498): any card of the unit without attachments, not only Followers.
-                var options = candidates.Select(c => new EffectOption(c.Id, $"Bow {Definition(c).Name}", [Se1BowCardEffect + c.Id])).ToArray();
-                return BeginShadowsEmbraceBatch1Choice(command, options, $"{name}: choose the card without attachments in {Definition(target!).Name}'s unit to bow.",
-                    consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            }
             // Daigotsu Arakan: Costly Feud's shape -- the penalty, then the bow if his Force is now 0 or he is Lion Clan (read after the penalty).
             case "arakan-weaken":
                 ApplyModifier(target!, source!.Id, id, "Force", -4);
@@ -167,23 +167,23 @@ public sealed partial class MatchEngine
             // Goju Bunoro: every card in the target's controller's provinces is turned face-up (a Personality there is then public information), then the acting
             // player may choose one face-up Personality there to overlay on the target -- or not.
             case "bunoro-displace":
-            {
-                var owner = Player(target!.OwnerId);
-                foreach (var province in owner.Provinces.Where(p => !p.Destroyed && p.CardId is not null))
                 {
-                    var card = Card(province.CardId);
-                    if (card.FaceUp) continue;
-                    card.FaceUp = true;
-                    Emit("provinceRevealed", $"{name}: {Definition(card).Name} in {owner.Name}'s province {province.Index + 1} is turned face-up.", player.Id, card.Id);
+                    var owner = Player(target!.OwnerId);
+                    foreach (var province in owner.Provinces.Where(p => !p.Destroyed && p.CardId is not null))
+                    {
+                        var card = Card(province.CardId);
+                        if (card.FaceUp) continue;
+                        card.FaceUp = true;
+                        Emit("provinceRevealed", $"{name}: {Definition(card).Name} in {owner.Name}'s province {province.Index + 1} is turned face-up.", player.Id, card.Id);
+                    }
+                    if (!InPlay(target)) return false;
+                    var overlays = owner.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => Card(p.CardId)).Where(c => BunoroMayOverlay(c, target)).ToArray();
+                    if (overlays.Length == 0) return false;
+                    var options = overlays.Select(c => new EffectOption(c.Id, $"Overlay {Definition(c).Name} on {Definition(target).Name}", [Se1OverlayEffect + c.Id]))
+                        .Append(new EffectOption("decline", "Do not overlay", [Se1DeclineEffect])).ToArray();
+                    return BeginShadowsEmbraceBatch1Choice(command, options, $"{name}: you may overlay a face-up Personality in a province on {Definition(target).Name}.",
+                        consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
                 }
-                if (!InPlay(target)) return false;
-                var overlays = owner.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => Card(p.CardId)).Where(c => BunoroMayOverlay(c, target)).ToArray();
-                if (overlays.Length == 0) return false;
-                var options = overlays.Select(c => new EffectOption(c.Id, $"Overlay {Definition(c).Name} on {Definition(target).Name}", [Se1OverlayEffect + c.Id]))
-                    .Append(new EffectOption("decline", "Do not overlay", [Se1DeclineEffect])).ToArray();
-                return BeginShadowsEmbraceBatch1Choice(command, options, $"{name}: you may overlay a face-up Personality in a province on {Definition(target).Name}.",
-                    consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            }
             case "nikaru-exp-shield":
                 _state.BattleTargetShields.RemoveAll(s => s.Turn != _state.TurnNumber || s.Battle != _state.BattleNumber);
                 _state.BattleTargetShields.Add(new(source!.Id, _state.BattleNumber, _state.TurnNumber, name));
@@ -374,8 +374,8 @@ public sealed partial class MatchEngine
     private bool AtosaCovers(CardInstance card) => Definition(card).Type == CardType.Personality && Keyword(card, "Gaijin");
     private bool AtosaCoversHerself(CardInstance card) => Definition(card).Effect == AtosaGaijinClanEffect;
 
-    // Chiisai: "Will not attach Items."
-    private bool WillNotAttachItems(CardDefinition attachment, CardInstance target) => attachment.Type == CardType.Item && Definition(target).Effect == ChiisaiRestrictionsEffect;
+    // Chiisai: "Will not attach Items." Matsu Sango prints the same (StatTermCards.cs, issue #672).
+    private bool WillNotAttachItems(CardDefinition attachment, CardInstance target) => attachment.Type == CardType.Item && (Definition(target).Effect == ChiisaiRestrictionsEffect || StatTermCardWillNotAttachItems(target));
 
     // Chiisai: "Melee Attacks may not target Chiisai's Followers."
     private bool IsChiisaisFollower(CardInstance card) =>
