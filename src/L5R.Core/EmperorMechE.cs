@@ -171,7 +171,7 @@ public sealed partial class MatchEngine
                             $"{name}: remove {Definition(dead).Name} from the game, the Spell costs {Definition(dead).Chi} less", dead));
             }
         }
-        return [.. reactions, .. destroys, .. TfAltProductionTokens(playerId, paying)]; // Jade Mine, Slave Pits (issue #622, TfHoldings.cs)
+        return [.. reactions, .. destroys, .. TfAltProductionTokens(playerId, paying), .. PromoPaymentSourceTokens(playerId, paying)]; // Jade Mine, Slave Pits (issue #622, TfHoldings.cs); Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
     }
 
     private HashSet<string> PaymentSourceIds(int playerId, PaymentSubject? paying) =>
@@ -180,13 +180,14 @@ public sealed partial class MatchEngine
     private int PaymentTokenAmount(string id, int playerId, PaymentSubject? paying) => PaymentTokens(playerId, paying).FirstOrDefault(t => t.Id == id)?.Amount ?? 0;
 
     // The most the tokens can add to one payment: each card's best token.
-    private int MaxPaymentTokenProduction(int playerId, PaymentSubject? paying) => PaymentTokens(playerId, paying).GroupBy(t => t.Card.Id).Sum(g => g.Max(t => t.Amount) - TfAltOverlap(g, playerId, paying));
+    private int MaxPaymentTokenProduction(int playerId, PaymentSubject? paying) => PaymentTokens(playerId, paying).Where(t => t.Amount > 0 /* issue #667: Profits' reduction produces less */).GroupBy(t => t.Card.Id).Sum(g => g.Max(t => t.Amount) - TfAltOverlap(g, playerId, paying));
 
     // One token of a card per payment; two tokens never destroy or remove the same card; a card another of the action's costs bows or destroys is not destroyed again.
     private void RequirePaymentTokens(string[] ids, IReadOnlySet<string>? exclude)
     {
         var tokens = ids.Where(IsPaymentToken).ToArray();
         Require(tokens.GroupBy(PaymentTokenCardId).All(g => g.Count() == 1), "A card's Reaction produces Gold only once in a payment.");
+        RequirePromoPaymentSources(ids); // Coin Pouch (issue #667, PromoPaymentSources.cs): only beside a Holding bowed in the same payment
         RequireTfAltExclusive(ids, exclude); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow is chosen instead of the card's own
         var subjects = tokens.Where(t => t.Contains(':')).Select(t => t[(t.IndexOf(':') + 1)..]).ToArray();
         Require(subjects.Distinct(StringComparer.Ordinal).Count() == subjects.Length, "A card can be destroyed or removed only once in a payment.");
@@ -207,6 +208,7 @@ public sealed partial class MatchEngine
         foreach (var token in tokens)
         {
             if (TfIsAltToken(token)) { TfUseAltToken(token, playerId); continue; } // Jade Mine, Slave Pits (issue #622, TfHoldings.cs)
+            if (PromoUsePaymentToken(token, playerId)) continue; // Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
             var ability = AbilityCatalog.All[token.AbilityId];
             token.Card.AbilityUses[ability.UsageKey ?? token.AbilityId] = _state.TurnNumber;
             var name = Definition(token.Card).Name;

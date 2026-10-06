@@ -206,6 +206,7 @@ public sealed partial class MatchEngine
         }
         TakeControl(attachment, wielder.OwnerId);
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
+        PromoPaymentAttached(attachment); // Coin Pouch (issue #667): "This card enters play bowed."
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
         if (fromDiscard) NoteAttached(player.Id, attachment, "discard"); // Issue #501 (EmperorMechD.cs): the attach log (a hand attach is logged above).
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name}{(fromDiscard ? " from a discard pile" : "")}.", player.Id, attachment.Id);

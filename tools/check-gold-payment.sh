@@ -13,8 +13,8 @@ l5r_console="${GODOT%.exe}_console.exe"
 if [ -f "$l5r_console" ]; then l5r_godot="$l5r_console"; fi
 dotnet build src/L5R.Client/L5R.Client.csproj --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo
 "$l5r_godot" --headless --editor --path "$L5R_PROJECT_ROOT/src/L5R.Client" --log-file "$L5R_PROJECT_ROOT/artifacts/checks/gold-import.log" --import
-# fixed: Kharmic; derived: Equip (Battle) retargeted between Spells priced 0/1/2; variable: a chosen amount.
-for l5r_mode in fixed fixed-confirm derived derived-swapped derived-confirm variable variable-raised variable-confirm; do
+# fixed: Kharmic; derived: Equip (Battle) retargeted between Spells priced 0/1/2; variable: a chosen amount; profits: Profits' "Use Profits" and Wealth-token Gold source and the Coin Pouch (issue #667).
+for l5r_mode in fixed fixed-confirm derived derived-swapped derived-confirm variable variable-raised variable-confirm profits profits-confirm; do
   "$l5r_godot" --path "$L5R_PROJECT_ROOT/src/L5R.Client" --resolution 1440x900 -- --capture="$L5R_PROJECT_ROOT/artifacts/screenshots/gold-$l5r_mode-1440.png" --capture-mode="gold-$l5r_mode" > "artifacts/checks/gold-$l5r_mode.log" 2>&1
   grep -q 'UI_SMOKE_PASS' "artifacts/checks/gold-$l5r_mode.log"
   if grep -Eq 'ERROR:|SCRIPT ERROR:|Unhandled exception|smoke failed' "artifacts/checks/gold-$l5r_mode.log"; then exit 1; fi

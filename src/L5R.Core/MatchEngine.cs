@@ -1005,7 +1005,7 @@ public sealed partial class MatchEngine
         // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
         // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
         var groups = sources.Select(c => new[] { (Id: c.Id, Amount: GoldProduced(c.Id, playerId, paying)) }).ToList();
-        var availableTokens = PaymentTokens(playerId, paying).Where(t => exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).ToArray();
+        var availableTokens = PaymentTokens(playerId, paying).Where(t => !PromoNeverSuggested(t) /* issue #667: Profits' reduction is only chosen */ && (exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id)))).ToArray();
         foreach (var tokenGroup in availableTokens.Where(t => !TfIsAltToken(t)).GroupBy(t => t.Card.Id))
             groups.Add(tokenGroup.Select(t => (t.Id, t.Amount)).ToArray());
         TfMergeAltIntoGroups(groups, availableTokens); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow joins the card's own group
@@ -1026,8 +1026,10 @@ public sealed partial class MatchEngine
             }
         }
         return byTotal.Where(p => p.Key >= cost).SelectMany(p => p.Value.Select(ids => new PaymentOption(ids, p.Key, cost, p.Key - cost)))
+            // Issue #667: the Coin Pouch is never suggested without its Holding; Near Miss, Profits and the Pouch are suggested only when nothing else pays as well (PromoPaymentSources.cs).
+            .Where(p => PromoPaymentOptionValid(p.SourceIds))
             // Zlkyt's destruction of a Holding (issue #501) is suggested only when nothing else pays.
-            .OrderBy(p => p.SourceIds.Count(IsDestroyingPaymentToken))
+            .OrderBy(p => p.SourceIds.Count(IsDestroyingPaymentToken)).ThenBy(p => PromoOptionalSourceCount(p.SourceIds))
             // A payment that bows no alternate source (a Personality that can bow for Gold, issue #338) is always preferred to one that does:
             // the engine never suggests bowing Sakuma when printed producers cover the cost. With no such card in play every count is 0.
             .ThenBy(p => p.SourceIds.Count(id => !IsPaymentToken(id) && Definition(Card(id)).GoldProduction == 0)).ThenBy(p => p.Excess)
@@ -2005,6 +2007,7 @@ public sealed partial class MatchEngine
         Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(command.PlayerId, card);
         NoteAttachedFollowerFromHand(card, target);
         card.Zone = Zone.Attached; card.AttachedTo = target.Id; card.FaceUp = true;
+        PromoPaymentAttached(card); // Coin Pouch (issue #667): "This card enters play bowed."
         if (inBattle) card.ProvinceIndex = target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(target, granted, card.Id, "Attachment");
         Emit("equipped", $"{def.Name} attached to {Definition(target).Name}.", command.PlayerId, card.Id);

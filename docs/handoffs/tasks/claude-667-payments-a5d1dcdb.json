@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wire Coin Pouch (item-wave-44), Near Miss and Profits (strategy-wave-113) through one payment-source extension point (PromoPaymentSources.cs); client shows Use Profits and hover-highlights the card",
+  "validation": "Core promo-payment-sources 9/9; Core, AI, Server, Transport, Collection suites pass; native probe gold-profits and gold-profits-confirm pass; check.sh stops only at the catalogue-art receipt (3 new scans need an art-pack rebuild)",
+  "remaining": "Catalogue art pack rebuild for oracle-l5r-1427/5523/6075; readings in docs/decisions/2026-10-05-667-payments.md for Mendon to confirm",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
+  "branch": "claude/667-payments",
+  "updated": "2026-10-06T02:21:59.682698+00:00"
+}
