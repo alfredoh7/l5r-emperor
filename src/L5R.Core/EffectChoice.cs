@@ -153,6 +153,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyAbilityRemovalBranchEffect(effect, command)) return; // issue #667 (AbilityRemoval.cs): permanent removal options.
         if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
         if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
         if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
