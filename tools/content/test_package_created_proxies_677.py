@@ -1,4 +1,3 @@
-import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -8,7 +7,7 @@ import unittest
 import package_created_proxies_677 as module
 
 ROOT = Path(__file__).resolve().parents[2]
-ALL_IDS = [f"oracle-l5r-{n}" for n in list(module.CREATORS) + list(module.PROXIES)] + [module.USER_SCAN_ID]
+ALL_IDS = [f"oracle-l5r-{n}" for n in list(module.CREATORS) + list(module.PROXIES)]
 
 
 def receipt_scan(card_id: str) -> Path | None:
@@ -20,7 +19,7 @@ def receipt_scan(card_id: str) -> Path | None:
 
 
 # The scan caches are gitignored: a checkout without them can check the published files but cannot run the packager again.
-SCANS_PRESENT = all((scan := receipt_scan(card_id)) is not None and scan.is_file() for card_id in ALL_IDS if card_id != module.USER_SCAN_ID)
+SCANS_PRESENT = all((scan := receipt_scan(card_id)) is not None and scan.is_file() for card_id in ALL_IDS)
 
 
 class PackageCreatedProxies677Tests(unittest.TestCase):
@@ -59,9 +58,11 @@ class PackageCreatedProxies677Tests(unittest.TestCase):
             card = cards[f"oracle-l5r-{oracle_id}"]
             self.assertEqual((card["Type"], card["Text"], card["Abilities"], card["Effect"]), (kind.title(), text or "", abilities, "none"))
             self.assertIs(card["CreatedOnly"], True)
-            self.assertEqual((card["GoldCost"], card["HonorRequirement"]), (0, None), card["Id"])
-        retinue = cards[module.USER_SCAN_ID]
-        self.assertEqual((retinue["Type"], retinue["Force"], retinue["Keywords"], retinue["Text"], retinue["CreatedOnly"]), ("Follower", 0, [], module.NO_DECKS, True))
+            self.assertEqual(card["GoldCost"], 0, card["Id"])
+            self.assertIn(card["HonorRequirement"], (None, 0), card["Id"])
+        troops = cards["oracle-l5r-9745"]
+        self.assertEqual((troops["Name"], troops["Type"], troops["Force"], troops["Keywords"], troops["Text"]), ("Disposable Troops", "Follower", 0, [], module.NO_DECKS))
+        self.assertNotIn("user-scan-korus-retinue", cards)
 
     def test_manifests_and_provenance_name_exactly_each_wave(self):
         for kind, profile in module.WAVES.items():
@@ -71,11 +72,6 @@ class PackageCreatedProxies677Tests(unittest.TestCase):
             sources = json.loads((ROOT / "content/published" / f"{profile}-sources.json").read_text(encoding="utf-8"))
             self.assertEqual([source["card_id"] for source in sources], ids)
             for source in sources:
-                if source["card_id"] == module.USER_SCAN_ID:
-                    scan = ROOT / source["image_path"]
-                    self.assertEqual(source["image_path"], f"assets/requested-scans/{module.USER_SCAN_FILE}")
-                    self.assertEqual(hashlib.sha256(scan.read_bytes()).hexdigest(), source["image_sha256"])
-                    continue
                 oracle_id = int(source["card_id"].removeprefix("oracle-l5r-"))
                 slug = module.PROXIES[oracle_id][1] if oracle_id in module.PROXIES else module.CREATORS[oracle_id][1]
                 self.assertIn(f"/oracle/{slug}/", source["image_path"])
@@ -97,12 +93,8 @@ class PackageCreatedProxies677Tests(unittest.TestCase):
     def test_repackaging_reproduces_the_published_files(self):
         with tempfile.TemporaryDirectory() as directory:
             scratch = Path(directory)
-            for relative in ("content/oracle", "assets/reference/oracle", "assets/requested-scans"):
-                (scratch / relative).parent.mkdir(parents=True, exist_ok=True)
             # The packager reads the catalogues, the receipts and the scans they name; only those are copied.
             for card_id in ALL_IDS:
-                if card_id == module.USER_SCAN_ID:
-                    continue
                 for receipt in (ROOT / "assets/reference/oracle").glob(f"*/receipts/{card_id}-printing-*.json"):
                     target = scratch / receipt.relative_to(ROOT)
                     target.parent.mkdir(parents=True, exist_ok=True)
@@ -116,8 +108,6 @@ class PackageCreatedProxies677Tests(unittest.TestCase):
                 target = scratch / catalogue.relative_to(ROOT)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(catalogue, target)
-            (scratch / "assets/requested-scans").mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(ROOT / "assets/requested-scans" / module.USER_SCAN_FILE, scratch / "assets/requested-scans" / module.USER_SCAN_FILE)
             counts = module.package(scratch)
             self.assertEqual(sum(counts.values()), len(ALL_IDS))
             for profile in module.WAVES.values():

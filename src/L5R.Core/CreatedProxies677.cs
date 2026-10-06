@@ -8,7 +8,7 @@ namespace L5R.Core;
 //   Kitsune Kichi - exp      "After Kichi enters play, lose 3 Honor and create a 4F/2C/0PH Badger ... with the ability, 'Battle, Bow: Melee 4 Attack.'"   EntryHonorLoss 3 + proxy677-kichi-exp-entry
 //   Kuni Renyu - exp2        "After Renyu enters play, create a 1F Dog - Nonhuman Follower and attach it to him." / "Earth Battle: Bow a target enemy card with Shadowlands or without
 //                            attachments."   proxy677-renyu-entry (Renyu's Dog), proxy677-renyu-bow
-//   Hiruma Koru              "Invest 1: Create a 0F Follower and attach it to Koru."   proxy677-koru-invest (Koru's Retinue; Clay Kshatriya's Invest window)
+//   Hiruma Koru              "Invest 1: Create a 0F Follower and attach it to Koru."   proxy677-koru-invest (Disposable Troops; Clay Kshatriya's Invest window)
 //   Kitsune Yamazaru         "Interrupt: After you Recruit Yamazaru, create a 3F/2C/3PH Mantis Clan - Monkey - Nonhuman - Spirit Personality with the ability ..."   proxy677-yamazaru-create
 //                            (Kitsu Tamao's entering-play creation); the Monkey's action is proxy677-monkey-weaken (Moto Paikao's)
 //   Komori Miyano            "Air Limited: Create a 0F/2C/0PH Bat - Nonhuman - Cavalry Personality. Remove it from the game after your next turn begins."   proxy677-miyano-bat
@@ -55,7 +55,7 @@ public static class CreatedProxies677Abilities
     public static readonly CreatedCardSpec ShadowBadger = new(CardType.Personality, Force: 4, Chi: 2, PersonalHonor: 0, Keywords: ["Badger", "Nonhuman", "Shadowlands", "Spirit"],
         AbilityText: "Battle, Bow: Melee 4 Attack", ProxyId: "oracle-l5r-11335");
     public static readonly CreatedCardSpec Dog = new(CardType.Follower, Force: 1, Keywords: ["Dog", "Nonhuman"], ProxyId: "oracle-l5r-10815") { HostIsSource = true };
-    public static readonly CreatedCardSpec Retinue = new(CardType.Follower, Force: 0, Keywords: [], ProxyId: "user-scan-korus-retinue") { HostIsSource = true };
+    public static readonly CreatedCardSpec Retinue = new(CardType.Follower, Force: 0, Keywords: [], ProxyId: "oracle-l5r-9745") { HostIsSource = true };
     public static readonly CreatedCardSpec Conscripts = new(CardType.Follower, Force: 1, Keywords: [], ProxyId: "oracle-l5r-10004");
     public static readonly CreatedCardSpec Monkey = new(CardType.Personality, Force: 3, Chi: 2, PersonalHonor: 3, Keywords: ["Mantis Clan", "Monkey", "Nonhuman", "Spirit"],
         AbilityText: "Battle: Discard a card to give a target enemy Personality or Follower a Force penalty equal to the card's Focus Value", ProxyId: "oracle-l5r-11327");

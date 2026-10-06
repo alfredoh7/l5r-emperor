@@ -36,12 +36,12 @@
     "image_sha256": "9028b5b3a33227b7d336d975803921867ea59281647987516b1a8df781e6e22b"
   },
   {
-    "card_id": "user-scan-korus-retinue",
+    "card_id": "oracle-l5r-9745",
     "printing_set": [
-      "User-supplied scan"
+      "Promotional&ndash;Celestial"
     ],
-    "source_url": "user-supplied-by-mendon-2026-10-06 (Koru's Guard)",
-    "image_path": "assets/requested-scans/korus-retinue.jpg",
-    "image_sha256": "19f0174021f394cc5cf706f5fa2eed8e93cf0f936100faa800ff9f12758ce269"
+    "source_url": "https://oracleofthevoid.com/#cardid=9745",
+    "image_path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9745-printing-1-image-1.jpg",
+    "image_sha256": "16ba58d2cbb6632ba36ed5d348aeb39b0c429fe5a964ce89bfce7f6f1973c6b3"
   }
 ]

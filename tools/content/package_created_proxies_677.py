@@ -5,8 +5,8 @@ Mendon's ruling of 2026-10-06 (docs/decisions/2026-10-06-677-created-card-proxie
 exact matches over my scans that are manufactured." So an Oracle of the Void proxy whose printed type, stats, keywords and text are exactly what the creator's text creates is published
 as the created card, whatever its frame. Where an Emperor-era printing of the proxy exists it is the one used (Bat and Renyu's Dog: Coils of Madness; Kaxt and Yuribara's Butterflies:
 Torn Asunder); the others exist only from Ivory Edition on, and the Ivory Edition printing (printing 1) is used. Their receipts are under assets/reference/oracle/ivory-edition/receipts
-(tools/content/download_expansion_printings.py --set "Ivory Edition" --cards ...). Koru's Retinue is the one user-supplied scan (assets/requested-scans/korus-retinue.jpg, Mendon's
-1061 x 1483 PNG resized to the 750 x 1050 of the other scans, as follower-wave-47's Colonists is).
+(tools/content/download_expansion_printings.py --set "Ivory Edition" --cards ...). Hiruma Koru's 0F Follower is Oracle's Disposable Troops (oracle-l5r-9745, the
+Promotional-Celestial printing): an exact match, so it is used and not the scan Mendon manufactured (Koru's Retinue).
 
 Every scan was opened and read: each proxy's printed type, stats, keywords and text, and each creator's own printed text (the scan wins over the catalogue text). The Oracle record types
 every proxy "Proxy"; the real type is read off the printed boxes (a Personal Honor fan: Personality; "+" boxes: Item; neither: Follower). A proxy is CreatedOnly: never in a deck, never in
@@ -15,11 +15,8 @@ spelling is kept. Engine support: src/L5R.Core/CreatedProxies677*.cs.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
-
-from PIL import Image
 
 from package_vanilla_wave import build_definition_fields, find_source
 
@@ -59,9 +56,10 @@ PROXIES: dict[int, tuple[str, str, str | None, list[str]]] = {
     11332: ("follower", "ivory-edition", IVORY_NOTE, []),  # Clay Yojimbo: 1F Clay Soldier, Nonhuman, Yojimbo
     11337: ("follower", "ivory-edition", IVORY_NOTE, []),  # Little Elephant: 1F Elephant, Nonhuman, Cavalry
     10815: ("follower", "coils-of-madness", None, []),  # Renyu's Dog: 1F Nonhuman, Dog (the scan prints no text)
+    9745: ("follower", "promotional-celestial", NO_DECKS, []),  # Disposable Troops: 0F, no keyword (the 2009 Celestial-frame printing; an exact Oracle match for Hiruma Koru's Follower)
     11348: ("item", "ivory-edition", "This Item's Force Modifier is equal to the discarded card's Focus Value." + NL + IVORY_NOTE, []),  # Unexpected Weapon: "+*"F/+0C Weapon
 }
-PROXY_SETS = {"ivory-edition": "Ivory Edition", "coils-of-madness": "Coils of Madness", "torn-asunder": "Torn Asunder"}
+PROXY_SETS = {"ivory-edition": "Ivory Edition", "coils-of-madness": "Coils of Madness", "torn-asunder": "Torn Asunder", "promotional-celestial": "Promotional&ndash;Celestial"}
 
 # Oracle id -> (type, reviewed set slug, printed text, Abilities, Effect, extra definition fields).
 CREATORS: dict[int, tuple[str, str, str, list[str], str, dict]] = {
@@ -113,10 +111,6 @@ CREATORS: dict[int, tuple[str, str, str, list[str], str, dict]] = {
             ["proxy677-onyx-circle"], "none", {"GoldProduction": 2}),  # The Onyx Dueling Circle (the Oracle record has no production field; the scan prints "Produce 2 Gold")
 }
 
-USER_SCAN_ID = "user-scan-korus-retinue"
-USER_SCAN_FILE = "korus-retinue.jpg"
-
-
 def proxy_definition(root: Path, oracle_id: int) -> tuple[str, dict, dict]:
     kind, slug, text, abilities = PROXIES[oracle_id]
     card_id = f"oracle-l5r-{oracle_id}"
@@ -145,31 +139,15 @@ def creator_definition(root: Path, oracle_id: int) -> tuple[str, dict, dict]:
     return kind, fields, source
 
 
-def user_scan_definition(root: Path) -> tuple[str, dict, dict]:
-    """Koru's Retinue: a Follower frame, Force 0 (top left), Gold Cost 0, Focus 0, no keyword, "May not be included in decks." and flavour text."""
-    image = root / "assets/requested-scans" / USER_SCAN_FILE
-    digest = hashlib.sha256(image.read_bytes()).hexdigest()
-    destination = root / "src/L5R.Client/Content/Published" / f"{USER_SCAN_ID}.jpg"
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with Image.open(image) as scan:
-        scan.convert("RGB").save(destination, "JPEG", quality=95)
-    definition = dict(Id=USER_SCAN_ID, Name="Koru's Retinue", Type="Follower", Clan="Unaligned", GoldCost=0, GoldProduction=0, Force=0, Chi=0, PersonalHonor=0,
-                      HonorRequirement=None, ProvinceStrength=0, StartingHonor=0, Text=NO_DECKS, ScenarioOnly=False, ArtworkKey=f"res://Content/Published/{USER_SCAN_ID}.jpg",
-                      Keywords=[], Focus=0, Abilities=[], Effect="none", CreatedOnly=True)
-    provenance = dict(card_id=USER_SCAN_ID, printing_set=["User-supplied scan"], source_url="user-supplied-by-mendon-2026-10-06 (Koru's Guard)",
-                      image_path=image.relative_to(root).as_posix(), image_sha256=digest)
-    return "follower", definition, provenance
-
-
 def package(root: Path = ROOT) -> dict[str, int]:
     cards: dict[str, list[dict]] = {kind: [] for kind in WAVES}
     sources: dict[str, list[dict]] = {kind: [] for kind in WAVES}
-    built = [creator_definition(root, oracle_id) for oracle_id in CREATORS] + [proxy_definition(root, oracle_id) for oracle_id in PROXIES] + [user_scan_definition(root)]
+    built = [creator_definition(root, oracle_id) for oracle_id in CREATORS] + [proxy_definition(root, oracle_id) for oracle_id in PROXIES]
     for kind, definition, source in built:
         cards[kind].append(definition)
         sources[kind].append(source)
     ids = [card["Id"] for kind in WAVES for card in cards[kind]]
-    assert len(ids) == len(set(ids)) == len(CREATORS) + len(PROXIES) + 1, "Duplicate or missing card"
+    assert len(ids) == len(set(ids)) == len(CREATORS) + len(PROXIES), "Duplicate or missing card"
     published = root / "content/published"
     published.mkdir(parents=True, exist_ok=True)
     for kind, profile in WAVES.items():

@@ -16,7 +16,7 @@ internal static class CreatedProxies677Tests
     // Proxies published here.
     private const string Ashalan = "oracle-l5r-11328", Bat = "oracle-l5r-10809", MinorIllusion = "oracle-l5r-11341", TowerGuard = "oracle-l5r-11345", Kaxt = "oracle-l5r-10813",
         ShadowBadger = "oracle-l5r-11335", OnyxOni = "oracle-l5r-11343", TsumaroIllusion = "oracle-l5r-11346", MajorIllusion = "oracle-l5r-11338", Monkey = "oracle-l5r-11327",
-        Butterflies = "oracle-l5r-10808", Zombie = "oracle-l5r-11349", ClayYojimbo = "oracle-l5r-11332", Elephant = "oracle-l5r-11337", Dog = "oracle-l5r-10815", Retinue = "user-scan-korus-retinue",
+        Butterflies = "oracle-l5r-10808", Zombie = "oracle-l5r-11349", ClayYojimbo = "oracle-l5r-11332", Elephant = "oracle-l5r-11337", Dog = "oracle-l5r-10815", Retinue = "oracle-l5r-9745",
         UnexpectedWeapon = "oracle-l5r-11348";
     // Proxies published by earlier waves.
     private const string Conscripts = "oracle-l5r-10004", DutifulCavalry = "oracle-l5r-10003", BirdOfPrey = "oracle-l5r-9712", HiredSamurai = "oracle-l5r-10811", Colonists = "user-scan-colonists";
@@ -218,11 +218,11 @@ internal static class CreatedProxies677Tests
         Is(ClayYojimbo, "Clay Yojimbo", F, "Unaligned", 1, 0, 0, 0, null, 0, ["Clay Soldier", "Nonhuman", "Yojimbo"], IvoryNote, [], created: true);
         Is(Elephant, "Little Elephant", F, "Unaligned", 1, 0, 0, 0, null, 0, ["Elephant", "Nonhuman", "Cavalry"], IvoryNote, [], created: true);
         Is(Dog, "Renyu's Dog", F, "Unaligned", 1, 0, 0, 0, null, 0, ["Nonhuman", "Dog"], "", [], created: true);
-        Is(Retinue, "Koru's Retinue", F, "Unaligned", 0, 0, 0, 0, null, 0, [], "May not be included in decks.", [], created: true);
+        Is(Retinue, "Disposable Troops", F, "Unaligned", 0, 0, 0, 0, 0, 0, [], "May not be included in decks.", [], created: true);
         Is(UnexpectedWeapon, "Unexpected Weapon", CardType.Item, "Unaligned", 0, 0, 0, 0, null, 0, ["Weapon"],
             "This Item's Force Modifier is equal to the discarded card's Focus Value.\n" + IvoryNote, [], created: true);
 
-        // Provenance: each Oracle proxy from the reviewed printing (an Emperor-era one where it exists, else Ivory Edition), each with a committed receipt; the user scan from its file.
+        // Provenance: each Oracle proxy from the reviewed printing (an Emperor-era one where it exists, else Ivory Edition; Disposable Troops from its Celestial-frame printing), each with a committed receipt.
         var expected = new Dictionary<string, string>
         {
             [Ashalan] = "ivory-edition",
@@ -237,6 +237,7 @@ internal static class CreatedProxies677Tests
             [ClayYojimbo] = "ivory-edition",
             [Elephant] = "ivory-edition",
             [UnexpectedWeapon] = "ivory-edition",
+            [Retinue] = "promotional-celestial",
             [Bat] = "coils-of-madness",
             [Dog] = "coils-of-madness",
             [Kaxt] = "torn-asunder",
@@ -267,13 +268,6 @@ internal static class CreatedProxies677Tests
                 rows++;
                 var id = row.GetProperty("card_id").GetString()!;
                 var path = row.GetProperty("image_path").GetString()!;
-                if (id == Retinue)
-                {
-                    Eq(path, "assets/requested-scans/korus-retinue.jpg", "Koru's Retinue comes from the user-supplied scan");
-                    var bytes = File.ReadAllBytes(Path.Combine(RepoRoot(), path));
-                    Eq(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant(), row.GetProperty("image_sha256").GetString(), "and its recorded hash is the file's");
-                    continue;
-                }
                 Check(path.Contains($"/oracle/{expected[id]}/"), $"{id} comes from the reviewed {expected[id]} scan ({path})");
                 Check(Directory.GetFiles(Path.Combine(RepoRoot(), "assets/reference/oracle", expected[id], "receipts"), $"{id}-printing-*-image-1.json").Length == 1, $"{id} has a committed receipt");
             }
@@ -320,7 +314,8 @@ internal static class CreatedProxies677Tests
         Resolves(WlStratGatesAbilities.Colonists, Colonists, "Exotic Farmlands (wired by strategy-wave-119)");
         // What each creating ability declares is what its card prints.
         var all = AbilityCatalog.All;
-        Eq(CreatedCards.Resolve(all[CreatedProxies677Abilities.KoruInvest].Creates!).Id, Retinue, "Koru's Invest creates Koru's Retinue");
+        Eq(CreatedCards.Resolve(all[CreatedProxies677Abilities.KoruInvest].Creates!).Id, Retinue, "Koru's Invest creates Disposable Troops, the Oracle scan");
+        Check(!CardCatalog.Cards.ContainsKey("user-scan-korus-retinue"), "the manufactured Koru's Retinue scan is not published: an exact Oracle scan is preferred");
         Check(all[CreatedProxies677Abilities.ShardCreate].Creates is { Count: 3, PerHost: false }, "the Shard: three in all");
         Check(all[CreatedProxies677Abilities.KaxtCreateBattle].Creates is { AtBattlefield: true } && all[CreatedProxies677Abilities.KaxtCreateHome].Creates is { AtBattlefield: false }, "Kaxt: at the battlefield, or at home");
         // A near miss is not accepted: the same card with one keyword more or fewer fits nothing.
@@ -462,7 +457,7 @@ internal static class CreatedProxies677Tests
                 Accept(e, Paid(e, 0, 1, Use(e, 0, CreatedProxies677Abilities.KoruInvest, koru.Id)));
                 var retinue = AttachedTo(e, e.State.Cards[koru.Id], Retinue).Single();
                 var d = Printed(retinue);
-                Check(d.Type == CardType.Follower && d.Force == 0 && (d.Keywords ?? []).Length == 0 && d.Name == "Koru's Retinue", "a 0F Follower with no keyword, attached to Koru");
+                Check(d.Type == CardType.Follower && d.Force == 0 && (d.Keywords ?? []).Length == 0 && d.Name == "Disposable Troops", "a 0F Follower with no keyword, attached to Koru");
                 Eq(e.State.Cards.Count, cards + 1, "exactly one card is created");
                 Check(!CanUse(e, 0, CreatedProxies677Abilities.KoruInvest, koru.Id), "once");
             }

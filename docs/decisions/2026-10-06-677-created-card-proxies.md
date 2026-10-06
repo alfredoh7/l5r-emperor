@@ -10,7 +10,7 @@ Mendon, 2026-10-06, verbatim:
 
 This replaces the older rule in `docs/requests/created-card-scans-needed.md` that a created card's scan must be in the Emperor Edition frame with the Emperor mark. An Oracle of the Void proxy in the Ivory frame is accepted as the created card when its printed type, stats, keywords and text are exactly what the creator's text creates. The rule against near misses (question 9 of [the proxy decision](2026-09-20-created-cards-from-proxy-scans.md)) is unchanged: the resolver still compares type, stats, the exact keyword set and the ability text.
 
-Printing used: where an Emperor-era printing of the proxy exists it is the one published (Bat and Renyu's Dog: Coils of Madness; Kaxt and Yuribara's Butterflies: Torn Asunder). The others were first printed in Ivory Edition, and printing 1 (Ivory Edition) is used.
+Printing used: where an Emperor-era printing of the proxy exists it is the one published (Bat and Renyu's Dog: Coils of Madness; Kaxt and Yuribara's Butterflies: Torn Asunder). The others were first printed in Ivory Edition, and printing 1 (Ivory Edition) is used. One proxy is older than both: Disposable Troops, in the 2009 Celestial frame (see reading 3).
 
 ## Proxies published
 
@@ -33,15 +33,15 @@ All are `CreatedOnly`. Every scan was opened and its printed type, stats, keywor
 | oracle-l5r-11332 | Clay Yojimbo | Follower 1F, Clay Soldier • Nonhuman • Yojimbo | Ivory Edition | follower-wave-58 | Yojimbo of Earth |
 | oracle-l5r-11337 | Little Elephant | Follower 1F, Elephant • Nonhuman • Cavalry | Ivory Edition | follower-wave-58 | New Cavalry Tactics |
 | oracle-l5r-10815 | Renyu's Dog | Follower 1F, Nonhuman • Dog (no text) | Coils of Madness | follower-wave-58 | Kuni Renyu - exp2 |
-| user-scan-korus-retinue | Koru's Retinue | Follower 0F, no keyword; "May not be included in decks." | user-supplied | follower-wave-58 | Hiruma Koru |
+| oracle-l5r-9745 | Disposable Troops | Follower 0F, no keyword; "May not be included in decks." | Promotional-Celestial | follower-wave-58 | Hiruma Koru |
 | oracle-l5r-11348 | Unexpected Weapon | Item "+*"F/+0C, Weapon | Ivory Edition | item-wave-58 | Never Without a Weapon |
 
-Receipts for the Ivory Edition printings are new (`assets/reference/oracle/ivory-edition/receipts`, catalogue `content/oracle/ivory-edition`), fetched with `tools/content/download_expansion_printings.py --set "Ivory Edition" --cards ...`. The four Emperor-era printings already had receipts. Koru's Retinue is Mendon's file (1061 x 1483), saved resized to 750 x 1050 as `assets/requested-scans/korus-retinue.jpg`, as Colonists was.
+Receipts for the Ivory Edition printings are new (`assets/reference/oracle/ivory-edition/receipts`, catalogue `content/oracle/ivory-edition`), fetched with `tools/content/download_expansion_printings.py --set "Ivory Edition" --cards ...`. The four Emperor-era printings and Disposable Troops already had receipts. No user-supplied scan is published.
 
-No proxy was rejected. Two things to know:
+One scan was set aside, and one proxy is published ahead of its rules:
 
 - **Yuribara's Butterflies is published with its two traits unbuilt.** Nothing creates it (Kitsune Yuribara is not wired), and a test fails if any ability's created card ever resolves to it, to Minor Illusion, to Tower Guard or to Tsumaro's Illusion before their creators are wired.
-- **An Oracle scan also fits Hiruma Koru's 0F Follower.** Disposable Troops (oracle-l5r-9745, a 0F Follower with no keyword, "May not be included in decks.", receipt already committed under `promotional-celestial`) is an exact match in type, stats, keywords and text. It is in the 2009 Celestial frame, not the Emperor or Ivory frame. Koru's Retinue was published because the task named it. By the second sentence of the ruling the Oracle scan would be preferred; see reading 3.
+- **Koru's Retinue is not used.** Mendon supplied it (a manufactured 0F Follower scan) for Hiruma Koru. Oracle's Disposable Troops (oracle-l5r-9745, a 0F Follower with no keyword, "May not be included in decks.", receipt already committed under `promotional-celestial`) is an exact match in type, stats, keywords and text, so by the second sentence of the ruling it is the one published. Koru's Retinue was first packaged in this branch and then removed; it is in no wave.
 
 Six more creators were served by proxies earlier waves published, each checked through the same resolver: Farmlands Conscripts (A New Perspective, Daigotsu Hashibei, Daigotsu Kikumura), Dutiful Cavalry (Shinjo Tselu - exp2), Bird of Prey (Shard of the Great Death's Bones), Hired Samurai (Recruitment Effort) and Colonists (Exotic Farmlands, already wired by strategy-wave-119).
 
@@ -95,7 +95,7 @@ Each has a blocker note (`tools/content/pe_677_created_proxies_blockers.json`). 
 
 1. **A created card keeps its proxy's title.** The Ivory proxies print "It is not considered to have a title". They are published with the Oracle title as their name (Zombie, Onyx Oni, ...), as every earlier proxy is, and the engine does not treat a created card as title-less. No wired card here asks for a title.
 2. **"considerd".** The Ivory proxies print that spelling; the published text says "considered".
-3. **Koru's Retinue or Disposable Troops.** Both are exact 0F Followers with no keyword. Koru's Retinue (yours) is published and named by Hiruma Koru's spec. Disposable Troops is an Oracle scan in the 2009 Celestial frame. Which do you want? Switching is the scan id in one spec and one packager row.
+3. **Disposable Troops, not Koru's Retinue.** Both are exact 0F Followers with no keyword. Disposable Troops is Oracle's scan and Koru's Retinue is the one you manufactured, so "prefer the oracle's scans that are exact matches" decides it: Hiruma Koru creates Disposable Troops and Koru's Retinue is not used. Disposable Troops is in the 2009 Celestial frame, neither Emperor nor Ivory; if the frame should outweigh the source here, say so and the scan id is one spec and one packager row.
 4. **"After X enters play, lose N Honor and create ..." is mandatory** (Abdollah, Kitsune Kichi - exp), as is "After Renyu enters play, create ... and attach it to him". The Honor is lost first, then the card is created at home (the Dog on Renyu), with no window of its own. A card put into play without entering it creates nothing.
 5. **Kuni Renyu's "an enemy card with Shadowlands or without attachments".** "With Shadowlands" is the Shadowlands keyword on an enemy Personality, Follower, Item or Spell at the battlefield. A card that is only Shadowlands-aligned without the keyword does not count. "Without attachments" is the engine's existing reading: a Follower, or a Personality with nothing attached.
 6. **Invest (Hiruma Koru)** is Clay Kshatriya's shape: offered once in the entering-play window, optional, a trait.
