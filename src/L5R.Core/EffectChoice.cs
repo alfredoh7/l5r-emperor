@@ -163,6 +163,7 @@ public sealed partial class MatchEngine
         if (ApplyEmperorRemainingDBranchEffect(effect, command)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Sincerity of the Dragon's named number.
         if (ApplyRulingR2BranchEffect(effect, command)) return;
         if (ApplyEmperorP4BranchEffect(effect, command)) return; // Issue #503, group P4 (EmperorP4.cs).
+        if (ApplyWlPersCoilsBranchEffect(effect, command)) return; // issue #674 (WlPersCoils.cs): Asako Chukage - exp2's removal of a Ring and the target from the game.
         if (ApplyEmperorMechABranchEffect(effect, command)) return; // issue #501 (EmperorMechA.cs): String of Victories' Ring, Aramasu's Legacy's bow // Emperor Edition ruling pass R2 (issue #492): The Honesty of the Phoenix's named card.
         switch (effect)
         {
