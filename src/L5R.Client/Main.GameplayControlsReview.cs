@@ -78,7 +78,8 @@ public partial class Main
                 var version = View.Version;
                 if (kind is "reaction" or "destruction" or "discount")
                 {
-                    GoldRequire(_chosen is not null && QuoteFor(_chosen)?.Sources?.Length > 0 && _paymentConfirm is { Disabled: false }, kind + " has no usable payment");
+                    GoldPickFirstTarget(); // issue #581: a targeted action starts with no target; the player picks one through the list of legal cards
+                    GoldRequire(_chosen is not null && QuoteFor(_chosen)?.Sources?.Length > 0 && _paymentConfirm is { Disabled: false }, $"{kind} has no usable payment (chosen={_chosen?.Label}; sources={(_chosen is null ? -1 : QuoteFor(_chosen)?.Sources?.Length)}; confirmDisabled={_paymentConfirm?.Disabled}; targets={_chosen?.TargetIds?.Length}; target={_chosen?.Command?.TargetId})");
                     _sources.Clear(); RenderInspector();
                     GoldRequire(_paymentConfirm is { Disabled: true }, kind + " confirmed without sources");
                     var quote = QuoteFor(_chosen!)!;
