@@ -107,6 +107,7 @@ public sealed partial class MatchEngine
         var reactor = card.OwnerId;
         if (P3HonorChangeApplies(card, abilityId, change) is { } p3) return p3; // Destructive Priorities (issue #503)
         if (IvoryHoldingsHonorChangeApplies(card, abilityId, change) is { } ivory) return ivory; // Deeds and Words (issue #622, IvoryHoldings.cs)
+        if (WlPersTornHonorChangeApplies(card, abilityId, change) is { } wlPersTorn) return wlPersTorn; // Shosuro Makiko - exp (issue #674, WlPersTorn.cs)
         if (PromoItemsHonorChangeApplies(card, abilityId, change) is { } promo) return promo; // Kimono of the Turquoise Champion (PromoEmperorItems.cs)
         switch (abilityId)
         {

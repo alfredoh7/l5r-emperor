@@ -3965,6 +3965,7 @@ public sealed partial class MatchEngine
         if (PromoItemsKeywordGranted(card, keyword)) return true; // The Emerald Armor's Imperial and Magistrate, Mantle of the Onyx Champion's Maho (PromoEmperorItems.cs)
         if (UnmeiMirrorsKeyword(card, keyword)) return true;
         if (PromoGrantsKeyword(card, keyword)) return true; // Tamahime's Tactician (issue #653, PromoEmperorPersonalities.cs)
+        if (WlPersTornGrantsKeyword(card, keyword)) return true; // Kaiu Nagai's and Asako Kyuudo's Elite while defending (issue #674, WlPersTorn.cs)
         if (OchiaiGrantsDuelist(card, keyword)) return true; // Ochiai's Bravery (issue #503) // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
@@ -4276,6 +4277,7 @@ public sealed partial class MatchEngine
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
                                                                                  // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
             ?? IvoryMovementMoveKind(abilityId)
+            ?? WlPersTornMoveKind(abilityId)
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -5546,6 +5548,7 @@ public sealed partial class MatchEngine
                 || PromoEmperorEvenIfBowed(id)
                 // Family Sword: "Open: Even if this card is bowed ..." (PromoEmperorItems.cs)
                 || PromoItemsEvenIfBowed(id)
+                || WlPersTornAbilities.EvenIfBowed(id)
                 || id == PromoEmperorEventAbilities.EmeraldStraighten // issue #653: The Emerald Championship, "Even if this Personality is bowed"
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;

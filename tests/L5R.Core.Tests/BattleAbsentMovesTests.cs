@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         // + shinoda-move (Emperor Edition Personality pass, issue #477 batch 2: Kuni Shinoda moves himself and an optional Crab Clan Personality to the current battlefield).
-        var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
+        var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !WlPersTornTests.MovesToBattleIds.Contains(p.Key)).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal)); // issue #674: wlpt-ibara-oppose is asserted in WlPersTornTests
         // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
         // + guided-by-honor-move (Emperor Edition remaining-cards pass, issue #492 group B: Guided by Honor moves its performing Paragon to the current battlefield).
         // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).

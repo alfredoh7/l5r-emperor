@@ -54,6 +54,7 @@ public sealed partial class MatchEngine
     internal static bool TfStrategiesBDuelAbilityDestroysLoser(string abilityId, bool loserDishonorable) => abilityId switch
     {
         "steel-on-steel-duel" or "sword-for-hire-create" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" or "insult-answered-duel" or "kudome-exp-duel" or "sanctioned-duel" or "fusako-duel" => true, // Sanctioned Duel (issue #622, IvorySpells.cs): "Destroy the duel's loser"
+        WlPersTornAbilities.IzaDuel or WlPersTornAbilities.KyoshiroDuel or WlPersTornAbilities.RikuDuel => true, // issue #674 (WlPersTorn.cs): "Destroy the duel's loser"
         "hakuseki-duel" => loserDishonorable, // "destroy him if he is dishonorable"
         _ => false
     };

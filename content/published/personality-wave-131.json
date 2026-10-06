@@ -1,0 +1,612 @@
+{
+  "Profile": "personality-wave-131",
+  "Rules": "Emperor Edition core rules; reviewed Torn Asunder scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10278",
+      "Name": "Asahina Akahiko",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Melee and Ranged Attacks targeting Akahiko have -4 strength.\nBattle: Target an enemy Personality: Move him and Akahiko home. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10278.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Air",
+        "Crane Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-akahiko-home"
+      ],
+      "Effect": "none",
+      "AttackDefenseKind": "Both",
+      "AttackDefenseAmount": -4,
+      "AttackDefenseScope": "Self"
+    },
+    {
+      "Id": "oracle-l5r-10279",
+      "Name": "Asahina Nanae",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 9,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Even if Nanae is bowed, target a Personality: You may straighten him. You may give him -4F. Bow him if he is Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10279.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Crane Clan",
+        "Experienced",
+        "Jade",
+        "Jade Champion",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-nanae-jade"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10302",
+      "Name": "Asako Izuna",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Take the Imperial Favor.\nBattle/Limited: Target another player's card in a unit: Bow the target. If it is Kolat, Ninja, or Shadowlands, choose a player who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10302.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Amethyst Champion",
+        "Courtier",
+        "Experienced",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja",
+        "Villain"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "noboru-exp2-favor",
+        "wlpt-izuna-bow-battle",
+        "wlpt-izuna-bow-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10303",
+      "Name": "Asako Kyuudo",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kyuudo has +3F and Elite while defending (Elite cards contribute Force even if bowed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10303.jpg",
+      "Keywords": [
+        "Earth",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wlpt-kyuudo"
+    },
+    {
+      "Id": "oracle-l5r-10304",
+      "Name": "Asako Suzukaze",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target a Holding: It produces 1 additional Gold when it bows to produce Gold (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10304.jpg",
+      "Keywords": [
+        "Air",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-suzukaze-gold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10310",
+      "Name": "Bayushi Wakui",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When another player would target a Magistrate at Wakui's battlefield with an action: The action targets Wakui instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10310.jpg",
+      "Keywords": [
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-wakui-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10280",
+      "Name": "Daidoji Ibara",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality or Follower: Move Ibara to oppose it. If she now opposes it, give it -3F and, if it is Mantis Clan, bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10280.jpg",
+      "Keywords": [
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-ibara-oppose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10281",
+      "Name": "Doji Iza",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's Mirumoto Kyoshiro: Iza duels him. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10281.jpg",
+      "Keywords": [
+        "Duelist",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-iza-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10318",
+      "Name": "Fubuko",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 1 less Gold if you are a Dragon Clan player.\nBattle: Take an additional action to play a Kiho Strategy in your discard pile, which Fubuko must perform, for one of its Battle actions. After it resolves, remove the Strategy from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10318.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Order of the Spider",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-fubuko-kiho"
+      ],
+      "Effect": "dragon-clan-discount"
+    },
+    {
+      "Id": "oracle-l5r-10325",
+      "Name": "Iuchi Shaocheng",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Shaocheng enters play: Turn a card in a province face-up. If it is a non-Unique Personality, discard him and he becomes honorably dead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10325.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Death Priest",
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-shaocheng-turn"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10274",
+      "Name": "Kaiu Nagai",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While Nagai is defending, he has Elite (Elite cards contribute Force even if bowed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10274.jpg",
+      "Keywords": [
+        "Tactician",
+        "Crab Clan",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wlpt-nagai"
+    },
+    {
+      "Id": "oracle-l5r-10285",
+      "Name": "Mirumoto Kyoshiro",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's Doji Iza: Kyoshiro duels her. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10285.jpg",
+      "Keywords": [
+        "Duelist",
+        "Courtier",
+        "Dragon Clan",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-kyoshiro-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10297",
+      "Name": "Moshi Ira",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action targets a card in this unit: Give the action's performer (if any) -3F after the action resolves.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10297.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-ira-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10323",
+      "Name": "Riku",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When another player's action would target Tamahime: It targets Riku instead, if legal.\nIaijutsu Battle: Target an enemy Personality: Riku duels him. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10323.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Commander",
+        "Ronin",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-riku-redirect",
+        "wlpt-riku-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10307",
+      "Name": "Shiba Tetsaka",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Shugenja: Give Tetsaka Cavalry or Naval.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10307.jpg",
+      "Keywords": [
+        "Duelist",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-tetsaka-cavalry",
+        "wlpt-tetsaka-naval"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10327",
+      "Name": "Shinjo Sihung",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your Tactical action resolves: Give a Personality who performed it +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10327.jpg",
+      "Keywords": [
+        "Tactician",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-sihung-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10311",
+      "Name": "Shosuro Makiko",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Bow Makiko: Take the Imperial Favor.\nPolitical Reaction: Before an action resolves, bow Makiko: Reduce all Honor gains from it by 2.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10311.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Courtier",
+        "Experienced",
+        "Scorpion Clan",
+        "Seductress"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makiko-favor",
+        "wlpt-makiko-reduce"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10313",
+      "Name": "Soshi Shinoko",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Personality: Give him Brash (the Defender may draw a card after a Brash card is assigned to attack).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10313.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Courtier",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-shinoko-brash"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10330",
+      "Name": "Utaku Suying",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a battle resolution in which Suying's army destroyed a defending army or province: Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10330.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wlpt-suying"
+    },
+    {
+      "Id": "oracle-l5r-10277",
+      "Name": "Yasuki Daito",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow Daito or pay 4 Gold, and target a Personality: Daito bribes him. Negate the target's straightening until after the next Straighten Phase ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10277.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-daito-bow",
+        "wlpt-daito-gold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10301",
+      "Name": "Yoritomo Tansen",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 3 Attack or give the current battlefield's province -3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10301.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpt-tansen-ranged",
+        "wlpt-tansen-province"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

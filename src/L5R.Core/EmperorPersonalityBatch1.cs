@@ -38,6 +38,7 @@ public sealed partial class MatchEngine
     private IEnumerable<string>? OutOfPlayEntryReactionTargets(AbilityDefinition ability, int playerId) => ability.Target switch
     {
         "own-dark-virtue-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard).Select(c => c.Id),
+        "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).Select(c => c.Id), // Iuchi Shaocheng (issue #674): "Turn a card in a province face-up", either player's, face down or up
         _ => null
     };
 
