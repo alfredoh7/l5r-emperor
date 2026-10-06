@@ -96,28 +96,30 @@ public sealed partial class MatchEngine
         {
             // Honor Never Falls' Battle half: the performer is straightened; if he is Unique the additional Battle action is granted -- his, and only for one of his base (printed) abilities.
             case EmperorThreeSAbilities.HonorNeverFallsStraighten:
-            {
-                var performer = Card(command.PerformerId!);
-                Straighten(performer);
-                if (Keyword(performer, "Unique")) GrantAdditionalAction(player.Id, null, performerId: performer.Id, baseAbilityOnly: true);
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    Straighten(performer);
+                    if (Keyword(performer, "Unique")) GrantAdditionalAction(player.Id, null, performerId: performer.Id, baseAbilityOnly: true);
+                    return false;
+                }
             // Kurohito's Perfection's trait: the action's effect (a draw) is recorded, to be applied as the End Phase begins.
             case EmperorThreeSAbilities.KurohitoFavorDraw:
                 Record(new DelayedEffect { Kind = DelayedKinds.Draw, Until = DelayUntil.EndPhaseBegins, PlayerId = player.Id, Reason = "Kurohito's Perfection" });
                 Emit("effectDelayed", $"{player.Name}: the Favor action's draw is delayed until {DelayUntil.Describe(DelayUntil.EndPhaseBegins)} (Kurohito's Perfection).", player.Id);
                 return false;
-            case "kurohito-perfection-cavalry": case "kurohito-perfection-duelist": case "kurohito-perfection-tactician":
+            case "kurohito-perfection-cavalry":
+            case "kurohito-perfection-duelist":
+            case "kurohito-perfection-tactician":
                 GiveKeywordPermanently(target!, EmperorThreeSAbilities.KurohitoKeywords.First(k => k.Id == id).Keyword, source!.Id);
                 return false;
             // Makito's Maho Battle: the acting player chooses the card without attachments in the target's unit to destroy (the Personality if he has none, else one of his attachments) as the action resolves.
             case EmperorThreeSAbilities.MakitoDestroy:
-            {
-                var candidates = UnitCardsWithoutAttachments(target!);
-                var options = candidates.Select(c => new EffectOption(c.Id, $"Destroy {Definition(c).Name}", [Batch1DestroyCardEffect + c.Id])).ToArray();
-                return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: choose the card without attachments in {Definition(target!).Name}'s unit to destroy (it will not be negated or delayed).",
-                    consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
+                {
+                    var candidates = UnitCardsWithoutAttachments(target!);
+                    var options = candidates.Select(c => new EffectOption(c.Id, $"Destroy {Definition(c).Name}", [Batch1DestroyCardEffect + c.Id])).ToArray();
+                    return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: choose the card without attachments in {Definition(target!).Name}'s unit to destroy (it will not be negated or delayed).",
+                        consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+                }
             default:
                 return null;
         }
@@ -187,6 +189,7 @@ public sealed partial class MatchEngine
     private void AfterCardDestroyed(CardInstance destroyed)
     {
         ControlReturnsOnDestruction(destroyed); // issue #501 (EmperorMechB.cs): Sachina's return, the moment she is destroyed.
+        NoteCreatedProxies677Destroyed(destroyed); // Goju Kaxt (issue #677, CreatedProxies677.cs): his destruction is marked on the record of the action in progress.
         foreach (var makito in _state.Cards.Values.Where(c => c.Id != destroyed.Id && InPlay(c) && Definition(c).Effect == EmperorThreeSAbilities.MakitoEffect && Definition(c).Type == CardType.Personality).ToArray())
         {
             Emit("makitoGrows", $"{Definition(makito).Name}: {Definition(destroyed).Name} was destroyed, so he gets +1F.", makito.OwnerId, makito.Id);

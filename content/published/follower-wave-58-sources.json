@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-10336",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10336",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10336-printing-1-image-1.webp",
+    "image_sha256": "ee7b0c798513259bc6275af58b7b537bf512647bb47b203e63c6578f0d2a00a2"
+  },
+  {
+    "card_id": "oracle-l5r-11332",
+    "printing_set": [
+      "Ivory Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=11332",
+    "image_path": "assets/reference/oracle/ivory-edition/images/oracle-l5r-11332-printing-1-image-1.jpg",
+    "image_sha256": "6415c83baa50300536e3437634dae0ea7fbd7c76c334fc648d6964a0c9e811f7"
+  },
+  {
+    "card_id": "oracle-l5r-11337",
+    "printing_set": [
+      "Ivory Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=11337",
+    "image_path": "assets/reference/oracle/ivory-edition/images/oracle-l5r-11337-printing-1-image-1.jpg",
+    "image_sha256": "b5da682d24d0d2402c651c16f6ed6e86e840ab462189ff20dc82d07810ba2d2f"
+  },
+  {
+    "card_id": "oracle-l5r-10815",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10815",
+    "image_path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10815-printing-1-image-1.jpg",
+    "image_sha256": "9028b5b3a33227b7d336d975803921867ea59281647987516b1a8df781e6e22b"
+  },
+  {
+    "card_id": "oracle-l5r-9745",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9745",
+    "image_path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9745-printing-1-image-1.jpg",
+    "image_sha256": "16ba58d2cbb6632ba36ed5d348aeb39b0c429fe5a964ce89bfce7f6f1973c6b3"
+  }
+]

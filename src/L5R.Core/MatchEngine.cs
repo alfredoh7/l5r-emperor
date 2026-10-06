@@ -493,6 +493,7 @@ public sealed partial class MatchEngine
         ApplyPromoEmperorEntryEffects(playerId, card); // Bandit's Sanctuary, Renewed Lands (issue #653, PromoEmperorHoldings.cs)
         ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
+        ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
@@ -2596,6 +2597,7 @@ public sealed partial class MatchEngine
         if (JiYunNegatesDishonor(card, byPlayerId)) return;
         if (SuikihimeRefusesDishonor(card)) return; // Otomo Suikihime (issue #503): will not become dishonorable.
         if (RestrictionRefusesDishonor(card)) return; // P11 (CardRestrictions.cs): a stored or static "will not become dishonorable"
+        if (TryConsumeWatch(WatchKind.Dishonor, card, byPlayerId ?? EffectSourcePlayer())) return; // P7 (PeriodWatches.cs)
         var wasDishonorable = card.Dishonorable;
         card.Dishonorable = true;
         if (!wasDishonorable) AfterPersonalityDishonored(card, byPlayerId); // Successful Bounty (issue #492, group F).
@@ -2642,6 +2644,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (TryConsumeWatch(WatchKind.Destroy, card, actingPlayerId)) continue; // P7 (PeriodWatches.cs): after the delay and the protections above, before the effect
             if (promoNegated.Contains(card.Id)) continue; // issue #653: Expansion, The Topaz Championship's trait
             if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
             foreach (var attachment in Attachments(card.Id).ToArray())

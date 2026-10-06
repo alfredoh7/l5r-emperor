@@ -53,7 +53,6 @@ BLOCKERS: dict[str, str] = {
     # oracle-l5r-2520 (Field Messenger) and oracle-l5r-2598 (Flanking Unit): re-evaluated for the Embers of War pass (issue #460, batch 6) now that the attachment
     # Transfer mechanic this note asked for exists (AttachmentTransfers.cs, Honor and Treachery pass issue #458). Both are now wired.
     "oracle-l5r-10681": "Its ordinary Equip is allowed from YOUR discard pile (\"You may Equip this Follower from your discard pile\"). The attach-from-a-discard-pile primitive exists (AttachAction.cs, issue #337) for an ability that TARGETS a card in a pile, but here the SOURCE card in the pile is the attachment (AttachSource.Self is hand-only) and the action is the ordinary Limited Equip command, not an ability -- not built.",
-    "oracle-l5r-10336": "Needs card creation (its army-scoped keyword-boost half is otherwise wirable).",
     "oracle-l5r-10683": "Needs a per-card, permanent \"this Personality may not attack\" attachment flag (Utaku Chikako's own restriction, issue #186, is a player-and-turn-scoped flag, not directly reusable here) plus a self-destroying Limited ability. Dishonor-as-an-action is now built (Justice of the Crane) and directly reusable for its own Dishonor half.",
     "oracle-l5r-10898": "Needs a persistent one-time destruction shield.",
     "oracle-l5r-10900": "Needs an attachment Transfer mechanic plus Home-timing generalization.",

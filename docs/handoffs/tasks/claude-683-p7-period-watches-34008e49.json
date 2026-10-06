@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Primitive P7 (period stamps and negation watches), engine only: Period/UsesPer stamps, NegationWatch store (dynamic and standing, TryConsumeWatch at the destroy/bow/move/straighten/dishonor/Political-announce choke points), period counters, EngineHooks.StandingWatches. Shared-file edits are one line each: CardAbilities.cs (AbilityDefinition.UsesPer, Political announce, MoveHome/TryMoveToBattlefield/Straighten/DestroyAttachment/StalwartNegatesBow), MatchEngine.cs (DestroyUnits, Dishonor), AbilityLimits.cs, EngineHookStartup.cs. No card wired.",
+  "validation": "Core suite incl. new period-watches (11/11); bash tools/check.sh --skip-client passes; check_format and lint_comment_swallow clean. No client change; native checks not required.",
+  "remaining": "Cards that need P7 are wired in the follow-up wave. HonorGain watch kind has no choke point (P14).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/683",
+  "branch": "claude/683-p7-period-watches",
+  "updated": "2026-10-06T18:31:08.393763+00:00"
+}

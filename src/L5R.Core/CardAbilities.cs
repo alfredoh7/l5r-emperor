@@ -154,7 +154,9 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // Tireless: "the action may be taken even while the card is bowed" -- waives ValidateAbility's bowed-source rule and nothing else (a bowed card still cannot pay a bow cost).
     // Home: "the action may be taken even while the card is at home rather than at the current battlefield" -- waives the two source-at-the-battlefield checks while the
     // source's unit is at home (MatchEngine.HomeWaivesSourceLocation); the acting player still needs a unit at the battlefield unless the action is Absent or moves to the battle.
-    bool Tireless = false, bool Home = false);
+    bool Tireless = false, bool Home = false,
+    // Primitive P7 (issue #683, PeriodWatches.cs): "the first time each turn / battle / phase / game" -- the ability may be used once per instance of this period (a stamp in AbilityUses, read by AbilityUseSpent beside OncePerGame).
+    Period? UsesPer = null);
 
 public static class AbilityCatalog
 {
@@ -4057,6 +4059,7 @@ public sealed partial class MatchEngine
         if (Delay(card, DelayedKinds.Bow, actingPlayerId)) return true; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): the bowing is recorded and applied when its trigger comes.
         if (P4ShieldNegatesBow(card)) return true; // Show of Restraint (issue #503, EmperorP4Watches.cs): the next card effect that bows him.
         if (BlessingsShieldNegates(card, "bowing")) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503): "Negate the next card effect that bows, destroys, or moves him".
+        if (TryConsumeWatch(WatchKind.Bow, card, actingPlayerId)) return true; // P7 (PeriodWatches.cs): after the delay and the shields above, before the effect
         if (TorchNegatesBow(card)) return true; // Torch's Flame Flickers (Emperor Edition remaining-cards pass, issue #492, group D): the next card effect that bows the player's Personalities there.
         if (card.OwnerId == actingPlayerId) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Twin Forks City's one-shot shield, and Wartime Preparations' second-bow negation (ShadowsEmbraceBatch6.cs).
@@ -7156,6 +7159,7 @@ public sealed partial class MatchEngine
         if (TouchTheEmptinessNegates(command)) return; // Touch the Emptiness (The Shadow's Embrace pass, issue #476 batch 5)
         if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
         if (KamalakarPoliticalNegates(command)) return; // Kamalakar (PromoCelestialA.cs): the first Political action each turn that targets him
+        if (WatchNegatesPoliticalAction(command)) return; // P7 (PeriodWatches.cs): a negation watch on the card the Political action names, or on the player
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
@@ -10684,6 +10688,7 @@ public sealed partial class MatchEngine
         }
         if (Delay(card, DelayedKinds.Straighten)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (HidaNegatesStraightening(card)) return; // Hida's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): the first straightening each battle.
+        if (_state.Phase != Phase.Straighten && TryConsumeWatch(WatchKind.Straighten, card, EffectSourcePlayer())) return; // P7 (PeriodWatches.cs): an effect's straightening, never the Straighten Phase's
         // "Negate his NEXT straightening" (Shinden Asahina; Togashi Hizumi/Tamori Ruya, issue #216):
         // a one-shot block, not "cannot straighten this turn at all" -- consumed the moment it
         // negates an actual attempt, so a LATER straighten attempt the same turn (an ability that
@@ -10756,6 +10761,7 @@ public sealed partial class MatchEngine
             return false;
         }
         if (Delay(card, DelayedKinds.MoveToBattlefield, arg: province.ToString())) return false; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
+        if (TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer())) return false; // P7 (PeriodWatches.cs)
         if (!MoveToBattlefield(card, province)) return false;
         Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to the battlefield at province {province + 1}.", card.OwnerId, card.Id);
         RecordActionEffect(card.Id, MovedKind); // Action-effect tracking (issue #437)
@@ -10778,6 +10784,7 @@ public sealed partial class MatchEngine
         }
         if (MovementLockNegates(card, MovementKinds.Home)) return;
         if (P4ShieldNegatesMoveHome(card)) return; // Show of Restraint, The Snow Has Teeth (issue #503, EmperorP4Watches.cs): one-shot shields.
+        if (TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer())) return; // P7 (PeriodWatches.cs)
         if (card.Zone == Zone.Battlefield && Delay(card, DelayedKinds.MoveHome, arg: bow ? "bow" : null)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): sent home later, if he still is at a battlefield.
         // I Cast Two Shadows (The Shadow's Embrace pass, issue #476 batch 3): the battlefield he is moved home FROM.
         var movedHomeFrom = card.Zone == Zone.Battlefield ? card.ProvinceIndex : null;
@@ -10931,6 +10938,7 @@ public sealed partial class MatchEngine
         if (P3FollowerShielded(card)) { Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Hida Fujita).", card.OwnerId, card.Id); return; } // issue #503
         if (Delay(card, DelayedKinds.Destroy)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (WideValleyNegatesDestruction(card)) return; // Seeds of Decay pass (issue #453), batch 1: an attachment's destruction is always an action's effect (see RecordActionEffect below).
+        if (TryConsumeWatch(WatchKind.Destroy, card, EffectSourcePlayer())) return; // P7 (PeriodWatches.cs): after the delay and the protections above
         // Gift Armor (issue #492 group G): "Negate any destruction of this card, except for its Personality being destroyed" (DestroyUnits, which does not come through here).
         if (GiftArmorNegatesDestruction(card) && !HiromiUnnegatable()) // issue #496: an action whose destruction will not be negated (Hiromi's, Makito's, Suitengu's Torch's) is not stopped by Gift Armor either
         {

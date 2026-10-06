@@ -46,6 +46,7 @@ internal static partial class EngineHooks
         _ = CardTargetBars.Items;
         _ = EntryCostTerms.Items;
         _ = AbilityCostTerms.Items;
+        _ = StandingWatches.Items;
         return true;
     }
 

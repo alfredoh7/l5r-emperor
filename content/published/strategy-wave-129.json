@@ -1,0 +1,122 @@
+{
+  "Profile": "strategy-wave-129",
+  "Rules": "Emperor Edition core rules; reviewed created-card proxy scans and their creators (issue #677).",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10715",
+      "Name": "Ashalan Ambush",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, :g8:: Create a 4F/4C/0PH Ashalan • Nonhuman • Shugenja Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10715.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "proxy677-ashalan-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10724",
+      "Name": "New Cavalry Tactics",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Engage, :g3:: Target your Personality. Create and attach two, or three if the target is a Commander, 1F Elephant • Nonhuman • Cavalry Followers to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10724.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "proxy677-cavalry-tactics"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10712",
+      "Name": "A New Perspective",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :g2:: Create and attach a 1F Follower to each of your opposed Personalities at the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10712.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "proxy677-new-perspective"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10390",
+      "Name": "Recruitment Effort",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Destroy your target non-Unique Holding: Create a 3F/3C/2PH Samurai Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10390.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "proxy677-recruitment-effort"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10949",
+      "Name": "Never Without a Weapon",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :g5:: Discard a card to create a Weapon Item with a Force Modifier equal to the discarded card's Focus Value and attach it to your target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10949.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "proxy677-never-without-weapon"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -26,10 +26,12 @@ public sealed partial class MatchEngine
     }
 
     private bool AbilityUseSpent(Dictionary<string, int> uses, AbilityDefinition ability, string key) =>
+        ability.UsesPer is { } per ? PeriodUseSpent(uses, key, per) : // P7 (PeriodWatches.cs): once per turn / battle / phase / game
         ability.UsesPerTurn != AbilityUseLimit.Unlimited && AbilityUsesThisTurn(uses, ability, key) >= EffectiveUsesPerTurn(uses, ability);
 
     private void SpendAbilityUse(Dictionary<string, int> uses, AbilityDefinition ability, string key)
     {
+        if (ability.UsesPer is { } per) { TrySpendPeriodUse(uses, key, per); return; } // P7 (PeriodWatches.cs)
         var counted = EffectiveUsesPerTurn(uses, ability) > 1;
         var used = counted ? AbilityUsesThisTurn(uses, ability, key) + 1 : 1;
         uses[key] = _state.TurnNumber;

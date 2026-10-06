@@ -1,0 +1,2463 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11328",
+      "image_ids": [
+        "oracle-l5r-11328-printing-1-image-1"
+      ],
+      "name": "Ashalan",
+      "oracle_id": 11328,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Paul (Prof.) Herbert"
+          ],
+          "number": [
+            "5"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "b7/b2"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:45:01.338591",
+        "cardid": 11328,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Ashalan",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "b7/b2",
+        "keywords": [
+          "Ashalan",
+          "Nonhuman",
+          "Shugenja"
+        ],
+        "legality": [],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Paul (Prof.) Herbert"
+            ],
+            "number": [
+              "5"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "b7/b2"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Paul (Prof.) Herbert"
+            ],
+            "chi": [
+              "4"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "4"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Ashalan",
+              "Nonhuman",
+              "Shugenja"
+            ],
+            "number": [
+              "7"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "d0/26"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Ashalan"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Paul (Prof.) Herbert"
+            ],
+            "chi": [
+              "4"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "4"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Ashalan",
+              "Nonhuman",
+              "Shugenja"
+            ],
+            "number": [
+              "18"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "2b/e0"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Ashalan"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Ashalan"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11328",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11332",
+      "image_ids": [
+        "oracle-l5r-11332-printing-1-image-1"
+      ],
+      "name": "Clay Yojimbo",
+      "oracle_id": 11332,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Felipe Gaona"
+          ],
+          "number": [
+            "9"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "ed/2e"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:45:05.559791",
+        "cardid": 11332,
+        "chi": [
+          "0"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "1"
+        ],
+        "formattedtitle": "Clay Yojimbo",
+        "imagehash": "ed/2e",
+        "keywords": [
+          "Clay Soldier",
+          "Nonhuman",
+          "Yojimbo"
+        ],
+        "legality": [],
+        "printing": [
+          {
+            "artist": [
+              "Felipe Gaona"
+            ],
+            "number": [
+              "9"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "ed/2e"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Felipe Gaona"
+            ],
+            "chi": [
+              "0"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "1"
+            ],
+            "keywords": [
+              "Clay Soldier",
+              "Nonhuman",
+              "Yojimbo"
+            ],
+            "number": [
+              "22"
+            ],
+            "printimagehash": [
+              "ab/1d"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Clay Yojimbo"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Felipe Gaona"
+            ],
+            "chi": [
+              "0"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "1"
+            ],
+            "keywords": [
+              "Clay Soldier",
+              "Nonhuman",
+              "Yojimbo"
+            ],
+            "number": [
+              "34"
+            ],
+            "printimagehash": [
+              "00/04"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Clay Yojimbo"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Clay Yojimbo"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11332",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "Battle, :bow:: Melee 4 Attack.\n(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11335",
+      "image_ids": [
+        "oracle-l5r-11335-printing-1-image-1"
+      ],
+      "name": "Kichi's Shadow Badger",
+      "oracle_id": 11335,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Immar Palomera"
+          ],
+          "number": [
+            "12"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "a1/0e"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:44:06.759365",
+        "cardid": 11335,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Kichi's Shadow Badger",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "a1/0e",
+        "keywords": [
+          "Badger",
+          "Nonhuman",
+          "Shadowlands",
+          "Spirit"
+        ],
+        "legality": [],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Immar Palomera"
+            ],
+            "number": [
+              "12"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "a1/0e"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Immar Palomera"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "4"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Badger",
+              "Nonhuman",
+              "Shadowlands",
+              "Spirit"
+            ],
+            "number": [
+              "13"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "21/81"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "Battle, :bow:: Melee 4 Attack.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Kichi's Shadow Badger"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Immar Palomera"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "4"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Badger",
+              "Nonhuman",
+              "Shadowlands",
+              "Spirit"
+            ],
+            "number": [
+              "24"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "72/ca"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "Battle, :bow:: Melee 4 Attack.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Kichi's Shadow Badger"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "Battle, :bow:: Melee 4 Attack.<br><i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Kichi's Shadow Badger"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11335",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11337",
+      "image_ids": [
+        "oracle-l5r-11337-printing-1-image-1"
+      ],
+      "name": "Little Elephant",
+      "oracle_id": 11337,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Aurelien Hubert"
+          ],
+          "number": [
+            "14"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "1e/84"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:43:51.099021",
+        "cardid": 11337,
+        "chi": [
+          "0"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "1"
+        ],
+        "formattedtitle": "Little Elephant",
+        "imagehash": "1e/84",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Elephant",
+          "Nonhuman"
+        ],
+        "legality": [],
+        "printing": [
+          {
+            "artist": [
+              "Aurelien Hubert"
+            ],
+            "number": [
+              "14"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "1e/84"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Aurelien Hubert"
+            ],
+            "chi": [
+              "0"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "1"
+            ],
+            "keywords": [
+              "Cavalry",
+              "Elephant",
+              "Nonhuman"
+            ],
+            "number": [
+              "27"
+            ],
+            "printimagehash": [
+              "23/03"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Little Elephant"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Aurelien Hubert"
+            ],
+            "chi": [
+              "0"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "1"
+            ],
+            "keywords": [
+              "Cavalry",
+              "Elephant",
+              "Nonhuman"
+            ],
+            "number": [
+              "39"
+            ],
+            "printimagehash": [
+              "eb/37"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Little Elephant"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Little Elephant"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11337",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "This Personality's Force is equal to the Chi of the caster, plus 1 if he was Air.\n(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11338",
+      "image_ids": [
+        "oracle-l5r-11338-printing-1-image-1"
+      ],
+      "name": "Major Illusion",
+      "oracle_id": 11338,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "J. Edwin Stevens"
+          ],
+          "number": [
+            "15"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "8b/62"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:44:58.239842",
+        "cardid": 11338,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "*"
+        ],
+        "formattedtitle": "Major Illusion",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "8b/62",
+        "keywords": [
+          "Illusion",
+          "Samurai",
+          "Spirit"
+        ],
+        "legality": [],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "J. Edwin Stevens"
+            ],
+            "number": [
+              "15"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "8b/62"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "J. Edwin Stevens"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "*"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Illusion",
+              "Samurai",
+              "Spirit"
+            ],
+            "number": [
+              "14"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "44/2d"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "This Personality's Force is equal to the Chi of the caster, plus 1 if he was Air.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Major Illusion"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "J. Edwin Stevens"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "*"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Illusion",
+              "Samurai",
+              "Spirit"
+            ],
+            "number": [
+              "26"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "2a/c8"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "This Personality's Force is equal to the Chi of the caster, plus 1 if he was Air.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Major Illusion"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "This Personality's Force is equal to the Chi of the caster, plus 1 if he was Air.<br><i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Major Illusion"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11338",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "This Personality's Chi and Personal Honor are equal to the Chi and Personal Honor of the caster, respectively.\n(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11341",
+      "image_ids": [
+        "oracle-l5r-11341-printing-1-image-1"
+      ],
+      "name": "Minor Illusion",
+      "oracle_id": 11341,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "number": [
+            "18"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "df/cd"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:25.546403",
+        "cardid": 11341,
+        "chi": [
+          "*"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "0"
+        ],
+        "formattedtitle": "Minor Illusion",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "df/cd",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Illusion",
+          "Nonhuman",
+          "Shugenja"
+        ],
+        "legality": [],
+        "ph": [
+          "*"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "number": [
+              "18"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "df/cd"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "chi": [
+              "*"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "0"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Cavalry",
+              "Illusion",
+              "Nonhuman",
+              "Shugenja"
+            ],
+            "number": [
+              "15"
+            ],
+            "personalhonor": [
+              "*"
+            ],
+            "printimagehash": [
+              "7d/7d"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "This Personality's Chi and Personal Honor are equal to the Chi and Personal Honor of the caster, respectively.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Minor Illusion"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "chi": [
+              "*"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "0"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Cavalry",
+              "Illusion",
+              "Nonhuman",
+              "Shugenja"
+            ],
+            "number": [
+              "27"
+            ],
+            "personalhonor": [
+              "*"
+            ],
+            "printimagehash": [
+              "bd/d2"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "This Personality's Chi and Personal Honor are equal to the Chi and Personal Honor of the caster, respectively.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Minor Illusion"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "This Personality's Chi and Personal Honor are equal to the Chi and Personal Honor of the caster, respectively.<br><i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Minor Illusion"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11341",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11343",
+      "image_ids": [
+        "oracle-l5r-11343-printing-1-image-1"
+      ],
+      "name": "Onyx Oni",
+      "oracle_id": 11343,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Jim Pavelec"
+          ],
+          "number": [
+            "20"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "df/da"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:47:25.378375",
+        "cardid": 11343,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "5"
+        ],
+        "formattedtitle": "Onyx Oni",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "df/da",
+        "keywords": [
+          "Nonhuman",
+          "Oni",
+          "Shadowlands"
+        ],
+        "legality": [],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Jim Pavelec"
+            ],
+            "number": [
+              "20"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "df/da"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Jim Pavelec"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "5"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Nonhuman",
+              "Oni",
+              "Shadowlands"
+            ],
+            "number": [
+              "17"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "46/67"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Onyx Oni"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Jim Pavelec"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "5"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Nonhuman",
+              "Oni",
+              "Shadowlands"
+            ],
+            "number": [
+              "29"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "bf/b9"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Onyx Oni"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Onyx Oni"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11343",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11345",
+      "image_ids": [
+        "oracle-l5r-11345-printing-1-image-1"
+      ],
+      "name": "Tower Guard",
+      "oracle_id": 11345,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Matt Zeilinger"
+          ],
+          "number": [
+            "22"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "99/c8"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:43:57.558687",
+        "cardid": 11345,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "0"
+        ],
+        "formattedtitle": "Tower Guard",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "99/c8",
+        "keywords": [
+          "Guard",
+          "Samurai"
+        ],
+        "legality": [],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Matt Zeilinger"
+            ],
+            "number": [
+              "22"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "99/c8"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Matt Zeilinger"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "0"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Guard",
+              "Samurai"
+            ],
+            "number": [
+              "18"
+            ],
+            "personalhonor": [
+              "2"
+            ],
+            "printimagehash": [
+              "0a/83"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Tower Guard"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Matt Zeilinger"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "0"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Guard",
+              "Samurai"
+            ],
+            "number": [
+              "30"
+            ],
+            "personalhonor": [
+              "2"
+            ],
+            "printimagehash": [
+              "f0/7b"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Tower Guard"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Tower Guard"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11345",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11346",
+      "image_ids": [
+        "oracle-l5r-11346-printing-1-image-1"
+      ],
+      "name": "Tsumaro's Illusion",
+      "oracle_id": 11346,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Diego Gisbert Llorens"
+          ],
+          "number": [
+            "23"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "cb/7c"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:44:23.858423",
+        "cardid": 11346,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "0"
+        ],
+        "formattedtitle": "Tsumaro's Illusion",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "cb/7c",
+        "keywords": [
+          "Air",
+          "Illusion",
+          "Shugenja"
+        ],
+        "legality": [],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Diego Gisbert Llorens"
+            ],
+            "number": [
+              "23"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "cb/7c"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Diego Gisbert Llorens"
+            ],
+            "chi": [
+              "3"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "0"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Air",
+              "Illusion",
+              "Shugenja"
+            ],
+            "number": [
+              "19"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "94/9c"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Tsumaro's Illusion"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Diego Gisbert Llorens"
+            ],
+            "chi": [
+              "3"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "0"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Air",
+              "Illusion",
+              "Shugenja"
+            ],
+            "number": [
+              "31"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "cb/75"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Tsumaro's Illusion"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Tsumaro's Illusion"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11346",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "This Item's Force Modifier is equal to the discarded card's Focus Value.\n(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11348",
+      "image_ids": [
+        "oracle-l5r-11348-printing-1-image-1"
+      ],
+      "name": "Unexpected Weapon",
+      "oracle_id": 11348,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Gong Studios"
+          ],
+          "number": [
+            "26"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "fe/a2"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:45:53.838764",
+        "cardid": 11348,
+        "chi": [
+          "+0"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "+*"
+        ],
+        "formattedtitle": "Unexpected Weapon",
+        "imagehash": "fe/a2",
+        "keywords": [
+          "<b>Weapon</b>"
+        ],
+        "legality": [],
+        "printing": [
+          {
+            "artist": [
+              "Gong Studios"
+            ],
+            "number": [
+              "26"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "fe/a2"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Gong Studios"
+            ],
+            "chi": [
+              "+0"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "+*"
+            ],
+            "keywords": [
+              "Weapon"
+            ],
+            "number": [
+              "32"
+            ],
+            "printimagehash": [
+              "14/3f"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "This Item's Force Modifier is equal to the discarded card's Focus Value.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Unexpected Weapon"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Gong Studios"
+            ],
+            "chi": [
+              "+0"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "+*"
+            ],
+            "keywords": [
+              "Weapon"
+            ],
+            "number": [
+              "44"
+            ],
+            "printimagehash": [
+              "a8/3a"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "This Item's Force Modifier is equal to the discarded card's Focus Value.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Unexpected Weapon"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "This Item's Force Modifier is equal to the discarded card's Focus Value.<br><i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Unexpected Weapon"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11348",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "Battle: Discard a card to give a target enemy Personality or Follower a Force penalty equal to the card's Focus Value.\n(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11327",
+      "image_ids": [
+        "oracle-l5r-11327-printing-1-image-1"
+      ],
+      "name": "Yamazaru's Monkey",
+      "oracle_id": 11327,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "number": [
+            "4"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "10/7c"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:43:54.338670",
+        "cardid": 11327,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Mantis"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Yamazaru's Monkey",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "10/7c",
+        "keywords": [
+          "Mantis Clan",
+          "Monkey",
+          "Nonhuman",
+          "Spirit"
+        ],
+        "legality": [],
+        "ph": [
+          "3"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "number": [
+              "4"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "10/7c"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Mantis"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "3"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Mantis Clan",
+              "Monkey",
+              "Nonhuman",
+              "Spirit"
+            ],
+            "number": [
+              "6"
+            ],
+            "personalhonor": [
+              "3"
+            ],
+            "printimagehash": [
+              "45/94"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "Battle: Discard a card to give a target enemy Personality or Follower a Force penalty equal to the card's Focus Value.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Yamazaru's Monkey"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Mantis"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "3"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Mantis Clan",
+              "Monkey",
+              "Nonhuman",
+              "Spirit"
+            ],
+            "number": [
+              "16"
+            ],
+            "personalhonor": [
+              "3"
+            ],
+            "printimagehash": [
+              "d3/4f"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "Battle: Discard a card to give a target enemy Personality or Follower a Force penalty equal to the card's Focus Value.<br>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Yamazaru's Monkey"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<b>Battle:</b> Discard a card to give a target enemy Personality or Follower a Force penalty equal to the card's Focus Value.<br><i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Yamazaru's Monkey"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11327",
+      "types": [
+        "Proxy"
+      ]
+    },
+    {
+      "current_oracle_text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "deck_types": [
+        "Other"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-11349",
+      "image_ids": [
+        "oracle-l5r-11349-printing-1-image-1"
+      ],
+      "name": "Zombie",
+      "oracle_id": 11349,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Sam Flegal"
+          ],
+          "number": [
+            "27"
+          ],
+          "printedwithset": [
+            "Ivory Edition"
+          ],
+          "printimagehash": [
+            "96/e8"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Premium"
+          ],
+          "set": [
+            "Ivory Edition"
+          ]
+        }
+      ],
+      "source_legality_labels": [],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-09-28T20:47:13.878174",
+        "cardid": 11349,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "0"
+        ],
+        "deck": [
+          "Other"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Zombie",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "96/e8",
+        "keywords": [
+          "Nonhuman",
+          "Shadowlands",
+          "Undead"
+        ],
+        "legality": [],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Sam Flegal"
+            ],
+            "number": [
+              "27"
+            ],
+            "printedwithset": [
+              "Ivory Edition"
+            ],
+            "printimagehash": [
+              "96/e8"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "Ivory Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Sam Flegal"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "2"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Nonhuman",
+              "Shadowlands",
+              "Undead"
+            ],
+            "number": [
+              "21"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "b3/21"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "The Coming Storm"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Zombie"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          },
+          {
+            "artist": [
+              "Sam Flegal"
+            ],
+            "chi": [
+              "2"
+            ],
+            "clan": [
+              "Unaligned"
+            ],
+            "cost": [
+              "0"
+            ],
+            "force": [
+              "2"
+            ],
+            "honor": [
+              "-"
+            ],
+            "keywords": [
+              "Nonhuman",
+              "Shadowlands",
+              "Undead"
+            ],
+            "number": [
+              "33"
+            ],
+            "personalhonor": [
+              "0"
+            ],
+            "printimagehash": [
+              "3c/5a"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Premium"
+            ],
+            "set": [
+              "A Line in the Sand"
+            ],
+            "text": [
+              "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)"
+            ],
+            "title": [
+              "Zombie"
+            ],
+            "type": [
+              "Proxy"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          "<i>(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)</i>"
+        ],
+        "title": [
+          "Zombie"
+        ],
+        "type": [
+          "Proxy"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=11349",
+      "types": [
+        "Proxy"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Ivory Edition",
+  "response_sha256": "5246950ce38952a8b4d18a0da92a1801ba389044f764f13a9e0593a42c18a5be",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

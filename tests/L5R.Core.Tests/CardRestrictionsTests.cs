@@ -168,10 +168,17 @@ internal static class CardRestrictionsTests
         var s = ActionTable();
         var protectedCard = Batch336Support.Add(s, Samurai, 0, Zone.Home); var plain = Batch336Support.Add(s, Samurai, 0, Zone.Home); var challenged = Batch336Support.Add(s, Lion, 1, Zone.Home);
         Stored(s, RestrictionKind.NoDishonor, protectedCard.Id); Stored(s, RestrictionKind.NoChallenge, protectedCard.Id);
+        s.NegationWatches.Add(new NegationWatch { Id = "dishonor-watch", OwnerPlayerId = 0, TargetCardId = protectedCard.Id, Kind = WatchKind.Dishonor });
         var e = MatchEngine.FromTestState(s);
         var live = Live(e);
-        Call(e, "Dishonor", live.Cards[protectedCard.Id], null);
+        Call(e, "Dishonor", live.Cards[protectedCard.Id], 1);
         Check(!live.Cards[protectedCard.Id].Dishonorable, "will not become dishonorable");
+        Check(live.NegationWatches.Count == 1, "a restriction does not consume the one-use dishonor watch");
+        live.Restrictions.Items.RemoveAll(r => r.Kind == RestrictionKind.NoDishonor);
+        Call(e, "Dishonor", live.Cards[protectedCard.Id], 1);
+        Check(!live.Cards[protectedCard.Id].Dishonorable && live.NegationWatches.Count == 0, "after the restriction ends, the watch still negates the next dishonor");
+        Call(e, "Dishonor", live.Cards[protectedCard.Id], 1);
+        Check(live.Cards[protectedCard.Id].Dishonorable, "after the watch is consumed, dishonoring succeeds");
         Call(e, "Dishonor", live.Cards[plain.Id], null);
         Check(live.Cards[plain.Id].Dishonorable, "another Personality is dishonored as usual");
         Call(e, "IssueChallenge", "training-duel-force", 0, protectedCard.Id, challenged.Id, "Force", false, null);

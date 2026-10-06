@@ -1,0 +1,57 @@
+{
+  "Profile": "item-wave-58",
+  "Rules": "Emperor Edition core rules; reviewed created-card proxy scans and their creators (issue #677).",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10697",
+      "Name": "Shard of the Great Death's Bones",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Item enters play, lose 2 Honor, create three 1F Nonhuman • Raptor • Shadowlands • Undead • Cavalry Followers, and attach them to your Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10697.jpg",
+      "Keywords": [
+        "Shadowlands"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "proxy677-shard-create"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-11348",
+      "Name": "Unexpected Weapon",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Item's Force Modifier is equal to the discarded card's Focus Value.\n(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-11348.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}
