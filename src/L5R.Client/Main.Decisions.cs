@@ -11,7 +11,7 @@ public partial class Main
     private bool _reviewingAlternativeCost;
     private bool _alternativeCostConfirmed;
     private bool GenericDecisionActive => View.WinnerId is null && !EventDecisionActive &&
-        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect" or "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten";
+        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect" or "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten" or "budgetSelect";
     private bool DecisionCanSubmit => !_session.Busy && !PresentationBusy && !_playHeld && (!_session.Online ||
         _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false));
 
@@ -89,6 +89,7 @@ public partial class Main
             if (!_session.Online && !_autoOpponent) _decisionActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
             return true;
         }
+        if (pending?.Type == "budgetSelect") return RenderBudgetSelect(options); // Sleep (issue #667): the budgeted multi-select, Main.BudgetSelect.cs
         if (pending is not null && RenderCandidateChoices(options)) return true;
         var rows = new List<(ActionOption Option, Button Button)>();
         var confirm = SidebarSkin.Button("Confirm choice", CommitDecision, true);

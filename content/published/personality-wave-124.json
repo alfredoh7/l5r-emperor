@@ -1,0 +1,59 @@
+{
+  "Profile": "personality-wave-124",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10232",
+      "Name": "Fusako",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijustu Limited: Target another player's Personality: Fusako challenges the target. His controller may bow him; if he is now bowed, he may refuse the duel. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10232.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Ronin",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fusako-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10585",
+      "Name": "Gaijin Sorcerer",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While your ritual is resolving, Gaijin Sorcerer counts as two Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10585.jpg",
+      "Keywords": [
+        "Gaijin",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "gaijin-sorcerer-two-shugenja"
+    }
+  ],
+  "Decks": []
+}
