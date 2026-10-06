@@ -5316,7 +5316,7 @@ public sealed partial class MatchEngine
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
         SearchPlaySourceZoneAllows(ability, source, player) is bool searchPlayZone ? searchPlayZone // issue #667 (SearchPlayMasaya.cs): Masaya's Open action from his face-up province
-        P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
+        : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
         : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)
