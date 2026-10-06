@@ -171,7 +171,7 @@ public sealed partial class MatchEngine
                             $"{name}: remove {Definition(dead).Name} from the game, the Spell costs {Definition(dead).Chi} less", dead));
             }
         }
-        return [.. reactions, .. destroys, .. TfAltProductionTokens(playerId, paying), .. PromoPaymentSourceTokens(playerId, paying)]; // Jade Mine, Slave Pits (issue #622, TfHoldings.cs); Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
+        return [.. reactions, .. destroys, .. TfAltProductionTokens(playerId, paying), .. PromoPaymentSourceTokens(playerId, paying), .. WlPaymentTokens(playerId)]; // Jade Mine, Slave Pits (issue #622, TfHoldings.cs); Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
     }
 
     private HashSet<string> PaymentSourceIds(int playerId, PaymentSubject? paying) =>
@@ -208,6 +208,7 @@ public sealed partial class MatchEngine
         foreach (var token in tokens)
         {
             if (TfIsAltToken(token)) { TfUseAltToken(token, playerId); continue; } // Jade Mine, Slave Pits (issue #622, TfHoldings.cs)
+            if (WlUsePaymentToken(token, playerId)) continue; // Bamboo Harvesters - exp2 (issue #674, WlHoldings.cs)
             if (PromoUsePaymentToken(token, playerId)) continue; // Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
             var ability = AbilityCatalog.All[token.AbilityId];
             token.Card.AbilityUses[ability.UsageKey ?? token.AbilityId] = _state.TurnNumber;

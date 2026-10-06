@@ -58,7 +58,8 @@ public sealed partial class MatchEngine
     private static bool PromoIsPouchToken(string id) => IsPaymentToken(id) && PromoPaymentKindOf(id) == PromoPaymentSourceAbilities.PouchKind;
 
     // A source the payer chooses deliberately and the engine never suggests: Profits' reduction lowers what the payment produces.
-    private static bool PromoNeverSuggested(PaymentToken token) => token.AbilityId == PromoPaymentSourceAbilities.ProfitsReduce;
+    // Issue #674 adds Bamboo Harvesters - exp2 with no Gold to add (WlHoldings.cs).
+    private static bool PromoNeverSuggested(PaymentToken token) => token.AbilityId == PromoPaymentSourceAbilities.ProfitsReduce || WlNeverSuggested(token);
 
     // A source that costs its owner a card or an optional Reaction; a suggestion prefers any payment without one (Near Miss discarded, Profits discarded, the Pouch bowed).
     private static int PromoOptionalSourceCount(string[] ids) => ids.Count(id => IsPaymentToken(id) && PromoPaymentKindOf(id) is PromoPaymentSourceAbilities.PouchKind or PromoPaymentSourceAbilities.NearMissKind or PromoPaymentSourceAbilities.ProfitsGoldKind);
