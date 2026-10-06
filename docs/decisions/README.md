@@ -33,3 +33,5 @@ interpretation this register's decision docs already settled.
 - [Playtest fixes (#644)](2026-10-05-playtest-fixes-644.md) — accepted: entry-reaction windows close when nothing is left to take, a face-up Celestial enters play at once, Steel on Steel needs a performer at the battlefield, the bot always uses its own entering-play Reactions.
 
 - [Promotional-Emperor pass (#653)](2026-10-05-promotional-emperor-pass.md) — accepted as readings: 106 of 134 unwired Promotional-Emperor cards wired, 28 blocked with notes; the rules readings and open questions for Mendon are listed.
+
+- [Remaining unwired cards and the minimal primitive set (#668)](2026-10-05-remaining-unwired-primitives.md) — proposed: 491 unwired cards triaged against the end-of-arc supplement and the engine; 206 wirable today, 25 ranked primitives, 18 rulings, with a [per-card appendix](2026-10-05-remaining-unwired-primitives-cards.md) and [one implementation prompt per primitive](2026-10-05-remaining-unwired-primitives-prompts.md). No card wired.
