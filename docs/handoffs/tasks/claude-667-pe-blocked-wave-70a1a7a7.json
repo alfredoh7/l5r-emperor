@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Promotional-Emperor blocked cards (#667), in progress: recorded Peace Treaty/Wildfire/Green Nightshade Blend as rejected; merged phase-order marker (The Deciding Moment, Nocturnal Attack).",
-  "validation": "Phase-order agent: full Core suite exit 0, phase-order suite 10/10, PhaseTrackProbe PHASE_ORDER_PASS; check.sh --skip-client stops at catalogue-art coverage until the art pack is rebuilt. Other clusters not yet merged.",
-  "remaining": "Merge duel-sleep, search-play, payments, favor, performers and removal branches; rebuild art pack; regenerate inventory; full checks; PR.",
+  "lane": "shared",
+  "summary": "Wires 22 blocked Promotional-Emperor/Celestial cards (#667): Fusako, Gaijin Sorcerer, Sleep, Gozu, Heart of Fudo exp2, Hyobuko, Masaya, Sacred Rosary, Topaz Armor, Coin Pouch, Near Miss, Profits, Mempo (+Favor discard window), Blade of the Balash, Isha's Yumi, Winter Sled, Wyrmbone Katana, Lying in Ambush (+Ambusher), Jade Embrace, Sea & Sky, Colonial Farm (+Colonists), The Deciding Moment and Nocturnal Attack (phase-order marker). Peace Treaty, Wildfire, Green Nightshade Blend recorded as rejected by Mendon.",
+  "validation": "Core suite all pass (no FAIL); bash tools/check.sh --skip-client exit 0; check_format clean; client builds 0 errors; native probes pass: six-phase-track, gold-payment, decision-chooser, event-decisions, either-or-ui, deck-search-ui, gameplay-controls, multi-targets-ui, deck-builder. Art pack candidate catalogue-art-issue667-20261005-r1 built locally and verified, not published. Fusako bow button, Sleep panel, Masaya province action and Topaz keyword chooser have no dedicated native probe.",
+  "remaining": "Through the Breach unpublished until the Breached Oni scan (oracle 10810) is supplied; art pack release r1 needs publishing before merge for CI/clients; readings listed in docs/decisions/2026-10-05-667-*.md await Mendon's confirmation.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
   "branch": "claude/667-pe-blocked-wave",
-  "updated": "2026-10-06T02:01:30.348659+00:00"
+  "updated": "2026-10-06T03:39:41.628106+00:00"
 }
