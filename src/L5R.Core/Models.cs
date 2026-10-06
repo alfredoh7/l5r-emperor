@@ -1523,6 +1523,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // Public display context for a battle fought inside the Action Phase. ActivePlayerId
     // remains the battle's attacker; this is the original turn owner, never the paused action.
     public int? ActionPhaseTurnPlayerId { get; init; }
+    // Issue #667 (PhaseOrder.cs): the six printed phases by name in the order this turn is running in, PUBLIC and identical for both seats; null while the usual order (Straighten, Events, Action, Attack, Dynasty, End) runs.
+    public string[]? PhaseOrder { get; init; }
 }
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);

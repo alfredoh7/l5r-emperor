@@ -285,7 +285,7 @@ public sealed partial class MatchEngine
     private void SetPhaseAfterManeuvers(int attacker)
     {
         if (_state.UnresolvedBattlefields.Count > 0) SetPhase(Phase.BattleSelection, BattleSelectionChooser(attacker));
-        else SetPhase(Phase.Dynasty, attacker);
+        else BeginPhaseAfterAttack(attacker); // issue #667
     }
 
     // ---- Target categories -------------------------------------------------------------------------------------------------------------------------------

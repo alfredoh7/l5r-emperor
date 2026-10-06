@@ -439,7 +439,7 @@ public sealed partial class MatchEngine
         if (command.Type == "useAbility") { UseAbility(command); return; }
         _state.TwistOfFateDeclinedTurn = _state.TurnNumber;
         _state.PendingChoice = null;
-        EndTurn();
+        EndDynastyPhase(); // issue #667: the Attack Phase when the order puts it after the Dynasty Phase
     }
 
     // Twist of Fate's effect: the Strategy is spent, the window closes, and the match steps into the Action Phase for exactly one additional action of its player's (a Limited or an Open one -- and, being
