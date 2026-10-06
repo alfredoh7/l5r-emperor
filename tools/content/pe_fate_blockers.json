@@ -1,8 +1,4 @@
 {
-  "oracle-l5r-9992": {
-    "note": "Through the Breach (Strategy): the removal Limited is built and tested (pe-through-the-breach-remove, Castle Holdings only, no Gold-producing abilities); the card is not published because its second Limited creates Breached Oni, whose scan (oracle 10810) is not available locally. Drop the JPEG at assets/reference/oracle/torn-asunder/images/oracle-l5r-10810-printing-1-image-1.jpg and package it as a CreatedOnly personality (see docs/decisions/2026-10-05-667-removal.md).",
-    "category": "SCAN"
-  },
   "oracle-l5r-9993": {
     "note": "REJECTED BY MENDON (2026-10-05): Wildfire is blocked on purpose; do not wire it. (It also needs a Fortress tile model that the engine does not have.)",
     "category": "RULES"
