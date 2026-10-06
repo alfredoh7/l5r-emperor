@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shrine to Nimuro (and every performer-category ability): performer candidates must be in play. Province-target abilities (Shrine, Ring of Earth, Genji, Study of the Wheel, Second City) now present a province picker grouped Opponent's / Your with number and title or Face down, hover highlight, and Confirm after the player's pick.",
+  "validation": "Core suite passes incl. new Shrine out-of-play performer check; client builds; native probe check-province-target-ui.sh passes at 1920x1080 and 1280x800 (screenshots reviewed). Full check.sh not run locally.",
+  "remaining": "Not played by hand in a full game; two-player online path unchanged (same command shape).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/678",
+  "branch": "claude/678-shrine-nimuro-province-picker",
+  "updated": "2026-10-06T17:05:21.512698+00:00"
+}

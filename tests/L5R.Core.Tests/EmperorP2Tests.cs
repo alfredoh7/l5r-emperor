@@ -277,6 +277,13 @@ internal static partial class EmperorP2Tests
         Eq(withTactician.GoldProduced(shrine.Id, 1), 3, "a Tactician: 3 Gold");
         Check(!CanUse(withTactician, 1, "p2-shrine-nimuro-lower", shrine.Id), "a Tactician without Lion Clan cannot perform it");
         var lion = Edit(withTactician, st => st.Cards["fx-tac"].GrantedKeywords.Add(new("Lion Clan", "test-fixture", GrantDuration.Permanent)));
+        // Only Tacticians in play are performers: a Lion Clan Tactician in the deck, hand or discard pile is never offered.
+        var outOfPlay = Edit(lion, st =>
+        {
+            foreach (var (id, zone) in new[] { ("fx-deck", Zone.DynastyDeck), ("fx-hand", Zone.Hand), ("fx-discard", Zone.DynastyDiscard) })
+            { var t = new CardInstance { Id = id, DefinitionId = "training-tactician", OwnerId = 1, Zone = zone }; t.GrantedKeywords.Add(new("Lion Clan", "test-fixture", GrantDuration.Permanent)); st.Cards.Add(id, t); }
+        });
+        Check(Options(outOfPlay, 1, "p2-shrine-nimuro-lower", shrine.Id).Select(o => o.Command?.PerformerId).Distinct().SequenceEqual(["fx-tac"]), "only the Tactician in play is offered as the performer");
         var option = Options(lion, 1, "p2-shrine-nimuro-lower", shrine.Id).First(o => o.Enabled);
         Check(option.Command!.PerformerId == "fx-tac", "the Lion Clan Tactician performs it");
         var before = lion.ProvinceStrengthForTest(0, 1);
