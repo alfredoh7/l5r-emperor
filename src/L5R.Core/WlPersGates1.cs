@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace L5R.Core;
 
 // ======================================================================================================================================================================================
@@ -36,6 +38,13 @@ public static class WlPersGates1Abilities
     /// <summary>The Effect keys of the cards whose static traits live in the engine (CardDefinition.Effect).</summary>
     public const string BoyohEffect = "wl1-boyoh", TametakaEffect = "wl1-tametaka";
 
+    /// <summary>The target category of Doji Razan's destruction: any card in play that has the Fudo keyword, except a Stronghold (not a card; it may not be destroyed). A Region is a card and qualifies.</summary>
+    public const string FudoCard = "wl1-fudo-card";
+
+    /// <summary>The Effect key prefix of the cards that print Invest BEFORE "After X enters play, lose N Honor" (Mendon's ruling, issue #679: enter-play effects occur top to bottom in the printed order): the
+    /// Honor loss (the number after the last dash) is applied once the entry window, and with it the Invest, has closed.</summary>
+    public const string InvestThenLossPrefix = "wl1-invest-then-loss-";
+
     /// <summary>The Invest abilities: a keyword trait with no designator (Mendon's R4 ruling: traits are not Reactions even though the engine models them with Reaction timing).</summary>
     private static readonly HashSet<string> Traits = new(StringComparer.Ordinal) { RazanInvest, GojiroInvest, HajimeInvest, YukoInvest };
 
@@ -56,7 +65,7 @@ public static class WlPersGates1Abilities
         all[TobeiAttack] = new("Battle", "Bow Tobei: Ranged 2 Attack", "attack", Costs: ActionCost.BowSource);
         // Doji Razan (oracle-l5r-10626): "Invest 1: Give Razan a +1C token." / "Limited: Destroy a target Fudo card. Destroy Razan."
         all[RazanInvest] = new("Reaction", "Invest 1 Gold: give this Personality a +1C token", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(1));
-        all[RazanDestroy] = new("Limited", "Target a Fudo card: Destroy it. Destroy Razan", "non-stronghold-card-with-keyword", RequiredKeywords: ["Fudo"]);
+        all[RazanDestroy] = new("Limited", "Target a Fudo card: Destroy it. Destroy Razan", FudoCard);
         // Hida Gojiro (oracle-l5r-10617): "Invest 4: Give Gojiro two +1F tokens."
         all[GojiroInvest] = new("Reaction", "Invest 4 Gold: give this Personality two +1F tokens", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(4));
         // Isawa Hajime (oracle-l5r-10649): "Invest 3: Give Hajime two +1F Fire tokens."
@@ -74,14 +83,21 @@ public static class WlPersGates1Abilities
     }
 }
 
+public sealed partial class MatchState
+{
+    /// <summary>Cards whose "After this card enters play, lose N Honor" is listed BELOW their Invest: the loss waits for the entry window to close (Gojiro, Hajime). Not a decision: it is drained as priority returns.</summary>
+    [JsonPropertyOrder(20100)]
+    public List<string> WlPersGates1DeferredLosses { get; set; } = [];
+}
+
 public static class WlPersGates1Searches
 {
     private static readonly SearchCriteria RingCard = new("Ring", [CardType.Ring]);
     private static readonly SearchCriteria LegionnaireCard = new("Yodotai Legionnaire Follower", [CardType.Follower], Titles: ["Yodotai Legionnaire"]);
 
-    /// <summary>Asahina Kitiaru - exp: "Search your discard pile, then Fate deck, for a Ring. Show it and put it in your hand. Discard a card." Ordered (R-011); the card then discarded is another one.</summary>
+    /// <summary>Asahina Kitiaru - exp: "Search your discard pile, then Fate deck, for a Ring. Show it and put it in your hand. Discard a card." Ordered (R-011). Mendon's ruling (issue #679, 2026-10-06): the card discarded afterwards MAY be the Ring just found.</summary>
     public static SearchSpec Kitiaru { get; } = new("wl1-kitiaru-ring", "Search your discard pile, then Fate deck, for a Ring",
-        [new(SearchDeck.FateDiscard, RingCard, SearchEffect.ToHandThenDiscard), new(SearchDeck.Fate, RingCard, SearchEffect.ToHandThenDiscard)], Ordered: true);
+        [new(SearchDeck.FateDiscard, RingCard, SearchEffect.ToHandThenDiscard), new(SearchDeck.Fate, RingCard, SearchEffect.ToHandThenDiscard)], Ordered: true, DiscardMayBeFound: true);
 
     /// <summary>Legulus: "Search your deck for a Yodotai Legionnaire Follower. Show it. Put it in your hand." A Follower is a Fate card: the Fate deck.</summary>
     public static SearchSpec Legulus { get; } = new("wl1-legulus-legionnaire", "Search your Fate deck for a Yodotai Legionnaire Follower",
@@ -98,8 +114,23 @@ public sealed partial class MatchEngine
     // empty hand owes nothing), queued like Daigotsu Bofana's so a Proclaim or entry window already open is never overwritten.
     private void ApplyWlPersGates1EntryEffects(int playerId, CardInstance card)
     {
-        if (Definition(card).Effect != WlPersGates1Abilities.BoyohEffect) return;
+        var effect = Definition(card).Effect;
+        if (effect?.StartsWith(WlPersGates1Abilities.InvestThenLossPrefix, StringComparison.Ordinal) == true) { _state.WlPersGates1DeferredLosses.Add(card.Id); return; }
+        if (effect != WlPersGates1Abilities.BoyohEffect) return;
         _state.PendingForcedDiscards.Add(new(playerId, Definition(card).Name));
+    }
+
+    // OpenOverconfidentDrawWindow's hook (called as priority returns): the Honor losses listed below an Invest, now that no entry or Proclaim window is open.
+    private void ApplyWlPersGates1DeferredLosses()
+    {
+        if (_state.WlPersGates1DeferredLosses.Count == 0 || _state.PendingChoice is { Type: "entryReaction" or "proclaim" }) return;
+        var owed = _state.WlPersGates1DeferredLosses.ToArray();
+        _state.WlPersGates1DeferredLosses.Clear();
+        foreach (var id in owed)
+        {
+            var card = Card(id);
+            GainHonor(card.OwnerId, -int.Parse(Definition(card).Effect![WlPersGates1Abilities.InvestThenLossPrefix.Length..], System.Globalization.CultureInfo.InvariantCulture), $"{Definition(card).Name} entering play", card);
+        }
     }
 
     // AfterProvinceDestroyedByResolution's hook. Boyoh Mercenary: "After Boyoh Mercenary's army destroys a Province, draw a card." Every Boyoh in the attacking army that stands at the
@@ -115,8 +146,8 @@ public sealed partial class MatchEngine
 
     // ---- Daidoji Tametaka - exp: "Tametaka loses any duel against Yoritomo Hiromi." ---------------------------------------------------------------------------------------------------------
 
-    // ResolveDuel's hook, after the totals (and the Duelist tie-break) have named a result. When Tametaka is a duelist and the other is a Yoritomo Hiromi (either version), a result in which Tametaka
-    // would not lose is replaced: he loses and Hiromi, the other duelist, wins. A tie (both lose) already has Tametaka losing and is left alone; a win by Hiromi is left alone.
+    // ResolveDuel's hook, after the totals (and the Duelist tie-break) have named a result. When Tametaka is a duelist and the other is a Yoritomo Hiromi (either version) and Tametaka would WIN, he
+    // loses instead and the result is the same as a tie (both duelists lose): the card says nothing about Hiromi winning (Mendon's ruling, issue #679, 2026-10-06). A tie and a win by Hiromi are left alone.
     private (string? WinnerId, List<string> LoserIds, string Reason) WlPersGates1DuelOutcome(PendingDuel duel, string? winnerId, List<string> loserIds, string reason)
     {
         foreach (var (mine, other) in new[] { (duel.ChallengerId, duel.ChallengedId), (duel.ChallengedId, duel.ChallengerId) })
@@ -125,12 +156,24 @@ public sealed partial class MatchEngine
             if (Definition(tametaka).Effect != WlPersGates1Abilities.TametakaEffect || !InPlay(tametaka) || winnerId != tametaka.Id) continue;
             if (Experienced.BaseTitle(Definition(opponent).Name) != "Yoritomo Hiromi") continue;
             Emit("duelAutoLoss", $"{Definition(tametaka).Name} loses any duel against Yoritomo Hiromi.", tametaka.OwnerId, tametaka.Id);
-            return (opponent.Id, [tametaka.Id], $"{Definition(tametaka).Name} loses any duel against Yoritomo Hiromi");
+            return (null, [duel.ChallengerId, duel.ChallengedId], $"{Definition(tametaka).Name} loses any duel against Yoritomo Hiromi · the duel is a tie");
         }
         return (winnerId, loserIds, reason);
     }
 
     // ---- the actions ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // "Fudo card": any card in play carrying the keyword; a Stronghold is not a card that may be destroyed.
+    private bool WlPersGates1TargetAllows(string category, CardInstance target) =>
+        category == WlPersGates1Abilities.FudoCard && InPlay(target) && Definition(target).Type != CardType.Stronghold && Keyword(target, "Fudo");
+
+    // Karachu: each keyword may be gained once a turn even when a granted extra use of his action lets him take it again -- an already-gained keyword is not offered again.
+    private void ValidateWlPersGates1(string id, CardInstance? source)
+    {
+        var keyword = id switch { WlPersGates1Abilities.KarachuCavalry => "Cavalry", WlPersGates1Abilities.KarachuConqueror => "Conqueror", WlPersGates1Abilities.KarachuNaval => "Naval", _ => null };
+        if (keyword is null || source is null) return;
+        Require(!source.GrantedKeywords.Any(k => k.Keyword == keyword && k.Source == source.Id && k.Duration == GrantDuration.Turn), $"{Definition(source).Name} has already gained {keyword} this turn.");
+    }
 
     private static int? WlPersGates1AttackStrength(string abilityId) => abilityId == WlPersGates1Abilities.TobeiAttack ? 2 : null;
 
@@ -162,7 +205,7 @@ public sealed partial class MatchEngine
                 CreateToken(source!, "Invest", id, "Chi", 1);
                 return false;
             case WlPersGates1Abilities.RazanDestroy:
-                // Two sentences, both done: the target is destroyed, then Razan.
+                // Two independent sentences (Mendon's ruling, issue #679): the target is destroyed, then Razan; a negation of one does not stop the other (DestroyUnits judges each card on its own).
                 DestroyTargetCard(target!, player.Id);
                 if (InPlay(source!)) DestroyTargetCard(source!, player.Id);
                 return false;
@@ -198,6 +241,8 @@ public sealed partial class MatchEngine
     {
         EngineHooks.Abilities.Register("AddWlPersGates1", 14100, static abilities => abilities.AddWlPersGates1());
         EngineHooks.Searches.Register("WlPersGates1Searches", 14100, static () => WlPersGates1Searches.All);
+        EngineHooks.TargetAllows.Register("WlPersGates1TargetAllows", 14100, static (engine, context) => engine.WlPersGates1TargetAllows(context.ability.Target, context.target));
+        EngineHooks.ValidateEarly.Register("ValidateWlPersGates1", 14100, static (engine, context) => engine.ValidateWlPersGates1(context.id, context.source));
         EngineHooks.RunEffects.Register("RunWlPersGates1", 14100, static (engine, context) => engine.RunWlPersGates1(context));
         EngineHooks.AttackStrengthAfter.Register("WlPersGates1AttackStrength", 14100, static (engine, context) => WlPersGates1AttackStrength(context.abilityId));
         EngineHooks.AttackKind.Register("WlPersGates1AttackKind", 14100, static context => WlPersGates1AttackKind(context.abilityId));

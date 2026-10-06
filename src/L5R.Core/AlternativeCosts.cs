@@ -56,7 +56,7 @@ public static class CostSubject
 /// <summary>One way to pay an ability's non-Gold cost. <paramref name="Id"/> is what GameCommand.CostOption names; <paramref name="Label"/> is
 /// the short phrase QueryActions appends to the offered action when the ability has more than one; <paramref name="Subject"/> (CostSubject) is
 /// the card the verb is applied to, which may differ per option.</summary>
-public sealed record CostOption(string Id, string Label, string Verb, string Subject = CostSubject.Performer)
+public sealed record CostOption(string Id, string Label, string Verb, string Subject = CostSubject.Performer, GoldCostRule? Gold = null)
 {
     public static CostOption Bow { get; } = new(CostVerb.Bow, "Bow it", CostVerb.Bow);
     public static CostOption Destroy { get; } = new(CostVerb.Destroy, "Destroy it", CostVerb.Destroy);
@@ -117,6 +117,7 @@ public sealed partial class MatchEngine
         var option = ChosenCostOption(ability, command);
         // Issue #501: "or discard the Imperial Favor" -- the acting player must control it (or a Favor token, Kyuden Otomo - exp); it names no card.
         if (option.Verb == CostVerbs.DiscardFavor) { RequireFavorDiscard(command, Player(command.PlayerId)); return; }
+        if (option.Verb == CostVerbs.PayGold) return; // issue #682: the Gold is validated and paid with the ability's price (AbilityGoldCost reads the option's rule)
         var subject = CostSubjectCard(option, ability, command, source) ?? throw new RuleViolation(option.Subject == CostSubject.Target ? "Choose a target." : "Choose a performing card.");
         if (MomokoWaivesCost(command, option.Verb)) return; // Isawa Momoko (issue #501): an ignored cost need not be payable
         var reason = CostOptionUnpayable(option, subject);
@@ -130,6 +131,7 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is null) return;
         var option = ChosenCostOption(ability, command);
         if (option.Verb == CostVerbs.DiscardFavor) { DiscardImperialFavorCost(command, player); return; } // issue #501
+        if (option.Verb == CostVerbs.PayGold) return; // issue #682: paid with the ability's Gold, beside the other costs
         var subject = CostSubjectCard(option, ability, command, source)!;
         if (MomokoWaivesCost(command, option.Verb)) { NoteMomokoWaivedCost(command, option.Verb); return; } // Isawa Momoko (issue #501)
         if (!InPlay(subject)) return; // a reaction between announcement and resolution already took it out of play: nothing is left to pay with
