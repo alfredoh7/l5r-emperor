@@ -232,8 +232,7 @@
       "Abilities": [
         "wl1-gojiro-invest"
       ],
-      "Effect": "none",
-      "EntryHonorLoss": 1
+      "Effect": "wl1-invest-then-loss-1"
     },
     {
       "Id": "oracle-l5r-10670",
@@ -312,8 +311,7 @@
       "Abilities": [
         "wl1-hajime-invest"
       ],
-      "Effect": "none",
-      "EntryHonorLoss": 1
+      "Effect": "wl1-invest-then-loss-1"
     },
     {
       "Id": "oracle-l5r-10641",
