@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Primitive P2: registered entry and ability cost-term channels (EngineHooks.EntryCostTerms/AbilityCostTerms, CostTerm with ignore-cost), the PayGold cost verb with CostOption.Gold, and helpers (ControlsRing, IsDefendingPlayer, OpponentIsClan, PrintedGoldCost). Engine only; cards are wired in a later wave.",
-  "validation": "cost-terms suite 8/8 passes; full check.sh --skip-client run in progress at handoff time (result recorded in the PR).",
-  "remaining": "Existing hard-coded entry discounts not migrated onto the channel; no card wired yet (wave follows P7 and P11); readings for Mendon in docs/decisions/2026-10-06-p2-cost-terms.md.",
+  "lane": "shared",
+  "summary": "Primitive P2: registered entry and ability cost-term channels, the PayGold cost verb with CostOption.Gold, and cost helpers. Engine only (shared interfaces: QuotePurchase, EquipGoldCost, AbilityGoldCost, CostOption); cards wired in a later wave.",
+  "validation": "cost-terms 8/8; bash tools/check.sh --skip-client passed (exit 0); format and comment-swallow gates clean.",
+  "remaining": "Existing hard-coded entry discounts not migrated; no card wired yet; readings in docs/decisions/2026-10-06-p2-cost-terms.md.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/682",
   "branch": "claude/682-p2-cost-terms",
-  "updated": "2026-10-06T17:46:53.519645+00:00"
+  "updated": "2026-10-06T18:06:46.413056+00:00"
 }
