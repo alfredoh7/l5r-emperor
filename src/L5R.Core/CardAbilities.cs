@@ -6699,7 +6699,7 @@ public sealed partial class MatchEngine
                         "any-card" => true,
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
-                        "enemy-attacking" => personality && !own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)), // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
+                        "enemy-attacking" => personality && (!own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)) || FavorMempoAllowsAnyUnit(id, player, target)), // Mempo of the Amethyst Champion (issue #667): any player's unit, attacking or not. // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
                         // Tokoru's Bear (oracle-l5r-10025, issue #299): "an attacking enemy card" -- not
                         // just an attacking Personality (enemy-attacking above) but any card in an
                         // attacking unit: the Personality himself or one of his attached Followers/

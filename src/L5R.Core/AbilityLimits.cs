@@ -15,7 +15,8 @@ public sealed partial class MatchEngine
 
     // The Fires of War (Emperor Edition remaining-cards pass, group C, issue #492): a Stronghold whose mark names this turn may use each of its abilities one more time (never an ability limited to once per game).
     private int EffectiveUsesPerTurn(Dictionary<string, int> uses, AbilityDefinition ability) =>
-        ability.UsesPerTurn == AbilityUseLimit.Unlimited || ability.OncePerGame ? ability.UsesPerTurn : ability.UsesPerTurn + (uses.TryGetValue(SecondUseKey, out var marked) && marked == _state.TurnNumber ? 1 : 0) + P3AdditionalUses(uses); // Centering the Soul (issue #503): additional uses this turn
+        ability.UsesPerTurn == AbilityUseLimit.Unlimited || ability.OncePerGame ? ability.UsesPerTurn : ability.UsesPerTurn + (uses.TryGetValue(SecondUseKey, out var marked) && marked == _state.TurnNumber ? 1 : 0) + P3AdditionalUses(uses) // Centering the Soul (issue #503): additional uses this turn
+            + RegisteredExtraUsesPerTurn(uses, ability); // the registered additive channel (Mempo of the Amethyst Champion, issue #667, FavorMempo.cs)
 
     private int AbilityUsesThisTurn(Dictionary<string, int> uses, AbilityDefinition ability, string key)
     {

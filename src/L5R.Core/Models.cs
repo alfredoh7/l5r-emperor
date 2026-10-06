@@ -1285,6 +1285,8 @@ public sealed class ResolvedActionFacts
     public List<int> HandRecipients { get; set; } = [];
     // Emperor Edition Stronghold pass (issue #486), batch 1 (Kyuden Otomo - exp): the players who took the Imperial Favor during the action.
     public List<int> FavorTakers { get; set; } = [];
+    // Issue #667 (FavorMempo.cs): the players who discarded the Imperial Favor as a cost of the action ("After you discard the Imperial Favor").
+    public List<int> FavorDiscarders { get; set; } = [];
     // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
     public bool WordsHaveStrengthPlayed { get; set; }
 }
