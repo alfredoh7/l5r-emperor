@@ -26,6 +26,9 @@ public static class FavorMempoAbilities
     /// <summary>The rulebook Favor actions print no Favor keyword on their ability, so they are named here.</summary>
     public static readonly string[] RulebookFavorActions = ["shunya-honor", "favor-cycle", "favor-cycle-kurohito", "favor-battle"];
 
+    /// <summary>Mendon: "only sending a personality home from battle (favor-battle) or discarding a card to draw a card (favor-cycle) trigger its ability": the only actions Mempo's Reaction answers (Kurohito's is the card-cycling action).</summary>
+    public static readonly string[] TakeBackTriggers = ["favor-battle", "favor-cycle", "favor-cycle-kurohito"];
+
     public static Dictionary<string, AbilityDefinition> AddFavorMempo(this Dictionary<string, AbilityDefinition> all)
     {
         // Mempo of the Amethyst Champion: "Reaction: After you discard the Imperial Favor: Take the Imperial Favor."
@@ -55,7 +58,7 @@ public sealed partial class MatchEngine
         return total;
     }
 
-    /// <summary>Synthetic AbilityId of the record a negated action leaves behind when it still discarded the Imperial Favor: only the Favor reactions read it.</summary>
+    /// <summary>Synthetic AbilityId of the record a negated action leaves behind when it still discarded the Imperial Favor (its SourceId holds the negated action's ability id): only the Favor reactions read it.</summary>
     internal const string FavorNegatedSentinel = "__favor-negated__";
 
     // ---- the one place the Imperial Favor is discarded ------------------------------------------------------------------------------------------------------------------------------------
@@ -119,16 +122,17 @@ public sealed partial class MatchEngine
     {
         if (abilityId != FavorMempoAbilities.TakeFavor) return facts.AbilityId == FavorNegatedSentinel ? false : null;
         return source.Zone == Zone.Attached && source.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && InPlay(host)
-            && facts.FavorDiscarders.Contains(playerId) && _state.FavorPlayerId != playerId;
+            && facts.FavorDiscarders.Contains(playerId) && _state.FavorPlayerId != playerId
+            && (facts.AbilityId == FavorNegatedSentinel ? facts.SourceId : facts.AbilityId) is { } actionId && FavorMempoAbilities.TakeBackTriggers.Contains(actionId); // only the two rulebook actions that move a Personality home or cycle a card
     }
 
     // CompleteNegatedAction's step: a negated Favor action still paid its cost, so "after you discard the Imperial Favor" still happened. True when the window opened over it.
-    private bool OpenFavorDiscardAfterNegation(int actingPlayerId, int closesTo)
+    private bool OpenFavorDiscardAfterNegation(string abilityId, int actingPlayerId, int closesTo)
     {
         var discarders = TakeFavorDiscarders();
         if (discarders.Count == 0 || !discarders.Any(FavorMempoControlled)) return false;
         var previous = _state.LastResolvedAction;
-        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = FavorNegatedSentinel, PlayerId = actingPlayerId, FavorDiscarders = discarders };
+        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = FavorNegatedSentinel, SourceId = abilityId, PlayerId = actingPlayerId, FavorDiscarders = discarders };
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         _state.LastResolvedAction = previous;
         return false;

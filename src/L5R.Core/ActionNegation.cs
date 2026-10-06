@@ -76,7 +76,7 @@ public sealed partial class MatchEngine
         P3AfterHeldAction(command); // Iron Will (issue #503): the additional Battle action it owes this player
         AfterMechAActionResolved(command.AbilityId!, player.Id, source?.Id); // issue #501: a negated action was still taken (Beyond the Line's "If you do, draw a card after the action's resolution")
         var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
-        if (_state.PendingChoice is null && OpenFavorDiscardAfterNegation(player.Id, burstContinues ? player.Id : 1 - player.Id)) return; // issue #667 (FavorMempo.cs): the Favor was discarded as a cost all the same
+        if (_state.PendingChoice is null && OpenFavorDiscardAfterNegation(command.AbilityId!, player.Id, burstContinues ? player.Id : 1 - player.Id)) return; // issue #667 (FavorMempo.cs): the Favor was discarded as a cost all the same
         TakeFavorDiscarders();
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
         NextAction(player.Id, burstContinues);
