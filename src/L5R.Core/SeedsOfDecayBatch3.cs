@@ -87,7 +87,6 @@ public sealed partial class MatchEngine
     // his controller), his trait has not fired this turn, and the movement is not one that "will not be negated" (MovementCannotBeNegated). The stamp makes it once a turn.
     private bool EnemyActionMovementAutoNegated(CardInstance card)
     {
-        if (SledOf(card) is not null) return false; // Winter Sled (issue #667): no shield, Twin Forks or trait negates his movement
         // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a one-shot shield against another player's card's effect moving him.
         if (BlessingsShieldNegatesMove(card)) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
         if (_runningCommand is { } mover && !MovementCannotBeNegated(mover) && TwinForksNegates(card, mover.PlayerId, "movement")) return true;

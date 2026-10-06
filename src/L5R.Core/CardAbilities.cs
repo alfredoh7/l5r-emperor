@@ -10755,7 +10755,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (MovementLockNegates(card, MovementKinds.Home)) return;
-        if (SledOf(card) is null && P4ShieldNegatesMoveHome(card)) return; // Winter Sled (issue #667): nothing negates his movement // Show of Restraint, The Snow Has Teeth (issue #503, EmperorP4Watches.cs): one-shot shields.
+        if (P4ShieldNegatesMoveHome(card)) return; // Show of Restraint, The Snow Has Teeth (issue #503, EmperorP4Watches.cs): one-shot shields.
         if (card.Zone == Zone.Battlefield && Delay(card, DelayedKinds.MoveHome, arg: bow ? "bow" : null)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): sent home later, if he still is at a battlefield.
         // I Cast Two Shadows (The Shadow's Embrace pass, issue #476 batch 3): the battlefield he is moved home FROM.
         var movedHomeFrom = card.Zone == Zone.Battlefield ? card.ProvinceIndex : null;
