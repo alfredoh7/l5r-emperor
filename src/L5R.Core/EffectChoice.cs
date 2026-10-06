@@ -153,6 +153,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyWlStratTornBranchEffect(effect, command)) return; // issue #674 (WlStratTornRun.cs): A Threat Enacted's destroy-then-dishonor option.
         if (ApplyAbilityRemovalBranchEffect(effect, command)) return; // issue #667 (AbilityRemoval.cs): permanent removal options.
         if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
         if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3

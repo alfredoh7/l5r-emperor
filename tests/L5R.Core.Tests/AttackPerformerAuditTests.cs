@@ -30,7 +30,7 @@ internal static class AttackPerformerAuditTests
     // Shugenja is Fire") prints none -- its Performer field only names the Spell's wielder, the performer of a Spell's action anyway, because the Spell is destroyed as the cost (Thunder's Wrath's shape).
     private static readonly string[] NamedPerformer = ["akio-attack", "akodo-guidance-melee", "breath-heavens-attack", "burning-fury-attack", "chokichi-attack", "chugo-melee", "junpei-attack", "lessons-never-forgotten-attack", "metsubushi-attack", "misaki-follower-attack", "monastery-fire-attack", "morio-attack", "never-beyond-reach-attack", "otoro-attack", "otoro-attack-move", "paragon-strength-attack", "pearls-spirits-chi-attack", "pearls-spirits-force-attack", "pearls-spirits-sacrifice-attack", "shiro-shiba-melee", "strategic-strike-attack", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard", "unseen-assailant-attack",
         // Issue #503 (pass group P5): Tsubute ("Choose your performing Ninja", both ways to pay) and Shiba Jouta - exp ("choose your performing Shugenja", alive and dead) print named performers.
-        "p5-tsubute-attack", "p5-tsubute-attack-hand", "p5-jouta-attack", "p5-jouta-attack-dead",
+        "p5-tsubute-attack", "p5-tsubute-attack-hand", "wl-ambush-attack", "wl-ambush-attack-move", "p5-jouta-attack", "p5-jouta-attack-dead",
         // Issue #566: The Lion's Charge ("Bow your performing Personality or Follower: Ranged 2 Attack") prints a named performer, Akio's own shape.
         "lions-charge-attack",
         // Issue #653 (Promotional-Emperor): Bar Fight ("Target your performing unbowed Personality") and Tamori Potion ("Bow your performing Personality") print named performers.

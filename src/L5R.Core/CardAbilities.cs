@@ -4419,6 +4419,7 @@ public sealed partial class MatchEngine
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
         if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
         if (PromoItemsBeforeActionApplies(card, abilityId, command) is { } promoItemsBefore) return promoItemsBefore; // The Pearl-Encrusted Staff of the Cobras (PromoEmperorItems.cs)
+        if (WlBeforeActionApplies(card, abilityId, command) is { } wlBefore) return wlBefore; // Improper Papers (issue #674, WlStratTorn.cs)
         if (PromoBeforeActionApplies(card, abilityId, command, affectedId) is { } promoBefore) return promoBefore; // Interrogation (issue #653, PromoEmperorFateReactions.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
@@ -5082,6 +5083,7 @@ public sealed partial class MatchEngine
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
         AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
         AfterKoshinKeepAttack(abilityId, playerId, targetId, strength, targetInPlayBefore); // Emperor Edition Stronghold pass (issue #486), batch 1: Koshin Keep's additional effects.
+        AfterWlStratTornAttack(abilityId, sourceId); // issue #674 (WlStratTorn.cs): Ambush Tactics' "You may move him home".
         AfterEmperorStrongholdBatch3Attack(abilityId, sourceId); // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "You may move your Ninja home".
         AfterEmperorRemainingGAttack(abilityId, playerId, targetId, targetInPlayBefore, sourceId); // Emperor Edition remaining-cards pass (issue #492), group G: Ikoma House Guard's "gain 1 Honor".
         AfterWlPersAftermathAttack(abilityId, targetId, targetInPlayBefore); // Issue #674 (WlPersAftermath.cs): Bayushi Dijuro's "If this destroyed a card, give this Province +2 or -2 strength".

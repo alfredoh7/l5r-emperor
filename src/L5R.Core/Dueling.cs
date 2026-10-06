@@ -549,6 +549,7 @@ public sealed partial class MatchEngine
             case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case TfStrategiesAAbilities.WitnessDuel: TfWitnessDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Awed Witness (issue #622)
             case WlStratGatesAbilities.Dojo: WlDojoDuelOutcome(loserIds, challengerPlayerId); break; // Iaijutsu Dojo (issue #674, WlStratGates.cs)
+            case WlStratTornAbilities.EyeDuel: WlEyeDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Eye of the Sword (issue #674, WlStratTornRun.cs)
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
