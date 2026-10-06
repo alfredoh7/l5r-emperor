@@ -5291,7 +5291,7 @@ public sealed partial class MatchEngine
         // A Dragon's Favor: "While this Shugenja is Thunder, he has +1C."
         + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "dragons-favor-chi" && Keyword(card, "Thunder"))
         + RyoshunChiBonus(card) // Ryoshun's Guidance (Forgotten Legacy pass, issue #467).
-        + EmperorP6ChiBonus(card) + RemAItemChiModifiers(card); // Illusory Defense (issue #503, EmperorP6.cs). A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
+        + EmperorP6ChiBonus(card) + RemAItemChiModifiers(card) + RegisteredPersonalityChi(card); // Illusory Defense (issue #503, EmperorP6.cs). A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
 
     // Where an ability's source card may be when the ability is used -- the ONE rule ValidateAbility enforces and every "could anyone play
     // this Reaction from out of play?" question asks (OutOfPlayReactions, so the window that opens for a Reaction and the offer inside it can

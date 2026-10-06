@@ -142,7 +142,6 @@ BLOCKERS: dict[str, str] = {
     # (oracle-l5r-9785), which Miro's own miro-create ability resolves to unchanged. See personality-wave-63.
     "oracle-l5r-10293": "The deck search primitive now exists (issue #312) and its criteria can express \"a non-Unique Lion Clan Shugenja\" from the Dynasty deck, but the effect is \"refill this province with him, face-up\" (a search effect the primitive does not have yet) and the ability must be usable from a face-up province card whose own cost is discarding her and paying 2 Gold.",
     "oracle-l5r-10852": "Needs Interrupt timing (not started); card creation is built (issue #387, the Lion Ancestor scan is published).",
-    "oracle-l5r-10294": "Needs a 'this card's Force counts twice during battle resolution' hook (no existing mechanism double-counts one specific card in a resolution total), and a personality-level 'will not attach Items' restriction (the existing 'Will only/not attach to X' restriction gates the ATTACHMENT side, not a blanket type-level refusal from the host).",
     "oracle-l5r-10464": "Needs a control-transfer mechanic (explicitly deferred since Loyal, #142) -- specifically a temporary, Gold-production-only control grant over another player's Holding, without a full ownership change.",
     # Dragon Clan Personality review (issue #207): the remaining 35 of 79 catalogue Dragon Clan
     # Personalities left unwired after wave 9. The "after a duel resolves" Reaction trigger noted

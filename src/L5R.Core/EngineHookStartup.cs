@@ -37,6 +37,10 @@ internal static partial class EngineHooks
         _ = Looks.Items;
         _ = Searches.Items;
         _ = PendingChoice.Items;
+        _ = FollowerForce.Items;
+        _ = PersonalityChi.Items;
+        _ = ArmyForce.Items;
+        _ = StatTerms.Items;
         return true;
     }
 

@@ -48,8 +48,8 @@ public static class TraitReactions
     public static IReadOnlyCollection<string> All => Ids;
 
     /// <summary>Whether this ability is a trait (not a printed Reaction) that the engine models with Reaction timing.</summary>
-    // The Ivory Sword (PromoEmperorItems.cs)
-    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId);
+    // The Ivory Sword (PromoEmperorItems.cs); Yoritomo Toganin's Invest (StatTermCards.cs, issue #672)
+    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId) || StatTermCards.IsTrait(abilityId);
 }
 
 public sealed partial class MatchEngine

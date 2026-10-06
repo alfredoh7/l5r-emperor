@@ -2293,7 +2293,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + (Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2405,13 +2405,15 @@ public sealed partial class MatchEngine
     {
         int af = 0, df = 0;
         // Hida Horu (Emperor Edition Personality pass, issue #477 batch 2): he contributes no Force while his army has two or more units (his Followers still do).
-        int Contribution(CardInstance c, CardInstance[] army) => HoruContributesNothing(c, army) ? 0 : PersonalityBattleContribution(c);
+        int Contribution(CardInstance c, CardInstance[] army) => HoruContributesNothing(c, army) ? 0 : StatTermContribution(c, PersonalityBattleContribution(c)); // StatTermContribution: "contributes his Force twice" (StatTerms.cs, issue #672)
         foreach (var c in a) { if (RedirectsTo(c, attacker, defender, a, d) == defender) df += Contribution(c, a); else af += Contribution(c, a); af += FollowerBattleContribution(c); }
         foreach (var c in d) { if (RedirectsTo(c, attacker, defender, a, d) == attacker) af += Contribution(c, d); else df += Contribution(c, d); df += FollowerBattleContribution(c); }
         // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
         af += CelestialArmyBonus(attacker, a, d, defending: false); df += CelestialArmyBonus(defender, d, a, defending: true);
         // Emperor Edition Personality pass (issue #477), batch 5: Isawa Norimichi's "+5 total Force while there are any units in your army".
         af += ArmyForceBonusFor(attacker, a); df += ArmyForceBonusFor(defender, d);
+        // Static army totals (EngineHooks.ArmyForce, issue #672): Bayushi Manami - exp's "During battle resolution, Manami's army has +2F" (StatTerms.cs).
+        af += RegisteredArmyForce(attacker, a, d, defending: false); df += RegisteredArmyForce(defender, d, a, defending: true);
         return (af, df);
     }
     private int? RedirectsTo(CardInstance card, int attacker, int defender, CardInstance[] a, CardInstance[] d)
