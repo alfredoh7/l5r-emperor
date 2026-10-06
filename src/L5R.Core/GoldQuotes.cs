@@ -224,7 +224,7 @@ public sealed partial class MatchEngine
     private AbilityCost? AbilityGoldCost(GameCommand command)
     {
         if (MechEPaymentDeclined(command)) return null; // Greasing the Wheels (issue #501, EmperorMechE.cs): "You may pay ..." declined -- nothing is paid.
-        var cost = BaseAbilityGoldCost(command);
+        var cost = AbilityCostWithTerms(command, BaseAbilityGoldCost(command));
         if (cost is not null && MomokoWaivesCost(command, MechAGoldVerb)) return null; // Isawa Momoko (issue #501): a Gold cost is one of the action's non-destruction costs
         if (cost is null || command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Cost is null) return cost;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
@@ -245,12 +245,22 @@ public sealed partial class MatchEngine
         };
     }
 
+    // Issue #682 (CostTerms.cs): the registered ability cost terms, applied to the rule's own price. A player-chosen amount and a price still waiting for a target are left alone.
+    private AbilityCost? AbilityCostWithTerms(GameCommand command, AbilityCost? cost)
+    {
+        if (cost is null || cost.Error is not null || cost.NeedsTarget || cost.Rule.Basis == GoldCostBasis.Variable || command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return cost;
+        var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
+        var terms = SumAbilityCostTerms(command.PlayerId, source, ability, command.AbilityId, command);
+        if (terms.Adjustment == 0) return cost;
+        return cost with { Amount = Math.Max(0, cost.Amount + terms.Adjustment), Basis = cost.Basis + terms.Basis + (cost.Amount + terms.Adjustment < 0 ? " (min 0)" : "") };
+    }
+
     private AbilityCost? BaseAbilityGoldCost(GameCommand command)
     {
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return null;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         var target = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var t) ? t : null;
-        var rule = ability.Cost ?? ImplicitGoldRule(ability, source);
+        var rule = PayGoldRule(ability, command) ?? (ability.CostOptions?.Any(o => o.Verb == CostVerbs.PayGold) == true ? null : ability.Cost ?? ImplicitGoldRule(ability, source)); // issue #682: a PayGold option is the price; a different option leaves it free
         if (rule is null) return null;
         switch (rule.Basis)
         {
@@ -554,6 +564,11 @@ public sealed partial class MatchEngine
         if (SearchPlayAttachesFree(card, target)) { raw = 0; kind = GoldCostKind.Derived; basis += " (attaches ignoring Gold cost)"; }
         // Promotional-Celestial group C (PromoCelestialC.cs): Fudo Cultist "ignoring Gold cost" on a Nonhuman Fudo Personality; Yotsu Ueda's Chosen "paying 2 less Gold" on Yotsu Ueda.
         if (PromoCelestialCAttachDiscount(card, target, raw) is { Amount: > 0 } promoC) { raw -= promoC.Amount; kind = GoldCostKind.Derived; basis += promoC.Basis; }
+        // Registered entry cost terms (issue #682, CostTerms.cs): the generic place a card prints "enters play ... less Gold" / "attaches ... paying N less Gold" / "ignoring Gold Cost".
+        var entryTerms = SumEntryCostTerms(card, playerId, EntryCostKind.Equip, target, fromHand);
+        if (entryTerms.WielderDependent) kind = GoldCostKind.Derived;
+        if (entryTerms.Ignore) raw = 0; else raw += entryTerms.Adjustment;
+        basis += entryTerms.Basis;
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }
@@ -578,7 +593,8 @@ public sealed partial class MatchEngine
     private GoldQuote? QuoteStrategyGold(int playerId, CardInstance card)
     {
         var def = Definition(card);
-        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost, new PaymentSubject(card, PaymentKind.Play)),
+        var (playCost, playBasis) = StrategyPlayCost(playerId, card); // issue #682: the registered ability cost terms
+        return def.GoldCost > 0 ? new(playCost, GoldCostKind.Fixed, playBasis, null, PaymentOptions(playerId, playCost, new PaymentSubject(card, PaymentKind.Play)),
             Sources: PaymentSourcesFor(playerId, new PaymentSubject(card, PaymentKind.Play))) : null; // issue #501
     }
 }

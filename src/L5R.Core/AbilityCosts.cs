@@ -64,6 +64,8 @@ public static class CostVerbs
     /// <summary>Discard the Imperial Favor ("Discard the Imperial Favor to ...", issue #501, EmperorMechE.cs): the acting player must control it (or discard a Favor token of Kyuden Otomo - exp's instead).
     /// Names no card. Declared in Costs it is mandatory; as one of CostOptions it is the alternative ("bow him or discard the Imperial Favor"). Nothing can block it (it is not a bow or a destruction).</summary>
     public const string DiscardFavor = "discard-favor";
+    /// <summary>Pay Gold as one of CostOptions ("Bow it or pay 4 Gold", CostTerms.cs, issue #682): the option's own CostOption.Gold rule is the ability's price. Names no card; nothing is bowed or destroyed for it.</summary>
+    public const string PayGold = "pay-gold";
     /// <summary>Remove every card chosen for the slot the cost's Subject names from the game ("remove ... any number of Holdings you control ... from the game", Mining Apparatus, issue #503).</summary>
     public const string RemoveSlotCards = "remove-slot-cards";
 }
@@ -207,7 +209,7 @@ public sealed partial class MatchEngine
         {
             var option = ChosenCostOption(ability, command);
             if (!MomokoWaivesCost(command, option.Verb)) // Isawa Momoko (issue #501)
-                yield return (new ActionCost(option.Verb, option.Subject), option.Verb == CostVerbs.DiscardFavor ? null : CostSubjectCard(option, ability, command, source)); // issue #501: the Favor names no card
+                yield return (new ActionCost(option.Verb, option.Subject), option.Verb is CostVerbs.DiscardFavor or CostVerbs.PayGold ? null : CostSubjectCard(option, ability, command, source)); // issue #501: the Favor names no card; issue #682: nor does Gold
         }
         foreach (var cost in ability.Costs ?? [])
         {
