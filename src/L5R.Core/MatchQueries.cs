@@ -601,6 +601,10 @@ public sealed partial class MatchEngine
         {
             result.AddRange(SequencedTargetActions(playerId));
         }
+        else if (_state.PendingChoice is { Type: DuelSleepAbilities.PendingType })
+        {
+            result.AddRange(BudgetSelectActions(playerId)); // Sleep (issue #667, DuelSleepBudget.cs): the budgeted multi-select
+        }
         else if (_state.PendingChoice is { Type: "attackTargetSelect" })
         {
             result.AddRange(AttackTargetSelectionActions(playerId)); // the Attack target selection step after an announce window (issue #498)

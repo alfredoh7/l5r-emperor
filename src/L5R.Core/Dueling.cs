@@ -109,8 +109,10 @@ public sealed partial class MatchEngine
         {
             case "AwaitingAccept":
                 Require(duel.Refusable, "This duel cannot be refused.");
-                Require(command.Type is "acceptDuel" or "declineDuel", "Accept or decline the duel challenge first.");
+                Require(command.Type is "acceptDuel" or "declineDuel" or DuelSleepFusakoAbilities.BowToRefuse, "Accept or decline the duel challenge first.");
                 Require(command.PlayerId == duel.ChallengedPlayerId, "Only the challenged player may respond to the challenge.");
+                if (command.Type == DuelSleepFusakoAbilities.BowToRefuse) { BowChallengedToRefuse(duel); break; } // Fusako (issue #667): bow him to gain the right to refuse
+                if (command.Type == "declineDuel") Require(DuelRefusalOpen(duel), "Only a bowed Personality may refuse this challenge."); // Fusako (issue #667)
                 if (command.Type == "declineDuel") ResolveDuelRefused();
                 else OpenDuelReactionWindowOrBeginFocusing();
                 break;
@@ -515,7 +517,7 @@ public sealed partial class MatchEngine
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
-            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": case IvorySpellAbilities.SanctionedDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": case IvorySpellAbilities.SanctionedDuel: case DuelSleepFusakoAbilities.FusakoDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.

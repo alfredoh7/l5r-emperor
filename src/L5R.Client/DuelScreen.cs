@@ -202,7 +202,7 @@ public partial class DuelScreen : Control
         {
             Button("Arrange Focus Effects…", ShowOrder);
         }
-        else foreach (var option in Legal.Where(a => a.Type is "acceptDuel" or "declineDuel" or "declineReaction" or "useAbility" or "overconfidentDraw"))
+        else foreach (var option in Legal.Where(a => a.Type is "acceptDuel" or "declineDuel" or "bowToRefuseDuel" or "declineReaction" or "useAbility" or "overconfidentDraw"))
             if (view.LastDuel is not null) SubmitButton(option.Label, option.Command);
         if (_selectedInspection is { } selected && _tiles.TryGetValue(selected, out var tile)) Button(inspectionParent is null ? "Inspect selected card" : "Inspect", () => Inspect(tile.Card), inspectionParent);
     }

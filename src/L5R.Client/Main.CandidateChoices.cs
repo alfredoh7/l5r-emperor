@@ -65,6 +65,7 @@ public partial class Main
     private bool SelectPendingCandidate(CardView card)
     {
         if (!GenericDecisionActive) return false;
+        if (SelectBudgetCandidate(card)) return true; // Sleep (issue #667)
         var matches = Actions.Where(a => a.Enabled && (a.DecisionCandidateIds?.Contains(card.Id) == true || a.Command?.TargetId == card.Id)).ToArray();
         if (matches.Length == 1) SelectCandidateOption(matches[0]);
         else if (matches.Length > 1) SetNotice("This card has more than one option. Choose its method in the tray.");

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Fusako (duel with bow-to-refuse), Gaijin Sorcerer (counts as two Shugenja for a Ritual's count) and Sleep (budgeted multi-select) from Mendon's confirmed rulings; personality-wave-124, spell-wave-52; client panel, bot answers",
+  "validation": "dotnet run duel-sleep 9/9; full L5R.Core.Tests, AI (soak 12/12), Server, Client.Transport, Client.Collection pass; python hooks/quality unittests pass; check_format clean; client builds. check.sh --skip-client stops at the catalogue-art coverage test (3 new printings need the art pack publisher step); Godot import segfaults in this fresh worktree so no native visual probe of the Sleep panel or Fusako bow was run",
+  "remaining": "Art pack rebuild for oracle-l5r-10232/10585/10596 and Godot import (.jpg.import) by the coordinator; native visual check of the Sleep panel and the Fusako bow button; Mendon to confirm the readings in docs/decisions/2026-10-05-667-duel-sleep.md",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
+  "branch": "claude/667-duel-sleep",
+  "updated": "2026-10-06T02:07:13.315377+00:00"
+}
