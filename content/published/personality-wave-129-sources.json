@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-10877",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10877",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10877-printing-1-image-1.webp",
+    "image_sha256": "689810d4341d8ab73233c20b69ccacc81a7063bbc728e0c3ba025407b2156c0b"
+  },
+  {
+    "card_id": "oracle-l5r-10643",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10643",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10643-printing-1-image-1.webp",
+    "image_sha256": "f0a0db0b80135a5b46afb6063801aff82c790205b343463e1f958dcb0faa8a1b"
+  },
+  {
+    "card_id": "oracle-l5r-10674",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10674",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10674-printing-1-image-1.webp",
+    "image_sha256": "4df429b9814d752030be91d341aeae07b5de0ecbe51fc2acf785ad87bcd71332"
+  },
+  {
+    "card_id": "oracle-l5r-10876",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10876",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10876-printing-1-image-1.webp",
+    "image_sha256": "de9ce42e65ebe36817d4684bf1a3997987dee77b3c6387f1691c008df4e38233"
+  }
+]

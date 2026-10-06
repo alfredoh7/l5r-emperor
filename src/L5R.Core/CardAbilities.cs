@@ -149,7 +149,12 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // Emperor Edition Stronghold pass (issue #486), batch 1 (Library of Rebirth: "Reaction: Even if this card is bowed, when paying for a Spell during the Combat Segment: Produce 4 Gold"): a reactive
     // Gold source of a card that also has a printed production -- PaymentProduction, offered only for a payment meeting PaymentWhen (EmperorStrongholdBatch1.cs), and PaymentEvenIfBowed when the
     // card may produce it while bowed.
-    string? PaymentWhen = null, bool PaymentEvenIfBowed = false);
+    string? PaymentWhen = null, bool PaymentEvenIfBowed = false,
+    // Coils of Madness supplement, rule 9 (issue #672, primitive P16, TirelessHome.cs) -- appended LAST and always passed by name.
+    // Tireless: "the action may be taken even while the card is bowed" -- waives ValidateAbility's bowed-source rule and nothing else (a bowed card still cannot pay a bow cost).
+    // Home: "the action may be taken even while the card is at home rather than at the current battlefield" -- waives the two source-at-the-battlefield checks while the
+    // source's unit is at home (MatchEngine.HomeWaivesSourceLocation); the acting player still needs a unit at the battlefield unless the action is Absent or moves to the battle.
+    bool Tireless = false, bool Home = false);
 
 public static class AbilityCatalog
 {
@@ -5298,7 +5303,7 @@ public sealed partial class MatchEngine
         // A Dragon's Favor: "While this Shugenja is Thunder, he has +1C."
         + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "dragons-favor-chi" && Keyword(card, "Thunder"))
         + RyoshunChiBonus(card) // Ryoshun's Guidance (Forgotten Legacy pass, issue #467).
-        + EmperorP6ChiBonus(card) + RemAItemChiModifiers(card); // Illusory Defense (issue #503, EmperorP6.cs). A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
+        + EmperorP6ChiBonus(card) + RemAItemChiModifiers(card) + RegisteredPersonalityChi(card); // Illusory Defense (issue #503, EmperorP6.cs). A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
 
     // Where an ability's source card may be when the ability is used -- the ONE rule ValidateAbility enforces and every "could anyone play
     // this Reaction from out of play?" question asks (OutOfPlayReactions, so the window that opens for a Reaction and the offer inside it can
@@ -5554,6 +5559,8 @@ public sealed partial class MatchEngine
                 // Family Sword: "Open: Even if this card is bowed ..." (PromoEmperorItems.cs)
                 || PromoItemsEvenIfBowed(id)
                 || WlPersTornAbilities.EvenIfBowed(id)
+                // issue #672 (P16): the printed Tireless keyword, as data (TirelessHome.cs)
+                || ability.Tireless
                 || id == PromoEmperorEventAbilities.EmeraldStraighten // issue #653: The Emerald Championship, "Even if this Personality is bowed"
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -5592,14 +5599,14 @@ public sealed partial class MatchEngine
             // no-presence clause as an explicit Absent.
             var reinforcesFromElsewhere = ability.Absent || ability.MovesToBattle || DojiWaivesFavorPresence(id, player); // Doji's Guidance (Emperor Edition remaining-cards pass, issue #492, group E).
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
-            if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && source is not null && Definition(source).Type == CardType.Personality)
+            if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
             // The check above only ever applies to a Personality-type source -- a Spell/Item's own
             // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
             // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
             // exactly "the attachment's own wielder is at this battlefield."
             // An action on an attachment is performed by its wielder (core rules), so any attached card's Battle ability needs him at the battle.
-            if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && source is { Zone: Zone.Attached }
+            if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is { Zone: Zone.Attached }
                 || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
                 Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
             if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");

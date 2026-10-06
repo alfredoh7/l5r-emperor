@@ -1,0 +1,32 @@
+{
+  "Profile": "spell-wave-54",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10705",
+      "Name": "My Ancestor's Steed",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Water Battle, Bow: Move your target Spirit Personality at any location to the current battlefield. (Home actions may be taken from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10705.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "ancestors-steed-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

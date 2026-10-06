@@ -27,4 +27,20 @@ public sealed partial class MatchEngine
         SearchPlayTransferGrants(attachment, host); // The Topaz Armor - exp (issue #667): the two keywords chosen for it follow it
         Emit("attachmentTransferred", $"{reason}: {Definition(attachment).Name} was transferred from {Definition(from).Name} to {Definition(host).Name}.", host.OwnerId, attachment.Id);
     }
+
+    // "Transfer this card to your target Personality" (Field Messenger, Communion): the attaching restrictions are part of what makes the target legal, so they
+    // are checked as the action is announced, not only as it resolves. Checked late, an illegal target was only refused after a before-action Reaction window
+    // had closed, which made the other player's decline the rejected command (issue #672: the bot soak stalled on exactly that).
+    private void ValidateSelfTransfer(string id, GameCommand command, CardInstance? source)
+    {
+        if (id is not ("field-messenger-transfer" or "communion-transfer") || source is null || command.TargetId is not { } targetId) return;
+        var host = Card(targetId);
+        Require(CanTransferTo(source, host), $"{Definition(source).Name} cannot be transferred to {Definition(host).Name}.");
+    }
+
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterAttachmentTransferHooks() =>
+        EngineHooks.ValidateLate.Register("ValidateSelfTransfer", 13100, static (engine, context) => engine.ValidateSelfTransfer(context.id, context.command, context.source));
 }
