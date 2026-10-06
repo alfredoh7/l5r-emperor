@@ -228,7 +228,7 @@ internal static class TargetedActionReactionTests
                 || id == "otomo-favor-token" /* Kyuden Otomo - exp's triggered trait is not limited to once per turn -- issue #486 batch 1 */ || id == "kae-favor-negate" /* Kakita Kae's trait is repeatable -- issue #501 */ || id is "shadows-lair-move" or "spiders-web-attach" /* batch 3: once per battle (own stamp) / a trait -- issue #486 */
                 || id is "p5-foundries-straighten" or "p5-foundries-attack" or "p5-foundries-draw" /* The New Foundries: "any number of times per turn" -- issue #503 */ || id is "p5-nes-equip" or "p5-nes-equip-open" or "p5-nes-equip-battle" or "p5-seek-stain-equip-limited" or "p5-seek-stain-equip-battle" /* the Equip rulebook action from a discard pile, "any number of times per turn" -- issue #503 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
                 : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */ || id == "tomaru-attack-3" /* "Twice per turn" -- issue #477 batch 3 */
-                    || id == "sleepless-boost" /* "Twice per turn" -- issue #467 batch 2 */ || id == "promo-fudo-negate" /* "Twice per turn" -- issue #653 */ ? 2 : 1, $"the limit of {id}");
+                    || id == "sleepless-boost" /* "Twice per turn" -- issue #467 batch 2 */ || id == "promo-fudo-negate" /* "Twice per turn" -- issue #653 */ ? 2 : id == "wl-sturdy-boost" /* "Three times per turn" -- issue #674 */ ? 3 : 1, $"the limit of {id}");
         Eq(AbilityUseLimit.Unlimited, 0);
     }
 

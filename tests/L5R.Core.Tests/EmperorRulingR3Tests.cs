@@ -69,7 +69,8 @@ internal static class EmperorRulingR3Tests
             }
         // Boastful Proclamation (EmperorRemainingFEvents.cs), Willing Spirits (ForgottenLegacyBatch5.cs) and Debt to the Kaiu (SeedsOfDecayBatch2.cs) print "permanently".
         // Issue #503: Dark Experiments (EmperorP6.cs) prints "Permanently give it -2 strength", so its file joins the list.
-        Eq(string.Join(",", writers.OrderBy(w => w, StringComparer.Ordinal)), "EmperorP6.cs,EmperorRemainingFEvents.cs,ForgottenLegacyBatch5.cs,SeedsOfDecayBatch2.cs", "only the cards that say 'permanently' change a province's own strength");
+        // Issue #674: The Second Battle of Beiden Pass (WlItemsMiscEvents.cs) prints "Until the game ends, ... has +10 Province Strength", a permanent change too.
+        Eq(string.Join(",", writers.OrderBy(w => w, StringComparer.Ordinal)), "EmperorP6.cs,EmperorRemainingFEvents.cs,ForgottenLegacyBatch5.cs,SeedsOfDecayBatch2.cs,WlItemsMiscEvents.cs", "only the cards that say 'permanently' change a province's own strength");
 
         // Willing Spirits' permanence versus a timed change: a permanent +2 is still there after the turn, the timed record is not.
         var s = Table(Phase.Action, 0);

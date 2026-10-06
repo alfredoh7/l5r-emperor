@@ -1,0 +1,87 @@
+{
+  "Profile": "celestial-wave-28",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10602",
+      "Name": "Blood of Shahai",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Maho Battle/Open: Give -1C to a target Personality with lower Chi than his printed Chi.\nMaho Battle: Discard this Celestial. Give each Personality at this battlefield a -1C Blood token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10602.jpg",
+      "Keywords": [
+        "Unique",
+        "Dark Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-shahai-chi",
+        "wl-shahai-blood"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10257",
+      "Name": "Hachiman's Prowess",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Once per game, target your Personality: While this card remains in play, he has Elite and the trait, \"May assign even if bowed.\" (Elite cards contribute Force even if bowed).\nBattle: Discard this card and target your Personality: Straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10257.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-hachiman-grant",
+        "wl-hachiman-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10818",
+      "Name": "The Ways of Sensei Wu",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Put a target Battle Strategy from your discard pile into your hand. Discard this Celestial.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10818.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-wu-return"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
