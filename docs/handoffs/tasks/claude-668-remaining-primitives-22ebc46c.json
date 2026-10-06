@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Assessment only (no cards wired): the 491 cards unwired on main triaged against the core rules, the end-of-arc supplement and five read-only engine surveys. docs/decisions/2026-10-05-remaining-unwired-primitives.md ranks 25 primitives (206 cards look wirable today, 249 need a primitive, 26 wait on scans or rulings), with a per-card appendix and one implementation prompt per primitive. Shared change: docs/decisions entries only; the prompts propose engine hooks that touch shared files once each, nothing is implemented here.",
+  "validation": "Docs only. Card list computed from content/deck-pool.json minus content/published/*.json at origin/main de0109c2; engine capability claims come from surveys of src/L5R.Core with file anchors quoted in the prompts. No build or test run needed; no code changed.",
+  "remaining": "Mendon to review the primitive ranking, the 18 rulings listed, and the WIRE judgements; the stale control-transfer decision doc (2026-09-12) needs a superseded note; Order Seppuku's action-effect tracking leak and the ResolveEvent hook missing from EngineHookStartup.Build are follow-ups.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/668",
+  "branch": "claude/668-remaining-primitives",
+  "updated": "2026-10-06T02:43:12.378219+00:00"
+}

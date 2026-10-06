@@ -49,3 +49,4 @@ interpretation this register's decision docs already settled.
 - [Jade Embrace, Sea & Sky, Through the Breach, Colonial Farm (#667)](2026-10-05-667-removal.md) — accepted as readings: per-card ability/trait removal that resets on leaving play.
 
 - [Gozu, Hyobuko, Masaya, Rosary, Topaz Armor (#667)](2026-10-05-667-search-play.md) — accepted as readings: owed play after a search, Celestial into play, keyword pair.
+- [Remaining unwired cards and the minimal primitive set (#668)](2026-10-05-remaining-unwired-primitives.md) — proposed: 491 unwired cards triaged against the end-of-arc supplement and the engine; 206 wirable today, 25 ranked primitives, 18 rulings, with a [per-card appendix](2026-10-05-remaining-unwired-primitives-cards.md) and [one implementation prompt per primitive](2026-10-05-remaining-unwired-primitives-prompts.md). No card wired.

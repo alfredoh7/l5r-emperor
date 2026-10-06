@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Corrects the #668 primitive plan, appendix and prompts. Their engine anchors were surveyed in the PR #670 worktree, not on main as stated: every anchor is now re-checked against main 727f13e5 (5 line anchors and 3 identifiers fixed), the 3 files that exist only with #670 are marked, P13 is marked as requiring #670, and the card counts are re-baselined for the 23 cards #670 wires (238 cards need a primitive, 13 need a ruling, 24 a scan). Shared change: docs/decisions only.",
+  "validation": "Scripted check of all 49 file:line anchors and 477 cited identifiers against main and the #670 worktree; relative anchors read by hand; counts recomputed from content/published on both refs. Docs only, no build or test run.",
+  "remaining": "PR #670 was NOT merged: it is a draft, another session was committing to it during this pass, and its art-pack receipt names release catalogue-art-issue667-20261005-r1, which is not published. After #670 lands, line numbers in the files it touches shift; the prompts say to find symbols by name. Survey descriptions of behaviour were only spot-checked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/668",
+  "branch": "claude/668-prompt-anchor-corrections",
+  "updated": "2026-10-06T04:35:30.201541+00:00"
+}
