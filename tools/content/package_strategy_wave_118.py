@@ -60,8 +60,13 @@ ENTRIES: dict[int, dict] = {
 }
 
 
+CARD_IDS = [f"oracle-l5r-{n}" for n in ENTRIES]
+
+
 def package(card_ids: list[str] | None = None, root: Path = ROOT) -> dict:
-    ids = card_ids if card_ids is not None else [f"oracle-l5r-{n}" for n in ENTRIES]
+    ids = card_ids if card_ids is not None else CARD_IDS
+    if sorted(ids) != sorted(CARD_IDS):
+        raise ValueError("Strategy wave 118 is the nineteen reviewed cards; a partial or foreign selection is refused")
     cards, sources = [], []
     for card_id in ids:
         entry = ENTRIES[int(card_id.rsplit("-", 1)[1])]
@@ -77,8 +82,7 @@ def package(card_ids: list[str] | None = None, root: Path = ROOT) -> dict:
         cards.append(fields)
         sources.append(source)
     assert len(cards) == len(ids) == len({card["Id"] for card in cards}), "Duplicate or missing card"
-    if card_ids is None:
-        assert len(cards) == 19, "The wave is the nineteen reviewed cards"
+    assert len(cards) == 19, "The wave is the nineteen reviewed cards"
     published = root / "content/published"
     published.mkdir(parents=True, exist_ok=True)
     (published / f"{PROFILE}.json").write_text(json.dumps(dict(Profile=PROFILE, Rules=RULES, Cards=cards, Decks=[]), ensure_ascii=False, indent=2) + NL, encoding="utf-8")
