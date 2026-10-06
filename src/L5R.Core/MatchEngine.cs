@@ -1916,6 +1916,7 @@ public sealed partial class MatchEngine
     {
         var provinceIndex = _state.ResolvedBattleProvinceIndex;
         _state.ResolvedBattleProvinceIndex = null;
+        ResolveWlStratACNoWayOut(provinceIndex); // No Way Out (issue #674, WlStratACEffects.cs): "After this battle resolves, if its Province was not destroyed, destroy the targets"
         if (provinceIndex is null) return;
         foreach (var terrain in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == provinceIndex.Value && Definition(c).Effect == "looting-return-to-hand").ToArray())
             ReturnToHand(terrain);
@@ -2056,7 +2057,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def)) DiscardTerrain(existingTerrain);
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def)) DiscardTerrain(existingTerrain);
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }

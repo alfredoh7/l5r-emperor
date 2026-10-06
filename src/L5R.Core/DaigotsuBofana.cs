@@ -70,7 +70,8 @@ public sealed partial class MatchEngine
         switch (Definition(performer).Type)
         {
             case CardType.Personality: case CardType.Follower: return CardForce(performer);
-            case CardType.Item: case CardType.Spell:
+            case CardType.Item:
+            case CardType.Spell:
                 if (performer.Zone != Zone.Attached || performer.AttachedTo is not string wielderId) return 0;
                 var wielder = Card(wielderId);
                 return Definition(wielder).Type == CardType.Personality ? CardForce(wielder) : 0;
@@ -111,7 +112,7 @@ public sealed partial class MatchEngine
     // only two ways to use a non-Reaction ability from a discard pile (ValidateAbility's zone check).
     private static bool PlayedFromDiscard(AbilityDefinition ability, CardInstance? source) =>
         source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard } && ability.Timing != "Reaction"
-        && ability.Attach?.Card != AttachSource.Self; // issue #503 (Seek the Stain): a card that attaches ITSELF from the pile enters play; it is not played and removed
+        && ability.Attach?.Card != AttachSource.Self && !WlStratACKeepsCardAfterDiscardPlay(ability); // issue #674 (Move the Troops goes to the hand); issue #503 (Seek the Stain): a card that attaches ITSELF from the pile enters play; it is not played and removed
     // Same-turn replay is refused PER ACTION (Mendon's ruling): the once-per-turn stamp lives under each ability's own UsageKey on the card
     // and survives the move to the discard pile, so an action performed this turn (from hand, in play, or earlier from the pile) cannot be
     // performed again, while another action of the same card can. The Discipline play uses the very same stamp, so both rules are one mechanism.
