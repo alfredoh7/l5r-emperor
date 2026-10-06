@@ -1,0 +1,381 @@
+{
+  "Profile": "personality-wave-129",
+  "Rules": "Emperor Edition core rules; reviewed scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10631",
+      "Name": "Mirumoto Katagi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :gstar:: Equip a target non-Unique Weapon in your discard pile to Katagi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10631.jpg",
+      "Keywords": [
+        "Kensai",
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-katagi-equip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10642",
+      "Name": "Moshi Rukia",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow a target enemy card without attachments. Destroy it if it is an attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10642.jpg",
+      "Keywords": [
+        "Naval",
+        "Unique",
+        "Experienced",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hiroto-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10652",
+      "Name": "Shiba Tsurao",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)\nBattle: Give a target enemy Personality or Follower -2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10652.jpg",
+      "Keywords": [
+        "Expendable",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-tsurao-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10676",
+      "Name": "Shinjo Yoshie",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nAfter Yoshie enters play, lose 1 Honor.\nBattle: Give a target enemy Infantry Personality or Follower -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10676.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Destined",
+        "Commander",
+        "Fallen",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hatsuto-weaken"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10655",
+      "Name": "Shosuro Nigawa",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g3:: Give Nigawa two +1F tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10655.jpg",
+      "Keywords": [
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-invest-two-tokens"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10656",
+      "Name": "Soshi Kodanshi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow your target unbowed Ninja Personality. Bow a target Personality; if he is Fudo or Fallen, he will not straighten this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10656.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-kodanshi-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10620",
+      "Name": "Toritaka Chokichi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow a target Spider Clan Personality or, if Chokichi has a Follower, bow a target enemy card without attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10620.jpg",
+      "Keywords": [
+        "Unique",
+        "Crab Clan",
+        "Experienced",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-chokichi-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10644",
+      "Name": "Tsuruchi Gombei",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Gombei enters play, lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10644.jpg",
+      "Keywords": [
+        "Naval",
+        "Fallen",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10671",
+      "Name": "Utaku Sayaka",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g3:: Give Sayaka two +1F tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10671.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-invest-two-tokens"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10622",
+      "Name": "Yasuki Daisuki",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10622.jpg",
+      "Keywords": [
+        "Expendable",
+        "Courtier",
+        "Crab Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10658",
+      "Name": "Yogo Nobukai",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is your turn or you control a Courtier, give a target Personality -2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10658.jpg",
+      "Keywords": [
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-nobukai-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10657",
+      "Name": "Yogo Takashi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\n(Draw a card after your Expendable card is destroyed.)\nAfter Takashi enters play, lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10657.jpg",
+      "Keywords": [
+        "Destined",
+        "Expendable",
+        "Courtier",
+        "Fallen",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10646",
+      "Name": "Yoritomo Hiromi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 14,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :gstar:: Ranged Attack with strength equal to the Gold paid.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10646.jpg",
+      "Keywords": [
+        "Kensai",
+        "Loyal",
+        "Naval",
+        "Unique",
+        "Clan Champion",
+        "Experienced",
+        "Mantis Clan",
+        "Samurai",
+        "The Growing Storm",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl2-hiromi-ranged-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
