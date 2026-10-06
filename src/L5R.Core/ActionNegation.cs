@@ -75,8 +75,11 @@ public sealed partial class MatchEngine
         P1ActionEnded(player.Id, command.AbilityId!); // Issue #503 (EmperorP1.cs): a wholly negated action ended too.
         P3AfterHeldAction(command); // Iron Will (issue #503): the additional Battle action it owes this player
         AfterMechAActionResolved(command.AbilityId!, player.Id, source?.Id); // issue #501: a negated action was still taken (Beyond the Line's "If you do, draw a card after the action's resolution")
+        var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
+        if (_state.PendingChoice is null && OpenFavorDiscardAfterNegation(player.Id, burstContinues ? player.Id : 1 - player.Id)) return; // issue #667 (FavorMempo.cs): the Favor was discarded as a cost all the same
+        TakeFavorDiscarders();
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
-        NextAction(player.Id, ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)));
+        NextAction(player.Id, burstContinues);
     }
 }
 
@@ -90,16 +93,16 @@ public sealed partial class MatchEngine
         // pending effects) or pass; the granting player may also pass here to decline this
         // specific opportunity outright (forfeiting it -- see ConsumeAdditionalActionGrant,
         // already removed the grant regardless of what happens next).
-        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending additional action first.");
-        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the pending additional action first.");
+        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
         if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
         {
-            var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
+            var pending = _state.PendingAdditionalAction; _state.PendingAdditionalAction = null;
             // Negated (Effortless Counterattack): it is taken and pays its costs, only its effects are lost, and the burst it was part of goes on --
             // the next additional action is the holder's to take (ResolveNegatedAction, consumedGrant).
-            var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
-            if(negated) ResolveNegatedAction(pending,consumedGrant:true);
-            else if(!ChainOutOfPlayReactionWindow(pending,consumedGrant:true)) ExecuteAbilityEffects(pending,consumedGrant:true); // R4 (issue #492): Bad Kharma and the like may still be played on top.
+            var negated = _state.DeferredActionNegated; _state.DeferredActionNegated = false;
+            if (negated) ResolveNegatedAction(pending, consumedGrant: true);
+            else if (!ChainOutOfPlayReactionWindow(pending, consumedGrant: true)) ExecuteAbilityEffects(pending, consumedGrant: true); // R4 (issue #492): Bad Kharma and the like may still be played on top.
         }
         return true;
     }
@@ -110,24 +113,24 @@ public sealed partial class MatchEngine
         // attackReaction/additionalActionReaction, which are open to either side) -- the
         // top-level priority check already enforces that, so this window closes the instant
         // they answer either way, same single-pass shape as entryReaction/bowReaction above.
-        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
-        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the pending reaction first.");
+        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
         if (_state.PendingChoice is null && _state.PendingOutOfPlayActionReaction is not null)
         {
-            var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
-            var reduction=_state.HonorLossReductionPlayerId;
+            var pending = _state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction = null;
+            var reduction = _state.HonorLossReductionPlayerId;
             // Mendon's R4 ruling (issue #492): this window can follow the before-action window and the additional-action window of the same action, and what they set (the negations of
             // effects, the additional action's grant) is carried through it.
-            var carried=_state.PendingOutOfPlayNegations; var carriedGrant=_state.PendingOutOfPlayConsumedGrant;
-            _state.PendingOutOfPlayNegations=null; _state.PendingOutOfPlayConsumedGrant=false;
-            var outer=ContinueSuspendedReaction(pending);
-            if(carried is not null) _state.NegatedEffects=carried;
-            _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
+            var carried = _state.PendingOutOfPlayNegations; var carriedGrant = _state.PendingOutOfPlayConsumedGrant;
+            _state.PendingOutOfPlayNegations = null; _state.PendingOutOfPlayConsumedGrant = false;
+            var outer = ContinueSuspendedReaction(pending);
+            if (carried is not null) _state.NegatedEffects = carried;
+            _state.HonorLossReductionPlayerId = reduction; var suspended = _state.SuspendedWindows.Count;
             // Bad Kharma / Footsteps of Madness (Emperor Edition remaining-cards pass, group A, issue #492): the held action was negated as a whole in this window.
-            if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,consumedGrant:carriedGrant,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending,consumedGrant:carriedGrant);
-            if(carried is not null) { _state.NegatedEffects.Clear(); RestoreTemporaryRemovals(TemporaryRemovals.Action); if(_state.SuspendedWindows.Count<=suspended) _state.NegatedEffects=outer?.NegatedEffects ?? []; }
-            if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
-            else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
+            if (RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending, consumedGrant: carriedGrant, ignoreCosts: remAIgnoreCosts); else ExecuteAbilityEffects(pending, consumedGrant: carriedGrant);
+            if (carried is not null) { _state.NegatedEffects.Clear(); RestoreTemporaryRemovals(TemporaryRemovals.Action); if (_state.SuspendedWindows.Count <= suspended) _state.NegatedEffects = outer?.NegatedEffects ?? []; }
+            if (_state.SuspendedWindows.Count > suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId = outer?.HonorLossReductionPlayerId;
+            else _state.HonorLossReductionPlayerId = outer?.HonorLossReductionPlayerId;
         }
         return true;
     }
@@ -137,15 +140,15 @@ public sealed partial class MatchEngine
         // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action"
         // primitive -- once the window closes, the originally-announced command finally runs,
         // the same defer-then-reexecute shape beforeActionReaction/PendingNegatableAbility uses.
-        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the announce reaction window first.");
-        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the announce reaction window first.");
+        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
         if (_state.PendingChoice is null && _state.PendingAnnouncedAction is not null)
         {
-            var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
-            if(P3ContinueAnnounce(pending,RunSetAsideBattleCommand)) return true; // Ikoma Ayumu, Utaku Lishan (issue #503): the next watcher, or the set-aside additional action or command goes on
+            var pending = _state.PendingAnnouncedAction; _state.PendingAnnouncedAction = null;
+            if (P3ContinueAnnounce(pending, RunSetAsideBattleCommand)) return true; // Ikoma Ayumu, Utaku Lishan (issue #503): the next watcher, or the set-aside additional action or command goes on
             // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
-            if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
-            else if(!BeginAttackTargetSelection(pending)) ContinueAnnouncedAction(pending); // No Hiding Place (issue #498): the Attack's target is selected after the announce window.
+            if (_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated = false; ResolveNegatedAction(pending); }
+            else if (!BeginAttackTargetSelection(pending)) ContinueAnnouncedAction(pending); // No Hiding Place (issue #498): the Attack's target is selected after the announce window.
         }
         return true;
     }

@@ -1,0 +1,33 @@
+{
+  "Profile": "item-wave-45",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9971",
+      "Name": "Mempo of the Amethyst Champion",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to an Amethyst Champion ignoring costs.\nYou may use Favor abilities one additional time per turn.\nAfter you announce the rulebook Favor Political Battle action: It may target any player's unit, and even if it is not attacking.\nReaction: After you discard the Imperial Favor: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9971.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-mempo-take-favor"
+      ],
+      "Effect": "pe-mempo-amethyst",
+      "AttachRequiresKeyword": "Amethyst Champion"
+    }
+  ],
+  "Decks": []
+}
