@@ -727,6 +727,7 @@ public sealed partial class MatchEngine
                 case Phase.CavalryDefense:
                     var cavalrySegment = _state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                     var units = _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type == CardType.Personality && (!cavalrySegment || IsCavalryUnit(c))
+                        && !RestrictionBarsAssignment(c, _state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense) // P11 (CardRestrictions.cs): may not attack / defend
                         && !DelayedArrivalBarsAttacker(c, _state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration)
                         && !(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense && IsGojuAsuka(c))
                         && !(cavalrySegment && CavalryAssignmentBarredP6()) && !SuikihimeMovementLocked(c, MovementKinds.Assign) && !PromoMovementLocked(c, MovementKinds.Assign)).Select(c => c.Id).ToArray(); // issue #503: Incredible Tragedy, Otomo Suikihime; Fudo's Charging tokens (issue #653) // Delayed Arrival (issue #492, group F); Goju Asuka never defends (issue #501)

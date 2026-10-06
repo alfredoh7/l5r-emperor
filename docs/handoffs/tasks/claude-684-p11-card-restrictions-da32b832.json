@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Resolved PR #686 against current main; retained P11 dishonor restrictions before P7 one-use watches and added an interaction regression.",
+  "validation": "Full bash tools/check.sh --skip-client passed; card-restrictions 10/10 including restriction/watch interaction; formatting and git diff --check passed. Native client checks not run locally (engine conflict only).",
+  "remaining": "Existing primitive limitations remain documented in the P11 decision; ready for CI and merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/684",
+  "branch": "claude/684-p11-card-restrictions",
+  "updated": "2026-10-06T22:19:28.100417+00:00"
+}
