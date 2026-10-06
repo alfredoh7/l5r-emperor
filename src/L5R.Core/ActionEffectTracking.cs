@@ -114,6 +114,7 @@ public sealed partial class MatchEngine
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (PromoAfterActionApplies(source, abilityId, playerId, facts) is { } promoAfter) return promoAfter; // Closing the Gap (issue #653, PromoEmperorFateReactions.cs)
+        if (WlAfterActionApplies(abilityId, playerId, facts) is { } wlHoldings) return wlHoldings; // Hero's Memorial (issue #674, WlHoldings.cs)
         if (PerformersAmbushApplies(source, abilityId, playerId, facts) is { } performersAmbush) return performersAmbush; // Lying in Ambush (issue #667, PerformersAmbush.cs)
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
         if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it

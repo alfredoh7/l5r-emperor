@@ -1,0 +1,478 @@
+{
+  "Profile": "holding-wave-53",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10428",
+      "Name": "Bamboo Harvesters",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Holding enters play bowed. (It straightens normally on your first turn.)\nBow this card: Produce 0 Gold. Give this Holding a +1 Gold Production Wealth token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10428.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique",
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wl-bamboo-exp2"
+    },
+    {
+      "Id": "oracle-l5r-10429",
+      "Name": "Border Keep",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if paying for a Holding.\nLimited: Once or twice during your first turn (only), put one or more cards in your Provinces at the bottom of your deck, refilling them face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10429.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-border-keep-exp2-refresh"
+      ],
+      "Effect": "wl-border-keep-exp2-gold"
+    },
+    {
+      "Id": "oracle-l5r-10264",
+      "Name": "Damaged Port",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 4 Gold if paying for a Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10264.jpg",
+      "Keywords": [
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wl-damaged-port-gold"
+    },
+    {
+      "Id": "oracle-l5r-10824",
+      "Name": "Exotic Market",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBow this card: When paying for an Item, it enters play for 3 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10824.jpg",
+      "Keywords": [
+        "Market"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wl-exotic-market-gold"
+    },
+    {
+      "Id": "oracle-l5r-10608",
+      "Name": "Exquisite Silk Works",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Target a dishonorable Personality. His controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10608.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "wl-silk-works-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10427",
+      "Name": "Fudoist Advisor",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, :g2:: Discard a Kharmic card from your Province and refill it face-up.)\nBow this card: Produce 2 Gold.\nLimited, Bow this card: Destroy a Madness token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10427.jpg",
+      "Keywords": [
+        "Kharmic",
+        "Fudo",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-fudoist-advisor-destroy-madness"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10610",
+      "Name": "Glassworks",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Items have +1F.\nBow this card: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10610.jpg",
+      "Keywords": [
+        "Singular",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wl-glassworks"
+    },
+    {
+      "Id": "oracle-l5r-10265",
+      "Name": "Green Lake Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen: Bow this card, destroy it if it is your turn, and target a Personality: Give him Cavalry.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10265.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-green-lake-dojo-cavalry-own-turn",
+        "wl-green-lake-dojo-cavalry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10266",
+      "Name": "Hero's Memorial",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action resolves which destroyed one of your Personalities, bow this card: Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10266.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-heros-memorial-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10825",
+      "Name": "House of Prophecy",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nBow this card: Produce 3 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10825.jpg",
+      "Keywords": [
+        "Destined"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10613",
+      "Name": "Imperial Explorer's Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: Put a target Terrain in your discard pile into your hand. Destroy this Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10613.jpg",
+      "Keywords": [
+        "Dojo",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-imperial-explorers-dojo-terrain"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10267",
+      "Name": "Merchant Outpost",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Target a card in a province and bow this card if the target is not yours: Turn it face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10267.jpg",
+      "Keywords": [
+        "Market",
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-merchant-outpost-own",
+        "wl-merchant-outpost-enemy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10607",
+      "Name": "Productive Mine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card from your Province and refill it face-up.)\nBow this card: Produce 4 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10607.jpg",
+      "Keywords": [
+        "Kharmic",
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10434",
+      "Name": "Questionable Merchant",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle: Move a target attacking Personality home. Destroy this Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10434.jpg",
+      "Keywords": [
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-questionable-merchant-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10430",
+      "Name": "Recruitment Station",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle/Open, :gstar:, Bow this card: Equip a Follower, paying 2 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10430.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "wl-recruitment-station-equip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10435",
+      "Name": "Temple of Madness",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: Give a target card a Madness token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10435.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-temple-of-madness-token"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10431",
+      "Name": "Temple of Tengen",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: Draw a card. Discard a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10431.jpg",
+      "Keywords": [
+        "Unique",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-temple-of-tengen-loot"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10616",
+      "Name": "The Breeding Ground",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, Bow this card: Give your target Personality Conqueror.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10616.jpg",
+      "Keywords": [
+        "Stables"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-breeding-ground-conqueror"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10269",
+      "Name": "The Forgotten Bay Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold.\nBattle: Target a Follower with a Gold Cost of 1 or more: Raise its Force to 4.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10269.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-forgotten-bay-dojo-force"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
