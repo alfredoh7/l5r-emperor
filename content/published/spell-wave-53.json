@@ -1,0 +1,58 @@
+{
+  "Profile": "spell-wave-53",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9985",
+      "Name": "Jade Embrace",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy Personality: Remove one of his abilities. If this Shugenja is Earth, reduce the target's Force to 0. If the target is an Oni, destroy it and this card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9985.jpg",
+      "Keywords": [
+        "Earth",
+        "Jade"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "pe-jade-embrace-remove"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9988",
+      "Name": "Sea & Sky",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy this card and target a Region or Terrain: Either destroy it or permanently remove its traits and abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9988.jpg",
+      "Keywords": [
+        "Pearl"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "pe-sea-and-sky-remove"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
