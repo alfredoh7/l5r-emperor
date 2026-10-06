@@ -5083,6 +5083,7 @@ public sealed partial class MatchEngine
         AfterKoshinKeepAttack(abilityId, playerId, targetId, strength, targetInPlayBefore); // Emperor Edition Stronghold pass (issue #486), batch 1: Koshin Keep's additional effects.
         AfterEmperorStrongholdBatch3Attack(abilityId, sourceId); // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "You may move your Ninja home".
         AfterEmperorRemainingGAttack(abilityId, playerId, targetId, targetInPlayBefore, sourceId); // Emperor Edition remaining-cards pass (issue #492), group G: Ikoma House Guard's "gain 1 Honor".
+        AfterWlPersAftermathAttack(abilityId, targetId, targetInPlayBefore); // Issue #674 (WlPersAftermath.cs): Bayushi Dijuro's "If this destroyed a card, give this Province +2 or -2 strength".
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.

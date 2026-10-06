@@ -293,7 +293,7 @@ public sealed partial class MatchEngine
     private static bool DishonorsTarget(string? abilityId) => abilityId is "training-dishonor-target" or "slanderer-dishonor" or "justice-of-crane-dishonor"
         or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "izuna-kolat" or "izuna-ninja" or "izuna-shadowlands" or "accidental-confession-dishonor"
         or "saibankan-dishonor" or "yoshihara-dishonor" or "testimony-dishonor" or "tsujiken-exp-dishonor" or "ingenuity-dishonor" or "duel-of-haiku"
-        or "subtle-games-dishonor";
+        or "subtle-games-dishonor" or WlPersAftermathAbilities.JiroDishonor; // issue #674: Yasuki Jiro
 
     // ---- Watchers in the Dark ----
 

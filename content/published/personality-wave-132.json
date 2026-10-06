@@ -1,0 +1,500 @@
+{
+  "Profile": "personality-wave-132",
+  "Rules": "Emperor Edition core rules; reviewed Aftermath scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10850",
+      "Name": "Akodo Uehara",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Put a target Terrain from your discard pile into your hand. Discard a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10850.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Imperial",
+        "Imperial Explorer",
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-uehara-terrain"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10867",
+      "Name": "Bayushi Dijuro",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Siege Battle, Bow this card: Ranged 3 Attack. If this destroyed a card, give this Province +2 or -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10867.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Samurai",
+        "Scorpion Clan",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-dijuro-raise",
+        "wlpa-dijuro-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10870",
+      "Name": "Bayushi Wateru",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\nNinja Interrupt: After you Recruit Wateru during battle, take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10870.jpg",
+      "Keywords": [
+        "Reserve",
+        "Ninja",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-wateru-additional"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10839",
+      "Name": "Daidoji Tametaka",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Mantis Clan players ignore Tametaka's Honor Requirement.\nBattle: Give a target enemy Personality three -1F tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10839.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique",
+        "Commander",
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-tametaka-tokens"
+      ],
+      "Effect": "none",
+      "HonorRequirementWaiverClan": "Mantis"
+    },
+    {
+      "Id": "oracle-l5r-10874",
+      "Name": "Daigotsu Chiboshi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\nBattle, :gstar:: Equip a Follower to Chiboshi. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10874.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Reserve",
+        "Commander",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-chiboshi-equip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10875",
+      "Name": "Daigotsu Endo",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nLimited, :gstar:: If Endo is dead, Recruit him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10875.jpg",
+      "Keywords": [
+        "Destined",
+        "Nonhuman",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan",
+        "Undead"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-endo-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10885",
+      "Name": "Ide Mutsuken",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open, Bow this card: The active player must choose and bow one of his unbowed Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10885.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Imperial",
+        "Liaison",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-mutsuken-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10880",
+      "Name": "Isidoros",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Isidoros enters play, lose 2 Honor.\nBattle: Straighten your target Follower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10880.jpg",
+      "Keywords": [
+        "Gaijin",
+        "Yodotai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-isidoros-straighten"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10834",
+      "Name": "Kaiu Esumi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy a target enemy attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10834.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Crab Clan",
+        "Experienced",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "komatsu-destroy-attachment"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10852",
+      "Name": "Kitsu Tamao",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Interrupt: After you Recruit Tamao, create a 2F/2C/3PH Lion Clan • Ancestor • Samurai • Spirit Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10852.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-tamao-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10865",
+      "Name": "Shiba Heirai",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If Heirai is opposed, discard a card to give him a Force bonus equal to the card's Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10865.jpg",
+      "Keywords": [
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-heirai-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10889",
+      "Name": "Shinjo Sujikaro",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, Bow this card: Melee 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10889.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-sujikaro-melee"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10879",
+      "Name": "Susumu Takada",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g3:: Discard a card to gain Honor equal to its Focus Value. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10879.jpg",
+      "Keywords": [
+        "Loyal",
+        "Courtier",
+        "Master of Guile",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-takada-invest"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10866",
+      "Name": "The Broken Man",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g5:: Give The Broken Man two +1F tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.)\nEarth Battle: Bow a target enemy card with lower Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10866.jpg",
+      "Keywords": [
+        "Earth",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-brokenman-invest",
+        "wlpa-brokenman-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10858",
+      "Name": "Tsuruchi Shusaku",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nRepeatable Battle, :g2:: Give Shusaku +1F. (Repeatable actions may be used any number of times per turn.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10858.jpg",
+      "Keywords": [
+        "Destined",
+        "Go Master",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-shusaku-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10884",
+      "Name": "Usui",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Usui enters play, lose 1 Honor.\nEarth Battle: Give this Province +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10884.jpg",
+      "Keywords": [
+        "Earth",
+        "Fudo",
+        "Monk"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-usui-province"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10836",
+      "Name": "Yasuki Jiro",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited, :g3:: Dishonor a target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10836.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Kolat",
+        "Merchant",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wlpa-jiro-dishonor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
