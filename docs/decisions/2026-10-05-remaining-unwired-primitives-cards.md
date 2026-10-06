@@ -1,6 +1,6 @@
-# Remaining unwired cards, by primitive (2026-10-05)
+# Remaining unwired cards, by primitive (2026-10-05, re-baselined 2026-10-06)
 
-Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). One row per card unwired on `main` at `de0109c2` (491). `Needs` lists the primitive codes from the plan; `WIRE` means the surveys found every piece already built (each card still needs its own reading before a wave); `DONE667` means the card is wired on the in-flight `claude/667-pe-blocked-wave` branch; `SCAN` needs a CreatedOnly proxy scan; `SCAN2` has no scan of its own; `RULE` needs a ruling from Mendon; `REJ` is rejected (docs/decisions/2026-10-05-rejected-cards.md); `MULTI` only works with more than two players.
+Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). One row per card unwired on `main` at `727f13e5` (491). `Needs` lists the primitive codes from the plan; `WIRE` means the surveys found every piece already built (each card still needs its own reading before a wave); `DONE667` means the card is wired by PR #670 (`claude/667-pe-blocked-wave`), open when this was written; `SCAN` needs a CreatedOnly proxy scan; `SCAN2` has no scan of its own; `RULE` needs a ruling from Mendon; `REJ` is rejected (docs/decisions/2026-10-05-rejected-cards.md); `MULTI` only works with more than two players.
 
 
 ## Stronghold (3)
@@ -71,7 +71,7 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Fusako | oracle-l5r-10232 | Promotional-Emperor | DONE667 |
 | Gaijin Sorcerer | oracle-l5r-10585 | Promotional-Emperor | DONE667 |
 | Goju Obayashi | oracle-l5r-10877 | Aftermath | P16 |
-| Gozu | oracle-l5r-2887 | Promotional-Emperor | P20, RULE |
+| Gozu | oracle-l5r-2887 | Promotional-Emperor | DONE667 |
 | Hamuro, the Wise | oracle-l5r-10474 | Coils of Madness | P2 |
 | Hantei XVI - inexperienced | oracle-l5r-10500 | Coils of Madness | P3, P20, P23 |
 | Hida Gojiro | oracle-l5r-10617 | Gates of Chaos | WIRE |
@@ -83,7 +83,7 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Hiruma Nikaru, the Flesh Eater - exp2 | oracle-l5r-10438 | Coils of Madness | WIRE |
 | Hiruma Ogata | oracle-l5r-10441 | Coils of Madness | P9 |
 | Hoshoku-sha | oracle-l5r-10670 | Gates of Chaos | WIRE |
-| Hyobuko | oracle-l5r-3534 | Promotional-Celestial | SCAN |
+| Hyobuko | oracle-l5r-3534 | Promotional-Celestial | DONE667 |
 | Ichiro Otani, the Stone Breaker | oracle-l5r-10494 | Coils of Madness | P3, P18 |
 | Ide Hinobu | oracle-l5r-10672 | Gates of Chaos | WIRE |
 | Ide Mutsuken | oracle-l5r-10885 | Aftermath | WIRE |
@@ -125,7 +125,7 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Kuni Renyu - exp2 | oracle-l5r-10440 | Coils of Madness | SCAN |
 | Legulus | oracle-l5r-10668 | Gates of Chaos | WIRE |
 | M'rika - exp | oracle-l5r-10661 | Gates of Chaos | WIRE |
-| Masaya | oracle-l5r-4853 | Promotional-Celestial | P21 |
+| Masaya | oracle-l5r-4853 | Promotional-Celestial | DONE667 |
 | Matsu Sango | oracle-l5r-10294 | Torn Asunder | P9, P11 |
 | Mirumoto Kalen - exp | oracle-l5r-10845 | Aftermath | P17 |
 | Mirumoto Katagi - exp | oracle-l5r-10631 | Gates of Chaos | WIRE |
@@ -246,11 +246,11 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Armor of the Mad | oracle-l5r-10529 | Coils of Madness | P9 |
 | Blood of the Preserver - exp | oracle-l5r-10521 | Coils of Madness | P21 |
 | Chiyurei's Axe | oracle-l5r-10340 | Torn Asunder | P2, P24 |
-| Coin Pouch | oracle-l5r-1427 | Promotional-Celestial | P1, P2 |
+| Coin Pouch | oracle-l5r-1427 | Promotional-Celestial | DONE667 |
 | Dagger of Crystal Wind | oracle-l5r-10903 | Aftermath | P4 |
 | Divination Bowl | oracle-l5r-10690 | Gates of Chaos | WIRE |
 | Fortune's Charm | oracle-l5r-10904 | Aftermath | P7, P18 |
-| Heart of Fudo - exp2 | oracle-l5r-10523 | Coils of Madness | WIRE |
+| Heart of Fudo - exp2 | oracle-l5r-10523 | Coils of Madness | DONE667 |
 | Kage's Teachings | oracle-l5r-10341 | Torn Asunder | WIRE |
 | Khalimpeh-jiak | oracle-l5r-10905 | Aftermath | WIRE |
 | Koan's Jingasa | oracle-l5r-10524 | Coils of Madness | P11, P24 |
@@ -270,17 +270,17 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Stonemason's Hammer | oracle-l5r-10908 | Aftermath | P9 |
 | Sturdy Armor | oracle-l5r-10344 | Torn Asunder | WIRE |
 | Tankoji | oracle-l5r-10909 | Aftermath | P11 |
-| The Blade of the Balash | oracle-l5r-9975 | Promotional-Emperor | RULE, P24 |
+| The Blade of the Balash | oracle-l5r-9975 | Promotional-Emperor | DONE667 |
 | The Egg of P'an Ku - exp | oracle-l5r-10522 | Coils of Madness | P22, P11, RULE |
-| The Isha's Yumi - exp | oracle-l5r-9979 | Promotional-Emperor | RULE, P24 |
-| The Sacred Rosary of the Constrictors | oracle-l5r-9982 | Promotional-Emperor | P20 |
-| The Topaz Armor - exp | oracle-l5r-9980 | Promotional-Emperor | RULE, P25 |
+| The Isha's Yumi - exp | oracle-l5r-9979 | Promotional-Emperor | DONE667 |
+| The Sacred Rosary of the Constrictors | oracle-l5r-9982 | Promotional-Emperor | DONE667 |
+| The Topaz Armor - exp | oracle-l5r-9980 | Promotional-Emperor | DONE667 |
 | Thunder Bow | oracle-l5r-10345 | Torn Asunder | P12 |
 | Translated Story of Shaharazad | oracle-l5r-10698 | Gates of Chaos | WIRE |
 | Tsujiken's Coin | oracle-l5r-10911 | Aftermath | P1 |
 | Watersteel Sword | oracle-l5r-10689 | Gates of Chaos | P22 |
-| Winter Sled | oracle-l5r-9350 | Promotional-Emperor | P12 |
-| Wyrmbone Katana | oracle-l5r-9414 | Promotional-Celestial | RULE |
+| Winter Sled | oracle-l5r-9350 | Promotional-Emperor | DONE667 |
+| Wyrmbone Katana | oracle-l5r-9414 | Promotional-Celestial | DONE667 |
 
 ## Spell (40)
 
@@ -361,7 +361,7 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Drain of Effort | oracle-l5r-10369 | Torn Asunder | P4 |
 | Duty Over All Things | oracle-l5r-10370 | Torn Asunder | P21, P2 |
 | Dying Remonstration | oracle-l5r-10936 | Aftermath | WIRE |
-| Exotic Farmlands | oracle-l5r-10727 | Gates of Chaos | SCAN |
+| Exotic Farmlands | oracle-l5r-10727 | Gates of Chaos | WIRE |
 | Expanding the Gardens | oracle-l5r-10937 | Aftermath | WIRE |
 | Eye of the Sword | oracle-l5r-10371 | Torn Asunder | WIRE |
 | Find Your Center | oracle-l5r-10939 | Aftermath | WIRE |
@@ -386,13 +386,13 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Looming Danger | oracle-l5r-10551 | Coils of Madness | WIRE |
 | Lost Caravan | oracle-l5r-10737 | Gates of Chaos | WIRE |
 | Lost Equipment | oracle-l5r-10944 | Aftermath | WIRE |
-| Lying in Ambush | oracle-l5r-4788 | Promotional-Celestial | P8, SCAN |
+| Lying in Ambush | oracle-l5r-4788 | Promotional-Celestial | DONE667 |
 | Martyr's Call | oracle-l5r-10383 | Torn Asunder | WIRE |
 | Merchant Patronage | oracle-l5r-10720 | Gates of Chaos | P14 |
 | Moments of Destiny | oracle-l5r-10560 | Coils of Madness | WIRE |
 | Move the Troops | oracle-l5r-10948 | Aftermath | WIRE |
 | Mukudori's Wisdom | oracle-l5r-10728 | Gates of Chaos | WIRE |
-| Near Miss | oracle-l5r-5523 | Promotional-Celestial | P1 |
+| Near Miss | oracle-l5r-5523 | Promotional-Celestial | DONE667 |
 | Never Without a Weapon | oracle-l5r-10949 | Aftermath | P22, SCAN |
 | New Cavalry Tactics | oracle-l5r-10724 | Gates of Chaos | SCAN |
 | No Way Out | oracle-l5r-10546 | Coils of Madness | WIRE |
@@ -405,7 +405,7 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | Planted Evidence | oracle-l5r-10950 | Aftermath | WIRE |
 | Practicing Kata | oracle-l5r-10731 | Gates of Chaos | P19 |
 | Prideful Allies | oracle-l5r-6065 | War of Honor | MULTI |
-| Profits | oracle-l5r-6075 | Promotional-Emperor | P1 |
+| Profits | oracle-l5r-6075 | Promotional-Emperor | DONE667 |
 | Provoked Violence | oracle-l5r-10951 | Aftermath | WIRE |
 | Ready the Defenses | oracle-l5r-10389 | Torn Asunder | P9 |
 | Recovering What Was Lost | oracle-l5r-10719 | Gates of Chaos | WIRE |
@@ -436,7 +436,7 @@ Companion to [the primitive plan](2026-10-05-remaining-unwired-primitives.md). O
 | The Tomb of Sun Tao | oracle-l5r-10750 | Gates of Chaos | WIRE |
 | The Way of the World | oracle-l5r-10959 | Aftermath | WIRE |
 | Thoughtless Sacrifice | oracle-l5r-10960 | Aftermath | WIRE |
-| Through the Breach | oracle-l5r-9992 | Promotional-Emperor | DONE667 |
+| Through the Breach | oracle-l5r-9992 | Promotional-Emperor | SCAN |
 | Touch of the Night | oracle-l5r-10400 | Torn Asunder | WIRE |
 | Trade Embargo | oracle-l5r-10723 | Gates of Chaos | P1, P7 |
 | Truce | oracle-l5r-10401 | Torn Asunder | P1 |
