@@ -296,6 +296,9 @@ internal static class EmbersOfWarBatch6Tests
         var messenger = Add(s, FieldMessenger, 0, Zone.Attached, province: 0, parent: host1.Id);
         Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(s);
+        // Issue #672: an illegal destination (here its current host) is refused as the action is announced, before any Reaction window could open, and nothing changes.
+        Check(Rejection(e, Use(e, 0, "field-messenger-transfer", messenger.Id, host1.Id)).Contains("cannot be transferred"), "a transfer to an illegal Personality is refused at announcement");
+        Check(e.State.Cards[messenger.Id].AttachedTo == host1.Id && e.State.PendingChoice?.Type != "beforeActionReaction" && !e.State.Cards[messenger.Id].Bowed, "the refused transfer changed nothing");
         Accept(e, Offer(e, 0, "field-messenger-transfer", messenger.Id, host2.Id));
         Eq(e.State.Cards[messenger.Id].AttachedTo, host2.Id, "transferred to the target Personality");
     }
