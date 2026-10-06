@@ -12,8 +12,8 @@
     "category": "EFFECT"
   },
   "oracle-l5r-9993": {
-    "note": "Wildfire (Strategy). Needs a Fortress tile model (a destroyed-Holding replacement that blocks movement); the engine has no such zone or tile.",
-    "category": "EFFECT"
+    "note": "REJECTED BY MENDON (2026-10-05): Wildfire is blocked on purpose; do not wire it. (It also needs a Fortress tile model that the engine does not have.)",
+    "category": "RULES"
   },
   "oracle-l5r-9985": {
     "note": "Jade Embrace (Spell). Needs the permanent removal of one chosen ability of a card; the engine has only a per-turn ability lock (DisableAbility) and a total removal.",
@@ -34,5 +34,9 @@
   "oracle-l5r-8242": {
     "note": "The Onyx Championship (Event). The granted Maho ability searches the discard pile, then the deck, then the Provinces for an Oni Personality and recruits it paying all costs; the engine's search primitive covers one source at a time and has no ordered multi-source search.",
     "category": "SEARCH"
+  },
+  "oracle-l5r-2904": {
+    "note": "REJECTED BY MENDON (2026-10-05) for complexity: Green Nightshade Blend (transfer any tokens between two Personalities, then destroy each that now holds a Fire, Poison and Sake token) is not to be wired.",
+    "category": "RULES"
   }
 }

@@ -20,8 +20,8 @@
     "note": "The Sacred Rosary of the Constrictors: \"Limited: Discard all your Celestials in play. Search your Dynasty deck or discard pile for a Celestial. Put it into play. If you searched your discard pile for it, remove this card from the game.\" Missing primitive: a search effect that puts a Celestial into play with no province (SearchEffect.PutIntoPlay enters only a Personality; ResolveCelestial is tied to refilling the province a Celestial was revealed in and to the discard of the controller's other Celestials), plus remembering which of the two places the card came from to remove the Rosary."
   },
   "oracle-l5r-10237": {
-    "category": "RULES",
-    "note": "Peace Treaty (scan): \"Limited: If there are more than two players, choose a player. He may choose to sign a peace treaty with you. If he chose this, then until your next Events Phase begins, neither of you may declare an attack against, or ally against, the other. If he did not choose this, you gain 3 Honor and he loses 3 Honor.\" The whole effect is conditional on a game of more than two players, which the engine does not support: wired it would be a Limited action that can never do anything. Question for Mendon: publish it as a deliberate two-player no-op, or leave it unpublished until multiplayer exists?"
+    "note": "REJECTED BY MENDON (2026-10-05): Peace Treaty is deliberately not wired. It only does anything in games of more than two players, which the engine does not support. Do not publish it as a two-player no-op; revisit only if multiplayer is built.",
+    "category": "RULES"
   },
   "oracle-l5r-9350": {
     "category": "LOCK",
