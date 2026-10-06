@@ -44,6 +44,8 @@ internal static partial class EngineHooks
         _ = StatTerms.Items;
         _ = CardRestrictions.Items;
         _ = CardTargetBars.Items;
+        _ = EntryCostTerms.Items;
+        _ = AbilityCostTerms.Items;
         return true;
     }
 
