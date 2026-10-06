@@ -1,7 +1,7 @@
 using L5R.Core;
 using static RegressionAssertions;
 
-// The "pers-coils" cluster of the #668 WIRE cards (issue #674): twenty-two Coils of Madness Personalities, personality-wave-130 (src/L5R.Core/WlPersCoils.cs). Driven only through QueryActions and the
+// The "pers-coils" cluster of the #668 WIRE cards (issue #674): twenty-two Coils of Madness Personalities, personality-wave-135 (src/L5R.Core/WlPersCoils.cs). Driven only through QueryActions and the
 // commands the engine offers, on explicit positions (Batch336Support.Table: player 0 the Crane/Defender, player 1 the Lion/Attacker, province 0 the current battlefield). Every card is checked for its
 // published shape, its printed behavior and the cases it must refuse with the state unchanged.
 internal static class WlPersCoilsTests
@@ -118,10 +118,10 @@ internal static class WlPersCoilsTests
     private static void PublishedShape()
     {
         var root = RepoRoot();
-        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-130.txt")).Where(l => l.Length > 0).ToArray();
+        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-135.txt")).Where(l => l.Length > 0).ToArray();
         Check(new HashSet<string>(listed).SetEquals(AllIds) && listed.Length == AllIds.Length, "the manifest is exactly the 22 cards");
         foreach (var id in AllIds) Check(File.Exists(Path.Combine(root, "src/L5R.Client/Content/Published", id + ".jpg")), $"{id} ships art");
-        var sources = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "content/published/personality-wave-130-sources.json"))).RootElement;
+        var sources = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "content/published/personality-wave-135-sources.json"))).RootElement;
         Eq(sources.GetArrayLength(), AllIds.Length, "one provenance row per card");
         foreach (var row in sources.EnumerateArray())
         {

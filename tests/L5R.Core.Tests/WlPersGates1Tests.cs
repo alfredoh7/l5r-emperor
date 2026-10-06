@@ -2,13 +2,13 @@ using System.Text.Json;
 using L5R.Core;
 using static RegressionAssertions;
 
-// Issue #674, cluster "pers-gates-1": personality-wave-128, fourteen Gates of Chaos Personalities wired from the printed text of their scans (Asahina Kitiaru - exp, Asako Ifukube, Asako Karachu - exp,
+// Issue #674, cluster "pers-gates-1": personality-wave-133, fourteen Gates of Chaos Personalities wired from the printed text of their scans (Asahina Kitiaru - exp, Asako Ifukube, Asako Karachu - exp,
 // Boyoh Mercenary, Daidoji Tametaka - exp, Daidoji Tobei, Doji Razan, Hida Gojiro, Hoshoku-sha, Ide Hinobu, Isawa Hajime, Kitsune Yuko, Legulus, M'rika - exp). Every scenario is an explicit position on
 // the economy table (Batch336Support.Table: player 0 the Crane Defender, player 1 the Lion Attacker, province 0 the current battlefield in a Battle) driven only through QueryActions and the commands the
 // engine offers. The mechanics are in src/L5R.Core/WlPersGates1.cs.
 internal static class WlPersGates1Tests
 {
-    private const string Wave = "personality-wave-128";
+    private const string Wave = "personality-wave-133";
     private const string Kitiaru = "oracle-l5r-10623", Ifukube = "oracle-l5r-10648", Karachu = "oracle-l5r-10647", Boyoh = "oracle-l5r-10669", Tametaka = "oracle-l5r-10627", Tobei = "oracle-l5r-10628",
         Razan = "oracle-l5r-10626", Gojiro = "oracle-l5r-10617", Hoshoku = "oracle-l5r-10670", Hinobu = "oracle-l5r-10672", Hajime = "oracle-l5r-10649", Yuko = "oracle-l5r-10641", Legulus = "oracle-l5r-10668",
         Mrika = "oracle-l5r-10661";

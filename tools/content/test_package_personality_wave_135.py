@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-import package_personality_wave_130 as wave
+import package_personality_wave_135 as wave
 
 ROOT = Path(__file__).resolve().parents[2]
 

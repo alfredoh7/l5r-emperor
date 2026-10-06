@@ -2,7 +2,7 @@ using System.Text.Json;
 using L5R.Core;
 using static RegressionAssertions;
 
-// Issue #674, the "spells-rings" cluster (spell-wave-54 and ring-wave-3): each scenario is an explicit position on the economy table (Batch336Support.Table: player 0 the Crane/Defender,
+// Issue #674, the "spells-rings" cluster (spell-wave-55 and ring-wave-3): each scenario is an explicit position on the economy table (Batch336Support.Table: player 0 the Crane/Defender,
 // player 1 the Lion/Attacker, province 0 the current battlefield) driven only through QueryActions and the commands the engine offers. Rejections leave the state unchanged (Reject).
 internal static partial class WlSpellsRingsTests
 {
@@ -74,7 +74,7 @@ internal static partial class WlSpellsRingsTests
 
     private static void PublishedShape()
     {
-        Manifest("spell-wave-54", "*", AmongTheClouds, Banished, BlisteringRain, BloodWave, CastAside, FlameLash, HiddenPower, MysticalAugmentation, SearingSiege, SoulOfEarth, StudyTheWheel, TempestOfAir, TaoOfFudo, ThunderersProtection);
+        Manifest("spell-wave-55", "*", AmongTheClouds, Banished, BlisteringRain, BloodWave, CastAside, FlameLash, HiddenPower, MysticalAugmentation, SearingSiege, SoulOfEarth, StudyTheWheel, TempestOfAir, TaoOfFudo, ThunderersProtection);
         Manifest("ring-wave-3", "Coils of Madness", FalseFire, FalseVoid);
         Shape(AmongTheClouds, CardType.Spell, "Among the Clouds", 0, 3, [], [WlSpellsRingsAbilities.AmongClouds], "none");
         Shape(Banished, CardType.Spell, "Banished from the Realm", 1, 3, [], [WlSpellsRingsAbilities.Banished], "none");

@@ -2,14 +2,14 @@ using System.Text.Json;
 using L5R.Core;
 using static RegressionAssertions;
 
-// The "pers-gates-2" cluster of issue #674 (personality-wave-129): thirteen Gates of Chaos Personalities wired from their scans' printed text. Every scenario is an explicit position on the
+// The "pers-gates-2" cluster of issue #674 (personality-wave-134): thirteen Gates of Chaos Personalities wired from their scans' printed text. Every scenario is an explicit position on the
 // economy table (Batch336Support.Table: player 0 the Crane, player 1 the Lion; Battle: province 0 is the current battlefield) driven through QueryActions and the commands the engine offers.
 internal static class WlPersGates2Tests
 {
     private const string Katagi = "oracle-l5r-10631", Rukia = "oracle-l5r-10642", Tsurao = "oracle-l5r-10652", Yoshie = "oracle-l5r-10676", Nigawa = "oracle-l5r-10655", Kodanshi = "oracle-l5r-10656",
         Chokichi = "oracle-l5r-10620", Gombei = "oracle-l5r-10644", Sayaka = "oracle-l5r-10671", Daisuki = "oracle-l5r-10622", Nobukai = "oracle-l5r-10658", Takashi = "oracle-l5r-10657",
         Hiromi = "oracle-l5r-10646";
-    private const string Wave = "personality-wave-129";
+    private const string Wave = "personality-wave-134";
     private const string Crane = "training-crane-samurai", Lion = "training-lion-samurai", Weapon = "training-weapon";
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -32,7 +32,7 @@ internal static class WlPersGates2Tests
     }
 
     public static void Run(TestRunner runner) => runner.Run("wl-pers-gates-2", [
-        ("Published shape: the thirteen Personalities carry their scans' stats, keywords, text, entry Honor loss and abilities, name Gates of Chaos, ship art and are in personality-wave-129's manifest", PublishedShape),
+        ("Published shape: the thirteen Personalities carry their scans' stats, keywords, text, entry Honor loss and abilities, name Gates of Chaos, ship art and are in personality-wave-134's manifest", PublishedShape),
         ("Mirumoto Katagi - exp: equips a non-Unique Weapon from your own discard pile as a Battle action, paying its cost; not a Unique or another player's Weapon, not away from the battle", KatagiEquip),
         ("Moshi Rukia - exp: bows an enemy card without attachments, destroying it instead when it is an attachment; a card with attachments or your own is refused", RukiaBow),
         ("Shiba Tsurao: -2F to an enemy Personality or Follower; refuses your own cards", TsuraoWeaken),

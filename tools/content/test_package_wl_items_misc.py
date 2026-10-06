@@ -5,7 +5,7 @@ import unittest
 import package_celestial_wave_28 as celestials
 import package_event_wave_32 as events
 import package_follower_wave_48 as followers
-import package_item_wave_47 as items
+import package_item_wave_48 as items
 import wl_items_misc_common as common
 
 ROOT = Path(__file__).resolve().parents[2]

@@ -23,7 +23,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-128"
+PROFILE = "personality-wave-133"
 SET_SLUG = "gates-of-chaos"
 NL = chr(10)
 

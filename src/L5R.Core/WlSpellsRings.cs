@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace L5R.Core;
 
 // ======================================================================================================================================================================================
-// ISSUE #674, THE "SPELLS-RINGS" CLUSTER (spell-wave-54, ring-wave-3): fifteen Spells and Rings of Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath wired from the PRINTED text of
+// ISSUE #674, THE "SPELLS-RINGS" CLUSTER (spell-wave-55, ring-wave-3): fifteen Spells and Rings of Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath wired from the PRINTED text of
 // their scans (the scan wins over the catalogue text; where the scan prints no keyword line the card carries none, and its element is the keyword of its own action: "Air Open", "Fire Battle").
 //
 //   SPELLS  Among the Clouds, Banished from the Realm, Blistering Rain, Blood Wave, Cast Aside Appearances, Flame Lash, Hidden Power, Mystical Augmentation, Searing Siege, Soul of Earth,

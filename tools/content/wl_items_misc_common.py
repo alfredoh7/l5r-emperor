@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared body of the four "items-misc" packagers of issue #674: item-wave-47, follower-wave-48, event-wave-32 and celestial-wave-28 (the Items, Followers, Events and Celestials of
+"""Shared body of the four "items-misc" packagers of issue #674: item-wave-48, follower-wave-48, event-wave-32 and celestial-wave-28 (the Items, Followers, Events and Celestials of
 Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath that the #668 assessment judged wirable with existing primitives).
 
 Each card is packaged from the printing of the set it was requested for (build_definition_fields prefers that set's slug; the packager then asserts the provenance names it), with the scan's

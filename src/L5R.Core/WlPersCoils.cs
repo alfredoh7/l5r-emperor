@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace L5R.Core;
 
 // ======================================================================================================================================================================================
-// THE "pers-coils" CLUSTER OF THE #668 WIRE CARDS (issue #674): twenty-two Coils of Madness Personalities, personality-wave-130. Every card is built from existing mechanisms; the reading of each
+// THE "pers-coils" CLUSTER OF THE #668 WIRE CARDS (issue #674): twenty-two Coils of Madness Personalities, personality-wave-135. Every card is built from existing mechanisms; the reading of each
 // printed line is in docs/decisions/2026-10-06-674-pers-coils.md. What each card is:
 //
 //   Moto Xin, Yoritomo Tonogi      Expendable (the keyword) and "After X enters play, lose N Honor" (EntryHonorLoss): no ability of their own.

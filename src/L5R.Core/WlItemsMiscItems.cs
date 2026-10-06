@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace L5R.Core;
 
 // ======================================================================================================================================================================================
-// ISSUE #674, CLUSTER "ITEMS-MISC" (item-wave-47): Divination Bowl, Kage's Teachings, Khalimpeh-jiak, Koan's Staff, Parangu, Renyu's Wrath, Sturdy Armor and Translated Story of Shaharazad,
+// ISSUE #674, CLUSTER "ITEMS-MISC" (item-wave-48): Divination Bowl, Kage's Teachings, Khalimpeh-jiak, Koan's Staff, Parangu, Renyu's Wrath, Sturdy Armor and Translated Story of Shaharazad,
 // wired from the printed text of their scans (docs/decisions/2026-10-06-674-items-misc.md lists the readings). The cluster's Followers are WlItemsMiscFollowers.cs, its Events
 // WlItemsMiscEvents.cs and its Celestials WlItemsMiscCelestials.cs; the state they share is WlItemsMiscState below.
 //

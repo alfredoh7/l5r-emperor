@@ -14,7 +14,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-129"
+PROFILE = "personality-wave-134"
 SLUG = "gates-of-chaos"
 NL = chr(10)
 

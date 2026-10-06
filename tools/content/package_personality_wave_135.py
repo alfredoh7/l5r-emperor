@@ -15,7 +15,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-130"
+PROFILE = "personality-wave-135"
 SLUG = "coils-of-madness"
 NL = chr(10)
 EXPENDABLE = "(Draw a card after your Expendable card is destroyed.)"

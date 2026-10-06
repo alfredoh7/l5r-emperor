@@ -59,13 +59,13 @@ interpretation this register's decision docs already settled.
 
 - [pers-coils cluster of the #668 WIRE cards (issue #674)](2026-10-06-674-pers-coils.md) — proposed readings built in for the #674 WIRE-list wave (pers-coils); Mendon to confirm.
 
-- [674 pers-gates-1 (personality-wave-128): fourteen Gates of Chaos Personalities](2026-10-06-674-pers-gates-1.md) — proposed readings built in for the #674 WIRE-list wave (pers-gates-1); Mendon to confirm.
+- [674 pers-gates-1 (personality-wave-133): fourteen Gates of Chaos Personalities](2026-10-06-674-pers-gates-1.md) — proposed readings built in for the #674 WIRE-list wave (pers-gates-1); Mendon to confirm.
 
-- [Issue #674, cluster "pers-gates-2": thirteen Gates of Chaos Personalities (personality-wave-129)](2026-10-06-674-pers-gates-2.md) — proposed readings built in for the #674 WIRE-list wave (pers-gates-2); Mendon to confirm.
+- [Issue #674, cluster "pers-gates-2": thirteen Gates of Chaos Personalities (personality-wave-134)](2026-10-06-674-pers-gates-2.md) — proposed readings built in for the #674 WIRE-list wave (pers-gates-2); Mendon to confirm.
 
 - [Issue #674, cluster "pers-torn": twenty-one Torn Asunder Personalities (personality-wave-131)](2026-10-06-674-pers-torn.md) — proposed readings built in for the #674 WIRE-list wave (pers-torn); Mendon to confirm.
 
-- [674, the "spells-rings" cluster (spell-wave-54, ring-wave-3)](2026-10-06-674-spells-rings.md) — proposed readings built in for the #674 WIRE-list wave (spells-rings); Mendon to confirm.
+- [674, the "spells-rings" cluster (spell-wave-55, ring-wave-3)](2026-10-06-674-spells-rings.md) — proposed readings built in for the #674 WIRE-list wave (spells-rings); Mendon to confirm.
 
 - [Issue #674, cluster strat-aftermath-coils: Aftermath and Coils of Madness Strategies (strategy-wave-117)](2026-10-06-674-strat-aftermath-coils.md) — proposed readings built in for the #674 WIRE-list wave (strat-aftermath-coils); Mendon to confirm.
 

@@ -1,7 +1,7 @@
 namespace L5R.Core;
 
 // ======================================================================================================================================================================================
-// THE "PERS-GATES-1" PERSONALITIES (issue #674, personality-wave-128): fourteen Gates of Chaos Personalities that the #668 assessment found wirable from existing mechanisms, each wired from the
+// THE "PERS-GATES-1" PERSONALITIES (issue #674, personality-wave-133): fourteen Gates of Chaos Personalities that the #668 assessment found wirable from existing mechanisms, each wired from the
 // printed text of its scan.
 //
 //   * ASAHINA KITIARU - EXP: "Limited, bow: Search your discard pile, then Fate deck, for a Ring. Show it and put it in your hand. Discard a card." An ordered Ring search (R-011, R-012) whose card

@@ -2,7 +2,7 @@ using System.Text.Json;
 using L5R.Core;
 using static RegressionAssertions;
 
-// Issue #674, cluster "items-misc": item-wave-47 (Divination Bowl, Kage's Teachings, Khalimpeh-jiak, Koan's Staff, Parangu, Renyu's Wrath, Sturdy Armor, Translated Story of Shaharazad),
+// Issue #674, cluster "items-misc": item-wave-48 (Divination Bowl, Kage's Teachings, Khalimpeh-jiak, Koan's Staff, Parangu, Renyu's Wrath, Sturdy Armor, Translated Story of Shaharazad),
 // follower-wave-48 (Maddened Horde, Reconnaissance Scouts, Shinobi Vassal, Sycophants, The Bestial Ones), event-wave-32 (A Fever in the Blood, Changing the Game, Purge of Fudoism, Riot in the
 // Second City, The Second Battle of Beiden Pass) and celestial-wave-28 (Blood of Shahai, Hachiman's Prowess, The Ways of Sensei Wu). Every scenario is an explicit position on the economy table
 // (Batch336Support.Table: player 0 the Crane Defender, player 1 the Lion Attacker, province 0 the current battlefield unless a test says otherwise), driven only through QueryActions and the
@@ -92,7 +92,7 @@ internal static class WlItemsMiscTests
                 Check(printing is "Coils of Madness" or "Torn Asunder" or "Gates of Chaos" or "Aftermath", id + ": " + printing);
             }
         }
-        Wave("item-wave-47", [Bowl, Kage, Khalimpeh, Koan, Parangu, Renyu, Sturdy, Shaharazad], CardType.Item, "");
+        Wave("item-wave-48", [Bowl, Kage, Khalimpeh, Koan, Parangu, Renyu, Sturdy, Shaharazad], CardType.Item, "");
         Wave("follower-wave-48", [Horde, Scouts, Vassal, Sycophants, Bestial], CardType.Follower, "");
         Wave("event-wave-32", [Fever, ChangingGame, Purge, Riot, Beiden], CardType.Event, "");
         Wave("celestial-wave-28", [Shahai, Hachiman, SenseiWu], CardType.Celestial, "");

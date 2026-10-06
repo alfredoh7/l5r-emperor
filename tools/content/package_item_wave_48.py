@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build item-wave-47 (issue #674, the "items-misc" cluster): eight Items of Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath, each wired from the printed text of its scan.
+"""Build item-wave-48 (issue #674, the "items-misc" cluster): eight Items of Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath, each wired from the printed text of its scan.
 
 Divination Bowl, Kage's Teachings, Khalimpeh-jiak, Koan's Staff, Parangu (Kharmic's reminder text only), Renyu's Wrath, Sturdy Armor and Translated Story of Shaharazad. Engine support:
 src/L5R.Core/WlItemsMiscItems.cs.
@@ -10,7 +10,7 @@ from pathlib import Path
 
 from wl_items_misc_common import NL, ROOT, package_cards
 
-PROFILE = "item-wave-47"
+PROFILE = "item-wave-48"
 
 ENTRIES: dict[int, dict] = {
     10690: dict(Slug="gates-of-chaos", Abilities=["wl-bowl-look", "wl-bowl-draw"],  # Divination Bowl

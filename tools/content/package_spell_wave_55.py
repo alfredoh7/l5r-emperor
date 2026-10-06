@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build spell-wave-54 (issue #674, the "spells-rings" cluster of the #668 WIRE cards): fourteen Spells of Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath, wired from the PRINTED text of
+"""Build spell-wave-55 (issue #674, the "spells-rings" cluster of the #668 WIRE cards): fourteen Spells of Coils of Madness, Torn Asunder, Gates of Chaos and Aftermath, wired from the PRINTED text of
 their scans (not the catalogue's scraped wording). Engine support: src/L5R.Core/WlSpellsRings.cs.
 Keywords are the ones printed on the scan's type line (Blood Wave: Maho; Hidden Power: Unique; The Thunderer's Protection: Thunder, Armor; the rest print none -- the element a catalogue lists for them is
 the keyword of their own action ("Air Open", "Fire Battle"), carried by the ability).
@@ -12,7 +12,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "spell-wave-54"
+PROFILE = "spell-wave-55"
 NL = chr(10)
 
 # Oracle id -> the set slug whose printing is the one reviewed (prefer_slug; the provenance printing_set is asserted against it).
@@ -103,7 +103,7 @@ def package(card_ids: list[str] | None = None, root: Path = ROOT) -> dict:
         sources.append(source)
     assert len(definitions) == len(ids) == len({c["Id"] for c in definitions}), "Duplicate or missing card"
     if card_ids is None:
-        assert len(definitions) == 14, "spell-wave-54 publishes fourteen Spells"
+        assert len(definitions) == 14, "spell-wave-55 publishes fourteen Spells"
     output = dict(Profile=PROFILE, Rules="Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.", Cards=definitions, Decks=[])
     published_dir = root / "content/published"
     published_dir.mkdir(parents=True, exist_ok=True)
