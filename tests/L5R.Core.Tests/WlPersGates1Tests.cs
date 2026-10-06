@@ -48,7 +48,7 @@ internal static class WlPersGates1Tests
     public static void Run(TestRunner runner) => runner.Run("wl-pers-gates-1", [
         ("Published shape: the fourteen Personalities carry the printed stats, keywords, text, abilities and effects of their scans, name the Gates of Chaos printing, ship art and are in the wave manifest", PublishedShape),
         ("Asahina Kitiaru - exp: bow to search the discard pile (never the deck while it holds a Ring), put the Ring in the hand and discard another card", KitiaruDiscardPile),
-        ("Asahina Kitiaru - exp: with no Ring in the discard pile the Fate deck is searched and shuffled; with none anywhere nothing is discarded; a lone Ring in the hand owes no discard", KitiaruDeckAndEdges),
+        ("Asahina Kitiaru - exp: with no Ring in the discard pile the Fate deck is searched and shuffled; with none anywhere nothing is discarded; a lone Ring in the hand is the card discarded", KitiaruDeckAndEdges),
         ("Asahina Kitiaru - exp: a bowed Kitiaru and the other player are refused and change nothing", KitiaruRefused),
         ("Asako Ifukube: Destined draws as he enters play and Expendable draws as he is destroyed", IfukubeDestinedExpendable),
         ("Asako Karachu - exp: one Open action gives him Cavalry, Conqueror or Naval until the turn ends, once", KarachuKeywords),
@@ -63,6 +63,9 @@ internal static class WlPersGates1Tests
         ("Ide Hinobu: a printed production of 3 Gold that bows her", HinobuProduces),
         ("Kitsune Yuko: Invest 2 Gold to gain 1 Honor, and Limited bow to gain 1 Honor", YukoHonor),
         ("Legulus: the entering Honor loss, -3 strength against Melee and Ranged Attacks targeting his unit and the Yodotai Legionnaire search", LegulusAll),
+        ("Karachu (ruling 7): with a granted extra use each keyword is still gained at most once a turn; an already-gained keyword is not offered again", KarachuExtraUse),
+        ("Doji Razan (ruling 8): any card in play with the Fudo keyword (read, not assumed) is a target, a Stronghold never; the two destructions are independent when one is negated", RazanFudoAndNegation),
+        ("Invest is an enter-play trait, not a Reaction (ruling 2): every Invest ability in the catalogue is a TraitReactions member, so the Reaction bans and Reaction-targeting rules skip it", InvestIsATrait),
         ("M'rika - exp: Open, bow: bow a target Personality (either player's), once she is unbowed", MrikaBows),
     ]);
 
@@ -96,14 +99,15 @@ internal static class WlPersGates1Tests
             "Tametaka loses any duel against Yoritomo Hiromi.");
         Shape(Tobei, "Daidoji Tobei", "Crane", 7, 3, 2, 0, null, ["Destined", "Crane Clan", "Fallen", "Samurai", "Scout"], [WlPersGates1Abilities.TobeiAttack], "none", "(Draw a card after your Destined card enters play.)");
         Shape(Razan, "Doji Razan", "Crane", 5, 2, 3, 3, 2, ["Duelist", "Courtier", "Crane Clan", "Magistrate", "Samurai"], [WlPersGates1Abilities.RazanInvest, WlPersGates1Abilities.RazanDestroy], "none", "Invest :g1:: Give Razan a +1C token.");
-        Shape(Gojiro, "Hida Gojiro", "Crab", 5, 3, 3, 0, null, ["Berserker", "Crab Clan", "Fallen"], [WlPersGates1Abilities.GojiroInvest], "none", "Invest :g4:: Give Gojiro two +1F tokens.");
+        Shape(Gojiro, "Hida Gojiro", "Crab", 5, 3, 3, 0, null, ["Berserker", "Crab Clan", "Fallen"], [WlPersGates1Abilities.GojiroInvest], WlPersGates1Abilities.InvestThenLossPrefix + "1", "Invest :g4:: Give Gojiro two +1F tokens.");
         Shape(Hoshoku, "Hoshoku-sha", "Unaligned", 7, 4, 1, 0, null, ["Nonhuman", "Wani"], [WlPersGates1Abilities.HoshokuDestroy], "none", "Battle/Open: Destroy your target Personality. Give Hoshoku-sha +2F.");
         Shape(Hinobu, "Ide Hinobu", "Unicorn", 6, 0, 3, 3, 4, ["Courtier", "Merchant", "Unicorn Clan"], [], "none", "Bow this card: Produce 3 Gold.");
-        Shape(Hajime, "Isawa Hajime", "Phoenix", 5, 2, 3, 0, null, ["Fallen", "Fire", "Phoenix Clan", "Shugenja"], [WlPersGates1Abilities.HajimeInvest], "none", "Invest :g3:: Give Hajime two +1F Fire tokens.");
+        Shape(Hajime, "Isawa Hajime", "Phoenix", 5, 2, 3, 0, null, ["Fallen", "Fire", "Phoenix Clan", "Shugenja"], [WlPersGates1Abilities.HajimeInvest], WlPersGates1Abilities.InvestThenLossPrefix + "1", "Invest :g3:: Give Hajime two +1F Fire tokens.");
         Shape(Yuko, "Kitsune Yuko", "Mantis", 6, 1, 4, 3, 2, ["Earth", "Kitsune", "Mantis Clan", "Nonhuman", "Shugenja", "Spirit"], [WlPersGates1Abilities.YukoInvest, WlPersGates1Abilities.YukoHonor], "none", "Invest :g2:: Gain 1 Honor.");
         Shape(Legulus, "Legulus", "Unaligned", 10, 4, 4, 0, null, ["Conqueror", "Unique", "Commander", "Gaijin", "Yodotai"], [WlPersGates1Abilities.LegulusSearch], "none", "After Legulus enters play, lose 2 Honor.");
         Shape(Mrika, "M'rika", "Spider", 8, 1, 4, 3, null, ["Loyal", "Unique", "Artisan", "Bog Hag", "Experienced", "Nonhuman", "Shadowlands", "Shugenja", "Spider Clan"], [WlPersGates1Abilities.MrikaBow], "none", "Open, Bow this card: Bow a target Personality.");
-        Eq(CardCatalog.Get(Tobei).EntryHonorLoss, 1, "Tobei: lose 1 Honor"); Eq(CardCatalog.Get(Gojiro).EntryHonorLoss, 1, "Gojiro: lose 1 Honor"); Eq(CardCatalog.Get(Hajime).EntryHonorLoss, 1, "Hajime: lose 1 Honor");
+        Eq(CardCatalog.Get(Tobei).EntryHonorLoss, 1, "Tobei: lose 1 Honor (listed first: before anything else)");
+        Check(CardCatalog.Get(Gojiro).EntryHonorLoss is null && CardCatalog.Get(Hajime).EntryHonorLoss is null, "Gojiro and Hajime list Invest first: their loss is applied after the Invest window, not as an EntryHonorLoss");
         Eq(CardCatalog.Get(Legulus).EntryHonorLoss, 2, "Legulus: lose 2 Honor");
         var legulus = CardCatalog.Get(Legulus);
         Check(legulus.AttackDefenseKind == "Both" && legulus.AttackDefenseAmount == -3 && legulus.AttackDefenseScope == "Unit", "Legulus: -3 strength to Melee and Ranged Attacks targeting cards in his unit");
@@ -138,8 +142,7 @@ internal static class WlPersGates1Tests
         Eq(e.State.Cards[ringInPile.Id].Zone, Zone.Hand, "the Ring is in his hand");
         Eq(e.State.PendingChoice?.Type, "searchDiscard", "he must now discard a card");
         var offered = e.QueryActions(0).Where(a => a.Type == "chooseSearchDiscard").Select(a => a.Command!.TargetId!).ToArray();
-        Eq(string.Join(",", offered), fodder.Id, "only the other card of the hand: the Ring he just found cannot be the one discarded");
-        RejectedWithoutChange(e, new GameCommand("chooseSearchDiscard", 0, e.Version, TargetId: ringInPile.Id));
+        Check(offered.ToHashSet().SetEquals([fodder.Id, ringInPile.Id]), "any card of the hand, the Ring he just found included (Mendon, issue #679)");
         Accept(e, new GameCommand("chooseSearchDiscard", 0, e.Version, TargetId: fodder.Id));
         Eq(e.State.Cards[fodder.Id].Zone, Zone.FateDiscard, "the other card was discarded");
         Eq(e.State.Cards[ringInPile.Id].Zone, Zone.Hand, "the Ring stays in his hand");
@@ -173,13 +176,16 @@ internal static class WlPersGates1Tests
         Eq(f.State.Cards[held2.Id].Zone, Zone.Hand, "no Ring was found, so no card was discarded");
         Check(f.State.Cards[kit2.Id].Bowed, "Kitiaru stays bowed");
 
-        // A found Ring and no other card in the hand: the discard cannot be satisfied and is skipped.
+        // A found Ring and no other card in the hand: the Ring itself is the card he must discard (Mendon, issue #679).
         var (g, kit3, _) = KitiaruRig(s => SetDeck(s, 0, RingAir), fodder: false);
         Accept(g, Enabled(g, 0, WlPersGates1Abilities.KitiaruSearch, kit3.Id).Command!);
         Accept(g, new GameCommand("passSearch", 0, g.Version));
         Accept(g, new GameCommand("selectSearchCard", 0, g.Version, Choice: RingAir));
-        Check(g.State.PendingSearch is null && g.State.PendingChoice is null, "nothing else to discard: the search simply ends");
-        Eq(g.State.Players[0].Hand.Count, 1, "the Ring alone is in his hand");
+        Eq(g.State.PendingChoice?.Type, "searchDiscard", "the discard is still owed");
+        var lone = g.State.Cards.Values.Single(c => c.DefinitionId == RingAir);
+        Accept(g, new GameCommand("chooseSearchDiscard", 0, g.Version, TargetId: lone.Id));
+        Eq(g.State.Cards[lone.Id].Zone, Zone.FateDiscard, "he discarded the Ring he had just found");
+        Check(g.State.PendingSearch is null && g.State.PendingChoice is null, "the search is over");
     }
 
     private static void KitiaruRefused()
@@ -331,14 +337,14 @@ internal static class WlPersGates1Tests
         // Tametaka the challenger, far stronger than Hiromi: he would win, and loses.
         var (e, tametaka, hiromi) = Duel(Tametaka, Hiromi, mineStrong: true, theirsStrong: false);
         Check(Destroyed(e, tametaka), "Tametaka lost the duel he would have won");
-        Check(!Destroyed(e, hiromi), "Hiromi won it");
+        Check(Destroyed(e, hiromi), "the result is a tie: both duelists lose, Hiromi does not win it (Mendon, issue #679)");
         Check(e.State.Events.Any(x => x.Type == "duelAutoLoss"), "the loss is in the log");
         // Tametaka the challenged duelist: the same.
         var (f, hiromi2, tametaka2) = Duel(Hiromi, Tametaka, mineStrong: false, theirsStrong: true);
-        Check(Destroyed(f, tametaka2) && !Destroyed(f, hiromi2), "challenged by Hiromi he still loses");
+        Check(Destroyed(f, tametaka2) && Destroyed(f, hiromi2), "challenged by Hiromi: the same tie");
         // Hiromi is the stronger: the result is unchanged (Tametaka loses anyway).
         var (g, tametaka3, hiromi3) = Duel(Tametaka, Hiromi, mineStrong: false, theirsStrong: true);
-        Check(Destroyed(g, tametaka3) && !Destroyed(g, hiromi3), "Hiromi stronger: Tametaka loses as usual");
+        Check(Destroyed(g, tametaka3) && !Destroyed(g, hiromi3), "Hiromi stronger: Hiromi wins as usual, Tametaka loses");
         Check(!g.State.Events.Any(x => x.Type == "duelAutoLoss"), "and nothing is overridden");
         // Anyone else: Tametaka wins the duel he should win.
         var (h, tametaka4, other) = Duel(Tametaka, Lion, mineStrong: true, theirsStrong: false);
@@ -456,30 +462,43 @@ internal static class WlPersGates1Tests
 
     private static void GojiroAndHajimeInvest()
     {
+        // Printed order, top to bottom (Mendon, issue #679): Invest is listed first, so the entering Honor loss comes AFTER the Invest window.
         var (e, gojiro, _, honor) = Buy(Gojiro);
-        Eq(Honor(e, 0), honor - 1, "After Gojiro enters play, lose 1 Honor");
+        Eq(e.State.PendingChoice?.Type, "entryReaction", "the entry window is open");
+        Eq(Honor(e, 0), honor, "the Honor loss is listed below Invest: it has not happened while the window is open");
         var option = InvestOption(e, WlPersGates1Abilities.GojiroInvest);
         Eq(option.Gold!.Cost, 4, "Invest 4 Gold");
         var force = e.CardForceForTest(gojiro);
         Accept(e, option.Command!);
         Eq(e.CardForceForTest(gojiro), force + 2, "two +1F tokens");
         Eq(e.State.Cards[gojiro].Tokens.Count(t => t.Stat == "Force" && t.Amount == 1), 2, "two tokens");
-        Eq(Honor(e, 0), honor - 1, "Invest costs Gold, not Honor");
+        Eq(Honor(e, 0), honor - 1, "After Gojiro enters play, lose 1 Honor: once the Invest is done");
+        Check(e.State.WlPersGates1DeferredLosses.Count == 0, "nothing is left owed");
+        var events = e.State.Events.Select(x => x.Message).ToArray();
+        Check(events.Count(m => m.Contains("-1 Honor") && m.Contains("entering play")) == 1, "the loss is one event: " + string.Join(" | ", events.TakeLast(4)));
 
         var (f, hajime, _, honor2) = Buy(Hajime);
-        Eq(Honor(f, 0), honor2 - 1, "After Hajime enters play, lose 1 Honor");
+        Eq(Honor(f, 0), honor2, "Hajime's loss waits for the window too");
         var option2 = InvestOption(f, WlPersGates1Abilities.HajimeInvest);
         Eq(option2.Gold!.Cost, 3, "Invest 3 Gold");
         var force2 = f.CardForceForTest(hajime);
         Accept(f, option2.Command!);
         Eq(f.CardForceForTest(hajime), force2 + 2, "two +1F tokens");
         Eq(f.State.Cards[hajime].Tokens.Count(t => t.Type == "Fire" && t.Stat == "Force" && t.Amount == 1), 2, "two Fire tokens");
+        Eq(Honor(f, 0), honor2 - 1, "After Hajime enters play, lose 1 Honor: after the Invest");
 
-        // Declined, the loss still stands and nothing is given.
+        // Declined, the loss still stands (applied as the window closes) and nothing is given.
         var (g, hajime2, _, honor3) = Buy(Hajime);
+        Eq(Honor(g, 0), honor3, "not yet");
         Accept(g, new GameCommand("declineReaction", g.State.PriorityPlayerId, g.Version));
         Eq(Honor(g, 0), honor3 - 1, "the entering loss is not optional");
         Check(g.State.Cards[hajime2].Tokens.Count == 0, "no tokens when declined");
+
+        // The other order: Tobei and Legulus list the loss first, so it is applied as they enter (no window to wait for).
+        var (t, _, _, honorT) = Buy(Tobei, s => SetDeck(s, 0, Focus, Focus));
+        Eq(Honor(t, 0), honorT - 1, "Tobei: lose 1 Honor at once");
+        var (l, _, _, honorL) = Buy(Legulus);
+        Eq(Honor(l, 0), honorL - 2, "Legulus: lose 2 Honor at once");
 
         // An Invest the player cannot pay for is disabled and changes nothing.
         var (h, gojiro2, _, _) = Buy(Gojiro);
@@ -609,6 +628,66 @@ internal static class WlPersGates1Tests
             PassWindow(h);
             Eq(h.State.Cards[small.Id].Zone, protectedUnit ? Zone.Attached : Zone.FateDiscard, protectedUnit ? "the Follower in Legulus's unit survives the weakened Attack" : "the same Attack destroys a Follower in another unit");
         }
+    }
+
+    private static void KarachuExtraUse()
+    {
+        var s = Table(Phase.Action, 0);
+        var karachu = Add(s, Karachu, 0, Zone.Home);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Enabled(e, 0, WlPersGates1Abilities.KarachuNaval, karachu.Id).Command!);
+        // An effect grants a further use of his action: the use stamp is cleared, as an extra use does.
+        var st = e.State; st.Cards[karachu.Id].AbilityUses.Remove("wl1-karachu-give"); st.PriorityPlayerId = 0;
+        var again = MatchEngine.FromTestState(st);
+        Check(!CanUse(again, 0, WlPersGates1Abilities.KarachuNaval, karachu.Id), "Naval was already gained this turn: not offered again");
+        Check(CanUse(again, 0, WlPersGates1Abilities.KarachuCavalry, karachu.Id) && CanUse(again, 0, WlPersGates1Abilities.KarachuConqueror, karachu.Id), "the other two are offered");
+        RejectedWithoutChange(again, Use(again, 0, WlPersGates1Abilities.KarachuNaval, again.State.Cards[karachu.Id]), "already gained");
+        Accept(again, Enabled(again, 0, WlPersGates1Abilities.KarachuCavalry, karachu.Id).Command!);
+        Check(again.State.Cards[karachu.Id].GrantedKeywords.Select(k => k.Keyword).Order().SequenceEqual(["Cavalry", "Naval"]), "both keywords now");
+        var st2 = again.State; st2.Cards[karachu.Id].AbilityUses.Remove("wl1-karachu-give"); st2.PriorityPlayerId = 0;
+        var third = MatchEngine.FromTestState(st2);
+        Check(!CanUse(third, 0, WlPersGates1Abilities.KarachuNaval, karachu.Id) && !CanUse(third, 0, WlPersGates1Abilities.KarachuCavalry, karachu.Id) && CanUse(third, 0, WlPersGates1Abilities.KarachuConqueror, karachu.Id), "only Conqueror is left");
+    }
+
+    private static void RazanFudoAndNegation()
+    {
+        var s = Table(Phase.Action, 0);
+        var razan = Add(s, Razan, 0, Zone.Home);
+        var granted = Add(s, Lion, 1, Zone.Home); granted.GrantedKeywords.Add(new("Fudo", "test-fixture", GrantDuration.Permanent));
+        var holding = Add(s, "training-marketplace", 1, Zone.Home); holding.GrantedKeywords.Add(new("Fudo", "test-fixture", GrantDuration.Permanent));
+        var follower = Add(s, Follower, 1, Zone.Attached, parent: granted.Id); follower.GrantedKeywords.Add(new("Fudo", "test-fixture", GrantDuration.Permanent));
+        var plain = Add(s, Crane, 1, Zone.Home);
+        var stronghold = s.Cards[s.Players[1].StrongholdId]; stronghold.GrantedKeywords.Add(new("Fudo", "test-fixture", GrantDuration.Permanent));
+        var e = MatchEngine.FromTestState(s);
+        var targets = Batch336Support.Options(e, 0, WlPersGates1Abilities.RazanDestroy, razan.Id).Where(a => a.Enabled).SelectMany(a => a.TargetIds ?? []).ToHashSet();
+        Check(targets.SetEquals([granted.Id, holding.Id, follower.Id]), "any card carrying the Fudo keyword (read from the card), never a Stronghold: " + string.Join(",", targets));
+        RejectedWithoutChange(e, Use(e, 0, WlPersGates1Abilities.RazanDestroy, razan, stronghold.Id));
+        RejectedWithoutChange(e, Use(e, 0, WlPersGates1Abilities.RazanDestroy, razan, plain.Id));
+        Accept(e, Offer(e, 0, WlPersGates1Abilities.RazanDestroy, razan.Id, holding.Id));
+        Check(Destroyed(e, e.State.Cards[holding.Id]) && Destroyed(e, e.State.Cards[razan.Id]), "a Fudo Holding and Razan are destroyed");
+
+        // Two independent effects: the target's destruction negated, Razan is still destroyed; Razan's negated, the Fudo card is still destroyed.
+        foreach (var negateTarget in new[] { true, false })
+        {
+            var t = Table(Phase.Action, 0);
+            var razan2 = Add(t, Razan, 0, Zone.Home); var fudo = Add(t, FudoPersonality, 1, Zone.Home);
+            t.NegatedEffects.Add(new("destroy", negateTarget ? fudo.Id : razan2.Id));
+            var f = MatchEngine.FromTestState(t);
+            Accept(f, Offer(f, 0, WlPersGates1Abilities.RazanDestroy, razan2.Id, fudo.Id));
+            Check(Destroyed(f, f.State.Cards[fudo.Id]) == !negateTarget, negateTarget ? "the negated Fudo card survives" : "the Fudo card is destroyed though Razan's destruction was negated");
+            Check(Destroyed(f, f.State.Cards[razan2.Id]) == negateTarget, negateTarget ? "Razan is still destroyed" : "Razan survives his negated destruction");
+        }
+    }
+
+    // Every Invest ability of every published card is a trait, and a Reaction ban (Cherry Blossom Festival) does not bar the entry window it is used in.
+    private static void InvestIsATrait()
+    {
+        var invests = CardCatalog.Cards.Values.Where(d => d.Text.Contains("Invest", StringComparison.Ordinal) && d.Text.Contains(":g", StringComparison.Ordinal))
+            .SelectMany(d => (d.Abilities ?? []).Select(a => (Card: d, Id: a))).Where(x => AbilityCatalog.All.TryGetValue(x.Id, out var a) && a.Timing == "Reaction" && a.Trigger == "own-enters-play" && a.Cost is not null && a.Label.StartsWith("Invest", StringComparison.Ordinal)).ToArray();
+        Check(invests.Length >= 11, $"the sweep found the Invest cards ({invests.Length})");
+        foreach (var (card, id) in invests) Check(TraitReactions.Is(id), $"{card.Name}: {id} is an Invest and must be a trait, not a Reaction");
+        foreach (var name in new[] { "Doji Razan", "Hida Gojiro", "Isawa Hajime", "Kitsune Yuko", "Shosuro Nigawa", "Utaku Sayaka", "Susumu Takada", "The Broken Man", "Yoritomo Toganin", "Togashi Noritada", "Clay Kshatriya" })
+            Check(invests.Any(x => x.Card.Name == name), name + " is among the Invest cards swept");
     }
 
     // ---- M'rika - exp ----------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -16,6 +16,7 @@ internal static class BotPolicyTests
         ("Favor as a cost: spent freely when an Open action takes it back, once when the always-lobby case guarantees it, otherwise never above passing", FavorSpend),
         ("Honor choice: a high deck gains, a low deck takes it from the opponent, an in-between deck gains when ahead or below its starting Honor", HonorChoice),
         ("Arena fixes: a harmful ability is never aimed at the bot's own card; Shinden always bows; a full hand does not spend Gold on a pure draw; the bot never gives the opponent Honor or loses its own by choice", ArenaFixes),
+        ("Hoshoku-sha (issue #679): the bot never chooses to destroy himself or any Personality of its own with his Battle/Open action; an enemy target is played", HoshokuNeverSelf),
         ("Memory: copies seen in public zones count (three of a non-Unique card, one of a Unique), the roll is deterministic and fair", Memory),
     ];
 
@@ -170,6 +171,20 @@ internal static class BotPolicyTests
             checkedPlayers++;
         }
         Check(checkedPlayers > 0, "the catalogue sweep found choose-a-player Honor abilities to check");
+    }
+
+    private static void HoshokuNeverSelf()
+    {
+        var (view, pass, _) = Table();
+        var person = CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force > 0);
+        var hoshoku = Person("hoshoku-1", 0, person); var ally = Person("ally-1", 0, person); var theirs = Person("theirs-1", 1, person);
+        var v = view with { Players = [view.Players[0] with { Home = [hoshoku, ally] }, view.Players[1] with { Home = [theirs] }] };
+        const string id = "wl1-hoshoku-destroy";
+        Check(AbilityIntent.Of(id).Rank == EffectRank.Destroy, "Hoshoku-sha's action reads as a destroy");
+        ActionOption Aimed(string target) => new("useAbility", id, true, null, new("useAbility", 0, v.Version, CardId: "hoshoku-1", TargetId: target, AbilityId: id), "hoshoku-1");
+        Check(TrainingOpponent.Choose(v, [pass, Aimed("hoshoku-1")]).Command?.Type == "pass", "aimed at himself: the bot passes");
+        Check(TrainingOpponent.Choose(v, [pass, Aimed("ally-1")]).Command?.Type == "pass", "aimed at its own Personality: the bot passes");
+        Check(TrainingOpponent.Choose(v, [pass, Aimed("hoshoku-1"), Aimed("ally-1")]).Command?.Type == "pass", "with only its own cards legal it still passes");
     }
 
     private static CardView Person(string id, int owner, CardDefinition d) => new(id, d, owner, Zone.Home, true, false, null, null, d.Force);
