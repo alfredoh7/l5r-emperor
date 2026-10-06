@@ -1,0 +1,56 @@
+{
+  "Profile": "strategy-wave-113",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5523",
+      "Name": "Near Miss",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Battle action targets one of your attachments: Negate the attachment's destruction from the action's effects.\nReaction: When paying for an attachment: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5523.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pay-near-miss-negate",
+        "pay-near-miss-gold"
+      ],
+      "Effect": "pay-near-miss"
+    },
+    {
+      "Id": "oracle-l5r-6075",
+      "Name": "Profits",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before you produce Gold to pay for a card with a base Gold Cost of 1 or greater: You may reduce the total Gold produced by 1; if you did, put a Wealth token on this card after the other card enters play.\nLimited: Put this card into play.\nReaction: When paying a Gold cost, if this card is in play, discard it: Produce Gold equal to the number of Wealth tokens on it before you discarded it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6075.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pay-profits-enter",
+        "pay-profits-reduce",
+        "pay-profits-gold"
+      ],
+      "Effect": "pay-profits"
+    }
+  ],
+  "Decks": []
+}
