@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wiring the 206 WIRE cards from #668 (issue #674), in progress: personality-wave-129 (13 Gates of Chaos personalities) merged so far; ten more clusters running.",
+  "validation": "pers-gates-2 cluster: wl-pers-gates-2 11/11, format clean; art pack and full check.sh pending until all clusters merge.",
+  "remaining": "Merge the other ten cluster branches, rebuild/publish art pack, regenerate inventory, full checks, PR and merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/674",
+  "branch": "claude/674-wire-list",
+  "updated": "2026-10-06T06:17:10.922431+00:00"
+}
