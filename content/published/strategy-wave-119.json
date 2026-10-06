@@ -1,0 +1,431 @@
+{
+  "Profile": "strategy-wave-119",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10738",
+      "Name": "Allied Efforts",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give a target enemy Personality or Follower -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10738.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "spitting-llama-force"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10717",
+      "Name": "Boiling Point",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Give +1F to your Yojimbo at the same location as your Personality in this duel.\nBattle/Open: Bow your target unbowed Personality at any location. Straighten another target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10717.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wl-sg-boiling-focus",
+        "wl-sg-boiling-bow-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10716",
+      "Name": "Chaos of Battle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give one or two target opposed Personalities a Force bonus equal to the number of different Clan alignments on Personalities at the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10716.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sg-chaos-of-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10743",
+      "Name": "Claiming the Ruins",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, :g2:: Put a non-Unique Item from your discard pile into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10743.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sg-claiming-ruins"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10721",
+      "Name": "Defensive Formation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give one to three of your target defending Personalities +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10721.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-sg-defensive-formation"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10727",
+      "Name": "Exotic Farmlands",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :gstar:: Target your Personality. Create and attach to him a 1F Ashigaru Follower for every 3 Gold you paid, rounded down.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10727.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "wl-sg-exotic-farmlands"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10740",
+      "Name": "Friends in the Jungle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open, :g1:: Give your target Nonhuman Personality +2F/+2C.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10740.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "wl-sg-friends-jungle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10725",
+      "Name": "Honor Replaces Rage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: A target Personality has -2F while attacking this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10725.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-sg-honor-replaces-rage"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10722",
+      "Name": "Iaijutsu Dojo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Your target unbowed Personality challenges a target enemy Personality. Dishonor and bow the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10722.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-sg-dojo-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10729",
+      "Name": "Ivinda Village",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nOpen, :gstar:: Give Cavalry to a number of target cards equal to the amount of Gold you paid.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10729.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "wl-sg-ivinda-cavalry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10737",
+      "Name": "Lost Caravan",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open, :g3:: Straighten your target Stronghold or Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10737.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sg-lost-caravan"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10728",
+      "Name": "Mukudori's Wisdom",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nBattle/Open: Straighten or bow a target Ring.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10728.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-sg-mukudori-straighten",
+        "wl-sg-mukudori-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10726",
+      "Name": "Nubane's Defense",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give one or two of your target Personalities +1F for each Ring you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10726.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sg-nubanes-defense"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10719",
+      "Name": "Recovering What Was Lost",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Absent Engage: If he would be opposed, move your target Personality at home to the current battlefield. Give him +2F if he is a Tactician. (Absent actions can be taken without presence.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10719.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wl-sg-recovering-lost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10747",
+      "Name": "Tactical Setback",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Absent Battle: Give a target enemy Personality -2F. (Absent actions can be taken without presence.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10747.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sg-tactical-setback"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10744",
+      "Name": "The False Route",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Create a battlefield without a Province. Move your target Personality and a target enemy Personality there; if your Personality is a Scout, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10744.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sg-false-route"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10749",
+      "Name": "The Final Lesson",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Permanently give one or two of your target unbowed Personalities Expendable. (Draw a card after your Expendable card is destroyed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10749.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wl-sg-final-lesson"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10750",
+      "Name": "The Tomb of Sun Tao",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nOpen: Put a target Ring into its owner's hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10750.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "wl-sg-tomb-sun-tao"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
