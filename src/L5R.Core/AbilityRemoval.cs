@@ -46,7 +46,7 @@ public sealed partial class MatchState
 
 public static class AbilityRemovalAbilities
 {
-    public const string JadeEmbrace = "pe-jade-embrace-remove", SeaAndSky = "pe-sea-and-sky-remove", ThroughTheBreach = "pe-through-the-breach-remove";
+    public const string JadeEmbrace = "pe-jade-embrace-remove", SeaAndSky = "pe-sea-and-sky-remove", ThroughTheBreach = "pe-through-the-breach-remove", BreachCreate = "pe-through-the-breach-create";
 
     /// <summary>Removal keys: every ability and trait of the card; the card's Effect (its traits).</summary>
     public const string AllKey = "*", TraitKey = "trait";
@@ -65,6 +65,9 @@ public static class AbilityRemovalAbilities
             "region-or-terrain", Costs: [new(CostVerbs.Sacrifice)]);
         // Through the Breach (oracle-l5r-9992), first Limited: "Target a Castle Holding: Permanently remove one of its non-Gold-producing traits or abilities."
         all[ThroughTheBreach] = new("Limited", "Target a Castle Holding: Permanently remove one of its non-Gold-producing traits or abilities", CastleHolding);
+        // Through the Breach, second Limited: "If you control a Personality, pay 4 Gold: Create a 4F/2C/0PH Shadowlands - Nonhuman - Oni Personality. Lose 3 Honor." (Breached Oni, user-scan-breached-oni.)
+        all[BreachCreate] = new("Limited", "If you control a Personality, pay 4 Gold: Create a 4F/2C/0PH Shadowlands - Nonhuman - Oni Personality. Lose 3 Honor", "none", Cost: GoldCostRule.Fixed(4),
+            Creates: new(CardType.Personality, Force: 4, Chi: 2, PersonalHonor: 0, Keywords: ["Shadowlands", "Nonhuman", "Oni"], ProxyId: "user-scan-breached-oni"));
         return all;
     }
 }
@@ -196,7 +199,7 @@ public sealed partial class MatchEngine
     // ---- execution ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     // null: not this feature's. false: the effects are done. true: the action paused for the acting player's choice.
-    private bool? RunAbilityRemoval(string id, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, bool consumedGrant, bool playedFromDiscard,
+    private bool? RunAbilityRemoval(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, bool consumedGrant, bool playedFromDiscard,
         int? opponentHonorBefore, HashSet<string> bowedBefore, List<AdditionalActionGrant> preExistingGrants)
     {
         switch (id)
@@ -230,9 +233,18 @@ public sealed partial class MatchEngine
             case AbilityRemovalAbilities.ThroughTheBreach:
                 return BeginRemovalChoice(command, RemovalOptions(target!, traits: true, excludeGold: true),
                     $"{Definition(source!).Name}: choose one of {Definition(target!).Name}'s non-Gold-producing traits or abilities to remove.", consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
+            case AbilityRemovalAbilities.BreachCreate:
+                return ExecuteCreate(ability, ability.Creates!, command, player, () => GainHonor(player.Id, -3, Definition(source!).Name, source));
             default:
                 return null;
         }
+    }
+
+    // "If you control a Personality": a Personality in play under the acting player's control.
+    private void ValidateAbilityRemoval(string id, PlayerState player)
+    {
+        if (id == AbilityRemovalAbilities.BreachCreate)
+            Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Personality), "You control no Personality.");
     }
 
     // Registration only: callbacks are not invoked during module initialization.
@@ -242,8 +254,9 @@ public sealed partial class MatchEngine
     {
         EngineHooks.Abilities.Register("AddAbilityRemoval", 12300, static abilities => abilities.AddAbilityRemoval());
         EngineHooks.TargetAllows.Register("AbilityRemovalTargetAllows", 12300, static (engine, context) => engine.RemovalTargetAllows(context.ability.Target, context.target));
+        EngineHooks.ValidateLate.Register("ValidateAbilityRemoval", 12300, static (engine, context) => engine.ValidateAbilityRemoval(context.id, context.player));
         EngineHooks.RunEffects.Register("RunAbilityRemoval", 12300, static (engine, context) =>
-            engine.RunAbilityRemoval(context.id, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard,
+            engine.RunAbilityRemoval(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard,
                 context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
     }
 }
