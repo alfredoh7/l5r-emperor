@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Applies Mendon's rulings on the pers-gates-1 readings (#679): Kitiaru may discard the found Ring; Invest audited as an enter-play trait for all 11 Invest cards (Nigawa and Sayaka fixed); entry effects run in printed order (Gojiro and Hajime Honor loss after the Invest window); Tametaka's win against Hiromi becomes a tie; Karachu gains each keyword once per turn; Razan targets any Fudo-keyword card, Strongholds excluded, destructions independent; Hoshoku-sha bot never self-targets (test).",
+  "validation": "wl-pers-gates-1 21/21; full Core 2880 PASS no FAIL; AI 112 PASS incl bot-soak 3/3 and bot-policy/HoshokuNeverSelf; check_format and lint_comment_swallow clean. No client or art changes.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/679",
+  "branch": "claude/679-gates1-rulings-pr",
+  "updated": "2026-10-06T17:26:37.236427+00:00"
+}
