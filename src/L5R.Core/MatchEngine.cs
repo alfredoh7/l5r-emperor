@@ -2586,6 +2586,7 @@ public sealed partial class MatchEngine
         if (Delay(card, DelayedKinds.Dishonor, byPlayerId)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (JiYunNegatesDishonor(card, byPlayerId)) return;
         if (SuikihimeRefusesDishonor(card)) return; // Otomo Suikihime (issue #503): will not become dishonorable.
+        if (TryConsumeWatch(WatchKind.Dishonor, card, byPlayerId ?? EffectSourcePlayer())) return; // P7 (PeriodWatches.cs)
         var wasDishonorable = card.Dishonorable;
         card.Dishonorable = true;
         if (!wasDishonorable) AfterPersonalityDishonored(card, byPlayerId); // Successful Bounty (issue #492, group F).
@@ -2632,6 +2633,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (TryConsumeWatch(WatchKind.Destroy, card, actingPlayerId)) continue; // P7 (PeriodWatches.cs): after the delay and the protections above, before the effect
             if (promoNegated.Contains(card.Id)) continue; // issue #653: Expansion, The Topaz Championship's trait
             if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
             foreach (var attachment in Attachments(card.Id).ToArray())
