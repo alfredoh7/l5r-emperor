@@ -1,0 +1,11 @@
+[
+  {
+    "card_id": "user-scan-colonists",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-by-mendon-2026-10-05 (Colonists.jpg)",
+    "image_path": "assets/requested-scans/ashigaru-1f.jpg",
+    "image_sha256": "5e1e6abd56fa62a5bccb254dc8bef1dd756a20f1c5293c9b688f1502cd8c7c74"
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "Profile": "item-wave-44",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1427",
+      "Name": "Coin Pouch",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card enters play bowed.\nThis Personality has +2 Gold Cost.\nReaction: When a Holding bows to produce Gold, bow this card: The Holding produces one additional Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1427.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "pay-coin-pouch-gold"
+      ],
+      "Effect": "pay-coin-pouch"
+    }
+  ],
+  "Decks": []
+}

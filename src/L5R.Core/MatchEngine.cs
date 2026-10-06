@@ -377,6 +377,7 @@ public sealed partial class MatchEngine
         if (command.Type == "passAllBattles") { command = BeginPassAllBattles(command); if (command.Type != "pass") return; } // issue #628: a pass that keeps passing
         // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
         EnforceForcedPass(command);
+        EnforceSearchPlay(command); // Gozu (issue #667, SearchPlayGozu.cs): the Terrain it found is owed as the next action; nothing else, and no pass, is legal until it is played.
         // Urgency (issue #453, batch 2): a player past his allowance of non-Reaction actions this phase may take none.
         EnforceActionAllowance(command);
         // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
@@ -402,7 +403,7 @@ public sealed partial class MatchEngine
             case "purchase": Purchase(command); break;
             case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
-            case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard, "Not in the Dynasty Phase."); if (BeginTwistOfFateWindow()) break; EndTurn(); break;
+            case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard, "Not in the Dynasty Phase."); if (BeginTwistOfFateWindow()) break; EndDynastyPhase(); break;
             case "declareAttack": DeclareAttackPhase(command); break;
             case "attack": AssignAttackers(command); break;
             case "assignDefense": AssignDefense(command); break;
@@ -485,6 +486,7 @@ public sealed partial class MatchEngine
         ApplyShadowsEmbraceBatch1EntryEffects(playerId, card); // The Shadow's Embrace pass (issue #476), batch 1: Atosa's Sensei discard.
         ApplyEmperorRemainingFEntryEffects(playerId, card); // Emperor Edition remaining-cards pass (issue #492), group F: Moneylender's Wealth tokens.
         ApplyEmperorFollowupsEntryEffects(playerId, card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
+        ApplySearchPlayEntryEffects(playerId, card); // The Topaz Armor - exp (issue #667, SearchPlayTopaz.cs): "After this card enters play: Choose two keywords" is queued.
         ApplyEmperorP1EntryEffects(playerId, card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
         ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
@@ -588,6 +590,7 @@ public sealed partial class MatchEngine
         if (original is not null) MarkAsCopy(card, original); // issue #501 item 32: the copy's frame and the original's scan
         var title = (printed ?? definition).Name; var where = battlefield is null ? "" : " at the battlefield";
         Emit("cardCreated", createdCopy ? $"{Player(ownerId).Name} created a copy of {title}{where}." : $"{Player(ownerId).Name} created {title}{where}.", ownerId, card.Id);
+        NotePersonalityCreated(card, battlefield); // issue #667 (PerformersAmbush.cs): the action's record of what it created
         QueueOverconfidentDraw(card);
         beforeWindow?.Invoke();
         if (duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId, card); return false; }
@@ -1005,7 +1008,7 @@ public sealed partial class MatchEngine
         // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
         // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
         var groups = sources.Select(c => new[] { (Id: c.Id, Amount: GoldProduced(c.Id, playerId, paying)) }).ToList();
-        var availableTokens = PaymentTokens(playerId, paying).Where(t => exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).ToArray();
+        var availableTokens = PaymentTokens(playerId, paying).Where(t => !PromoNeverSuggested(t) /* issue #667: Profits' reduction is only chosen */ && (exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id)))).ToArray();
         foreach (var tokenGroup in availableTokens.Where(t => !TfIsAltToken(t)).GroupBy(t => t.Card.Id))
             groups.Add(tokenGroup.Select(t => (t.Id, t.Amount)).ToArray());
         TfMergeAltIntoGroups(groups, availableTokens); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow joins the card's own group
@@ -1026,8 +1029,10 @@ public sealed partial class MatchEngine
             }
         }
         return byTotal.Where(p => p.Key >= cost).SelectMany(p => p.Value.Select(ids => new PaymentOption(ids, p.Key, cost, p.Key - cost)))
+            // Issue #667: the Coin Pouch is never suggested without its Holding; Near Miss, Profits and the Pouch are suggested only when nothing else pays as well (PromoPaymentSources.cs).
+            .Where(p => PromoPaymentOptionValid(p.SourceIds))
             // Zlkyt's destruction of a Holding (issue #501) is suggested only when nothing else pays.
-            .OrderBy(p => p.SourceIds.Count(IsDestroyingPaymentToken))
+            .OrderBy(p => p.SourceIds.Count(IsDestroyingPaymentToken)).ThenBy(p => PromoOptionalSourceCount(p.SourceIds))
             // A payment that bows no alternate source (a Personality that can bow for Gold, issue #338) is always preferred to one that does:
             // the engine never suggests bowing Sakuma when printed producers cover the cost. With no such card in play every count is 0.
             .ThenBy(p => p.SourceIds.Count(id => !IsPaymentToken(id) && Definition(Card(id)).GoldProduction == 0)).ThenBy(p => p.Excess)
@@ -1171,7 +1176,7 @@ public sealed partial class MatchEngine
                     // grant, and the holder keeps the priority while he holds another. Only both players passing in succession ends the phase (CountPass), not one player passing twice.
                     var passer = _state.PriorityPlayerId;
                     var keeps = PassSpendsAdditionalAction(passer);
-                    if (CountPass(passer)) { _state.AdditionalActions.RemoveAll(Forfeitable); SetPhase(Phase.AttackDeclaration, _state.ActivePlayerId); }
+                    if (CountPass(passer)) { _state.AdditionalActions.RemoveAll(Forfeitable); BeginPhaseAfterAction(); } // issue #667: the next printed phase of the turn's order
                     else _state.PriorityPlayerId = keeps ? passer : 1 - passer;
                     break;
                 }
@@ -1196,7 +1201,7 @@ public sealed partial class MatchEngine
                 FinishBattlePass();
                 break;
             case Phase.Dynasty:
-            case Phase.DynastyDiscard: if (BeginTwistOfFateWindow()) break; EndTurn(); break;
+            case Phase.DynastyDiscard: if (BeginTwistOfFateWindow()) break; EndDynastyPhase(); break;
             default: throw new RuleViolation("Choose a battlefield before continuing.");
         }
     }
@@ -1246,7 +1251,7 @@ public sealed partial class MatchEngine
         if (ForcedAttackDeclineRefusal(_state.PriorityPlayerId) is string forcedDecline) throw new RuleViolation(forcedDecline);
         Emit("attackDeclined", $"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.", _state.PriorityPlayerId);
         _state.UnresolvedBattlefields = []; R1.TwoFronts.RemoveAll(m => m.Turn <= _state.TurnNumber);
-        SetPhase(Phase.Dynasty, _state.ActivePlayerId);
+        BeginPhaseAfterAttack(_state.ActivePlayerId); // issue #667: the Dynasty Phase in the default order, otherwise the turn ends
     }
     // Infantry Maneuvers (InfantryDeclaration/DefenseAssignment) runs first, then Cavalry Maneuvers
     // (CavalryDeclaration/CavalryDefense), both on the battlefields the declaration already created: assigning
@@ -2005,6 +2010,7 @@ public sealed partial class MatchEngine
         Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(command.PlayerId, card);
         NoteAttachedFollowerFromHand(card, target);
         card.Zone = Zone.Attached; card.AttachedTo = target.Id; card.FaceUp = true;
+        PromoPaymentAttached(card); // Coin Pouch (issue #667): "This card enters play bowed."
         if (inBattle) card.ProvinceIndex = target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(target, granted, card.Id, "Attachment");
         Emit("equipped", $"{def.Name} attached to {Definition(target).Name}.", command.PlayerId, card.Id);
@@ -2790,6 +2796,7 @@ public sealed partial class MatchEngine
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
+        ResolveSearchPlayTurnEnd(); // Masaya (issue #667, SearchPlayMasaya.cs): "Before the turn ends, put him on top of your Dynasty deck."
         ApplyDelayedEffects(DelayUntil.EndOfTurn);
         ReturnSteppedUnits(); // Step Through the Void (issue #503, EmperorP5Zones.cs): "Before this turn ends, put his unit into play". // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
@@ -3156,6 +3163,12 @@ public sealed partial class MatchEngine
     private void ResolveCelestial(PlayerState player, ProvinceState province, CardInstance card)
     {
         province.CardId = null; card.ProvinceIndex = null;
+        EnterCelestialPlay(player, card);
+        Refill(player, province);
+    }
+    // The entry itself (issue #667: The Sacred Rosary of the Constrictors puts a Celestial into play with no province): it replaces the controller's other Celestials and runs the entry traits.
+    private void EnterCelestialPlay(PlayerState player, CardInstance card)
+    {
         var hadRyoshun = ControlsCelestialEffect(player.Id, RyoshunsGuidanceEffect); // Ryoshun's Guidance (issue #467): its +1C leaves with it.
         foreach (var other in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.Celestial).ToArray())
         {
@@ -3166,7 +3179,6 @@ public sealed partial class MatchEngine
         Emit("celestialEnteredPlay", $"{Definition(card).Name} entered play.", player.Id, card.Id);
         ApplyDaigotsusGuidanceTrait(); // Daigotsu's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a Celestial enters play (including this one): Discard all Kami Celestials in play."
         if (hadRyoshun && Definition(card).Effect != RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
-        Refill(player, province);
     }
     // Lady Matsu's Rage's own destroy-redirect trait is Effect-keyed the same way RegionStrengthBonus
     // is, checked from DestroyUnits' own single shared choke point (see its own doc comment).
@@ -3402,9 +3414,8 @@ public sealed partial class MatchEngine
         if (phase == Phase.Dynasty) DragonsBreathHonor();
         // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
         if (phase == Phase.Dynasty) ResolveSentinelWatches();
-        if (phase == Phase.Dynasty)
-            foreach (var waveMan in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "wave-man-attack-phase-straighten"))
-                StraightenBowedUnit(waveMan);
+        if (phase == Phase.Dynasty && !DynastyBeforeAttack()) StraightenWaveMen(); // issue #667 (PhaseOrder.cs): with the Dynasty Phase first it is not the end of the Attack Phase
+        NotePhaseOrder(phase); // issue #667: the phase-order marker
         _state.Phase = phase; _state.PriorityPlayerId = priority; _state.ConsecutivePasses = 0; Emit("phaseChanged", $"Phase: {phase}.");
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if (phase == Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);

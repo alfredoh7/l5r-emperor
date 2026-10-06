@@ -27,6 +27,7 @@ internal static partial class EngineHooks
         _ = PersonalityForce.Items;
         _ = ProvinceBonus.Items;
         _ = TargetedReaction.Items;
+        _ = ExtraUsesPerTurn.Items;
         _ = ValidateEarly.Items;
         _ = ValidateMiddle.Items;
         _ = ValidateLate.Items;

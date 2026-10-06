@@ -1,0 +1,11 @@
+[
+  {
+    "card_id": "user-scan-ambusher",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-by-mendon-2026-10-05",
+    "image_path": "assets/requested-scans/ambusher.jpg",
+    "image_sha256": "21208df574e7a1ff41c87ec27346b59f0e9615cbf531f042c48d2ca154f8ea0e"
+  }
+]

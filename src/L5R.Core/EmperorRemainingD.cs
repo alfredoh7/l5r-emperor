@@ -163,16 +163,16 @@ public sealed partial class MatchEngine
             // The Power of One: the combined total Gold Cost of the targeted units is at most the Commander's unit's total Gold Cost. A slot's candidate is judged alone (it must fit by
             // itself), the whole selection together.
             case "power-one-bow" when command.PerformerId is not null:
-            {
-                var reach = UnitTotalGoldCost(Card(command.PerformerId), out _);
-                if (ability.Slots is null)
                 {
-                    if (command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var candidate) && Definition(candidate).Type == CardType.Personality)
-                        Require(UnitTotalGoldCost(candidate, out _) <= reach, "That unit's total Gold Cost is above your Commander's unit's.");
+                    var reach = UnitTotalGoldCost(Card(command.PerformerId), out _);
+                    if (ability.Slots is null)
+                    {
+                        if (command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var candidate) && Definition(candidate).Type == CardType.Personality)
+                            Require(UnitTotalGoldCost(candidate, out _) <= reach, "That unit's total Gold Cost is above your Commander's unit's.");
+                    }
+                    else Require(SlotCards(command, "targets").Sum(c => UnitTotalGoldCost(c, out _)) <= reach, "The targets' combined total Gold Cost is above your Commander's unit's.");
+                    break;
                 }
-                else Require(SlotCards(command, "targets").Sum(c => UnitTotalGoldCost(c, out _)) <= reach, "The targets' combined total Gold Cost is above your Commander's unit's.");
-                break;
-            }
             // Words Have Strength: "You may only play one copy of Words Have Strength in reaction to any one resolution."
             case "words-strength-resolution":
                 Require(_state.PendingAfterResolution is { WordsHaveStrengthPlayed: false }, "Words Have Strength was already played in reaction to this resolution.");
@@ -261,13 +261,13 @@ public sealed partial class MatchEngine
                 return false;
             case "wall-of-honor-raise":
             case "wall-of-honor-lower":
-            {
-                var battle = _state.CurrentBattleProvince!.Value;
-                var units = Army(1 - player.Id, battle).Count();
-                if (CurrentProvinceIndex() is int wallProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, wallProvince, id == "wall-of-honor-raise" ? units : -units, name); // no province, no strength (issue #492, rulings pass R1)
-                GainHonor(player.Id, 2, name, source);
-                return false;
-            }
+                {
+                    var battle = _state.CurrentBattleProvince!.Value;
+                    var units = Army(1 - player.Id, battle).Count();
+                    if (CurrentProvinceIndex() is int wallProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, wallProvince, id == "wall-of-honor-raise" ? units : -units, name); // no province, no strength (issue #492, rulings pass R1)
+                    GainHonor(player.Id, 2, name, source);
+                    return false;
+                }
             // "Move him home. If this did not move him home, destroy him": a movement that was negated or locked leaves him at the battlefield, and then he is destroyed.
             case "laws-strength-move":
                 MoveHome(target!, false);
@@ -285,14 +285,14 @@ public sealed partial class MatchEngine
                 foreach (var shamed in SlotCards(command, "targets").ToArray()) MoveHome(shamed, false);
                 return false;
             case "serpents-deception-move":
-            {
-                var monk = Card(command.PerformerId!);
-                MoveHome(target!, false);
-                monk.DeepRootsTurn = _state.TurnNumber;
-                Emit("contributesWhileBowed", $"{name}: {Definition(monk).Name} contributes Force to his army even if bowed this turn.", player.Id, monk.Id);
-                GainHonor(player.Id, -3, name, source);
-                return false;
-            }
+                {
+                    var monk = Card(command.PerformerId!);
+                    MoveHome(target!, false);
+                    monk.DeepRootsTurn = _state.TurnNumber;
+                    Emit("contributesWhileBowed", $"{name}: {Definition(monk).Name} contributes Force to his army even if bowed this turn.", player.Id, monk.Id);
+                    GainHonor(player.Id, -3, name, source);
+                    return false;
+                }
             case "words-strength-resolution":
             case "words-strength-action":
                 if (id == "words-strength-resolution" && _state.PendingAfterResolution is { } resolution) resolution.WordsHaveStrengthPlayed = true;
@@ -304,26 +304,26 @@ public sealed partial class MatchEngine
                 return true;
             // Torch's Flame Flickers: Reconnaissance now, and the watch on the next card effect that bows one of the player's Personalities at this battlefield.
             case "torch-flame-recon":
-            {
-                GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                _state.TorchWatches.RemoveAll(w => w.Battle != _state.BattleNumber);
-                _state.TorchWatches.Add(new(player.Id, _state.CurrentBattleProvince!.Value, _state.BattleNumber, name));
-                Emit("watchSet", $"{name}: the next card effect that bows one or more of {player.Name}'s Personalities at this battlefield will be negated.", player.Id, source!.Id);
-                return false;
-            }
+                {
+                    GrantReconnaissanceAtCurrentBattlefield(player.Id);
+                    _state.TorchWatches.RemoveAll(w => w.Battle != _state.BattleNumber);
+                    _state.TorchWatches.Add(new(player.Id, _state.CurrentBattleProvince!.Value, _state.BattleNumber, name));
+                    Emit("watchSet", $"{name}: the next card effect that bows one or more of {player.Name}'s Personalities at this battlefield will be negated.", player.Id, source!.Id);
+                    return false;
+                }
             // White Shore Plain's granted Reaction: the Tactician's own Force bonus, equal to his Chi as it resolves.
             case "white-shore-plain-boost":
                 ApplyModifier(source!, source!.Id, id, "Force", PersonalityChi(source));
                 return false;
             // The Shadow Court: bow him, then the performing Courtier is watched for the turn.
             case "shadow-court-bow":
-            {
-                var courtier = Card(command.PerformerId!);
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                _state.ShadowCourtWatches.Add(new(courtier.Id, player.Id, _state.TurnNumber, source!.Id));
-                Emit("watchSet", $"{name}: after the next time this turn another player's action or a battle resolution destroys {Definition(courtier).Name}, {player.Name} draws a card and chooses a player who gains or loses 2 Honor.", player.Id, courtier.Id);
-                return false;
-            }
+                {
+                    var courtier = Card(command.PerformerId!);
+                    if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                    _state.ShadowCourtWatches.Add(new(courtier.Id, player.Id, _state.TurnNumber, source!.Id));
+                    Emit("watchSet", $"{name}: after the next time this turn another player's action or a battle resolution destroys {Definition(courtier).Name}, {player.Name} draws a card and chooses a player who gains or loses 2 Honor.", player.Id, courtier.Id);
+                    return false;
+                }
             default:
                 return null;
         }
@@ -439,7 +439,7 @@ public sealed partial class MatchEngine
         if (command.Type == "useAbility") { UseAbility(command); return; }
         _state.TwistOfFateDeclinedTurn = _state.TurnNumber;
         _state.PendingChoice = null;
-        EndTurn();
+        EndDynastyPhase(); // issue #667: the Attack Phase when the order puts it after the Dynasty Phase
     }
 
     // Twist of Fate's effect: the Strategy is spent, the window closes, and the match steps into the Action Phase for exactly one additional action of its player's (a Limited or an Open one -- and, being

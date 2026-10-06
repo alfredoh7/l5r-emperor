@@ -550,6 +550,8 @@ public sealed partial class MatchEngine
         if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
         // Promotional-Emperor Champion items (PromoEmperorItems.cs): "Attaches to a [X] Champion ignoring costs."
         if (PromoItemsAttachesFree(card, target)) { raw = 0; kind = GoldCostKind.Derived; basis += " (attaches to a Champion ignoring costs)"; }
+        // Hyobuko's Heart of Fudo and The Topaz Armor - exp (issue #667, SearchPlayFudo.cs): "ignoring Gold cost" / "ignoring costs" on the wielder they name.
+        if (SearchPlayAttachesFree(card, target)) { raw = 0; kind = GoldCostKind.Derived; basis += " (attaches ignoring Gold cost)"; }
         // Promotional-Celestial group C (PromoCelestialC.cs): Fudo Cultist "ignoring Gold cost" on a Nonhuman Fudo Personality; Yotsu Ueda's Chosen "paying 2 less Gold" on Yotsu Ueda.
         if (PromoCelestialCAttachDiscount(card, target, raw) is { Amount: > 0 } promoC) { raw -= promoC.Amount; kind = GoldCostKind.Derived; basis += promoC.Basis; }
         if (raw < 0) basis += " (min 0)";

@@ -172,6 +172,7 @@ public sealed partial class MatchEngine
         foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand && !P5Borrowed(c))) RestoreOwner(card); // issue #503: Learning's borrowed Strategy
         SweepP5Borrowed();
         ApplyControlReturnsAfterCommand();
+        SweepRemovedAbilities(); // issue #667 (AbilityRemoval.cs): a card whose abilities were removed has them again once it has left play.
         SweepP5Records(); // issue #503 (EmperorP5Zones.cs): a Ring whose abilities were removed is a new object once it has left play. // issue #501 (EmperorMechB.cs): a return owed to a card that left play (Sachina), and returns blocked by Unique/Singular tried again.
     }
 
@@ -205,6 +206,7 @@ public sealed partial class MatchEngine
         }
         TakeControl(attachment, wielder.OwnerId);
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
+        PromoPaymentAttached(attachment); // Coin Pouch (issue #667): "This card enters play bowed."
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
         if (fromDiscard) NoteAttached(player.Id, attachment, "discard"); // Issue #501 (EmperorMechD.cs): the attach log (a hand attach is logged above).
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name}{(fromDiscard ? " from a discard pile" : "")}.", player.Id, attachment.Id);

@@ -423,7 +423,9 @@ public sealed partial class MatchEngine
                 HoldSearchedRefill(search, card);
                 FinishSearch(search);
                 break;
-            default: throw new RuleViolation("Unknown search effect.");
+            default:
+                if (!SearchPlayApplyEffect(search, card, option.Effect)) throw new RuleViolation("Unknown search effect."); // issue #667 (SearchPlayRosary.cs): a Celestial put into play with no province
+                break;
         }
     }
 
@@ -519,6 +521,7 @@ public sealed partial class MatchEngine
     private void FinishSearch(PendingSearch search)
     {
         TfStrategiesAFinishSearch(search); // Death of the Winds (issue #622, TfStrategiesA.cs): an additional action to play the card it found
+        SearchPlayFinishSearch(search); // Gozu (issue #667, SearchPlayGozu.cs): the Terrain it found is played now (an owed additional action) or discarded
         // Emperor Edition remaining-cards pass (issue #492), group E: I Give You My Name's "Lose 2 Honor" (whether or not a card was found), then the entering-play window of a Personality it put into play.
         if (search.HonorLossOnFinish > 0) GainHonor(search.PlayerId, -search.HonorLossOnFinish, Definition(Card(search.SourceCardId)).Name, Card(search.SourceCardId));
         ShuffleDeck(Player(search.PlayerId), search.Deck!);
@@ -552,7 +555,7 @@ public sealed partial class MatchEngine
         if (origin == "event") { ResumeEventAfterDeferral(playerId, sourceCardId); return; }
         if (bowedBefore is not null && OpenBowReactionWindow(playerId, bowedBefore.ToHashSet(StringComparer.Ordinal), 1 - playerId)) return;
         if (OpenOverconfidentDrawWindow(1 - playerId)) return;
-        NextAction(playerId, TfStrategiesAKeepsPriority(playerId, sourceCardId)); // Death of the Winds (issue #622): the player takes the additional action it granted
+        NextAction(playerId, TfStrategiesAKeepsPriority(playerId, sourceCardId) || SearchPlayKeepsPriority(playerId)); // Death of the Winds (issue #622) and Gozu (issue #667): the player takes the additional action it granted
     }
 
     // An Event's own resolution once its deferred text is done (Imperial Gift's search, Signs and Portents' look): the Event

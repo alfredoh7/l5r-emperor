@@ -130,8 +130,9 @@ public sealed record AppliedModifier(string Source, string Effect, string Stat, 
 
 /// <summary>One negation a "before an action resolves" reaction has set on a card for the deferred command:
 /// Kind is "destroy", "move", "straighten", "bow" (each consumed by its first match) or "all" (Champion of
-/// Thunder: every effect the action applies to that card, live for the whole re-invocation).</summary>
-public sealed record NegatedEffect(string Kind, string CardId);
+/// Thunder: every effect the action applies to that card, live for the whole re-invocation). ByPlayer (issue #667, PerformersSled.cs): the player whose Reaction set it, stamped when that
+/// Reaction's effects finish (Winter Sled: other players' cards' effects will not negate the Personality's movement).</summary>
+public sealed record NegatedEffect(string Kind, string CardId, int? ByPlayer = null);
 
 /// <summary>A reaction window set aside while a Reaction played inside it (an action, like any other) has a window of its own to deal
 /// with -- a before-action window, a forced discard, Unimpeachable Name, an "after this action" window. PendingChoice holds one window,
@@ -1285,6 +1286,8 @@ public sealed class ResolvedActionFacts
     public List<int> HandRecipients { get; set; } = [];
     // Emperor Edition Stronghold pass (issue #486), batch 1 (Kyuden Otomo - exp): the players who took the Imperial Favor during the action.
     public List<int> FavorTakers { get; set; } = [];
+    // Issue #667 (FavorMempo.cs): the players who discarded the Imperial Favor as a cost of the action ("After you discard the Imperial Favor").
+    public List<int> FavorDiscarders { get; set; } = [];
     // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
     public bool WordsHaveStrengthPlayed { get; set; }
 }
@@ -1523,6 +1526,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // Public display context for a battle fought inside the Action Phase. ActivePlayerId
     // remains the battle's attacker; this is the original turn owner, never the paused action.
     public int? ActionPhaseTurnPlayerId { get; init; }
+    // Issue #667 (PhaseOrder.cs): the six printed phases by name in the order this turn is running in, PUBLIC and identical for both seats; null while the usual order (Straighten, Events, Action, Attack, Dynasty, End) runs.
+    public string[]? PhaseOrder { get; init; }
 }
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);

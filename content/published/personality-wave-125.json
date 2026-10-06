@@ -1,0 +1,90 @@
+{
+  "Profile": "personality-wave-125",
+  "Rules": "Emperor Edition core rules; reviewed scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2887",
+      "Name": "Gozu",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Terrain: Destroy it. You may discard a card. If you did, search your Fate deck for a Terrain, show it, then take an additional Battle action to play it, if legal; if not, discard it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2887.jpg",
+      "Keywords": [
+        "Ronin",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sp-gozu-destroy",
+        "sp-gozu-destroy-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3534",
+      "Name": "Hyobuko",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches Heart of Fudo ignoring Gold cost.\nLimited: Discard Hyobuko: He searches for an ancient relic. Search your discard pile, then Fate deck, for a card titled Heart of Fudo. Show it and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3534.jpg",
+      "Keywords": [
+        "Singular",
+        "Fudo",
+        "Monk",
+        "Shugenja",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sp-hyobuko-search"
+      ],
+      "Effect": "sp-hyobuko-fudo"
+    },
+    {
+      "Id": "oracle-l5r-4853",
+      "Name": "Masaya",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If Masaya is face-up in one of your provinces: Bring him into play, paying all costs and paying 2 less Gold. Before the turn ends, put him on top of your Dynasty deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4853.jpg",
+      "Keywords": [
+        "Ronin",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sp-masaya-recruit"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

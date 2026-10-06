@@ -1,0 +1,11 @@
+[
+  {
+    "card_id": "user-scan-breached-oni",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-by-mendon-2026-10-05 (Breached Oni.jpg)",
+    "image_path": "assets/requested-scans/breached-oni.jpg",
+    "image_sha256": "34427dd8e120c2b61a59163b6da34ca73e2076f539a79ed34c2d9513742e0161"
+  }
+]

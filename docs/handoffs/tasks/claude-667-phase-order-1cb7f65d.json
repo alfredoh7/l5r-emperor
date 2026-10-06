@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Phase-order marker (#667): per-turn order of the six printed phases in match state drives the Action->Attack->Dynasty->End transitions; The Deciding Moment and Nocturnal Attack (strategy-wave-116) put Dynasty before Attack for one turn; MatchView.PhaseOrder; phase header names slide between slots and reset.",
+  "validation": "dotnet run Core tests all pass (phase-order 10/10); native PhaseTrackProbe SIX_PHASE_PASS + PHASE_ORDER_PASS at 1672x941; check.sh --skip-client stops at the catalogue-art coverage test (2 new printings need the art-pack publisher step); repo-wide check_format baseline errors are pre-existing",
+  "remaining": "Art pack rebuild for oracle-l5r-10119 and 10385; coordinator inventory/blocker updates; readings in docs/decisions/2026-10-05-667-phase-order.md for Mendon to confirm",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
+  "branch": "claude/667-phase-order",
+  "updated": "2026-10-06T02:00:35.222308+00:00"
+}

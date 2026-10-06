@@ -277,6 +277,7 @@ public sealed partial class MatchEngine
                 case CostVerbs.DestroyRegion: DestroyRegion(subject); break;
                 case CostVerbs.RemoveUnit: RemoveUnitFromGame(subject); break;
                 case CostVerbs.DiscardFromPlay:
+                    if (SearchPlayDiscardPersonalityFromPlay(subject)) break; // Hyobuko (issue #667, SearchPlayFudo.cs): a Personality discarded from play takes his unit with him
                     PromoCelestialCRegionLeft(subject); // a Region discarded from play leaves its province (PromoCelestialC.cs)
                     subject.Zone = IsDynastyCardType(Definition(subject).Type) ? Zone.DynastyDiscard : Zone.FateDiscard;
                     subject.ProvinceIndex = null; subject.FaceUp = true;

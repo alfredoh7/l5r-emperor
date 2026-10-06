@@ -1,0 +1,31 @@
+{
+  "Profile": "personality-wave-127",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "user-scan-ambusher",
+      "Name": "Ambusher",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-ambusher.jpg",
+      "Keywords": [
+        "Samurai"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

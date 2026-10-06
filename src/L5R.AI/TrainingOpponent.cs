@@ -281,6 +281,14 @@ public static partial class TrainingOpponent
             case "beforeBattleOptional":
                 var optionalTarget = opponent.Army.FirstOrDefault(c => c.Id == command.TargetId);
                 return command.Choice == "use" ? 60 + (optionalTarget?.Force ?? 0) : 20;
+            // Sleep's budgeted multi-select (issue #667): the bot bows enemy unbowed Personalities the budget allows (strongest first), never its own or an already bowed one, never clears, then confirms.
+            case "budgetSelectAdd":
+                var sleepTarget = opponent.Army.Concat(opponent.Home).FirstOrDefault(c => c.Id == command.TargetId);
+                return sleepTarget is { Bowed: false } ? 120 + sleepTarget.Force : -50;
+            case "budgetSelectConfirm": return 100;
+            case "budgetSelectClear": return -100;
+            // Fusako's pre-accept bow (issue #667): the bot never bows its own Personality to refuse; it accepts the duel.
+            case "bowToRefuseDuel": return -100;
             // Any other decision the engine offers is answered rather than ignored (issue #642): a modest bot takes the first complete option, just above passing,
             // so a decision it has no rule for can never stall a match.
             default: return PassScore + 1;

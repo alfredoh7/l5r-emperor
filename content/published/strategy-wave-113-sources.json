@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-5523",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5523",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-5523-printing-1-image-1.webp",
+    "image_sha256": "c3b5774887d306d69cf400f9834b4080b33df57116e08ebbd622ede03361ef7f"
+  },
+  {
+    "card_id": "oracle-l5r-6075",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6075",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-6075-printing-1-image-1.webp",
+    "image_sha256": "164fc0ab14ed3274148b151a2f94a9347b5748eb90f487a163124ff48cd71438"
+  }
+]

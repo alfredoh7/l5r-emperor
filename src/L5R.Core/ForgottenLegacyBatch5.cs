@@ -42,7 +42,7 @@ public sealed partial class MatchEngine
                 card.AbilityUses[BurningDreamsUntilKey] = player.TurnsTaken + 2;
                 if (_state.FavorPlayerId is int favorHolder)
                 {
-                    _state.FavorPlayerId = null;
+                    ReleaseImperialFavor(favorHolder, asCost: false); // issue #667 (FavorMempo.cs): the Event's effect, not a cost, so no "after you discard" window follows it
                     Emit("favorDiscarded", $"{Definition(card).Name}: {Player(favorHolder).Name} discards the Imperial Favor.", favorHolder, card.Id);
                 }
                 Emit("eventEnteredPlay", $"{Definition(card).Name} stays in play: Nonhumans may not perform Political actions until the game ends.", player.Id, card.Id);
