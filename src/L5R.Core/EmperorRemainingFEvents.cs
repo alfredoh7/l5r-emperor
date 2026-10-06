@@ -564,6 +564,7 @@ public sealed partial class MatchEngine
     // Attacker may draw a card").
     private void AfterProvinceDestroyedByResolution(int attacker, int defender, ProvinceState province, CardInstance[] attackingArmy)
     {
+        WlPersGates1AfterProvinceDestroyed(attacker, attackingArmy); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary's army destroys a Province, draw a card."
         foreach (var boast in EventsInPlay(BoastfulProclamationEffect).Where(e => e.OwnerId == defender && e.AbilityUses.TryGetValue(BoastProvinceKey, out var i) && i == province.Index).ToArray())
         {
             foreach (var personality in attackingArmy.Where(c => c.Zone == Zone.Battlefield && Definition(c).Type == CardType.Personality))
