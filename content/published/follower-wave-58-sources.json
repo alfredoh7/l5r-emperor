@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-10336",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10336",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10336-printing-1-image-1.webp",
+    "image_sha256": "ee7b0c798513259bc6275af58b7b537bf512647bb47b203e63c6578f0d2a00a2"
+  },
+  {
+    "card_id": "oracle-l5r-11332",
+    "printing_set": [
+      "Ivory Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=11332",
+    "image_path": "assets/reference/oracle/ivory-edition/images/oracle-l5r-11332-printing-1-image-1.jpg",
+    "image_sha256": "6415c83baa50300536e3437634dae0ea7fbd7c76c334fc648d6964a0c9e811f7"
+  },
+  {
+    "card_id": "oracle-l5r-11337",
+    "printing_set": [
+      "Ivory Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=11337",
+    "image_path": "assets/reference/oracle/ivory-edition/images/oracle-l5r-11337-printing-1-image-1.jpg",
+    "image_sha256": "b5da682d24d0d2402c651c16f6ed6e86e840ab462189ff20dc82d07810ba2d2f"
+  },
+  {
+    "card_id": "oracle-l5r-10815",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10815",
+    "image_path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10815-printing-1-image-1.jpg",
+    "image_sha256": "9028b5b3a33227b7d336d975803921867ea59281647987516b1a8df781e6e22b"
+  },
+  {
+    "card_id": "user-scan-korus-retinue",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-by-mendon-2026-10-06 (Koru's Guard)",
+    "image_path": "assets/requested-scans/korus-retinue.jpg",
+    "image_sha256": "19f0174021f394cc5cf706f5fa2eed8e93cf0f936100faa800ff9f12758ce269"
+  }
+]

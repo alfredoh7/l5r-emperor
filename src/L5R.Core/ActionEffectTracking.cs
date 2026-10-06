@@ -123,6 +123,7 @@ public sealed partial class MatchEngine
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
         if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
         if (WlPersTornAfterActionApplies(source, abilityId, playerId, facts) is { } wlPersTorn) return wlPersTorn; // Shinjo Sihung (issue #674, WlPersTorn.cs): "after your Tactical action resolves"
+        if (CreatedProxies677AfterActionApplies(source, abilityId, facts) is { } proxy677) return proxy677; // Goju Kaxt (issue #677, CreatedProxies677.cs): "an action ... during which this card was destroyed"
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
