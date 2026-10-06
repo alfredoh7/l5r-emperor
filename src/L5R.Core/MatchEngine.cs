@@ -402,7 +402,7 @@ public sealed partial class MatchEngine
             case "purchase": Purchase(command); break;
             case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
-            case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard, "Not in the Dynasty Phase."); if (BeginTwistOfFateWindow()) break; EndTurn(); break;
+            case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard, "Not in the Dynasty Phase."); if (BeginTwistOfFateWindow()) break; EndDynastyPhase(); break;
             case "declareAttack": DeclareAttackPhase(command); break;
             case "attack": AssignAttackers(command); break;
             case "assignDefense": AssignDefense(command); break;
@@ -1171,7 +1171,7 @@ public sealed partial class MatchEngine
                     // grant, and the holder keeps the priority while he holds another. Only both players passing in succession ends the phase (CountPass), not one player passing twice.
                     var passer = _state.PriorityPlayerId;
                     var keeps = PassSpendsAdditionalAction(passer);
-                    if (CountPass(passer)) { _state.AdditionalActions.RemoveAll(Forfeitable); SetPhase(Phase.AttackDeclaration, _state.ActivePlayerId); }
+                    if (CountPass(passer)) { _state.AdditionalActions.RemoveAll(Forfeitable); BeginPhaseAfterAction(); } // issue #667: the next printed phase of the turn's order
                     else _state.PriorityPlayerId = keeps ? passer : 1 - passer;
                     break;
                 }
@@ -1196,7 +1196,7 @@ public sealed partial class MatchEngine
                 FinishBattlePass();
                 break;
             case Phase.Dynasty:
-            case Phase.DynastyDiscard: if (BeginTwistOfFateWindow()) break; EndTurn(); break;
+            case Phase.DynastyDiscard: if (BeginTwistOfFateWindow()) break; EndDynastyPhase(); break;
             default: throw new RuleViolation("Choose a battlefield before continuing.");
         }
     }
@@ -1246,7 +1246,7 @@ public sealed partial class MatchEngine
         if (ForcedAttackDeclineRefusal(_state.PriorityPlayerId) is string forcedDecline) throw new RuleViolation(forcedDecline);
         Emit("attackDeclined", $"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.", _state.PriorityPlayerId);
         _state.UnresolvedBattlefields = []; R1.TwoFronts.RemoveAll(m => m.Turn <= _state.TurnNumber);
-        SetPhase(Phase.Dynasty, _state.ActivePlayerId);
+        BeginPhaseAfterAttack(_state.ActivePlayerId); // issue #667: the Dynasty Phase in the default order, otherwise the turn ends
     }
     // Infantry Maneuvers (InfantryDeclaration/DefenseAssignment) runs first, then Cavalry Maneuvers
     // (CavalryDeclaration/CavalryDefense), both on the battlefields the declaration already created: assigning
@@ -3400,9 +3400,8 @@ public sealed partial class MatchEngine
         if (phase == Phase.Dynasty) DragonsBreathHonor();
         // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
         if (phase == Phase.Dynasty) ResolveSentinelWatches();
-        if (phase == Phase.Dynasty)
-            foreach (var waveMan in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "wave-man-attack-phase-straighten"))
-                StraightenBowedUnit(waveMan);
+        if (phase == Phase.Dynasty && !DynastyBeforeAttack()) StraightenWaveMen(); // issue #667 (PhaseOrder.cs): with the Dynasty Phase first it is not the end of the Attack Phase
+        NotePhaseOrder(phase); // issue #667: the phase-order marker
         _state.Phase = phase; _state.PriorityPlayerId = priority; _state.ConsecutivePasses = 0; Emit("phaseChanged", $"Phase: {phase}.");
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if (phase == Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);

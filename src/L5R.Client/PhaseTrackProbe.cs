@@ -11,6 +11,7 @@ public partial class PhaseTrackProbe : Control
     private int _stage,_phase;
     private float _clock;
     private byte[]? _still;
+    private static readonly string[] DynastyFirst=["Straighten","Events","Action","Dynasty","Attack","End"];
     private static readonly Phase[] Ordered=[Phase.Straighten,Phase.Events,Phase.Action,Phase.AttackDeclaration,Phase.Dynasty,Phase.End];
     public override void _Ready()
     {
@@ -73,10 +74,56 @@ public partial class PhaseTrackProbe : Control
             if(_stage==5)
             {
                 RenderingServer.ForceDraw();if(!_still!.SequenceEqual(GetViewport().GetTexture().GetImage().GetData()))throw new Exception("Reduced motion changed pixels");
+                _stage++;return;
+            }
+            // Issue #667: the phase-order marker. A card put the Dynasty Phase before the Attack Phase for this turn: the names slide to their new slots, then slide back when the engine resets the order.
+            if(_stage==6)
+            {
+                if(!_track.LabelsSettled||_track.PhaseAtSlot(3)!="ATTACK"||_track.PhaseAtSlot(4)!="DYNASTY")throw new Exception("The default order is not in the default slots");
+                _track.ReducedMotion=false;_track.Present(_view with{Phase=Phase.Action,PhaseOrder=DynastyFirst});
+                if(_track.PhaseAtSlot(3)!="DYNASTY"||_track.PhaseAtSlot(4)!="ATTACK")throw new Exception("The reorder did not put Dynasty before Attack");
+                if(_track.LabelsSettled)throw new Exception("The reorder did not animate");
+                _stage++;return;
+            }
+            if(_stage==7)
+            {
+                if(!_track.LabelsSettled)throw new Exception("The reorder animation did not finish");
+                Save("reordered-action");
+                _track.Present(_view with{Phase=Phase.Dynasty,PhaseOrder=DynastyFirst});
+                if(_track.ActiveSegment!=4||_track.ActiveSlot!=3)throw new Exception("The Dynasty Phase must light the slot it now occupies");
+                foreach(var area in _track.HelpRegions)if(!GetViewportRect().Encloses(area.GetGlobalRect()))throw new Exception("Clipped phase target");
+                _track.HelpRegions[3].GrabFocus();if(!_track.HelpVisible)throw new Exception("The third slot has no help");
+                _track.HelpRegions[3].ReleaseFocus();
+                _stage++;return;
+            }
+            if(_stage==8)
+            {
+                Save("reordered-dynasty");
+                _track.Present(_view with{Phase=Phase.AttackDeclaration,PhaseOrder=DynastyFirst});
+                if(_track.ActiveSegment!=3||_track.ActiveSlot!=4)throw new Exception("The Attack Phase must light the slot it now occupies");
+                // The turn is done: the engine's view carries no order again and the names slide back.
+                _track.Present(_view with{Phase=Phase.End,PhaseOrder=null});
+                if(_track.PhaseAtSlot(3)!="ATTACK"||_track.PhaseAtSlot(4)!="DYNASTY")throw new Exception("The reset did not restore the default order");
+                if(_track.LabelsSettled)throw new Exception("The reset did not animate");
+                _stage++;return;
+            }
+            if(_stage==9)
+            {
+                if(!_track.LabelsSettled)throw new Exception("The reset animation did not finish");
+                Save("reset");
+                // Reduced motion: the names are in place at once, no animation.
+                _track.ReducedMotion=true;_track.Present(_view with{Phase=Phase.Action,PhaseOrder=DynastyFirst});
+                if(!_track.LabelsSettled||_track.PhaseAtSlot(3)!="DYNASTY")throw new Exception("Reduced motion must change the order at once");
+                _track.Present(_view with{Phase=Phase.Action,PhaseOrder=null});
+                if(!_track.LabelsSettled||_track.PhaseAtSlot(3)!="ATTACK")throw new Exception("Reduced motion must reset the order at once");
+                // A malformed order is the usual order.
+                _track.Present(_view with{Phase=Phase.Action,PhaseOrder=["Straighten","Events","Action","Attack","Attack","End"]});
+                if(_track.PhaseAtSlot(3)!="ATTACK"||_track.PhaseAtSlot(4)!="DYNASTY")throw new Exception("A malformed order must not scramble the rail");
                 _track.Present(_view with{Phase=Phase.Finished});_stage++;return;
             }
             if(_track.ActiveSegment!=-1||!_track.HelpButton.Disabled)throw new Exception("Finished match highlights a playable phase");
-            GD.Print("SIX_PHASE_PASS: all enum mappings, six native states, hover Events help, keyboard arrows/Escape, no Pass dispatch, viewport fit, pixel-stable reduced motion, Finished unlit.");GetTree().Quit();
+            GD.Print("SIX_PHASE_PASS: all enum mappings, six native states, hover Events help, keyboard arrows/Escape, no Pass dispatch, viewport fit, pixel-stable reduced motion, Finished unlit.");
+            GD.Print("PHASE_ORDER_PASS: Dynasty-before-Attack slides the names into their new slots and lights the slot each phase occupies, the reset slides them back, reduced motion is immediate, a malformed order is ignored.");GetTree().Quit();
         }
         catch(Exception e){GD.PushError(e.ToString());Save("failure");GetTree().Quit(1);}
     }
