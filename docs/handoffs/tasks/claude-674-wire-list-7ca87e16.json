@@ -1,9 +1,9 @@
 {
   "lane": "rules",
-  "summary": "Wires 202 of the 206 WIRE-list cards from the #668 assessment (#674) across 11 waves: personality-wave-133..132, strategy-wave-117..119 (+118), holding-wave-53, spell-wave-55, ring-wave-3, item-wave-48, follower-wave-48, event-wave-32, celestial-wave-28. Four blocked with notes: Benediction (province+card target slot), Read the Essence (two face-down provinces), Witness the Untold (no after-Ring-enters trigger), Fudo's Assurances (Ring entry provenance).",
-  "validation": "Full Core suite pass (after test-list merge fixes); AI suite incl. bot-soak 3/3; check_format and lint_comment_swallow clean; art pack catalogue-art-issue674-20261006-r1 built (4382 images, 202 new) and install-verified locally. All readings in docs/decisions/2026-10-06-674-*.md are proposed, not confirmed rulings. No client changes; no native visual probes run.",
-  "remaining": "Publish art pack release; CI; Mendon to confirm readings; known pre-existing issue: Field Messenger transfer rejected offers (bot-soak rejected count) not addressed.",
+  "summary": "Wires 202 of the 206 WIRE-list cards from the #668 assessment (#674) across 15 waves: personality-wave-131..135, strategy-wave-117..119, holding-wave-53, spell-wave-55, ring-wave-3, item-wave-48, follower-wave-48, event-wave-32, celestial-wave-28 (renumbered from 128-130/item-47/spell-54 after #672 took those). Four blocked with notes: Benediction, Read the Essence, Witness the Untold, Fudo's Assurances.",
+  "validation": "Full Core suite and check.sh --skip-client pass on the pre-#672-merge tree; re-run after merging main (see PR). AI suite incl bot-soak 3/3; format and lint clean; art pack catalogue-art-issue674-20261006-r2 (4398 images, 202 new, base = #672's r1) built and install-verified. Readings in docs/decisions/2026-10-06-674-*.md are proposed. No client code changed; no native probes run.",
+  "remaining": "Mendon to confirm readings; Field Messenger transfer rejected offers in bot-soak are pre-existing and unaddressed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/674",
   "branch": "claude/674-wire-list",
-  "updated": "2026-10-06T13:57:56.138067+00:00"
+  "updated": "2026-10-06T14:55:49.750944+00:00"
 }
