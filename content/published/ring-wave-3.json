@@ -1,0 +1,63 @@
+{
+  "Profile": "ring-wave-3",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10533",
+      "Name": "False Ring of Fire",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Does not count towards an Enlightenment Victory.\nOpen: If your maximum hand size is 10 or more, put this Ring into play and lose 2 Honor.\nInterrupt, Bow this card: Reduce all Honor gains and losses from an action by 2.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10533.jpg",
+      "Keywords": [
+        "Fire",
+        "Fudo",
+        "Unique"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-false-ring-of-fire-recruit",
+        "wl-false-ring-of-fire-reduce"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10534",
+      "Name": "False Ring of the Void",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Does not count towards an Enlightenment Victory.\nAfter a battle resolves where you destroyed a Province, you may put this Ring into play and lose 2 Honor.\nEngage, Bow this card: A target Personality at any location will not move this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10534.jpg",
+      "Keywords": [
+        "Fudo",
+        "Void",
+        "Unique"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-false-ring-of-void-recruit",
+        "wl-false-ring-of-void-lock"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

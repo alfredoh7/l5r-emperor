@@ -3950,6 +3950,7 @@ public sealed partial class MatchEngine
             return false;
         if (printedOrGranted) return true;
         if (keyword == "Naval" && PromoEmperorNaval(card)) return true; // Suitengu's Blessing (issue #653): Naval while the Celestial remains in play
+        if (WlItemsMiscKeywordGranted(card, keyword)) return true; // Hachiman's Prowess (issue #674, WlItemsMiscCelestials.cs): Elite while the Celestial remains in play
         // Isawa Kojiro (oracle-l5r-3850, issue #301): "Kojiro has Naval while he has a Spell" -- the same
         // additive live conditional grant Tamori Yayu's Cavalry below is, re-evaluated on every call so
         // it appears the moment a Spell attaches and disappears the moment it leaves (destroyed,
@@ -3970,6 +3971,7 @@ public sealed partial class MatchEngine
         if (PromoItemsKeywordGranted(card, keyword)) return true; // The Emerald Armor's Imperial and Magistrate, Mantle of the Onyx Champion's Maho (PromoEmperorItems.cs)
         if (UnmeiMirrorsKeyword(card, keyword)) return true;
         if (PromoGrantsKeyword(card, keyword)) return true; // Tamahime's Tactician (issue #653, PromoEmperorPersonalities.cs)
+        if (WlPersTornGrantsKeyword(card, keyword)) return true; // Kaiu Nagai's and Asako Kyuudo's Elite while defending (issue #674, WlPersTorn.cs)
         if (OchiaiGrantsDuelist(card, keyword)) return true; // Ochiai's Bravery (issue #503) // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
@@ -4281,6 +4283,7 @@ public sealed partial class MatchEngine
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
                                                                                  // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
             ?? IvoryMovementMoveKind(abilityId)
+            ?? WlPersTornMoveKind(abilityId)
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -4423,6 +4426,7 @@ public sealed partial class MatchEngine
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
         if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
         if (PromoItemsBeforeActionApplies(card, abilityId, command) is { } promoItemsBefore) return promoItemsBefore; // The Pearl-Encrusted Staff of the Cobras (PromoEmperorItems.cs)
+        if (WlBeforeActionApplies(card, abilityId, command) is { } wlBefore) return wlBefore; // Improper Papers (issue #674, WlStratTorn.cs)
         if (PromoBeforeActionApplies(card, abilityId, command, affectedId) is { } promoBefore) return promoBefore; // Interrogation (issue #653, PromoEmperorFateReactions.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
@@ -4991,7 +4995,7 @@ public sealed partial class MatchEngine
     // Water's and Ring of the Void's recruits are standing checks with no grant.)
     private static readonly HashSet<string> RingRecruitGrantIds = new(StringComparer.Ordinal)
     {
-        "ring-of-air-recruit", "ring-of-water-recruit", "ring-of-earth-recruit", "ring-of-fire-recruit", "false-ring-of-air-recruit", "false-ring-of-earth-recruit"
+        "ring-of-air-recruit", "ring-of-water-recruit", "ring-of-earth-recruit", "ring-of-fire-recruit", "false-ring-of-air-recruit", "false-ring-of-earth-recruit", "wl-false-ring-of-void-recruit" // issue #674: False Ring of the Void
     };
     // The battle a recruit grant made NOW belongs to (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle"): the battle in
     // progress -- its Battle phase, through its resolution and aftermath -- or, made anywhere else (the Action phase's Favor actions), the next battle to be fought.
@@ -5086,8 +5090,10 @@ public sealed partial class MatchEngine
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
         AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
         AfterKoshinKeepAttack(abilityId, playerId, targetId, strength, targetInPlayBefore); // Emperor Edition Stronghold pass (issue #486), batch 1: Koshin Keep's additional effects.
+        AfterWlStratTornAttack(abilityId, sourceId); // issue #674 (WlStratTorn.cs): Ambush Tactics' "You may move him home".
         AfterEmperorStrongholdBatch3Attack(abilityId, sourceId); // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "You may move your Ninja home".
         AfterEmperorRemainingGAttack(abilityId, playerId, targetId, targetInPlayBefore, sourceId); // Emperor Edition remaining-cards pass (issue #492), group G: Ikoma House Guard's "gain 1 Honor".
+        AfterWlPersAftermathAttack(abilityId, targetId, targetInPlayBefore); // Issue #674 (WlPersAftermath.cs): Bayushi Dijuro's "If this destroyed a card, give this Province +2 or -2 strength".
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
@@ -5164,6 +5170,7 @@ public sealed partial class MatchEngine
         // Lessons Never Forgotten (The Shadow's Embrace pass, issue #476 batch 3): the same hand-over of its optional attachment target after a deferred Attack.
         if (BeginLessonsFollowUpAfterDeferredAttack(attack, grantsBeforeAttack)) return;
         if (BeginP4FollowUpAfterDeferredAttack(attack, grantsBeforeAttack)) return; // Tsuruchi Nobukatsu (issue #503, EmperorP4.cs)
+        if (BeginWlBloodWaveFollowUpAfterDeferredAttack(attack, grantsBeforeAttack)) return; // Blood Wave's second Attack (issue #674, WlSpellsRings.cs)
         // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
         // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). The inherited
         // keywords are the ability's source card's (Command.CardId), not the performer's (SourceId).
@@ -5551,6 +5558,7 @@ public sealed partial class MatchEngine
                 || PromoEmperorEvenIfBowed(id)
                 // Family Sword: "Open: Even if this card is bowed ..." (PromoEmperorItems.cs)
                 || PromoItemsEvenIfBowed(id)
+                || WlPersTornAbilities.EvenIfBowed(id)
                 // issue #672 (P16): the printed Tireless keyword, as data (TirelessHome.cs)
                 || ability.Tireless
                 || id == PromoEmperorEventAbilities.EmeraldStraighten // issue #653: The Emerald Championship, "Even if this Personality is bowed"
@@ -6171,6 +6179,7 @@ public sealed partial class MatchEngine
                 || MechCCarriesCostCard(id) // Emperor Edition mechanics group C (issue #501): the card an optional cost spends.
                 || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
                 || SearchPlayCarriesCostCard(id)
+                || WlCarriesCostCard(id)
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
             // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
@@ -6503,10 +6512,15 @@ public sealed partial class MatchEngine
                 else if (IsEmperorRemainingCOutOfPlayTarget(ability.Target))
                     Require(EmperorRemainingCOutOfPlayTargetAllows(ability.Target, player, target), "Choose a non-Unique Personality with your Clan alignment in your discard pile.");
                 // Emperor Edition remaining-cards pass (issue #492), group E: the discard-pile and hand categories of the Guidance Celestials.
+                else if (IsWlHoldingsOutOfPlayTarget(ability.Target)) // issue #674 (WlHoldings.cs): a Terrain in your discard pile; a face-down card in a province
+                    ValidateWlHoldingsOutOfPlayTarget(ability.Target, player, target);
                 else if (IsP5ZoneOutOfPlayTarget(ability.Target)) // issue #503: The New Foundries' Spell in the hand
                     ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
+                else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
+                    Require(WlItemsMiscOutOfPlayTargetAllows(player, target), "Choose a Battle Strategy from your discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -6529,7 +6543,7 @@ public sealed partial class MatchEngine
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or TfGearAbilities.SpellForCopy /* issue #622: The Thunder Resounds names a Thunder Spell at any location */ or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
                         or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner" or EmperorRulingR1Abilities.EnemyPersonalityAtBattleOrHome
-                        or "own-unbowed-ring") && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
+                        or "own-unbowed-ring" or WlStratGatesAbilities.OwnUnbowedAnyLocation /* issue #674: Boiling Point */) && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
                             or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move" or "shinoda-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
@@ -11206,7 +11220,7 @@ public sealed partial class MatchEngine
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).
             string?[] shownChoices = id == "ishibashi-attack" ? IshibashiShowableCards(player).Cast<string?>().DefaultIfEmpty(null).ToArray()
-                : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
+                : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? WlCostCardChoices(id, player, source) /* issue #674 */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
             // "You may compare it against ..." (issue #492, ruling R5): one offered action per thing the player may compare against; the choice rides on the command.
             string?[] compareChoices = AttackCompareOptions(id) is { } compareOptions ? compareOptions.Select(o => (string?)o.Key).ToArray()
                 : (MechEChoiceOptions(id) ?? P2ChoiceOptions(id)) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray()
@@ -11292,7 +11306,7 @@ public sealed partial class MatchEngine
                                     // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                     EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                     "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? inPlay
+                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? inPlay
                                 }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                    // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                    // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
@@ -11330,7 +11344,7 @@ public sealed partial class MatchEngine
                                     var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                                         ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                                     var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                                        + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
+                                        + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
                                         + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                                         + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                                     yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",

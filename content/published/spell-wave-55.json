@@ -1,0 +1,337 @@
+{
+  "Profile": "spell-wave-55",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10348",
+      "Name": "Blood Wave",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if this unit is not at the current battlefield, bow this Shugenja and destroy your target Personality or Follower: Two consecutive Ranged Attacks, each with strength equal to half your target's Force, rounded down.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10348.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-blood-wave-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10355",
+      "Name": "The Thunderer's Protection",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has +4F.\nReaction: After an action targets a card in this unit, bow this card: Bow the action's performers (if any) after the action resolves.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10355.jpg",
+      "Keywords": [
+        "Thunder",
+        "Armor"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "wl-thunderers-protection-bow"
+      ],
+      "Effect": "wl-thunderers-protection"
+    },
+    {
+      "Id": "oracle-l5r-10536",
+      "Name": "Hidden Power",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If this Shugenja is unbowed, put a Spell in your discard pile into your hand. Bow this Shugenja. Remove this Spell from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10536.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "wl-hidden-power-return"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10537",
+      "Name": "Tempest of Air",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Air Open: If this Shugenja is unbowed, give a target Personality or Follower a Force penalty equal to this Shugenja's Chi. Bow this Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10537.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-tempest-of-air-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10538",
+      "Name": "Soul of Earth",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Earth Battle, Bow this card: Give your target defending Personality a Force bonus equal to his Personal Honor plus 1.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10538.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-soul-of-earth-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10539",
+      "Name": "Flame Lash",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Open, Bow this card: Destroy a target attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10539.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "wl-flame-lash-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10542",
+      "Name": "Among the Clouds",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Air Open: If this Shugenja is unbowed, target a Personality with Force equal to or less than this Shugenja's Chi. Give the target and each of his Followers Cavalry. Bow this Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10542.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-among-the-clouds-cavalry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10703",
+      "Name": "Cast Aside Appearances",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Earth Limited, Bow this card: If this Shugenja is Human, permanently give him Nonhuman, +2F, and the ability, \"Battle: Bow a target enemy card with lower Force.\" Destroy this Spell. Lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10703.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wl-cast-aside-appearances"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10706",
+      "Name": "Study the Wheel",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Void Limited, Bow this card: Turn a card in a Province face-up (if needed) and give it Kharmic. (Repeatable Limited, 2 Gold: Discard a Kharmic card from your Province and refill it face-up.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10706.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-study-the-wheel-kharmic"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10709",
+      "Name": "The Tao of Fudo",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target your Ring in your discard pile or in play. Straighten it or put it in your hand. Destroy this Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10709.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-tao-of-fudo-straighten",
+        "wl-tao-of-fudo-hand"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10913",
+      "Name": "Banished from the Realm",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open, Bow this card: Give your target Spirit Expendable (Draw a card after your Expendable card is destroyed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10913.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-banished-expendable"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10914",
+      "Name": "Blistering Rain",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Water Battle, Bow this card: Give a target Personality or Follower a Force penalty equal to your target Personality's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10914.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "wl-blistering-rain-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10918",
+      "Name": "Mystical Augmentation",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Void Battle, Bow this card: Give a target Personality +1F, or +2F if this Shugenja or the Personality is Void or a Yojimbo.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10918.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-mystical-augmentation-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10921",
+      "Name": "Searing Siege",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Repeatable Fire Battle: Discard a card to make a Ranged Attack with strength equal to its Focus Value or this Shugenja's Chi, whichever is higher. (Repeatable actions may be used any number of times per turn.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10921.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-searing-siege-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

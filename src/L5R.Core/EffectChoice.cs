@@ -153,7 +153,9 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyWlStratTornBranchEffect(effect, command)) return; // issue #674 (WlStratTornRun.cs): A Threat Enacted's destroy-then-dishonor option.
         if (ApplyAbilityRemovalBranchEffect(effect, command)) return; // issue #667 (AbilityRemoval.cs): permanent removal options.
+        if (ApplyWlPersTornBranchEffect(effect, command)) return; // issue #674 (WlPersTorn.cs): Asahina Nanae - exp's options.
         if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
         if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
         if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
@@ -161,6 +163,7 @@ public sealed partial class MatchEngine
         if (ApplyEmperorRemainingDBranchEffect(effect, command)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Sincerity of the Dragon's named number.
         if (ApplyRulingR2BranchEffect(effect, command)) return;
         if (ApplyEmperorP4BranchEffect(effect, command)) return; // Issue #503, group P4 (EmperorP4.cs).
+        if (ApplyWlPersCoilsBranchEffect(effect, command)) return; // issue #674 (WlPersCoils.cs): Asako Chukage - exp2's removal of a Ring and the target from the game.
         if (ApplyEmperorMechABranchEffect(effect, command)) return; // issue #501 (EmperorMechA.cs): String of Victories' Ring, Aramasu's Legacy's bow // Emperor Edition ruling pass R2 (issue #492): The Honesty of the Phoenix's named card.
         switch (effect)
         {

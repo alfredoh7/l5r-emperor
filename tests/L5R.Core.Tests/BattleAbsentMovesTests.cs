@@ -86,6 +86,8 @@ internal static class BattleAbsentMovesTests
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.Move?.Destination == MoveSpec.CurrentBattlefield)) { found.Add(id); groups.Add([id]); }
         foreach (var group in groups)
             Check(group.Any(id => AbilityCatalog.All[id].MovesToBattle), $"an effect that moves a Personality to a battlefield ({string.Join(",", group)}) is not on an ability marked MovesToBattle");
+        // Strategy wave 117 (issue #674): Moments of Destiny and The Way of the World move their target in a feature file (WlStratACEffects.cs, TryMoveToBattlefield), not in RunAbilityEffects.
+        found.UnionWith(["wlsac-moments-of-destiny", "wlsac-way-of-the-world"]);
         foreach (var flagged in AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key))
             Check(found.Contains(flagged), $"{flagged} is marked MovesToBattle but no effect case moves a Personality to a battlefield");
     }
@@ -93,7 +95,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         // + shinoda-move (Emperor Edition Personality pass, issue #477 batch 2: Kuni Shinoda moves himself and an optional Crab Clan Personality to the current battlefield).
-        var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
+        var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !WlPersTornTests.MovesToBattleIds.Contains(p.Key)).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal)); // issue #674: wlpt-ibara-oppose is asserted in WlPersTornTests
         // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
         // + guided-by-honor-move (Emperor Edition remaining-cards pass, issue #492 group B: Guided by Honor moves its performing Paragon to the current battlefield).
         // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).
@@ -107,7 +109,7 @@ internal static class BattleAbsentMovesTests
         // + pf-wyrmbone-move, pf-sled-move (issue #667, item-wave-46): Wyrmbone Katana moves its wielder back to the battlefield he was assigned to this phase (offered only with that record); Winter Sled's Reaction moves its wearer there after engaging (a Reaction, with enemy units at the battlefield). Neither can be offered by the no-presence rig below.
         // + ancestors-steed-move, kinto-exp-move-battle (issue #672, primitive P16, TirelessHome.cs: My Ancestor's Steed moves its target Spirit, Shinjo Kinto - exp himself, to the current battlefield).
 
-        Eq(marked, "ancestors-steed-move,blighted-region-move,broken-alliance-move,charge-into-danger-move,chukage-move,courage-mantis-move,determined-challenge-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,indecision-move,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,kinto-exp-move-battle,lesson-of-earth-move,light-of-justice-move,mai-move-force-penalty,michi-move,moto-house-guard-attack,moving-unmoving-approach,natsumi-move,natures-wrath-move,pe-closing-the-gap-to-battle,pe-suitengus-blessing-move,pf-sled-move,pf-wyrmbone-move,promo-b-brave-new-world-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,tf-camel-mounts-move,tf-typhoon-surge-move,tf-versatile-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "ancestors-steed-move,blighted-region-move,broken-alliance-move,charge-into-danger-move,chukage-move,courage-mantis-move,determined-challenge-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,indecision-move,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,kinto-exp-move-battle,lesson-of-earth-move,light-of-justice-move,mai-move-force-penalty,michi-move,moto-house-guard-attack,moving-unmoving-approach,natsumi-move,natures-wrath-move,pe-closing-the-gap-to-battle,pe-suitengus-blessing-move,pf-sled-move,pf-wyrmbone-move,promo-b-brave-new-world-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,tf-camel-mounts-move,tf-typhoon-surge-move,tf-versatile-move,training-move-current,training-move-to-battle,trusting-instinct-move,wlsac-moments-of-destiny,wlsac-way-of-the-world,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen" || id is "pe-closing-the-gap-to-battle" or "pf-sled-move", $"{id}: a move to the battle is a Battle action");
     }

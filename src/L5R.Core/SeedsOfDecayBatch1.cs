@@ -14,7 +14,8 @@ public sealed partial class MatchEngine
     }
 
     // ---- Embracing Battle / Military Promotion: "He may assign even if bowed. Give him Elite" ---------------------------------------------------------------------
-    private bool MayAssignBowed(CardInstance card) => card.AssignBowedTurn == _state.TurnNumber;
+    // Hachiman's Prowess (issue #674, WlItemsMiscCelestials.cs): its trait "May assign even if bowed" lasts while the Celestial is in play.
+    private bool MayAssignBowed(CardInstance card) => card.AssignBowedTurn == _state.TurnNumber || WlItemsMiscMayAssignBowed(card);
     private void GrantAssignWhileBowedAndElite(CardInstance personality, CardInstance source)
     {
         personality.AssignBowedTurn = _state.TurnNumber;

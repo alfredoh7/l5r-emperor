@@ -3,7 +3,7 @@ using L5R.Core;
 
 // The False Rings (issue #370, Mendon's ruling): "The False Ring of Air has no mechanism by which it may be played directly from hand. In fact, none of
 // the false rings do. They should only be playable when they meet the condition and their second action that requires the ring to bow may only be used
-// once it is in play." Air `oracle-l5r-10531`, Earth `10532` and Water `10535` are published; Fire `10533` and Void `10534` are not wired at all (the
+// once it is in play." Air `oracle-l5r-10531`, Earth `10532` and Water `10535` are published (Fire `10533` and Void `10534` since issue #674, ring-wave-3) (the
 // same rule applies when they are: put-into-play only, from the hand, on their condition; the second action a declared bow cost). Everything is checked
 // through QueryActions, the way the client sees it. See docs/decisions/2026-09-20-false-rings.md.
 internal static class FalseRingTests
@@ -15,7 +15,7 @@ internal static class FalseRingTests
     public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [
-            ("Published shape: Air, Earth and Water are the wired False Rings; Fire and Void are not; each second ability bows the Ring as a declared cost with no hand alternative, and the put-into-play abilities declare none", PublishedShape),
+            ("Published shape: Air, Earth, Water, Fire and Void are the wired False Rings; each second ability bows the Ring as a declared cost with no hand alternative, and the put-into-play abilities declare none", PublishedShape),
             ("False Ring of Air / Water: the second ability is never OFFERED from a hand or a discard pile (not even disabled), is rejected there, and is offered once the Ring is in play and unbowed; a bowed Ring is refused", SecondAbilityOnlyInPlay),
             ("False Ring of Air / Water in play: using the second ability bows the Ring first (a cost) and applies its effect; the Ring is not bowed by a refused attempt", SecondAbilityBowsTheRing),
             ("A False Ring in hand is offered exactly one action -- its put-into-play -- and only when its condition holds (Water: Province Strength 11 or greater; 10 refused); the Honor loss is paid", WaterPutIntoPlay),
@@ -63,8 +63,8 @@ internal static class FalseRingTests
             var c = CardCatalog.Get(id);
             Check(!c.ScenarioOnly && c.Type == CardType.Ring && c.Name == name, id);
         }
-        foreach (var name in new[] { "False Ring of Fire", "False Ring of the Void" })
-            Check(!CardCatalog.Cards.Values.Any(c => !c.ScenarioOnly && c.Name == name), name + " is not wired");
+        foreach (var name in new[] { "False Ring of Fire", "False Ring of the Void" }) // wired since issue #674 (ring-wave-3, WlSpellsRingsTests)
+            Check(CardCatalog.Cards.Values.Any(c => !c.ScenarioOnly && c.Name == name), name + " is wired");
         foreach (var second in new[] { AirForce, WaterAttack })
         {
             var costs = AbilityCatalog.All[second].Costs!;

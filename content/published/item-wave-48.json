@@ -1,0 +1,209 @@
+{
+  "Profile": "item-wave-48",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10690",
+      "Name": "Divination Bowl",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, Bow this card: Look at the top three cards of your Fate deck. Put them back in any order.\nLimited, Bow this card: Draw a card. Destroy this Item.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10690.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-bowl-look",
+        "wl-bowl-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10341",
+      "Name": "Kage's Teachings",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Kolat.\nOpen: If it is not your turn, bow this card and choose a player: He chooses and bows one of his unbowed Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10341.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-kage-bow"
+      ],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Kolat"
+    },
+    {
+      "Id": "oracle-l5r-10905",
+      "Name": "Khalimpeh-jiak",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Engage, Bow this card: Give a target enemy Personality or Follower -2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10905.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-khalimpeh-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10527",
+      "Name": "Koan's Staff",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Battle, Bow this card: Ranged 3 Attack with +1 strength for each other Koan card in this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10527.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Fire",
+        "Koan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl-koan-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10530",
+      "Name": "Parangu",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10530.jpg",
+      "Keywords": [
+        "Kharmic",
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10343",
+      "Name": "Renyu's Wrath",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target a Region (at any location) or a Terrain: Destroy it.\nBattle: Bow this card: Ranged 4 Attack, with +1 strength if this Personality is Siege or Earth.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10343.jpg",
+      "Keywords": [
+        "Unique",
+        "Siege"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "wl-renyu-destroy",
+        "wl-renyu-ranged"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10344",
+      "Name": "Sturdy Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Three times per turn: Give this Personality +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10344.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sturdy-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10698",
+      "Name": "Translated Story of Shaharazad",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, Bow this card: Give this Item a +1F token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10698.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-shaharazad-token"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

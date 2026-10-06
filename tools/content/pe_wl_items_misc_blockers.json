@@ -1,0 +1,6 @@
+{
+  "oracle-l5r-10416": {
+    "note": "Fudo's Assurances (Celestial, Coils of Madness): not wired whole. Battle/Open: Straighten a Ring is buildable, but Open: 'If you control five Fudo Rings that last entered play by their own text, destroy a Province' needs a per-Ring record of HOW it last entered play (by its own text, as the False Rings do, versus recruited, Searched or put into play by another card), and the engine records only that a Ring is in play (the Ring-search entry marks only the Enlightenment count). The only Fudo Rings are the six False Rings, none of which is wired (they exist only as training fixtures). Needs the entry-provenance record (PROVENANCE) and the False Rings wired first; a card with two printed lines is wired whole or blocked.",
+    "category": "PROVENANCE"
+  }
+}

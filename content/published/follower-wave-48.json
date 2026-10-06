@@ -1,0 +1,136 @@
+{
+  "Profile": "follower-wave-48",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10518",
+      "Name": "Maddened Horde",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard the top card of any Fate deck. Melee Attack with strength equal to the card's Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10518.jpg",
+      "Keywords": [
+        "Unique",
+        "Fallen"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "wl-horde-own",
+        "wl-horde-enemy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10519",
+      "Name": "Reconnaissance Scouts",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Engage: You have Reconnaissance at this battlefield. If you are the Attacker, you have the first opportunity to take a Battle action or pass. You may target and give an enemy Personality or Follower -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10519.jpg",
+      "Keywords": [
+        "Scout"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-scouts-engage",
+        "wl-scouts-engage-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10517",
+      "Name": "Shinobi Vassal",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Ninja. You may Equip this Follower as a Battle action.\nBattle: Destroy a target enemy card without attachments. Destroy this Follower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10517.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "wl-vassal-equip",
+        "wl-vassal-destroy"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ninja"
+    },
+    {
+      "Id": "oracle-l5r-10338",
+      "Name": "Sycophants",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Bow this card: Straighten this Personality. You may use his Political abilities that may only be used once per turn a second time (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10338.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-sycophants-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10677",
+      "Name": "The Bestial Ones",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Follower enters play, lose 1 Honor and discard a card.\nEngage: Give a target enemy Personality or Follower -2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10677.jpg",
+      "Keywords": [
+        "Nonhuman"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-bestial-engage"
+      ],
+      "Effect": "wl-bestial-entry-discard",
+      "EntryHonorLoss": 1
+    }
+  ],
+  "Decks": []
+}

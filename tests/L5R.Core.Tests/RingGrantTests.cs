@@ -366,7 +366,7 @@ internal static class RingGrantTests
         }
         // A duel-won False Ring of Earth (Dueling) and the six ids the scoping covers are exactly the grant-based recruits.
         var scoped = AbilityCatalog.All.Where(p => p.Key.EndsWith("-recruit") && p.Value.Absent).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", scoped), "false-ring-of-air-recruit,false-ring-of-earth-recruit,ring-of-air-recruit,ring-of-earth-recruit,ring-of-fire-recruit,ring-of-water-recruit");
+        Eq(string.Join(",", scoped), "false-ring-of-air-recruit,false-ring-of-earth-recruit,ring-of-air-recruit,ring-of-earth-recruit,ring-of-fire-recruit,ring-of-water-recruit,wl-false-ring-of-void-recruit");
         // Every other Additional Action grant stays untagged (it is cleared at battle end whatever its battle).
         var t = BattleTable(1, 0, 0);
         var host = Add(t, "training-crane-samurai", 0, Zone.Battlefield, province: 0);

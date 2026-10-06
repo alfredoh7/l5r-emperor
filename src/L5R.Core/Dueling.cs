@@ -294,7 +294,7 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => (P2DuelStat(card) /* issue #503: Killing Intent */ ?? NikaruDuelStat(card) ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (P2DuelStat(card) /* issue #503: Killing Intent */ ?? NikaruDuelStat(card) ?? WlPersCoilsDuelStat(card) /* issue #674: Hiruma Nikaru - exp2 */ ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
@@ -326,6 +326,7 @@ public sealed partial class MatchEngine
         // that asks who lost (the R2 delays, Honor Never Falls), the duel's own outcome and the other Focus Effects.
         var rendOfWinner = winnerId is null ? null : RendTheSoulOfWinner(duel, winnerId);
         if (rendOfWinner is not null) { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Rend the Soul · the winner loses too"; }
+        (winnerId, loserIds, resolutionReason) = WlPersGates1DuelOutcome(duel, winnerId, loserIds, resolutionReason); // Daidoji Tametaka - exp (issue #674): "loses any duel against Yoritomo Hiromi"
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         if (TfBeginWitnessDecision(duel, winnerId)) return; // Awed Witness (issue #622, TfStrategiesA.cs): the winner's controller may create Witness -- asked once, then the duel resolves again
@@ -436,6 +437,7 @@ public sealed partial class MatchEngine
         if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
         ApplyTfPersonalitiesDuelWin(winnerId); // Kakita Izumiko (issue #622, TfPersonalities.cs): "After Izumiko wins a duel, gain 1 Honor." -- a trait.
+        ApplyWlPersCoilsDuelWin(winnerId); // Kakita Hideo - exp2 (issue #674, WlPersCoils.cs): "After Hideo wins a duel, give him two +1F tokens." -- a trait.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
@@ -518,6 +520,7 @@ public sealed partial class MatchEngine
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
             case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": case IvorySpellAbilities.SanctionedDuel: case DuelSleepFusakoAbilities.FusakoDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case WlPersTornAbilities.IzaDuel: case WlPersTornAbilities.KyoshiroDuel: case WlPersTornAbilities.RikuDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break; // issue #674: "Destroy the duel's loser"
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.
@@ -547,6 +550,8 @@ public sealed partial class MatchEngine
             // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
             case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case TfStrategiesAAbilities.WitnessDuel: TfWitnessDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Awed Witness (issue #622)
+            case WlStratGatesAbilities.Dojo: WlDojoDuelOutcome(loserIds, challengerPlayerId); break; // Iaijutsu Dojo (issue #674, WlStratGates.cs)
+            case WlStratTornAbilities.EyeDuel: WlEyeDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Eye of the Sword (issue #674, WlStratTornRun.cs)
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
@@ -654,6 +659,7 @@ public sealed partial class MatchEngine
                 ApplyRegretFocusEffect(abilityId, winnerPlayerId); // Regret (RegretEmbracingVirtue.cs)
                 ApplyTfStrategiesAFocusEffect(abilityId, ownerId, winnerPlayerId); // Breaking the Rhythm (issue #622, TfStrategiesA.cs)
                 ApplyTfStrategiesBFocusEffect(abilityId, ownerId, winnerPlayerId); // Strategic Withdrawal (TfStrategiesB.cs)
+                ApplyWlStratGatesFocusEffect(abilityId, ownerId); // Boiling Point (issue #674, WlStratGates.cs)
                 ApplyMechEFocusEffect(abilityId);
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;

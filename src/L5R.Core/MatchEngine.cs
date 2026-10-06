@@ -491,7 +491,9 @@ public sealed partial class MatchEngine
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
         ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
         ApplyPromoEmperorEntryEffects(playerId, card); // Bandit's Sanctuary, Renewed Lands (issue #653, PromoEmperorHoldings.cs)
+        ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
+        ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1684,10 +1686,13 @@ public sealed partial class MatchEngine
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Forgotten Legacy pass (issue #467 batch 4).
+        WlGrantVoidRecruit(attacker, provinceDestroyedNow); // issue #674 (WlSpellsRings.cs): False Ring of the Void's recruit, "after a battle resolves where you destroyed a Province"
         FireCowedAndDefeatedBattleWatches(a, d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
         PromoApplyEventResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // A Great Victory (issue #653)
         PromoApplyResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // Imminent Victory (issue #653, PromoEmperorFateReactions.cs): the +1F/+1C tokens at battle resolution.
+        ApplyWlStratTornResolutionTraits(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // issue #674 (WlStratTorn.cs): Spoils of Exploration's draw.
         ApplyShibasGuidanceTrait(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
+        WlPersTornApplyResolution(a, attacker, destroyedByPlayer, provinceDestroyedNow); // Utaku Suying (issue #674, WlPersTorn.cs): "after a battle resolution in which Suying's army destroyed a defending army or province"
         var resolutionFacts = NewAfterResolutionFacts(provinceIndex, attacker, attackerWon, a, destroyedByPlayer, provinceDestroyedNow, losers);
         // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): the cards the resolution destroyed are the losing army (both armies in a tie).
         resolutionFacts.DestroyedCardIds = (attackerWon ? (aramasuSpares ? [] : d) : defenderWon ? a : (a.Length > 0 && d.Length > 0 ? (aramasuSpares ? a : a.Concat(d).ToArray()) : [])).Select(c => c.Id).ToList(); // Aramasu's Legacy (issue #501): a spared army was not destroyed
@@ -1916,6 +1921,7 @@ public sealed partial class MatchEngine
     {
         var provinceIndex = _state.ResolvedBattleProvinceIndex;
         _state.ResolvedBattleProvinceIndex = null;
+        ResolveWlStratACNoWayOut(provinceIndex); // No Way Out (issue #674, WlStratACEffects.cs): "After this battle resolves, if its Province was not destroyed, destroy the targets"
         if (provinceIndex is null) return;
         foreach (var terrain in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == provinceIndex.Value && Definition(c).Effect == "looting-return-to-hand").ToArray())
             ReturnToHand(terrain);
@@ -2056,7 +2062,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def)) DiscardTerrain(existingTerrain);
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def)) DiscardTerrain(existingTerrain);
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }
@@ -2299,7 +2305,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + WlItemsMiscFollowerForce(card) /* A Fever in the Blood (issue #674) */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2793,6 +2799,7 @@ public sealed partial class MatchEngine
         _state.PendingTamokoHonorChecks.Clear();
         ResolveProvincesHeldHonorChecks(); // Forgotten Legacy pass (issue #467), batch 1: Asahina Shigemitsu's "before it ends" Honor.
         ResolveShadowsEmbraceBatch1TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's check, Agasha Kurou's removal.
+        ResolveWlStratTornTurnEnd(); // issue #674 (WlStratTorn.cs): Forgotten Teachings' "(this turn)" ends.
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
@@ -3323,6 +3330,7 @@ public sealed partial class MatchEngine
         }
         // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): "Reduce any Honor gain or loss from the action's effects by 2."
         amount = ChugoReducedHonorChange(playerId, amount, reason);
+        amount = WlPersTornReducedHonorGain(playerId, amount, reason); // Shosuro Makiko - exp (issue #674, WlPersTorn.cs): "Reduce all Honor gains from it by 2"
         if (amount == 0) return;
         // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
         if (amount == -1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId, reason)) return; // issue #501: an unnegatable action's loss is not negated

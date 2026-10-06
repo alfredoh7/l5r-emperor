@@ -285,6 +285,7 @@ public sealed partial class MatchEngine
             default:
                 if (ResolveP4EventChoice(command, pending)) return; // Too Close to Home (issue #503, EmperorP4Watches.cs)
                 if (PromoEventChoice(pending, command)) return; // issue #653 (PromoEmperorEvents.cs)
+                if (WlItemsMiscEventChoice(pending, command)) return; // issue #674 (WlItemsMiscEvents.cs): Purge of Fudoism, Riot in the Second City
                 if (SearchPlayEventChoice(pending, command)) return; // issue #667 (SearchPlayTopaz.cs): The Topaz Armor's two keywords
                 if (ResolveEmperorP6Choice(pending, command)) return; // issue #503 (EmperorP6.cs): Dark Experiments, the face-up refills, Ietsuno's switch
                 throw new RuleViolation("Unknown Event decision.");
@@ -328,6 +329,7 @@ public sealed partial class MatchEngine
                 break;
             default:
                 foreach (var option in PromoEventChoiceActions(pending, playerId)) yield return option; // issue #653
+                foreach (var option in WlItemsMiscEventChoiceActions(pending, playerId)) yield return option; // issue #674 (WlItemsMiscEvents.cs)
                 foreach (var option in SearchPlayEventChoiceActions(pending, playerId)) yield return option; // issue #667 (SearchPlayTopaz.cs)
                 foreach (var option in EmperorP6ChoiceActions(pending, playerId)) yield return option; // issue #503 (EmperorP6.cs)
                 break;
@@ -564,6 +566,7 @@ public sealed partial class MatchEngine
     // Attacker may draw a card").
     private void AfterProvinceDestroyedByResolution(int attacker, int defender, ProvinceState province, CardInstance[] attackingArmy)
     {
+        WlPersGates1AfterProvinceDestroyed(attacker, attackingArmy); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary's army destroys a Province, draw a card."
         foreach (var boast in EventsInPlay(BoastfulProclamationEffect).Where(e => e.OwnerId == defender && e.AbilityUses.TryGetValue(BoastProvinceKey, out var i) && i == province.Index).ToArray())
         {
             foreach (var personality in attackingArmy.Where(c => c.Zone == Zone.Battlefield && Definition(c).Type == CardType.Personality))

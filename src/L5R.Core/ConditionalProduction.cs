@@ -40,7 +40,9 @@ public enum ProductionCondition
     /// (PaymentKind.Recruit) -- never an action of one, and never another kind of card.</summary>
     PayingForPersonality,
     /// <summary>Issue #503 (Shrine to Nimuro: "or 3 Gold if you control a Tactician"): a condition on the producing card's controller, already judged when the production was asked for.</summary>
-    ControllerCondition
+    ControllerCondition,
+    /// <summary>Issue #674 (Exotic Market: "When paying for an Item, it enters play for 3 less Gold"): an Item being attached and paid for (an Equip) -- never a Follower or Spell, nor an action.</summary>
+    PayingForItem
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
@@ -67,6 +69,10 @@ public static class ConditionalProductionCatalog
         "yasuki-palaces-gold" => new(4, ProductionCondition.PayingForPersonality),
         // Temple of Harmony (issue #622, holding-wave-48): "Produce 2 Gold, or 3 Gold if paying for a Monk." (a Monk Personality recruited, PaymentKind.Recruit; never an action).
         "temple-of-harmony-gold" => new(3, ProductionCondition.PayingForKeyword, "Monk"),
+        // Issue #674 (holding-wave-53, WlHoldings.cs): Border Keep - exp2 ("Produce 2 Gold, or 3 Gold if paying for a Holding"), Damaged Port (4), Exotic Market (3 for an Item).
+        WlHoldingsAbilities.BorderKeepEffect => new(3, ProductionCondition.PayingForHolding),
+        WlHoldingsAbilities.DamagedPortEffect => new(4, ProductionCondition.PayingForHolding),
+        WlHoldingsAbilities.ExoticMarketEffect => new(3, ProductionCondition.PayingForItem),
         _ => null
     };
 }
@@ -100,6 +106,7 @@ public sealed partial class MatchEngine
                 paying.Kind != PaymentKind.Action && production.Threshold is int threshold && Definition(paying.Card).GoldCost >= threshold,
             ProductionCondition.PayingForAttachment => paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type is CardType.Follower or CardType.Item or CardType.Spell,
             ProductionCondition.PayingForPersonality => paying.Kind == PaymentKind.Recruit && Definition(paying.Card).Type == CardType.Personality,
+            ProductionCondition.PayingForItem => paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Item,
             _ => false
         };
     }

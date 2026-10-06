@@ -89,6 +89,7 @@ internal static partial class EmperorRulingR4Tests
         "kae-favor-negate", // issue #501 (Mendon's item 16): Kakita Kae's Favor discard triggers like a Reaction but is a trait
         "makubesu-create", "never-safe-return", "nojima-entry", "noritada-invest", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost", "small-time-bully-dishonor",
         "spiders-web-attach", "spiders-web-attach-kensai", "tf-band-brothers-create", "thick-marsh-entry", "tsudoken-exp2-entry", // issue #622: Band of Brothers' entering-play trait
+        "wl2-invest-two-tokens", // issue #674: Shosuro Nigawa and Utaku Sayaka's Invest (the trait shape of Clay Kshatriya)
         "words-of-consecration-honor", // issue #622: Words of Consecration's "After this card enters play, if this Shugenja is Air: Choose a player, who gains or loses 1 Honor." is a trait
     ];
 

@@ -38,6 +38,8 @@ public sealed partial class MatchEngine
     // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null, IEnumerable<string>? targetIds = null)
     {
+        WlAfterActionResolved(abilityId, playerId, sourceId); // issue #674 (WlSpellsRings.cs): The Thunderer's Protection bows the action's performers after it resolves
+        WlPersTornActionDone(abilityId, playerId, sourceId); // Moshi Ira (issue #674, WlPersTorn.cs): the -3F owed once the action targeting his unit has resolved
         AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
         ApplyAgonyOfHerGaze(abilityId, playerId); // issue #503 (EmperorP2.cs): The Agony of Her Gaze's trait, before any Reaction to the same moment
         var affected = _state.CurrentActionAffected;
@@ -71,6 +73,7 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
+        ApplyWlPersCoilsAfterAction(sourceId); // Daidoji Adachi (issue #674, WlPersCoils.cs): a trait, before any Reaction to the same point.
         ApplyP3AfterActionTraits(affected); // Deep Snows (issue #503, EmperorP3.cs): its trait, before any Reaction to the same point.
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
@@ -79,7 +82,8 @@ public sealed partial class MatchEngine
         if (OpenP1AfterActionTraits(closesTo, playerId)) return true; // Issue #503 (EmperorP1.cs): traits resolve before the Reactions to the same moment.
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
-        return OpenInoStorm(closesTo);
+        // Adachi's owed discard (issue #674) is asked here when no Reaction window has opened to carry it.
+        return OpenInoStorm(closesTo) || WlPersCoilsDrainDiscards(closesTo);
     }
 
     // The Personality who performs an ability: the named performer, else the source resolved to its wielder; null for a player ability or a non-Personality source.
@@ -114,9 +118,11 @@ public sealed partial class MatchEngine
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (PromoAfterActionApplies(source, abilityId, playerId, facts) is { } promoAfter) return promoAfter; // Closing the Gap (issue #653, PromoEmperorFateReactions.cs)
+        if (WlAfterActionApplies(abilityId, playerId, facts) is { } wlHoldings) return wlHoldings; // Hero's Memorial (issue #674, WlHoldings.cs)
         if (PerformersAmbushApplies(source, abilityId, playerId, facts) is { } performersAmbush) return performersAmbush; // Lying in Ambush (issue #667, PerformersAmbush.cs)
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
         if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
+        if (WlPersTornAfterActionApplies(source, abilityId, playerId, facts) is { } wlPersTorn) return wlPersTorn; // Shinjo Sihung (issue #674, WlPersTorn.cs): "after your Tactical action resolves"
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;

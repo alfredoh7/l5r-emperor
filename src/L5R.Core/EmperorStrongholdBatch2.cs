@@ -41,6 +41,7 @@ public sealed partial class MatchEngine
         if (_honorWindowsDone > 0) return; // R4 (issue #492): the action's replay after an Honor-change window keeps the marks the Reactions played in it set.
         _state.UnnegatableActionKey = null;
         _state.HonorReducedActionKey = null; _state.UnimpeachableActionKey = null; _state.UnimpeachablePlayerId = null;
+        _state.WlPersTorn.HonorGainReducedActionKey = null; // Shosuro Makiko - exp (issue #674)
         _state.RemC.RedirectActionKey = null; _state.RemC.NegateLossesActionKey = null; // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's and Solid Defense's marks.
     }
 

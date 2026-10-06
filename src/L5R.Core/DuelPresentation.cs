@@ -22,6 +22,7 @@ public sealed partial class MatchEngine
         var loss = abilityId switch
         {
             "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" or IvorySpellAbilities.SanctionedDuel or DuelSleepFusakoAbilities.FusakoDuel => "Defeat: the losing unit is destroyed.",
+            WlPersTornAbilities.IzaDuel or WlPersTornAbilities.KyoshiroDuel or WlPersTornAbilities.RikuDuel => "Defeat: the losing unit is destroyed.", // issue #674
             "daisuke-duel" => "Defeat: the losing unit moves home.",
             "training-duel-force" or "training-duel-honor" or "training-duel-open" or "training-duel-challenge" => "Defeat: the losing Personality gets −1 Force this turn.",
             _ => "The challenge card defines the consequences."

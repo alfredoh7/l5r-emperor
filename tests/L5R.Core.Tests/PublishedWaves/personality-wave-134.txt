@@ -1,0 +1,13 @@
+oracle-l5r-10620
+oracle-l5r-10622
+oracle-l5r-10631
+oracle-l5r-10642
+oracle-l5r-10644
+oracle-l5r-10646
+oracle-l5r-10652
+oracle-l5r-10655
+oracle-l5r-10656
+oracle-l5r-10657
+oracle-l5r-10658
+oracle-l5r-10671
+oracle-l5r-10676

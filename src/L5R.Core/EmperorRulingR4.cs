@@ -28,7 +28,7 @@ public static class TraitReactions
         // Other entering-play traits: Bayushi Makubesu's Followers, Small-Time Bully's dishonor, Thick Marsh's bow.
         "makubesu-create", "small-time-bully-dishonor", "thick-marsh-entry",
         // Invest (a special trait, core rules): Clay Kshatriya, Togashi Noritada.
-        "clay-kshatriya-invest", "noritada-invest",
+        "clay-kshatriya-invest", "noritada-invest", "wl2-invest-two-tokens", // issue #674: Shosuro Nigawa, Utaku Sayaka
         // Triggered traits with other triggers: Never Safe's return ("After this battle ends, if this card is in your discard pile..."), The Castle of Order's redirect, The Spider's Web's attach,
         // Kyuden Otomo's Favor token, Matsu Rika's bonus, Akodo Shihiro's bonus.
         "never-safe-return", "castle-of-order-redirect", "spiders-web-attach", "spiders-web-attach-kensai", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost",
@@ -49,7 +49,7 @@ public static class TraitReactions
 
     /// <summary>Whether this ability is a trait (not a printed Reaction) that the engine models with Reaction timing.</summary>
     // The Ivory Sword (PromoEmperorItems.cs); Yoritomo Toganin's Invest (StatTermCards.cs, issue #672)
-    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId) || StatTermCards.IsTrait(abilityId);
+    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId) || StatTermCards.IsTrait(abilityId) || WlPersAftermathAbilities.IsTrait(abilityId) || WlPersGates1Abilities.IsTrait(abilityId) || WlPersTornAbilities.IsTrait(abilityId);
 }
 
 public sealed partial class MatchEngine

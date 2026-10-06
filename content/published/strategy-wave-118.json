@@ -1,0 +1,472 @@
+{
+  "Profile": "strategy-wave-118",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10360",
+      "Name": "A Threat Enacted",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed non-Duelist Courtier Personality, target a Personality with equal or lower Personal Honor, and discard the Imperial Favor: Destroy a non-Unique card in his unit without attachments. Dishonor him (if he is still in play).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10360.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-threat-enacted"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10361",
+      "Name": "Ambush Tactics",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Personality: Ranged 3 Attack with +2 strength if your performer is a Scout. You may move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10361.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-ambush-attack",
+        "wl-ambush-attack-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10363",
+      "Name": "Bamboo Tattoo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Tattooed Personality: Permanently give him Stalwart (Stalwart cards negate their first bowing each turn by other players' cards).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10363.jpg",
+      "Keywords": [
+        "Tattoo"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "wl-bamboo-stalwart"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10365",
+      "Name": "Calling the Darkness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow your performing Personality: Give him three +1F tokens and permanently give him Shadowlands. Straighten him before the turn ends. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10365.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-calling-darkness"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10367",
+      "Name": "Courteous Gift",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow your performing Samurai, target a face-up card in a province, and choose another player: He may draw a card. Reduce the target's Gold Cost (this turn) by 2, or 4 if the player drew a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10367.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Courtesy"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "wl-courteous-gift"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10371",
+      "Name": "Eye of the Sword",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Duelist and target an enemy Personality: Your Personality duels the target. Give the winner two +1F tokens. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10371.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-eye-sword-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10372",
+      "Name": "Forest Cover",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing Scout Personality at the current battlefield: You have Reconnaissance there. You may attach a Follower to him from your hand or discard pile, paying all costs. If you did, draw an additional card during your next End Phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10372.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-forest-cover-recon",
+        "wl-forest-cover-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10373",
+      "Name": "Forgotten Teachings",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's Sensei Personality: Remove all traits and abilities from him (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10373.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wl-forgotten-teachings"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10379",
+      "Name": "Improper Papers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before an action resolves, target a Personality: Negate his movement from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10379.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wl-improper-papers"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10380",
+      "Name": "Imprudent Misstep",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target another player with 30 or more Family Honor: He commits a public breach of etiquette. He loses 5 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10380.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-imprudent-misstep"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10381",
+      "Name": "In the Right",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Courtier at any location and target one or more attacking cards, up to half your Courtier's Chi, rounded down: Bow the targets.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10381.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-in-the-right"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10383",
+      "Name": "Martyr's Call",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy your performing Paragon and target one or two of your other Personalities: Give them +3F and Stalwart (Stalwart cards negate their first bowing each turn by other players' cards).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10383.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-martyrs-call"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10387",
+      "Name": "Overpower",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is the active player's first or second turn: No Attack Phase may be declared.\nLimited: Target your discarded (not dead) Personality: Put him into one of your provinces, discarding any card currently there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10387.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wl-overpower-open",
+        "wl-overpower-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10391",
+      "Name": "Scandalous Gossip",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If (and only if) this card is in your discard pile, remove it from the game and target a player: He must choose and bow one of his unbowed Personalities, if possible. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10391.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-scandalous-gossip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10394",
+      "Name": "Spoils of Exploration",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a battle resolution ends in which you destroyed an army or province: Draw a card.\nLimited: Put this card into play. Discard all your other Kata in play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10394.jpg",
+      "Keywords": [
+        "Kata"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "wl-spoils-enter"
+      ],
+      "Effect": "wl-spoils-draw"
+    },
+    {
+      "Id": "oracle-l5r-10397",
+      "Name": "Tactical Sacrifice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Commander, destroy his performing Follower, and target a Follower, or Personality without attachments, with Gold Cost equal to or less than twice your Follower's Gold Cost: Destroy the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10397.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-tactical-sacrifice"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10398",
+      "Name": "The Last Move",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your performing unbowed Courtier and target an enemy Personality: Dishonor him. You may target and destroy a card without attachments in his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10398.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-last-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10399",
+      "Name": "The Passing of Tradition",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Personality and target your Personality: The performer permanently copies a keyword from the target, other than Courtier, Samurai, or Shugenja.\nLimited: Target your discarded Personality: Put him into one of your provinces (face-up) discarding the card currently there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10399.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "wl-passing-copy",
+        "wl-passing-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10400",
+      "Name": "Touch of the Night",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Ninja Personality: Give each Personality and Follower opposing him -2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10400.jpg",
+      "Keywords": [
+        "Fear",
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-touch-night"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

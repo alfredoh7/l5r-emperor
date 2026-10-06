@@ -293,7 +293,7 @@ public sealed partial class MatchEngine
     private static bool DishonorsTarget(string? abilityId) => abilityId is "training-dishonor-target" or "slanderer-dishonor" or "justice-of-crane-dishonor"
         or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "izuna-kolat" or "izuna-ninja" or "izuna-shadowlands" or "accidental-confession-dishonor"
         or "saibankan-dishonor" or "yoshihara-dishonor" or "testimony-dishonor" or "tsujiken-exp-dishonor" or "ingenuity-dishonor" or "duel-of-haiku"
-        or "subtle-games-dishonor";
+        or "subtle-games-dishonor" or WlPersAftermathAbilities.JiroDishonor; // issue #674: Yasuki Jiro
 
     // ---- Watchers in the Dark ----
 
@@ -308,7 +308,7 @@ public sealed partial class MatchEngine
 
     // The Terrains whose own ability puts them into play: never played through the generic playStrategy Terrain rule (MatchQueries, PlayStrategy).
     // Deep Snows (issue #503) is put into play by its Reaction; The Eternal Rainbows (issue #622, TfStrategiesB.cs) names a target.
-    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter) || TfStrategiesBTerrainThroughAbility(card);
+    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter) || TfStrategiesBTerrainThroughAbility(card) || WlStratACTerrainThroughAbility(card);
 
     // "Put this card into play there": PlayStrategy's own Terrain placement, from the hand to the current battlefield.
     private void PutTerrainIntoPlay(PlayerState player, CardInstance terrain)
