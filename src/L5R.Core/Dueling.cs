@@ -547,6 +547,7 @@ public sealed partial class MatchEngine
             // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
             case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case TfStrategiesAAbilities.WitnessDuel: TfWitnessDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Awed Witness (issue #622)
+            case WlStratGatesAbilities.Dojo: WlDojoDuelOutcome(loserIds, challengerPlayerId); break; // Iaijutsu Dojo (issue #674, WlStratGates.cs)
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
@@ -654,6 +655,7 @@ public sealed partial class MatchEngine
                 ApplyRegretFocusEffect(abilityId, winnerPlayerId); // Regret (RegretEmbracingVirtue.cs)
                 ApplyTfStrategiesAFocusEffect(abilityId, ownerId, winnerPlayerId); // Breaking the Rhythm (issue #622, TfStrategiesA.cs)
                 ApplyTfStrategiesBFocusEffect(abilityId, ownerId, winnerPlayerId); // Strategic Withdrawal (TfStrategiesB.cs)
+                ApplyWlStratGatesFocusEffect(abilityId, ownerId); // Boiling Point (issue #674, WlStratGates.cs)
                 ApplyMechEFocusEffect(abilityId);
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;
