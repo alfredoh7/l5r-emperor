@@ -326,6 +326,7 @@ public sealed partial class MatchEngine
         // that asks who lost (the R2 delays, Honor Never Falls), the duel's own outcome and the other Focus Effects.
         var rendOfWinner = winnerId is null ? null : RendTheSoulOfWinner(duel, winnerId);
         if (rendOfWinner is not null) { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Rend the Soul · the winner loses too"; }
+        (winnerId, loserIds, resolutionReason) = WlPersGates1DuelOutcome(duel, winnerId, loserIds, resolutionReason); // Daidoji Tametaka - exp (issue #674): "loses any duel against Yoritomo Hiromi"
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         if (TfBeginWitnessDecision(duel, winnerId)) return; // Awed Witness (issue #622, TfStrategiesA.cs): the winner's controller may create Witness -- asked once, then the duel resolves again

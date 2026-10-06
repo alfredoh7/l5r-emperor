@@ -491,6 +491,7 @@ public sealed partial class MatchEngine
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
         ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
         ApplyPromoEmperorEntryEffects(playerId, card); // Bandit's Sanctuary, Renewed Lands (issue #653, PromoEmperorHoldings.cs)
+        ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --

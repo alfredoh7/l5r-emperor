@@ -1,0 +1,417 @@
+{
+  "Profile": "personality-wave-128",
+  "Rules": "Emperor Edition core rules; reviewed scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10623",
+      "Name": "Asahina Kitiaru",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, Bow this card: Search your discard pile, then Fate deck, for a Ring. Show it and put it in your hand. Discard a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10623.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Crane Clan",
+        "Experienced",
+        "Monk"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-kitiaru-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10648",
+      "Name": "Asako Ifukube",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 12,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\n(Draw a card after your Expendable card is destroyed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10648.jpg",
+      "Keywords": [
+        "Destined",
+        "Expendable",
+        "Earth",
+        "Inquisitor",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10647",
+      "Name": "Asako Karachu",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Give Karachu Cavalry, Conqueror, or Naval.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10647.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Experienced",
+        "Golden Arm",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Protector of the Second City"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-karachu-cavalry",
+        "wl1-karachu-conqueror",
+        "wl1-karachu-naval"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10669",
+      "Name": "Boyoh Mercenary",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Boyoh Mercenary enters play, discard a card.\nAfter Boyoh Mercenary's army destroys a Province, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10669.jpg",
+      "Keywords": [
+        "Mercenary"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wl1-boyoh"
+    },
+    {
+      "Id": "oracle-l5r-10627",
+      "Name": "Daidoji Tametaka",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tametaka loses any duel against Yoritomo Hiromi.\nBattle: Reduce the Force of a target enemy Personality or Follower to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10627.jpg",
+      "Keywords": [
+        "Unique",
+        "Commander",
+        "Crane Clan",
+        "Experienced",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-tametaka-zero"
+      ],
+      "Effect": "wl1-tametaka"
+    },
+    {
+      "Id": "oracle-l5r-10628",
+      "Name": "Daidoji Tobei",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nAfter Tobei enters play, lose 1 Honor.\nBattle, Bow this card: Ranged 2 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10628.jpg",
+      "Keywords": [
+        "Destined",
+        "Crane Clan",
+        "Fallen",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-tobei-attack"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10626",
+      "Name": "Doji Razan",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g1:: Give Razan a +1C token. (After this card enters play, you may also pay the Invest cost to get the effect, once.)\nLimited: Destroy a target Fudo card. Destroy Razan.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10626.jpg",
+      "Keywords": [
+        "Duelist",
+        "Courtier",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-razan-invest",
+        "wl1-razan-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10617",
+      "Name": "Hida Gojiro",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g4:: Give Gojiro two +1F tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.)\nAfter Gojiro enters play, lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10617.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan",
+        "Fallen"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-gojiro-invest"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10670",
+      "Name": "Hoshoku-sha",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy your target Personality. Give Hoshoku-sha +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10670.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Wani"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-hoshoku-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10672",
+      "Name": "Ide Hinobu",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 6,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10672.jpg",
+      "Keywords": [
+        "Courtier",
+        "Merchant",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10649",
+      "Name": "Isawa Hajime",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g3:: Give Hajime two +1F Fire tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.)\nAfter Hajime enters play, lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10649.jpg",
+      "Keywords": [
+        "Fallen",
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-hajime-invest"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10641",
+      "Name": "Kitsune Yuko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g2:: Gain 1 Honor. (After this card enters play, you may also pay the Invest cost to get the effect, once.)\nLimited, Bow this card: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10641.jpg",
+      "Keywords": [
+        "Earth",
+        "Kitsune",
+        "Mantis Clan",
+        "Nonhuman",
+        "Shugenja",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-yuko-invest",
+        "wl1-yuko-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10668",
+      "Name": "Legulus",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Legulus enters play, lose 2 Honor.\nMelee and Ranged Attacks targeting cards in this unit have -3 strength.\nLimited: Search your deck for a Yodotai Legionnaire Follower. Show it. Put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10668.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Unique",
+        "Commander",
+        "Gaijin",
+        "Yodotai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-legulus-search"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2,
+      "AttackDefenseKind": "Both",
+      "AttackDefenseAmount": -3,
+      "AttackDefenseScope": "Unit"
+    },
+    {
+      "Id": "oracle-l5r-10661",
+      "Name": "M'rika",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open, Bow this card: Bow a target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10661.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Artisan",
+        "Bog Hag",
+        "Experienced",
+        "Nonhuman",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wl1-mrika-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
