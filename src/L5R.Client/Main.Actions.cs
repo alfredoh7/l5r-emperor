@@ -14,7 +14,7 @@ public partial class Main
         if (View.PendingAttack is { } pendingAttack)
             _sidebarHeader.AddChild(Palette.Wrapped(pendingAttack.Kind + " Attack · " +
                 (FindCard(pendingAttack.SourceId)?.Definition?.Name ?? "Resolving"), 16, Palette.Gold));
-        _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" or "recruitReserve" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null && QuoteFor(_chosen) is not null ? "Review the cost and its basis, then choose ready Gold sources. Confirm pays and resolves; cancel changes your plan." : _chosen is not null ? "Review the highlighted target. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
+        _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" or "recruitReserve" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null && QuoteFor(_chosen) is not null ? "Review the cost and its basis, then choose ready Gold sources. Confirm pays and resolves; cancel changes your plan." : ProvinceTargetActive ? "Choose a province in the list or on the table. Confirm to resolve, or cancel to change your plan." : _chosen is not null ? "Review the highlighted target. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
         if (View.WinnerId is null && View.PendingDuel?.Stage is ("AwaitingAccept" or "Reaction") && View.LastDuel is { } duel)
@@ -84,6 +84,7 @@ public partial class Main
         if (RenderHomeReminderInspection()) { }
         else if (RenderSupportInspection()) { }
         else if (_selected is { ActionLocked: true, Definition: not null } locked) RenderLockedInspection(locked);
+        else if (ProvinceTargetActive) { } // the province list needs the room: the placard below names the card and its action
         else if (_selected?.Definition is { } def)
         {
             var panel = new PanelContainer(); panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
@@ -356,10 +357,12 @@ public partial class Main
         var targets = action.TargetIds ?? [];
         var target = command.TargetId; // issue #581: no default; Confirm waits for the player's pick when the action names legal targets
         var needsTarget = targets.Length > 0 && target is null;
-        _inspector.AddChild(Palette.Wrapped(Placard(action), 17, Palette.Gold));
+        var needsProvince = IsProvinceTarget(action) && command.Province is null; // the player picks the province
+        _inspector.AddChild(Palette.Wrapped(Placard(action, IsProvinceTarget(action) ? WithoutProvinceOwner(action.Label) : null), 17, Palette.Gold));
         if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Click a gold-outlined card on the table or choose below. The arrow shows the selected target; confirm to resolve.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
+        if (IsProvinceTarget(action)) RenderProvincePicker(action);
         if (targets.Length > 0)
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
@@ -388,7 +391,7 @@ public partial class Main
             AddConfirm("Confirm action", 0, false, () => command, "Cancel action", false); return;
         }
         var (required, ready) = RenderGoldPanel(action);
-        AddConfirm("Confirm action", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget);
+        AddConfirm("Confirm action", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince);
     }
 
     // Back to "Choose a target…": the action keeps its legal targets but none is selected.
@@ -457,6 +460,7 @@ public partial class Main
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
+        if (IsProvinceTarget(option)) { AddProvinceTargetAction(container, option); return; }
         if (option.AlternativeCost is { } cost)
         {
             var key = $"{option.CardId}/{cost.AbilityId}/{cost.PerformerId}";

@@ -172,6 +172,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search", StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal)) { ProcessCreatedCopyCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-battle-sequence", StringComparison.Ordinal)) { ProcessBattleSequenceCapture(delta); return; }
@@ -650,10 +651,10 @@ public partial class Main : Node
         foreach (var (key, button) in _provinceButtons)
         {
             var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true
-                || MovementDestination(key.Owner, key.Province) || AttackProvinceTarget(key.Owner, key.Province);
-            button.Modulate = legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
+                || MovementDestination(key.Owner, key.Province) || AttackProvinceTarget(key.Owner, key.Province) || ProvinceTargetLegal(key.Owner, key.Province);
+            button.Modulate = ProvinceTargetChosen(key.Owner, key.Province) ? new Color(1.4f, 1.25f, .75f) : legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
             var provinceState = View.Players.Single(p => p.Id == key.Owner).Provinces.Single(p => p.Index == key.Province);
-            var instruction = AttackTargetActive ? "Target this battlefield’s province. Confirm separately.\n" : MovementActive ? "Choose this movement destination. Nothing moves until you confirm.\n" : "Assign the selected unit here. Nothing moves until you confirm.\n";
+            var instruction = ProvinceTargetActive ? "Choose this province as the target. Confirm separately.\n" : AttackTargetActive ? "Target this battlefield’s province. Confirm separately.\n" : MovementActive ? "Choose this movement destination. Nothing moves until you confirm.\n" : "Assign the selected unit here. Nothing moves until you confirm.\n";
             button.TooltipText = RulesHelp.Tooltip($"Province {key.Province + 1} · {provinceState.Strength} province strength\n" + (legal ? instruction : "Inspect this province.\n") + RulesHelp.Topic("province"));
         }
         foreach (var (province, label) in _laneSummaries)
@@ -678,6 +679,7 @@ public partial class Main : Node
         if (!keepTarget && NeedsTargetPick(option)) option = option with { Command = option.Command! with { TargetId = null } };
         ResetDecisionSelection();
         if (option.Movement is not null && option.Command is { } moveCommand) option = option with { Command = moveCommand with { Province = null } };
+        if (IsProvinceTarget(option) && option.Command is { } provinceCommand) option = option with { Command = provinceCommand with { Province = null } }; // the player picks the province, not Core's first legal one
         _attackChoice = AttackChoice.Unselected;
         if (HasAttackTargets(option)) option = option with { Command = option.Command! with { TargetId = null, Province = null } };
         _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
