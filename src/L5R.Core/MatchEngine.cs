@@ -2494,6 +2494,7 @@ public sealed partial class MatchEngine
     // an empty hand owes nothing.
     private bool OpenOverconfidentDrawWindow(int closesTo)
     {
+        ApplyWlPersGates1DeferredLosses(); // Gojiro, Hajime (issue #679, WlPersGates1.cs): the Honor loss listed below an Invest, once its entry window has closed.
         // Emperor Edition remaining-cards pass (issue #492), group F: an optional draw owed by an Event (Boastful Proclamation, Glory of the Shogun), asked here like the forced discards below.
         if (OpenQueuedEventChoice(closesTo)) return true;
         if (OpenQueuedEntrySearch(closesTo)) return true; // Emperor Edition follow-ups (issue #498): an "After this card enters play: search ..." trait, once the entry windows are done.
