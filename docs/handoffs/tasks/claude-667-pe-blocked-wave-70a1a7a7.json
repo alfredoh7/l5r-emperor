@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Promotional-Emperor blocked cards (#667), in progress: recorded Peace Treaty/Wildfire/Green Nightshade Blend as rejected; merged phase-order marker (The Deciding Moment, Nocturnal Attack).",
+  "validation": "Phase-order agent: full Core suite exit 0, phase-order suite 10/10, PhaseTrackProbe PHASE_ORDER_PASS; check.sh --skip-client stops at catalogue-art coverage until the art pack is rebuilt. Other clusters not yet merged.",
+  "remaining": "Merge duel-sleep, search-play, payments, favor, performers and removal branches; rebuild art pack; regenerate inventory; full checks; PR.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
+  "branch": "claude/667-pe-blocked-wave",
+  "updated": "2026-10-06T02:01:30.348659+00:00"
+}
