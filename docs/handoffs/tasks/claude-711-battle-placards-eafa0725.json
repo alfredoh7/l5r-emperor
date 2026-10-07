@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Replace #710's A+C battle court rails with Mendon's placard layout: clickable Province Strength placards on defending provinces, a fixed left-edge stack (opponent, Province, own) on the clan placard frame, and an engine-computed ProvinceFalls flag driving the Province Destroyed katana. Rails code and art removed; review fixtures add Light Armor on/off.",
+  "validation": "dotnet run battle-values 7/7; native check-battle-values-ui equivalent (BATTLE_VALUES_PASS: eight scenarios, both seats, stack/katana/click/frame clearance, Light Armor toggle) on Windows; full tools/check.sh --skip-client result recorded in the PR",
+  "remaining": "Windows graphical playability review and Mac preview not done; maneuver-phase placards share the battle code path but only engaged scenes were captured; 'active player' read as the viewing player.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/709",
+  "branch": "claude/711-battle-placards",
+  "updated": "2026-10-07T16:40:11.217043+00:00"
+}

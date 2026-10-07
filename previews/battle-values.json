@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "slug": "battle-values",
+  "title": "Battle Force, Units and Province Strength",
+  "source_pr": 710,
+  "source_commit": "faa2613f9d6f49ed33d017095155176090b9c3a5",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo has built the approved A battle rails with C's number hierarchy, with both rails inside the blood border, and would like Mendon to review the current Force totals, unit counts, province strength and player usability before merge.",
+  "review_steps": [
+    "Open Start Review.cmd: it opens directly to a prepared real-engine battle, with no deck setup or development tools needed.",
+    "Confirm the Force medallions are more prominent than Units, both army rails sit entirely inside the blood border, and cards/attachments remain fully visible and clickable. Use the mouse wheel to inspect them closely.",
+    "Use the scenario dropdown to try bowed Personality/ready Follower, no province, empty armies, crowded armies/attachments, and redirected Force plus an army bonus. Check all totals against your rules knowledge.",
+    "Use Other seat to inspect ownership and Attacker/Defender roles from each player's perspective. View battle reframes the court and Reset restores the selected prepared scene.",
+    "Try Crushing Strength and other offered legal actions, then check the Force total updates. Pass, switch seats and concede to check that the interaction works and finished-match values clear.",
+    "Use Open Full Game.cmd for normal game menus/Practice. Please record any mechanics, UI or QoL changes needed on PR #710 using Send Feedback.url. Alfredo has approved the visual direction; merging is contingent on Mendon's review."
+  ],
+  "known_limitations": [
+    "Unmerged review candidate. Automated checks do not establish expert rules acceptance; Mendon/Nathan remain the mechanics source of truth.",
+    "Rails summarize the currently engaged battle only, using Core's existing resolution calculation. Proposed assignments and other unselected courts do not show speculative totals. Older servers without the optional Values projection do not display rails.",
+    "Prepared positions use real engine actions but deliberately synthetic setup, manual seats and no AI. Their unsupported replay export is disabled; ordinary Practice replay export remains available.",
+    "Windows runtime and launcher CI are verified before delivery; Windows graphical playtesting remains for Mendon."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "battle-values-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

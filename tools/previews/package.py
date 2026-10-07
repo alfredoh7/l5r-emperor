@@ -12,6 +12,59 @@ from pathlib import Path
 
 REPO = "alfredoh7/l5r-emperor"
 ROOT = Path(__file__).resolve().parents[2]
+RELEASE_LIMIT = 2 * 1024**3 - 1
+
+
+def split_delivery(archive_path, receipt, spec, limit=RELEASE_LIMIT, chunk_size=1400 * 1024**2):
+    """Keep the exact full ZIP; distribute oversized builds as extract-together ZIPs."""
+    if archive_path.stat().st_size <= limit:
+        return receipt
+    if not 0 < chunk_size < limit:
+        raise ValueError("Chunk size must be smaller than the release limit")
+    complete = archive_path.with_name(archive_path.stem + "-Complete.zip")
+    if complete.exists():
+        raise ValueError("Complete archive already exists; use a new output/version")
+    archive_path.rename(complete)
+    bundle = {"schema_version": 1, "folder": receipt["folder"], "source_commit": receipt["source_commit"],
+              "bytes": complete.stat().st_size, "sha256": digest(complete), "parts": []}
+    assets = []
+    with tempfile.TemporaryDirectory(prefix="parts-", dir=archive_path.parent) as temporary:
+        with complete.open("rb") as source:
+            index = 0
+            while source.tell() < complete.stat().st_size:
+                index += 1
+                part = Path(temporary) / f"game.zip.{index:03}"
+                remaining = chunk_size
+                with part.open("wb") as output:
+                    while remaining and (block := source.read(min(remaining, 8 * 1024**2))):
+                        output.write(block)
+                        remaining -= len(block)
+                bundle["parts"].append({"file": part.name, "bytes": part.stat().st_size, "sha256": digest(part)})
+        for index, part in enumerate(bundle["parts"], 1):
+            asset = archive_path if index == 1 else archive_path.with_name(archive_path.stem + f"-Part{index}.zip")
+            with zipfile.ZipFile(asset, "w", zipfile.ZIP_STORED) as output:
+                prefix = receipt["folder"] + "/"
+                output.write(Path(temporary) / part["file"], prefix + part["file"])
+                if index == 1:
+                    output.writestr(prefix + "review-bundle.json", json.dumps(bundle, indent=2) + "\n")
+                    output.write(ROOT / "tools/previews/prepare_review.ps1", prefix + "Prepare Review.ps1")
+                    output.writestr(prefix + "Start Review.cmd",
+                        '@echo off\r\nsetlocal DisableDelayedExpansion\r\n'
+                        'set "L5R_REVIEW_ROOT=%~dp0"\r\n'
+                        'powershell.exe -NoProfile -Command "try { & ([scriptblock]::Create([IO.File]::ReadAllText($env:L5R_REVIEW_ROOT + \'Prepare Review.ps1\'))) -BundleRoot $env:L5R_REVIEW_ROOT; exit 0 } catch { Write-Host $_; exit 1 }"\r\n'
+                        'if errorlevel 1 pause\r\n')
+                    output.writestr(prefix + "READ ME FIRST.txt",
+                        "Download ALL ZIP parts from this version. Extract every ZIP into the SAME destination folder.\n"
+                        "Open Start Review.cmd. It verifies and prepares the complete game on first launch, then opens it.\n"
+                        "No build tools, runtime downloads, administrator access or security-setting changes are needed.\n\n"
+                        + readme(spec))
+                    output.writestr(prefix + "Send Feedback.url",
+                        f"[InternetShortcut]\r\nURL=https://github.com/{REPO}/pull/{spec['source_pr']}\r\n")
+            if asset.stat().st_size > limit:
+                raise ValueError("A delivery ZIP still exceeds the release limit")
+            assets.append({"asset": asset.name, "bytes": asset.stat().st_size, "sha256": digest(asset)})
+    return {**receipt, **assets[0], "companions": assets[1:],
+            "complete_archive": {"bytes": bundle["bytes"], "sha256": bundle["sha256"]}}
 
 
 def digest(path):
@@ -194,6 +247,7 @@ def package(spec_path, source, output):
                "tag": "preview-" + identity(spec) + "-windows", "asset": archive_path.name,
                "bytes": archive_path.stat().st_size, "sha256": digest(archive_path),
                "folder": name, "launcher": "Start Review.cmd", "reviewer": spec["reviewer"]}
+    receipt = split_delivery(archive_path, receipt, spec)
     receipt_path = output / (spec["slug"] + ".receipt.json")
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     print(receipt_path)

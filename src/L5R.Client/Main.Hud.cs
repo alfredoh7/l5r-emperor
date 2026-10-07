@@ -25,6 +25,7 @@ public partial class Main
             fallen.Pressed += () => ShowFallenGallery(player.Id);
             Place(_clanHud, fallen, 16, plaqueY + ClanPlaque.DesignHeight + 4, ClanPlaque.DesignWidth, FallenCounter.DesignHeight);
         }
+        AddBattleStack();
         if (IsInstanceValid(_fallenGallery)) _fallenGallery!.Refresh(View.Players);
     }
     private readonly Dictionary<(int, Zone), CardView> _discardPreview = [];
@@ -63,6 +64,11 @@ public partial class Main
         foreach (var (text, action) in new (string, Action)[] { ("Practice", ShowPractice), ("Private match", ShowOnline), ("Card library", () => LibraryDialog.Show(this)), ("Match history", ShowHistory), ("Settings", ShowSettings), ("Main menu", ShowMainMenu), ("Export practice replay", ExportReplay), ("Rules coverage", ShowCoverage), ("Concede…", ShowConcede) })
         {
             var button = SidebarSkin.Button(text, () => { dialog.QueueFree(); action(); });
+            if (text == "Export practice replay" && _session.BattleValuesReview)
+            {
+                button.Disabled = true;
+                button.TooltipText = "Prepared review scenes cannot be exported as replayable matches.";
+            }
             button.CustomMinimumSize = new Vector2(0, 48);
             foreach (var state in new[] { "normal", "hover", "pressed" }) { var skin = SidebarSkin.Surface(true); skin.ContentMarginTop = skin.ContentMarginBottom = 8; button.AddThemeStyleboxOverride(state, skin); }
             body.AddChild(button);
