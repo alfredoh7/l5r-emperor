@@ -2836,6 +2836,7 @@ public sealed partial class MatchEngine
         if (player.DishonorLossPending) { Win(1 - player.Id, "Dishonor defeat at the beginning of the End Phase"); return; }
         ResolvePendingEndPhaseDraws(); // Eternal Victory Dojo (Stronghold pass, issue #486 batch 1): "Draw a card after the next End Phase begins."
         if (_state.WinnerId is not null) return;
+        DrawTurnRuleEndTurnCards(player); // P4 (TurnBoundaryRules.cs): a standing rule's extra end-of-turn draw, judged before the End Phase's own draw
         Draw(player);
         // Ingenuity (issue #453, batch 2): "draw an additional card during your next End Phase".
         DrawExtraEndPhaseCards(player);
@@ -2909,6 +2910,7 @@ public sealed partial class MatchEngine
         ResolveShadowsEmbraceBatch5TurnBegins(); // The Shadow's Embrace pass (issue #476), batch 5: Blood of the Preserver's units re-enter play "after the next turn begins".
         ApplyBayushisGuidanceTrait(player); // Bayushi's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a player's turn begins, if he is Scorpion Clan: Each other player loses 1 Honor."
         AdvanceStraightenHolds(StraightenPoint.TurnBegins);
+        if (RunTurnBegins(player)) return; // P4 (TurnBoundary.cs): durations that end as the turn begins, then the "after a turn begins" callbacks; a pending choice resumes through ResumeTurnBegins
         StraightenPhase(player);
     }
     private static readonly string[] RingElements = ["Fire", "Water", "Air", "Earth", "Void"];

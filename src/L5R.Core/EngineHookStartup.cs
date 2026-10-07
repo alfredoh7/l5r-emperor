@@ -47,6 +47,9 @@ internal static partial class EngineHooks
         _ = EntryCostTerms.Items;
         _ = AbilityCostTerms.Items;
         _ = StandingWatches.Items;
+        _ = TurnBegins.Items;
+        _ = TurnBeginChoices.Items;
+        _ = PlayerGrantAbilities.Items;
         return true;
     }
 

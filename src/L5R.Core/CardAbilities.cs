@@ -5364,7 +5364,7 @@ public sealed partial class MatchEngine
         RequireNotBarredFromTargeting(command, ability!);
         Require(ability!.Timing switch
         {
-            "Limited" => _state.Phase == Phase.Action && (command.PlayerId == _state.ActivePlayerId || LimitedInsteadOfOpen(command.PlayerId))
+            "Limited" => _state.Phase == Phase.Action && (command.PlayerId == _state.ActivePlayerId || LimitedInsteadOfOpen(command.PlayerId) || TurnRuleLimitedAsOpen(command.PlayerId, command.CardId))
                 || MechAActsAsBattle(command.PlayerId, ability, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var limitedSource) ? limitedSource : null), // Beyond the Line (issue #501)
             "Open" => _state.Phase == Phase.Action
                 || MechAActsAsBattle(command.PlayerId, ability, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var openSource) ? openSource : null), // Beyond the Line (issue #501)
@@ -7106,6 +7106,7 @@ public sealed partial class MatchEngine
         ValidateAbility(command);
         ControlReturnsOnAnnouncement(command); // issue #501 (EmperorMechB.cs): Shadow Dragon's "return control of him ... after the next time this game this ability is announced".
         NoteP1Announcement(command); // Issue #503 (EmperorP1.cs): Osote, Bakishi, Sanetomo.
+        NoteTurnRuleAnnouncement(command); // P4 (TurnBoundaryRules.cs): a Limited action only a standing rule allowed spends that rule's use for the turn
         CaptureAtAnnounceForMechD(command); // Issue #501, mechanics group D (EmperorMechD.cs): Narizane's Recon count, read as the action is taken.
         // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): every action announced on a Strategy is counted against its watch (ShadowsEmbraceBatch3.cs).
         if (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var announcedSource)) NoteForthrightnessStrategyAction(command.PlayerId, announcedSource);
@@ -11082,7 +11083,7 @@ public sealed partial class MatchEngine
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
             var ability = AbilityCatalog.All[id];
-            if (ability.PlayerAbility && (PlayerAbilityDormant(id) || P5PlayerAbilityDormant(id, playerId) /* issue #503 */ || ShadowsEmbraceBatch6PlayerAbilityDormant(id) || ThreeSPlayerAbilityDormant(id, playerId))) continue; // Assault in the Jungle (issue #467), Fortress of Lidless Eyes (issue #476): only while granted.
+            if (ability.PlayerAbility && (PlayerAbilityDormant(id) || P5PlayerAbilityDormant(id, playerId) /* issue #503 */ || ShadowsEmbraceBatch6PlayerAbilityDormant(id) || ThreeSPlayerAbilityDormant(id, playerId) || PlayerGrantDormant(id, playerId))) continue; // Assault in the Jungle (issue #467), Fortress of Lidless Eyes (issue #476): only while granted.
             if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
             if (inAfterActionResolvedWindow != IsAfterActionResolvedReaction(ability)) continue;
             if (inHeldActionWindow && ability.Timing != "Reaction") continue; // issue #492: only a Reaction is on offer against a held action.
@@ -11100,7 +11101,7 @@ public sealed partial class MatchEngine
             var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             var mechAAsBattle = MechAActsAsBattle(playerId, ability, source); // Beyond the Line (issue #501): a Limited or Open Recon ability used as a Battle action
             if (!phaseOk && !mechAAsBattle) continue;
-            if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
+            if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !TurnRuleLimitedAsOpen(playerId, source?.Id) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
             // ValidateAbility itself uses, mirrored here so an offered command is never one
             // ValidateAbility would then reject (or, symmetrically, so a legal Open-phase performer
