@@ -19,6 +19,19 @@ public partial class Main
         Actions.Where(a => a.CardId == action.CardId && a.AlternativeCost is { } other &&
             other.AbilityId == cost.AbilityId && other.PerformerId == cost.PerformerId).ToArray();
 
+    // The hand cards the cost review may discard (Akodo Kamina: "bow Kamina, or discard a card"): one engine-listed option per card, each naming it on CardIds.
+    private HashSet<string> AlternativeCostCards() => !_reviewingAlternativeCost || _chosen?.AlternativeCost is null ? [] :
+        AlternativeCosts(_chosen).Where(a => a.Enabled && a.Command?.CardIds is { Length: 1 }).Select(a => a.Command!.CardIds![0]).ToHashSet();
+
+    // Clicking such a hand card selects its discard option, the same as picking it in the sidebar list; the choice is still confirmed separately.
+    private bool SelectAlternativeCostCard(CardView card)
+    {
+        if (!_reviewingAlternativeCost || _chosen?.AlternativeCost is null) return false;
+        var option = AlternativeCosts(_chosen).FirstOrDefault(a => a.Enabled && a.Command?.CardIds is [var id] && id == card.Id);
+        if (option is null) return false;
+        _decisionSelection = option; RenderInspector(); Highlight(); return true;
+    }
+
     private void ResetDecisionSelection()
     {
         _decisionSelection = null;
@@ -47,6 +60,11 @@ public partial class Main
         if (pending is null && _chosen?.Command is { } draft)
         {
             _inspector.AddChild(Palette.Wrapped(_reviewingAlternativeCost ? "Choose one cost to pay." : "Review the performer and target.", 22, Palette.Paper));
+            if (_reviewingAlternativeCost && AlternativeCostCards().Count > 0)
+            {
+                _inspector.AddChild(Palette.Wrapped("Pay by the first option, or discard a card instead: select a card below, or click a highlighted card in your hand.", 17, Palette.PaperDim));
+                Highlight(); // the hand cards that may be discarded light up as soon as the review opens
+            }
             if (draft.PerformerId is { } performer && FindCard(performer) is { } card)
                 _inspector.AddChild(Palette.Wrapped("Performer: " + card.Definition?.Name, 17, Palette.PaperDim));
             if (draft.TargetId is { } target && FindCard(target) is { } targetCard)

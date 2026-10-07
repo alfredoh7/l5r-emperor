@@ -60,8 +60,8 @@ internal static class NegatedCostTests
 
     private static CardInstance Now(MatchEngine e, string id) => e.State.Cards[id];
 
-    private static GameCommand Use(MatchEngine e, int player, string ability, string cardId, string? target = null, string? performer = null) =>
-        new("useAbility", player, e.Version, CardId: cardId, TargetId: target, AbilityId: ability, PerformerId: performer);
+    private static GameCommand Use(MatchEngine e, int player, string ability, string cardId, string? target = null, string? performer = null, string? costOption = null) =>
+        new("useAbility", player, e.Version, CardId: cardId, TargetId: target, AbilityId: ability, PerformerId: performer, CostOption: costOption);
 
     // A targeted action through the option the engine offers; an untargeted one when no target is given.
     private static GameCommand Offer(MatchEngine e, int player, string ability, string cardId, string? targetId = null)
@@ -146,14 +146,14 @@ internal static class NegatedCostTests
     {
         var s = Table();
         var kamina = Add(s, Kamina, 0, Zone.Home); var ally = Add(s, "training-crane-samurai", 0, Zone.Home);
-        var e = Negated(s, e => Use(e, 0, "kamina-boost", kamina.Id, ally.Id));
+        var e = Negated(s, e => Use(e, 0, "kamina-boost", kamina.Id, ally.Id, costOption: "bow"));
         Check(Now(e, kamina.Id).Bowed, "the cost bow was paid");
         Check(!Now(e, ally.Id).Modifiers.Any(m => m.Amount == 4), "the +4F did not happen");
         Check(LastUse(e).Contains("(negated)"), LastUse(e));
         Eq(e.State.PriorityPlayerId, 1, "priority passes on as after any action");
         // The control: the same action un-negated does both.
         var f = MatchEngine.FromTestState(s);
-        Accept(f, Use(f, 0, "kamina-boost", kamina.Id, ally.Id));
+        Accept(f, Use(f, 0, "kamina-boost", kamina.Id, ally.Id, costOption: "bow"));
         Check(Now(f, kamina.Id).Bowed && Now(f, ally.Id).Modifiers.Any(m => m.Amount == 4), "un-negated: bow and +4F");
     }
 

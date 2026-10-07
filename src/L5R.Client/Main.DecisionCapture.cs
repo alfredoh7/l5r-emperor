@@ -69,7 +69,7 @@ public partial class Main
                 }
                 GD.Print("DECISION_CHOOSER_PASS: " + _captureMode); GetTree().Quit(); return;
             }
-            var kind = _captureMode.Contains("fukui-bowed") ? "fukui-bowed" : _captureMode.Contains("fukui") ? "fukui" : "yumaru";
+            var kind = _captureMode.Contains("fukui-bowed") ? "fukui-bowed" : _captureMode.Contains("fukui") ? "fukui" : _captureMode.EndsWith("-kamina", StringComparison.Ordinal) ? "kamina" : "yumaru";
             var waiting = _captureMode.Contains("waiting");
             await PrepareDecisionReview(kind, waiting ? 1 : 0);
             if (DecisionReviewMode)
@@ -128,6 +128,36 @@ public partial class Main
                 await SupportCapture("-selected"); await SupportClick(DecisionButton("Confirm choice")); await WaitDecisionPresentation();
                 DecisionRequire(View.Version == version + 1 && View.PendingChoice is null, "Selected choice did not resolve exactly once");
                 DecisionRequire(View.Events.Any(e => e.Type == "effectChosen" && e.Message.Contains(label)), "Chosen consequence absent from public log");
+            }
+            else if (kind == "kamina")
+            {
+                // Akodo Kamina: one grouped action, then the cost review lists "Bow Kamina" and one discard per hand card; a hand card click selects its discard; nothing is implicit.
+                var kamina = _tiles.First(t => t.Card.Definition?.Id == "oracle-l5r-224").Card;
+                SelectCard(kamina); await EventFrames(5);
+                var grouped = StabilizationButtons(_inspector).Where(b => b.HasMeta("alternative_cost_group")).ToArray();
+                DecisionRequire(grouped.Length == 1, "Kamina's ways to pay were not grouped");
+                await SupportClick(grouped[0]); await EventFrames(5);
+                DecisionRequire(DecisionButton("Review cost choices").Disabled, "Cost review opened before a target was chosen");
+                var ally = Actions.First(a => a.Enabled && a.AlternativeCost is not null && a.TargetIds is { Length: > 0 }).TargetIds![0];
+                ChooseTarget(ally); await EventFrames(5);
+                DecisionRequire(_chosen?.Command?.CardIds is null, "The target step defaulted to a discard");
+                await SupportClick(DecisionButton("Review cost choices")); await EventFrames(8);
+                var hand = Self.Hand.Select(c => c.Id).ToArray();
+                DecisionRequire(hand.Length == 2, "The fixture hand changed");
+                var labels = new[] { "Bow Kamina" }.Concat(hand.Select(id => "Discard a card: " + FindCard(id)!.Definition!.Name)).ToArray();
+                var scroll = (ScrollContainer)_inspector.GetParent();
+                foreach (var label in labels) { scroll.EnsureControlVisible(DecisionButton(label)); await EventFrames(3); DecisionRequire(scroll.GetGlobalRect().Encloses(DecisionButton(label).GetGlobalRect()), "Review choice unreachable: " + label); } // a long hand scrolls; every choice must be reachable
+                DecisionRequire(DecisionButton("Confirm choice").Disabled, "Alternative cost has implicit default");
+                DecisionRequire(hand.All(id => _tiles.First(t => t.Card.Id == id).LegalTarget), "Hand cards are not marked as discard choices");
+                await SupportCapture("");
+                SelectCard(FindCard(hand[1])!); await EventFrames(5);
+                DecisionRequire(View.Version == version && _decisionSelection?.Command?.CardIds?.Single() == hand[1], "A hand card click did not select its discard");
+                DecisionRequire(!DecisionButton("Confirm choice").Disabled, "Selected discard cannot be confirmed");
+                await SupportCapture("-selected"); await SupportClick(DecisionButton("Confirm choice")); await WaitDecisionPresentation();
+                DecisionRequire(View.Version == version + 1, $"Cost did not execute once (v{version} -> v{View.Version})");
+                DecisionRequire(FindCard(kamina.Id) is { Bowed: false }, "Discarding must leave Kamina unbowed");
+                DecisionRequire(Self.Hand.Count() == 1 && Self.Hand.All(c => c.Id == hand[0]), "The chosen card was not discarded");
+                DecisionRequire(FindCard(ally)?.Modifiers?.Any(m => m.Stat == "Force" && m.Amount == 4) == true || View.Events.Any(e => e.Message.Contains("+4")), "No +4F");
             }
             else
             {
