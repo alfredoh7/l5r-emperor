@@ -255,7 +255,8 @@ public sealed partial class MatchEngine
         }
         if (checkLoyal && !LoyaltyAllowsControl(personality, Player(controllerId).Clan, controllerId))
         {
-            Emit("controlRefused", $"{via}: {name} is Loyal and cannot be controlled by {Player(controllerId).Name}.", controllerId, personality.Id);
+            var gateReason = RecruitGateFor(personality, controllerId, Player(controllerId).Clan, RecruitGateKind.ControlChange).RefuseReason; // P3 (issue #695): a RecruitGate refusal says why (the legacy Loyal-like one keeps its words)
+            Emit("controlRefused", $"{via}: {(gateReason is null or LoyalRecruitRefusal ? $"{name} is Loyal and cannot be controlled by {Player(controllerId).Name}." : gateReason)}", controllerId, personality.Id);
             return false;
         }
         if ((Keyword(personality, "Unique") || Keyword(personality, "Singular")) && ControlsCopyOf(controllerId, name))

@@ -17,7 +17,7 @@ public sealed partial class MatchEngine
     {
         var printed = Definition(copier);
         var keywords = (printed.Keywords ?? []).ToList();
-        foreach (var keyword in CurrentKeywordList(spell)) if (!keywords.Contains(keyword, StringComparer.Ordinal)) keywords.Add(keyword);
+        foreach (var keyword in CurrentKeywordList(spell)) if (!keywords.Contains(keyword, StringComparer.Ordinal) && !KeywordGainBlocked(copier, keyword)) keywords.Add(keyword);
         var abilities = (printed.Abilities ?? []).ToList();
         var copiedAbilities = new List<string>();
         foreach (var id in Definition(spell).Abilities ?? [])
@@ -39,7 +39,7 @@ public sealed partial class MatchEngine
         var keywords = (printed.Keywords ?? []).ToList();
         var newKeywords = new List<string>();
         foreach (var keyword in Definition(from).Keywords ?? [])
-            if (!excluded.Contains(keyword, StringComparer.Ordinal) && !keywords.Contains(keyword, StringComparer.Ordinal)) { keywords.Add(keyword); newKeywords.Add(keyword); }
+            if (!excluded.Contains(keyword, StringComparer.Ordinal) && !keywords.Contains(keyword, StringComparer.Ordinal) && !KeywordGainBlocked(copier, keyword)) { keywords.Add(keyword); newKeywords.Add(keyword); }
         var abilities = (printed.Abilities ?? []).ToList();
         var copied = 0;
         foreach (var id in Definition(from).Abilities ?? [])

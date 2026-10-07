@@ -107,7 +107,7 @@ public sealed partial class MatchEngine
     private static bool CopyableAbility(AbilityDefinition ability) => !ability.CopiesAbilities && !ability.NotCopyable && ability.Trigger != "own-enters-play" && ability.Timing != GrantedTraits.Timing;
 
     private string[] CopyableKeywords(CardInstance source, CardInstance receiver) =>
-        CurrentKeywordList(source).Where(keyword => !Keyword(receiver, keyword)).ToArray();
+        CurrentKeywordList(source).Where(keyword => !Keyword(receiver, keyword) && !KeywordGainBlocked(receiver, keyword)).ToArray();
 
     private string[] CopyableAbilityIds(CardInstance source, CardInstance receiver)
     {
@@ -196,7 +196,7 @@ public sealed partial class MatchEngine
     {
         if (step == CopyStep.Keyword)
         {
-            if (!Keyword(receiver, value)) receiver.GrantedKeywords.Add(new(value, copy.CopierAbilityId, copy.Duration, copy.SourceDefinitionId, copy.SourceName));
+            if (!Keyword(receiver, value) && !KeywordGainBlocked(receiver, value)) receiver.GrantedKeywords.Add(new(value, copy.CopierAbilityId, copy.Duration, copy.SourceDefinitionId, copy.SourceName));
             Emit("keywordCopied", $"{Definition(receiver).Name} copies the keyword {value} from {copy.SourceName}.", receiver.OwnerId, receiver.Id);
             return;
         }

@@ -141,7 +141,7 @@ public sealed partial class MatchEngine
     private CardDefinition WithControllerClan(CardDefinition printed, PlayerState player)
     {
         var stronghold = Definition(Card(player.StrongholdId));
-        var clans = (stronghold.Clans ?? [stronghold.Clan]).Where(clan => clan != "Unaligned").ToArray();
+        var clans = (stronghold.Clans ?? [stronghold.Clan]).Where(clan => clan != "Unaligned" && !CreatedClanGainBlocked(player.Id, clan)).ToArray();
         return clans.Length == 0 ? printed : printed with
         {
             Clan = clans[0],

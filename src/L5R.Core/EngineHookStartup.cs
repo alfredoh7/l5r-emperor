@@ -61,6 +61,13 @@ internal static partial class EngineHooks
         _ = TurnBeginChoices.Items;
         _ = PlayerGrantAbilities.Items;
         _ = CostWaivers.Items;
+        _ = PaymentTokens.Items;
+        _ = ProductionCondition.Items;
+        _ = ConditionalProductions.Items;
+        _ = ProductionAdjustment.Items;
+        _ = AfterPayment.Items;
+        _ = RecruitGate.Items;
+        _ = KeywordRule.Items;
         return true;
     }
 
