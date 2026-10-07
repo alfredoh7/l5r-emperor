@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "P15 Fortification Holdings engine primitive: Fortification Holdings enter straightened, guard a province and are discarded with it. Engine only, no card wired. Shared change: additive ProvinceView.FortificationIds (client may ignore).",
+  "validation": "fortification-holdings 4/4; bash tools/check.sh --skip-client passed; format check and comment-swallow lint clean; native Godot not run (engine only)",
+  "remaining": "Cards (The Tower of Vigilance) wired in a follow-up wave; client does not draw ProvinceView.FortificationIds",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/719",
+  "branch": "claude/719-p15-fortification-holdings",
+  "updated": "2026-10-07T18:42:27.356884+00:00"
+}
