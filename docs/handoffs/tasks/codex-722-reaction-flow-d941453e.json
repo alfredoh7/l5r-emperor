@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement contextual reaction flow, direct offered reactions, explicit named preparation, guarded submission and prepared-review replay safety.",
-  "validation": "Full tools/check.sh --skip-client passed on base 8fce8053, including 12 reaction-presentation regressions and 21 transport checks. Client compilation passed with zero warnings/errors. Native target/cancel/closure/receipt/repeated-input checks passed before remaining matrix checks; full native and package checks pending.",
-  "remaining": "Integrate current main, finish both-seat normal/reduced native matrix and relevant chooser regressions, publish verified Windows preview, request mdornbrook review. Human rules and native Windows acceptance pending.",
+  "summary": "Contextual reaction decisions, direct source-card options, explicit named preparation, input guards and prepared-review replay protection implemented; current main through e494e279 integrated.",
+  "validation": "tools/check.sh --skip-client passed: all content/Core suites, 98 AI, 12 bot-policy, 3 bot-soak, 9 server and 21 client transport checks. Post-integration 12 reaction-presentation, 9 reaction-window-settle and 4 Fortification checks passed. Client compiled with zero warnings/errors and Godot import passed. Earlier native target/cancel/closure/receipt/repeated-input checks passed; remaining matrix blocked by locked Mac. Launcher generated and shell syntax checked.",
+  "remaining": "Unlock Mac and finish native normal/reduced matrix for both seats, relevant chooser checks and visual review. Package, publish and verify Windows preview, notify mdornbrook once and request rules-lead review. Human Windows/rules acceptance pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/722",
   "branch": "codex/722-reaction-flow",
-  "updated": "2026-10-07T19:30:06.059575+00:00"
+  "updated": "2026-10-07T19:33:09.651448+00:00"
 }

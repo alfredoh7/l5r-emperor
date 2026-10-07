@@ -111,10 +111,11 @@ public partial class Main
         await LoadSupportFixture(fixture.Engine, seat);
         await WaitReactionCapture();
         FocusBattle(); await EventFrames(8);
-        for (var attempt = 0; attempt < 10 && !GetWindow().HasFocus(); attempt++)
+        if (!GetWindow().HasFocus()) GD.Print("REACTION_FLOW_FOCUS_REQUIRED: activate the game window for native input checks.");
+        for (var attempt = 0; attempt < 1800 && !GetWindow().HasFocus(); attempt++)
         {
-            GetWindow().GrabFocus();
-            await EventFrames(6);
+            if (attempt % 60 == 0) GetWindow().GrabFocus();
+            await EventFrames(1);
         }
         SupportRequire(GetWindow().HasFocus(), "Native reaction window did not receive focus");
         SupportRequire(_selected is null && _chosen is null, "Fixture unexpectedly preselected a source or action");
