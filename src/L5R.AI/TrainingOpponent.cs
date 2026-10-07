@@ -241,6 +241,7 @@ public static partial class TrainingOpponent
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
             // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
             case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            case "selectSearchCards": case "chooseSearchAttachTarget": return 100; // P20 (SearchExtensions.cs): the engine's default legal selection; the first Personality it can be attached to
             // "Put it into play or your hand" (issue #498): a modest bot puts the found Ring into play; the Attack target selection step: any offered target over none.
             case "chooseSearchDestination": return command.Choice == "play" ? 100 : 90;
             case "chooseAttackTarget": return command.TargetId is null ? 50 : 100;
