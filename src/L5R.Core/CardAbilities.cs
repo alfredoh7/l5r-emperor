@@ -5492,6 +5492,11 @@ public sealed partial class MatchEngine
                 EmperorP3EntryAbilities.EntryTrigger => P3EntryWindowApplies(command), // Easy Persuasion (issue #503)
                 // Ikoma Ayumu, Utaku Lishan (issue #503): the announce window of this card, for its player's Tactical / Battle action.
                 EmperorP3PriorityAbilities.OwnTacticalAnnounced or EmperorP3PriorityAbilities.OwnBattleAnnounced => P3AnnounceWindowOpen(ability.Trigger!, command),
+                // P6 (issue #705, AfterFacts.cs): "after you announce an action" taken by a registered watcher with a performer filter.
+                AnnounceTriggers.WithPerformer => AnnounceWithPerformerOpen(id, command),
+                // P6: a Reaction that names a fact, in the window that fact opened.
+                { } factTrigger when FactTriggers.IsFact(factTrigger) => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var factSource)
+                    && _state.LastResolvedAction is { } factFacts && FactApplies(factSource, id, command.PlayerId, factFacts) == true,
                 _ => false
             },
             _ => false
@@ -10894,6 +10899,7 @@ public sealed partial class MatchEngine
     {
         if (NegatesEffect(terrain, "destroy")) { Emit("destructionNegated", $"{Definition(terrain).Name}'s destruction was negated before it resolved.", terrain.OwnerId, terrain.Id); return; } // Interrogation (issue #653)
         if (ImmuneNegates(terrain, ImmunityKind.TerrainDestroy, EffectSourcePlayer(), "destruction")) return; // P12 (ImmunityLedger.cs): the battle's own discard has no source player and is never stopped
+        var terrainBattlefield = terrain.ProvinceIndex;
         terrain.Zone = Zone.FateDiscard; terrain.ProvinceIndex = null; terrain.FaceUp = true;
         // Fields of Mercy (oracle-l5r-2530): "the count of destroyed personalities does not start
         // until Fields of Mercy are played" -- so a LATER copy entering play must start fresh, not
@@ -10901,6 +10907,7 @@ public sealed partial class MatchEngine
         _state.FieldsOfMercyWatches.RemoveAll(w => w.CardId == terrain.Id);
         foreach (var province in _state.Players.SelectMany(p => p.Provinces)) province.SourceBonuses.RemoveAll(b => b.SourceId == terrain.Id);
         Emit("terrainDiscarded", $"{Definition(terrain).Name} was removed from play.", terrain.OwnerId, terrain.Id);
+        RecordFact(FactKinds.TerrainDestroyed, terrain.OwnerId, terrain.Id, null, terrainBattlefield); // P6 (AfterFacts.cs)
     }
     // Brawl (issue #304): a Region attached to a province leaves play for its owner's Dynasty discard,
     // the same removal ResolveProvinceDestruction applies when the province itself is destroyed.

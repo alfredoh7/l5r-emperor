@@ -1306,6 +1306,9 @@ public sealed class ResolvedActionFacts
     public List<int> FavorDiscarders { get; set; } = [];
     // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
     public bool WordsHaveStrengthPlayed { get; set; }
+    // P6 (issue #705, AfterFacts.cs): the fact this record stands for when AbilityId is a fact sentinel (FactTriggers.Sentinel); null for an action's record.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public FactRecord? Fact { get; set; }
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in

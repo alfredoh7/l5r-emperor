@@ -38,6 +38,7 @@ public sealed partial class MatchEngine
     // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null, IEnumerable<string>? targetIds = null)
     {
+        ClearActionScopedModifiers(ActionKeyPrefix(playerId, sourceId, abilityId)); // P6 (AfterFacts.cs): "until the action ends" modifiers end with the action
         WlAfterActionResolved(abilityId, playerId, sourceId); // issue #674 (WlSpellsRings.cs): The Thunderer's Protection bows the action's performers after it resolves
         WlPersTornActionDone(abilityId, playerId, sourceId); // Moshi Ira (issue #674, WlPersTorn.cs): the -3F owed once the action targeting his unit has resolved
         AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
@@ -97,7 +98,7 @@ public sealed partial class MatchEngine
     // A Battle action: a Battle-timed ability, or a Battle/Open one resolved in a Combat Segment.
     private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
 
-    private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger is AfterActionReactionTriggers.AfterActionResolved or ReactionTriggers.RingEntersPlay;
+    private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && (ability.Trigger is AfterActionReactionTriggers.AfterActionResolved or ReactionTriggers.RingEntersPlay || FactTriggers.IsFact(ability.Trigger)); // P6: a fact's Reaction is offered in the same window
 
     // Whether the last resolved action's own effects destroyed a Personality of `playerId`'s.
     private bool LastActionDestroyedOwnPersonality(int playerId) =>
@@ -112,6 +113,7 @@ public sealed partial class MatchEngine
     private bool AfterActionResolvedApplies(CardInstance source, string abilityId, int playerId)
     {
         if (_state.LastResolvedAction is not { } facts || source.OwnerId != playerId) return false;
+        if (FactApplies(source, abilityId, playerId, facts) is { } factApplies) return factApplies; // P6 (AfterFacts.cs): a fact's window offers only the Reactions that name it, and an action's only the others
         if (WlRingsAfterActionApplies(abilityId, playerId, facts) is { } wlRings) return wlRings; // issue #699 (WlRings.cs): "After your Ring enters play"
         if (FavorMempoAfterActionApplies(source, abilityId, playerId, facts) is { } favorAfter) return favorAfter; // issue #667 (FavorMempo.cs): after you discard the Imperial Favor, and a negated Favor action's record
         // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
