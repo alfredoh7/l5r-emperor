@@ -289,6 +289,7 @@ public sealed partial class MatchEngine
                 if (SearchPlayEventChoice(pending, command)) return; // issue #667 (SearchPlayTopaz.cs): The Topaz Armor's two keywords
                 if (ResolveEmperorP6Choice(pending, command)) return; // issue #503 (EmperorP6.cs): Dark Experiments, the face-up refills, Ietsuno's switch
                 if (ResolveP6EventChoice(pending, command)) return; // primitive P6 (issue #705, AfterFacts.cs): a Celestial's entry decision
+                if (ResolveWatchEventChoice(pending, command)) return; // primitive P8 (issue #712, ActionEffectWatch.cs): a watch's choice
                 throw new RuleViolation("Unknown Event decision.");
         }
     }
@@ -334,6 +335,7 @@ public sealed partial class MatchEngine
                 foreach (var option in SearchPlayEventChoiceActions(pending, playerId)) yield return option; // issue #667 (SearchPlayTopaz.cs)
                 foreach (var option in EmperorP6ChoiceActions(pending, playerId)) yield return option; // issue #503 (EmperorP6.cs)
                 foreach (var option in P6EventChoiceActions(pending, playerId)) yield return option; // primitive P6 (issue #705, AfterFacts.cs)
+                foreach (var option in WatchEventChoiceActions(pending, playerId)) yield return option; // primitive P8 (issue #712, ActionEffectWatch.cs)
                 break;
         }
     }

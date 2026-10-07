@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "P8 action-effect watch engine primitive (ActionEffectWatch.cs): watches armed against a held action hear moved/discarded/created facts, move gate, FocusValueOf. Shared change: AffectedCard gains three optional fields omitted from saved state when unset; engine only, no client change, no cards wired",
+  "validation": "dotnet run action-effect-watch 9/9; bash tools/check.sh --skip-client passed; check_format and lint_comment_swallow clean; native Godot not run (engine-only)",
+  "remaining": "Cards (Moto Taigo - exp, Reverse Fate, Verdant Jungle) wired in a follow-up wave; see docs/decisions/2026-10-07-p8-action-effect-watch.md",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/712",
+  "branch": "claude/712-p8-action-effect-watch",
+  "updated": "2026-10-07T16:32:09.265748+00:00"
+}

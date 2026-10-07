@@ -82,7 +82,7 @@ public sealed partial class MatchEngine
         _state.PendingMoveReactionCardId = card.Id;
         FireConsecrationWatches(card, province);
         Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to {BattlefieldLabel(province)}.", card.OwnerId, card.Id);
-        RecordActionEffect(card.Id, MovedKind);
+        RecordActionEffect(card.Id, MovedKind, toBattlefield: province);
     }
 
     // ---- adjacent battlefields --------------------------------------------------------------------------------------------------------------------------------------------------------------

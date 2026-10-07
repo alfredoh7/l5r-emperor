@@ -36,6 +36,7 @@ public sealed partial class MatchEngine
     private void ResolveNegatedAction(GameCommand command, bool consumedGrant = false, bool ignoreCosts = false)
     {
         ClearActionScopedModifiers(ActionKeyPrefix(command.PlayerId, command.CardId, command.AbilityId)); // P6 (AfterFacts.cs): a negated action ends too
+        DropWatchesOf(command); // P8 (ActionEffectWatch.cs): a wholly negated action does nothing, so nothing is heard
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
         // Bad Kharma (Emperor Edition remaining-cards pass, group A, issue #492): "He ignores the action's costs" -- the action is taken, nothing of it is paid and nothing happens.
         if (ignoreCosts)
