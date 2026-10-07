@@ -723,6 +723,9 @@ public sealed class PendingDuel
     // none is named.
     public string Stat { get; set; } = "Chi";
     public bool Refusable { get; set; }
+    // P18 (DuelRules.cs, issue #698): the rules this duel carries (focus counts, first to focus, item bonuses, automatic losses, the cost of refusing); null -- and not saved -- for an ordinary duel.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DuelRules? Rules { get; set; }
     public string Stage { get; set; } = "AwaitingAccept";
     // Whose turn to Focus or Strike, alternating, starting with ChallengedPlayerId.
     public int TurnPlayerId { get; set; }

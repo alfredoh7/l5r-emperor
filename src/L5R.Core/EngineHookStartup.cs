@@ -50,6 +50,8 @@ internal static partial class EngineHooks
         _ = AbilityCostTerms.Items;
         _ = RefillFaceUp.Items;
         _ = StandingWatches.Items;
+        _ = DuelRulesFor.Items;
+        _ = DuelRefusableWhen.Items;
         _ = TurnBegins.Items;
         _ = TurnBeginChoices.Items;
         _ = PlayerGrantAbilities.Items;
