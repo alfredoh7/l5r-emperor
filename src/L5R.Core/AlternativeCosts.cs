@@ -118,6 +118,9 @@ public sealed partial class MatchEngine
         // Issue #501: "or discard the Imperial Favor" -- the acting player must control it (or a Favor token, Kyuden Otomo - exp); it names no card.
         if (option.Verb == CostVerbs.DiscardFavor) { RequireFavorDiscard(command, Player(command.PlayerId)); return; }
         if (option.Verb == CostVerbs.PayGold) return; // issue #682: the Gold is validated and paid with the ability's price (AbilityGoldCost reads the option's rule)
+        if (option.Verb == CostVerbs.Discard) { ValidateDiscardOption(ability, option, command, source); return; } // Akodo Kamina (AlternativeDiscard.cs)
+        // An ability that offers a discard option carries a card only on that option (a bow naming a card is a malformed command).
+        if (ability.CostOptions.Any(AlternativeDiscard.IsDiscardOption)) Require(command.CardIds is null or { Length: 0 }, "This way of paying names no card.");
         var subject = CostSubjectCard(option, ability, command, source) ?? throw new RuleViolation(option.Subject == CostSubject.Target ? "Choose a target." : "Choose a performing card.");
         if (MomokoWaivesCost(command, option.Verb)) return; // Isawa Momoko (issue #501): an ignored cost need not be payable
         var reason = CostOptionUnpayable(option, subject);
@@ -132,6 +135,7 @@ public sealed partial class MatchEngine
         var option = ChosenCostOption(ability, command);
         if (option.Verb == CostVerbs.DiscardFavor) { DiscardImperialFavorCost(command, player); return; } // issue #501
         if (option.Verb == CostVerbs.PayGold) return; // issue #682: paid with the ability's Gold, beside the other costs
+        if (option.Verb == CostVerbs.Discard) { PayDiscardOption(ability, option, command, player, source); return; } // Akodo Kamina (AlternativeDiscard.cs)
         var subject = CostSubjectCard(option, ability, command, source)!;
         if (MomokoWaivesCost(command, option.Verb)) { NoteMomokoWaivedCost(command, option.Verb); return; } // Isawa Momoko (issue #501)
         if (!InPlay(subject)) return; // a reaction between announcement and resolution already took it out of play: nothing is left to pay with
