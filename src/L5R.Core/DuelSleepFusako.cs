@@ -33,7 +33,7 @@ public sealed partial class MatchEngine
     private static bool RefusalNeedsBowedTarget(PendingDuel duel) => duel.AbilityId == DuelSleepFusakoAbilities.FusakoDuel;
 
     /// <summary>Whether the challenged player may refuse right now: always for an ordinary refusable challenge; for Fusako's only while the target is bowed.</summary>
-    private bool DuelRefusalOpen(PendingDuel duel) => duel.Refusable && (!RefusalNeedsBowedTarget(duel) || Card(duel.ChallengedId).Bowed);
+    private bool DuelRefusalOpen(PendingDuel duel) => duel.Refusable && (!RefusalNeedsBowedTarget(duel) || Card(duel.ChallengedId).Bowed) && DuelRefusalCostProblem(duel) is null; // P18: a refusal whose cost cannot be paid is not open
 
     /// <summary>Whether the challenged player may still bow his Personality to gain the right to refuse (Fusako, refusable, target straightened).</summary>
     private bool DuelBowToRefuseOffered(PendingDuel duel) =>

@@ -100,6 +100,7 @@ public sealed partial class MatchEngine
 
     private void GiveProvinceStrengthUntilResolution(int playerId, int provinceIndex, int amount, string source)
     {
+        if (ProvinceStrengthChangeNegated(playerId, provinceIndex, source)) return; // P12 (ImmunityLedger.cs)
         _state.ProvinceStrengthEffects.Add(new(playerId, provinceIndex, ProvinceEffectFlat, amount, _state.TurnNumber, source, _state.BattleNumber));
         Emit("provinceStrengthRaised", $"{source}: {Player(playerId).Name}'s province {provinceIndex + 1} has {amount:+#;-#;0} strength until the battle's resolution begins.", playerId);
     }

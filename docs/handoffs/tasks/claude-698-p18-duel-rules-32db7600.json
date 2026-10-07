@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Primitive P18: DuelRules on PendingDuel (item-bonus exclusion, min/exact focus counts, first-to-focus, automatic loss, refusal costs, refusable-when) with DuelRuleRegistry one-line registration and the substitute-duelist reaction (Ezuno-shaped, challenge-issuing actions only). Engine only; cards wired in a later wave.",
+  "validation": "duel-rules suite 10/10; format and comment-swallow gates clean; full check.sh --skip-client result recorded in the PR.",
+  "remaining": "No card wired; R-027 stand-ins not separately tested under the counts; readings in docs/decisions/2026-10-06-p18-duel-rules.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/698",
+  "branch": "claude/698-p18-duel-rules",
+  "updated": "2026-10-07T04:40:51.671753+00:00"
+}

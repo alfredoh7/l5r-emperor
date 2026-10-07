@@ -9,11 +9,13 @@ public sealed partial class MatchEngine
     {
         var ownerId = _state.Players.First(p => p.Provinces.Contains(province)).Id;
         var total = 0;
+        var ignoresOthers = ProvinceIgnoresOthersCards(ownerId); // P12 (ImmunityLedger.cs)
         foreach (var card in _state.Cards.Values.Where(InPlay))
         {
             var effect = Definition(card).Effect;
             if (effect.Length == 0 || effect == "none") continue;
             var mine = card.OwnerId == ownerId;
+            if (!mine && ignoresOthers) continue;
             total += RegisteredProvinceBonus(card, mine);
             switch (effect)
             {

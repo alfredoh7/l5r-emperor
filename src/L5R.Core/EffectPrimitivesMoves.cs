@@ -51,7 +51,7 @@ public sealed partial class MatchEngine
             return true;
         }
         if (to is not int province)
-            return MovementLockNegates(card, MovementKinds.Home) || P4ShieldNegatesMoveHome(card) || TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer()) || SwitchSideDelayed(card, DelayedKinds.MoveHome);
+            return MovementLockNegates(card, MovementKinds.Home) || P4ShieldNegatesMoveHome(card) || BattlefieldMovementNegated(card, StandingBattlefield(card), null) || TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer()) || SwitchSideDelayed(card, DelayedKinds.MoveHome);
         return SwitchSideDelayed(card, DelayedKinds.MoveToBattlefield) || TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer())
             || MovementLockNegates(card, MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card, province) || KitsuneNegatesMovement(card, province) || UguluNegatesMovement(card, province)
             || ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card, province) || AsukaNegatesMove(card) || HoteiNegatesMove(card) || P4NegatesMoveToBattlefield(card, province);

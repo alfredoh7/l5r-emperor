@@ -45,6 +45,11 @@ public sealed partial class MatchEngine
     /// <summary>THE question: is a card controlled by <paramref name="negatingPlayerId"/> barred from negating <paramref name="mover"/>'s movement? An unknown negator is never barred.</summary>
     private bool MovementNegationBarred(CardInstance mover, int? negatingPlayerId)
     {
+        if (negatingPlayerId is int immuneAgainst && IsImmune(mover, ImmunityKind.MoveNegation, immuneAgainst)) // P12 (ImmunityLedger.cs): "his movement cannot be negated", asked by every negation
+        {
+            Emit("movementNotNegated", $"{Definition(mover).Name}'s movement will not be negated by another player's card: it is immune.", mover.OwnerId, mover.Id);
+            return true;
+        }
         if (negatingPlayerId is not int negator || SledOf(mover) is not { } sled || negator == sled.OwnerId) return false;
         Emit("movementNotNegated", $"{Definition(mover).Name}'s movement will not be negated by another player's card ({Definition(sled).Name}).", mover.OwnerId, sled.Id);
         return true;
@@ -60,7 +65,7 @@ public sealed partial class MatchEngine
     // MovementLockNegates' term: every lock that holds on the card is another player's card's (null players, such as an unknown lock, hold it).
     private bool MovementLockBarredBySled(CardInstance card, MovementKinds kind)
     {
-        if (SledOf(card) is null) return false;
+        if (SledOf(card) is null && !IsImmune(card, ImmunityKind.MoveNegation, 1 - card.OwnerId)) return false; // P12: a card whose movement cannot be negated is guarded the way a Sled carrier is
         var negators = card.MovementLocks.Where(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l)).Select(l => l.ByPlayer).ToList();
         if (PerfectMomentLocks(card) && R1.PerfectMoment is { } moment) negators.Add(moment.PlayerId);
         if (P4GlobalMovementLock(kind)) negators.AddRange(EventsInPlay(EmperorP4WatchAbilities.TooCloseToHomeEffect).Select(e => (int?)e.OwnerId));
@@ -71,7 +76,7 @@ public sealed partial class MatchEngine
     // MovementToBattlefieldNegated's term: Chikushudo's Trickery on the battlefield and the Ambush fought there are the only sources; they bar the move when every one that holds is another player's.
     private bool SledBarsBattlefieldNegation(CardInstance card, int battlefield)
     {
-        if (SledOf(card) is null) return false;
+        if (SledOf(card) is null && !IsImmune(card, ImmunityKind.MoveNegation, 1 - card.OwnerId)) return false; // P12: a card whose movement cannot be negated is guarded the way a Sled carrier is
         var trickery = R1.MovementNegated.Contains(battlefield);
         var ambush = IvoryAmbushNegatesMove(card, battlefield);
         if (!trickery && !ambush) return false;

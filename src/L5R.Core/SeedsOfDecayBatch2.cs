@@ -62,6 +62,7 @@ public sealed partial class MatchEngine
     private void GiveProvinceStrengthThisTurn(int playerId, int provinceIndex, int amount, string source)
     {
         if (!Player(playerId).Provinces.Any(p => p.Index == provinceIndex)) return; // a battlefield without a province has no strength to change (issue #492, rulings pass R1 with R3)
+        if (ProvinceStrengthChangeNegated(playerId, provinceIndex, source)) return; // P12 (ImmunityLedger.cs)
         _state.ProvinceStrengthEffects.Add(new(playerId, provinceIndex, ProvinceEffectFlat, amount, _state.TurnNumber, source));
         Emit("provinceStrengthRaised", $"{source}: {Player(playerId).Name}'s province {provinceIndex + 1} has {amount:+#;-#;0} strength this turn.", playerId);
     }

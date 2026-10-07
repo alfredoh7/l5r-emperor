@@ -35,8 +35,11 @@ public sealed partial class MatchEngine
         if (RestrictionBarsChallenge(challenger)) { Emit("challengeRefused", $"{Definition(challenger).Name} will not challenge.", challengerPlayerId, challengerId); return; } // P11 (CardRestrictions.cs): "will not challenge" -- the duel is not issued
         // Kitsuki Yataku (issue #477 batch 6): "The Samurai's controller may not choose to refuse any challenge created by the action."
         if (refusable && !ChallengeMayBeRefused(challengedId)) { refusable = false; Emit("refusalForbidden", $"{Definition(challenged).Name} may not refuse this challenge.", challenged.OwnerId, challengedId); }
+        var duelRules = ResolveDuelRules(abilityId, challengerPlayerId, challenger, challenged, source); // P18 (DuelRules.cs)
+        if (refusable && !DuelRefusableConditionHolds(duelRules, challenger, challenged)) refusable = false;
         _state.PendingDuel = new PendingDuel
         {
+            Rules = duelRules,
             AbilityId = abilityId,
             ChallengerPlayerId = challengerPlayerId,
             ChallengedPlayerId = challenged.OwnerId,
@@ -74,10 +77,10 @@ public sealed partial class MatchEngine
         var duel = _state.PendingDuel!;
         duel.Stage = "Focusing";
         ApplyDuelEntryTraits(duel); // Spiked Tetsubo (issue #622, IvoryPolitical.cs): "After this Personality enters a duel"
-        duel.TurnPlayerId = duel.ChallengedPlayerId; // the challenged player has the first option, always
+        duel.TurnPlayerId = DuelFirstFocuser(duel); // the challenged player has the first option, unless a duel rule (P18) gives it to the other
         _state.PriorityPlayerId = duel.TurnPlayerId;
         _state.ConsecutivePasses = 0;
-        Emit("duelFocusingBegan", "Focusing begins; the challenged player has the first option.", duel.TurnPlayerId);
+        Emit("duelFocusingBegan", duel.TurnPlayerId == duel.ChallengedPlayerId ? "Focusing begins; the challenged player has the first option." : "Focusing begins; the challenger has the first option.", duel.TurnPlayerId);
     }
 
     // Refusing is only ever reachable when Refusable -- Steel on Steel's own unrefusable phrasing
@@ -87,6 +90,7 @@ public sealed partial class MatchEngine
     private void ResolveDuelRefused()
     {
         var duel = _state.PendingDuel!;
+        PayDuelRefusalCost(duel); // P18 (DuelRules.cs): "to refuse, dishonor him and move him home" / "bow him"
         Emit("duelRefused", $"{Definition(Card(duel.ChallengedId)).Name} refuses the duel.", duel.ChallengedPlayerId, duel.ChallengedId);
         var refusalStart = _state.Events.Count - 1;
         // Doji Shigeyuki: "He may refuse; if he does, move him home."
@@ -113,6 +117,7 @@ public sealed partial class MatchEngine
                 Require(command.Type is "acceptDuel" or "declineDuel" or DuelSleepFusakoAbilities.BowToRefuse, "Accept or decline the duel challenge first.");
                 Require(command.PlayerId == duel.ChallengedPlayerId, "Only the challenged player may respond to the challenge.");
                 if (command.Type == DuelSleepFusakoAbilities.BowToRefuse) { BowChallengedToRefuse(duel); break; } // Fusako (issue #667): bow him to gain the right to refuse
+                if (command.Type == "declineDuel") Require(DuelRefusalCostProblem(duel) is null, DuelRefusalCostProblem(duel) ?? ""); // P18
                 if (command.Type == "declineDuel") Require(DuelRefusalOpen(duel), "Only a bowed Personality may refuse this challenge."); // Fusako (issue #667)
                 if (command.Type == "declineDuel") ResolveDuelRefused();
                 else OpenDuelReactionWindowOrBeginFocusing();
@@ -120,7 +125,7 @@ public sealed partial class MatchEngine
             case "Focusing":
                 Require(command.Type is "focus" or "strike", "Focus or Strike.");
                 Require(command.PlayerId == duel.TurnPlayerId, "Wait for your turn to Focus or Strike in this duel.");
-                if (command.Type == "strike") Strike(); else Focus(command);
+                if (command.Type == "strike") { Require(DuelStrikeRefusal(duel, command.PlayerId) is null, DuelStrikeRefusal(duel, command.PlayerId) ?? ""); Strike(); } else Focus(command); // P18: the duel's focus counts
                 break;
             case "DuelistRefocus":
                 Require(command.Type == "duelistRefocus", "Resolve the Duelist re-focus decision first.");
@@ -150,6 +155,7 @@ public sealed partial class MatchEngine
     private void Focus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
+        Require(DuelFocusSlotOpen(duel, command.PlayerId), $"This duel allows each Personality to focus exactly {duel.Rules?.ExactFocusEach} time(s); you have focused that often. Strike."); // P18 (DuelRules.cs)
         // Reserve Weapon (issue #492 group G): "Before this Personality focuses: You may give him +3 to his duel stat until the duel ends instead of focusing."
         if (command.Choice == "reserve") { ReserveWeaponFocus(command); return; }
         if (command.Choice == GonjiFocusChoice) { GonjiFocus(command); return; } // Kakita Gonji (issue #503, EmperorP2Duel.cs): "instead of focusing that time"
@@ -300,7 +306,7 @@ public sealed partial class MatchEngine
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    }) + RemADuelStatBonus(card) + P4DuelStatBonus(card, stat); // Secret Reserve (issue #503): +1C for each Weapon on the duelist. // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
+    }) + RemADuelStatBonus(card) + P4DuelStatBonus(card, stat) - ExcludedItemDuelBonus(card, stat); // P18: "Items give no bonuses" in this duel. // Secret Reserve (issue #503): +1C for each Weapon on the duelist. // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
 
     private void ResolveDuel()
     {
@@ -328,6 +334,7 @@ public sealed partial class MatchEngine
         var rendOfWinner = winnerId is null ? null : RendTheSoulOfWinner(duel, winnerId);
         if (rendOfWinner is not null) { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Rend the Soul · the winner loses too"; }
         (winnerId, loserIds, resolutionReason) = WlPersGates1DuelOutcome(duel, winnerId, loserIds, resolutionReason); // Daidoji Tametaka - exp (issue #674): "loses any duel against Yoritomo Hiromi"
+        (winnerId, loserIds, resolutionReason) = DuelRulesAutoLoseOutcome(duel, winnerId, loserIds, resolutionReason); // P18 (DuelRules.cs): a registered "loses any duel against ..."
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         if (TfBeginWitnessDecision(duel, winnerId)) return; // Awed Witness (issue #622, TfStrategiesA.cs): the winner's controller may create Witness -- asked once, then the duel resolves again

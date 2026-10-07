@@ -46,7 +46,7 @@ public sealed partial class MatchEngine
                 units.Where(c => c.Zone == Zone.Battlefield || c.Zone == Zone.Attached && Card(c.AttachedTo).Zone == Zone.Battlefield).Select(c => ViewCard(c)).ToArray(),
                 player.Provinces.Select(p => new ProvinceView(p.Index, EffectiveProvinceStrength(p), p.Destroyed,
                     p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp),
-                    p.RegionId is null ? null : ViewCard(Card(p.RegionId)), ProvinceStrengthMax(p), p.HoldsNoDynastyCards, p.DarkExperimentsMarked)
+                    p.RegionId is null ? null : ViewCard(Card(p.RegionId)), ProvinceStrengthMax(p), HoldsNoDynasty(p), p.DarkExperimentsMarked)
                 // Plains of Otosan Uchi (issue #554): DynastySlots is authoritative only once a second slot has ever existed; every
                 // other province leaves it null, keeping the legacy Card field as the whole story (the PR #544 view contract).
                 { DynastySlots = p.CardId2 is null ? null : [new(0, p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp)), new(1, ViewCard(Card(p.CardId2), Card(p.CardId2).FaceUp))] }).ToArray(), // issue #503
@@ -62,7 +62,7 @@ public sealed partial class MatchEngine
                 EventsInPlay: owned.Where(c => c.Zone == Zone.EventInPlay).Select(c => ViewCard(c)).ToArray(),
                 Celestials: owned.Where(c => c.Zone == Zone.Celestial).Select(c => ViewCard(c)).ToArray(),
                 FocusCount: owned.Count(c => c.Zone == Zone.Focused),
-                Underneath: owned.Where(c => c.Zone == Zone.Underneath).Select(c => ViewCard(c)).ToArray())
+                Underneath: owned.Where(c => c.Zone == Zone.Underneath).Select(c => ViewUnder(c, playerId)).ToArray())
             { HandLimit = HandLimitFor(player.Id), DynastyActionTaken = player.DynastyActionTaken }; // issue #503: The New Foundries
         }).ToArray();
         var duel = _state.PendingDuel;
@@ -115,7 +115,7 @@ public sealed partial class MatchEngine
             card.Protections.Select(p => new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.", p.Source, p.Duration)).Concat(MechBGrantedEffects(card)).Concat(PromoGrantedEffects(card)).ToArray(), // issue #501: Only a Shadow's trait
             IsCopyCard(card), card.CopyOfCardId, CopyOfDefinition(card), CopyConditionsText(card), // issue #501 item 32 (EmperorMechBCopies.cs)
             card.OriginalOwnerId is int realOwner && realOwner != card.OwnerId ? realOwner : null, // issue #501: the owner of a card another player controls
-            card.UnitNumber);
+            card.UnitNumber, card.Zone == Zone.Underneath ? card.HostCardId : null);
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -564,7 +564,7 @@ public sealed partial class MatchEngine
             Add("provinceCardChoice", pcRight, Command("provinceCardChoice") with { Choice = "right" });
         }
         else if (_state.PendingChoice is { Type: "yourClanNeedsYouProvince" })
-            foreach (var p in Player(playerId).Provinces.Where(p => !p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503
+            foreach (var p in Player(playerId).Provinces.Where(p => !p.Destroyed && !HoldsNoDynasty(p))) // issue #503
                 // Hidden information: only a face-up card's name may be shown; a face-down card is never revealed by the prompt.
                 Add("chooseYourClanNeedsYouProvince", $"Place into province {p.Index + 1}" + (p.CardId is { } existingId ? Card(existingId).FaceUp ? $" (discarding {Definition(Card(existingId)).Name})" : " (discarding the face-down card)" : ""),
                     Command("chooseYourClanNeedsYouProvince", province: p.Index));

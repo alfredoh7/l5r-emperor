@@ -214,11 +214,11 @@ internal static class SearchPlayCardsTests
         Accept(e, offered.Command!);
         Eq(e.State.Cards[masaya.Id].Zone, Zone.Home, "Masaya is in play");
         Check(e.State.Players[0].Provinces[0].CardId != masaya.Id, "his province refilled");
-        Check(e.State.SearchPlayReturns.Any(r => r.CardId == masaya.Id && r.PlayerId == 0), "his return is owed before the turn ends");
+        Check(e.State.DelayedEffects.Any(d => d.Kind == DelayedKinds.ToDeck && d.CardId == masaya.Id && d.Arg == "Top"), "his return is owed before the turn ends (the to-deck delay, P21)");
         // Before the turn ends he is put on top of the Dynasty deck, face down.
         var deckBefore = e.State.Players[0].DynastyDeck.Count;
         var weapon = Add(e.State, Weapon, 0, Zone.Attached); // (a detached copy: the attachment fixture below is built on a state copy)
-        e.SearchPlayTurnEndForTest();
+        e.ApplyDelayedEffectsForTest(DelayUntil.EndOfTurn);
         Eq(e.State.Cards[masaya.Id].Zone, Zone.DynastyDeck, "Masaya is back in the Dynasty deck");
         Eq(e.State.Players[0].DynastyDeck[0], masaya.Id, "on top of it");
         Check(!e.State.Cards[masaya.Id].FaceUp, "face down");
@@ -240,7 +240,7 @@ internal static class SearchPlayCardsTests
         Accept(g, Enabled(g, 0, SearchPlayAbilities.MasayaRecruit, masaya3.Id).Command!);
         var h = Edit(g, st => st.Cards[masaya3.Id].Zone = Zone.Dead);
         var deckCount = h.State.Players[0].DynastyDeck.Count;
-        h.SearchPlayTurnEndForTest();
+        h.ApplyDelayedEffectsForTest(DelayUntil.EndOfTurn);
         Eq(h.State.Cards[masaya3.Id].Zone, Zone.Dead, "a dead Masaya is not put on the deck");
         Eq(h.State.Players[0].DynastyDeck.Count, deckCount, "and the deck is unchanged");
     }
