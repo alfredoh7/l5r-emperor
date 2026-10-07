@@ -33,4 +33,6 @@ Reviewers used targeted searches and bounded excerpts rather than reading entire
 
 Future P6 non-action fact Reactions reuse `afterActionResolvedReaction`; when such cards are wired, specialize the action wording for their fact kind and add a caption regression. No production card uses that non-action fact path in this reviewed snapshot.
 
-Concurrent PR #725 touches Models/MatchQueries for Fortification Holdings at different declarations/producers. Its approach was inspected and preserved; current main was refreshed before final delivery.
+PR #725 landed during verification and was integrated through main `e494e279`. Its Fortification Holdings changes touch Models/MatchQueries at different declarations/producers; both implementations are preserved. Post-integration reaction-presentation, reaction-settlement and Fortification tests passed.
+
+The final integrated client-contract review found no remaining blocker in decline, receipt, reconnect or session/submission handling. It was read-only and did not rerun runtime checks. The remaining native input matrix requires an unlocked Mac; the task handoff records that limitation separately from the completed automated checks.
