@@ -185,10 +185,8 @@ public sealed partial class MatchEngine
             : [];
 
     // Enlightenment: a Ring put into play by another card's text is not one that "most recently entered play via its own printed text".
-    private bool CountsForEnlightenment(CardInstance ring) => !ring.AbilityUses.ContainsKey(NoEnlightenmentKey);
-
-    // A Ring's own recruit action puts it into play by its own printed text: whatever another card's effect once said no longer applies.
-    private static void RingEnteredByOwnText(CardInstance ring) => ring.AbilityUses.Remove(NoEnlightenmentKey);
+    // Issue #699 (WlRings.cs): read off the Ring's entry record (how it LAST entered play); a Ring recruited by its own text again counts afresh.
+    private bool CountsForEnlightenment(CardInstance ring) => RingLastEnteredByOwnText(ring);
 
     // ---- The rulebook Favor Political Battle action: Akodo's and Doji's Guidance ----------------------------------------------------------------------------
     // Akodo's Guidance: "Lion Clan players may target defending enemy units with the rulebook Favor Political Battle action." (An extra legal target, beside the attacking enemy Personalities.)
@@ -514,10 +512,8 @@ public sealed partial class MatchEngine
             case "togashis-guidance-ring-play":
                 player.Hand.Remove(target!.Id);
                 target.Zone = Zone.Home; target.ProvinceIndex = null; target.FaceUp = true;
-                target.AbilityUses[NoEnlightenmentKey] = 1;
-                player.RingPutIntoPlayTurn = _state.TurnNumber;
+                RingEntersPlay(player, target, false, source, id); // issue #699 (WlRings.cs)
                 Emit("cardEnteredPlay", $"{player.Name} put {Definition(target).Name} into play (Togashi's Guidance); it does not count towards an Enlightenment Victory.", player.Id, target.Id);
-                RecordActionEffect(target.Id, RingEnteredKind);
                 return false;
             // Yoritomo's Guidance: the discarded Port Holding enters play bowed (its Gold, 2 less, was paid as the action's cost).
             case "yoritomos-guidance-port":

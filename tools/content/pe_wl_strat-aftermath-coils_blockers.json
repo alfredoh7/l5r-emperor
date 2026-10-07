@@ -1,6 +1,1 @@
-{
-  "oracle-l5r-10930": {
-    "note": "Benediction (Aftermath, Strategy; scan verified): \"Open: Destroy your target Holding. Give a Province +3 strength.\" Two independent targets of different kinds, a card (your Holding) and a province (either player's, Ring of Earth's 'any-province' shape: GameCommand.Province plus TargetPlayerId). The engine has no ability that names a card and a province together: a multi-target ability is Slots (cards or players only), while the province categories ('any-province', 'enemy-province') are mutually exclusive with a card target in ValidateAbility and in the QueryActions candidate loop (one candidate per province/owner, no card). Wiring it needs a province target slot kind (TargetSlotKinds.Province with a SlotSelection province index and owner, validated in ValidateSlotCard and offered by SlotAbilityOption, plus the client picking a province inside a slot ability). That is a new decision shape for the client, not a local feature addition. Everything else is built: the effect itself is DestroyAttachment-free (DestroyUnits/Holding destroy, then GiveProvinceStrengthThisTurn(owner, index, 3)). QUESTION for Mendon: is 'Give a Province +3 strength' until end of turn (R-001 default, GiveProvinceStrengthThisTurn as Ring of Earth) and may the Province be either player's?",
-    "category": "TARGET"
-  }
-}
+{}

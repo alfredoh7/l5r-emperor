@@ -28,6 +28,8 @@ public sealed record TargetSlot(string Id, string Category, string Label, int Mi
     /// card would offer a choice (e.g. the Personality who could be destroyed) that is only ever legal against a target no one submitted.</summary>
     public bool ProbeDefaultOnlyForLaterSlots { get; init; }
     public bool IsPlayer => Category == TargetSlotKinds.Player;
+    /// <summary>The slot names a Province (either player's, face-up or face-down) rather than a card or a player (Benediction, issue #699): its selection is a province owner and index.</summary>
+    public bool IsProvince => Category == TargetSlotKinds.Province;
     public bool AtResolution => Resolution is not null;
 }
 
@@ -35,18 +37,23 @@ public static class TargetSlotKinds
 {
     public const string Card = "card";
     public const string Player = "player";
+    /// <summary>A Province of either player (issue #699, Benediction): the selection is SlotSelection.ProvinceOwner and SlotSelection.Province; the slot's Category is this same word.</summary>
+    public const string Province = "province";
     public const string FollowUp = "follow-up";
 }
 
 /// <summary>What the acting player chose for one slot: the cards, or -- for a "player" slot -- the player.</summary>
-public sealed record SlotSelection(string Slot, string[]? CardIds = null, int? PlayerId = null);
+public sealed record SlotSelection(string Slot, string[]? CardIds = null, int? PlayerId = null, int? ProvinceOwner = null, int? Province = null);
+
+/// <summary>One Province a province slot may name: whose it is and its index. Face-up or face-down is read from the view, never decided here.</summary>
+public sealed record ProvinceSlotChoice(int Owner, int Index);
 
 /// <summary>One slot as offered to the acting player: its counts and every legal candidate. Kind is "card" (CardIds holds the
 /// legal cards, each checked on its own), "player" (PlayerIds holds the legal players) or "follow-up". Timing "up-front" slots are answered in
 /// the command's Selections; Timing "at-resolution" slots (Kind "follow-up", Min 0, Max 0) are NOT: Condition names when the engine will ask
 /// (BranchCondition) and OptionLabels lists what the acting player will then be offered, so a viewer can say so beforehand.</summary>
 public sealed record TargetSlotOption(string Slot, string Label, string Kind, int Min, int Max, string[] CardIds, int[] PlayerIds,
-    string Timing = TargetSlotTimings.UpFront, string? Condition = null, string[]? OptionLabels = null);
+    string Timing = TargetSlotTimings.UpFront, string? Condition = null, string[]? OptionLabels = null, ProvinceSlotChoice[]? ProvinceChoices = null);
 
 public static class TargetSlotTimings
 {
@@ -105,8 +112,15 @@ public sealed partial class MatchEngine
                 Require(selection?.PlayerId is null or 0 or 1, $"{slot.Label}: choose a real player.");
                 continue;
             }
+            if (slot.IsProvince)
+            {
+                Require(selection?.CardIds is null or { Length: 0 } && selection?.PlayerId is null, $"{slot.Label}: choose a province, not cards or a player.");
+                Require(selection?.ProvinceOwner is not null && selection.Province is not null, $"{slot.Label}: choose a province.");
+                Require(ProvinceSlotLegal(selection!.ProvinceOwner!.Value, selection.Province!.Value), $"{slot.Label}: choose a province that has not been destroyed.");
+                continue;
+            }
             var ids = selection?.CardIds ?? [];
-            Require(selection?.PlayerId is null, $"{slot.Label}: choose cards, not a player.");
+            Require(selection?.PlayerId is null && selection?.ProvinceOwner is null && selection?.Province is null, $"{slot.Label}: choose cards, not a player or a province.");
             Require(ids.Length >= slot.Min && ids.Length <= slot.Max, slot.Min == slot.Max ? $"{slot.Label}: choose exactly {slot.Min}."
                 : $"{slot.Label}: choose {slot.Min} to {slot.Max}.");
             Require(slot.Repeatable || ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
@@ -115,6 +129,14 @@ public sealed partial class MatchEngine
         // Dislodge the Foe: every performing Tactician stands at the SAME battlefield, and the one Personality they oppose stands there too.
         if (ability is { Move.Movers: MoveSpec.PerformingSlot }) ValidatePerformersTogether(command, ability);
     }
+
+    // A province slot's candidate: a real, undestroyed province of either player.
+    private bool ProvinceSlotLegal(int owner, int index) =>
+        owner is 0 or 1 && _state.Players.FirstOrDefault(p => p.Id == owner) is { } holder && holder.Provinces.Any(p => p.Index == index && !p.Destroyed);
+
+    // Every province a province slot offers: either player's undestroyed one, face-up or face-down alike (the viewer says which; nothing hidden is named here).
+    private ProvinceSlotChoice[] ProvinceSlotChoices() =>
+        _state.Players.OrderBy(p => p.Id).SelectMany(p => p.Provinces.Where(x => !x.Destroyed).OrderBy(x => x.Index).Select(x => new ProvinceSlotChoice(p.Id, x.Index))).ToArray();
 
     // The cards of the ability's performing slot(s), in the order chosen.
     private IEnumerable<CardInstance> PerformingSlotCards(GameCommand command, AbilityDefinition ability) =>
@@ -162,6 +184,14 @@ public sealed partial class MatchEngine
             {
                 options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Player, slot.Min, slot.Max, [], [0, 1]));
                 if (slot.Min > 0) chosen.Add(new(slot.Id, PlayerId: prototype.PlayerId));
+                continue;
+            }
+            if (slot.IsProvince)
+            {
+                var provinces = ProvinceSlotChoices();
+                options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Province, slot.Min, slot.Max, [], [], ProvinceChoices: provinces));
+                if (provinces.Length < slot.Min) complete = false;
+                else if (slot.Min > 0) chosen.Add(new(slot.Id, ProvinceOwner: provinces[0].Owner, Province: provinces[0].Index));
                 continue;
             }
             var legal = new List<string>();

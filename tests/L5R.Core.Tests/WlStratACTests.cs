@@ -49,7 +49,7 @@ internal static class WlStratACTests
         ("The Legion's Might: Ranged 1 Attack, and the Favor Political Battle action discards the Imperial Favor for a Ranged 3 Attack (not without the Favor)", LegionScenario),
         ("Thoughtless Sacrifice: both your unbowed Personality and an enemy unit within his Force (plus Personal Honor while defending) are destroyed; a stronger unit is refused", ThoughtlessScenario),
         ("Unpleasant Truths: a Force penalty equal to the target's printed Personal Honor, and a dishonorable target is bowed", TruthsScenario),
-        ("Benediction is blocked, not published: no wave lists it", BenedictionBlocked),
+        ("Benediction is wired in strategy-wave-120, not strategy-wave-117 (WlBenedictionTests covers it)", BenedictionBlocked),
         ("The state survives a serialisation round trip with No Way Out's watch in it", SerialisationScenario),
     ]);
 
@@ -854,10 +854,11 @@ internal static class WlStratACTests
 
     private static void BenedictionBlocked()
     {
+        // Issue #699: Benediction is now wired in strategy-wave-120 (WlBenediction.cs, with its own tests); wave 117 still does not list it.
         var root = RepoRoot();
-        foreach (var file in Directory.GetFiles(Path.Combine(root, "content/published"), "*.txt").Concat(Directory.GetFiles(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves"), "*.txt")))
-            Check(!File.ReadAllLines(file).Contains(Benediction), $"{Path.GetFileName(file)} must not list Benediction");
+        Check(!File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/strategy-wave-117.txt")).Contains(Benediction), "strategy-wave-117 must not list Benediction");
+        Check(File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/strategy-wave-120.txt")).Contains(Benediction), "strategy-wave-120 lists Benediction");
         var blockers = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "tools/content/pe_wl_strat-aftermath-coils_blockers.json"))).RootElement;
-        Check(blockers.TryGetProperty(Benediction, out var note) && note.GetProperty("note").GetString()!.Length > 40, "Benediction is recorded as blocked with a note");
+        Check(!blockers.TryGetProperty(Benediction, out _), "Benediction is no longer recorded as blocked");
     }
 }

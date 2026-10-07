@@ -2399,7 +2399,7 @@ public static class AbilityCatalog
         // Yung (oracle-l5r-9697): "Reaction: After one of your Rings enters play, bow Yung: Search your Fate deck for a Ring, show it, and put it in your hand." A Ring enters play by its own recruit action, so this reads the
         // action that just resolved (the after-action-resolved window, Yung's controller's Ring, put into play by it).
         ["yung-search-ring"] = new("Reaction", "After one of your Rings enters play, bow Yung: Search your Fate deck for a Ring, show it, and put it in your hand", "none",
-            Trigger: AfterActionReactionTriggers.AfterActionResolved, Costs: ActionCost.BowSource, Search: SearchCatalog.YungRing),
+            Trigger: ReactionTriggers.RingEntersPlay, Costs: ActionCost.BowSource, Search: SearchCatalog.YungRing),
         // Daigotsu Ishibashi (oracle-l5r-1728): "Fear Battle: Show a Dark Virtue card in your hand: Ranged Attack with strength equal to the card's Focus Value plus one." The shown card rides on CardIds (Mitsu's
         // token ids are the precedent for a per-command Attack strength); its strength is read by RequireLegalAttackTarget and the execution case alike.
         ["ishibashi-attack"] = new("Battle", "Fear Battle: Show a Dark Virtue card in your hand: Ranged Attack with strength equal to the card's Focus Value plus one", "attack", ActionKeywords: ["Fear"]),
@@ -5461,7 +5461,7 @@ public sealed partial class MatchEngine
                 AfterResolutionTrigger => _state.PendingChoice.Type == "afterResolutionReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterSource)
                     && AfterResolutionApplies(afterSource, id, command.PlayerId),
                 // After an action resolves (issue #437, ActionEffectTracking.cs): open to either player while the window is; each Reaction reads MatchState.LastResolvedAction for its own condition.
-                AfterActionReactionTriggers.AfterActionResolved => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterActionSource)
+                AfterActionReactionTriggers.AfterActionResolved or ReactionTriggers.RingEntersPlay => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterActionSource)
                     && AfterActionResolvedApplies(afterActionSource, id, command.PlayerId),
                 // Turning the Story (issue #453, batch 2): the one reacting player, in the window Proclaim itself opened (SeedsOfDecayBatch2.cs).
                 "before-proclaim-resolves" => _state.PendingChoice.Type == "proclaimNegateReaction" && command.PlayerId == _state.PendingChoice.PlayerId && _state.HeldProclaim is not null,
@@ -8953,22 +8953,19 @@ public sealed partial class MatchEngine
             case "ring-of-earth-recruit":
             case "ring-of-fire-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
-                player.RingPutIntoPlayTurn = _state.TurnNumber; // Brotherhood Schism (issue #453, batch 2)
-                RingEnteredByOwnText(source!); // issue #492: a Ring put into play by its own text counts for Enlightenment again (issue #498: this call had been swallowed by the comment above)
+                RingEntersPlay(player, source!, true, source, id); // issue #699 (WlRings.cs): entry by its own text, Brotherhood Schism's turn, "after your Ring enters play"
                 break;
             case "false-ring-of-air-recruit":
             case "false-ring-of-water-recruit":
             case "false-ring-of-earth-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
-                player.RingPutIntoPlayTurn = _state.TurnNumber; // Brotherhood Schism (issue #453, batch 2)
-                RingEnteredByOwnText(source!); // issue #492: a Ring put into play by its own text counts for Enlightenment again (issue #498: this call had been swallowed by the comment above)
+                RingEntersPlay(player, source!, true, source, id); // issue #699 (WlRings.cs): entry by its own text, Brotherhood Schism's turn, "after your Ring enters play"
                 GainHonor(player.Id, -2, Definition(source).Name);
                 break;
             case "ring-of-void-recruit":
                 foreach (var handId in player.Hand.Where(h => h != source!.Id).ToArray()) DiscardFate(player, Card(handId));
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
-                player.RingPutIntoPlayTurn = _state.TurnNumber; // Brotherhood Schism (issue #453, batch 2)
-                RingEnteredByOwnText(source!); // issue #492: a Ring put into play by its own text counts for Enlightenment again (issue #498: this call had been swallowed by the comment above)
+                RingEntersPlay(player, source!, true, source, id); // issue #699 (WlRings.cs): entry by its own text, Brotherhood Schism's turn, "after your Ring enters play"
                 break;
             case "ring-of-air-straighten": Straighten(target!); break;
             case "ring-of-water-move-home": MoveHome(target!, false); break;

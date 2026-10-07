@@ -24,6 +24,8 @@ public static partial class TrainingOpponent
         // Deck search (issue #312): a modest bot uses Ikoma Shizuka's search when nothing more useful is on offer (just above passing), which is what lets a whole
         // AI-vs-AI match exercise the full search flow.
         if (id == "shizuka-search") return 12;
+        // Read the Essence (issue #699): turning an enemy face-down province card face-up scouts it; turning the bot's own only tells the opponent, so that is worse than passing.
+        if (id == WlEssenceAbilities.Flip) return command.TargetPlayerId == x.Self.Id ? SelfHarmScore : 110;
         var intent = AbilityIntent.Of(id);
         // Never aim a harmful ability (destroy, bow, penalize, an Honor loss) at the bot's own cards: that is worse than passing, so it scores below it. The target picker already
         // prefers the opponent's cards; this catches the case where only the bot's own are legal (found by the arena: Scars of War, Tsujiken and Baiko cost a bot 24 Honor).
@@ -121,6 +123,9 @@ public static partial class TrainingOpponent
     /// <summary>"Choose a player who gains or loses N Honor": each answer is scored from the Honor profile.</summary>
     private static double EffectChoiceScore(Ctx x, GameCommand command)
     {
+        // Read the Essence's optional second flip (issue #699): an enemy face-down card is scouted, the bot's own is never turned, and declining beats the latter.
+        if (command.Choice is { } essence && essence.StartsWith(WlEssenceAbilities.SecondFlipPrefix, StringComparison.Ordinal))
+            return essence[WlEssenceAbilities.SecondFlipPrefix.Length..].StartsWith(x.Self.Id + ":", StringComparison.Ordinal) ? -100 : 110;
         var gain = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
         return command.Choice switch
         {

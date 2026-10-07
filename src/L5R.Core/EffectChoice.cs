@@ -154,6 +154,7 @@ public sealed partial class MatchEngine
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
         if (ApplyWlStratTornBranchEffect(effect, command)) return; // issue #674 (WlStratTornRun.cs): A Threat Enacted's destroy-then-dishonor option.
+        if (ApplyWlEssenceBranchEffect(effect, command)) return; // issue #699 (WlEssence.cs): Read the Essence's optional second flip.
         if (ApplyAbilityRemovalBranchEffect(effect, command)) return; // issue #667 (AbilityRemoval.cs): permanent removal options.
         if (ApplyWlPersTornBranchEffect(effect, command)) return; // issue #674 (WlPersTorn.cs): Asahina Nanae - exp's options.
         if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.

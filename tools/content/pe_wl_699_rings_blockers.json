@@ -1,0 +1,10 @@
+{
+  "oracle-l5r-10493": {
+    "note": "Asako Usohara (Personality, Emperor Edition, issue #699): \"Limited, bow: Search your Dynasty discard pile, then deck, for a Fudo Celestial. Put it into play.\" and \"Limited: Put a Fudo Ring from your hand into play. This counts as playing it by its own text. Remove Usohara from the game.\" The second line is now buildable (the Ring-entry record of WlRings.cs takes an own-text entry with Usohara as source), but the first needs a search whose destination is IN PLAY for a Celestial (Zone.Celestial entry from the Dynasty discard pile or deck, honouring Unique and the Celestial's entry rules); the search catalogue's destinations are hand, province, holding and Ring-into-play only. A card with two printed lines is wired whole or blocked. Needs a search-to-Celestial-in-play destination.",
+    "category": "SEARCH"
+  },
+  "oracle-l5r-10561": {
+    "note": "The False Path (Stronghold, issue #699): \"You may not win by Enlightenment\" is now a one-line read of the Ring-entry primitive's Enlightenment check, but the card is a whole Stronghold: its non-Unique Monk and Fudo Personalities gain Monk and Fudo in and out of play, Fudo Personalities join for 2 less Gold, Honor Requirements of Fudo cards are ignored, no Honor is lost from owned Fudo cards, and a Limited bow search for a Fudo Ring. Granting keywords to cards out of play and the Fudo Honor waivers are separate primitives, and no stronghold scan is packaged in the rings waves.",
+    "category": "GRANT"
+  }
+}
