@@ -20,6 +20,7 @@ public sealed partial class MatchEngine
 
     private IEnumerable<string> StaticGrantedAbilityIds(CardInstance card)
     {
+        foreach (var p22 in FilterGrantedAbilityIds(card)) yield return p22; // P22 (issue #690, CreatedCopies690.cs): filter-scoped grants, for a card of any type
         if (Definition(card).Type != CardType.Personality || !InPlay(card)) yield break;
         if (HasClanAffiliation(card, "Scorpion") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == TowersOfYogoGrantEffect))
             yield return TowersOfYogoAbilityId;

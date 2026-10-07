@@ -218,7 +218,8 @@ public sealed class StraightenHold
 /// by this specific token -- unlike a Modifier, it is not cleared at turn end, only when the token
 /// itself is destroyed or its host card leaves play.</summary>
 // Issue #503 (Shosuro Keirei's "-1F/-1C Poison tokens"): a token may carry a second stat bonus/penalty (Stat2/Amount2); StatModifier reads both.
-public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0, string? Stat2 = null, int Amount2 = 0);
+// Issue #690 (P24, EffectPrimitivesTokens.cs): and a third (Stat3/Amount3: A Doomseeker's Tomb's "+1F/+1C/+1PH token"); absent from every older save, where it reads as none.
+public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0, string? Stat2 = null, int Amount2 = 0, string? Stat3 = null, int Amount3 = 0);
 
 public sealed class CardInstance
 {

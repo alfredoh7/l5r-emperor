@@ -654,6 +654,10 @@ public sealed partial class MatchEngine
         {
             result.AddRange(RentatsuLossActions(playerId)); // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4).
         }
+        else if (_state.PendingChoice is { Type: TurnBoundary.ChoiceType })
+        {
+            result.AddRange(TurnBeginChoiceActions(playerId)); // P4 (TurnBoundary.cs): the generic choice of an "after a turn begins" trait.
+        }
         else if (_state.PendingChoice is { Type: "p5BlessingsTop" })
         {
             result.AddRange(BlessingsTopActions(playerId)); // issue #503: Blessings of the Shi-Tien Yen-Wang (EmperorP5Zones.cs)

@@ -50,6 +50,9 @@ public static class DelayUntil
     public const string EndOfTurn = "turn-end";
     public const string NextDynastyPhase = "dynasty-phase-begins";
     public const string EndPhaseBegins = "end-phase-begins";
+    /// <summary>P4 (TurnBoundary.cs): "until the game ends" -- never applied. A turn-begin point is <see cref="TurnBeginsPrefix"/> + owner + ":" + turn, built by the engine's DelayUntilTurn.</summary>
+    public const string GameEnd = "game-end";
+    public const string TurnBeginsPrefix = "turn-begins:";
 
     public static string Describe(string until) => until switch
     {
@@ -58,7 +61,7 @@ public static class DelayUntil
         EndOfTurn => "before this turn ends",
         NextDynastyPhase => "after the next Dynasty Phase begins",
         EndPhaseBegins => "after the End Phase begins",
-        _ => until
+        _ => TurnBoundary.DescribeDelayUntil(until) ?? until
     };
 }
 

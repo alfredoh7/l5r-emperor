@@ -26,11 +26,11 @@ namespace L5R.Core;
 //   The Onyx Dueling Circle  "Limited, Bow: Destroy your target Shugenja. Create a 5F/2C/0PH Nonhuman - Oni - Shadowlands Personality. Destroy this Holding. Lose 4 Honor."   proxy677-onyx-circle
 //   Kichi's Shadow Badger    "Battle, Bow: Melee 4 Attack."   proxy677-badger-melee
 //   Never Without a Weapon   "Battle, 5 Gold: Discard a card to create a Weapon Item with a Force Modifier equal to the discarded card's Focus Value and attach it to your target
-//                            Personality."   proxy677-never-without-weapon: the Unexpected Weapon, minted with its printed Force set to the Focus Value (CardInstance.Printed, issue #405)
+//                            Personality."   proxy677-never-without-weapon: the Unexpected Weapon, its printed Force set to the Focus Value (CardInstance.Printed, issue #405)
 //   The Wind's Champion      "Air Open, Bow: Bow this Shugenja to create a 2C/0PH Illusion - Samurai - Spirit Personality with Force equal to this Shugenja's Chi, plus 1 if he is Air.
-//                            Destroy this Spell."   proxy677-winds-champion: the Major Illusion, minted with its printed Force set to the Shugenja's current Chi (plus 1 if he is Air)
-// The last two set one printed value of the created card where it is made: CreatedCardSpec.Values cannot express them (it reads a card's PRINTED value from the performer, source, wielder
-// or target, and has neither a current-stat read nor a subject for a card discarded as a cost, nor a Focus Value), so they are minted here with the value as the action resolves.
+//                            Destroy this Spell."   proxy677-winds-champion: the Major Illusion, its printed Force set to the Shugenja's current Chi (plus 1 if he is Air)
+// The last two set one printed value of the created card as it is made. Since P22 (issue #690) their specs say so (CreatedCardSpec.Values: a current-stat read of the wielder; the Focus
+// Value of the card in the cost-only discard slot), and ExecuteCreate writes the value on the created card as the action resolves.
 // A Strategy's printed Gold cost is its own Gold Cost, paid by the engine's rule for every Strategy (GoldQuotes.ImplicitGoldRule); the other Gold costs are on the ability.
 // Readings, for Mendon to confirm or correct, are in docs/decisions/2026-10-06-677-created-card-proxies.md.
 public static class CreatedProxies677Abilities
@@ -69,12 +69,14 @@ public static class CreatedProxies677Abilities
     public static readonly CreatedCardSpec Elephants = new(CardType.Follower, Force: 1, Keywords: ["Elephant", "Nonhuman", "Cavalry"], ProxyId: "oracle-l5r-11337", Count: 2);
     public static readonly CreatedCardSpec HiredSamurai = new(CardType.Personality, Force: 3, Chi: 3, PersonalHonor: 2, Keywords: ["Samurai"], ProxyId: "oracle-l5r-10811");
     public static readonly CreatedCardSpec OnyxOni = new(CardType.Personality, Force: 5, Chi: 2, PersonalHonor: 0, Keywords: ["Nonhuman", "Oni", "Shadowlands"], ProxyId: "oracle-l5r-11343");
-    // The two whose Force is set as they are made: the spec names no Force, and the scan prints "*".
+    // The two whose Force is set as they are made: the spec names no Force, and the scan prints "*". The value is declared (P22, issue #690): the Focus Value of the card in the
+    // cost-only discard slot; the current Chi of the Shugenja the Spell is attached to, plus 1 if he is Air.
     public static readonly CreatedCardSpec UnexpectedWeapon = new(CardType.Item, Chi: 0, Keywords: ["Weapon"], AbilityText: "This Item's Force Modifier is equal to the discarded card's Focus Value",
         ProxyId: "oracle-l5r-11348")
-    { HostSlot = "target" };
+    { HostSlot = "target", Values = [new(CreatedStat.Force, CreatedSubject.Slot, Read: CreatedStat.Focus) { Slot = "discard" }] };
     public static readonly CreatedCardSpec MajorIllusion = new(CardType.Personality, Chi: 2, PersonalHonor: 0, Keywords: ["Illusion", "Samurai", "Spirit"],
-        AbilityText: "This Personality's Force is equal to the Chi of the caster, plus 1 if he was Air", ProxyId: "oracle-l5r-11338");
+        AbilityText: "This Personality's Force is equal to the Chi of the caster, plus 1 if he was Air", ProxyId: "oracle-l5r-11338")
+    { Values = [new(CreatedStat.Force, CreatedSubject.Wielder, Read: CreatedStat.Chi, Keyword: "Air", PlusWithKeyword: 1) { Current = true }] };
 
     /// <summary>Invest, Goju Kaxt's creation and the Shard's creation print no "Reaction:" designator: they are traits modelled with Reaction timing, so a rule that bars Reactions does not touch
     /// them (Mendon's R4 ruling; TraitReactions.Is asks this). Kitsune Yamazaru's "Interrupt:" and New Cavalry Tactics' "Engage" are printed designators, not traits.</summary>
@@ -174,7 +176,8 @@ public sealed partial class MatchEngine
                     });
                 }
             // The Strategies: the played card is spent before the creation, because a created card's entering-play window ends this case early (Exotic Farmlands' order).
-            case CreatedProxies677Abilities.AshalanCreate or CreatedProxies677Abilities.RecruitmentEffort:
+            // Never Without a Weapon: the discard was paid as a cost; the Weapon's Force Modifier is the discarded card's Focus Value, read by its spec (its definition is unchanged in the pile).
+            case CreatedProxies677Abilities.AshalanCreate or CreatedProxies677Abilities.RecruitmentEffort or CreatedProxies677Abilities.NeverWithoutWeapon:
                 SpendHandPlayedCard(player, source);
                 return ExecuteCreate(ability, ability.Creates!, command, player);
             case CreatedProxies677Abilities.CavalryTactics:
@@ -203,26 +206,14 @@ public sealed partial class MatchEngine
                         GainHonor(player.Id, -4, name, source);
                     });
                 }
-            case CreatedProxies677Abilities.NeverWithoutWeapon:
-                {
-                    SpendHandPlayedCard(player, source);
-                    // The discard was paid as a cost; the Weapon is made with the discarded card's Focus Value as its printed Force Modifier (its definition is unchanged in the pile).
-                    var scan = CreatedCards.Resolve(ability.Creates!);
-                    var focus = Definition(SlotCards(command, "discard").Single()).Focus;
-                    return CreateAttachments(player.Id, scan, scan with { Force = focus }, ability.Creates!, SlotCards(command, "target").ToArray(), false, null);
-                }
             case CreatedProxies677Abilities.WindsChampion:
+                // Both bows were paid as costs. "Force equal to this Shugenja's Chi, plus 1 if he is Air": his Chi as it stands now, written on the Illusion as it is made
+                // (the scan: "plus 1 if he was Air"), by the spec's current-value read. Then "Destroy this Spell".
+                if (WielderOf(source!) is null) return false;
+                return ExecuteCreate(ability, ability.Creates!, command, player, () =>
                 {
-                    // Both bows were paid as costs. "Force equal to this Shugenja's Chi, plus 1 if he is Air": his Chi as it stands now, written on the Illusion as it is made
-                    // (the scan: "plus 1 if he was Air"). Then "Destroy this Spell".
-                    if (WielderOf(source!) is not { } shugenja) return false;
-                    var scan = CreatedCards.Resolve(ability.Creates!);
-                    var force = Math.Max(0, PersonalityChi(shugenja)) + (Keyword(shugenja, "Air") ? 1 : 0);
-                    return CreatePersonality(player.Id, scan, false, null, out _, scan with { Force = force }, () =>
-                    {
-                        if (InPlay(source!)) DestroyAttachment(source!);
-                    });
-                }
+                    if (InPlay(source!)) DestroyAttachment(source!);
+                });
             // Koru's Invest, Yamazaru's Monkey, Hashibei's and Tselu's Followers, Kaxt, the Shard's Birds and the Clay Yojimbo need no case: the default arm runs the
             // ability's Creates (CreatedCardEntry.cs), inside the entry window for the entering-play ones.
             default:

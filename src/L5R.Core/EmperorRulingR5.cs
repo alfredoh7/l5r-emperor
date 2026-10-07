@@ -84,8 +84,12 @@ public sealed partial class MatchEngine
         else throw new RuleViolation("That Personality is not in the duel.");
         var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
         if (_state.LastDuel is { } record)
-            _state.LastDuel = record with { Challenger = ViewCard(challenger), Challenged = ViewCard(challenged),
-                Attachments = Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray() };
+            _state.LastDuel = record with
+            {
+                Challenger = ViewCard(challenger),
+                Challenged = ViewCard(challenged),
+                Attachments = Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray()
+            };
         Emit("duelSubstituted", $"{Definition(substitute).Name} enters the duel instead of {Definition(replaced).Name} ({Definition(reactor).Name}).", reactor.OwnerId, substitute.Id);
     }
     // ---- Ruling 4: whole-unit bow / straighten; ruling 5: a Terrain is never bowed or straightened -------------------------------------------------------------------------------------------------
@@ -123,7 +127,7 @@ public sealed partial class MatchEngine
         "unseen-assailant-attack" => [("force", "Force"), ("chi", "Chi")],
         "tsuruchi-house-guard-attack" => [("force", "Force"), ("gold", "Gold Cost")],
         "nobunori-attack" => [("force", "Force"), ("base", "base Force")],
-        _ => null
+        _ => AttackSpecCompareOptions(abilityId) // issue #690 (P24, EffectPrimitivesAttack.cs): AttackSpec.CompareOptional
     };
 
     /// <summary>The compare choice of the Attack now resolving (its own command's), or null.</summary>

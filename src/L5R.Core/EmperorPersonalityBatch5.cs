@@ -24,6 +24,7 @@ public sealed partial class MatchEngine
     private void NoteCardIntoHand(int playerId)
     {
         PromoNoteCardIntoHand(playerId); // issue #653: Tales of Valor
+        AddTurnCount(TurnCounters.CardsIntoHand, playerId); // P4 (TurnBoundaryRules.cs): the per-turn count a standing rule may be conditional on
         NoteCardIntoHandThisPhase(playerId); // Broken Cipher (issue #501, EmperorMechD.cs): any card put into a hand, during an action or not.
         if (_runningCommand is null && _state.PendingAttack is null && _state.PendingDuel is null) return;
         if (!_state.CurrentActionHandRecipients.Contains(playerId)) _state.CurrentActionHandRecipients.Add(playerId);

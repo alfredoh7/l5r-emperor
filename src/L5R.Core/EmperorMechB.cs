@@ -58,6 +58,8 @@ public sealed class ControlReturn
     public string? AbilityId { get; set; }
     public string Reason { get; set; } = "";
     public bool Blocked { get; set; }
+    /// <summary>SourceStraightens only (issue #690): the source has been seen bowed since the return was registered, so the next time it is unbowed it has straightened.</summary>
+    public bool SourceSeenBowed { get; set; }
 }
 
 /// <summary>A permanent grant of the infiltrator straighten trait: "Choose your bowed non-<see cref="ExcludedKeyword"/> Personality. Negate his straightening this phase."</summary>
@@ -76,6 +78,8 @@ public static class ControlReturnTriggers
     public const string SourceLeavesPlay = "source-leaves-play";
     /// <summary>"Return control of him to his owner after the next time this game this ability is announced" (Shadow Dragon).</summary>
     public const string AbilityAnnounced = "ability-announced";
+    /// <summary>"After P'an Ku [straightens or leaves play], give control of the target to his owner" (issue #690, P24, EffectPrimitivesTokens.cs): the source straightening, or leaving play.</summary>
+    public const string SourceStraightens = "source-straightens";
 }
 
 public static class EmperorMechBAbilities
@@ -166,55 +170,55 @@ public sealed partial class MatchEngine
                 TransferUnitControl(source!, 1 - player.Id, Definition(source!).Name, checkLoyal: true, fromEffect: false);
                 return false;
             case EmperorMechBAbilities.ShadowDragonTake:
-            {
-                var name = Definition(source!).Name;
-                GiveKeywordPermanently(target!, "Ninja", source!.Id);
-                GiveKeywordPermanently(target!, "Shadowlands", source.Id);
-                if (TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true))
-                    RegisterControlReturn(target!, ControlReturnTriggers.AbilityAnnounced, source.Id, id, $"{name}: the next time this ability is announced");
-                return false;
-            }
+                {
+                    var name = Definition(source!).Name;
+                    GiveKeywordPermanently(target!, "Ninja", source!.Id);
+                    GiveKeywordPermanently(target!, "Shadowlands", source.Id);
+                    if (TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true))
+                        RegisterControlReturn(target!, ControlReturnTriggers.AbilityAnnounced, source.Id, id, $"{name}: the next time this ability is announced");
+                    return false;
+                }
             case EmperorMechBAbilities.ShadowDragonReturn:
                 return BringDeadPersonalityIntoPlay(player, source!, Definition(source!).Name, null);
             case EmperorMechBAbilities.DarkNagaForest:
                 NegateEffects(source!, "destroy");
                 return false;
             case EmperorMechBAbilities.DarkNagaBattle:
-            {
-                var name = Definition(source!).Name;
-                if (Keyword(target!, "Nonhuman")) TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true);
-                else BowUnitByEffect(target!, player.Id);
-                // "Destroy him before this turn ends": the shared store's instruction to destroy (Deadly Orders' shape), carried out at the top of EndTurn if he is still in play.
-                ScheduleDelayedEffect(target!, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, name, source!.Id);
-                Emit("destructionScheduled", $"{Definition(target!).Name} will be destroyed before this turn ends ({name}).", player.Id, target!.Id);
-                return false;
-            }
+                {
+                    var name = Definition(source!).Name;
+                    if (Keyword(target!, "Nonhuman")) TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true);
+                    else BowUnitByEffect(target!, player.Id);
+                    // "Destroy him before this turn ends": the shared store's instruction to destroy (Deadly Orders' shape), carried out at the top of EndTurn if he is still in play.
+                    ScheduleDelayedEffect(target!, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, name, source!.Id);
+                    Emit("destructionScheduled", $"{Definition(target!).Name} will be destroyed before this turn ends ({name}).", player.Id, target!.Id);
+                    return false;
+                }
             case EmperorMechBAbilities.SachinaTake:
-            {
-                var name = Definition(source!).Name;
-                if (TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true))
-                    RegisterControlReturn(target!, ControlReturnTriggers.SourceLeavesPlay, source!.Id, null, $"{name}: the next time she leaves play");
-                return false;
-            }
+                {
+                    var name = Definition(source!).Name;
+                    if (TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true))
+                        RegisterControlReturn(target!, ControlReturnTriggers.SourceLeavesPlay, source!.Id, null, $"{name}: the next time she leaves play");
+                    return false;
+                }
             case EmperorMechBAbilities.BlackMarketeering:
-            {
-                var name = Definition(source!).Name;
-                if (TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true))
-                    RegisterControlReturn(target!, ControlReturnTriggers.TurnEnds, source!.Id, null, $"{name}: before the turn ends");
-                Dishonor(target!, player.Id);
-                // "Any of his Followers whose Honor Requirement he now fails to meet": his current Personal Honor (0 once dishonorable) against each Follower's printed requirement.
-                foreach (var follower in Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower && FollowerRequirementFailed(target, a)).ToArray())
-                    if (InPlay(follower)) DestroyAttachment(follower);
-                return false;
-            }
+                {
+                    var name = Definition(source!).Name;
+                    if (TransferUnitControl(target!, player.Id, name, checkLoyal: true, fromEffect: true))
+                        RegisterControlReturn(target!, ControlReturnTriggers.TurnEnds, source!.Id, null, $"{name}: before the turn ends");
+                    Dishonor(target!, player.Id);
+                    // "Any of his Followers whose Honor Requirement he now fails to meet": his current Personal Honor (0 once dishonorable) against each Follower's printed requirement.
+                    foreach (var follower in Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower && FollowerRequirementFailed(target, a)).ToArray())
+                        if (InPlay(follower)) DestroyAttachment(follower);
+                    return false;
+                }
             case EmperorMechBAbilities.OnlyAShadow:
-            {
-                var ninja = Card(command.PerformerId!);
-                MechB.InfiltratorGrants.Add(new InfiltratorGrant { CardId = ninja.Id, ExcludedKeyword = "Ninja", Source = Definition(source!).Name });
-                Emit("traitGranted", $"{Definition(ninja).Name} permanently has the trait \"After a Straighten Phase begins: Choose your bowed non-Ninja Personality. Negate his straightening this phase.\" ({Definition(source!).Name})", player.Id, ninja.Id);
-                TransferUnitControl(ninja, 1 - player.Id, Definition(source!).Name, checkLoyal: true, fromEffect: false);
-                return false;
-            }
+                {
+                    var ninja = Card(command.PerformerId!);
+                    MechB.InfiltratorGrants.Add(new InfiltratorGrant { CardId = ninja.Id, ExcludedKeyword = "Ninja", Source = Definition(source!).Name });
+                    Emit("traitGranted", $"{Definition(ninja).Name} permanently has the trait \"After a Straighten Phase begins: Choose your bowed non-Ninja Personality. Negate his straightening this phase.\" ({Definition(source!).Name})", player.Id, ninja.Id);
+                    TransferUnitControl(ninja, 1 - player.Id, Definition(source!).Name, checkLoyal: true, fromEffect: false);
+                    return false;
+                }
             default:
                 return null;
         }
@@ -329,7 +333,8 @@ public sealed partial class MatchEngine
     {
         if (MechB.ControlReturns.Count == 0) return;
         MechB.ControlReturns.RemoveAll(r => !_state.Cards.TryGetValue(r.CardId, out var c) || !InPlay(c) || (c.OriginalOwnerId ?? c.OwnerId) == c.OwnerId);
-        ApplyControlReturns(r => r.Blocked || r.Trigger == ControlReturnTriggers.SourceLeavesPlay && (r.SourceId is null || !_state.Cards.TryGetValue(r.SourceId, out var s) || !InPlay(s)));
+        ApplyControlReturns(r => r.Blocked || r.Trigger == ControlReturnTriggers.SourceLeavesPlay && (r.SourceId is null || !_state.Cards.TryGetValue(r.SourceId, out var s) || !InPlay(s))
+            || SourceStraightenedReturnDue(r)); // issue #690 (P24): ControlReturnTriggers.SourceStraightens
     }
 
     // AfterCardDestroyed's hook: Sachina's "after the next time this game Sachina leaves play" happens at once when she is destroyed (other ways out of play are caught after the command).
