@@ -18,6 +18,7 @@ try
     var url = app.Urls.Single();
     var cases = new (string Name, Func<Task> Test)[]
     {
+        ("current battle values survive both public server envelopes; review export stays unavailable", BattleValuesProjection),
         ("payment source methods and private entry candidates survive the server envelope", () => { GameplayControlsProjection(); return Task.CompletedTask; }),
         ("private duel round trip retains own focus, result and priority through reconnect", () => PrivateDuel(url,duelRoom,duelTokens)),
         ("live duel queue preserves immediate results, reconnects and back-to-back presentations", DuelQueue),
@@ -74,6 +75,33 @@ static void GameplayControlsProjection()
                 Check(received.Any(a => a.DecisionCandidateIds?.Length > 0) == (viewer == seat), "Private entry candidates were dropped or exposed to the waiting seat");
         }
     }
+}
+
+static async Task BattleValuesProjection()
+{
+    var engine = MatchEngine.CreateBattleValuesShowcase("bonus");
+    var web = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    foreach (var seat in new[] { 0, 1 })
+    {
+        var view = engine.GetView(seat);
+        var message = new StateMessage("state", "ABCDEFGH", seat, view.Version, view, [], [true, true]);
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(message, Protocol.Json));
+        var received = document.RootElement.GetProperty("view").Deserialize<MatchView>(web)!;
+        Check(received.Battlefields!.Single().Values == view.Battlefields!.Single().Values, "Server envelope changed authoritative battle values");
+        Check(received.Players.Single(p => p.Id != seat).Hand.Length == 0, "Battle values exposed opponent hand");
+        var older = JsonSerializer.SerializeToNode(view, web)!;
+        older["battlefields"]![0]!.AsObject().Remove("values");
+        Check(older.Deserialize<MatchView>(web)!.Battlefields!.Single().Values is null, "Older payload invented battle values");
+    }
+    using var session = new MatchSession(); session.StartBattleValuesReview("standard");
+    Check(session.ExportPracticeReplay() is null, "Prepared fixture exported an unsupported replay");
+    var before = session.Snapshot!.View.Battlefields!.Single().Values;
+    session.SwitchPracticeSeat();
+    Check(session.Snapshot!.View.Battlefields!.Single().Values == before, "Review seat switch changed totals");
+    await session.Submit(new GameCommand("concede", session.Snapshot.View.ViewerId, session.Snapshot.View.Version));
+    Check(session.Snapshot!.View.Battlefields!.All(b => b.Values is null), "Concession retained battle values in client session");
+    session.StartPractice(false, true, 0);
+    Check(!session.BattleValuesReview && session.ExportPracticeReplay() is not null, "Ordinary practice kept preview restrictions");
 }
 
 static void AttackTargetProjection()

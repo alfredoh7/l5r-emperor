@@ -86,6 +86,16 @@ public sealed partial class MatchSession : IDisposable
         RefreshLocal();
     }
 
+    public bool BattleValuesReview { get; private set; }
+
+    public void StartBattleValuesReview(string scenario)
+    {
+        var engine = MatchEngine.CreateBattleValuesShowcase(scenario);
+        Generation++; Disconnect(); _engine = engine; BattleValuesReview = true;
+        MatchKey = Guid.NewGuid().ToString("N"); _localSeat = _practiceNameSeat = 0;
+        RefreshLocal();
+    }
+
     public void SwitchPracticeSeat()
     {
         if (_engine is null || Online) return;
@@ -115,7 +125,7 @@ public sealed partial class MatchSession : IDisposable
         Changed?.Invoke();
     }
 
-    public string? ExportPracticeReplay() => _engine is null ? null : JsonSerializer.Serialize(_engine.ExportReplay(), new JsonSerializerOptions(Json) { WriteIndented = true });
+    public string? ExportPracticeReplay() => _engine is null || BattleValuesReview ? null : JsonSerializer.Serialize(_engine.ExportReplay(), new JsonSerializerOptions(Json) { WriteIndented = true });
 
     /// <summary>One move of the practice opponent. Issue #642: like a player whose action is refused, it chooses again: each refusal is reported to <paramref name="refused"/> (the
     /// bot remembers it) and the opponent is asked once more at the same position, up to a dozen tries. Without a callback a refusal is shown as a notice, as before.</summary>
@@ -358,6 +368,7 @@ public sealed partial class MatchSession : IDisposable
 
     public void Disconnect()
     {
+        BattleValuesReview = false;
         _connection?.Cancel();
         _socket?.Dispose();
         _connection?.Dispose();

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved A battle rails with C Force hierarchy fully inside the blood borders; authoritative Force/Units/Province Strength, native prepared Mac launcher and complete two-part Windows preview delivered. Mendon notified once on PR #710; no merge.",
+  "validation": "Full check.sh --skip-client passed; focused Core 6/6, transport 19/19, existing native presentation 8/8; native six scenes both seats plus resize/reduced motion, GC, review controls, Force actions/concession pass. Client build zero warnings/errors. Game source faa2613 passed all Mac/Windows CI. Delivery 12e27e7: all 16 Windows packages passed in four groups, exact archive assembly/runtime/inner and outer launchers verified. Toolkit 12/12, workflow policy/security 9/9 and offline audit pass. See docs/handoffs/2026-10-07-battle-values-review.md and notification issuecomment-6038080388.",
+  "remaining": "Mendon/Nathan expert mechanics acceptance and native Windows graphical playtesting. Do not merge automatically. Final evidence update is documentation only; GitHub may rerun checks.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/709",
+  "branch": "codex/709-battle-value-rails",
+  "updated": "2026-10-07T12:39:43.942046+00:00"
+}

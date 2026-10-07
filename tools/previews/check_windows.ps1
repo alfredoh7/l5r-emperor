@@ -13,6 +13,21 @@ if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant
 $expanded = Join-Path $scratch 'expanded'
 Expand-Archive -LiteralPath $archive -DestinationPath $expanded
 $root = Join-Path $expanded $receipt.folder
+$bundleRoot = $null
+if ($receipt.companions) {
+  $bundleRoot = $root
+  foreach ($part in $receipt.companions) {
+    if ([System.IO.Path]::GetFileName($part.asset) -ne $part.asset -or $part.sha256 -notmatch '^[a-f0-9]{64}$') { throw 'Invalid companion' }
+    & gh release download $receipt.tag --repo $receipt.repository --pattern $part.asset --dir $scratch
+    if ($LASTEXITCODE -ne 0) { throw 'Companion download failed' }
+    $partArchive = Join-Path $scratch $part.asset
+    if ((Get-Item -LiteralPath $partArchive).Length -ne $part.bytes -or (Get-FileHash -LiteralPath $partArchive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $part.sha256) { throw 'Companion checksum mismatch' }
+    Expand-Archive -LiteralPath $partArchive -DestinationPath $expanded -Force
+  }
+  & (Join-Path $root 'Prepare Review.ps1') -BundleRoot $root -AssembleOnly
+  if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw 'Preview preparation failed' }
+  $root = Join-Path (Join-Path $root 'payload') $receipt.folder
+}
 $spec = Get-Content -Raw -LiteralPath (Join-Path $root 'preview.json') | ConvertFrom-Json
 if ($spec.source_commit -ne $receipt.source_commit) { throw 'Source version mismatch' }
 $exe = Join-Path $root 'game\L5R-Emperor.exe'
@@ -95,6 +110,35 @@ foreach ($scenario in $spec.scenarios) {
   } elseif (@($lines | Where-Object { $_.StartsWith('--capture=') }).Count) { throw 'Normal game unexpectedly enters a fixture' }
   Write-Host "WINDOWS_LAUNCHER_PASS: $($scenario.name)"
 }
+if ($bundleRoot) {
+  # Exercise the byte-identical outer one-click launcher, including its inline
+  # PowerShell invocation, against the same argument recorder after assembly.
+  $bootstrapRoot = Join-Path $scratch 'bootstrap routing space & bang!'
+  $bootstrapPayload = Join-Path (Join-Path $bootstrapRoot 'payload') $receipt.folder
+  New-Item -ItemType Directory -Path (Split-Path $bootstrapPayload) -Force | Out-Null
+  Copy-Item -LiteralPath $launcherRoot -Destination $bootstrapPayload -Recurse
+  Copy-Item -LiteralPath (Join-Path $root 'preview.json') -Destination $bootstrapPayload
+  foreach ($name in @('Start Review.cmd', 'Prepare Review.ps1', 'review-bundle.json')) {
+    Copy-Item -LiteralPath (Join-Path $bundleRoot $name) -Destination $bootstrapRoot
+  }
+  Remove-Item -LiteralPath $marker -ErrorAction SilentlyContinue
+  $start = New-Object System.Diagnostics.ProcessStartInfo
+  $start.FileName = $env:ComSpec
+  $start.Arguments = '/d /s /c ""' + (Join-Path $bootstrapRoot 'Start Review.cmd') + '""'
+  $start.UseShellExecute = $false
+  $bootstrapProcess = [System.Diagnostics.Process]::Start($start)
+  if (-not $bootstrapProcess.WaitForExit(30000)) { $bootstrapProcess.Kill(); throw 'Bundle launcher hung' }
+  if ($bootstrapProcess.ExitCode -ne 0) { throw 'Bundle launcher failed' }
+  $deadline = (Get-Date).AddSeconds(15)
+  while (-not (Test-Path -LiteralPath $marker) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 100 }
+  if (-not (Test-Path -LiteralPath $marker)) { throw 'Bundle launcher did not open the prepared scenario' }
+  $lines = @(Get-Content -LiteralPath $marker)
+  if ($lines[0] -ne (Join-Path $bootstrapPayload 'game') -or $lines -notcontains ('--capture-mode=' + $spec.scenarios[0].mode)) { throw 'Bundle launcher changed the destination/scenario' }
+  Write-Host 'WINDOWS_BUNDLE_LAUNCHER_PASS: outer click opens exact prepared game under paths with spaces, & and !'
+}
 Remove-Item Env:L5R_PREVIEW_ARGUMENTS_TEST
 # The release archive and its real extracted executable were never changed.
 Write-Host 'WINDOWS_PREVIEW_PASS: checksum, runtime, isolated package and all scenario launchers'
+
+# Each receipt owns this scratch tree; release it before validating the next large package.
+try { Remove-Item -LiteralPath $scratch -Recurse -Force } catch { Write-Warning ('Temporary preview cleanup: ' + $_) }

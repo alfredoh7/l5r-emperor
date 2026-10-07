@@ -27,6 +27,7 @@ public partial class Main
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover: true);
         ClearBattlefieldHeaders();
+        _provincePlacards.Clear();
         MeasureTableLayout();
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
@@ -240,6 +241,7 @@ public partial class Main
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
             Place(area, button, 0, -28, width, PlaneHeight(CardHeight) + 28); _provinceButtons[(owner.Id, province.Index)] = button;
             var slots = ProvincePresentation.Slots(province);
+            AddProvincePlacard(area, owner, province, width);
             var x = (width - slots.Length * 164 - (province.Region is null ? 0 : 184)) / 2;
             if (province.Region is { } region)
             {
