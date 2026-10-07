@@ -72,11 +72,10 @@ public partial class Main
     { await SupportClick(_paymentConfirm!); await WaitDecisionPresentation(); await EventFrames(25); }
     private async Task ClickMultiBoard(string id)
     {
-        if (!GetWindow().HasFocus()) GD.Print("MULTI_TARGETS_FOCUS_REQUIRED: activate this game window for native table input.");
-        for (var i = 0; i < 18000 && !GetWindow().HasFocus(); i++) await EventFrames(1);
-        SupportRequire(GetWindow().HasFocus(), "Native game window did not receive focus");
+        await ReactionCaptureFocus();
         var point = MultiTargetPoint(_tiles.Single(t => t.Card.Id == id));
         PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point }); await EventFrames(5);
+        GD.Print($"MULTI_TARGETS_BOARD_CLICK: {id} at {point}; focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, hovered={(TableHovered as CardTile)?.Card.Id}, busy={PresentationBusy}");
         PushCaptureMouse(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, ButtonMask = MouseButtonMask.Left, Pressed = true });
         PushCaptureMouse(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); await EventFrames(12);
     }

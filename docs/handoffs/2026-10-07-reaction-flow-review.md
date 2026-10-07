@@ -36,3 +36,5 @@ Future P6 non-action fact Reactions reuse `afterActionResolvedReaction`; when su
 PR #725 landed during verification and was integrated through main `e494e279`. Its Fortification Holdings changes touch Models/MatchQueries at different declarations/producers; both implementations are preserved. Post-integration reaction-presentation, reaction-settlement and Fortification tests passed.
 
 The final integrated client-contract review found no remaining blocker in decline, receipt, reconnect or session/submission handling. It was read-only and did not rerun runtime checks. The remaining native input matrix requires an unlocked Mac; the task handoff records that limitation separately from the completed automated checks.
+
+Final refresh found open PR #727 (P25 decision infrastructure), overlapping Main.Decisions/MatchQueries. Its inspected patches add an unknown-pending generic chooser and a shown-card chooser; existing reaction types remain on their current paths. It is not part of this branch or preview. Recheck required-choice precedence and shared query routing when that PR lands; no approval of its independent implementation is inferred.

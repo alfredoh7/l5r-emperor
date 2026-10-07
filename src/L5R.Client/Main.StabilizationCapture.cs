@@ -131,7 +131,7 @@ public partial class Main
                 GetViewport().GetTexture().GetImage().SavePng(_capturePath!);
                 if (!_captureMode.Contains("pass"))
                 {
-                    await StabilizationClick(StabilizationButton(option.Label));
+                    await StabilizationClick(ReactionOption(option.CardId!, option.Command!.AbilityId!, option.Command.PerformerId));
                     // Both reactions open their reviewed action first and execute on Confirm (the Tamoko reaction lists no plain targets, so it takes the same review path as the Hizumi bow).
                     Check(View.Version == before, "Opening the reaction mutated the match"); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".target.png"); await StabilizationClick(ReviewedCommitButton());
                     Check(View.Version == before + 1, "Reaction did not execute exactly once");

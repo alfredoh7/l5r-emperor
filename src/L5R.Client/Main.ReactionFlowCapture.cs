@@ -160,6 +160,24 @@ public partial class Main
     private void ReactionCaptureKey(Key key, bool pressed, bool echo = false) =>
         GetViewport().PushInput(new InputEventKey { Keycode = key, Pressed = pressed, Echo = echo }, true);
 
+    private async Task ReactionCaptureFocus()
+    {
+        GetWindow().GrabFocus(); await EventFrames(3);
+        for (var attempt = 0; attempt < 1800 && !GetWindow().HasFocus(); attempt++)
+        {
+            if (attempt % 60 == 0) GetWindow().GrabFocus();
+            await EventFrames(1);
+        }
+        SupportRequire(GetWindow().HasFocus(), "Native reaction gesture has no foreground window focus");
+    }
+
+    private async Task ReactionNativeClick(Control control)
+    {
+        // A native capture sequence can lose foreground focus between gestures.
+        // Restore real OS focus; do not bypass the game's unfocused-input guard.
+        await ReactionCaptureFocus(); await SupportClick(control);
+    }
+
     private async Task CheckDisconnectedReactionCapture()
     {
         var before = View.Version; var pending = View.PendingChoice;
@@ -182,8 +200,14 @@ public partial class Main
         }
         finally
         {
-            socketField.SetValue(_session, null); disconnected.Dispose(); Render(); await EventFrames(8);
+            socketField.SetValue(_session, null); disconnected.Dispose(); Render(); GetWindow().GrabFocus(); await EventFrames(8);
         }
+        for (var attempt = 0; attempt < 1800 && !GetWindow().HasFocus(); attempt++)
+        {
+            if (attempt % 60 == 0) GetWindow().GrabFocus();
+            await EventFrames(1);
+        }
+        SupportRequire(GetWindow().HasFocus(), "Disconnected fixture restoration did not return native window focus");
         SupportRequire(View.Version == before && View.PendingChoice == pending, "Restoring the fixture advanced the reaction");
     }
 
@@ -196,7 +220,7 @@ public partial class Main
         {
             if (View.ViewerId != View.PriorityPlayerId) await SwitchReactionCaptureSeat();
             CheckReactionCaptureLayout(); var before = View.Version;
-            await SupportClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
+            await ReactionNativeClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
             SupportRequire(View.Version == before + 1, "An explicit continuation submitted more than once");
         }
         SupportRequire(View.PendingChoice is null, "Explicit continuations did not finish the engine's remaining reaction windows");
@@ -211,13 +235,13 @@ public partial class Main
     private async Task DraftRuya(ReactionCaptureFixture fixture)
     {
         var version = View.Version;
-        await SupportClick(ReactionOption(fixture.Source, "ruya-bow"));
+        await ReactionNativeClick(ReactionOption(fixture.Source, "ruya-bow"));
         SupportRequire(_chosen?.Command is { AbilityId: "ruya-bow", TargetId: null } && View.Version == version, "Reaction selection submitted or chose a target implicitly");
         var commit = ReactionControl<Button>("CommitAction");
         SupportRequire(commit.Disabled && commit.Text.Contains("Tamori Ruya"), "Incomplete reaction may be committed or its commit is unnamed");
         var target = _tiles.Single(t => t.Card.Id == fixture.Target);
         SupportRequire(target.LegalTarget, "The actual legal target is not highlighted");
-        await SupportClick(target);
+        await ReactionNativeClick(target);
         SupportRequire(_chosen?.Command?.TargetId == fixture.Target && View.Version == version && !ReactionControl<Button>("CommitAction").Disabled,
             "Native card click did not retain a target draft without mutating the game");
     }
@@ -246,11 +270,11 @@ public partial class Main
                 "A stale command advanced the window or invented a played-reaction receipt");
             await CheckDisconnectedReactionCapture();
             await DraftRuya(fixture); await SupportCapture("-target");
-            ReactionCaptureKey(Key.Escape, true); ReactionCaptureKey(Key.Escape, false); await EventFrames(8);
+            await ReactionCaptureFocus(); ReactionCaptureKey(Key.Escape, true); ReactionCaptureKey(Key.Escape, false); await EventFrames(8);
             SupportRequire(View.Version == before && _chosen is null && View.PendingChoice?.Type == "bowReaction" && !MenuVisible,
                 "Escape changed the game, declined the response, or opened a menu instead of cancelling the uncommitted draft");
             await SupportCapture("-cancelled"); await DraftRuya(fixture);
-            await SupportClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
+            await ReactionNativeClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
             SupportRequire(View.Version == before + 1 && fixture.Engine.State.Cards[fixture.Target].Bowed, "Reaction did not bow its selected target exactly once");
             SupportRequire(View.PendingChoice is null && !Actions.Any(a => a.Type == "declineReaction") && !_playHeld,
                 "Engine-closed reaction requires a dismissal or another pass");
@@ -263,26 +287,26 @@ public partial class Main
             // One gesture must never activate the next, still-meaningful response.
             fixture = ReactionCaptureBow(seat, followup: true); await PrepareReactionCapture(fixture, seat); await DraftRuya(fixture);
             before = View.Version; var commitPoint = ReactionControl<Button>("CommitAction").GetGlobalRect().GetCenter();
-            ReactionCaptureMouse(commitPoint); ReactionCaptureMouse(commitPoint, doubleClick: true); await WaitReactionCapture();
+            await ReactionCaptureFocus(); ReactionCaptureMouse(commitPoint); ReactionCaptureMouse(commitPoint, doubleClick: true); await WaitReactionCapture();
             SupportRequire(View.Version == before + 1 && View.PendingChoice?.Type == "bowReaction" && Actions.Any(a => a.Enabled && a.CardId == fixture.SecondSource),
                 "A rapid double-click submitted twice or consumed the remaining reaction opportunity");
             CheckReactionCaptureLayout(); await SupportCapture("-double-click-guard");
-            await SupportClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
+            await ReactionNativeClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
             SupportRequire(View.Version == before + 2, "A fresh deliberate continuation did not submit exactly once");
             await FinishReactionCaptureWindows();
 
             fixture = ReactionCaptureBow(seat, followup: true); await PrepareReactionCapture(fixture, seat); await DraftRuya(fixture);
-            before = View.Version; ReactionControl<Button>("CommitAction").GrabFocus();
+            before = View.Version; await ReactionCaptureFocus(); ReactionControl<Button>("CommitAction").GrabFocus();
             // Native Godot buttons activate on release. Holding and repeating the
             // confirmation key must not turn that gesture into several commands.
             ReactionCaptureKey(Key.Enter, true); ReactionCaptureKey(Key.Enter, true, echo: true); await EventFrames(8);
             SupportRequire(View.Version == before, "A held confirmation key committed before its release");
             ReactionCaptureKey(Key.Enter, false); await WaitReactionCapture();
             SupportRequire(View.Version == before + 1 && View.PendingChoice?.Type == "bowReaction", "Keyboard commit did not leave the real follow-up response");
-            ReactionControl<Button>("ReactionDecline").GrabFocus(); ReactionCaptureKey(Key.Enter, true, echo: true); await EventFrames(8);
+            await ReactionCaptureFocus(); ReactionControl<Button>("ReactionDecline").GrabFocus(); ReactionCaptureKey(Key.Enter, true, echo: true); await EventFrames(8);
             SupportRequire(View.Version == before + 1 && View.PendingChoice?.Type == "bowReaction", "Holding Enter consumed the next reaction opportunity");
             await SupportCapture("-held-key-guard");
-            ReactionControl<Button>("ReactionDecline").GrabFocus();
+            await ReactionCaptureFocus(); ReactionControl<Button>("ReactionDecline").GrabFocus();
             ReactionCaptureKey(Key.Enter, true); ReactionCaptureKey(Key.Enter, false); await WaitReactionCapture();
             SupportRequire(View.Version == before + 2, "A new keyboard gesture could not continue after release exactly once");
             await FinishReactionCaptureWindows();
@@ -291,15 +315,23 @@ public partial class Main
             await SwitchReactionCaptureSeat(); CheckReactionCaptureLayout(); before = View.Version;
             SupportRequire(Actions.All(a => a.Type is "wait" or "concede") && !StabilizationButtons(_root).Any(b => b.IsVisibleInTree() && b.Name.ToString().StartsWith("ReactionOption")),
                 "Waiting seat received another player's private reaction controls");
-            var publicCard = _tiles.Single(t => t.Card.Id == fixture.Target); await SupportClick(publicCard);
+            var publicCard = _tiles.Single(t => t.Card.Id == fixture.Target); await ReactionNativeClick(publicCard);
             SupportRequire(View.Version == before && _selected?.Id == fixture.Target, "Waiting-player card inspection submitted or was blocked");
             await SupportCapture("-waiting");
-            var publicPoint = ScreenCenter(publicCard); PushCaptureMouse(new InputEventMouseMotion { Position = publicPoint, GlobalPosition = publicPoint }); await EventFrames(50);
-            SupportRequire(_tableTooltip is not null && CardTile.LastPreviewCardId == fixture.Target && GetViewport().GetVisibleRect().Encloses(_tableTooltip.GetGlobalRect()) && View.Version == before,
-                "The waiting player cannot read a bounded full-card preview without changing the match");
+            bool WaitingPreviewReady() => GetWindow().HasFocus() && _tableTooltip is not null && CardTile.LastPreviewCardId == fixture.Target &&
+                GetViewport().GetVisibleRect().Encloses(_tableTooltip.GetGlobalRect()) && View.Version == before;
+            var publicPoint = Vector2.Zero;
+            for (var attempt = 0; attempt < 5 && !WaitingPreviewReady(); attempt++)
+            {
+                await ReactionCaptureFocus(); publicCard = _tiles.Single(t => t.Card.Id == fixture.Target); publicPoint = ScreenCenter(publicCard);
+                HideTableTooltip(); PushCaptureMouse(new InputEventMouseMotion { Position = publicPoint, GlobalPosition = publicPoint });
+                for (var frame = 0; frame < 60 && GetWindow().HasFocus() && !WaitingPreviewReady(); frame++) await EventFrames(1);
+            }
+            SupportRequire(WaitingPreviewReady(),
+                $"The waiting player cannot read a bounded full-card preview without changing the match (focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, point={publicPoint}, hovered={(TableHovered as CardTile)?.Card.Id}, tooltip={_tableTooltip is not null}, preview={CardTile.LastPreviewCardId}, time={_tableHoverTime})");
             await SaveShownCapture("-waiting-inspection"); HideTableTooltip();
             await SwitchReactionCaptureSeat(); await DraftRuya(fixture);
-            await SupportClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
+            await ReactionNativeClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
             SupportRequire(fixture.Engine.State.SuspendedWindows.Count > 0 && View.ReactionPresentation is { IsNested: true, ParentContext.Length: > 0 }, "Nested response lost its public parent context");
             await SupportCapture("-nested-waiting");
             for (var i = 0; i < 6 && View.PendingChoice is not null; i++)
@@ -311,7 +343,7 @@ public partial class Main
                         "Switching seats retained the other player's reaction receipt");
                 }
                 CheckReactionCaptureLayout(); if (i == 0) await SupportCapture("-nested-response");
-                await SupportClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
+                await ReactionNativeClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
             }
             SupportRequire(View.PendingChoice is null && fixture.Engine.State.SuspendedWindows.Count == 0 && fixture.Engine.State.Cards[fixture.Target].Bowed,
                 "Nested responses did not restore and finish the original action");
@@ -319,17 +351,17 @@ public partial class Main
             fixture = ReactionCaptureForest(seat); await PrepareReactionCapture(fixture, seat); CheckReactionCaptureLayout(); before = View.Version;
             SupportRequire(Actions.Where(a => a.Enabled && a.Command?.AbilityId == "wl-forest-cover-attach").Select(a => a.Command!.PerformerId).Distinct().Count() == 2,
                 "The real Forest Cover fixture does not offer both performing Scouts");
-            await SupportClick(ReactionOption(fixture.Source, "wl-forest-cover-attach", fixture.SecondSource));
+            await ReactionNativeClick(ReactionOption(fixture.Source, "wl-forest-cover-attach", fixture.SecondSource));
             SupportRequire(_chosen?.Command?.PerformerId == fixture.SecondSource && _tiles.Single(t => t.Card.Id == fixture.Performer).LegalTarget,
                 "The other engine-offered performer is not available directly on the table");
-            await SupportClick(_tiles.Single(t => t.Card.Id == fixture.Performer));
+            await ReactionNativeClick(_tiles.Single(t => t.Card.Id == fixture.Performer));
             SupportRequire(_chosen is { Command: { TargetId: null } performerDraft } && performerDraft.PerformerId == fixture.Performer && View.Version == before,
                 "Choosing the second real performer mutated the game or implicitly selected the Follower");
-            await SupportClick(_tiles.Single(t => t.Card.Id == fixture.Target));
+            await ReactionNativeClick(_tiles.Single(t => t.Card.Id == fixture.Target));
             var quote = QuoteFor(_chosen!); SupportRequire(quote is { Cost: 2 } && _chosen?.Command?.TargetId == fixture.Target,
                 "Follower target did not obtain its authoritative Gold quote");
             SupportRequire(!ReactionControl<Button>("CommitAction").Disabled && ReactionControl<Button>("CommitAction").Text.Contains("Forest Cover"), "Prepared paid reaction lacks its named single commit");
-            await SupportCapture("-performer-cost"); await SupportClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
+            await SupportCapture("-performer-cost"); await ReactionNativeClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
             SupportRequire(View.Version == before + 1 && fixture.Engine.State.Cards[fixture.Target] is { Zone: Zone.Attached } follower && follower.AttachedTo == fixture.Performer &&
                 fixture.Engine.State.Cards[fixture.Source].Zone == Zone.FateDiscard && fixture.Engine.State.ExtraEndPhaseDraws[seat] == 1,
                 "Forest Cover did not pay and attach to the selected actual performer in one submission");
@@ -338,17 +370,17 @@ public partial class Main
             fixture = ReactionCaptureOrdered(seat); await PrepareReactionCapture(fixture, seat); before = View.Version;
             var order = Actions.First(a => a.Enabled && a.Type == "beforeBattleOrder" && a.Command!.TargetId == "reaction:" + fixture.Source);
             var orderIndex = Actions.Where(a => a.Type == "beforeBattleOrder").ToList().IndexOf(order);
-            await SupportClick(StabilizationButtons(_inspector).Where(b => b.Text == order.Label).ElementAt(orderIndex));
+            await ReactionNativeClick(StabilizationButtons(_inspector).Where(b => b.Text == order.Label).ElementAt(orderIndex));
             SupportRequire(View.Version == before && _decisionSelection == order, "Ordering the before-resolution item submitted before confirmation");
-            await SupportClick(DecisionButton("Confirm choice")); await WaitReactionCapture();
+            await ReactionNativeClick(DecisionButton("Confirm choice")); await WaitReactionCapture();
             SupportRequire(View.PendingChoice is { Type: "beforeBattleReaction" } && View.PendingChoice.CardId == fixture.Source,
                 "The selected ordered reaction did not open for its actual owner");
             CheckReactionCaptureLayout(); SupportRequire(ReactionControl<Button>("ReactionDecline").Text.Contains("Steady Resolve"), "Ordered reaction decline does not name the card being declined");
-            await SupportCapture("-ordered-reaction"); await SupportClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
+            await SupportCapture("-ordered-reaction"); await ReactionNativeClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
             SupportRequire(View.PendingChoice is { Type: "beforeBattleReaction" } && View.PendingChoice.CardId == fixture.Target,
                 "Declining one ordered item incorrectly skipped the opponent's different item");
             if (View.ViewerId != View.PriorityPlayerId) await SwitchReactionCaptureSeat();
-            CheckReactionCaptureLayout(); await SupportClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
+            CheckReactionCaptureLayout(); await ReactionNativeClick(ReactionControl<Button>("ReactionDecline")); await WaitReactionCapture();
             SupportRequire(View.PendingChoice is null && View.Events.Any(e => e.Type == "battleResolved"), "The ordered reactions did not finish into actual battle resolution");
             await SupportCapture("-ordered-result");
             GD.Print("REACTION_FLOW_PASS: published reactions; no source-inspection prerequisite; native performers, target and Gold review; stale-command rejection; disconnected context/recovery; Escape draft cancellation; exactly one commit; accepted played receipt and seat isolation; automatic engine closure; preserved optional responses; mouse double-click and held-key safety; both public waiting and nested context; ordered named decline; seat=" + seat + "; reduced=" + _preferences.ReducedMotion);
