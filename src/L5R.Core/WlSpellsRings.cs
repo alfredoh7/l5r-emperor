@@ -276,8 +276,7 @@ public sealed partial class MatchEngine
         // The Honor is lost while the Ring is still in the hand: a Ring just put into play could otherwise offer to interrupt the very loss that came with it.
         GainHonor(player.Id, -2, Definition(ring).Name);
         player.Hand.Remove(ring.Id); ring.Zone = Zone.Home; ring.FaceUp = true;
-        player.RingPutIntoPlayTurn = _state.TurnNumber;
-        RingEnteredByOwnText(ring);
+        RingEntersPlay(player, ring, true, ring, WlSpellsRingsAbilities.FalseFireRecruit); // issue #699 (WlRings.cs)
     }
 
     // ---- Blood Wave's second Attack --------------------------------------------------------------------------------------------------------------------------------------

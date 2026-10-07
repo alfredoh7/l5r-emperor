@@ -50,7 +50,7 @@ internal static class WlItemsMiscTests
     }
 
     public static void Run(TestRunner runner) => runner.Run("wl-items-misc", [
-        ("Published shape: the 21 wired cards carry their printed stats, keywords, text and abilities, name their printings and are in their waves' manifests; Fudo's Assurances is blocked, not published", PublishedShape),
+        ("Published shape: the 21 wired cards carry their printed stats, keywords, text and abilities, name their printings and are in their waves' manifests; Fudo's Assurances left this cluster for the rings cluster (issue #699)", PublishedShape),
         ("Divination Bowl: bow it to look at the top three of your Fate deck and put them back in any order; or bow it to draw a card and destroy it", BowlScenario),
         ("Kage's Teachings: its Personality has Kolat; when it is not your turn, bow it and choose a player: he chooses and bows one of his unbowed Personalities", KageScenario),
         ("Khalimpeh-jiak: Engage, bow it: a target enemy Personality or Follower gets -2F; only enemies, only after engaging, only while unbowed", KhalimpehScenario),
@@ -134,9 +134,9 @@ internal static class WlItemsMiscTests
         foreach (var id in typeof(WlItemsMiscItemAbilities).GetFields().Concat(typeof(WlItemsMiscFollowerAbilities).GetFields()).Concat(typeof(WlItemsMiscCelestialAbilities).GetFields())
             .Where(f => f.IsLiteral && f.GetRawConstantValue() is string v && v.StartsWith("wl-") && f.Name is not ("BestialEntryEffect" or "SycophantsMark" or "BelowPrintedChi" or "OwnBattleStrategyInDiscard")).Select(f => (string)f.GetRawConstantValue()!))
             Check(AbilityCatalog.All.ContainsKey(id), id + " is catalogued");
-        Check(!CardCatalog.Cards.ContainsKey(FudosAssurances) || CardCatalog.Get(FudosAssurances).ScenarioOnly, "Fudo's Assurances is not published");
+        Check(CardCatalog.Cards.ContainsKey(FudosAssurances) && File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/celestial-wave-29.txt")).Contains(FudosAssurances), "Fudo's Assurances is published by the rings cluster (celestial-wave-29, issue #699)");
         var blockers = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "tools/content/pe_wl_items_misc_blockers.json"))).RootElement;
-        Check(blockers.TryGetProperty(FudosAssurances, out var blocked) && blocked.GetProperty("category").GetString() == "PROVENANCE", "Fudo's Assurances is recorded as blocked");
+        Check(!blockers.TryGetProperty(FudosAssurances, out _), "and is no longer recorded as blocked");
     }
 
     // ---- Divination Bowl -----------------------------------------------------------------------------------------------------------------------------------------------------

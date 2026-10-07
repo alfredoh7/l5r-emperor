@@ -98,7 +98,7 @@ public sealed partial class MatchEngine
     // A Battle action: a Battle-timed ability, or a Battle/Open one resolved in a Combat Segment.
     private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
 
-    private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && (ability.Trigger == AfterActionReactionTriggers.AfterActionResolved || FactTriggers.IsFact(ability.Trigger)); // P6: a fact's Reaction is offered in the same window
+    private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && (ability.Trigger is AfterActionReactionTriggers.AfterActionResolved or ReactionTriggers.RingEntersPlay || FactTriggers.IsFact(ability.Trigger)); // P6: a fact's Reaction is offered in the same window
 
     // Whether the last resolved action's own effects destroyed a Personality of `playerId`'s.
     private bool LastActionDestroyedOwnPersonality(int playerId) =>
@@ -114,6 +114,7 @@ public sealed partial class MatchEngine
     {
         if (_state.LastResolvedAction is not { } facts || source.OwnerId != playerId) return false;
         if (FactApplies(source, abilityId, playerId, facts) is { } factApplies) return factApplies; // P6 (AfterFacts.cs): a fact's window offers only the Reactions that name it, and an action's only the others
+        if (WlRingsAfterActionApplies(abilityId, playerId, facts) is { } wlRings) return wlRings; // issue #699 (WlRings.cs): "After your Ring enters play"
         if (FavorMempoAfterActionApplies(source, abilityId, playerId, facts) is { } favorAfter) return favorAfter; // issue #667 (FavorMempo.cs): after you discard the Imperial Favor, and a negated Favor action's record
         // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
         // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.

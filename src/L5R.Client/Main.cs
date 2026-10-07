@@ -656,7 +656,7 @@ public partial class Main : Node
                 || MovementDestination(key.Owner, key.Province) || AttackProvinceTarget(key.Owner, key.Province) || ProvinceTargetLegal(key.Owner, key.Province);
             button.Modulate = ProvinceTargetChosen(key.Owner, key.Province) ? new Color(1.4f, 1.25f, .75f) : legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
             var provinceState = View.Players.Single(p => p.Id == key.Owner).Provinces.Single(p => p.Index == key.Province);
-            var instruction = ProvinceTargetActive ? "Choose this province as the target. Confirm separately.\n" : AttackTargetActive ? "Target this battlefield’s province. Confirm separately.\n" : MovementActive ? "Choose this movement destination. Nothing moves until you confirm.\n" : "Assign the selected unit here. Nothing moves until you confirm.\n";
+            var instruction = ProvinceTargetActive || MultiProvinceActive ? "Choose this province as the target. Confirm separately.\n" : AttackTargetActive ? "Target this battlefield’s province. Confirm separately.\n" : MovementActive ? "Choose this movement destination. Nothing moves until you confirm.\n" : "Assign the selected unit here. Nothing moves until you confirm.\n";
             button.TooltipText = RulesHelp.Tooltip($"Province {key.Province + 1} · {provinceState.Strength} province strength\n" + (legal ? instruction : "Inspect this province.\n") + RulesHelp.Topic("province"));
         }
         foreach (var (province, label) in _laneSummaries)

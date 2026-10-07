@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #699: Benediction (strategy-wave-120, new province slot kind in TargetSlots), Read the Essence (spell-wave-56, one action with an optional linked second flip for a Void Shugenja), and the Ring entry provenance primitive (MatchState.WlRings, records how each Ring last entered play; enlightenment ignores Rings not entered by their own text) with a new 'after your Ring enters play' reaction trigger, used by Witness the Untold (spell-wave-57), Fudo's Assurances (celestial-wave-29), Introspection and Yung. Entry searches now respect Brotherhood Schism and Losing the Way. Shared change: TargetSlots.cs (province slot), ActionEffectTracking/CardAbilities/EmperorRemainingE etc. (Ring entry paths), client multi-target and province-target UI, bot province-slot answers. Blocked: Asako Usohara (search that puts a Celestial into play), The False Path.",
+  "validation": "wl-benediction 7/7, wl-essence 9/9, wl-rings 10/10; full Core, AI, Server and Transport suites passed in each cluster before merge; format and comment-swallow lint clean; native check-province-target-ui and check-multi-targets-ui passed in the Benediction cluster. Art pack catalogue-art-issue699-20261007-r1 (4463 images, 4 new, base #689 r1) built and install-verified. Final merged-tree check.sh and probes listed in the PR.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-06-699-*.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/699",
+  "branch": "claude/699-benediction-essence-rings",
+  "updated": "2026-10-07T05:36:29.728874+00:00"
+}

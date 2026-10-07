@@ -539,6 +539,7 @@ public sealed partial class MatchEngine
             _state.PendingChoice = null;
             if (OpenRecruitEntryWindows(Player(search.PlayerId), Card(enteredId), false, null)) return;
         }
+        if (WlRingEntrySearchFinished(search)) return; // issue #699 (WlRings.cs): a Ring the entry search put into play opens "after your Ring enters play"
         // Emperor Edition follow-ups (issue #498): an "After this card enters play" search hands priority back where its entry left it (EmperorFollowupsSearch.cs).
         if (search.Origin == EntrySearchOrigin) { _state.PendingChoice = null; ResumeAfterDeferredWindow(search.ResumeTo ?? search.PlayerId); return; }
         FinishDeferredAction(search.PlayerId, search.Origin, search.SourceCardId, search.BowedBefore);

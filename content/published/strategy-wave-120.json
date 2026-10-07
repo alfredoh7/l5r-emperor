@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-120",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10930",
+      "Name": "Benediction",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Destroy your target Holding. Give a Province +3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10930.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "wlben-benediction"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
