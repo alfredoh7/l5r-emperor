@@ -6183,7 +6183,8 @@ public sealed partial class MatchEngine
                 || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
                 || SearchPlayCarriesCostCard(id)
                 || WlCarriesCostCard(id)
-                || AlternativeDiscard.CarriesCostCard(id) // Akodo Kamina: the hand card a discard cost option spends
+                // Akodo Kamina: the hand card a discard cost option spends.
+                || AlternativeDiscard.CarriesCostCard(id)
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
             // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
