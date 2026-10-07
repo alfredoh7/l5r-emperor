@@ -3334,6 +3334,8 @@ public sealed partial class MatchEngine
     {
         if (amount == 0) return;
         if (PromoEmperorHonorLossPrevented(playerId, amount, source)) return; // Den of Iniquity (issue #653, PromoEmperorHoldings.cs): "Other players will not lose Honor from your Spells."
+        (playerId, amount) = ApplyHonorChangeHooks(HonorChangeStage.Standing, playerId, amount, reason, source); // P14 (HonorModifiers.cs): standing modifiers, so the window below opens with the modified amount
+        if (amount == 0) return;
         OfferHonorChangeWindow(playerId, amount, reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
         if (P3HonorGainNegated(playerId, amount, reason)) return; // Destructive Priorities (issue #503): "Negate the gain."
         if (DeedsAndWordsReduces(playerId, amount, reason)) return; // Deeds and Words (issue #622, IvoryHoldings.cs): "Reduce it to 0."
@@ -3374,7 +3376,7 @@ public sealed partial class MatchEngine
             amount = reduced;
         }
         // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): "Reduce any Honor gain or loss from the action's effects by 2."
-        amount = ChugoReducedHonorChange(playerId, amount, reason);
+        (playerId, amount) = ApplyHonorChangeHooks(HonorChangeStage.Applied, playerId, amount, reason, source); // P14 (HonorModifiers.cs): Chugo's reduction is its first registrant
         amount = WlPersTornReducedHonorGain(playerId, amount, reason); // Shosuro Makiko - exp (issue #674, WlPersTorn.cs): "Reduce all Honor gains from it by 2"
         if (amount == 0) return;
         // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
