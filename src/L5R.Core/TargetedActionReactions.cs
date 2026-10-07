@@ -193,7 +193,7 @@ public sealed partial class MatchEngine
         subject is not null && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
 
     private bool IsBattleAction(GameCommand command) =>
-        AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
+        AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) && ability.Timing is "Battle" or "BattleOrOpen" && _state.Phase == Phase.Battle; // P19: a rulebook timing override can take a Battle action in the Action phase
 
     // Each card's printed trigger. A reaction is applicable only when it could do something, so no window opens for nothing.
     private bool TargetedActionReactionApplies(CardInstance card, string abilityId, ReactionSubject subject)

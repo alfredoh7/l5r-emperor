@@ -644,7 +644,9 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 // followed after it leaves the list (Inokuchi's "If you don't, bow him") and is never equal to another grant; Mandatory -- the text does not say "may" (Beyond the Line: "Take an additional action"),
 // so the grant may be taken as a pass but not declined (Mendon's item 2).
 public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false,
-    string? RequiredActionKeyword = null, string? Tag = null, string? Id = null, bool Mandatory = false);
+    string? RequiredActionKeyword = null, string? Tag = null, string? Id = null, bool Mandatory = false,
+    // Primitive P17 (issue #721, AdditionalActionScope.cs) -- appended LAST, passed by name: the grant is spent only by a command that uses one of these abilities (Mirumoto Kalen - exp's second printed ability).
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string[]? ScopeAbilityIds = null);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -1437,6 +1439,8 @@ public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardV
     /// When supplied this is authoritative, including empty slots; Card must not be appended again.
     /// Slot indices are stable across refills. Face-down cards must already be redacted by the producer.</summary>
     public ProvinceCardSlotView[]? DynastySlots { get; init; }
+    /// <summary>P15 (issue #719): the ids of the Fortification Holdings that guard this Province (public: a Holding in play is face up). Null when none.</summary>
+    public string[]? FortificationIds { get; init; }
 }
 public sealed record ProvinceCardSlotView(int Index, CardView? Card);
 /// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,
