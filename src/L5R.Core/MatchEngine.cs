@@ -1989,7 +1989,7 @@ public sealed partial class MatchEngine
 
     private void Equip(GameCommand command)
     {
-        if (_state.Phase == Phase.Battle) RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1).
+        if (_state.Phase == Phase.Battle || HoldsOnlyAbilityScopedBurst(command.PlayerId)) RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1); issue #721: an Action-Phase Equip is not one of a grant's named abilities.
         var card = Card(command.CardId); var target = Card(command.TargetId); var def = Definition(card);
         Require(card.OwnerId == command.PlayerId && card.Zone == Zone.Hand && def.Type is CardType.Item or CardType.Follower or CardType.Spell, "Choose a supported attachment from your hand.");
         // Equip (Limited) attaches a Spell too (Mendon's ruling, issue #501): only to a Shugenja (core rules Glossary), every other restriction as for any attachment. A Spell in a battle
@@ -2046,8 +2046,9 @@ public sealed partial class MatchEngine
             NextAction(command.PlayerId, stays);
             return;
         }
-        if (FinishEquipTracking(command.PlayerId, 1 - command.PlayerId)) return; // Hida Takeuchi (issue #477 batch 2).
-        NextAction(command.PlayerId);
+        var staysWithGrant = SpendEquipGrant(command, card); // issue #721 (AdditionalActionScope.cs): an Action-Phase Equip spends (or forfeits) the grants its holder has
+        if (FinishEquipTracking(command.PlayerId, staysWithGrant ? command.PlayerId : 1 - command.PlayerId)) return; // Hida Takeuchi (issue #477 batch 2).
+        NextAction(command.PlayerId, staysWithGrant);
     }
     private void PlayStrategy(GameCommand command)
     {

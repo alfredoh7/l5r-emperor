@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "P17 additional-action scope: AdditionalActionGrant.ScopeAbilityIds (spent only by the named abilities; restricted-grant rejection otherwise) and an Action-Phase Equip that spends or forfeits grants. Engine only, no cards wired.",
+  "validation": "additional-action-scope 7/7; bash tools/check.sh --skip-client passed; check_format and comment-swallow lint clean; native Godot not run (engine only)",
+  "remaining": "Cards not wired: Mirumoto Kalen - exp, Yoritomo Harumi second ability (first line needs P19). Readings in docs/decisions/2026-10-07-p17-additional-action-scope.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/721",
+  "branch": "claude/721-p17-additional-action-scope",
+  "updated": "2026-10-07T19:09:45.346373+00:00"
+}

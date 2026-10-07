@@ -5030,7 +5030,7 @@ public sealed partial class MatchEngine
         // was validated against, and an unscoped grant must not be spent in its place.
         // Koshin Keep (Stronghold pass, issue #486 batch 1): a grant restricted to a Ranged Attack on one card is spent only by that Attack (and by nothing when no command is given).
         var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)) && RangedTargetGrantMatches(g, command) && (g.RangedTargetId is null || command is not null) && PerformerGrantMatches(g, command))
-            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.Tag is not null || g.RequiredActionKeyword is not null).ThenByDescending(g => g.RangedTargetId is not null).ThenByDescending(g => g.PerformerId is not null).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
+            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.Tag is not null || g.RequiredActionKeyword is not null).ThenByDescending(g => g.RangedTargetId is not null).ThenByDescending(g => g.PerformerId is not null).ThenByDescending(g => g.ScopeAbilityIds is not null).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
         if (grant is null) return false;
         _state.AdditionalActions.Remove(grant);
         NoteMechAGrantSpent(grant, command); // issue #501 (EmperorMechA.cs): Inokuchi's grant was taken; Beyond the Line's draw after the action's resolution

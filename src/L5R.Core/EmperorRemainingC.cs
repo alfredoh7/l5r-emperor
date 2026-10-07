@@ -582,7 +582,7 @@ public sealed partial class MatchEngine
     // Item's or Spell's by its wielder, a named "performing X" by X; a Strategy that names no performer is performed by no Personality at all).
     private bool PerformerGrantMatches(AdditionalActionGrant grant, GameCommand? command) =>
         (grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId) && BaseAbilityGrantMatches(grant, command) && UnsafePassageGrantMatches(grant, command) // issue #496: Honor Never Falls' base abilities only; issue #622: Unsafe Passage's Follower
-        && MechAGrantMatches(grant, command); // issue #501 (EmperorMechA.cs): Inokuchi's Iaijutsu, Beyond the Line's Recon ability as a Battle action
+        && MechAGrantMatches(grant, command) && AbilityScopeGrantMatches(grant, command); // issue #721 (AdditionalActionScope.cs): a grant scoped to named abilities. issue #501 (EmperorMechA.cs): Inokuchi's Iaijutsu, Beyond the Line's Recon ability as a Battle action
 
     // ---- Retribution: an additional Attack Phase ----------------------------------------------------------------------------------------------------------------------
 
