@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "P17 additional-action scope (engine only, no cards wired). Shared change: AdditionalActionGrant (Models.cs) gains ScopeAbilityIds, read by ConsumeAdditionalActionGrant and the restricted-grant checks; an Action-Phase Equip now spends or forfeits grants. No client change; the restriction surfaces as an engine rejection.",
+  "validation": "additional-action-scope 7/7; bash tools/check.sh --skip-client passed; full Core run after merging main no failures; check_format and comment-swallow lint clean; native Godot not run (engine only)",
+  "remaining": "Cards not wired: Mirumoto Kalen - exp, Yoritomo Harumi second ability. Readings in docs/decisions/2026-10-07-p17-additional-action-scope.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/721",
+  "branch": "claude/721-p17-additional-action-scope",
+  "updated": "2026-10-07T19:49:34.024815+00:00"
+}
