@@ -174,19 +174,20 @@ public sealed partial class MatchEngine
                 foreach (var follower in Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower && CardForce(a) <= 3).ToArray())
                     if (!StalwartNegatesBow(follower, player.Id)) follower.Bowed = true;
                 return false;
-            case "esumi-attack-raise": case "esumi-attack-lower":
+            case "esumi-attack-raise":
+            case "esumi-attack-lower":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             case "hideaki-province":
                 if (CurrentProvinceIndex() is int province) GiveProvinceStrengthUntilResolution(1 - _state.ActivePlayerId, province, 3, "Kaiu Hideaki");
                 return false;
             case "shinoda-move": ExecuteMove(command, ability, source, target); return false;
             case "shinju-destroy":
-            {
-                var enemy = SlotCards(command, "enemy").Single(); var terrain = SlotCards(command, "terrain").Single();
-                DestroyUnitCard(enemy, player.Id);
-                DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; // Ring of Water's own recruitment condition (issue #194).
-                return false;
-            }
+                {
+                    var enemy = SlotCards(command, "enemy").Single(); var terrain = SlotCards(command, "terrain").Single();
+                    DestroyUnitCard(enemy, player.Id);
+                    DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; // Ring of Water's own recruitment condition (issue #194).
+                    return false;
+                }
             case "hana-bow": HanaBow(source!, target!, player); return false;
             default: throw new RuleViolation("Unknown ability.");
         }
