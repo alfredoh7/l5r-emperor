@@ -17,6 +17,7 @@ internal static class BotPolicyTests
         ("Honor choice: a high deck gains, a low deck takes it from the opponent, an in-between deck gains when ahead or below its starting Honor", HonorChoice),
         ("Arena fixes: a harmful ability is never aimed at the bot's own card; Shinden always bows; a full hand does not spend Gold on a pure draw; the bot never gives the opponent Honor or loses its own by choice", ArenaFixes),
         ("Hoshoku-sha (issue #679): the bot never chooses to destroy himself or any Personality of its own with his Battle/Open action; an enemy target is played", HoshokuNeverSelf),
+        ("Read the Essence (issue #699): the bot turns an enemy face-down province card, never its own for nothing, scouts with the optional second flip or declines it, and never stalls", ReadTheEssenceBot),
         ("Memory: copies seen in public zones count (three of a non-Unique card, one of a Unique), the roll is deterministic and fair", Memory),
     ];
 
@@ -185,6 +186,20 @@ internal static class BotPolicyTests
         Check(TrainingOpponent.Choose(v, [pass, Aimed("hoshoku-1")]).Command?.Type == "pass", "aimed at himself: the bot passes");
         Check(TrainingOpponent.Choose(v, [pass, Aimed("ally-1")]).Command?.Type == "pass", "aimed at its own Personality: the bot passes");
         Check(TrainingOpponent.Choose(v, [pass, Aimed("hoshoku-1"), Aimed("ally-1")]).Command?.Type == "pass", "with only its own cards legal it still passes");
+    }
+
+    // Read the Essence (issue #699): the bot scouts an enemy face-down province card, never turns its own for nothing, answers the optional second flip, and never stalls.
+    private static void ReadTheEssenceBot()
+    {
+        var (view, pass, _) = Table();
+        const string id = WlEssenceAbilities.Flip;
+        ActionOption Flip(int owner) => new("useAbility", id, true, null, new("useAbility", 0, view.Version, CardId: "spell-1", AbilityId: id, TargetPlayerId: owner, Province: 1), "spell-1");
+        Check(TrainingOpponent.Choose(view, [pass, Flip(1)]).Command?.TargetPlayerId == 1, "an enemy face-down card is turned");
+        Check(TrainingOpponent.Choose(view, [pass, Flip(0)]).Command?.Type == "pass", "its own face-down card is not turned for nothing");
+        ActionOption Answer(string choice) => new("chooseEffect", choice, true, null, new("chooseEffect", 0, view.Version, Choice: choice));
+        var second = TrainingOpponent.Choose(view, [Answer(WlEssenceAbilities.Decline), Answer("wl-essence-flip:0:1"), Answer("wl-essence-flip:1:2")]).Command!.Choice;
+        Check(second == "wl-essence-flip:1:2", "the second flip scouts the enemy's card (got " + second + ")");
+        Check(TrainingOpponent.Choose(view, [Answer("wl-essence-flip:0:1"), Answer(WlEssenceAbilities.Decline)]).Command!.Choice == WlEssenceAbilities.Decline, "with only its own card left it declines the second flip");
     }
 
     private static CardView Person(string id, int owner, CardDefinition d) => new(id, d, owner, Zone.Home, true, false, null, null, d.Force);

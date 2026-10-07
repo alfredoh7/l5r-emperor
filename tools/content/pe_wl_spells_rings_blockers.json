@@ -1,10 +1,1 @@
-{
-  "oracle-l5r-10352": {
-    "note": "Read the Essence (Spell, Torn Asunder, issue #674): \"Open: Bow this card and target one face-down card in a province, or one or two such cards if this Shugenja is Void: Turn the targets face-up.\" Everything else exists (a bow-this-card cost; Second City's Political Open turns a face-down card face-up), but the engine names a face-down province card only by its province (the any-province command parameter, TargetPlayerId + Province, because a face-down card's id is hidden from the view), and that is ONE card. A Void Shugenja's \"one or two\" needs a second province in the same command (and a pair listing in QueryActions); no multi-province selection exists, and a card id may not be used (hidden information). Question for Mendon: may the Void version be two separate entries (one province each) sharing one use, or is a two-province selection UI wanted?",
-    "category": "HIDDEN"
-  },
-  "oracle-l5r-10357": {
-    "note": "Witness the Untold (Spell, Torn Asunder, issue #674): \"Reaction: After your Ring enters play, bow this card: Look at the top three cards of your Dynasty or Fate deck. Put them back in any order.\" The look and reorder exist (LookSpec, It Was a Cat's shape: either deck, three cards, reorder only), but nothing narrates a Ring entering play: every Ring is put into play by its own recruit case (RingEnteredByOwnText) and no Reaction trigger \"after your Ring enters play\" exists for another card to listen to (the Ring-entering gap the TRIG-AFTER category names). Needs a new reaction trigger fired from every Ring's entry, which is shared-interface work.",
-    "category": "TRIG-AFTER"
-  }
-}
+{}

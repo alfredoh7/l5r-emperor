@@ -309,6 +309,7 @@ public partial class Main
             RenderBoard(); RenderInspector(); Highlight(); return;
         }
         if (ProvinceTargetActive) { ChooseProvinceTarget(owner, province); return; }
+        if (MultiProvinceActive) { ChooseMultiProvince(owner, province); return; }
         if (_chosen is not null) return;
         var battle = Actions.FirstOrDefault(a => a.Enabled && a.Type == "selectBattle" && a.Command?.Province == province);
         if (owner == 1 - View.ActivePlayerId && battle is not null) { _ = Submit(battle.Command!); return; }

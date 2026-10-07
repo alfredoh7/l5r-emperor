@@ -9,6 +9,8 @@ public static class ReactionTriggers
     public const string TargetedByAction = "targeted-by-action";
     /// <summary>"After a battle's resolution ends" (issue #417, AfterResolution.cs): played from a hand, a discard pile or play in the after-resolution window.</summary>
     public const string AfterBattleResolution = "after-battle-resolution";
+    /// <summary>"After your Ring enters play" (issue #699, WlRings.cs): offered in the after-action-resolved window to the Ring's controller, whichever path put the Ring into play.</summary>
+    public const string RingEntersPlay = "ring-enters-play";
 }
 
 public sealed partial class MatchEngine
