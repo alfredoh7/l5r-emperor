@@ -158,7 +158,9 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // Primitive P7 (issue #683, PeriodWatches.cs): "the first time each turn / battle / phase / game" -- the ability may be used once per instance of this period (a stamp in AbilityUses, read by AbilityUseSpent beside OncePerGame).
     Period? UsesPer = null,
     // Primitive P24 (issue #690, EffectPrimitivesAttack.cs) -- appended LAST and always passed by name: where this ability's Attack may reach beyond the current enemy army, and what it is compared against.
-    AttackSpec? Attack = null);
+    AttackSpec? Attack = null,
+    // Primitive P21 (issue #697, ZoneExtensions.cs) -- appended LAST, passed by name: the ability is taken by its own card while that card is face up in its owner's province.
+    bool FromProvince = false);
 
 public static class AbilityCatalog
 {
@@ -5334,7 +5336,7 @@ public sealed partial class MatchEngine
         ability.Costs?.Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !c.UnlessInHand) == true;
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        SearchPlaySourceZoneAllows(ability, source, player) is bool searchPlayZone ? searchPlayZone // issue #667 (SearchPlayMasaya.cs): Masaya's Open action from his face-up province
+        ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
         : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
         : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
@@ -6360,7 +6362,7 @@ public sealed partial class MatchEngine
                 // Everything else about attaching it is ValidateAttach, below.
                 else if (ability.Target == "attachment-in-discard")
                 {
-                    var attachError = AttachTargetError(ability.Attach!, player.Id, target);
+                    var attachError = AttachTargetError(ability.Attach!, player.Id, target, source?.Id);
                     Require(attachError is null, attachError ?? "");
                 }
                 // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
@@ -11059,7 +11061,7 @@ public sealed partial class MatchEngine
         // HAND is always a candidate (and offered as the ordinary free play); the same card in a discard pile is
         // offered, priced and removed from the game as the Discipline play -- never both at once, since a card is
         // in one zone at a time.
-        var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand || SearchPlayHasProvinceAction(c) || // issue #667: Masaya, face-up in a province
+        var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand || HasProvinceAction(c) || // issue #667: Masaya, face-up in a province
                 c.Zone == Zone.Dead && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var deadDef) && deadDef.FromDead) ||
                 c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && ((Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && (def.Discipline || def.FromDiscard)) || DiscardPlayGrant(playerId, c) is not null)))
             .OrderBy(c => c.Id, StringComparer.Ordinal)
@@ -11307,7 +11309,7 @@ public sealed partial class MatchEngine
                                     IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
                                     "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
                                     // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
-                                    "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId).Select(c => (string?)c.Id).ToArray(),
+                                    "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId, source?.Id).Select(c => (string?)c.Id).ToArray(),
                                     // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
                                     "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                                     // Seeds of Decay pass (issue #453), batch 2: the two out-of-play categories.

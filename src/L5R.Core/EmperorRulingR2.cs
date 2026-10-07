@@ -80,6 +80,8 @@ public static class DelayedKinds
     public const string Token = "token";
     public const string Keyword = "keyword";
     public const string Ability = "ability";
+    /// <summary>P21 (ZoneExtensions.cs): put the card on top ("Top") or the bottom ("Bottom", the effect's Arg) of its owner's deck, as ToOwnerDeck does.</summary>
+    public const string ToDeck = "to-deck";
     /// <summary>A card drawn by a delayed action (Kurohito's Perfection, issue #496): an effect on a PLAYER, not on a card. Its DelayedEffect has no card; PlayerId is who draws.</summary>
     public const string Draw = "draw";
 }
@@ -222,6 +224,7 @@ public sealed partial class MatchEngine
         DelayedKinds.Keyword => $"gaining {arg?.Split('/')[0]}",
         DelayedKinds.Ability => "gaining an ability",
         DelayedKinds.Draw => "drawing a card",
+        DelayedKinds.ToDeck => "being put on its owner's deck",
         _ => $"{(amount >= 0 ? "+" : "")}{amount} {stat}"
     };
 
@@ -278,6 +281,9 @@ public sealed partial class MatchEngine
                 Emit("delayedDestruction", $"{name} is destroyed, as delayed ({effect.Reason}).", card.OwnerId, card.Id);
                 if (Definition(card).Type == CardType.Personality) DestroyUnits([card], effect.Arg == "combat" || effect.PlayerId is null, effect.PlayerId);
                 else DestroyAttachment(card);
+                break;
+            case DelayedKinds.ToDeck:
+                ApplyDelayedToDeck(effect, card);
                 break;
             case DelayedKinds.Bow:
                 Emit("delayedEffectApplied", $"{name} is bowed, as delayed ({effect.Reason}).", card.OwnerId, card.Id);

@@ -127,13 +127,13 @@ public sealed partial class MatchEngine
                 return false;
             // Deep Roots.
             case "deep-roots-negate":
-            {
-                var rooted = Card(command.PerformerId!);
-                NegateForcePenalties(rooted);
-                rooted.DeepRootsTurn = _state.TurnNumber;
-                Emit("forceContributionGuaranteed", $"{Definition(source!).Name}: {Definition(rooted).Name} contributes Force even while bowed this turn, and nothing prevents him from contributing it.", player.Id, rooted.Id);
-                return false;
-            }
+                {
+                    var rooted = Card(command.PerformerId!);
+                    NegateForcePenalties(rooted);
+                    rooted.DeepRootsTurn = _state.TurnNumber;
+                    Emit("forceContributionGuaranteed", $"{Definition(source!).Name}: {Definition(rooted).Name} contributes Force even while bowed this turn, and nothing prevents him from contributing it.", player.Id, rooted.Id);
+                    return false;
+                }
             case "defensive-grill-move":
             case "cast-two-shadows-move":
                 ExecuteMove(command, ability, source, target);
@@ -148,14 +148,14 @@ public sealed partial class MatchEngine
                 return BeginForgedDocuments(command, player, source!, target!, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
             // Forthrightness: show the Strategy (the public shown-cards record) and watch for the next action from a card with its title.
             case "forthrightness-show":
-            {
-                var shown = target!;
-                _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, shown.DefinitionId, source!.Id, source.DefinitionId, "Hand", $"{Definition(source).Name}, shown from hand",
-                    _state.TurnNumber, _state.Events.Count + 1L));
-                Emit("cardShown", $"{player.Name} shows {Definition(shown).Name} ({Definition(source).Name}).", player.Id);
-                _state.ForthrightnessWatches.Add(new() { PlayerId = player.Id, SamuraiId = command.PerformerId!, Title = Definition(shown).Name, Turn = _state.TurnNumber, SourceId = source.Id });
-                return false;
-            }
+                {
+                    var shown = target!;
+                    _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, shown.DefinitionId, source!.Id, source.DefinitionId, "Hand", $"{Definition(source).Name}, shown from hand",
+                        _state.TurnNumber, _state.Events.Count + 1L));
+                    Emit("cardShown", $"{player.Name} shows {Definition(shown).Name} ({Definition(source).Name}).", player.Id);
+                    _state.ForthrightnessWatches.Add(new() { PlayerId = player.Id, SamuraiId = command.PerformerId!, Title = Definition(shown).Name, Turn = _state.TurnNumber, SourceId = source.Id });
+                    return false;
+                }
             // Forthrightness's granted ability: "Limited: Gain 1 Honor." on the Samurai -- his own action, so a dishonorable Samurai is rehonored instead.
             case "forthrightness-honor":
                 GainHonorFromPerformer(source!, 1, "Forthrightness");
@@ -166,31 +166,31 @@ public sealed partial class MatchEngine
                 GainHonor(target!.OwnerId, -Definition(target).PersonalHonor, Definition(source!).Name, source);
                 return false;
             case "kitsuki-methods-interrogate":
-            {
-                SpendHandPlayedCard(player, source);
-                if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
-                var stay = _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
-                if (OpenEitherOr(EitherOrSpecs.KitsukiMethodsDiscard, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction, stay, command.PerformerId)) return true;
-                // No decision for the target's controller (an empty hand): his refusal handed the acting player his own choice, which is open now.
-                return _state.PendingEitherOr is not null;
-            }
+                {
+                    SpendHandPlayedCard(player, source);
+                    if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+                    var stay = _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
+                    if (OpenEitherOr(EitherOrSpecs.KitsukiMethodsDiscard, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction, stay, command.PerformerId)) return true;
+                    // No decision for the target's controller (an empty hand): his refusal handed the acting player his own choice, which is open now.
+                    return _state.PendingEitherOr is not null;
+                }
             // Kuon's Legacy: "Straighten him. Give him +3F. He may not perform actions. You may target and bow a card at his location."
             case "kuons-legacy-rage":
-            {
-                var kuon = Card(command.PerformerId!);
-                Straighten(kuon);
-                ApplyModifier(kuon, source!.Id, id, "Force", 3);
-                LockActions(kuon, source.Id);
-                foreach (var bowed in SlotCards(command, "bow").ToArray())
-                    if (InPlay(bowed) && !StalwartNegatesBow(bowed, player.Id)) bowed.Bowed = true;
-                return false;
-            }
+                {
+                    var kuon = Card(command.PerformerId!);
+                    Straighten(kuon);
+                    ApplyModifier(kuon, source!.Id, id, "Force", 3);
+                    LockActions(kuon, source.Id);
+                    foreach (var bowed in SlotCards(command, "bow").ToArray())
+                        if (InPlay(bowed) && !StalwartNegatesBow(bowed, player.Id)) bowed.Bowed = true;
+                    return false;
+                }
             case "lessons-never-forgotten-attack":
-            {
-                var yojimbo = Card(command.PerformerId!);
-                if (ResolveOrDeferAttack(id, player, target?.Id, yojimbo.Id, consumedGrant)) return true;
-                return BeginLessonsFollowUp(command, player.Id, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
+                {
+                    var yojimbo = Card(command.PerformerId!);
+                    if (ResolveOrDeferAttack(id, player, target?.Id, yojimbo.Id, consumedGrant)) return true;
+                    return BeginLessonsFollowUp(command, player.Id, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+                }
             // Methodical Questioning: the Strategy is spent as it is played (the look defers the action's tail); the bowing play returns it to hand as the turn ends.
             case "methodical-questioning-look":
             case "methodical-questioning-bow-look":
@@ -200,30 +200,30 @@ public sealed partial class MatchEngine
                 return true;
             // Forge Your Soul: "Show the top four cards of your Fate deck." Then the attach and shuffle decisions (EitherOr.cs), chained.
             case "forge-your-soul-show":
-            {
-                SpendHandPlayedCard(player, source);
-                if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
-                var stay = _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
-                var smith = Card(command.PerformerId!);
-                var shown = ForgeShownCards(player.Id);
-                foreach (var card in shown)
                 {
-                    _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, card.DefinitionId, source!.Id, source.DefinitionId, SearchDeck.Fate, $"{Definition(source).Name}, top of the Fate deck",
-                        _state.TurnNumber, _state.Events.Count + 1L));
-                    Emit("cardShown", $"{player.Name} shows {Definition(card).Name} ({Definition(source).Name}, top of the Fate deck).", player.Id);
+                    SpendHandPlayedCard(player, source);
+                    if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+                    var stay = _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
+                    var smith = Card(command.PerformerId!);
+                    var shown = ForgeShownCards(player.Id);
+                    foreach (var card in shown)
+                    {
+                        _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, card.DefinitionId, source!.Id, source.DefinitionId, SearchDeck.Fate, $"{Definition(source).Name}, top of the Fate deck",
+                            _state.TurnNumber, _state.Events.Count + 1L));
+                        Emit("cardShown", $"{player.Name} shows {Definition(card).Name} ({Definition(source).Name}, top of the Fate deck).", player.Id);
+                    }
+                    if (shown.Length == 0) Emit("deckEmpty", $"{player.Name}'s Fate deck is empty: nothing is shown.", player.Id);
+                    var spec = shown.Any(IsWeapon) ? EitherOrSpecs.ForgeYourSoulAttach : EitherOrSpecs.ForgeYourSoulShuffleNoWeapon;
+                    if (OpenEitherOr(spec, source!, player.Id, player.Id, null, "action", bowedBeforeAction, stay, smith.Id)) return true;
+                    return _state.PendingEitherOr is not null;
                 }
-                if (shown.Length == 0) Emit("deckEmpty", $"{player.Name}'s Fate deck is empty: nothing is shown.", player.Id);
-                var spec = shown.Any(IsWeapon) ? EitherOrSpecs.ForgeYourSoulAttach : EitherOrSpecs.ForgeYourSoulShuffleNoWeapon;
-                if (OpenEitherOr(spec, source!, player.Id, player.Id, null, "action", bowedBeforeAction, stay, smith.Id)) return true;
-                return _state.PendingEitherOr is not null;
-            }
             // One Shout: "Give him +2F, or +4F if he has an attachment."
             case "one-shout-boost":
-            {
-                var shouter = Card(command.PerformerId!);
-                ApplyModifier(shouter, source!.Id, id, "Force", HasAttachments(shouter) ? 4 : 2);
-                return false;
-            }
+                {
+                    var shouter = Card(command.PerformerId!);
+                    ApplyModifier(shouter, source!.Id, id, "Force", HasAttachments(shouter) ? 4 : 2);
+                    return false;
+                }
             default:
                 return null;
         }
@@ -242,8 +242,15 @@ public sealed partial class MatchEngine
         }
         _state.PendingEffectChoice = new()
         {
-            Command = command, PlayerId = deciderId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant, PlayedFromDiscard = playedFromDiscard,
-            OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList(), Options = options.ToList()
+            Command = command,
+            PlayerId = deciderId,
+            Negated = _state.NegatedEffects.ToList(),
+            ConsumedGrant = consumedGrant,
+            PlayedFromDiscard = playedFromDiscard,
+            OpponentHonorBefore = opponentHonorBefore,
+            BowedBefore = bowedBefore.ToList(),
+            PreExistingGrants = preExistingGrants.ToList(),
+            Options = options.ToList()
         };
         _state.PendingChoice = new("effectChoice", deciderId, command.CardId, prompt, command.PlayerId);
         _state.PriorityPlayerId = deciderId; _state.ConsecutivePasses = 0;
@@ -346,7 +353,7 @@ public sealed partial class MatchEngine
         }
         foreach (var province in emptied)
         {
-            if (province.Destroyed || owner.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) continue; // issue #503: Illusory Defense's province
+            if (province.Destroyed || owner.DynastyDeck.Count == 0 || HoldsNoDynasty(province)) continue; // issue #503: Illusory Defense's province
             var refillId = owner.DynastyDeck[0]; owner.DynastyDeck.RemoveAt(0);
             var refill = Card(refillId);
             province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
@@ -471,25 +478,25 @@ public sealed partial class MatchEngine
         {
             // Forge Your Soul: attach the chosen Weapon (or none), then the shuffle decision.
             case (EitherOrSpecs.ForgeYourSoulAttach, _):
-            {
-                CardInstance? attached = null;
-                if (option.Key.StartsWith("attach-", StringComparison.Ordinal) && p.PerformerId is not null)
                 {
-                    var weapon = ForgeShownCards(decider.Id)[int.Parse(option.Key["attach-".Length..])];
-                    var smith = Card(p.PerformerId);
-                    Pay(decider.Id, weapon, option.GoldCost, sourceIds, paying: new PaymentSubject(weapon, PaymentKind.Equip, Wielder: smith)); // issue #501: the wielder
-                    decider.FateDeck.Remove(weapon.Id);
-                    weapon.AbilityUses.Clear(); weapon.Bowed = false;
-                    weapon.Zone = Zone.Attached; weapon.AttachedTo = smith.Id; weapon.FaceUp = true; weapon.ProvinceIndex = smith.ProvinceIndex;
-                    NoteAttached(decider.Id, weapon, "deck"); // Issue #501 (EmperorMechD.cs): the attach log.
-                    if (Definition(weapon).AttachGrantsKeyword is string granted) GrantKeyword(smith, granted, weapon.Id, "Attachment");
-                    Emit("equipped", $"{Definition(weapon).Name} attached to {Definition(smith).Name} from the top of the Fate deck ({name}).", decider.Id, weapon.Id);
-                    attached = weapon;
+                    CardInstance? attached = null;
+                    if (option.Key.StartsWith("attach-", StringComparison.Ordinal) && p.PerformerId is not null)
+                    {
+                        var weapon = ForgeShownCards(decider.Id)[int.Parse(option.Key["attach-".Length..])];
+                        var smith = Card(p.PerformerId);
+                        Pay(decider.Id, weapon, option.GoldCost, sourceIds, paying: new PaymentSubject(weapon, PaymentKind.Equip, Wielder: smith)); // issue #501: the wielder
+                        decider.FateDeck.Remove(weapon.Id);
+                        weapon.AbilityUses.Clear(); weapon.Bowed = false;
+                        weapon.Zone = Zone.Attached; weapon.AttachedTo = smith.Id; weapon.FaceUp = true; weapon.ProvinceIndex = smith.ProvinceIndex;
+                        NoteAttached(decider.Id, weapon, "deck"); // Issue #501 (EmperorMechD.cs): the attach log.
+                        if (Definition(weapon).AttachGrantsKeyword is string granted) GrantKeyword(smith, granted, weapon.Id, "Attachment");
+                        Emit("equipped", $"{Definition(weapon).Name} attached to {Definition(smith).Name} from the top of the Fate deck ({name}).", decider.Id, weapon.Id);
+                        attached = weapon;
+                    }
+                    else Emit("eitherOrChosen", $"{decider.Name} attached no Weapon ({name}).", decider.Id, source.Id);
+                    OpenEitherOr(EitherOrSpecs.ForgeYourSoulShuffle, source, p.ActingPlayerId, decider.Id, attached, p.Origin, p.BowedBefore, p.StayWithActor, p.PerformerId);
+                    break;
                 }
-                else Emit("eitherOrChosen", $"{decider.Name} attached no Weapon ({name}).", decider.Id, source.Id);
-                OpenEitherOr(EitherOrSpecs.ForgeYourSoulShuffle, source, p.ActingPlayerId, decider.Id, attached, p.Origin, p.BowedBefore, p.StayWithActor, p.PerformerId);
-                break;
-            }
             case (EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon, "shuffle"):
                 ShuffleDeck(decider, SearchDeck.Fate);
                 break;
@@ -497,41 +504,41 @@ public sealed partial class MatchEngine
                 Emit("eitherOrChosen", $"{decider.Name} did not shuffle ({name}).", decider.Id, source.Id);
                 break;
             case (EitherOrSpecs.KitsukiMethodsDiscard, "discard"):
-            {
-                if (P2HandDiscardBlocked(decider.Id, p.ActingPlayerId, true, name)) break; // issue #503: Pillowbook, The Scorpion Wall is Finished
-                var hand = decider.Hand.ToList();
-                var random = new StableRandom(_state.RngState);
-                random.Shuffle(hand);
-                _state.RngState = random.State;
-                Emit("eitherOrChosen", $"{decider.Name} chose to discard a card at random ({name}).", decider.Id, source.Id);
-                DiscardFate(decider, Card(hand[0]));
-                break;
-            }
+                {
+                    if (P2HandDiscardBlocked(decider.Id, p.ActingPlayerId, true, name)) break; // issue #503: Pillowbook, The Scorpion Wall is Finished
+                    var hand = decider.Hand.ToList();
+                    var random = new StableRandom(_state.RngState);
+                    random.Shuffle(hand);
+                    _state.RngState = random.State;
+                    Emit("eitherOrChosen", $"{decider.Name} chose to discard a card at random ({name}).", decider.Id, source.Id);
+                    DiscardFate(decider, Card(hand[0]));
+                    break;
+                }
             case (EitherOrSpecs.KitsukiMethodsDiscard, _):
                 Emit("eitherOrChosen", $"{decider.Name} did not discard ({name}): {Player(p.ActingPlayerId).Name} chooses.", decider.Id, source.Id);
                 OpenEitherOr(EitherOrSpecs.KitsukiMethodsReward, source, p.ActingPlayerId, p.ActingPlayerId, affected, p.Origin, p.BowedBefore, p.StayWithActor, p.PerformerId);
                 break;
             case (EitherOrSpecs.KitsukiMethodsReward, "honor"):
-            {
-                Emit("eitherOrChosen", $"{decider.Name} chose to gain 2 Honor ({name}).", decider.Id, source.Id);
-                // The performing Courtier's action: a dishonorable one is rehonored instead of the gain.
-                if (p.PerformerId is not null && _state.Cards.TryGetValue(p.PerformerId, out var courtier) && courtier.OwnerId == decider.Id) GainHonorFromPerformer(courtier, 2, name);
-                else GainHonor(decider.Id, 2, name, source);
-                break;
-            }
+                {
+                    Emit("eitherOrChosen", $"{decider.Name} chose to gain 2 Honor ({name}).", decider.Id, source.Id);
+                    // The performing Courtier's action: a dishonorable one is rehonored instead of the gain.
+                    if (p.PerformerId is not null && _state.Cards.TryGetValue(p.PerformerId, out var courtier) && courtier.OwnerId == decider.Id) GainHonorFromPerformer(courtier, 2, name);
+                    else GainHonor(decider.Id, 2, name, source);
+                    break;
+                }
             case (EitherOrSpecs.KitsukiMethodsReward, _):
                 Emit("eitherOrChosen", $"{decider.Name} chose: {Definition(affected!).Name}'s controller loses Honor equal to his base Personal Honor ({name}).", decider.Id, source.Id);
                 GainHonor(affected!.OwnerId, -Definition(affected).PersonalHonor, name, source);
                 break;
             case (EitherOrSpecs.CrowdedStreetsMoveHome, "home"):
-            {
-                Emit("eitherOrChosen", $"{decider.Name} moves {Definition(affected!).Name} home ({name}).", decider.Id, affected!.Id);
-                // A trait's move, not an action's effect: it is not recorded as something the next action did.
-                var recorded = _state.CurrentActionAffected.Count;
-                MoveHome(affected!, false);
-                if (_state.CurrentActionAffected.Count > recorded) _state.CurrentActionAffected.RemoveRange(recorded, _state.CurrentActionAffected.Count - recorded);
-                break;
-            }
+                {
+                    Emit("eitherOrChosen", $"{decider.Name} moves {Definition(affected!).Name} home ({name}).", decider.Id, affected!.Id);
+                    // A trait's move, not an action's effect: it is not recorded as something the next action did.
+                    var recorded = _state.CurrentActionAffected.Count;
+                    MoveHome(affected!, false);
+                    if (_state.CurrentActionAffected.Count > recorded) _state.CurrentActionAffected.RemoveRange(recorded, _state.CurrentActionAffected.Count - recorded);
+                    break;
+                }
             default:
                 Emit("eitherOrChosen", $"{decider.Name} leaves {Definition(affected!).Name} at the battlefield ({name}).", decider.Id, source.Id);
                 break;

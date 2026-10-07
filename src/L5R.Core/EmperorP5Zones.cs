@@ -105,7 +105,7 @@ public sealed partial class MatchEngine
     // ---- the zone under a card ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private IEnumerable<CardInstance> CardsUnder(int playerId) =>
-        _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Underneath).OrderBy(c => c.Id, StringComparer.Ordinal);
+        _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Underneath && c.HostCardId is null).OrderBy(c => c.Id, StringComparer.Ordinal);
 
     // The branches whose Spell rides on CardIds (the straightening branch is a multi-target action: its Spell is its first slot).
     private static bool P5CarriesCostCard(string abilityId) => abilityId is EmperorP5ZoneAbilities.FoundriesAttack or EmperorP5ZoneAbilities.FoundriesDraw;
@@ -351,7 +351,7 @@ public sealed partial class MatchEngine
     {
         if (IsP5HiddenOutOfPlayTarget(target)) ValidateP5HiddenOutOfPlayTarget(player, card);
         else if (target == EmperorP5ZoneAbilities.UnderAirOrWaterSpell)
-            Require(card.OwnerId == player.Id && card.Zone == Zone.Underneath && Definition(card).Type == CardType.Spell && (Keyword(card, "Air") || Keyword(card, "Water")), "Choose an Air or Water Spell under this card.");
+            Require(card.OwnerId == player.Id && card.Zone == Zone.Underneath && card.HostCardId is null && Definition(card).Type == CardType.Spell && (Keyword(card, "Air") || Keyword(card, "Water")), "Choose an Air or Water Spell under this card.");
         else Require(card.OwnerId == player.Id && card.Zone == Zone.Hand && player.Hand.Contains(card.Id) && Definition(card).Type == CardType.Spell, "Choose a Spell in your hand.");
     }
 
@@ -365,7 +365,7 @@ public sealed partial class MatchEngine
         {
             case EmperorP5ZoneAbilities.FoundriesAttack:
             case EmperorP5ZoneAbilities.FoundriesDraw:
-                Require(ChosenCostCard(command) is { } spell && spell.Zone == Zone.Underneath && spell.OwnerId == player.Id && Definition(spell).Type == CardType.Spell
+                Require(ChosenCostCard(command) is { } spell && spell.Zone == Zone.Underneath && spell.HostCardId is null && spell.OwnerId == player.Id && Definition(spell).Type == CardType.Spell
                     && FoundriesElements(id).Any(e => Keyword(spell, e)), $"Discard a Spell from under this card that is {string.Join(" or ", FoundriesElements(id))}.");
                 break;
             case EmperorP5ZoneAbilities.BlessingsStrength when command.PerformerId is { } blessedId && _state.Cards.TryGetValue(blessedId, out var blessed):
