@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Primitive P6: fact records and windows for seppuku, Proclaim, assigned to attack, turned face up, Terrain destroyed, Celestial entry and leaves play; Celestial entry decisions that pause the Events reveal; registered announce watchers with a performer filter; until-the-action-ends modifiers. Fixes the Order Seppuku accumulator leak, the missing ResolveEvent startup seal and the Terrain self-replacing path. Engine only; shared interfaces: the after-action window, the announce window, the Event decision, the Celestial entry.",
+  "validation": "after-facts 12/12; full Core suite and bash tools/check.sh --skip-client passed (exit 0, no FAIL) before and after merging origin/main; format and comment-swallow gates clean.",
+  "remaining": "No card wired; readings for Mendon in docs/decisions/2026-10-06-p6-after-event-windows.md; no native graphical check (no client change).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/705",
+  "branch": "claude/705-p6-after-event-windows",
+  "updated": "2026-10-07T07:07:39.504476+00:00"
+}

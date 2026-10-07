@@ -35,6 +35,7 @@ public sealed partial class MatchEngine
     // (skipped) effects. `consumedGrant`: the action was taken as one of a burst of Additional Actions, and being negated loses only itself.
     private void ResolveNegatedAction(GameCommand command, bool consumedGrant = false, bool ignoreCosts = false)
     {
+        ClearActionScopedModifiers(ActionKeyPrefix(command.PlayerId, command.CardId, command.AbilityId)); // P6 (AfterFacts.cs): a negated action ends too
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
         // Bad Kharma (Emperor Edition remaining-cards pass, group A, issue #492): "He ignores the action's costs" -- the action is taken, nothing of it is paid and nothing happens.
         if (ignoreCosts)

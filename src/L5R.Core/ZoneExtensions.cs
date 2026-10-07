@@ -110,7 +110,7 @@ public sealed partial class MatchEngine
         foreach (var card in _state.Cards.Values)
         {
             if (InPlay(card)) { card.EnteredPlayTurn ??= turnAtStart; }
-            else if (card.EnteredPlayTurn is not null) card.EnteredPlayTurn = null;
+            else if (card.EnteredPlayTurn is not null) { card.EnteredPlayTurn = null; NoteLeftPlay(card); } // P6 (AfterFacts.cs): "after X leaves play"
             if (card.Zone == Zone.Underneath && card.HostCardId is { } hostId && !(_state.Cards.TryGetValue(hostId, out var host) && InPlay(host)))
             {
                 card.Zone = Zone.FateDiscard; card.HostCardId = null; card.FaceUp = true;
