@@ -177,8 +177,8 @@ public sealed partial class MatchEngine
         // is named on CardIds, chosen later (a sequenced second target) or moved here by a redirection. The
         // Attack's own performer is the acting card when the command names one (the second half of a sequenced
         // action carries it even though its ability declares no Performer of its own).
-        RequireTargetNotBarred(command.PerformerId is { } attackPerformerId && _state.Cards.TryGetValue(attackPerformerId, out var attackPerformer)
-            ? ActingPersonality(attackPerformer) : PerformingCard(command, ability), target);
+        RequireTargetNotBarredForAction(command.PerformerId is { } attackPerformerId && _state.Cards.TryGetValue(attackPerformerId, out var attackPerformer)
+            ? ActingPersonality(attackPerformer) : PerformingCard(command, ability), target, command, ability);
         var type = Definition(target).Type;
         // Core rules: a Personality with an attached FOLLOWER is immune to a Ranged/Melee Attack (attack the
         // Follower instead), unless the Attack is explicitly allowed to target one -- an exception printed

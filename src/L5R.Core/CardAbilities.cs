@@ -6116,7 +6116,7 @@ public sealed partial class MatchEngine
         // Alternative cost (issue #337): the way the acting player pays the non-Gold cost is part of the command, and payable.
         ValidateCostOption(ability, command, source);
         ValidateWielderCosts(ability, command, source);
-        Require(command.Choice is null || command.AbilityId is not null && (AttackCompareOptions(command.AbilityId) is not null || MechEChoiceOptions(command.AbilityId) is not null || P2ChoiceOptions(command.AbilityId) is not null || P5AllowsChoice(command.AbilityId)), "Choices are resolved by a separate decision command."); // issue #503: Isawa Mina's attachment or token // issue #492, ruling R5: the "may compare" choice rides on the command; issue #501: Greasing the Wheels' pay-or-straighten
+        Require(command.Choice is null || command.AbilityId is not null && (AttackCompareOptions(command.AbilityId) is not null || MechEChoiceOptions(command.AbilityId) is not null || P2ChoiceOptions(command.AbilityId) is not null || P5AllowsChoice(command.AbilityId) || Wave9601ChoiceOptions(command.AbilityId, command.PlayerId) is not null), "Choices are resolved by a separate decision command."); // issue #503: Isawa Mina's attachment or token // issue #492, ruling R5: the "may compare" choice rides on the command; issue #501: Greasing the Wheels' pay-or-straighten
         // Goju House Guard (issue #192): the only current DeckPosition consumer, so this stays a
         // per-id check rather than a generic AbilityDefinition flag until a second card needs it.
         Require(id == "goju-house-guard-return" ? command.DeckPosition is "Top" or "Bottom" : command.DeckPosition is null,
@@ -11233,7 +11233,7 @@ public sealed partial class MatchEngine
             // "You may compare it against ..." (issue #492, ruling R5): one offered action per thing the player may compare against; the choice rides on the command.
             string?[] compareChoices = AttackCompareOptions(id) is { } compareOptions ? compareOptions.Select(o => (string?)o.Key).ToArray()
                 : (MechEChoiceOptions(id) ?? P2ChoiceOptions(id)) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray()
-                : P5ChoiceOptions(id, playerId) is { } p5Choices ? p5Choices.Select(o => (string?)o.Key).ToArray() : [null]; // issue #501: Greasing the Wheels' pay-or-straighten; issue #503: Isawa Mina's attachment or token
+                : (P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId)) is { } p5Choices ? p5Choices.Select(o => (string?)o.Key).ToArray() : [null]; // issue #689: Earth's Protection's amounts // issue #501: Greasing the Wheels' pay-or-straighten; issue #503: Isawa Mina's attachment or token
             foreach (var performer in performers)
                 foreach (var costOption in costOptions)
                     foreach (var createChoice in createChoices)
@@ -11354,7 +11354,7 @@ public sealed partial class MatchEngine
                                         ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                                     var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
                                         + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
-                                        + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
+                                        + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                                         + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                                     yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                                         legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
