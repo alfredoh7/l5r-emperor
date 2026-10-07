@@ -76,3 +76,9 @@ interpretation this register's decision docs already settled.
 
 - [Created-card proxies in the Ivory frame, and the creators they unblock (issue #677)](2026-10-06-677-created-card-proxies.md) — Mendon's ruling of 2026-10-06 (the Ivory frame is accepted; an exact Oracle proxy is preferred to a manufactured scan), seventeen proxies published, eighteen creators wired, five left with a precise gap; readings for Mendon to confirm.
 - [Engine for P24, P4 and P22 (#690)](2026-10-06-690-p24-effect-primitives.md) — accepted as readings, engine only: [small effect primitives](2026-10-06-690-p24-effect-primitives.md) (switch, home-targeted and printed-Force Attacks, cost substitution, three-stat tokens), the [turn-begins hook, owner-turn durations and player-level grants](2026-10-06-690-p4-turn-boundary.md), and [created-card removal and current values, exchange, overlay onto a target, control-changing transfer, filter grants and traits](2026-10-06-690-p22-created-copies-grants.md); each doc gives the API for card wiring and the readings for Mendon.
+
+- [Issue #699: Benediction (strategy-wave-120)](2026-10-06-699-benediction.md) — proposed readings for the #699 follow-up (benediction); Mendon's rulings applied, remaining readings to confirm.
+
+- [699, the "essence" follow-up: Read the Essence (spell-wave-56)](2026-10-06-699-essence.md) — proposed readings for the #699 follow-up (essence); Mendon's rulings applied, remaining readings to confirm.
+
+- [699, the "rings" cluster: how a Ring enters play (spell-wave-57, celestial-wave-29)](2026-10-06-699-rings.md) — proposed readings for the #699 follow-up (rings); Mendon's rulings applied, remaining readings to confirm.
