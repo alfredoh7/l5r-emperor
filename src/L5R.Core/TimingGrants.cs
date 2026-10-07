@@ -59,19 +59,29 @@ public sealed partial class MatchEngine
             .OrderBy(x => x.Item1.Id, StringComparer.Ordinal);
 
     // Why this equip may not be taken right now (null when it may): the ordinary Equip (Limited) timing, or a granted Open or Battle timing.
-    private string? EquipTimingError(int playerId, CardInstance attachment)
+    private string? EquipTimingError(int playerId, CardInstance attachment) => ResolveEquipTiming(playerId, attachment, out _);
+
+    // The same, naming the card-free once-per-turn grant (PlayerTimingGrants, RulebookModifiers.cs) the equip would spend: only when no ordinary timing and no card's grant already allows it.
+    private string? ResolveEquipTiming(int playerId, CardInstance attachment, out PlayerTimingGrant? spent)
     {
+        spent = null;
         var actionClass = EquipActionClass(attachment);
         // A Spell (Equip (Limited) since issue #501) takes no granted timing: in a battle a Spell is attached with Equip (Battle), unchanged.
         var grants = Definition(attachment).Type == CardType.Spell ? [] : (actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray()).Concat(GloryOfTheShogunGrants()).ToArray(); // Glory of the Shogun (issue #492, group F)
+        var free = Definition(attachment).Type == CardType.Spell ? [] : FreeTimingGrantsOf(playerId, actionClass); // P19: grants that belong to the player, not to a card
         if (_state.Phase == Phase.Action)
-            return playerId == _state.ActivePlayerId || grants.Any(x => x.Grant.GrantsOpen) ? null : "Equip is a Limited action on your turn.";
+        {
+            if (playerId == _state.ActivePlayerId || grants.Any(x => x.Grant.GrantsOpen)) return null;
+            spent = free.FirstOrDefault(g => g.GrantsOpen);
+            return spent is not null ? null : "Equip is a Limited action on your turn.";
+        }
         if (_state.Phase == Phase.Battle)
         {
-            if (grants.Length == 0) return "Equip is not a Battle action.";
+            if (grants.Length == 0 && free.Length == 0) return "Equip is not a Battle action.";
             if (_state.CurrentBattleProvince is not int province || !Army(playerId, province).Any()) return "You need a unit at the current battlefield to take a Battle action.";
-            return grants.Any(x => x.Grant.GrantsBattle && (!x.Grant.BattleRequiresUnbowedSource || !x.Source.Bowed)) ? null
-                : $"{Definition(grants[0].Source).Name} must be unbowed to equip during a battle.";
+            if (grants.Any(x => x.Grant.GrantsBattle && (!x.Grant.BattleRequiresUnbowedSource || !x.Source.Bowed))) return null;
+            spent = free.FirstOrDefault(g => g.GrantsBattle);
+            return spent is not null ? null : grants.Length == 0 ? "Equip is not a Battle action." : $"{Definition(grants[0].Source).Name} must be unbowed to equip during a battle.";
         }
         return "Equip is a Limited action on your turn.";
     }
@@ -86,7 +96,7 @@ public sealed partial class MatchEngine
             ? (_state.CurrentBattleProvince is int province ? Army(playerId, province).ToArray() : [])
             : _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Home && Definition(c).Type == CardType.Personality).ToArray();
         // Equip (Limited) offers Spells too (Mendon's ruling, issue #501), to a Shugenja only; EquipTimingError keeps them out of a battle (Equip (Battle) is their Battle action).
-        foreach (var card in Player(playerId).Hand.Select(Card).Where(c => Definition(c).Type is CardType.Item or CardType.Follower or CardType.Spell))
+        foreach (var card in Player(playerId).Hand.Select(Card).Where(c => Definition(c).Type is CardType.Item or CardType.Follower or CardType.Spell).Concat(RulebookEquipDiscardCandidates(playerId, "equip"))) // P19: plus the owner's discard pile when a modifier allows it
         {
             if (EquipTimingError(playerId, card) is not null) continue;
             var def = Definition(card);
