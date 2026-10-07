@@ -5495,6 +5495,7 @@ public sealed partial class MatchEngine
         // action may be taken until it closes (spec 4.2 precedes 4.5) -- only the Engage/"after engaging" Reactions are legal.
         Require(_state.PendingChoice?.Type != "engageReaction" || ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield",
             "Until the Engage window closes, only Engage actions and \"After engaging\" Reactions may be played.");
+        Require(!IsEngageAction(ability) || !EngageActionBarred(command.PlayerId), "The Attacker may not take Engage actions at this battlefield."); // P13 (RuleFlags.cs)
         // ...and a one-shot limit on the first-action holder's FIRST Battle action.
         ValidateFirstActionRestriction(command);
         var player = Player(command.PlayerId);
@@ -7168,6 +7169,7 @@ public sealed partial class MatchEngine
         if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
         if (KamalakarPoliticalNegates(command)) return; // Kamalakar (PromoCelestialA.cs): the first Political action each turn that targets him
         if (WatchNegatesPoliticalAction(command)) return; // P7 (PeriodWatches.cs): a negation watch on the card the Political action names, or on the player
+        if (RuleFlagNegatesBattleAction(command)) return; // P13 (RuleFlags.cs): a Battle action by a player without units at a flagged battlefield
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
@@ -11107,6 +11109,7 @@ public sealed partial class MatchEngine
             if (inP3EntryWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3EntryAbilities.EntryTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
+            if (isEngageReaction && EngageActionBarred(playerId)) continue; // P13 (RuleFlags.cs)
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
