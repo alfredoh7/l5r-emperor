@@ -81,3 +81,4 @@ interpretation this register's decision docs already settled.
 - [699, the "essence" follow-up: Read the Essence (spell-wave-56)](2026-10-06-699-essence.md) — proposed readings for the #699 follow-up (essence); Mendon's rulings applied, remaining readings to confirm.
 - [699, the "rings" cluster: how a Ring enters play (spell-wave-57, celestial-wave-29)](2026-10-06-699-rings.md) — proposed readings for the #699 follow-up (rings); Mendon's rulings applied, remaining readings to confirm.
 - [Battle placards](2026-10-07-battle-placards.md) — replaces #710's court rails: province placards, left-edge stack, katana when the province falls
+- [Direct play from the hand](2026-10-07-direct-play-from-hand.md) — select a playable card, confirm first, assume the single legal action, clickable action text when several

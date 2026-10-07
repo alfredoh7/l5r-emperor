@@ -113,7 +113,8 @@ public partial class Main
                 var cost = _captureMode.Contains("free") ? 0 : 2;
                 var option = Actions.Single(a => a.Type == "equip" && a.CardId == fixture.Source && a.Enabled);
                 Check(option.TargetIds!.Contains(fixture.Target), "Expected target missing from quoted group");
-                await StabilizationClick(StabilizationButton(option.Label));
+                Check(_playPrompt is not null, "Selecting the equipment did not ask to confirm play");
+                await StabilizationClick(StabilizationButton("Confirm play")); // direct play: confirm first, then choose the target and pay
                 ChooseTarget(fixture.Target!); await EventFrames();
                 var button = StabilizationButton(cost == 0 ? "Confirm action" : "Confirm action · 2 Gold");
                 Check(_chosen is not null && QuoteFor(_chosen)?.Cost == cost, "Client did not retain authoritative quote");

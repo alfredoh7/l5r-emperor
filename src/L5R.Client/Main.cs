@@ -174,6 +174,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-decisions", StringComparison.Ordinal)) { ProcessDecisionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal)) { ProcessDirectPlayCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search", StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
@@ -614,13 +615,13 @@ public partial class Main : Node
         if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
         if (_selected?.Id == card.Id) { DeselectCard(); return; }
         _selectedHomeReminder = null; HighlightHomeReminders();
-        _selected = card; _sources.Clear();
+        _selected = card; _sources.Clear(); _playPrompt = null;
         var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
         if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
         var purchase = Actions.FirstOrDefault(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled);
         var multiSlot = card.ProvinceIndex is int index && card.Zone == Zone.Province &&
             ProvincePresentation.Slots(View.Players.Single(p => p.Id == card.OwnerId).Provinces.Single(p => p.Index == index)).Length > 1;
-        if (purchase is not null && !multiSlot) Choose(purchase); else { RenderInspector(); RenderPhaseActions(); Highlight(); }
+        if (purchase is not null && !multiSlot) Choose(purchase); else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
     }
 
     private void Highlight()
@@ -705,7 +706,7 @@ public partial class Main : Node
         {
             SetNotice("Both players need to be connected before continuing."); return;
         }
-        _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
+        _chosen = null; _playPrompt = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
         Highlight();
         await _session.Submit(command);
     }

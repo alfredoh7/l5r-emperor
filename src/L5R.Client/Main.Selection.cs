@@ -9,6 +9,7 @@ public partial class Main
         // Inspection is local presentation. Active game choices retain their
         // explicit Cancel action, so this cannot silently discard a draft.
         if (_chosen is not null || _session.Busy) return;
+        _playPrompt = null;
         _selected = null;
         _selectedHomeReminder = null;
         HighlightHomeReminders();
