@@ -106,18 +106,18 @@ public partial class Main
         .Single(b => b.IsVisibleInTree() && !b.Disabled && b.HasMeta("reaction_card") && b.GetMeta("reaction_card").AsString() == source &&
             b.GetMeta("reaction_ability").AsString() == ability && (performer is null || b.GetMeta("reaction_performer").AsString() == performer));
 
-    private async Task PrepareReactionCapture(ReactionCaptureFixture fixture, int seat)
+    private async Task PrepareReactionCapture(ReactionCaptureFixture fixture, int seat, bool input = true)
     {
         await LoadSupportFixture(fixture.Engine, seat);
         await WaitReactionCapture();
         FocusBattle(); await EventFrames(8);
-        if (!GetWindow().HasFocus()) GD.Print("REACTION_FLOW_FOCUS_REQUIRED: activate the game window for native input checks.");
-        for (var attempt = 0; attempt < 1800 && !GetWindow().HasFocus(); attempt++)
+        if (input && !GetWindow().HasFocus()) GD.Print("REACTION_FLOW_FOCUS_REQUIRED: activate the game window for native input checks.");
+        for (var attempt = 0; input && attempt < 1800 && !GetWindow().HasFocus(); attempt++)
         {
             if (attempt % 60 == 0) GetWindow().GrabFocus();
             await EventFrames(1);
         }
-        SupportRequire(GetWindow().HasFocus(), "Native reaction window did not receive focus");
+        SupportRequire(!input || GetWindow().HasFocus(), "Native reaction window did not receive focus");
         SupportRequire(_selected is null && _chosen is null, "Fixture unexpectedly preselected a source or action");
     }
 
@@ -228,8 +228,14 @@ public partial class Main
         {
             var seat = _captureMode.Contains("seat1") ? 1 : 0;
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); _preferences.PausedAnimation = false; ApplyPreferences(false);
-            var fixture = ReactionCaptureBow(seat); await PrepareReactionCapture(fixture, seat);
+            var layout = _captureMode.Contains("layout");
+            var fixture = ReactionCaptureBow(seat); await PrepareReactionCapture(fixture, seat, input: !layout);
             CheckReactionCaptureLayout(); await SupportCapture("-offer");
+            if (layout)
+            {
+                GD.Print("REACTION_FLOW_LAYOUT_PASS: rendered public context and decision bounds; seat=" + seat + "; reduced=" + _preferences.ReducedMotion + "; input not exercised.");
+                GetTree().Quit(); return;
+            }
             if (_captureMode.Contains("review")) { GD.Print("REACTION_FLOW_REVIEW_READY: real Horibe action resolved; Ruya may respond without inspecting her source first."); return; }
             var before = View.Version;
             var pending = View.PendingChoice;
