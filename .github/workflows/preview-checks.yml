@@ -16,10 +16,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  windows-review:
-    name: Windows review package
+  windows-review-shard:
+    name: Windows review packages (${{ matrix.shard }})
     runs-on: windows-2022
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -33,9 +37,28 @@ jobs:
         shell: powershell
         env:
           GH_TOKEN: ${{ github.token }}
+          REVIEW_SHARD: ${{ matrix.shard }}
         run: |
-          $receipts = @(Get-ChildItem previews/published -Filter *.json)
+          $receipts = @(Get-ChildItem previews/published -Filter *.json | Sort-Object Name)
           if ($receipts.Count -eq 0) { throw 'No package receipts to validate' }
-          foreach ($receipt in $receipts) {
+          for ($index = [int]$env:REVIEW_SHARD; $index -lt $receipts.Count; $index += 4) {
+            $receipt = $receipts[$index]
+            Write-Host ('Validating ' + $receipt.Name)
             & ./tools/previews/check_windows.ps1 -ReceiptPath $receipt.FullName
           }
+  windows-review:
+    name: Windows review package
+    needs: windows-review-shard
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every Windows package shard
+        env:
+          RESULT: ${{ needs.windows-review-shard.result }}
+        run: |
+          if [ "$RESULT" != "success" ]; then
+            echo "Windows package validation failed or was cancelled: $RESULT"
+            exit 1
+          fi
+          echo "All Windows package shards passed."

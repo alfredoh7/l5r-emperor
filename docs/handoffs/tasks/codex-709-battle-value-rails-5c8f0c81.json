@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Approved A battle rails with C Force hierarchy inside blood borders; authoritative public Force/Units/Strength and native prepared review. Versioned multipart Windows candidate staged; see docs/handoffs/2026-10-07-battle-values-review.md.",
-  "validation": "Full check.sh --skip-client passed; focused Core 6/6, transport 19/19, existing native battle presentation 8/8; native values six scenes both seats plus resize, reduced motion, GC and real actions/concession pass. Mac launcher opened and native picker manually verified. Client build zero warnings/errors; formatting check passed. Strict Windows export passed; preview toolkit 12/12. Package source faa2613, immutable parts/hash receipt committed; Windows CI validation pending.",
-  "remaining": "Run Windows package CI and relevant GitHub checks before one targeted Mendon notification. Mendon/Nathan expert mechanics acceptance and Windows graphical playtesting required; no automatic merge.",
+  "summary": "Approved inside-border A/C battle rails implemented and native-tested. Complete immutable two-part Windows preview staged; sequential validation confirmed this package, then timed out on historical packages. All receipts now run in four parallel Windows groups.",
+  "validation": "Game source faa2613 passed Mac, Windows rules and Windows client GitHub CI; native values and existing presentation checks passed. Tooling 4142d96: battle archive assembled byte-for-byte, exported Windows executable and inner/outer launchers passed; full historical run exceeded deadline. Preview toolkit 12/12, formatting pass. Four-shard CI rerun pending; evidence in docs/handoffs/2026-10-07-battle-values-review.md.",
+  "remaining": "Aggregate Windows CI must pass before one authorized Mendon delivery notification. Mendon/Nathan expert mechanics review and Windows graphical playtesting required; no automatic merge.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/709",
   "branch": "codex/709-battle-value-rails",
-  "updated": "2026-10-07T12:08:50.671366+00:00"
+  "updated": "2026-10-07T12:28:33.303155+00:00"
 }

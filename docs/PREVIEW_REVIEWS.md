@@ -113,6 +113,10 @@ every build retry or claim that a GitHub comment was delivered/read by email.
    argument-capturing executable, including paths with spaces, `&` and `!`. Multipart
    receipts also require every companion asset, byte-for-byte archive assembly, and
    the outer Start Review bootstrap through its real PowerShell helper.
+   All committed receipts run in four parallel Windows groups; the named **Windows
+   review package** check succeeds only when every group succeeds. This keeps the
+   growing archive collection within each job's time/disk limits without skipping
+   any package.
    This proves packaging/runtime/argument handling, not native graphical gameplay.
 5. Once checks pass, publish and notify using the exact validated delivery commit:
 
