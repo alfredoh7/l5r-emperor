@@ -1644,7 +1644,7 @@ public sealed partial class MatchEngine
             MarkAttackVictory(a);
             var destroyedDefenders = aramasuSpares ? 0 : DestroyUnits(TfResolutionDestroyable(d, true)); // issue #622: Hitomi's Devotion spares its unit (TfGear.cs)
             destroyedByPlayer[attacker] = destroyedDefenders; losers.Add(defender);
-            if (!RehonorWinners(a)) { GainHonor(attacker, destroyedDefenders * 2, "Battle victory"); CheckEarthFlowsBonus(attacker, a); }
+            if (!RehonorWinners(a)) { GainHonor(attacker, ResolutionHonor(attacker, defender, destroyedDefenders * 2), "Battle victory"); CheckEarthFlowsBonus(attacker, a); }
             var province = battleProvince;
             var destroyedProvince = province is not null && !aramasuSpares && !PerfectMomentBarsDestruction(attacker) && af > df + EffectiveProvinceStrength(province) && !RendBarsProvinceDestruction(attacker); // Rend the Soul (issue #498): "You will not destroy the province in this battle's resolution"
             if (destroyedProvince) { DestroyProvince(defender, province!); NotePerfectMomentDestruction(attacker); }
@@ -1671,7 +1671,7 @@ public sealed partial class MatchEngine
         {
             var destroyedAttackers = DestroyUnits(TfResolutionDestroyable(a, false));
             destroyedByPlayer[defender] = destroyedAttackers; losers.Add(attacker);
-            if (!RehonorWinners(d)) { GainHonor(defender, destroyedAttackers * 2, "Battle victory"); CheckEarthFlowsBonus(defender, d); }
+            if (!RehonorWinners(d)) { GainHonor(defender, ResolutionHonor(defender, attacker, destroyedAttackers * 2), "Battle victory"); CheckEarthFlowsBonus(defender, d); }
             GrantRingRecruit(Player(defender), a.Length > 0, "false-ring-of-air-recruit");
             GrantRingRecruit(Player(defender), a.Length > 0, "ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(defender), destroyedAttackers > 0);
@@ -1689,8 +1689,8 @@ public sealed partial class MatchEngine
             destroyedByPlayer[attacker] = destroyedD; destroyedByPlayer[defender] = destroyedA; losers.Add(attacker); losers.Add(defender);
             // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
             // being "in the WINNING army," which a tie -- by definition -- never has.
-            if (!attackerHadDishonorable) GainHonor(attacker, destroyedD, "Tied battle");
-            if (!defenderHadDishonorable) GainHonor(defender, destroyedA, "Tied battle");
+            if (!attackerHadDishonorable) GainHonor(attacker, ResolutionHonor(attacker, defender, destroyedD), "Tied battle");
+            if (!defenderHadDishonorable) GainHonor(defender, ResolutionHonor(defender, attacker, destroyedA), "Tied battle");
             if (destroyedD > 0) AttackerDestructionBonus(attacker, a);
             // Ring of Water/Fire (issue #194): no "win" requirement, unlike False Ring of Air/Ring of
             // Earth -- a tie still counts as "a battle resolves" for both players independently.
@@ -2057,7 +2057,7 @@ public sealed partial class MatchEngine
         Require(card.OwnerId == command.PlayerId && card.Zone == Zone.Hand && def.Type == CardType.Strategy, "Choose a supported Strategy from your hand.");
         var province = _state.CurrentBattleProvince!.Value;
         Require(Army(command.PlayerId, province).Any() || TerrainPlaysWithoutPresence(def) && Keyword(card, "Terrain"), "You need a unit at the current battlefield to take a Battle action."); // Flooded Pass (issue #492): "Even if you control no units".
-        if (Keyword(card, "Terrain")) RequireJahanAllowsTerrain(command.PlayerId); // Jahan (PromoCelestialA.cs): checked before anything is paid
+        if (Keyword(card, "Terrain")) { RequireJahanAllowsTerrain(command.PlayerId); RequireRuleFlagAllowsTerrain(command.PlayerId); } // Jahan (PromoCelestialA.cs): checked before anything is paid
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
@@ -2127,6 +2127,7 @@ public sealed partial class MatchEngine
     // touched them may skip ceding priority.
     private void NextAction(int playerId, bool stayWithPlayer = false)
     {
+        if (ActionPhaseJustEnded()) return; // P13 (RuleFlags.cs): the action ended the Action Phase itself, so priority already belongs to the phase that began
         _state.ConsecutivePasses = 0; _state.PriorityPlayerId = stayWithPlayer ? playerId : 1 - playerId; EndAttackerLeadIfCeded(playerId, stayWithPlayer);
         // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.
         if (_state.PendingChoice is null && _state.PendingEventChoices.Count > 0) OpenQueuedEventChoice(stayWithPlayer ? playerId : 1 - playerId);
@@ -2865,6 +2866,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
+        if (MadnessLossAtTurnEnd()) return; // P13 (RuleFlags.cs): a madness-loss flag
         MechDTurnEnds(); // Issue #501, mechanics group D (EmperorMechD.cs): "remove him from the game when the turn ends" (Yajinden); the Recon counters and the attach log restart.
         ClearReconnaissanceAtTurnEnd(); // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): a battlefield exists only within its Attack Phase, and so does Reconnaissance at it.
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
@@ -2894,7 +2896,7 @@ public sealed partial class MatchEngine
         // elemental keyword too (e.g. False Ring of Air prints "Air"), so this alone is not enough
         // to exclude them -- but all five False Rings also carry "Fudo", which no real Ring does,
         // so that keyword is the actual False-Ring exclusion.
-        if (RingElements.All(e => _state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring && Keyword(c, e) && !Keyword(c, "Fudo") && CountsForEnlightenment(c))))
+        if (!EnlightenmentBarred(player.Id) && RingElements.All(e => _state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring && Keyword(c, e) && !Keyword(c, "Fudo") && CountsForEnlightenment(c))))
         { Win(player.Id, "Enlightenment victory"); return; }
         player.TurnsTaken++;
         PromoTurnBegins(player); // issue #653 (PromoEmperorEvents.cs): Losing the Way
