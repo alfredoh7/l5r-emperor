@@ -69,6 +69,7 @@ public partial class Main
                 }
                 GD.Print("DECISION_CHOOSER_PASS: " + _captureMode); GetTree().Quit(); return;
             }
+            if (_captureMode.EndsWith("-p25", StringComparison.Ordinal)) { await CaptureDecisionInfra(); GD.Print("DECISION_CHOOSER_PASS: " + _captureMode); GetTree().Quit(); return; }
             var kind = _captureMode.Contains("fukui-bowed") ? "fukui-bowed" : _captureMode.Contains("fukui") ? "fukui" : _captureMode.EndsWith("-kamina", StringComparison.Ordinal) ? "kamina" : "yumaru";
             var waiting = _captureMode.Contains("waiting");
             await PrepareDecisionReview(kind, waiting ? 1 : 0);

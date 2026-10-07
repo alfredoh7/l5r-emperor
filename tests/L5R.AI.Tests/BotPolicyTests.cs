@@ -18,6 +18,7 @@ internal static class BotPolicyTests
         ("Arena fixes: a harmful ability is never aimed at the bot's own card; Shinden always bows; a full hand does not spend Gold on a pure draw; the bot never gives the opponent Honor or loses its own by choice", ArenaFixes),
         ("Hoshoku-sha (issue #679): the bot never chooses to destroy himself or any Personality of its own with his Battle/Open action; an enemy target is played", HoshokuNeverSelf),
         ("Read the Essence (issue #699): the bot turns an enemy face-down province card, never its own for nothing, scouts with the optional second flip or declines it, and never stalls", ReadTheEssenceBot),
+        ("P25 decision infrastructure (issue #723): the bot answers a multi-pick Either/Or with the fewest picks and Done, a hook-registered pending type with an offered option, and a choice among shown cards, and never stalls", DecisionInfraBot),
         ("Memory: copies seen in public zones count (three of a non-Unique card, one of a Unique), the roll is deterministic and fair", Memory),
     ];
 
@@ -259,6 +260,28 @@ internal static class BotPolicyTests
         Check(Pick(WithAverage(At(4, 12, 10, 0), 2)) == "self-gain", "in between and ahead: gain");
         Check(Pick(WithAverage(At(4, 8, 10, 0), 2)) == "opponent-lose", "in between, behind and above the starting Honor: take it away");
         Check(Pick(WithAverage(At(4, 3, 10, 0), 2)) == "self-gain", "in between and below the starting Honor: gain");
+    }
+
+    private static void DecisionInfraBot()
+    {
+        foreach (var (kind, spec) in new[] { ("p25-multi", "multi-pick Either/Or"), ("p25-unknown", "hook-registered pending type"), ("p25-shown", "shown choice") })
+        {
+            var engine = MatchEngine.CreateDecisionShowcase(kind);
+            Check(engine.State.PendingChoice is not null && engine.State.PendingChoice.PlayerId == 0, $"{spec}: the showcase opens a decision for seat 0");
+            var steps = 0; var picks = new List<string>();
+            while (engine.State.PendingChoice is not null && steps++ < 8)
+            {
+                var actions = engine.QueryActions(0);
+                Check(actions.Any(a => a.Enabled && a.Command is not null && a.Type != "concede"), $"{spec}: the engine offers an answer");
+                var decision = TrainingOpponent.Choose(engine.GetView(0), actions);
+                Check(decision.Command is not null && decision.Command.Type != "concede", $"{spec}: the bot answers ({decision.Reason})");
+                picks.Add(decision.Command!.Choice ?? "");
+                var result = engine.Execute(decision.Command);
+                Check(result.Accepted, $"{spec}: the engine accepts the bot's answer: {result.Error}");
+            }
+            Check(engine.State.PendingChoice is null, $"{spec}: the decision is answered within {steps} steps (stalled)");
+            if (kind == "p25-multi") Check(picks.Count == 2 && picks[1] == "done", "multi-pick: the bot takes the one pick it must and then Done: " + string.Join(",", picks));
+        }
     }
 
     private static void Memory()

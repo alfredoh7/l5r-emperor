@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Engine primitive P25 (decision infrastructure) from the #668/#671 plan (#723), engine only, no cards wired: multi-pick Either/Or (PendingEitherOr.Min/Max with a Done option, picks applied together in order), EngineHooks.PendingActions plus BranchEffects/EffectChoiceContinuations hooks so a feature-owned pending decision needs no MatchQueries branch, the client rendering any unknown pending type with engine-listed options generically (KnownPendingTypes snapshot keeps existing screens), TargetSlot.CrossConstraint validated and used to filter candidates, and a shown-card decider choice (PendingShownChoice). Shared change: EitherOr.cs, MatchQueries.cs (one call), EffectChoice.cs, TargetSlots.cs, EngineHookStartup.cs, client Main.Decisions.cs, bot score for Done.",
+  "validation": "decision-infra 11/11; bot-policy 13/13; full Core 3184/3184 0 FAIL; AI 98/98 and bot-soak 3/3; check.sh --skip-client passed; format and comment-swallow lint clean; native check-decision-chooser all 11 modes incl. the new p25 mode and check-either-or-ui both modes pass on Windows with the shared Godot.",
+  "remaining": "Cards that use it (Poison the Cup, Now We Are Enemies, Dark Audience) are a later wave; readings in docs/decisions/2026-10-07-p25-decision-infrastructure.md to confirm.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/723",
+  "branch": "claude/723-p25-pr",
+  "updated": "2026-10-07T20:06:44.797402+00:00"
+}
