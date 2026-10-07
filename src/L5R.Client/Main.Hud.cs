@@ -25,6 +25,7 @@ public partial class Main
             fallen.Pressed += () => ShowFallenGallery(player.Id);
             Place(_clanHud, fallen, 16, plaqueY + ClanPlaque.DesignHeight + 4, ClanPlaque.DesignWidth, FallenCounter.DesignHeight);
         }
+        AddBattleStack();
         if (IsInstanceValid(_fallenGallery)) _fallenGallery!.Refresh(View.Players);
     }
     private readonly Dictionary<(int, Zone), CardView> _discardPreview = [];

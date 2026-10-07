@@ -27,7 +27,7 @@ public partial class Main
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover: true);
         ClearBattlefieldHeaders();
-        _valueRails.Clear(); _strengthBadges.Clear();
+        _provincePlacards.Clear();
         MeasureTableLayout();
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
@@ -241,7 +241,7 @@ public partial class Main
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
             Place(area, button, 0, -28, width, PlaneHeight(CardHeight) + 28); _provinceButtons[(owner.Id, province.Index)] = button;
             var slots = ProvincePresentation.Slots(province);
-            AddProvinceStrength(area, owner, province, width);
+            AddProvincePlacard(area, owner, province, width);
             var x = (width - slots.Length * 164 - (province.Region is null ? 0 : 184)) / 2;
             if (province.Region is { } region)
             {
@@ -289,7 +289,6 @@ public partial class Main
             CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, index);
             Place(court, target, 0, 0, bounds.Size.X, MatHeader); _laneSummaries[index] = target;
             AddOpenBattlefieldHeader(index);
-            AddBattleValues(court, index, bounds);
             foreach (var player in View.Players)
                 foreach (var unit in player.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == index))
                 {

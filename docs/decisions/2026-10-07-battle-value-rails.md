@@ -1,4 +1,6 @@
-# Battle value rails — approved presentation
+# Battle value rails — approved presentation (superseded)
+
+> **Superseded 2026-10-07 by [Battle placards](2026-10-07-battle-placards.md).** Mendon replaced the A+C court rails with the placard layout; the rails code and art were removed. The public `BattleValuesView` contract below is unchanged and still the data source.
 
 Issue #709. Alfredo approved concept A's lacquer/brass court rails with concept C's prominent Force number and quieter Units count on 2026-10-07. Both rails, especially the bottom rail, must sit entirely **inside** the blood court border. Reserve separate space for cards and attachments. This explicit request supersedes the earlier restriction on unsolicited persistent Force totals for this feature.
 

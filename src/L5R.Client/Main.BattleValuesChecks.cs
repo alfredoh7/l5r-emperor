@@ -19,9 +19,6 @@ public partial class Main
                     // Sample settled UI, with texture resources surviving a collection.
                     _turnBloom.Cancel(); GC.Collect(); GC.WaitForPendingFinalizers(); await CoverageFrames();
                     VerifyBattleValuesGeometry();
-                    var field = View.CurrentBattleProvince!.Value; var v = BattleValues(field)!;
-                    RequireCamera(_valueRails[(field, v.AttackerId)].Force == v.AttackerForce && _valueRails[(field, v.DefenderId)].Units == v.DefenderUnits, "Displayed values differ from engine snapshot");
-                    RequireCamera(_strengthBadges.Count == (v.ProvinceStrength is null ? 0 : 1), "Open court invented a province strength");
                     using var image = GetViewport().GetTexture().GetImage();
                     RequireCamera(image.SavePng(System.IO.Path.Combine(directory, $"{ValuesScenarios[scenario]}-seat{seat}.png")) == Error.Ok, "Capture failed");
                 }
@@ -49,18 +46,18 @@ public partial class Main
             // keys do not activate the separate macOS PopupMenu window.
             popup.Hide(); await CoverageFrames(); await CoverageFocus();
             _valuesReviewScenario = 0; PrepareBattleValuesReview(); await CoverageFrames(); _turnBloom.Cancel();
-            var zoomPoint = ScreenCenter(_valueRails[(View.CurrentBattleProvince!.Value, View.ViewerId)]);
+            var zoomPoint = WorldToScreen(_battleCourts[View.CurrentBattleProvince!.Value].GetCenter());
             var zoomBefore = _cameraZoom; MoveProbeMouse(zoomPoint);
             for (var n = 0; n < 3; n++) { CameraMouse(MouseButton.WheelUp, true, zoomPoint); CameraMouse(MouseButton.WheelUp, false, zoomPoint); }
-            await CoverageFrames(); RequireCamera(_cameraZoom > zoomBefore, "Review cannot zoom to inspect its rails");
+            await CoverageFrames(); RequireCamera(_cameraZoom > zoomBefore, "Review cannot zoom to inspect its battle");
             VerifyBattleValuesGeometry();
             using (var closeup = GetViewport().GetTexture().GetImage()) closeup.SavePng(System.IO.Path.Combine(directory, "closeup-seat0.png"));
             FocusBattleValues(); await CoverageFrames();
-            // Native input must still reach a full scan beneath the inset rails.
+            // Native input must still reach a full scan beneath the placards.
             var tile = _tiles.First(t => t.Card.Zone == Zone.Battlefield && t.Card.AttachedTo is null);
             await CoverageFocus(); var point = ScreenCenter(tile); MoveProbeMouse(point); await CoverageFrames();
             CameraMouse(MouseButton.Left, true, point); CameraMouse(MouseButton.Left, false, point); await CoverageFrames();
-            RequireCamera(_selected?.Id == tile.Card.Id, "Rail blocked card inspection");
+            RequireCamera(_selected?.Id == tile.Card.Id, "Placard blocked card inspection");
             var forceBefore = BattleValues(View.CurrentBattleProvince!.Value)!.AttackerForce;
             var boost = Actions.FirstOrDefault(a => a.Enabled && a.Command?.AbilityId == "crushing-force");
             RequireCamera(boost?.Command is not null && boost.TargetIds?.Length > 0, "Prepared Force-changing action unavailable");
@@ -75,6 +72,7 @@ public partial class Main
             }
             RequireCamera(BattleValues(View.CurrentBattleProvince!.Value)!.AttackerForce == forceBefore + 3, "Live Force action did not update engine total");
             VerifyBattleValuesGeometry();
+            await CheckPlacardLayout();
             PrepareBattleValuesReview(); await CoverageFrames();
             var pass = Actions.FirstOrDefault(a => a.Enabled && a.Command?.Type == "pass");
             RequireCamera(pass?.Command is not null, "Prepared review is not an interactive engine battle");
@@ -82,26 +80,60 @@ public partial class Main
             RequireCamera(View.PriorityPlayerId == 1, "Live engine action did not refresh the seat opportunity");
             VerifyBattleValuesGeometry();
             await _session.Submit(new GameCommand("concede", View.ViewerId, View.Version)); await CoverageFrames();
-            RequireCamera(_valueRails.Count == 0 && _strengthBadges.Count == 0, "Finished match retained battle values");
-            GD.Print("BATTLE_VALUES_PASS: six real-engine scenarios, both seats, inset/card clearance, native review controls/zoom/card input, live Force action/concession, two resize/reduced-motion cases.");
+            RequireCamera(_placardStack.Count == 0 && _provincePlacards.Count == 0, "Finished match retained battle values");
+            GD.Print("BATTLE_VALUES_PASS: eight real-engine scenarios, both seats, placard stack/katana/click/frame clearance, Light Armor toggle, native review controls/zoom/card input, live Force action/concession, two resize/reduced-motion cases.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
     }
 
+    private async Task CheckPlacardLayout()
+    {
+        foreach (var (scenario, lethal) in new[] { (0, false), (6, true), (7, false), (8, true) })
+            foreach (var seat in new[] { 0, 1 })
+            {
+                _valuesReviewScenario = scenario; PrepareBattleValuesReview();
+                if (seat == 1) _session.SwitchPracticeSeat();
+                await CoverageFrames(); FocusBattleValues(); await CoverageFrames();
+                var field = View.CurrentBattleProvince!.Value;
+                RequireCamera(BattleValues(field)!.ProvinceFalls == lethal, "Engine flag differs from the scenario");
+                VerifyBattleValuesGeometry();
+                var tablePlacard = _provincePlacards.Single(p => p.Key.Province == BattlefieldProvince(field)).Value;
+                _selected = null; tablePlacard.EmitSignal(BaseButton.SignalName.Pressed);
+                RequireCamera(_selected is not null, "Pressing a table placard did not act like pressing its province");
+            }
+        // The Toggle armor button attaches / removes Light Armor; Force changes and the katana follows it.
+        _valuesReviewScenario = 7; PrepareBattleValuesReview(); await CoverageFrames();
+        var before = BattleValues(View.CurrentBattleProvince!.Value)!;
+        RequireCamera(!before.ProvinceFalls && _placardStack.OfType<ProvincePlacard>().Single().GetNodeOrNull("ProvinceDestroyedIcon") is null, "Bare army already shows the katana");
+        ToggleValuesArmor(); await CoverageFrames();
+        var armed = BattleValues(View.CurrentBattleProvince!.Value)!;
+        RequireCamera(armed.AttackerForce > before.AttackerForce && armed.ProvinceFalls && _placardStack.OfType<ProvincePlacard>().Single().GetNodeOrNull("ProvinceDestroyedIcon") is not null, "Attaching armor did not make the katana appear");
+        ToggleValuesArmor(); await CoverageFrames();
+        RequireCamera(!BattleValues(View.CurrentBattleProvince!.Value)!.ProvinceFalls && _placardStack.OfType<ProvincePlacard>().Single().GetNodeOrNull("ProvinceDestroyedIcon") is null, "Removing armor did not remove the katana");
+        _valuesReviewScenario = 0;
+    }
+
+    /// <summary>Stack, order, alignment, engine agreement and frame clearance of every battle placard on screen.</summary>
     private void VerifyBattleValuesGeometry()
     {
-        foreach (var ((field, owner), rail) in _valueRails)
-        {
-            var court = _battleCourts[field]; var rect = new Rect2(court.Position + rail.Position, rail.Size);
-            // Pigment and ornamental fittings occupy the outer 22 world units.
-            RequireCamera(court.Grow(-22).Encloses(rect), "Rail crosses the blood border");
-            foreach (var child in rail.GetChildren().OfType<Control>())
-                RequireCamera(new Rect2(Vector2.Zero, rail.Size).Encloses(new Rect2(child.Position, child.Size)), "Rail child expands beyond its intended bounds");
-            RequireCamera((owner == Self.Id) == (rect.GetCenter().Y > court.GetCenter().Y), "Army rail belongs to the wrong seat");
-            foreach (var player in View.Players)
-                foreach (var unit in player.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == field))
-                    RequireCamera(!rect.Intersects(new Rect2(_battlePlacements[unit.Id], new Vector2(UnitWidth(unit, player), StackHeight(unit, player)))), "Rail obscures a card, bowed unit, attachment or standard");
-        }
+        var field = View.CurrentBattleProvince!.Value; var v = BattleValues(field)!;
+        var hasProvince = BattlefieldProvince(field) is not null && v.ProvinceStrength is not null;
+        var seals = _placardStack.OfType<BattleSeal>().ToArray(); var plates = _placardStack.OfType<ProvincePlacard>().ToArray();
+        RequireCamera(seals.Length == 2 && plates.Length == (hasProvince ? 1 : 0) && _placardStack.Count == 2 + plates.Length, "Stack is not opponent, province (when there is one), own");
+        RequireCamera(_placardStack[0] == seals.Single(x => x.OwnerId != View.ViewerId) && _placardStack[^1] == seals.Single(x => x.OwnerId == View.ViewerId), "Stack order is wrong");
+        RequireCamera(_placardStack.Zip(_placardStack.Skip(1)).All(pair => pair.First.Position.Y < pair.Second.Position.Y), "Stack is not top to bottom");
+        RequireCamera(_placardStack.All(c => c.Size.IsEqualApprox(_placardStack[0].Size) && c.Scale.IsEqualApprox(_placardStack[0].Scale) && Mathf.IsEqualApprox(c.Position.X, _placardStack[0].Position.X)), "Stack placards differ in size or alignment");
+        var attacker = seals.Single(x => x.OwnerId == v.AttackerId); var defender = seals.Single(x => x.OwnerId == v.DefenderId);
+        RequireCamera(attacker.Role == "Attacker" && defender.Role == "Defender" && attacker.Force == v.AttackerForce && attacker.Units == v.AttackerUnits && defender.Force == v.DefenderForce && defender.Units == v.DefenderUnits, "Placard differs from engine");
+        RequireCamera(plates.All(p => p.Strength == v.ProvinceStrength && p.Falls == v.ProvinceFalls && (p.GetNodeOrNull("ProvinceDestroyedIcon") is not null) == v.ProvinceFalls), "Province placard or katana differs from engine");
+        var middle = _placardStack.Select(c => c.Position.Y + c.Size.Y * PlacardStackScale / 2).Average();
+        RequireCamera(Math.Abs(middle - 540) < 2 && _placardStack.All(c => c.Position.X == 16), "Stack is not centred on the left edge");
+        var crossing = _placardStack.Concat(_provincePlacards.Values).SelectMany(part => part.GetChildren().OfType<Control>().Where(child => !PlacardPlate.Inner(part.Size).Grow(.5f).Encloses(new Rect2(child.Position, child.Size)))
+            .Select(child => $"{(child as Label)?.Text ?? child.Name} {new Rect2(child.Position, child.Size)} in {PlacardPlate.Inner(part.Size)}")).ToArray();
+        RequireCamera(crossing.Length == 0, "Placard content crosses the frame border: " + string.Join("; ", crossing));
+        RequireCamera(_provincePlacards.Count == View.Players.Single(p => p.Id != View.ActivePlayerId).Provinces.Count(p => !p.Destroyed), "Each undestroyed defending province needs a placard");
+        RequireCamera(_provincePlacards.Keys.All(k => k.Owner != View.ActivePlayerId), "Attacker's own provinces carry a placard");
+        if (hasProvince) RequireCamera(_provincePlacards.Single(p => p.Key.Province == BattlefieldProvince(field)).Value is { } table && table.Falls == v.ProvinceFalls && table.Strength == v.ProvinceStrength, "Table placard differs from engine");
     }
 }

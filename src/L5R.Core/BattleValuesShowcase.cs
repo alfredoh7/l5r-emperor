@@ -6,7 +6,7 @@ public sealed partial class MatchEngine
     /// Not reachable from normal menus, deck creation or network rooms.</summary>
     public static MatchEngine CreateBattleValuesShowcase(string scenario)
     {
-        if (scenario is not ("standard" or "bowed" or "open" or "empty" or "crowded" or "bonus"))
+        if (scenario is not ("standard" or "bowed" or "open" or "empty" or "crowded" or "bonus" or "lethal" or "armor-off" or "armor-on"))
             throw new ArgumentException("Unknown battle values scenario", nameof(scenario));
         var s = CreatePublishedMatch(91).State;
         s.Phase = Phase.Battle; s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
@@ -41,6 +41,14 @@ public sealed partial class MatchEngine
             if (scenario == "crowded")
                 foreach (var player in new[] { 0, 1 })
                     for (var i = 0; i < 4; i++) { var host = Add(player == 0 ? crane : lion, player, bowed: i == 2); Add(follower, player, host.Id); }
+            if (scenario is "armor-off" or "armor-on")
+            {
+                // Attacker Force sits exactly on defender Force plus Strength without the armor, so the armor alone tips the province over.
+                var probe = FromTestState(s); var totals = probe.ArmyForcesForTest();
+                s.ArmyForceBonuses.Add(new(0, totals.Defender + probe.EffectiveProvinceStrength(probe.Player(1).Provinces[1]) - totals.Attacker, s.BattleNumber));
+                if (scenario == "armor-on") Add(CardCatalog.Get("oracle-l5r-10118"), 0, own.Id);
+            }
+            if (scenario == "lethal") s.ArmyForceBonuses.Add(new(0, 20, s.BattleNumber)); // far beyond defender Force plus Strength
             if (scenario == "bonus")
             {
                 s.ForceRedirects.Add(new(own.Id, 1));

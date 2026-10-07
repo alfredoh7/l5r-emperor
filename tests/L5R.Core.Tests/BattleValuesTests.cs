@@ -10,7 +10,8 @@ internal static class BattleValuesTests
         ("Redirection and army-wide bonuses use resolution totals, never another court", Bonuses),
         ("Empty armies, open and destroyed provinces have accurate absent strength", EmptyAndOpen),
         ("Detached wire summary is public, backward compatible and hides hand identities", Wire),
-        ("Conceding a live battle removes its current summary", Concession)
+        ("Conceding a live battle removes its current summary", Concession),
+        ("Province falls flag follows resolution: Force must exceed defender Force plus Strength", ProvinceFalls)
     ]);
 
     private static BattleValuesView Values(MatchEngine e, int seat = 0) => e.GetView(seat).Battlefields!.Single(b => b.Index == e.State.CurrentBattleProvince).Values!;
@@ -85,5 +86,24 @@ internal static class BattleValuesTests
         Batch336Support.Eq(e.GetView(0).Phase, Phase.Finished);
         foreach (var seat in new[] { 0, 1 })
             Batch336Support.Check(e.GetView(seat).Battlefields!.All(b => b.Values is null), "Finished match retains no current-battle summary");
+    }
+
+    private static BattleValuesView WithBonus(int bonus)
+    {
+        var s = MatchEngine.CreateBattleValuesShowcase("standard").State; s.ArmyForceBonuses.Add(new(0, bonus, s.BattleNumber));
+        return Values(MatchEngine.FromTestState(s));
+    }
+
+    private static void ProvinceFalls()
+    {
+        var v = Values(MatchEngine.CreateBattleValuesShowcase("standard"));
+        var gap = v.DefenderForce + v.ProvinceStrength!.Value - v.AttackerForce; // the bonus that leaves Force exactly level with defender + Strength
+        Batch336Support.Check(!WithBonus(gap).ProvinceFalls, "Equal to defender Force plus Strength does not destroy the province");
+        Batch336Support.Check(WithBonus(gap + 1).ProvinceFalls, "One more than defender Force plus Strength destroys it if both pass");
+        Batch336Support.Check(!WithBonus(gap - 5).ProvinceFalls, "Well short of destruction");
+        Batch336Support.Check(!Values(MatchEngine.CreateBattleValuesShowcase("open")).ProvinceFalls, "A battle without a province destroys nothing");
+        var bare = Values(MatchEngine.CreateBattleValuesShowcase("armor-off")); var armored = Values(MatchEngine.CreateBattleValuesShowcase("armor-on"));
+        Batch336Support.Eq(bare.AttackerForce, bare.DefenderForce + bare.ProvinceStrength!.Value, "Without the armor the attacker is exactly short");
+        Batch336Support.Check(!bare.ProvinceFalls && armored.ProvinceFalls && armored.AttackerForce > bare.AttackerForce, "Attaching Light Armor raises Force and the province falls");
     }
 }

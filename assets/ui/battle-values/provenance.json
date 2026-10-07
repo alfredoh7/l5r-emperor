@@ -1,46 +1,13 @@
 {
-  "approved": "A rails + C hierarchy; both rails inside blood court",
+  "approved": "Mendon's placard layout (supersedes the A rails + C hierarchy concepts, kept here as references)",
   "sources": {
     "A-court-rails.png": "1cfb1b72bc2fa72ca367bcf263a049ee63994853f7a9554de4c5d425a78171ab",
-    "C-corner-seals.png": "f18d3fc81ba33acfb2c29df7aa1fc366f9bf43c5c465408c850a74c13d6ada55"
+    "C-corner-seals.png": "f18d3fc81ba33acfb2c29df7aa1fc366f9bf43c5c465408c850a74c13d6ada55",
+    "Province Destroyed Icon (supplied by Mendon)": "1e2e626615dd39db2c17205f634c13d1f63fded792d833afe1a53a1487f75fed"
   },
   "derivatives": {
-    "rail-left.png": [
-      508,
-      278,
-      566,
-      323
-    ],
-    "rail-run.png": [
-      766,
-      278,
-      780,
-      323
-    ],
-    "rail-right.png": [
-      1017,
-      278,
-      1077,
-      323
-    ],
-    "strength-left.png": [
-      690,
-      164,
-      737,
-      221
-    ],
-    "strength-run.png": [
-      714,
-      164,
-      725,
-      221
-    ],
-    "strength-right.png": [
-      851,
-      164,
-      897,
-      221
-    ]
+    "src/L5R.Client/Art/BattleValues/province-destroyed.png": "Supplied icon cropped to its alpha bounds, centred on a square canvas, resized to 256 px (Lanczos)"
   },
-  "generation": "None in this implementation; exact crops of approved A"
+  "frame": "Placards reuse Art/ClanPlacard/frame.png (the clan placards' own frame) as a nine-patch; no new frame art",
+  "generation": "None; no image generation"
 }

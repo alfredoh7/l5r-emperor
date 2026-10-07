@@ -100,8 +100,8 @@ public partial class Main
             var unitWidth = View.Players.SelectMany(p => CourtUnits(p, i)
                 .Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
             _laneWidths[i] = _reservedLaneWidths[i] = Math.Max(_reservedLaneWidths[i],
-                Math.Max(BattleValues(i) is null ? 0 : ValuesCourtWidth + 16, Math.Max(View.Players.Max(p => ProvinceContentWidth(p.Provinces.Single(v => v.Index == i))) + 8,
-                    ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10)));
+                Math.Max(View.Players.Max(p => ProvinceContentWidth(p.Provinces.Single(v => v.Index == i))) + 8,
+                    ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
         }
         // This inner play area mirrors by seat. Holdings deliberately remain on
         // screen-left for both owners and never enter this mirrored slot system.
@@ -116,7 +116,7 @@ public partial class Main
         {
             var extra = _extraLanes[k];
             var extraUnitWidth = View.Players.SelectMany(p => CourtUnits(p, extra).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
-            var extraWidth = Math.Max(BattleValues(extra) is null ? 300 : ValuesCourtWidth + 16, ArmyColumns(extra) * (extraUnitWidth + CardGap) + MatPadding * 2 + 10);
+            var extraWidth = Math.Max(300, ArmyColumns(extra) * (extraUnitWidth + CardGap) + MatPadding * 2 + 10);
             _slotCenters[8 + k] = x + extraWidth / 2; x += extraWidth;
         }
         _playWidth = x;
@@ -147,9 +147,9 @@ public partial class Main
         // Home remains outside that court, on the table-facing side as well.
         _enemyProvinceY = MatPadding + MatHeader;
         var connectedCourt = BattleActive && (View.CurrentBattleProvince is not null || View.UnresolvedBattlefields.Length > 0 || View.Players.Any(p => Enumerable.Range(0, 4).Concat(_extraLanes).Any(i => CourtUnits(p, i).Any())));
-        var requiredCourtHeight = Enumerable.Range(0, 4).Concat(_extraLanes).Select(i => CourtHeight(i, View.Players.Sum(p => CourtUnits(p, i).Chunk(ArmyColumns(i))
-            .Sum(r => r.Max(c => StackHeight(c, p)) + RowGap)))).DefaultIfEmpty(270).Max();
-        _battleHeight = connectedCourt ? Math.Max(_reservedBattleHeight, requiredCourtHeight) : _reservedBattleHeight;
+        var occupied = Enumerable.Range(0, 4).Concat(_extraLanes).Select(i => View.Players.Sum(p => CourtUnits(p, i).Chunk(ArmyColumns(i))
+            .Sum(r => r.Max(c => StackHeight(c, p)) + RowGap))).DefaultIfEmpty(0).Max();
+        _battleHeight = connectedCourt ? Math.Max(_reservedBattleHeight, Math.Max(270, occupied + MatHeader + MatPadding + 38)) : _reservedBattleHeight;
         if (BattleActive) _reservedBattleHeight = _battleHeight;
         var enemyDefends = View.ActivePlayerId == Self.Id;
         // C's top stroke sits inside its bounds. Close that inset so the neck
@@ -204,11 +204,11 @@ public partial class Main
                 if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index &&
                     !MovementDestination(defender.Id, index) && !View.UnresolvedBattlefields.Contains(index)) continue;
                 var widest = View.Players.SelectMany(p => CourtUnits(p, index).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
-                var width = Math.Max(BattleValues(index) is not null ? ValuesCourtWidth + 16 : IsAdditionalBattlefield(index) ? 300 : 210,
+                var width = Math.Max(IsAdditionalBattlefield(index) ? 300 : 210,
                     ArmyColumns(index) * (widest + CardGap) + MatPadding * 2 + 10) - 16;
                 var occupiedHeight = View.Players.Sum(p => CourtUnits(p, index).Chunk(ArmyColumns(index))
                     .Sum(r => r.Max(c => StackHeight(c, p)) + RowGap));
-                var courtHeight = CourtHeight(index, occupiedHeight);
+                var courtHeight = Math.Max(270, occupiedHeight + MatHeader + MatPadding + 38);
                 var yCourt = defender.Id == Self.Id ? _battleY + _battleHeight - courtHeight : _battleY;
                 var bounds = new Rect2(SlotX(defender, LaneSlot(index)) + CardHeight / 2 - width / 2, yCourt, width, courtHeight);
                 _battleCourts[index] = bounds;
@@ -221,7 +221,7 @@ public partial class Main
                 {
                     var rows = CourtUnits(player, index).Chunk(ArmyColumns(index)).ToArray();
                     var height = rows.Sum(r => r.Max(c => StackHeight(c, player)) + RowGap);
-                    var y = player.Id == enemy.Id ? bounds.Position.Y + ValuesTop(index) : bounds.End.Y - ValuesBottom(index) - height;
+                    var y = player.Id == enemy.Id ? bounds.Position.Y + MatHeader : bounds.End.Y - MatPadding - height;
                     foreach (var row in rows)
                     {
                         var rowWidth = row.Sum(c => UnitWidth(c, player)) + (row.Length - 1) * CardGap;
