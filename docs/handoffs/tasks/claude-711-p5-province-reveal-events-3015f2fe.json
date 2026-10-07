@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "P5 province-reveal Events: flag an Event by effect id so it stays face up in its province, EngineHooks.AfterProvincesRevealed fires it once per Events Phase with an optional yes/no or card decision. Engine only, no card wired.",
+  "validation": "dotnet run tests/L5R.Core.Tests --filter province-reveal-events 5/5; full bash tools/check.sh --skip-client; format check and comment-swallow lint clean. No native Godot run (engine-only).",
+  "remaining": "No card wired (wave follows); Revelations needs P20.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/711",
+  "branch": "claude/711-p5-province-reveal-events",
+  "updated": "2026-10-07T16:23:10.639456+00:00"
+}

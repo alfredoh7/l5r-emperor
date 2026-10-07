@@ -3024,6 +3024,7 @@ public sealed partial class MatchEngine
             // (rules lead ruling, docs/decisions/2026-09-22-suspicions-owner-events-phase.md).
             else if (Definition(card).Type == CardType.Event && ResolveEvent(player, province, card)) return;
         }
+        if (RunAfterProvincesRevealed(player)) return; // P5 (ProvinceRevealEvents.cs): Events that stay face up in their province fire now; a decision pauses the phase
         AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
         // not just the phase that reveals them, so a card already sitting in Zone.EventInPlay from a
@@ -3043,6 +3044,7 @@ public sealed partial class MatchEngine
     // in which case ContinueEventsReveal's own loop must stop here; ResolveHarshChoices resumes it.
     private bool ResolveEvent(PlayerState player, ProvinceState province, CardInstance card)
     {
+        if (StaysFaceUpInProvince(card)) return false; // P5 (ProvinceRevealEvents.cs): it neither resolves at reveal nor leaves its province
         if (P3BeforeEvent(player, province, card) is { } p3Event) return p3Event; // Forging Destiny (issue #503): the window before an Event resolves
         if (RegisteredResolveEvent(player, province, card) is { } registeredEvent) return registeredEvent; // issue #653 (PromoEmperorEvents.cs)
         if (Definition(card).Effect == "harsh-choices")

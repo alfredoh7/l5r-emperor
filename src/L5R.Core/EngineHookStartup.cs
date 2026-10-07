@@ -49,6 +49,7 @@ internal static partial class EngineHooks
         _ = StandingImmunities.Items;
         _ = AbilityCostTerms.Items;
         _ = RefillFaceUp.Items;
+        _ = AfterProvincesRevealed.Items; // P5 (issue #711)
         _ = FactTraits.Items;
         _ = FactConditions.Items;
         _ = CelestialEntryChoices.Items;
