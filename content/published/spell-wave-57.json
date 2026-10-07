@@ -1,0 +1,32 @@
+{
+  "Profile": "spell-wave-57",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10357",
+      "Name": "Witness the Untold",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your Ring enters play, bow this card: Look at the top three cards of your Dynasty or Fate deck. Put them back in any order.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10357.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wl-witness-the-untold-look"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

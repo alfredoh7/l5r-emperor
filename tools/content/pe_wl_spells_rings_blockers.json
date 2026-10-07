@@ -1,6 +1,1 @@
-{
-  "oracle-l5r-10357": {
-    "note": "Witness the Untold (Spell, Torn Asunder, issue #674): \"Reaction: After your Ring enters play, bow this card: Look at the top three cards of your Dynasty or Fate deck. Put them back in any order.\" The look and reorder exist (LookSpec, It Was a Cat's shape: either deck, three cards, reorder only), but nothing narrates a Ring entering play: every Ring is put into play by its own recruit case (RingEnteredByOwnText) and no Reaction trigger \"after your Ring enters play\" exists for another card to listen to (the Ring-entering gap the TRIG-AFTER category names). Needs a new reaction trigger fired from every Ring's entry, which is shared-interface work.",
-    "category": "TRIG-AFTER"
-  }
-}
+{}
