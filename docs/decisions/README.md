@@ -87,3 +87,5 @@ interpretation this register's decision docs already settled.
 - [P19: rulebook-action modifiers (#717)](2026-10-07-p19-rulebook-modifiers.md) — built, engine only, no card wired; the RulebookModifier hook and card-free timing grants.
 
 - [P25: decision infrastructure (#723)](2026-10-07-p25-decision-infrastructure.md) — built, engine only, no card wired; multi-pick Either/Or, the PendingActions hook with generic client rendering of unknown pending types, slot cross-constraints and a shown-card choice.
+
+- [P20: search and look extensions (#728)](2026-10-07-p20-search-look-extensions.md) — built, engine only, no card wired; province and any-player search sources, multi-select, new criteria and dispositions, other-player-chooses and reveal-until looks.
