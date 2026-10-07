@@ -49,7 +49,7 @@ public sealed partial class MatchEngine
                     p.RegionId is null ? null : ViewCard(Card(p.RegionId)), ProvinceStrengthMax(p), HoldsNoDynasty(p), p.DarkExperimentsMarked)
                 // Plains of Otosan Uchi (issue #554): DynastySlots is authoritative only once a second slot has ever existed; every
                 // other province leaves it null, keeping the legacy Card field as the whole story (the PR #544 view contract).
-                { DynastySlots = p.CardId2 is null ? null : [new(0, p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp)), new(1, ViewCard(Card(p.CardId2), Card(p.CardId2).FaceUp))] }).ToArray(), // issue #503
+                { FortificationIds = FortificationsOf(player.Id, p.Index), DynastySlots = p.CardId2 is null ? null : [new(0, p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp)), new(1, ViewCard(Card(p.CardId2), Card(p.CardId2).FaceUp))] }).ToArray(), // issue #503
                 player.Id == playerId ? player.Hand.Select(id => ViewCard(Card(id))).ToArray() : [], player.Hand.Count,
                 player.DynastyDeck.Count, player.FateDeck.Count,
                 owned.Where(c => c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c => ViewCard(c)).ToArray(),

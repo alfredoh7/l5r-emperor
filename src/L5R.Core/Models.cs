@@ -1437,6 +1437,8 @@ public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardV
     /// When supplied this is authoritative, including empty slots; Card must not be appended again.
     /// Slot indices are stable across refills. Face-down cards must already be redacted by the producer.</summary>
     public ProvinceCardSlotView[]? DynastySlots { get; init; }
+    /// <summary>P15 (issue #719): the ids of the Fortification Holdings that guard this Province (public: a Holding in play is face up). Null when none.</summary>
+    public string[]? FortificationIds { get; init; }
 }
 public sealed record ProvinceCardSlotView(int Index, CardView? Card);
 /// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,
