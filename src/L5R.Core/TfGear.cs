@@ -185,7 +185,7 @@ public sealed partial class MatchEngine
 
     // Hitomi's Devotion: "Battle resolution will not destroy cards in this unit while defending and, if this Shugenja is Earth, while attacking." The army's units the resolution may destroy.
     private CardInstance[] TfResolutionDestroyable(CardInstance[] army, bool defending) =>
-        army.Where(unit => !(Attachments(unit.Id).Any(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == TfGearAbilities.DevotionEffect) && (defending || Keyword(unit, "Earth")))).ToArray();
+        army.Where(unit => !(Attachments(unit.Id).Any(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == TfGearAbilities.DevotionEffect) && (defending || Keyword(unit, "Earth"))) && !ImmuneNegates(unit, ImmunityKind.DestroyInResolution, null, "destruction from battle resolution")).ToArray(); // P12 (ImmunityLedger.cs): the one filter the three resolution destroy sites share
 
     // ---- Lookout ---------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -556,7 +556,7 @@ public sealed partial class MatchEngine
     // The top of the owner's Dynasty deck fills the province face-up (a destroyed province, or an empty deck, refills nothing).
     private void RefillProvinceFaceUp(PlayerState owner, ProvinceState province)
     {
-        if (province.Destroyed || province.CardId is not null || owner.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) return; // issue #503: Illusory Defense's province
+        if (province.Destroyed || province.CardId is not null || owner.DynastyDeck.Count == 0 || HoldsNoDynasty(province)) return; // issue #503: Illusory Defense's province
         var refillId = owner.DynastyDeck[0]; owner.DynastyDeck.RemoveAt(0);
         var refill = Card(refillId);
         province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
@@ -588,7 +588,7 @@ public sealed partial class MatchEngine
     private void BeginSearchProvincePlacement(PendingSearch search, CardInstance card)
     {
         var player = Player(search.PlayerId);
-        var provinces = player.Provinces.Where(p => !p.Destroyed && !p.HoldsNoDynastyCards).ToArray(); // issue #503
+        var provinces = player.Provinces.Where(p => !p.Destroyed && !HoldsNoDynasty(p)).ToArray(); // issue #503
         if (provinces.Length == 0)
         {
             Emit("searchFailed", $"{player.Name} has no province to put {Definition(card).Name} into.", player.Id);
@@ -604,7 +604,7 @@ public sealed partial class MatchEngine
         Require(command.Type == "chooseSearchProvince" && command.Province is not null, "Choose a province to put the card into.");
         var player = Player(search.PlayerId); var card = Card(search.SelectedCardId);
         var province = player.Provinces.FirstOrDefault(p => p.Index == command.Province);
-        Require(province is not null && !province.Destroyed && !province.HoldsNoDynastyCards, "Choose one of your own provinces that has not been destroyed (and can hold Dynasty cards)."); // issue #503
+        Require(province is not null && !province.Destroyed && !HoldsNoDynasty(province), "Choose one of your own provinces that has not been destroyed (and can hold Dynasty cards)."); // issue #503
         SearchDeckList(player, search.Deck!).Remove(card.Id);
         player.DynastyDeck.Remove(card.Id);
         if (province!.CardId is { } oldId && _state.Cards.TryGetValue(oldId, out var old))
@@ -622,7 +622,7 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> SearchProvincePlacementActions(PendingSearch search, int playerId)
     {
         var card = Card(search.SelectedCardId);
-        foreach (var province in Player(playerId).Provinces.Where(p => !p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503
+        foreach (var province in Player(playerId).Provinces.Where(p => !p.Destroyed && !HoldsNoDynasty(p))) // issue #503
             yield return new("chooseSearchProvince", $"Put {Definition(card).Name} into province {province.Index + 1}, face-up, discarding the card there", true, null,
                 new GameCommand("chooseSearchProvince", playerId, _state.Version, Province: province.Index), card.Id, Provinces: [province.Index]);
     }

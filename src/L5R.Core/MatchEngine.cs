@@ -197,7 +197,9 @@ public sealed partial class MatchEngine
 
     public CommandResult Execute(GameCommand command)
     {
+        var turnAtStart = _state.TurnNumber;
         var result = ExecuteOne(command);
+        if (result.Accepted) SweepZoneHistory(turnAtStart); // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
         return result.Accepted ? RunPassAllBattles(result) : result; // "Pass all battles" (issue #628, PassAllBattles.cs)
     }
 
@@ -1903,7 +1905,7 @@ public sealed partial class MatchEngine
     {
         var pending = _state.PendingChoice!;
         Require(command.Type == "chooseYourClanNeedsYouProvince" && command.PlayerId == pending.PlayerId && command.Province is int provinceIndex
-            && Player(pending.PlayerId).Provinces.Any(p => p.Index == provinceIndex && !p.Destroyed && !p.HoldsNoDynastyCards), // issue #503: Illusory Defense's province
+            && Player(pending.PlayerId).Provinces.Any(p => p.Index == provinceIndex && !p.Destroyed && !HoldsNoDynasty(p)), // issue #503: Illusory Defense's province
             "Choose one of your own non-destroyed provinces.");
         var card = Card(pending.CardId!);
         var province = Player(pending.PlayerId).Provinces.Single(p => p.Index == command.Province!.Value);
@@ -2644,6 +2646,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (ImmuneNegates(card, ImmunityKind.Destroy, actingPlayerId, "destruction")) continue; // P12 (ImmunityLedger.cs)
             if (TryConsumeWatch(WatchKind.Destroy, card, actingPlayerId)) continue; // P7 (PeriodWatches.cs): after the delay and the protections above, before the effect
             if (promoNegated.Contains(card.Id)) continue; // issue #653: Expansion, The Topaz Championship's trait
             if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
@@ -2816,7 +2819,8 @@ public sealed partial class MatchEngine
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
-        ResolveSearchPlayTurnEnd(); // Masaya (issue #667, SearchPlayMasaya.cs): "Before the turn ends, put him on top of your Dynasty deck."
+        ResolveSearchPlayTurnEnd(); // Masaya (issue #667, SearchPlayMasaya.cs): legacy drain of the pre-P21 debt list.
+        CaptureInPlayDuringTurn(); // P21 (ZoneExtensions.cs): who was in play during this player's turn
         ApplyDelayedEffects(DelayUntil.EndOfTurn);
         ReturnSteppedUnits(); // Step Through the Void (issue #503, EmperorP5Zones.cs): "Before this turn ends, put his unit into play". // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
@@ -3271,9 +3275,16 @@ public sealed partial class MatchEngine
     }
     private void Refill(PlayerState player, ProvinceState province)
     {
-        if (province.Destroyed || province.CardId is not null || player.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) return; // issue #503: Illusory Defense's province holds no Dynasty cards
+        if (province.Destroyed || province.CardId is not null || player.DynastyDeck.Count == 0 || HoldsNoDynasty(province)) return; // issue #503: Illusory Defense's province holds no Dynasty cards
         var id = player.DynastyDeck[0]; player.DynastyDeck.RemoveAt(0);
         province.CardId = id; var card = Card(id); card.Zone = Zone.Province; card.ProvinceIndex = province.Index; card.FaceUp = false;
+        if (RefillWantsFaceUp(player, province)) // P21 (ZoneExtensions.cs): a registered feature makes this one refill face up
+        {
+            card.FaceUp = true;
+            Emit("provinceRefilledFaceUp", $"{player.Name} refilled province {province.Index + 1} face up with {Definition(card).Name}.", player.Id, card.Id);
+            AfterProvinceRefilledP6(player, province, faceUp: true);
+            return;
+        }
         Emit("provinceRefilled", $"{player.Name} refilled province {province.Index + 1} face down.", player.Id); // Neither player can inspect it.
         AfterProvinceRefilledP6(player, province, faceUp: false); // Issue #503 (EmperorP6.cs): Susaiken's / Distant Expansion's face-up refill, Ietsuno's look.
     }
