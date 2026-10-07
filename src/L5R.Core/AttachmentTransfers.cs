@@ -5,23 +5,32 @@ namespace L5R.Core;
 // one to the other") and Cavalry Detachment ("Transfer the target's attachments to the created Personality"). The attachment keeps its state (bowed,
 // tokens, modifiers) and only changes host: no cost is paid, no entering-play window opens (it never left play), and the grants an attachment gives its
 // wielder (AttachGrantsKeyword) follow it to the new host. The three cards move an attachment between two Personalities of the SAME controller, so a
-// transfer never changes who controls it; a transfer across controllers is a change of control (docs/decisions/2026-09-12-unique-singular-control-transfer.md)
-// and is not built here.
+// transfer never changes who controls it. A transfer across controllers is a change of control (docs/decisions/2026-09-12-unique-singular-control-transfer.md):
+// P22 (issue #690) builds it behind allowControlChange ("Transfer it to any player's target Personality (this may change control of the attachment)", Unsettling
+// Gathering). The attachment is then controlled by its new Personality's controller (core rules, Control) and still returns to its owner's pile when it leaves play
+// (TakeControl); a Unique or Singular attachment is not transferred to a player who already controls a card of that title (the rule TransferUnitControl applies to
+// the card whose control it changes).
 public sealed partial class MatchEngine
 {
     // The attaching restrictions a transfer must still satisfy: the destination is a Personality in play of the same controller, not the current host, the
     // attachment's own "will only/not attach to" rule accepts it, and the Armor/Weapon limits hold. Unique is not re-checked: the card is already the one
     // copy its controller controls.
-    private bool CanTransferTo(CardInstance attachment, CardInstance host) =>
-        attachment.Zone == Zone.Attached && attachment.AttachedTo != host.Id && host.OwnerId == attachment.OwnerId && !WillNotBeTransferred(attachment)
+    private bool CanTransferTo(CardInstance attachment, CardInstance host, bool allowControlChange = false) =>
+        attachment.Zone == Zone.Attached && attachment.AttachedTo != host.Id && !WillNotBeTransferred(attachment)
+        && (host.OwnerId == attachment.OwnerId || allowControlChange && !DuplicateForNewController(attachment, host.OwnerId))
         && InPlay(host) && Definition(host).Type == CardType.Personality
         && AttachmentLegalTarget(Definition(attachment), host) && AttachmentAllowed(attachment, host);
 
-    private void TransferAttachment(CardInstance attachment, CardInstance host, string reason)
+    // "A player cannot ... take control of a Singular/Unique card sharing a title with one they already control" (core rules, Singular / Unique).
+    private bool DuplicateForNewController(CardInstance attachment, int controllerId) =>
+        (Keyword(attachment, "Unique") || Keyword(attachment, "Singular")) && ControlsCopyOf(controllerId, Definition(attachment).Name);
+
+    private void TransferAttachment(CardInstance attachment, CardInstance host, string reason, bool allowControlChange = false)
     {
-        Require(CanTransferTo(attachment, host), $"{Definition(attachment).Name} cannot be transferred to {Definition(host).Name}.");
+        Require(CanTransferTo(attachment, host, allowControlChange), $"{Definition(attachment).Name} cannot be transferred to {Definition(host).Name}.");
         var from = Card(attachment.AttachedTo);
         RemoveAttachmentGrants(from, attachment.Id);
+        TakeControl(attachment, host.OwnerId); // P22 (issue #690): nothing happens between two Personalities of one controller
         attachment.AttachedTo = host.Id; attachment.ProvinceIndex = host.ProvinceIndex;
         if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(host, granted, attachment.Id, GrantDuration.Attachment);
         SearchPlayTransferGrants(attachment, host); // The Topaz Armor - exp (issue #667): the two keywords chosen for it follow it

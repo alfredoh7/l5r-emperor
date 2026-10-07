@@ -12,7 +12,8 @@ namespace L5R.Core;
 /// Count applies to a Personality too: that many are created together. HostIsPerformer attaches a created attachment to the action's performer ("attach them to him").
 /// ControllerClan gives the created Personality its creator's Stronghold Clan and Clan keyword, fixed when it is created ("with your Clan alignment"). Values set printed values of
 /// the one created card from another card ("the performer's title and base Gold Cost", "Force equal to the target's Personal Honor"); the scan is still what the card is.
-/// EntersBowed creates a Holding bowed ("Create a (bowed) Holding"); a Holding enters play at home, a Terrain (a Strategy with the Terrain keyword) at the current battlefield.</summary>
+/// EntersBowed creates a Holding bowed ("Create a (bowed) Holding"); a Holding enters play at home, a Terrain (a Strategy with the Terrain keyword) at the current battlefield.
+/// P22 (issue #690): RemoveWhen removes the created cards from the game at a later moment; Abilities and Trait declare what the created card prints beyond its stats.</summary>
 public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi = null, int? PersonalHonor = null, string[]? Keywords = null,
     string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null, bool CopyOfTarget = false)
 {
@@ -33,8 +34,18 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
     /// <summary>Count is the target's Chi as it stood before the action's costs were paid ("a number of Followers equal to his Chi", Suiteiru no Oni: the target is destroyed as a cost).</summary>
     public bool CountFromTargetChi { get; init; }
     public CreatedValue[]? Values { get; init; }
+    /// <summary>P22 (issue #690): when the created cards are removed from the game ("Remove it from the game after your next turn begins", "After the next time this game this Spell
+    /// straightens or leaves play, remove the Illusion from the game"). Null: they stay until something else removes them.</summary>
+    public CreatedRemoval? RemoveWhen { get; init; }
+    /// <summary>P22 (issue #690): the abilities the created card prints ("... Personality with the ability, 'Battle, Bow: Melee 4 Attack.'"), by ability id, written on the one created card
+    /// beside the abilities its scan's catalogue record already lists. The scan must print them: AbilityText is required and compared with the scan's text (CreatedCards.Verify).
+    /// A mandatory triggered trait is an ability id registered as a trait (CreatedCopies690Catalog.RegisterTrait).</summary>
+    public string[]? Abilities { get; init; }
+    /// <summary>P22 (issue #690): the continuous trait the created card prints ("with the trait ..."), as the Effect id its rules are keyed on (CardDefinition.Effect), written on the one
+    /// created card. The scan must print it: AbilityText is required.</summary>
+    public string? Trait { get; init; }
 
-    public bool HasInstanceValues => ControllerClan || Values is { Length: > 0 };
+    public bool HasInstanceValues => ControllerClan || Values is { Length: > 0 } || Abilities is { Length: > 0 } || Trait is not null;
 
     public IEnumerable<CreatedCardSpec> Alternatives => Or is { Length: > 0 } others ? others.Prepend(this with { Or = null }) : [this];
 
@@ -57,22 +68,59 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (HostIsEntered) text.Append(" attached to the entering Personality");
         if (ControllerClan) text.Append(" with the controller's Clan");
         if (Values is { Length: > 0 } values) text.Append(" with ").Append(string.Join(", ", values.Select(v => v.Describe())));
+        if (Abilities is { Length: > 0 } abilities) text.Append(abilities.Length == 1 ? " with the ability " : " with the abilities ").Append(string.Join(", ", abilities));
+        if (Trait is not null) text.Append(" with the trait ").Append(Trait);
+        if (RemoveWhen is not null) text.Append(", removed ").Append(RemoveWhen.Describe());
         if (Or is { Length: > 0 } others) text.Append(" or ").Append(string.Join(" or ", others.Select(o => o.Describe())));
         return text.ToString();
     }
 }
 
-public enum CreatedStat { Name, GoldCost, Force, Chi, PersonalHonor }
+/// <summary>Focus (P22, issue #690) is read only: the Focus Value of the subject, never a value a created card is given.</summary>
+public enum CreatedStat { Name, GoldCost, Force, Chi, PersonalHonor, Focus }
 
-/// <summary>The card a created card's value is read from: the action's performer, its source card, the Personality its source is attached to, or its target.</summary>
-public enum CreatedSubject { Performer, Source, Wielder, Target }
+/// <summary>The card a created card's value is read from: the action's performer, its source card, the Personality its source is attached to, or its target.
+/// Slot (P22, issue #690): the first card the command names for the ability's slot CreatedValue.Slot ("the discarded card": a cost-only slot).</summary>
+public enum CreatedSubject { Performer, Source, Wielder, Target, Slot }
 
-/// <summary>One printed value of a created card, taken from another card's printed value: Stat is set from Read of From (the same stat when Read is omitted) plus Plus, and plus
-/// PlusWithKeyword more when the subject has Keyword. Name is copied as it is; the numbers are printed values, never the current ones.</summary>
+/// <summary>One printed value of a created card, taken from another card's value: Stat is set from Read of From (the same stat when Read is omitted) plus Plus, and plus
+/// PlusWithKeyword more when the subject has Keyword. Name is copied as it is. The numbers are the subject's PRINTED values unless Current is set (P22, issue #690): then they
+/// are its values as they stand when the card is created (its Force, Chi, Personal Honor or Gold Cost with its attachments, tokens and modifiers), written on the created
+/// card once and never following the subject afterwards.</summary>
 public sealed record CreatedValue(CreatedStat Stat, CreatedSubject From, CreatedStat? Read = null, int Plus = 0, string? Keyword = null, int PlusWithKeyword = 0)
 {
-    public string Describe() => $"{Stat} from the {From.ToString().ToLowerInvariant()}" + (Read is { } read && read != Stat ? $"'s {read}" : "") + (Plus != 0 ? $" {Plus:+#;-#}" : "")
-        + (Keyword is null ? "" : $" and {PlusWithKeyword:+#;-#} with {Keyword}");
+    /// <summary>Read the subject's current value instead of its printed one ("with Force equal to this Shugenja's Chi").</summary>
+    public bool Current { get; init; }
+    /// <summary>The slot whose first card is the subject, when From is Slot ("equal to the discarded card's Focus Value").</summary>
+    public string? Slot { get; init; }
+
+    public string Describe() => $"{Stat} from the {(From == CreatedSubject.Slot ? $"card in slot {Slot}" : From.ToString().ToLowerInvariant())}"
+        + (Read is { } read && read != Stat ? $"'s {(Current ? "current " : "")}{read}" : Current ? " (current)" : "")
+        + (Plus != 0 ? $" {Plus:+#;-#}" : "") + (Keyword is null ? "" : $" and {PlusWithKeyword:+#;-#} with {Keyword}");
+}
+
+/// <summary>P22 (issue #690): when a created card is removed from the game. When is a TimedRemovalWhen value (the turn ends; the creating player's next turn begins), or
+/// SourceStraightensOrLeaves: after the next time this game the action's source card (the Spell, the Holding, the Personality the ability is on) straightens or leaves play.</summary>
+public sealed record CreatedRemoval(string When)
+{
+    public const string SourceStraightensOrLeaves = "source-straightens-or-leaves";
+
+    /// <summary>"Remove it from the game when the turn ends."</summary>
+    public static readonly CreatedRemoval TurnEnds = new(TimedRemovalWhen.TurnEnds);
+    /// <summary>"Remove it from the game after your next turn begins": the creating player's.</summary>
+    public static readonly CreatedRemoval NextTurnBegins = new(TimedRemovalWhen.PlayersNextTurnBegins);
+    /// <summary>"After the next time this game this Spell straightens or leaves play, remove the Illusion from the game."</summary>
+    public static readonly CreatedRemoval WhenSourceStraightensOrLeaves = new(SourceStraightensOrLeaves);
+
+    public bool IsWatch => When == SourceStraightensOrLeaves;
+
+    public string Describe() => When switch
+    {
+        TimedRemovalWhen.TurnEnds => "when the turn ends",
+        TimedRemovalWhen.PlayersNextTurnBegins => "when the creating player's next turn begins",
+        SourceStraightensOrLeaves => "after its source next straightens or leaves play",
+        _ => $"at an unknown moment ({When})"
+    };
 }
 
 /// <summary>A spec that no scan, or more than one scan, fits. Candidates are the scans that matched or, when none did, the scans of the same type.</summary>
@@ -132,8 +180,16 @@ public static class CreatedCards
         CreatedStat.Name or CreatedStat.GoldCost => true,
         CreatedStat.Force => type is CardType.Personality or CardType.Follower or CardType.Item,
         CreatedStat.Chi => type is CardType.Personality or CardType.Item,
+        CreatedStat.Focus => false,
         _ => type == CardType.Personality
     };
+
+    // P22 (issue #690): a removal moment the engine knows.
+    private static void VerifyRemoval(string abilityId, CreatedCardSpec spec, List<string> problems)
+    {
+        if (spec.RemoveWhen is { } removal && removal.When is not (TimedRemovalWhen.TurnEnds or TimedRemovalWhen.PlayersNextTurnBegins or CreatedRemoval.SourceStraightensOrLeaves))
+            problems.Add($"{abilityId}: {spec.Describe()} is removed at a moment the engine does not know");
+    }
 
     // A Personality carries one Armor and one Weapon (two with Kensai): several created at once could not all attach, and are not built.
     private static bool IsSingleOfKind(CardDefinition scan) => scan.Type == CardType.Item && (scan.Keywords ?? []).Any(k => k is "Armor" or "Weapon");
@@ -166,6 +222,8 @@ public static class CreatedCards
                 if (spec.Type != CardType.Personality) problems.Add($"{abilityId}: a created copy of a {spec.Type} is not built");
                 else if (spec.Force is not null || spec.Chi is not null || spec.PersonalHonor is not null || spec.Keywords is not null || spec.AbilityText is not null || spec.ProxyId is not null)
                     problems.Add($"{abilityId}: {spec.Describe()} names stats or a scan, but a copy is exactly the card it copies");
+                if (spec.Abilities is { Length: > 0 } || spec.Trait is not null) problems.Add($"{abilityId}: {spec.Describe()} declares an ability or trait, but a copy is exactly the card it copies");
+                VerifyRemoval(abilityId, spec, problems);
                 continue;
             }
             foreach (var alternative in spec.Alternatives)
@@ -188,8 +246,22 @@ public static class CreatedCards
                         problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to the entering Personality, which needs an attachment, no other host and an own-personality-enters-play Reaction");
                     if (alternative.ControllerClan && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} gives {scan.Name} a Clan, which only a Personality has");
                     foreach (var value in alternative.Values ?? [])
-                        if (!CanHave(scan.Type, value.Stat) || value.Stat == CreatedStat.Name && (value.Read is not null || value.Plus != 0 || value.Keyword is not null) || value.PlusWithKeyword != 0 != (value.Keyword is not null))
+                    {
+                        if (!CanHave(scan.Type, value.Stat) || value.Stat == CreatedStat.Name && (value.Read is not null || value.Plus != 0 || value.Keyword is not null || value.Current) || value.PlusWithKeyword != 0 != (value.Keyword is not null))
                             problems.Add($"{abilityId}: {alternative.Describe()} sets {value.Stat} of {scan.Name} in a way it cannot be set");
+                        // P22 (issue #690): a slot subject names a card slot of the ability, and only a slot subject names one.
+                        if (value.From == CreatedSubject.Slot != (value.Slot is not null)
+                            || value.Slot is not null && AbilityCatalog.All.TryGetValue(abilityId, out var slotted) && slotted.Slots?.Any(s => s.Id == value.Slot && !s.IsPlayer) != true)
+                            problems.Add($"{abilityId}: {alternative.Describe()} reads {value.Stat} of {scan.Name} from a slot the ability does not have");
+                    }
+                    // P22 (issue #690): a declared ability or trait is one the scan prints (AbilityText is what is compared with its text), and the ability exists.
+                    if ((alternative.Abilities is { Length: > 0 } || alternative.Trait is not null) && alternative.AbilityText is null)
+                        problems.Add($"{abilityId}: {alternative.Describe()} declares an ability or trait of {scan.Name} without the printed text (AbilityText) the scan is held to");
+                    foreach (var declared in alternative.Abilities ?? [])
+                        if (!AbilityCatalog.All.ContainsKey(declared)) problems.Add($"{abilityId}: {alternative.Describe()} declares the ability {declared}, which is not catalogued");
+                    if (alternative.Trait is { } trait && scan.Effect != "none" && scan.Effect != trait)
+                        problems.Add($"{abilityId}: {alternative.Describe()} declares the trait {trait}, but {scan.Name} already has the trait {scan.Effect}");
+                    VerifyRemoval(abilityId, alternative, problems);
                 }
                 catch (CreatedCardResolutionException e) { problems.Add($"{abilityId}: {e.Message}"); }
         }

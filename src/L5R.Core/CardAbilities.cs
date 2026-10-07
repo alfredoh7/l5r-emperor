@@ -5290,6 +5290,7 @@ public sealed partial class MatchEngine
         FireSteelSoulTrait(ability, actingPlayerId, source); // Steel Soul Dojo (Emperor Edition Stronghold pass, issue #486 batch 2).
         FireAfterOwnBattleActionTerrainTraits(ability, actingPlayerId);
         FireMechCAfterOwnActionTraits(ability, actingPlayerId, source); // The Marshalling Fields (issue #501): "After the first time each turn one of your Terrain actions resolves: Draw a card."
+        FireCreatedCopies690Traits(ability, actingPlayerId, source); // P22 (issue #690, CreatedCopies690.cs): the triggered traits a card was given or created with
         foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == actingPlayerId && InPlay(c) && AfterOwnActionTraits.ContainsKey(Definition(c).Effect))
                      .OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
         {
@@ -10713,6 +10714,7 @@ public sealed partial class MatchEngine
         else if (P4NegatesNextStraightening(card)) { } // Drawing on the Mountain (issue #503, EmperorP4Watches.cs): "Negate his next straightening this game."
         else
         {
+            NoteCreatedCopies690Straightens(card); // P22 (issue #690, CreatedCopies690.cs): "after the next time this game this Spell straightens ..., remove the Illusion"
             card.Bowed = false;
             card.RentatsuHeld = false; // Bayushi Rentatsu (issue #477): his "while he remains bowed" effect ends when he straightens.
             // Lady Matsu's Rage: "After the next time (this turn) it straightens, destroy it." The
