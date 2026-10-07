@@ -3952,23 +3952,11 @@ public sealed partial class MatchEngine
         // mid-game in this engine, so the two are equivalent, and this avoids a new persisted field.
         if (printedOrGranted && keyword == "Overconfident" && Definition(card).Effect == "loses-overconfident-vs-lion" && Player(1 - card.OwnerId).Clan == "Lion")
             return false;
+        if (ConsultKeywordRules(card, keyword) is { } ruled) return ruled == KeywordRuleResult.Granted; // P10 (KeywordRules695.cs): keyword rules, gain blocks, element replacements, granted Clan alignments
         if (printedOrGranted) return true;
         if (keyword == "Naval" && PromoEmperorNaval(card)) return true; // Suitengu's Blessing (issue #653): Naval while the Celestial remains in play
         if (WlItemsMiscKeywordGranted(card, keyword)) return true; // Hachiman's Prowess (issue #674, WlItemsMiscCelestials.cs): Elite while the Celestial remains in play
-        // Isawa Kojiro (oracle-l5r-3850, issue #301): "Kojiro has Naval while he has a Spell" -- the same
-        // additive live conditional grant Tamori Yayu's Cavalry below is, re-evaluated on every call so
-        // it appears the moment a Spell attaches and disappears the moment it leaves (destroyed,
-        // returned to hand, ...), never a durable GrantedKeyword that would outlive the Spell.
-        if (keyword == "Naval" && Definition(card).Effect == "naval-while-has-spell")
-            return Attachments(card.Id).Any(a => Definition(a).Type == CardType.Spell);
-        // Moto Jun-Ni (oracle-l5r-5337, issue #337): "Followers in this unit have Cavalry" -- live too: a Follower has Cavalry exactly while it is
-        // attached to a card carrying this Effect, so it appears when it attaches (from hand, or from a discard pile by her own action) and is
-        // gone the moment it leaves her unit. Never a durable GrantedKeyword, which would follow it out of her unit.
-        if (keyword == "Cavalry" && card.Zone == Zone.Attached && Definition(card).Type == CardType.Follower
-            && card.AttachedTo is string hostId && _state.Cards.TryGetValue(hostId, out var host) && Definition(host).Effect == "unit-followers-cavalry")
-            return true;
-        // Hida Watari (oracle-l5r-3227, Emperor Edition Personality pass, issue #477 batch 2): "While Watari has exactly one Follower, that Follower has Cavalry" -- live, like Jun-Ni's.
-        if (keyword == "Cavalry" && WatariGrantsCavalry(card)) return true;
+        // Isawa Kojiro's Naval, Moto Jun-Ni's and Hida Watari's unit Cavalry, and Tamori Yayu's Cavalry are keyword rules now (KeywordRules695Legacy.cs), read by the consult above.
         // A static rule of a card in play gives the keyword to a category of its controller's cards, in or out of play (Ikoma Aimi's Courtier, Seppun Nagi's Clan
         // keyword, Tsuruchi Nobukatsu - exp's Magistrate) -- StaticKeywordRules.cs, read live like the two conditional grants around it.
         if (StaticKeywordGranted(card, keyword)) return true;
@@ -3977,9 +3965,7 @@ public sealed partial class MatchEngine
         if (PromoGrantsKeyword(card, keyword)) return true; // Tamahime's Tactician (issue #653, PromoEmperorPersonalities.cs)
         if (WlPersTornGrantsKeyword(card, keyword)) return true; // Kaiu Nagai's and Asako Kyuudo's Elite while defending (issue #674, WlPersTorn.cs)
         if (OchiaiGrantsDuelist(card, keyword)) return true; // Ochiai's Bravery (issue #503) // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
-        // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
-        // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
-        return keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
+        return false;
     }
     // Shosuro Hawado (issue #301): the card types built from the Dynasty deck (as opposed to the Fate deck's
     // Strategy/Follower/Item/Spell/Ring, or a Stronghold). Only ever asked of a card in a discard pile.
@@ -4089,7 +4075,7 @@ public sealed partial class MatchEngine
     // Seppun Nagi (Seeds of Decay, issue #453): "Your other non-Loyal Magistrate Personalities in and out of play have your Clan alignment" -- a static rule
     // (StaticKeywordRules.cs) adds his controller's Clan to the printed alignments while he is in play, so this reads the engine's state (no longer static).
     private string[] ClanAlignments(CardInstance card) =>
-        (Definition(card).Clans ?? [Definition(card).Clan]).Concat(StaticClanAlignments(card))
+        (Definition(card).Clans ?? [Definition(card).Clan]).Concat(GainedClanAlignments(card))
             .Where(clan => clan != "Unaligned" && !card.RemovedClanAffiliations.Contains(clan, StringComparer.Ordinal))
             .Distinct(StringComparer.Ordinal).ToArray();
     private bool HasClanAffiliation(CardInstance card, string clan) => ClanAlignments(card).Contains(clan, StringComparer.Ordinal);
@@ -4101,6 +4087,7 @@ public sealed partial class MatchEngine
             card.RemovedClanAffiliations.Add(clan);
             if (!card.RemovedKeywords.Contains($"{clan} Clan", StringComparer.Ordinal)) card.RemovedKeywords.Add($"{clan} Clan");
         }
+        ForgetClanGrants(card); // P10 (KeywordRules695.cs): permanent grants go with them
         Emit("clanAlignmentRemoved", $"{Definition(card).Name} permanently loses his Clan Alignment keywords.", card.OwnerId, card.Id);
     }
     private bool LoyaltyAllowsControl(CardInstance card, string clan, int? playerId = null, RecruitGateKind kind = RecruitGateKind.ControlChange) => // P3 (issue #695, RecruitGates695.cs): the RecruitGate refuses or waives Loyal
@@ -4114,6 +4101,7 @@ public sealed partial class MatchEngine
     // (e.g. two Naval-granting attachments on the same Personality, one later detached) for no effect.
     private void GrantKeyword(CardInstance card, string keyword, string source, string duration)
     {
+        if (KeywordGainBlocked(card, keyword)) return; // P10 (KeywordRules695.cs): "will not gain ...".
         if (!Keyword(card, keyword) && Delay(card, DelayedKinds.Keyword, arg: $"{keyword}/{duration}", sourceId: source)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (PurifyTheSoulNegatesGrant(card, keyword)) return; // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): a negated Kolat/Ninja/Shadowlands grant.
         if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration));

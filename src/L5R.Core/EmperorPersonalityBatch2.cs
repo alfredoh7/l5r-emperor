@@ -73,9 +73,7 @@ public sealed partial class MatchEngine
     private bool HoruContributesNothing(CardInstance card, CardInstance[] army) => Definition(card).Effect == HoruEffect && army.Length >= 2;
 
     // ---- Hida Watari: "While Watari has exactly one Follower, that Follower has Cavalry." (a live grant read by Keyword()) ----------------------------------------------------
-    private bool WatariGrantsCavalry(CardInstance follower) =>
-        follower.Zone == Zone.Attached && Definition(follower).Type == CardType.Follower && follower.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host)
-        && Definition(host).Effect == WatariEffect && Attachments(host.Id).Count(a => Definition(a).Type == CardType.Follower) == 1;
+    // Now a keyword rule (KeywordRules695Legacy.cs): the Follower is in Watari's unit and he has exactly one Follower.
 
     // ---- Matsu Yuuto: "Ranged Attacks may not target cards in this unit." -------------------------------------------------------------------------------------------------
     private bool UnitImmuneToRangedAttacks(CardInstance target) => _state.Cards.TryGetValue(UnitHostId(target), out var head) && Definition(head).Effect == YuutoEffect;
@@ -173,19 +171,20 @@ public sealed partial class MatchEngine
                 foreach (var follower in Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower && CardForce(a) <= 3).ToArray())
                     if (!StalwartNegatesBow(follower, player.Id)) follower.Bowed = true;
                 return false;
-            case "esumi-attack-raise": case "esumi-attack-lower":
+            case "esumi-attack-raise":
+            case "esumi-attack-lower":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             case "hideaki-province":
                 if (CurrentProvinceIndex() is int province) GiveProvinceStrengthUntilResolution(1 - _state.ActivePlayerId, province, 3, "Kaiu Hideaki");
                 return false;
             case "shinoda-move": ExecuteMove(command, ability, source, target); return false;
             case "shinju-destroy":
-            {
-                var enemy = SlotCards(command, "enemy").Single(); var terrain = SlotCards(command, "terrain").Single();
-                DestroyUnitCard(enemy, player.Id);
-                DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; // Ring of Water's own recruitment condition (issue #194).
-                return false;
-            }
+                {
+                    var enemy = SlotCards(command, "enemy").Single(); var terrain = SlotCards(command, "terrain").Single();
+                    DestroyUnitCard(enemy, player.Id);
+                    DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; // Ring of Water's own recruitment condition (issue #194).
+                    return false;
+                }
             case "hana-bow": HanaBow(source!, target!, player); return false;
             default: throw new RuleViolation("Unknown ability.");
         }
