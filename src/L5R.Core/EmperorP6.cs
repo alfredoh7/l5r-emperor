@@ -349,7 +349,7 @@ public sealed partial class MatchEngine
     {
         if (!P6.SearchedRefills.Remove(eventCard.Id, out var senseiId)) return false;
         var sensei = Card(senseiId);
-        if (province.Destroyed || province.CardId is not null || province.HoldsNoDynastyCards)
+        if (province.Destroyed || province.CardId is not null || HoldsNoDynasty(province))
         {
             sensei.Zone = Zone.DynastyDiscard; sensei.FaceUp = true; sensei.ProvinceIndex = null;
             Emit("provinceDiscard", $"{Definition(sensei).Name} could not refill the province and was discarded.", player.Id, sensei.Id);

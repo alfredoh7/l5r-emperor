@@ -47,6 +47,7 @@ internal static partial class EngineHooks
         _ = AfterActionTraits.Items;
         _ = EntryCostTerms.Items;
         _ = AbilityCostTerms.Items;
+        _ = RefillFaceUp.Items;
         _ = StandingWatches.Items;
         _ = TurnBegins.Items;
         _ = TurnBeginChoices.Items;

@@ -346,7 +346,7 @@ public sealed partial class MatchEngine
         }
         foreach (var province in emptied)
         {
-            if (province.Destroyed || owner.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) continue; // issue #503: Illusory Defense's province
+            if (province.Destroyed || owner.DynastyDeck.Count == 0 || HoldsNoDynasty(province)) continue; // issue #503: Illusory Defense's province
             var refillId = owner.DynastyDeck[0]; owner.DynastyDeck.RemoveAt(0);
             var refill = Card(refillId);
             province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;

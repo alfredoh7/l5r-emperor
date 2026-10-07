@@ -215,7 +215,7 @@ public sealed partial class MatchEngine
             }
             return;
         }
-        if (player.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) return; // issue #503: Illusory Defense's province
+        if (player.DynastyDeck.Count == 0 || HoldsNoDynasty(province)) return; // issue #503: Illusory Defense's province
         var refillId = player.DynastyDeck[0]; player.DynastyDeck.RemoveAt(0);
         var refill = Card(refillId);
         province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = provinceIndex; refill.FaceUp = true;

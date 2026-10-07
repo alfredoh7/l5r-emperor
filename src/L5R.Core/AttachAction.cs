@@ -51,6 +51,8 @@ public static class AttachPile
     public const string OwnHandOrDiscard = "own-hand-or-discard";
     /// <summary>Your own hand only (Asako Ebara, Moto Hailung: "a Weapon/Follower in your hand").</summary>
     public const string OwnHand = "own-hand";
+    /// <summary>A card under the ability's own source (P21, ZoneExtensions.cs: The Tachikaze's Followers): in Zone.Underneath with HostCardId the source, owned by the acting player.</summary>
+    public const string UnderHost = "under-host";
 }
 
 /// <summary>Who receives the attached card.</summary>
@@ -76,12 +78,16 @@ public sealed record AttachSpec(string Card = AttachSource.Target, string Pile =
 public sealed partial class MatchEngine
 {
     // Why this discarded card may not be the target of an attach, or null when it may (the pile, its owner, its kind and keywords).
-    private string? AttachTargetError(AttachSpec spec, int playerId, CardInstance card)
+    private string? AttachTargetError(AttachSpec spec, int playerId, CardInstance card, string? sourceId = null)
     {
         var def = Definition(card);
         if (spec.Pile == AttachPile.OwnHand)
         {
             if (card.OwnerId != playerId || card.Zone != Zone.Hand || !Player(playerId).Hand.Contains(card.Id)) return "Choose a card in your hand.";
+        }
+        else if (spec.Pile == AttachPile.UnderHost)
+        {
+            if (card.Zone != Zone.Underneath || card.OwnerId != playerId || card.HostCardId is null || sourceId is not null && card.HostCardId != sourceId) return "Choose a card under this card.";
         }
         else if (spec.Pile == AttachPile.OwnHandOrDiscard)
         {
@@ -98,8 +104,8 @@ public sealed partial class MatchEngine
         return null;
     }
 
-    private IEnumerable<CardInstance> AttachCandidatesInDiscard(AttachSpec spec, int playerId) =>
-        _state.Cards.Values.Where(c => AttachTargetError(spec, playerId, c) is null);
+    private IEnumerable<CardInstance> AttachCandidatesInDiscard(AttachSpec spec, int playerId, string? sourceId = null) =>
+        _state.Cards.Values.Where(c => AttachTargetError(spec, playerId, c, sourceId) is null);
 
     // The wielder an attach command names: the source itself, or the chosen performer.
     private CardInstance? WielderOfAttach(AttachSpec spec, GameCommand command, CardInstance? source) =>
@@ -138,7 +144,7 @@ public sealed partial class MatchEngine
         else
         {
             attachment = Card(command.TargetId);
-            var error = AttachTargetError(spec, player.Id, attachment);
+            var error = AttachTargetError(spec, player.Id, attachment, source?.Id);
             Require(error is null, error ?? "");
         }
         var wielder = WielderOfAttach(spec, command, source) ?? throw new RuleViolation("Choose a Personality to attach it to.");
@@ -182,7 +188,7 @@ public sealed partial class MatchEngine
     {
         var attachment = spec.Card == AttachSource.Self ? source! : target!;
         var wielder = WielderOfAttach(spec, command, source)!;
-        var fromDiscard = attachment.Zone == Zone.FateDiscard;
+        var fromDiscard = attachment.Zone is Zone.FateDiscard or Zone.Underneath;
         PlaceAttachment(attachment, wielder, player);
         // Clearing Crew (issue #476 batch 6): an attach from a discard pile is not an entry "from your hand".
         _attachingFromPileId = fromDiscard ? attachment.Id : null;
@@ -195,7 +201,7 @@ public sealed partial class MatchEngine
     private void PlaceAttachment(CardInstance attachment, CardInstance wielder, PlayerState player)
     {
         var def = Definition(attachment);
-        var fromDiscard = attachment.Zone == Zone.FateDiscard;
+        var fromDiscard = attachment.Zone is Zone.FateDiscard or Zone.Underneath; // P21: a card from under a host is a new entry into play like one from a discard pile
         if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
         Player(attachment.OwnerId).Hand.Remove(attachment.Id);
         if (fromDiscard)
@@ -205,6 +211,7 @@ public sealed partial class MatchEngine
             attachment.Protections.Clear(); attachment.AbilityUses.Clear(); attachment.Bowed = false; attachment.Dishonorable = false;
         }
         TakeControl(attachment, wielder.OwnerId);
+        attachment.HostCardId = null;
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
         PromoPaymentAttached(attachment); // Coin Pouch (issue #667): "This card enters play bowed."
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");

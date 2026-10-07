@@ -10,7 +10,7 @@ public sealed partial class MatchEngine
     private void RefillProvinceWithDiscardedPersonality(PlayerState player, CardInstance personality, int provinceIndex, string sourceName)
     {
         var province = player.Provinces.Single(p => p.Index == provinceIndex);
-        if (province.HoldsNoDynastyCards) { Emit("provinceHoldsNoDynastyCards", $"{sourceName}: {player.Name}'s province {province.Index + 1} does not hold Dynasty cards.", player.Id); return; } // issue #503
+        if (HoldsNoDynasty(province)) { Emit("provinceHoldsNoDynastyCards", $"{sourceName}: {player.Name}'s province {province.Index + 1} does not hold Dynasty cards.", player.Id); return; } // issue #503
         if (province.CardId is string existingId)
         {
             var existing = Card(existingId);
