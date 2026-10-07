@@ -149,8 +149,8 @@ public sealed partial class MatchEngine
     /// amount of its alternate source. Null when it produces nothing or is not somewhere it could.</summary>
     private int? GoldSourceProduction(CardInstance card)
     {
-        if (card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
-        if (Definition(card).GoldProduction > 0 || Definition(card).Effect == MoneylenderEffect) return GoldProduced(card.Id, card.OwnerId);
+        if (!ProducerZone(card, Definition(card))) return null; // issue #695: also an Attached card and an in-play Strategy
+        if (Definition(card).GoldProduction > 0 || Definition(card).Effect == MoneylenderEffect) return GoldProduced(card.Id, LentBorrower(card) ?? card.OwnerId); // a lent Holding is priced for its borrower
         return IsVariableGoldSource(card) ? null : AlternateGoldSource(card)?.Amount;
     }
 
@@ -427,6 +427,7 @@ public sealed partial class MatchEngine
         var producers = PaymentSourceIds(playerId, paying); // issue #501: the payment tokens too (EmperorMechE.cs)
         Require(ids.All(producers.Contains), "Every Gold source must be yours, in play, unbowed and able to produce Gold.");
         RequirePaymentTokens(ids, null);
+        RequirePaymentTokenConditions(ids, playerId, paying); // issue #695
         RequirePaymentDiscards(playerId, ids.Where(id => !IsPaymentToken(id)).ToArray(), paying);
         Require(TrySplitPayment(playerId, lead, rest, ids, out _, out var restIds, paying) && (rest > 0 || restIds.Length == 0),
             $"This play needs its Discipline cost ({lead} Gold) paid first and then {rest} Gold for the action itself, each from its own sources (Gold does not carry over); the selected sources cannot do that.");

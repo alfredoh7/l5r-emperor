@@ -185,6 +185,7 @@ public sealed partial class MatchEngine
     internal static void RegisterIvoryHoldingsHooks()
     {
         EngineHooks.Abilities.Register("AddIvoryHoldings", 11000, static abilities => abilities.AddIvoryHoldings());
+        EngineHooks.AfterPayment.Register("P1AfterPaymentVastPaddy", 16301, static (engine, context) => engine.RecordVastPaddyPayment(context.ProducerIds, context.Subject)); // issue #695: was a call in Pay
         EngineHooks.RunEffects.Register("RunIvoryHoldings", 11000, static (engine, context) => engine.RunIvoryHoldings(context.id, context.ability, context.command, context.player, context.source, context.target));
         EngineHooks.ValidateLate.Register("ValidateIvoryHoldings", 11000, static (engine, context) => engine.ValidateIvoryHoldings(context.id, context.command, context.player));
         EngineHooks.TargetAllows.Register("IvoryHoldingsTargetAllows", 11000, static (engine, context) => engine.IvoryHoldingsTargetAllows(context.ability.Target, context.player, context.target));
