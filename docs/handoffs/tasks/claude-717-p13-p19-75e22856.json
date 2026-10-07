@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #717 in progress: primitive P19 (rulebook-action modifiers, RulebookModifiers.cs) merged; P13 (phase and battle rule flags) still being built. Engine only, no cards wired.",
+  "validation": "P19 agent: rulebook-modifiers 8/8, full Core 0 FAIL, AI 98/98 and bot-soak 3/3, format and lint clean.",
+  "remaining": "Merge P13, final full checks, PR and merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/717",
+  "branch": "claude/717-p13-p19",
+  "updated": "2026-10-07T17:45:21.563133+00:00"
+}
