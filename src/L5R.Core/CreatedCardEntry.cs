@@ -12,9 +12,10 @@ public sealed partial class MatchEngine
         {
             var copied = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : throw new RuleViolation("Choose the card to copy.");
             // Issue #501 item 32: the copy is marked before any entry window opens, so every view shows the duplicate frame and the original's scan.
-            return CreatePersonality(player.Id, Definition(copied), insideEntryWindow, null, out _, copied.Printed, beforeWindow, createdCopy: true, original: copied);
+            return CreatePersonality(player.Id, Definition(copied), insideEntryWindow, null, out _, copied.Printed, WithCreatedRemoval(spec, command, player, copied.DefinitionId, beforeWindow), createdCopy: true, original: copied);
         }
         var scan = CreatedCards.Resolve(spec);
+        beforeWindow = WithCreatedRemoval(spec, command, player, scan.Id, beforeWindow); // P22 (issue #690, CreatedCopies690.cs): CreatedCardSpec.RemoveWhen
         var printed = DerivePrinted(scan, spec, command, player);
         // Emperor Edition proxy pass (issue #492): the count is read from the target before it was destroyed as a cost (Suiteiru no Oni); a count of 0 creates nothing.
         if (spec.CountFromTargetChi) { spec = spec with { Count = _createdCountFromTargetChi }; if (spec.Count < 1) { beforeWindow?.Invoke(); return false; } }
@@ -92,13 +93,14 @@ public sealed partial class MatchEngine
             RequireAttachable(new CardInstance { Id = "created-preview", DefinitionId = scan.Id, OwnerId = player.Id, Zone = Zone.Hand, FaceUp = true }, host, player.Id);
     }
 
-    private CardInstance? ValueSubject(CreatedSubject from, GameCommand command)
+    private CardInstance? ValueSubject(CreatedSubject from, GameCommand command, string? slot = null)
     {
         var id = from switch
         {
             CreatedSubject.Performer => command.PerformerId,
             CreatedSubject.Source => command.CardId,
             CreatedSubject.Wielder => command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var source) ? source.AttachedTo : null,
+            CreatedSubject.Slot => slot is null ? null : command.Selections?.FirstOrDefault(s => s.Slot == slot)?.CardIds?.FirstOrDefault(), // P22 (issue #690): "the discarded card"
             _ => command.TargetId
         };
         return id is not null && _state.Cards.TryGetValue(id, out var subject) ? subject : null;
@@ -114,11 +116,13 @@ public sealed partial class MatchEngine
         if (hasClanAlignment) printed = WithControllerClan(printed, player);
         foreach (var value in spec.Values ?? [])
         {
-            var subject = ValueSubject(value.From, command) ?? throw new RuleViolation($"There is no {value.From.ToString().ToLowerInvariant()} to take the {value.Stat} from.");
+            var subject = ValueSubject(value.From, command, value.Slot) ?? throw new RuleViolation($"There is no {value.From.ToString().ToLowerInvariant()} to take the {value.Stat} from.");
             var definition = Definition(subject);
             if (value.Stat == CreatedStat.Name) { printed = printed with { Name = definition.Name }; continue; }
             var read = value.Read ?? value.Stat;
-            var amount = Math.Max(0, (read switch { CreatedStat.GoldCost => definition.GoldCost, CreatedStat.Force => definition.Force, CreatedStat.Chi => definition.Chi, _ => definition.PersonalHonor })
+            // P22 (issue #690): a Current value is the subject's stat as it stands now (CreatedCopies690.cs); the Focus Value is the printed one (a card in a pile keeps it).
+            var amount = Math.Max(0, (value.Current && read != CreatedStat.Focus ? CurrentCreatedValue(subject, read)
+                : read switch { CreatedStat.GoldCost => definition.GoldCost, CreatedStat.Force => definition.Force, CreatedStat.Chi => definition.Chi, CreatedStat.Focus => definition.Focus, _ => definition.PersonalHonor })
                 + value.Plus + (value.Keyword is not null && Keyword(subject, value.Keyword) ? value.PlusWithKeyword : 0));
             printed = value.Stat switch
             {
@@ -128,6 +132,9 @@ public sealed partial class MatchEngine
                 _ => printed with { PersonalHonor = amount }
             };
         }
+        // P22 (issue #690): the abilities and the trait the created card prints, declared with the creation.
+        if (spec.Abilities is { Length: > 0 } declared) printed = printed with { Abilities = (printed.Abilities ?? []).Concat(declared).Distinct(StringComparer.Ordinal).ToArray() };
+        if (spec.Trait is { } trait) printed = printed with { Effect = trait };
         return printed;
     }
 
@@ -184,6 +191,7 @@ public sealed partial class MatchEngine
     // A created card has no pile to return to: whatever way it leaves play (a destroyed host, a return to hand, a shuffle), it is removed from the game by the end of the command.
     private void RemoveCreatedCardsLeftInPiles()
     {
+        SweepCreatedCopies690(); // P22 (issue #690, CreatedCopies690.cs): a created card whose watched card straightened or left play; filter grants that have ended
         foreach (var card in _state.Cards.Values.Where(c => IsCreatedCard(c) && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead or Zone.Hand or Zone.FateDeck or Zone.DynastyDeck).ToArray())
         {
             foreach (var player in _state.Players) { player.Hand.Remove(card.Id); player.FateDeck.Remove(card.Id); player.DynastyDeck.Remove(card.Id); }

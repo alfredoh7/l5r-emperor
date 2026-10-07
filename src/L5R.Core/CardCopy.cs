@@ -84,7 +84,7 @@ public sealed partial class MatchEngine
     // to the printed ones; every scan of "the abilities this card has" goes through it.
     private IEnumerable<string> AbilityIdsOf(CardInstance card) => RemovedAbilitiesFilter(card, P5AbilitiesRemoved(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
                                                                                                                                 // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
-        (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal)); // issue #667 (AbilityRemoval.cs): permanently removed abilities are left out.
+        (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal).Where(GrantedTraits.IsNot)); // issue #667 (AbilityRemoval.cs): permanently removed abilities are left out. P22 (issue #690): a trait is not an ability.
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
     // used again, wherever the receiver is). A turn or attachment grant belongs to a card in play -- it does not follow a Personality
@@ -103,7 +103,8 @@ public sealed partial class MatchEngine
 
     // "An ability that does not itself copy abilities" -- and one that triggers on its own card ENTERING play is not offered either:
     // that moment has already happened for the receiver, so the copy could never do anything.
-    private static bool CopyableAbility(AbilityDefinition ability) => !ability.CopiesAbilities && !ability.NotCopyable && ability.Trigger != "own-enters-play";
+    // P22 (issue #690): a trait is not an ability (core rules, Reading the Cards), so one catalogued as a trait (GrantedTraits.Timing) is not offered either.
+    private static bool CopyableAbility(AbilityDefinition ability) => !ability.CopiesAbilities && !ability.NotCopyable && ability.Trigger != "own-enters-play" && ability.Timing != GrantedTraits.Timing;
 
     private string[] CopyableKeywords(CardInstance source, CardInstance receiver) =>
         CurrentKeywordList(source).Where(keyword => !Keyword(receiver, keyword)).ToArray();
