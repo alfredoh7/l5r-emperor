@@ -364,6 +364,14 @@ public sealed partial class MatchEngine
                 var card = Card(announcePending.CardId!);
                 foreach (var reactionId in AbilityIdsOf(card).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger or EmperorStrongholdBatch2Triggers.TorchAnnounce or EmperorFollowupsAbilities.NoHidingPlaceTrigger))
                     AddReaction(card, reactionId);
+                // P6 (AfterFacts.cs): a registered watcher's Reaction, one option per performer it may name.
+                foreach (var reactionId in AbilityIdsOf(card).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == AnnounceTriggers.WithPerformer))
+                {
+                    var announceReaction = AbilityCatalog.All[reactionId];
+                    if (announceReaction.Performer is null) { AddReaction(card, reactionId, validate: true); continue; }
+                    foreach (var performer in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && HasKeywords(c, announceReaction.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal))
+                        AddReaction(card, reactionId, label: $"{announceReaction.Label} · {Definition(performer).Name}", validate: true, performerId: performer.Id);
+                }
             }
             // No Hiding Place (issue #498): the announcing player's copies in hand, whichever card the window was opened for.
             foreach (var (noHidingPlace, noHidingId) in NoHidingPlaceOptions(playerId)) AddReaction(noHidingPlace, noHidingId);

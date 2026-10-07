@@ -255,7 +255,9 @@ public sealed partial class MatchEngine
     }
 
     /// <summary>The next P3 watcher of the announcement not yet asked (FindAnnounceWatcher's fallback, the window's reopening), marked asked.</summary>
-    private CardInstance? P3AnnounceWatcher(GameCommand command)
+    private CardInstance? P3AnnounceWatcher(GameCommand command) => P3BuiltInAnnounceWatcher(command) ?? (EngineHooks.AnnounceRegistrants.Items.Length == 0 ? null : RegisteredAnnounceWatcher(command)); // P6 (AfterFacts.cs): any registered watcher
+
+    private CardInstance? P3BuiltInAnnounceWatcher(GameCommand command)
     {
         if (_state.Phase != Phase.Battle || _state.CurrentBattleProvince is not int battle) return null;
         var battleAction = AnnouncesBattleAction(command); var tactical = AnnouncesTacticalAction(command);

@@ -168,6 +168,7 @@ public sealed partial class MatchEngine
         Rehonor(card);
         DestroyUnits([card], actingPlayerId: playerId);
         Emit("seppuku", $"{Definition(card).Name} committed seppuku, dying honorably.", card.OwnerId, card.Id);
+        RecordFact(FactKinds.Seppuku, playerId, card.Id); // P6 (AfterFacts.cs)
     }
 }
 

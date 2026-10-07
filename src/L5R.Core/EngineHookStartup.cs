@@ -49,6 +49,11 @@ internal static partial class EngineHooks
         _ = StandingImmunities.Items;
         _ = AbilityCostTerms.Items;
         _ = RefillFaceUp.Items;
+        _ = FactTraits.Items;
+        _ = FactConditions.Items;
+        _ = CelestialEntryChoices.Items;
+        _ = AnnounceRegistrants.Items;
+        _ = ResolveEvent.Items; // P6 (issue #705): the only channel the startup seal had forgotten (a survey finding of #668)
         _ = StandingWatches.Items;
         _ = DuelRulesFor.Items;
         _ = DuelRefusableWhen.Items;

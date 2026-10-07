@@ -199,7 +199,7 @@ public sealed partial class MatchEngine
     {
         var turnAtStart = _state.TurnNumber;
         var result = ExecuteOne(command);
-        if (result.Accepted) SweepZoneHistory(turnAtStart); // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
+        if (result.Accepted) { SweepZoneHistory(turnAtStart); SweepFactsAfterCommand(); } // P6 (AfterFacts.cs): facts only a comparison sees, and the drain when nothing is open // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
         return result.Accepted ? RunPassAllBattles(result) : result; // "Pass all battles" (issue #628, PassAllBattles.cs)
     }
 
@@ -896,6 +896,8 @@ public sealed partial class MatchEngine
         // Overconfident window it triggers (issue #223, MarkDead already queued it inside DestroyUnits below) closes to that player.
         DestroyUnits([card], actingPlayerId: command.PlayerId);
         Emit("seppuku", $"{Definition(card).Name} performed Seppuku, dying honorably.", command.PlayerId, card.Id);
+        RecordFact(FactKinds.Seppuku, command.PlayerId, card.Id); // P6 (AfterFacts.cs)
+        ClearActionAccumulators(); // P6: what the destruction recorded belongs to this action, not to the next one (Order Seppuku never reached FinishActionEffectTracking)
         if (OpenOverconfidentDrawWindow(1 - command.PlayerId)) return;
         // An ordinary action forfeits the player's own still-unused Additional Action grants, same as every other action's tail.
         _state.AdditionalActions.RemoveAll(g => g.PlayerId == command.PlayerId && Forfeitable(g));
@@ -2071,7 +2073,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def)) DiscardTerrain(existingTerrain);
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def)) { DiscardTerrain(existingTerrain); if (existingTerrain.Zone != Zone.Battlefield) Player(command.PlayerId).TerrainDestroyedThisBattle = true; } // P6: the Terrain this one replaced was destroyed (Ring of Water's condition)
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }
@@ -2502,6 +2504,7 @@ public sealed partial class MatchEngine
         ApplyWlPersGates1DeferredLosses(); // Gojiro, Hajime (issue #679, WlPersGates1.cs): the Honor loss listed below an Invest, once its entry window has closed.
         // Emperor Edition remaining-cards pass (issue #492), group F: an optional draw owed by an Event (Boastful Proclamation, Glory of the Shogun), asked here like the forced discards below.
         if (OpenQueuedEventChoice(closesTo)) return true;
+        if (OpenQueuedFactWindow(closesTo)) return true; // P6 (AfterFacts.cs): the facts that happened since the last safe point
         if (OpenQueuedEntrySearch(closesTo)) return true; // Emperor Edition follow-ups (issue #498): an "After this card enters play: search ..." trait, once the entry windows are done.
         if (_state.PendingForcedDiscards.Count > 0)
         {
@@ -2821,6 +2824,7 @@ public sealed partial class MatchEngine
         ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
         ResolveSearchPlayTurnEnd(); // Masaya (issue #667, SearchPlayMasaya.cs): legacy drain of the pre-P21 debt list.
         CaptureInPlayDuringTurn(); // P21 (ZoneExtensions.cs): who was in play during this player's turn
+        ClearActionScopedModifiers(); // P6 (AfterFacts.cs): a backstop for an action that never reached its tail
         ApplyDelayedEffects(DelayUntil.EndOfTurn);
         ReturnSteppedUnits(); // Step Through the Void (issue #503, EmperorP5Zones.cs): "Before this turn ends, put his unit into play". // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
@@ -3007,7 +3011,7 @@ public sealed partial class MatchEngine
                 Emit("provinceRevealed", $"{player.Name} revealed {Definition(card).Name} in province {province.Index + 1}.", player.Id, card.Id);
                 if (Definition(card).Type == CardType.Event) { if (ResolveEvent(player, province, card)) return; }
                 else if (Definition(card).Type == CardType.Region) { if (ResolveRegion(player, province, card)) return; }
-                else if (Definition(card).Type == CardType.Celestial) ResolveCelestial(player, province, card);
+                else if (Definition(card).Type == CardType.Celestial) { if (ResolveCelestialCore(player, province, card, pauseReveal: true)) return; } // P6: the entry decisions pause the reveal
                 // Tested Land (Seeds of Decay, issue #453): "After a Holding is revealed in this Province, discard it and this Region." (SeedsOfDecayBatch4.cs)
                 else if (Definition(card).Type == CardType.Holding) DiscardRevealedHoldingOnTestedLand(player, province, card);
             }
@@ -3187,26 +3191,35 @@ public sealed partial class MatchEngine
     // opponent's). Goes straight to Zone.Celestial -- never attaches to a province the way Region does,
     // and (unlike Event) never resolves-once-then-discards; it just stays in play until something
     // removes it.
-    private void ResolveCelestial(PlayerState player, ProvinceState province, CardInstance card)
+    // pauseReveal (P6, AfterFacts.cs): the Events Phase reveal asks for the entry decisions of the Celestial it reveals and carries on once they are answered (true: it paused).
+    private void ResolveCelestial(PlayerState player, ProvinceState province, CardInstance card) => ResolveCelestialCore(player, province, card, pauseReveal: false);
+
+    private bool ResolveCelestialCore(PlayerState player, ProvinceState province, CardInstance card, bool pauseReveal)
     {
-        if (RestrictionDelaysCelestial(player, province, card)) return; // P11 (CardRestrictions.cs): a locked province's Celestial enters when the next turn begins
+        if (RestrictionDelaysCelestial(player, province, card)) return false; // P11 (CardRestrictions.cs): a locked province's Celestial enters when the next turn begins
         province.CardId = null; card.ProvinceIndex = null;
-        EnterCelestialPlay(player, card);
+        var paused = EnterCelestialPlayCore(player, card, pauseReveal);
         Refill(player, province);
+        return paused;
     }
     // The entry itself (issue #667: The Sacred Rosary of the Constrictors puts a Celestial into play with no province): it replaces the controller's other Celestials and runs the entry traits.
-    private void EnterCelestialPlay(PlayerState player, CardInstance card)
+    // P6 (AfterFacts.cs): a registered entry decision (Natsu-Togumara's choice of a Personality, Shrine to the Heavens' choice of a Celestial to keep) is asked after the Celestial is in play; when one
+    // spares a card, the discard of the other Celestials waits for the answers. Returns true when the Events Phase reveal paused on the first decision (pauseReveal).
+    private void EnterCelestialPlay(PlayerState player, CardInstance card) => EnterCelestialPlayCore(player, card, pauseReveal: false);
+
+    private bool EnterCelestialPlayCore(PlayerState player, CardInstance card, bool pauseReveal)
     {
         var hadRyoshun = ControlsCelestialEffect(player.Id, RyoshunsGuidanceEffect); // Ryoshun's Guidance (issue #467): its +1C leaves with it.
-        foreach (var other in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.Celestial).ToArray())
-        {
-            other.Zone = Zone.DynastyDiscard;
-            Emit("celestialDiscarded", $"{Definition(other).Name} was discarded: {player.Name} may control only one Celestial in play at a time.", player.Id, other.Id);
-        }
+        var asks = EngineHooks.CelestialEntryChoices.Items.Length == 0 ? [] : CelestialEntryAsks(player, card);
+        var deferDiscard = asks.Any(a => a.Choice.SparesFromDiscard);
+        if (deferDiscard) (_state.CelestialDiscardDebts ??= []).Add(new CelestialDiscardDebt { CelestialId = card.Id, PlayerId = player.Id });
+        else DiscardOtherCelestials(player, card);
         card.Zone = Zone.Celestial;
         Emit("celestialEnteredPlay", $"{Definition(card).Name} entered play.", player.Id, card.Id);
+        RecordFact(FactKinds.CelestialEntered, player.Id, card.Id); // P6 (AfterFacts.cs)
         ApplyDaigotsusGuidanceTrait(); // Daigotsu's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a Celestial enters play (including this one): Discard all Kami Celestials in play."
         if (hadRyoshun && Definition(card).Effect != RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
+        return asks.Count > 0 && QueueCelestialEntryAsks(player, card, asks, pauseReveal);
     }
     // Lady Matsu's Rage's own destroy-redirect trait is Effect-keyed the same way RegionStrengthBonus
     // is, checked from DestroyUnits' own single shared choke point (see its own doc comment).
