@@ -137,6 +137,7 @@ public sealed partial class MatchEngine
     // the performer's own keyword, not the source's -- the subject, when the caller has it, is who "he" is.
     private bool CostExempt(ActionCost cost, CardInstance? source, CardInstance? subject = null)
     {
+        if (CostWaivedByRule(cost, source, subject)) return true; // issue #690 (P24, EffectPrimitivesCosts.cs): "he need not bow for his Spells with an odd Focus Value"
         if (cost.IfSubjectHome)
         {
             var judged = subject ?? (source is null ? null : cost.Subject == CostSubject.Wielder ? WielderOf(source) : source);
@@ -192,7 +193,7 @@ public sealed partial class MatchEngine
     {
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return [];
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var card) ? card : null;
-        try { return PlannedCosts(ability, command, source).ToList(); }
+        try { return CostsAfterSubstitution(command, PlannedCosts(ability, command, source).ToList()); } // issue #690 (P24): a substitute bowed in a Ring's place is the card that pays
         catch (RuleViolation) { return []; }
     }
 
@@ -269,7 +270,7 @@ public sealed partial class MatchEngine
             if (YorimiWaivesBow(ability, cost, source, subject)) { SpendYorimiWaiver(subject, source is null ? "an action" : Definition(source).Name); continue; }
             switch (cost.Verb)
             {
-                case CostVerb.Bow: subject.Bowed = true; break;
+                case CostVerb.Bow: CostBowPayer(command, subject).Bowed = true; break; // issue #690 (P24): the substitute, when the command names one for this Ring
                 case CostVerbs.Discard: DiscardFate(player, subject); break;
                 // A Strategy still in its player's hand (Void Tattoo's "remove this card from the game", issue #476 batch 4) leaves the hand as well.
                 case CostVerbs.Remove: Player(subject.OwnerId).Hand.Remove(subject.Id); RemoveFromGame(subject); break;

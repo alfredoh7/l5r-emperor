@@ -148,7 +148,8 @@ public sealed partial class MatchEngine
     // Issue #492 (Mendon's ruling R5): every "may compare" clause is the PLAYER's choice ("The player chooses."), made with the action (GameCommand.Choice, one listed option per choice) -- the engine no
     // longer picks the lower value for him (EmperorRulingR5.cs, AttackCompareChoiceOf).
     private int AttackComparedValue(string abilityId, CardInstance target) =>
-        abilityId == "samuru-attack" ? CardGoldCost(target)
+        AttackSpecComparedValue(abilityId, target) is { } specValue ? specValue // issue #690 (P24, EffectPrimitivesAttack.cs): AttackSpec.CompareAgainst
+        : abilityId == "samuru-attack" ? CardGoldCost(target)
         : abilityId == "unseen-assailant-attack" && Definition(target).Type == CardType.Personality && AttackCompareChoiceOf(abilityId) == "chi" ? PersonalityChi(target)
         : AttackComparedValueRemainingG(abilityId, target);
 
@@ -172,7 +173,7 @@ public sealed partial class MatchEngine
         string? forcePenaltyTargetId = null, int forcePenalty = 0)
     {
         // No Hiding Place (issue #498): "That Ranged Attack may target a card in the Defender's home (if otherwise legal)" -- every other rule below still applies.
-        Require(InPlay(target) && (AtBattle(target) || MayTargetInDefendersHome(command, target)) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
+        Require(InPlay(target) && (AtBattle(target) || MayTargetInDefendersHome(command, target) || AttackSpecReaches(ability.Attack, target)) && target.OwnerId != player.Id, "Target a card in the current enemy army."); // issue #690 (P24): AttackSpec.TargetScope
         // "May not be targeted by" (issue #420) is judged here too, so a bar also stops an Attack whose target
         // is named on CardIds, chosen later (a sequenced second target) or moved here by a redirection. The
         // Attack's own performer is the acting card when the command names one (the second half of a sequenced

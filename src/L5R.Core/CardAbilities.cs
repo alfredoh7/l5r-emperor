@@ -156,7 +156,9 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // source's unit is at home (MatchEngine.HomeWaivesSourceLocation); the acting player still needs a unit at the battlefield unless the action is Absent or moves to the battle.
     bool Tireless = false, bool Home = false,
     // Primitive P7 (issue #683, PeriodWatches.cs): "the first time each turn / battle / phase / game" -- the ability may be used once per instance of this period (a stamp in AbilityUses, read by AbilityUseSpent beside OncePerGame).
-    Period? UsesPer = null);
+    Period? UsesPer = null,
+    // Primitive P24 (issue #690, EffectPrimitivesAttack.cs) -- appended LAST and always passed by name: where this ability's Attack may reach beyond the current enemy army, and what it is compared against.
+    AttackSpec? Attack = null);
 
 public static class AbilityCatalog
 {
@@ -5078,7 +5080,7 @@ public sealed partial class MatchEngine
             // AttackComparedForce is the one decision point for WHICH Force a Personality's Attack
             // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
             // that needs no Follower exception.
-            if (InPlay(target) && (AtBattle(target) || AttackMayHitInDefendersHome(playerId, target)) && AttackComparedValue(abilityId, target) <= strength) // No Hiding Place (issue #498): a target in the Defender's home
+            if (InPlay(target) && (AtBattle(target) || AttackMayHitInDefendersHome(playerId, target) || AttackSpecReaches(abilityId, target)) && AttackComparedValue(abilityId, target) <= strength) // No Hiding Place (issue #498): a target in the Defender's home
             {
                 DestroyAttackTarget(target, playerId);
             }
@@ -5205,7 +5207,8 @@ public sealed partial class MatchEngine
     // Tokens contribute here too: unlike Modifiers (cleared every FinishTurn), a token's stat bonus
     // persists until the token itself is destroyed or its host leaves play (core rules Glossary — Token).
     private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount)
-        + card.Tokens.Where(t => t.Stat2 == stat).Sum(t => t.Amount2); // issue #503: a two-stat token (Shosuro Keirei's Poison)
+        + card.Tokens.Where(t => t.Stat2 == stat).Sum(t => t.Amount2) // issue #503: a two-stat token (Shosuro Keirei's Poison)
+        + card.Tokens.Where(t => t.Stat3 == stat).Sum(t => t.Amount3); // issue #690 (P24, EffectPrimitivesTokens.cs): a three-stat token
     // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
     // every current and future Chi-reducing effect enforces it without needing its own check.
     // "Permanently give him +2F" (Spirit of the Berserker): a stat change no turn end removes (AppliedModifier.Permanent).
@@ -6521,6 +6524,7 @@ public sealed partial class MatchEngine
                     ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                else if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
                 // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
                 else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
                     Require(WlItemsMiscOutOfPlayTargetAllows(player, target), "Choose a Battle Strategy from your discard pile.");
@@ -11226,6 +11230,7 @@ public sealed partial class MatchEngine
             // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): a Favor-discard action is also offered with a Favor token discarded in place of the Imperial Favor.
             CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).Concat(FavorTokenAlternative(ability, playerId)).ToArray() // issue #501: a Favor token for an alternative Favor discard
                 : IsFavorDiscardAbility(id) && FavorTokenSource(playerId) is not null ? [null, FavorTokenOption] : [null];
+            costOptions = [.. costOptions, .. CostSubstitutionOffers(ability, playerId, source)]; // issue #690 (P24, EffectPrimitivesCosts.cs): one more offered action per card that may be bowed in a Ring's place
             // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).

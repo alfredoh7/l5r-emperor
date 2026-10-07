@@ -15,6 +15,8 @@ public sealed record MoveSpec(string Movers, string Destination)
     /// <summary>The Personality that performed the Battle action an "after a Battle action resolves" Reaction reacts to (MatchState.BattleActionReactionPerformerId): Shosuro
     /// Hawado - exp's "target a Personality that performed it: Move him from his current location to another" (issue #453).</summary>
     public const string BattleActionPerformer = "battle-action-performer";
+    /// <summary>The Personality the ability's source is attached to (issue #690, P24: Befriend the Tides' "Move this Shugenja ... to an adjacent battlefield" on a Spell).</summary>
+    public const string Wielder = "wielder";
     public const string Home = "home", CurrentBattlefield = "current-battlefield", AdjacentUnresolved = "adjacent-unresolved-battlefield", AnyUnresolved = "unresolved-battlefield";
     /// <summary>Issue #503 (Shosuro Keirei: "Move Keirei from the current battlefield to a different battlefield"): any other battlefield of the Attack Phase, resolved or not.</summary>
     public const string AnyOther = "any-other-battlefield";
@@ -30,7 +32,7 @@ public sealed partial class MatchEngine
         // Hawado's target pays the removal cost; only Hawado moves. Her existing effect and validation are unchanged.
         if (abilityId == "hawado-move-battlefield") return new(1 - _state.ActivePlayerId, source is null ? [] : [source.Id], false);
         if (ability.Move is not { ChoosesBattlefield: true } move) return null;
-        var fixedId = move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget ? source?.Id :
+        var fixedId = move.Movers == MoveSpec.Wielder ? source?.AttachedTo : move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget ? source?.Id :
             move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget ? performer : null;
         return new(1 - _state.ActivePlayerId, fixedId is null ? [] : [fixedId],
             move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget);
@@ -76,6 +78,7 @@ public sealed partial class MatchEngine
         var battlefield = move.Destination == MoveSpec.CurrentBattlefield ? _state.CurrentBattleProvince : command.Province;
         if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget) MoveByRule(source!, move, battlefield);
         if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget) MoveByRule(Card(command.PerformerId), move, battlefield);
+        if (move.Movers == MoveSpec.Wielder && source is not null && WielderOf(source) is { } wielder) MoveByRule(wielder, move, battlefield); // issue #690 (P24)
         if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability).ToArray()) MoveByRule(mover, move, battlefield);
         if (move.Movers == MoveSpec.BattleActionPerformer && _state.BattleActionReactionPerformerId is { } reactedPerformerId && _state.Cards.TryGetValue(reactedPerformerId, out var reactedPerformer) && InPlay(reactedPerformer))
             MoveByRule(reactedPerformer, move, battlefield);
