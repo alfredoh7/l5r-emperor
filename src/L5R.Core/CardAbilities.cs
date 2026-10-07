@@ -5358,6 +5358,7 @@ public sealed partial class MatchEngine
         var id = command.AbilityId ?? "";
         Require(AbilityCatalog.All.TryGetValue(id, out var ability), "Unknown ability.");
         if (slotAbility is not null) ability = slotAbility;
+        ability = RulebookAbility(ability!, id, command); // P19 (issue #717, RulebookModifiers.cs): a rulebook action's timing / Absent as the performer's modifiers leave them
         RequireNotBarredFromTargeting(command, ability!);
         Require(ability!.Timing switch
         {
@@ -5494,6 +5495,7 @@ public sealed partial class MatchEngine
         // action may be taken until it closes (spec 4.2 precedes 4.5) -- only the Engage/"after engaging" Reactions are legal.
         Require(_state.PendingChoice?.Type != "engageReaction" || ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield",
             "Until the Engage window closes, only Engage actions and \"After engaging\" Reactions may be played.");
+        Require(!IsEngageAction(ability) || !EngageActionBarred(command.PlayerId), "The Attacker may not take Engage actions at this battlefield."); // P13 (RuleFlags.cs)
         // ...and a one-shot limit on the first-action holder's FIRST Battle action.
         ValidateFirstActionRestriction(command);
         var player = Player(command.PlayerId);
@@ -5960,7 +5962,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-follower-in-source-unit" => Definition(performer).Type == CardType.Follower && !performer.Bowed
                     && performer.Zone == Zone.Attached && performer.AttachedTo == UnitHostId(source!),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
-                "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
+                "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && (!actingAsBattle || AtBattle(performer)) && Keyword(performer, "Tactician"), // P19: an Open use (a timing override) is not at a battlefield
                 // Naval Invasion (issue #310): "choose your performing Naval Personality" -- printed or granted
                 // Naval (Keyword() covers Suitengu's Path, Scourge of the Sea, Kojiro's live conditional), in
                 // the Attacker's own army at the battlefield being engaged. Bowed is not excluded: the text says only "Naval".
@@ -5972,6 +5974,7 @@ public sealed partial class MatchEngine
                 // the Shugenja trait is excluded by the Type check, matching the printed restriction.
                 "own-unbowed-shugenja-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
                     Keyword(performer, "Shugenja") && Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()
+                    || RulebookEquipPerformerLegal(player.Id, performer, command)
                     || SanetomoExemptionNeeded(player.Id, performer), // Isawa Sanetomo (issue #503): even if bowed and even if unopposed
                 // Nakanu Technique (issue #402): "your performing unbowed opposed Personality at the current battlefield".
                 "own-unbowed-personality-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
@@ -6331,7 +6334,7 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && type == CardType.Strategy && target.Id != command.CardId, "Show another Strategy from your hand.");
                 else if (ability.Target == "spell-or-reserve-in-hand")
                 {
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && (type == CardType.Spell || Keyword(target, "Reserve")), "Choose a Spell, or a Reserve Fate card, from your hand.");
+                    Require(target.OwnerId == player.Id && (target.Zone == Zone.Hand || RulebookDiscardSource(id, player.Id, command.PerformerId, target)) && (type == CardType.Spell || Keyword(target, "Reserve")), "Choose a Spell, or a Reserve Fate card, from your hand."); // P19: or from the discard pile when a modifier allows it
                     Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Shugenja.");
                     Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
                     // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
@@ -6731,7 +6734,7 @@ public sealed partial class MatchEngine
                         "any-card" => true,
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
-                        "enemy-attacking" => personality && (!own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)) || FavorMempoAllowsAnyUnit(id, player, target)), // Mempo of the Amethyst Champion (issue #667): any player's unit, attacking or not. // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
+                        "enemy-attacking" => personality && (!own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)) || FavorMempoAllowsAnyUnit(id, player, target) || RulebookAllowsAnyTarget(id, player.Id, command)), // P19: a rulebook modifier's any-target. // Mempo of the Amethyst Champion (issue #667): any player's unit, attacking or not. // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
                         // Tokoru's Bear (oracle-l5r-10025, issue #299): "an attacking enemy card" -- not
                         // just an attacking Personality (enemy-attacking above) but any card in an
                         // attacking unit: the Personality himself or one of his attached Followers/
@@ -7128,7 +7131,7 @@ public sealed partial class MatchEngine
     {
         // Seeds of Decay pass (issue #453), batch 1: a standing redirect of another player's rewrites this action's target as it is announced (StandingRedirects.cs).
         command = ApplyStandingRedirects(command);
-        var ability = AbilityCatalog.All[command.AbilityId!];
+        var ability = RulebookAbility(AbilityCatalog.All[command.AbilityId!], command.AbilityId!, command); // P19 (RulebookModifiers.cs): the timing the action was taken under
         ClearActionMarkersForNewAction(command.AbilityId); // Emperor Edition Stronghold pass (issue #486), batch 2: Suitengu's Torch's and Shiro Chugo's marks belong to one announced action.
         // Additional Action (issue #181): a Battle-timed use that matches one of this player's
         // currently available grants is taken "out of order" -- deferred through the same
@@ -7166,6 +7169,7 @@ public sealed partial class MatchEngine
         if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
         if (KamalakarPoliticalNegates(command)) return; // Kamalakar (PromoCelestialA.cs): the first Political action each turn that targets him
         if (WatchNegatesPoliticalAction(command)) return; // P7 (PeriodWatches.cs): a negation watch on the card the Political action names, or on the player
+        if (RuleFlagNegatesBattleAction(command)) return; // P13 (RuleFlags.cs): a Battle action by a player without units at a flagged battlefield
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
@@ -7216,7 +7220,7 @@ public sealed partial class MatchEngine
     // performer (never for a Reaction's own resolution, already excluded by the caller).
     private bool OpenBattleActionReactionWindow(GameCommand command, AbilityDefinition ability, CardInstance? source, int closesTo)
     {
-        if (ability.Timing != "Battle") return false;
+        if (ability.Timing != "Battle" || _state.Phase != Phase.Battle) return false; // P19: a Battle-timed action taken as an Open one (a timing override) in the Action phase is not a Battle action
         var performer = ability.Performer is not null ? (command.PerformerId is null ? null : ActingPersonality(Card(command.PerformerId)))
             : source is null ? null : ActingPersonality(source);
         if (performer is null || Definition(performer).Type != CardType.Personality) return false;
@@ -8372,7 +8376,7 @@ public sealed partial class MatchEngine
             // Training-only (issue #309): "You have Reconnaissance at the current battlefield" (a Battle action of either side).
             case "training-gain-reconnaissance-here": GrantReconnaissanceAtCurrentBattlefield(player.Id); break;
             case "tactical-advantage":
-                ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", FocusValueOf(target!));
+                ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Math.Max(0, FocusValueOf(target!) + RulebookAmountDelta(id, player.Id, command))); // P19: Akodo Kano - exp's bonus
 
                 break;
             case "training-keyword-conditional-force-boost": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 2); break;
@@ -8380,7 +8384,7 @@ public sealed partial class MatchEngine
                 {
                     var performer = Card(command.PerformerId!);
                     var attachment = target!;
-                    player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); NoteAttachedFromHandForGlory(player.Id, attachment); // Hida Takeuchi (issue #477 batch 2); Glory of the Shogun (issue #492).
+                    if (attachment.Zone == Zone.Hand) { player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); NoteAttachedFromHandForGlory(player.Id, attachment); } // Hida Takeuchi (issue #477 batch 2); Glory of the Shogun (issue #492); P19: not from a discard pile
                     attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                     // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
                     // Spell never has, so this was never needed before) -- same as the ordinary Equip().
@@ -11091,7 +11095,8 @@ public sealed partial class MatchEngine
         foreach (var (source, id) in sources)
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
-            var ability = AbilityCatalog.All[id];
+            var printedAbility = AbilityCatalog.All[id];
+            var ability = RulebookListingAbility(printedAbility, id, playerId); // P19 (RulebookModifiers.cs): widened to the timing / Absent a modifier gives; the performers are filtered below
             if (ability.PlayerAbility && (PlayerAbilityDormant(id) || P5PlayerAbilityDormant(id, playerId) /* issue #503 */ || ShadowsEmbraceBatch6PlayerAbilityDormant(id) || ThreeSPlayerAbilityDormant(id, playerId) || PlayerGrantDormant(id, playerId))) continue; // Assault in the Jungle (issue #467), Fortress of Lidless Eyes (issue #476): only while granted.
             if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
             if (inAfterActionResolvedWindow != IsAfterActionResolvedReaction(ability)) continue;
@@ -11104,6 +11109,7 @@ public sealed partial class MatchEngine
             if (inP3EntryWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3EntryAbilities.EntryTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
+            if (isEngageReaction && EngageActionBarred(playerId)) continue; // P13 (RuleFlags.cs)
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
@@ -11190,7 +11196,7 @@ public sealed partial class MatchEngine
                 "own-personality-with-keyword-opposed-at-battle" => _state.CurrentBattleProvince is not int opposedProvince || !Army(1 - playerId, opposedProvince).Any() ? []
                     : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-                "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (actingAsBattle ? AtBattle(c) : InPlay(c)) && Keyword(c, "Tactician")).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 // Kitsu Fukui / Fading Shadows (issue #337): the generic "performing [Keyword] Personality", bowed or not. It was missing from
                 // this listing, so an ability that used it (Again!'s shape) could only be played by a hand-built command.
                 "own-personality-with-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
@@ -11200,7 +11206,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-follower-in-source-unit" => source is null ? [] : Attachments(UnitHostId(source)).Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-shugenja-opposed-at-battle" => (!Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Shugenja")).Select(c => (string?)c.Id))
-                    .Concat(SanetomoEquipPerformers(playerId)).Distinct().ToArray(), // Isawa Sanetomo (issue #503)
+                    .Concat(RulebookEquipPerformers(playerId)).Concat(SanetomoEquipPerformers(playerId)).Distinct().ToArray(), // P19: a modifier's exemptions; Isawa Sanetomo (issue #503)
                 "own-unbowed-personality-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 // Testimony (issue #453, batch 2).
@@ -11227,7 +11233,12 @@ public sealed partial class MatchEngine
             // performer -- see the generic fallback below), Equip (Battle) is not offered at all
             // without an eligible Shugenja or a Spell/Reserve card in hand: it is a standing player
             // ability with no source card of its own to anchor a disabled entry to.
-            if (id == "equip-battle" && (performers.Length == 0 || !player.Hand.Any(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")))) continue;
+            if (!ReferenceEquals(printedAbility, ability))
+            {
+                performers = RulebookKeepPerformers(printedAbility, ability, id, playerId, performers);
+                if (performers.Length == 0 && !RulebookBaseTimingOpenNow(printedAbility, playerId)) continue; // P19: no performer's modifier gives it this timing now
+            }
+            if (id == "equip-battle" && (performers.Length == 0 || !player.Hand.Any(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")) && !RulebookEquipDiscardCandidates(playerId, id).Any())) continue;
             if (performers.Length == 0) performers = [null];
             // Alternative cost (issue #337): one offered action per way to pay when the ability has more than one (each with its own label and
             // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
@@ -11268,7 +11279,7 @@ public sealed partial class MatchEngine
                                     "own-army-personalities" => armyIds.Cast<string?>().ToArray(),
                                     "hand" => player.Hand.ToArray(),
                                     "own-terrain-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Strategy && Keyword(Card(h), "Terrain")).Cast<string?>().ToArray(),
-                                    "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
+                                    "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Concat(RulebookEquipDiscardCandidates(playerId, id).Select(c => c.Id)).Cast<string?>().ToArray(), // P19: plus the discard pile when a modifier allows it
                                     // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): another Strategy in the acting player's own hand.
                                     "own-other-strategy-in-hand" => player.Hand.Where(h => h != source?.Id && Definition(Card(h)).Type == CardType.Strategy).Cast<string?>().ToArray(),
                                     // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/

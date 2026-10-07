@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Engine primitives P13 (phase and battle rule flags: RuleFlags.cs, SetRuleFlag/RemoveRuleFlag, kinds end-action-phase, no-engage-for-attacker, negate-battle-action-without-units, no-destruction-honor-for-others, defenders-may-not-play-terrains, no-enlightenment-victory, madness-loss; limited-as-open reuses P4) and P19 (rulebook-action modifiers: EngineHooks.RulebookModifier for Tactical Advantage amount/timing, Equip from the discard pile and exemptions, Favor (Battle) absent/any-target, card-free player timing grants) from the #668/#671 plan (#717). Engine only: no cards wired, no content, no art pack. Shared change: 12 lines in MatchEngine/CardAbilities/MatchQueries (P13) and ValidateAbility/QueryActions/Equip/TimingGrants (P19); both keep default behaviour identical when unused (state fields omitted).",
+  "validation": "rule-flags 11/11 and rulebook-modifiers 8/8; full Core 0 FAIL and AI incl bot-soak 3/3 in each cluster; format and comment-swallow lint clean; final merged-tree check.sh result in the PR.",
+  "remaining": "Cards that use the primitives are a later wave; readings in docs/decisions/2026-10-07-p13-rule-flags.md and 2026-10-07-p19-rulebook-modifiers.md to confirm.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/717",
+  "branch": "claude/717-p13-p19",
+  "updated": "2026-10-07T18:00:10.798880+00:00"
+}
