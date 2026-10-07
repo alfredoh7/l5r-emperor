@@ -41,10 +41,10 @@ class PackageWlItemsMiscTests(unittest.TestCase):
                 self.assertEqual(source["printing_set"], [common.PRINTINGS[slug]], "each card names the printing it was requested for")
                 self.assertIn(f"/oracle/{slug}/", source["image_path"])
 
-    def test_the_cluster_is_21_cards_and_fudos_assurances_is_blocked(self):
+    def test_the_cluster_is_21_cards_and_fudos_assurances_moved_to_the_rings_cluster(self):
         self.assertEqual(sum(len(m.ENTRIES) for m, _ in MODULES), 21)
         blockers = json.loads((ROOT / "tools/content/pe_wl_items_misc_blockers.json").read_text(encoding="utf-8"))
-        self.assertEqual(list(blockers), ["oracle-l5r-10416"])
+        self.assertEqual(list(blockers), [], "Fudo's Assurances is wired by the rings cluster (celestial-wave-29, issue #699)")
         for module, _ in MODULES:
             self.assertNotIn(10416, module.ENTRIES)
 

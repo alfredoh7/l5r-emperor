@@ -122,6 +122,7 @@ public sealed partial class MatchEngine
     private void ChooseSearchDestination(PendingSearch search, GameCommand command)
     {
         Require(command.Type == "chooseSearchDestination" && command.Choice is DestinationPlay or DestinationHand, "Put the card into play or into your hand.");
+        Require(command.Choice != DestinationPlay || RingMayEnterPlay(Player(search.PlayerId)), "Brotherhood Schism: you already put a Ring into play this turn."); // issue #699 (WlRings.cs)
         var ring = Card(search.SelectedCardId);
         if (command.Choice == DestinationHand) MoveSearchedCardToHand(search, ring);
         else PutSearchedRingIntoPlay(search, ring);
@@ -131,8 +132,8 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> SearchDestinationActions(PendingSearch search, int playerId)
     {
         var ring = Card(search.SelectedCardId);
-        yield return new("chooseSearchDestination", $"Put {Definition(ring).Name} into play (it will not count towards an Enlightenment Victory)", true, null,
-            new GameCommand("chooseSearchDestination", playerId, _state.Version, Choice: DestinationPlay), ring.Id);
+        yield return new("chooseSearchDestination", $"Put {Definition(ring).Name} into play (it will not count towards an Enlightenment Victory)", RingMayEnterPlay(Player(playerId)), RingMayEnterPlay(Player(playerId)) ? null : "Brotherhood Schism: you already put a Ring into play this turn.",
+            RingMayEnterPlay(Player(playerId)) ? new GameCommand("chooseSearchDestination", playerId, _state.Version, Choice: DestinationPlay) : null, ring.Id);
         yield return new("chooseSearchDestination", $"Put {Definition(ring).Name} into your hand", true, null,
             new GameCommand("chooseSearchDestination", playerId, _state.Version, Choice: DestinationHand), ring.Id);
     }
@@ -144,10 +145,9 @@ public sealed partial class MatchEngine
         SearchDeckList(player, search.Deck!).Remove(ring.Id);
         player.Hand.Remove(ring.Id); // a Ring found in the hand leaves it by changing zone
         ring.Zone = Zone.Home; ring.ProvinceIndex = null; ring.FaceUp = true; ring.Bowed = false;
-        ring.AbilityUses[NoEnlightenmentKey] = 1;
-        player.RingPutIntoPlayTurn = _state.TurnNumber;
+        RingEntersPlay(player, ring, false, Card(search.SourceCardId)); // issue #699 (WlRings.cs): another card's text put it into play
+        WlR.SearchEnteredRingId = ring.Id; // FinishSearch opens "after your Ring enters play" for an entry search
         Emit("cardEnteredPlay", $"{player.Name} put {Definition(ring).Name} into play ({Definition(Card(search.SourceCardId)).Name}); while it remains in play it does not count towards an Enlightenment Victory.", player.Id, ring.Id);
-        if (_runningCommand is not null) RecordActionEffect(ring.Id, RingEnteredKind); // "after one of your Rings enters play" reads the resolving action's record
     }
 
     // ---- Asako Chukage's Reaction ----

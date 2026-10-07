@@ -422,14 +422,14 @@ public sealed partial class MatchEngine
                 break;
             case EmperorP5Abilities.YutakaReturn:
             case EmperorP5Abilities.YutakaReturnDark:
-            {
-                Require(_state.CurrentBattleProvince is int yutakaBattle && Army(1 - player.Id, yutakaBattle).Any(), "Yutaka would not be opposed at the current battlefield.");
-                var dark = TookDarkVirtueActionThisPhase(player.Id);
-                Require(id == EmperorP5Abilities.YutakaReturnDark ? dark : !dark, dark ? "You have taken a Dark Virtue action this phase: Yutaka pays 3 less Gold." : "You have not taken a Dark Virtue action this phase.");
-                var quote = QuotePurchase(player.Id, source!.Id, fromDeadPile: true);
-                Require(quote.Error is null, quote.Error ?? "");
-                break;
-            }
+                {
+                    Require(_state.CurrentBattleProvince is int yutakaBattle && Army(1 - player.Id, yutakaBattle).Any(), "Yutaka would not be opposed at the current battlefield.");
+                    var dark = TookDarkVirtueActionThisPhase(player.Id);
+                    Require(id == EmperorP5Abilities.YutakaReturnDark ? dark : !dark, dark ? "You have taken a Dark Virtue action this phase: Yutaka pays 3 less Gold." : "You have not taken a Dark Virtue action this phase.");
+                    var quote = QuotePurchase(player.Id, source!.Id, fromDeadPile: true);
+                    Require(quote.Error is null, quote.Error ?? "");
+                    break;
+                }
             case EmperorP5Abilities.TokikoHome:
             case EmperorP5Abilities.TokikoBattlefield:
                 if (command.TargetId is { } tokikoTarget && _state.Cards.ContainsKey(tokikoTarget))
@@ -500,22 +500,22 @@ public sealed partial class MatchEngine
                 if (target!.Zone != Zone.Dead) { Emit("raiseFailed", $"{Definition(target).Name} is no longer dead.", player.Id, target.Id); return false; }
                 return BringDeadPersonalityIntoPlay(player, target, Definition(source!).Name, id == EmperorP5Abilities.TokikoBattlefield ? _state.CurrentBattleProvince : null);
             case EmperorP5Abilities.DisruptingBow:
-            {
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                var leader = Player(1 - player.Id);
-                if (leader.Hand.Count == 0) { Emit("discardNothing", $"{Definition(source!).Name}: {leader.Name} has no card to discard.", leader.Id, source!.Id); return false; }
-                if (HasReconnaissanceAtCurrentBattlefield(player.Id))
                 {
-                    var hand = leader.Hand.ToList();
-                    var random = new StableRandom(_state.RngState);
-                    random.Shuffle(hand);
-                    _state.RngState = random.State;
-                    Emit("randomDiscard", $"{Definition(source!).Name}: {player.Name} has Reconnaissance, so {leader.Name} discards a card at random.", leader.Id, source!.Id);
-                    DiscardFate(leader, Card(hand[0]));
-                    return false;
+                    if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                    var leader = Player(1 - player.Id);
+                    if (leader.Hand.Count == 0) { Emit("discardNothing", $"{Definition(source!).Name}: {leader.Name} has no card to discard.", leader.Id, source!.Id); return false; }
+                    if (HasReconnaissanceAtCurrentBattlefield(player.Id))
+                    {
+                        var hand = leader.Hand.ToList();
+                        var random = new StableRandom(_state.RngState);
+                        random.Shuffle(hand);
+                        _state.RngState = random.State;
+                        Emit("randomDiscard", $"{Definition(source!).Name}: {player.Name} has Reconnaissance, so {leader.Name} discards a card at random.", leader.Id, source!.Id);
+                        DiscardFate(leader, Card(hand[0]));
+                        return false;
+                    }
+                    return BeginDeciderChoice(DeciderSpecs.KimiDiscard, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
                 }
-                return BeginDeciderChoice(DeciderSpecs.KimiDiscard, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
             case EmperorP5Abilities.BiteEnter:
             case EmperorP5Abilities.EconEnter:
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true; source.ProvinceIndex = null;
@@ -534,10 +534,8 @@ public sealed partial class MatchEngine
             case EmperorP5Abilities.StartingPathRing:
                 player.Hand.Remove(target!.Id);
                 target.Zone = Zone.Home; target.ProvinceIndex = null; target.FaceUp = true; target.Bowed = false;
-                target.AbilityUses[NoEnlightenmentKey] = 1;
-                player.RingPutIntoPlayTurn = _state.TurnNumber;
+                RingEntersPlay(player, target, false, source, id); // issue #699 (WlRings.cs)
                 Emit("cardEnteredPlay", $"{player.Name} put {Definition(target).Name} into play (Starting on the Path); while it remains in play it does not count towards an Enlightenment Victory.", player.Id, target.Id);
-                RecordActionEffect(target.Id, RingEnteredKind);
                 return false;
             case EmperorP5Abilities.SeekStainKolat:
             case EmperorP5Abilities.SeekStainNinja:
@@ -545,33 +543,33 @@ public sealed partial class MatchEngine
                 GrantKeyword(target!, id == EmperorP5Abilities.SeekStainKolat ? "Kolat" : id == EmperorP5Abilities.SeekStainNinja ? "Ninja" : "Shadowlands", source!.Id, GrantDuration.Turn);
                 return false;
             case EmperorP5Abilities.GuestsDiscard:
-            {
-                var him = Card(HeldAction().TargetId!);
-                if (InPlay(him)) DiscardPersonalityFromPlay(him, Definition(source!).Name);
-                return false;
-            }
-            case EmperorP5Abilities.GuestsCreate:
-            {
-                var name = Definition(source!).Name;
-                return ExecuteCreate(ability, ability.Creates!, command, player, () =>
                 {
-                    var created = Card($"created-{_state.CreatedCardSequence:D4}");
-                    ScheduleTimedRemoval(created, TimedRemovalWhen.TurnEnds, player.Id, name);
-                });
-            }
-            case EmperorP5Abilities.MistrustNegate:
-            {
-                var name = Definition(source!).Name;
-                if (CurrentBattlefieldProvince() is { CardId: { } shownId })
-                {
-                    var shown = Card(shownId);
-                    Emit("cardShown", $"{name}: {Player(player.Id).Name} shows the card in the current battlefield's province: {Definition(shown).Name}.", player.Id, shown.Id);
-                    RecordShown(player.Id, shown, source!, "Province", "reaction"); // the public shown-cards record
-                    if (Definition(shown).Type == CardType.Personality) NegateHeldAction(source!);
+                    var him = Card(HeldAction().TargetId!);
+                    if (InPlay(him)) DiscardPersonalityFromPlay(him, Definition(source!).Name);
+                    return false;
                 }
-                else Emit("cardShown", $"{name}: the current battlefield's province holds no card.", player.Id, source!.Id);
-                return false;
-            }
+            case EmperorP5Abilities.GuestsCreate:
+                {
+                    var name = Definition(source!).Name;
+                    return ExecuteCreate(ability, ability.Creates!, command, player, () =>
+                    {
+                        var created = Card($"created-{_state.CreatedCardSequence:D4}");
+                        ScheduleTimedRemoval(created, TimedRemovalWhen.TurnEnds, player.Id, name);
+                    });
+                }
+            case EmperorP5Abilities.MistrustNegate:
+                {
+                    var name = Definition(source!).Name;
+                    if (CurrentBattlefieldProvince() is { CardId: { } shownId })
+                    {
+                        var shown = Card(shownId);
+                        Emit("cardShown", $"{name}: {Player(player.Id).Name} shows the card in the current battlefield's province: {Definition(shown).Name}.", player.Id, shown.Id);
+                        RecordShown(player.Id, shown, source!, "Province", "reaction"); // the public shown-cards record
+                        if (Definition(shown).Type == CardType.Personality) NegateHeldAction(source!);
+                    }
+                    else Emit("cardShown", $"{name}: the current battlefield's province holds no card.", player.Id, source!.Id);
+                    return false;
+                }
             case EmperorP5Abilities.MistrustDiscard:
                 DiscardCurrentProvinceCard();
                 Draw(player);

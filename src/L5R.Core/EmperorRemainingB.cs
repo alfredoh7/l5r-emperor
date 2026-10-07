@@ -74,7 +74,7 @@ public static class EmperorRemainingBAbilities
             Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Commander"], Move: new(MoveSpec.Target, MoveSpec.AnyUnresolved));
         // Introspection (oracle-l5r-3793): "Reaction: After one of your Rings enters play: Search your Fate deck for a card. Put it in your hand." Yung's trigger, played from a hand.
         all["introspection-search"] = new("Reaction", "After one of your Rings enters play: Search your Fate deck for a card. Put it in your hand", "none",
-            Trigger: AfterActionReactionTriggers.AfterActionResolved, Search: SearchCatalog.Introspection);
+            Trigger: ReactionTriggers.RingEntersPlay, Search: SearchCatalog.Introspection);
         // Martial Instruction (oracle-l5r-4843, Kiho): "Open: Bow your performing Monk and remove this card from the game: Search your Fate deck for a Kiho Battle Strategy, show it, and put it in your
         // hand." A Battle Strategy is a Strategy with a printed Battle action (Battle or Battle/Open).
         all["martial-instruction-search"] = new("Open", "Bow your performing Monk and remove this card from the game: Search your Fate deck for a Kiho Battle Strategy, show it, and put it in your hand", "none",
@@ -186,7 +186,7 @@ public sealed partial class MatchEngine
             case "hidden-defenses-move":
                 Require(_state.CurrentBattleProvince is int engaged && Army(1 - player.Id, engaged).Any(), "Hidden Defenses requires enemy units at the current battlefield.");
                 break;
-            // Mysterious Deaths is a Limited action of the Action Phase like any other (ValidateAbility's timing check); nothing more is required to take it.
+                // Mysterious Deaths is a Limited action of the Action Phase like any other (ValidateAbility's timing check); nothing more is required to take it.
         }
     }
 
@@ -204,34 +204,34 @@ public sealed partial class MatchEngine
                 return false;
             // Murderous Intent: +1F per keyword now (the Honor loss is an effect of the action, so a negation stops it with the rest).
             case "murderous-intent-boost":
-            {
-                var paragon = Card(command.PerformerId!);
-                var count = KeywordCountExceptSoulOf(paragon);
-                if (count > 0) ApplyModifier(paragon, source!.Id, id, "Force", count);
-                Emit("murderousIntent", $"{Definition(paragon).Name} has {count} keyword{(count == 1 ? "" : "s")} besides \"Soul of\" keywords: +{count}F.", player.Id, paragon.Id);
-                GainHonor(player.Id, -4, Definition(source!).Name, source);
-                return false;
-            }
+                {
+                    var paragon = Card(command.PerformerId!);
+                    var count = KeywordCountExceptSoulOf(paragon);
+                    if (count > 0) ApplyModifier(paragon, source!.Id, id, "Force", count);
+                    Emit("murderousIntent", $"{Definition(paragon).Name} has {count} keyword{(count == 1 ? "" : "s")} besides \"Soul of\" keywords: +{count}F.", player.Id, paragon.Id);
+                    GainHonor(player.Id, -4, Definition(source!).Name, source);
+                    return false;
+                }
             // In the Heart of Battle.
             case "heart-of-battle-surge":
-            {
-                var samurai = Card(command.PerformerId!);
-                Straighten(samurai);
-                ApplyModifier(samurai, source!.Id, id, "Force", 3);
-                ScheduleDelayedEffect(samurai, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, Definition(source!).Name, source.Id); // the shared delay store (issue #492, EmperorRulingR2.cs)
-                Emit("destructionScheduled", $"{Definition(samurai).Name} will be destroyed before this turn ends.", player.Id, samurai.Id);
-                return false;
-            }
+                {
+                    var samurai = Card(command.PerformerId!);
+                    Straighten(samurai);
+                    ApplyModifier(samurai, source!.Id, id, "Force", 3);
+                    ScheduleDelayedEffect(samurai, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, Definition(source!).Name, source.Id); // the shared delay store (issue #492, EmperorRulingR2.cs)
+                    Emit("destructionScheduled", $"{Definition(samurai).Name} will be destroyed before this turn ends.", player.Id, samurai.Id);
+                    return false;
+                }
             // Guided by Honor: the move (his own; a negated or blocked move leaves him where he was), then the optional bow only if he really moved.
             case "guided-by-honor-move":
-            {
-                var paragon = Card(command.PerformerId!);
-                var wasAtBattle = AtBattle(paragon);
-                ExecuteMove(command, ability, source, target);
-                var moved = !wasAtBattle && AtBattle(paragon);
-                if (moved && SlotCards(command, "target").FirstOrDefault() is { } enemy && InPlay(enemy) && !StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
-                return false;
-            }
+                {
+                    var paragon = Card(command.PerformerId!);
+                    var wasAtBattle = AtBattle(paragon);
+                    ExecuteMove(command, ability, source, target);
+                    var moved = !wasAtBattle && AtBattle(paragon);
+                    if (moved && SlotCards(command, "target").FirstOrDefault() is { } enemy && InPlay(enemy) && !StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
+                    return false;
+                }
             // Nerve Strike.
             case "nerve-strike-freeze":
                 NerveStrike(target!, source!, id);
@@ -243,18 +243,18 @@ public sealed partial class MatchEngine
                 return BeginDeciderChoice(EmperorRemainingBSpecs.MysteriousDeathsFirst, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
             // My Enemy's Mercy: the Honor is gained whatever the enemy leader chooses; the choice then belongs to the enemy leader (EitherOr.cs).
             case "my-enemys-mercy-choose":
-            {
-                GainHonor(player.Id, 2, Definition(source!).Name, source);
-                if (NegatesEffect(target!, "all"))
                 {
-                    Emit("effectsNegated", $"{Definition(target!).Name}: the action's effects were negated before they resolved.", target!.OwnerId, target.Id);
-                    return false;
+                    GainHonor(player.Id, 2, Definition(source!).Name, source);
+                    if (NegatesEffect(target!, "all"))
+                    {
+                        Emit("effectsNegated", $"{Definition(target!).Name}: the action's effects were negated before they resolved.", target!.OwnerId, target.Id);
+                        return false;
+                    }
+                    SpendHandPlayedCard(player, source);
+                    if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+                    return OpenEitherOr(EmperorRemainingBSpecs.MercyBowOrHome, source!, player.Id, 1 - player.Id, target, "action", bowedBeforeAction,
+                        stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)), performerId: command.PerformerId);
                 }
-                SpendHandPlayedCard(player, source);
-                if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
-                return OpenEitherOr(EmperorRemainingBSpecs.MercyBowOrHome, source!, player.Id, 1 - player.Id, target, "action", bowedBeforeAction,
-                    stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)), performerId: command.PerformerId);
-            }
             // Introspection / Meeting the Keepers' Reaction: a Strategy played from a hand is spent first; the window it was played in is set aside until the search is over (ReactionsAreActions.cs).
             case "introspection-search":
             case "keepers-search":
@@ -276,21 +276,21 @@ public sealed partial class MatchEngine
                 return false;
             // Oyo's Second Lesson: the dead Henshin takes the target's place (overlay), then the draw and the additional action.
             case "oyos-second-lesson-reborn":
-            {
-                var henshin = Card(command.PerformerId!);
-                var host = target!;
-                if (henshin.Zone == Zone.Dead && InPlay(host) && host.OwnerId == player.Id && Definition(host).Type == CardType.Personality)
                 {
-                    var hostName = Definition(host).Name;
-                    ResetCardState(henshin);
-                    TransferOverlayState(host, henshin);
-                    RemoveFromGame(host);
-                    Emit("personalityOverlayed", $"{Definition(henshin).Name} is reborn: overlaid onto {hostName}.", player.Id, henshin.Id);
+                    var henshin = Card(command.PerformerId!);
+                    var host = target!;
+                    if (henshin.Zone == Zone.Dead && InPlay(host) && host.OwnerId == player.Id && Definition(host).Type == CardType.Personality)
+                    {
+                        var hostName = Definition(host).Name;
+                        ResetCardState(henshin);
+                        TransferOverlayState(host, henshin);
+                        RemoveFromGame(host);
+                        Emit("personalityOverlayed", $"{Definition(henshin).Name} is reborn: overlaid onto {hostName}.", player.Id, henshin.Id);
+                    }
+                    Draw(player);
+                    GrantAdditionalAction(player.Id, null);
+                    return false;
                 }
-                Draw(player);
-                GrantAdditionalAction(player.Id, null);
-                return false;
-            }
             // Hidden Defenses: bow them and lock their straightening for the turn (each effect independent of the other).
             case "hidden-defenses-bow":
                 foreach (var victim in SlotCards(command, "targets").ToArray())
@@ -300,13 +300,13 @@ public sealed partial class MatchEngine
                 }
                 return false;
             case "hidden-defenses-move":
-            {
-                var mover = Card(command.PerformerId!);
-                var battlefield = _state.CurrentBattleProvince!.Value;
-                var wasThere = AtBattle(mover);
-                if (!wasThere && TryMoveToBattlefield(mover, battlefield) && AtBattle(mover)) Straighten(mover);
-                return false;
-            }
+                {
+                    var mover = Card(command.PerformerId!);
+                    var battlefield = _state.CurrentBattleProvince!.Value;
+                    var wasThere = AtBattle(mover);
+                    if (!wasThere && TryMoveToBattlefield(mover, battlefield) && AtBattle(mover)) Straighten(mover);
+                    return false;
+                }
             // Hundred-Fold Cut: the Weapon was bowed or destroyed as the cost; the held action's destruction of the Kensai is negated. The Battle half draws two.
             case "hundred-fold-cut-bow":
             case "hundred-fold-cut-destroy":
@@ -328,12 +328,12 @@ public sealed partial class MatchEngine
                     stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)), performerId: command.PerformerId);
             // He's Mine!: the Personality bowed as the cost is replaced in the duel by the chosen Samurai, who bows when the duel has ended.
             case "hes-mine-substitute":
-            {
-                var samurai = Card(command.PerformerId!);
-                SubstituteDuelParticipant(target!, samurai, source!);
-                _state.HesMineSubstitutes.Add(samurai.Id);
-                return false;
-            }
+                {
+                    var samurai = Card(command.PerformerId!);
+                    SubstituteDuelParticipant(target!, samurai, source!);
+                    _state.HesMineSubstitutes.Add(samurai.Id);
+                    return false;
+                }
             // Plans Within Plans.
             case "plans-within-plans-arm":
                 player.PlansWithinPlansArmed = true; player.PlansWithinPlansSets++;
@@ -582,7 +582,15 @@ public sealed partial class MatchEngine
             var (candidates, min, max) = EmperorRemainingBDeciderOptions(second, other);
             var next = new PendingDeciderChoice
             {
-                SpecId = second, SourceCardId = p.SourceCardId, ActingPlayerId = p.ActingPlayerId, DeciderPlayerId = other, Candidates = candidates, Min = min, Max = max, EarlierChosen = chosen, Paused = p.Paused
+                SpecId = second,
+                SourceCardId = p.SourceCardId,
+                ActingPlayerId = p.ActingPlayerId,
+                DeciderPlayerId = other,
+                Candidates = candidates,
+                Min = min,
+                Max = max,
+                EarlierChosen = chosen,
+                Paused = p.Paused
             };
             // Nothing to decide (no candidate, or only the one a mandatory choice needs): announced and applied, as for the first decider (BeginDeciderChoice).
             if (candidates.Count <= min)
