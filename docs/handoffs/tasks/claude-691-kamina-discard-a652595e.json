@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Akodo Kamina (#691): his printed 'You may discard a card to ignore the cost of bowing Kamina' was simplified away in #198 (the action always bowed him). kamina-boost now has two cost options (Bow Kamina; Discard a card via the new AlternativeDiscard.cs, a discard/chosen-card cost option usable by any ability), the discard listed once per hand card with the card named in its label. Client: the existing 'How do you pay' review lists both ways, shows a hint, highlights the hand cards that may be discarded and lets a hand-card click select that discard. Shared change: AlternativeCosts.cs and CardAbilities.cs listing code, client Main.cs/Main.Decisions.cs, and the NeedsTargetPick rule so the player still picks the target.",
+  "validation": "kamina-discard suite 6/6; full Core suite exit 0; AI suite exit 0; check_format clean; native check-decision-chooser all 10 probes pass including the new kamina probe (1280x800: grouped action, target step, cost review with Bow Kamina plus per-card discards, hand-card click selects, confirm discards the card and leaves Kamina unbowed).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/691",
+  "branch": "claude/691-kamina-discard",
+  "updated": "2026-10-07T00:55:17.704593+00:00"
+}

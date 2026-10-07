@@ -581,7 +581,7 @@ public partial class Main : Node
     {
         if (_shownOpen) ToggleShownCards(false);
         if (_session.Busy || PresentationBusy || _playHeld) return;
-        if (SelectEventCard(card) || SelectPendingCandidate(card)) return;
+        if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
@@ -644,6 +644,8 @@ public partial class Main : Node
             tile.DecisionSelected |= GenericDecisionActive && (tile.Card.Id == _decisionSelection?.Command?.TargetId || _decisionSelection?.DecisionCandidateIds?.Contains(tile.Card.Id) == true);
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
             tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id);
+            tile.LegalTarget |= AlternativeCostCards().Contains(tile.Card.Id); // a hand card a discard way to pay may spend (Akodo Kamina)
+            tile.DecisionSelected |= _reviewingAlternativeCost && _decisionSelection?.Command?.CardIds?.Contains(tile.Card.Id) == true;
             tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id) || _sources.Any(id => id.StartsWith(tile.Card.Id + "#", StringComparison.Ordinal)); tile.QueueRedraw(); // a payment token ("<card>#reaction") marks its card
@@ -669,7 +671,7 @@ public partial class Main : Node
     // Core builds each targeted action's command with its first legal target filled in. The player, not the client or that default, picks the target (issue #581):
     // the panel starts on "Choose a target…". Attack targets and support cards have their own target flows and keep theirs.
     private bool NeedsTargetPick(ActionOption option) =>
-        option is { Type: "equip" or "playStrategy" or "useAbility", Command: { CardIds: null, TargetId: not null }, TargetIds: { Length: > 0 } } && !HasAttackTargets(option)
+        option is { Type: "equip" or "playStrategy" or "useAbility", Command: { TargetId: not null }, TargetIds: { Length: > 0 } } && (option.Command!.CardIds is null || option.AlternativeCost is not null) && !HasAttackTargets(option)
         && !(option.CardId is { } sourceId && FindCard(sourceId) is { } source && IsSupportCard(source));
 
     private void Choose(ActionOption option, bool keepTarget = false)

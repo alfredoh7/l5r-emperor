@@ -6,6 +6,7 @@ public sealed partial class MatchEngine
     public static MatchEngine CreateDecisionShowcase(string kind)
     {
         if (kind is "preserving" or "rin" or "conqueror" or "straighten" or "discard") return CreateGenericDecisionShowcase(kind);
+        if (kind == "kamina") return CreateKaminaShowcase();
         if (kind is not ("yumaru" or "fukui" or "fukui-bowed")) throw new ArgumentException("Unknown decision showcase.", nameof(kind));
         var state = CreatePublishedTestMatch(42).State;
         state.Phase = Phase.Battle; state.ActivePlayerId = 0; state.PriorityPlayerId = 0;
@@ -27,6 +28,22 @@ public sealed partial class MatchEngine
             if (!result.Accepted || engine.State.PendingChoice?.Type != "effectChoice") throw new InvalidOperationException("Yumaru showcase failed to open its engine choice.");
         }
         return engine;
+    }
+    // Akodo Kamina (issue #691): "bow Kamina, or discard a card", in the Action Phase with two cards in hand.
+    private static MatchEngine CreateKaminaShowcase()
+    {
+        var state = CreatePublishedTestMatch(42).State;
+        state.Phase = Phase.Action; state.ActivePlayerId = state.PriorityPlayerId = 0; state.PendingChoice = null;
+        foreach (var id in state.Players[0].Hand.ToArray()) { state.Cards.Remove(id); }
+        state.Players[0].Hand.Clear();
+        CardInstance Put(string definition, int owner, Zone zone)
+        {
+            var card = new CardInstance { Id = "kamina-review-" + state.Cards.Count, DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = zone != Zone.Hand };
+            state.Cards.Add(card.Id, card); if (zone == Zone.Hand) state.Players[owner].Hand.Add(card.Id); return card;
+        }
+        Put("oracle-l5r-224", 0, Zone.Home); Put("training-crane-samurai", 0, Zone.Home);
+        Put("oracle-l5r-1450", 0, Zone.Hand); Put("oracle-l5r-5523", 0, Zone.Hand);
+        return FromTestState(state);
     }
     private static MatchEngine CreateGenericDecisionShowcase(string kind)
     {
