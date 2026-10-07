@@ -36,6 +36,8 @@ def release_for(receipt):
 
 
 def verify_asset(receipt, release):
+    for companion in receipt.get("companions", []):
+        verify_asset(companion, release)
     assets = [a for a in release["assets"] if a["name"] == receipt["asset"]]
     if len(assets) != 1:
         raise ValueError("Release must contain exactly one matching package")
@@ -61,17 +63,23 @@ def notification(spec, receipt, asset):
     url = f"https://github.com/{REPO}/releases/tag/{receipt['tag']}"
     checks = "\n".join("- " + step for step in spec["review_steps"])
     limits = "\n".join("- " + item for item in spec["known_limitations"])
+    steps = f"1. [Download the Windows preview]({asset['browser_download_url']}) (sign in to GitHub).\n2. Right-click the ZIP → **Extract All**."
+    if receipt.get("companions"):
+        downloads = [f"[Part 1]({asset['browser_download_url']})"] + [
+            f"[Part {i}](https://github.com/{REPO}/releases/download/{receipt['tag']}/{part['asset']})"
+            for i, part in enumerate(receipt["companions"], 2)]
+        steps = "1. Download all ZIP parts: " + " · ".join(downloads) + " (sign in to GitHub).\n2. **Extract All** on each ZIP, choosing the **same destination folder** for every part."
     return f'''<!-- l5r-preview:{receipt['tag']} -->
 @{spec['reviewer']} **Alfredo has built {spec['title']} and would like your review.**
 
 ### Open the Windows preview
 
-1. [Download the Windows preview]({asset['browser_download_url']}) (sign in to GitHub).
-2. Right-click the ZIP → **Extract All**.
+{steps}
 3. Open the extracted folder and double-click **Start Review.cmd**.
 
 The game opens directly to the prepared table. It includes the runtime and artwork;
-no Godot, .NET SDK, Git checkout or build is needed. Keep the `game` folder beside the launcher.
+no Godot, .NET SDK, Git checkout or build is needed. Keep all extracted files together.
+For a multipart download, Start Review verifies and prepares the complete game on its first launch.
 Settings and decks are separate from your normal game. Windows may show a first-run warning
 because this is a private unsigned development build.
 
@@ -87,10 +95,11 @@ opens this PR. A feedback comment is distinct from formal code-review approval.
 
 Ask: **“Download and open Alfredo's Windows preview from PR #{spec['source_pr']},
 release `{receipt['tag']}`. Read its launch instructions, verify the SHA-256, extract
-the whole package into a new folder and run Start Review.cmd. Do not switch my
+all download parts into the same new folder and run Start Review.cmd. Do not switch my
 working branch or merge anything.”**
 
 SHA-256: `{receipt['sha256']}`
+{"".join(chr(10) + part['asset'] + " SHA-256: `" + part['sha256'] + "`" for part in receipt.get("companions", []))}
 
 Exact game source: `{receipt['source_commit']}` · [Release and instructions]({url})
 
@@ -108,6 +117,16 @@ def stage(spec, receipt, archive):
         raise ValueError("Receipt and specification do not match")
     if archive.name != receipt["asset"] or archive.stat().st_size != receipt["bytes"] or digest(archive) != receipt["sha256"]:
         raise ValueError("Local archive no longer matches the receipt")
+    if archive.stat().st_size >= 2 * 1024**3:
+        raise ValueError("Split delivery exceeds the GitHub release limit")
+    archives = [archive]
+    for part in receipt.get("companions", []):
+        if Path(part["asset"]).name != part["asset"] or part["bytes"] >= 2 * 1024**3:
+            raise ValueError("Unsafe or oversized companion asset")
+        path = archive.parent / part["asset"]
+        if path.stat().st_size != part["bytes"] or digest(path) != part["sha256"]:
+            raise ValueError("Companion archive no longer matches the receipt")
+        archives.append(path)
     if not api(f"repos/{REPO}")["private"]:
         raise ValueError("Preview publication requires the private repository")
     existing = release_for(receipt)
@@ -122,10 +141,11 @@ def stage(spec, receipt, archive):
                "--draft", "--prerelease", "--latest=false", "--title", "Review: " + spec["title"] + " (Windows)",
                "--notes-file", str(file))
         existing = wait_for_release(receipt)
-    if not any(a["name"] == receipt["asset"] for a in existing["assets"]):
-        if not existing["draft"]:
-            raise ValueError("Never append or replace a published preview; increment its revision")
-        gh("release", "upload", receipt["tag"], str(archive), "--repo", REPO)
+    for path in archives:
+        if not any(a["name"] == path.name for a in existing["assets"]):
+            if not existing["draft"]:
+                raise ValueError("Never append or replace a published preview; increment its revision")
+            gh("release", "upload", receipt["tag"], str(path), "--repo", REPO)
     release = wait_for_release(receipt)
     verify_asset(receipt, release)
     if release["draft"]:

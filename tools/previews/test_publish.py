@@ -7,6 +7,16 @@ from package import REPO, digest
 
 
 class PublishTests(unittest.TestCase):
+    def test_missing_or_corrupt_companion_cannot_be_delivered(self):
+        receipt = {"asset": "review.zip", "bytes": 12, "sha256": "a" * 64,
+                   "companions": [{"asset": "review-Part2.zip", "bytes": 9, "sha256": "b" * 64}]}
+        release = {"assets": [{"name": "review.zip", "size": 12, "digest": "sha256:" + "a" * 64}]}
+        with self.assertRaises(ValueError):
+            verify_asset(receipt, release)
+        release["assets"].append({"name": "review-Part2.zip", "size": 9, "digest": "sha256:" + "c" * 64})
+        with self.assertRaises(ValueError):
+            verify_asset(receipt, release)
+
     def test_delayed_draft_listing_resumes_one_release_without_notification(self):
         with tempfile.TemporaryDirectory() as temp:
             archive = Path(temp) / "review.zip"

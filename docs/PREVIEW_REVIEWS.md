@@ -18,7 +18,10 @@ Packages remain immutable; publication does not merge the candidate.
 
 1. Open the GitHub notification **“Alfredo has built … and would like your review.”**
 2. Follow **Download the Windows preview** while signed into GitHub.
-3. Right-click the ZIP → **Extract All**, then open **Start Review.cmd**.
+3. Right-click the ZIP → **Extract All**, then open **Start Review.cmd**. If the
+   notification lists multiple ZIP parts, download every part and extract each into
+   the **same destination folder**. Start Review verifies and assembles the complete
+   game on its first launch; later launches reuse that prepared game.
 4. Try the prepared scene. Close/reopen to reset it. Other views are in **Other previews**;
    **Open Full Game.cmd** opens the same build's normal menus.
 5. Open **Send Feedback.url** or reply to the GitHub notification email. Describe
@@ -58,6 +61,10 @@ Expand-Archive -LiteralPath ZIP_PATH -DestinationPath NEW_REVIEW_FOLDER
 Start-Process -FilePath 'FULL_PATH_TO_EXTRACTED_FOLDER\Start Review.cmd'
 ```
 
+For a multipart release, repeat the download, hash verification and extraction for
+every named ZIP asset, using the same new destination folder. Each asset has its
+own hash in the notification; never launch before all parts have been extracted.
+
 Do not invent a different branch, substitute `main`, fetch artwork separately, alter
 Mendon's checkout, or merge anything to launch a review. A normal local filesystem
 link to the extracted launcher is then available for future clicks. If GitHub CLI
@@ -85,7 +92,10 @@ every build retry or claim that a GitHub comment was delivered/read by email.
 
    This runs the existing strict Windows exporter, checks source SHA and tracked
    cleanliness, adds isolated settings/launchers and emits a ZIP plus receipt under
-   ignored `artifacts/previews/`. Never put game binaries into Git.
+   ignored `artifacts/previews/`. Never put game binaries into Git. Archives above
+   GitHub's 2 GiB per-asset limit are delivered as numbered ZIP parts without changing
+   the game or its artwork. The receipt records each part and the original archive's
+   hash; the bundled Windows helper verifies and assembles those exact bytes.
 3. Stage a private validation candidate (GitHub CLI authentication required):
 
    ```sh
@@ -100,7 +110,9 @@ every build retry or claim that a GitHub comment was delivered/read by email.
 4. Wait for **Windows review package** CI and the relevant existing checks. The
    Windows job downloads the same release archive, verifies its hash, starts its
    real exported executable headlessly and executes every .cmd launcher against an
-   argument-capturing executable, including paths with spaces, `&` and `!`.
+   argument-capturing executable, including paths with spaces, `&` and `!`. Multipart
+   receipts also require every companion asset, byte-for-byte archive assembly, and
+   the outer Start Review bootstrap through its real PowerShell helper.
    This proves packaging/runtime/argument handling, not native graphical gameplay.
 5. Once checks pass, publish and notify using the exact validated delivery commit:
 

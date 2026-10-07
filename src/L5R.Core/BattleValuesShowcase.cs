@@ -15,8 +15,17 @@ public sealed partial class MatchEngine
                      CardCatalog.Get(c.DefinitionId).Type is not CardType.Holding).ToArray()) s.Cards.Remove(card.Id);
         CardInstance Add(CardDefinition definition, int owner, string? parent = null, bool bowed = false)
         {
-            var card = new CardInstance { Id = $"values-{s.Cards.Count}", DefinitionId = definition.Id,
-                OwnerId = owner, Zone = parent is null ? Zone.Battlefield : Zone.Attached, ProvinceIndex = 1, FaceUp = true, AttachedTo = parent, Bowed = bowed };
+            var card = new CardInstance
+            {
+                Id = $"values-{s.Cards.Count}",
+                DefinitionId = definition.Id,
+                OwnerId = owner,
+                Zone = parent is null ? Zone.Battlefield : Zone.Attached,
+                ProvinceIndex = 1,
+                FaceUp = true,
+                AttachedTo = parent,
+                Bowed = bowed
+            };
             s.Cards.Add(card.Id, card); return card;
         }
         var personalities = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && !c.CreatedOnly && c.Type == CardType.Personality && c.ArtworkKey is not null).ToArray();

@@ -34,7 +34,15 @@ Remaining focused coverage gaps: hidden-state substitution and an engaged authen
 - Client transport executable: 19/19 pass, including protocol JSON and fixture export/normal-practice recovery.
 - `bash tools/check-battle-values-ui.sh`: native Mac compilation and checks; six prepared real-engine scenes from both seats, border/card/attachment clearance, texture lifetime after GC, review controls, zoom/card input, Force-changing action, concession and two resized/reduced-motion cases. Evidence under ignored `artifacts/battle-values-review/`.
 - `bash tools/check-battle-presentation.sh`: eight existing native layout/assignment/defense/casualty/fall cases pass at 1920×1080 and 1280×800.
-- `python3 -m unittest discover -s tools/previews -p 'test_*.py'`: 9/9 pass.
+- `python3 -m unittest discover -s tools/previews -p 'test_*.py'`: 12/12 pass, including multipart assembly and companion validation.
 - Clickable source-linked Review app generated and launched on Mac; prepared scenario visible. Native mouse selection of the bowed scenario verified through computer-use (synthetic PopupMenu keys were not a valid Mac input path). Latest app refreshed for this isolated checkout.
 
 Windows export/runtime/launcher evidence is added with the versioned preview receipt. Windows CI is not graphical playtesting. Mendon's mechanics/playability review is still required, and this candidate must not merge automatically.
+
+## Windows delivery candidate
+
+Game source is `faa2613f9d6f49ed33d017095155176090b9c3a5`. Delivery tooling and a formatting-only fixture correction follow on this branch; they do not change the packaged game behavior. The strict Windows exporter completed its runtime, .NET assembly, resources and source-omission checks.
+
+The exact complete preview ZIP is 2,598,982,649 bytes, above GitHub's per-asset limit. Two immutable ZIP assets retain every original byte: extract both into the same destination and click Start Review. The bundled Windows helper validates the parts and original archive, assembles the isolated payload once, then opens the prepared scene. `previews/published/battle-values.json` records both asset hashes plus the original archive's checksum. No build tools or runtime download are needed.
+
+The private prerelease is staged with validation pending. Automated Windows CI must verify both hashes, real archive assembly, exported runtime, inner launchers and the actual outer launcher before the publisher sends the single authorized Mendon notification. Native Windows graphical playtesting and expert mechanics acceptance remain separate; no automatic merge.
