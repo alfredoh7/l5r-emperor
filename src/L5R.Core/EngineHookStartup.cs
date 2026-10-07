@@ -47,6 +47,7 @@ internal static partial class EngineHooks
         _ = EntryCostTerms.Items;
         _ = AbilityCostTerms.Items;
         _ = StandingWatches.Items;
+        _ = CostWaivers.Items;
         return true;
     }
 

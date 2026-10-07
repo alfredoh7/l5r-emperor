@@ -82,7 +82,7 @@ public sealed partial class MatchEngine
     private CostOption ChosenCostOption(AbilityDefinition ability, GameCommand command)
     {
         var options = ability.CostOptions!;
-        if (command.CostOption is null)
+        if (command.CostOption is null || IsCostSubstitutionOption(command.CostOption)) // issue #690 (P24): a substitution rides in CostOption beside a single way to pay
             return options.Length == 1 ? options[0] : throw new RuleViolation($"Choose how to pay: {string.Join(" or ", options.Select(o => o.Label))}.");
         return options.FirstOrDefault(o => o.Id == command.CostOption)
             // Kyuden Otomo - exp (issue #486) with the Favor discard as an alternative cost (issue #501): a Favor token discarded is that option, paid with the token.
@@ -107,11 +107,12 @@ public sealed partial class MatchEngine
     // ValidateAbility's step: the command names a payable option (or none, for an ability without any).
     private void ValidateCostOption(AbilityDefinition ability, GameCommand command, CardInstance? source)
     {
+        if (IsCostSubstitutionOption(command.CostOption)) ValidateCostSubstitution(ability, command, source); // issue #690 (P24, EffectPrimitivesCosts.cs): "you may bow this card instead of bowing a Ring"
         if (ability.CostOptions is null)
         {
             // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): a Favor-discard action may discard a Favor token instead (the option is validated with the Favor cost itself).
             if (command.CostOption == FavorTokenCostOption && command.AbilityId is { } favorId && IsFavorDiscardAbility(favorId)) return;
-            Require(command.CostOption is null, "This action has no alternative cost to choose.");
+            Require(command.CostOption is null || IsCostSubstitutionOption(command.CostOption), "This action has no alternative cost to choose.");
             return;
         }
         var option = ChosenCostOption(ability, command);
@@ -138,7 +139,7 @@ public sealed partial class MatchEngine
         switch (option.Verb)
         {
             case CostVerb.Bow:
-                subject.Bowed = true;
+                CostBowPayer(command, subject).Bowed = true; // issue #690 (P24): the substitute, when the command names one for this Ring
                 break;
             case CostVerb.Destroy:
                 Emit("costDestroyed", $"{player.Name} destroyed {Definition(subject).Name} to pay for the action.", player.Id, subject.Id);
