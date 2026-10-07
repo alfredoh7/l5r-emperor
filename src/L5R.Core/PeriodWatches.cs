@@ -93,6 +93,9 @@ public sealed partial class MatchState
 {
     [JsonPropertyOrder(1780)]
     public List<NegationWatch> NegationWatches { get; set; } = [];
+    [JsonPropertyOrder(1784)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int WatchSequence { get; set; }
     /// <summary>What the standing rules have spent: "ruleId|ownerCardId" -> the period instance.</summary>
     [JsonPropertyOrder(1781)]
     public Dictionary<string, int> WatchSpent { get; set; } = [];
@@ -171,12 +174,15 @@ public sealed partial class MatchEngine
 
     // ---- dynamic watches ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    private int _watchSequence;
+
+
+    /// <summary>A watch whose Arg starts with this and is shared with others is one negation in all: the first to negate removes every watch with the same Arg (Earth's Protection: "his next bowing or movement").</summary>
+    internal const string ExclusiveWatchPrefix = "exclusive:";
 
     /// <summary>Adds a watch and returns it. An empty Id gets a unique one.</summary>
     internal NegationWatch AddNegationWatch(NegationWatch watch)
     {
-        if (string.IsNullOrEmpty(watch.Id)) watch.Id = $"watch-{_state.TurnNumber}-{_state.NegationWatches.Count}-{++_watchSequence}";
+        if (string.IsNullOrEmpty(watch.Id)) watch.Id = $"watch-{_state.TurnNumber}-{_state.NegationWatches.Count}-{++_state.WatchSequence}";
         _state.NegationWatches.Add(watch);
         return watch;
     }
@@ -210,6 +216,7 @@ public sealed partial class MatchEngine
             if (watch.Refresh is { } refresh) watch.RefreshStamp = PeriodInstance(refresh);
             if (watch.Remaining > 0) watch.Remaining--;
             if (watch.Remaining == 0) _state.NegationWatches.Remove(watch);
+            if (watch.Arg is { } linked && linked.StartsWith(ExclusiveWatchPrefix, StringComparison.Ordinal)) _state.NegationWatches.RemoveAll(w => w.Arg == linked); // linked watches ("his next bowing OR movement"): the first to fire ends them all
             RecordWatchNegation(watch.Id, context, null);
             return true;
         }

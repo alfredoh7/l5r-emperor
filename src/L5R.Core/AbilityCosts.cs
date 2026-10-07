@@ -253,6 +253,7 @@ public sealed partial class MatchEngine
                 continue;
             }
             if (cost.Verb == CostVerbs.ShuffleHand) { RemAShuffleHandIntoDeck(player, source); continue; }
+            if (cost.Verb == Wave9601Abilities.ProvinceBargain) { Wave9601PayProvinceBargain(command, player, source); continue; } // issue #689: Earth's Protection's province bonus or penalty
             if (cost.Verb == CostVerbs.DiscardFavor) continue; // issue #501: paid with the other Favor discards (DiscardImperialFavorCost, beside the Gold)
             // Contemplate the Void (issue #492): "discard your hand (even if empty)".
             if (cost.Verb == CostVerbs.DiscardHand) { PromoItemsNoteHandDiscard(player.Hand.Count); foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; } // the count: Enigmatic Pendant (PromoEmperorItems.cs)

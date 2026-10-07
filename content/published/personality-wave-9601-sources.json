@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10309",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10309",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10309-printing-1-image-1.webp",
+    "image_sha256": "09e96f93f898a0f453b785fc42645b7c82793573e15f04cdd0a60e871426ee74"
+  },
+  {
+    "card_id": "oracle-l5r-10487",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10487",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10487-printing-1-image-1.webp",
+    "image_sha256": "da0bb5bb409599ffadd2dffa4798be6e948ea33cb36fbecb1aa8ae029cc6d98e"
+  }
+]

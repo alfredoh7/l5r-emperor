@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue 689: wire 26 cards unlocked by P2/P7/P11 (12 P2, 6 P7, 8 P11) with shared-engine support (action-aware target bars, after-action traits hook, exclusive linked watches, province-bargain cost) and publish catalogue-art-issue689-20261006-r1. Seven draft extras and Hiruma Ikeuchi plus 15 P11 candidates are documented blockers.",
+  "validation": "wave-689 18/18; bash tools/check.sh --skip-client run with only the python wave count assertion failing, fixed (26); python wave packaging test passes; art pack installs and verifies offline (4459 images, 597169558 bytes, sha256 4e1338dd...).",
+  "remaining": "Native graphical playability not checked; Pierce the Tapestery needs Mendon's ruling; draft extras (Kikumura, Shakash, Tsiang, Shigemitsu, Kachiko, Trade Embargo) need their own card pass; readings in docs/decisions/2026-10-06-p2-p7-p11-card-wave.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/689",
+  "branch": "claude/689-p2-p7-p11-wave",
+  "updated": "2026-10-07T00:38:56.321861+00:00"
+}

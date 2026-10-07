@@ -1,0 +1,67 @@
+{
+  "Profile": "personality-wave-9601",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10309",
+      "Name": "Bayushi Kazutoshi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kazutoshi enters play or overlays: Discard all your other Sensei Personalities.\nBefore the first time each turn another player's card's effect destroys one of your Loyal Personalities: Negate the destruction. Move him home. Bow him. Dishonor him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10309.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Courtier",
+        "Samurai",
+        "Scorpion Clan",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "discard-other-sensei"
+    },
+    {
+      "Id": "oracle-l5r-10487",
+      "Name": "Daigotsu Gyoken",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Gyoken enters play, lose 3 Honor.\nNegate Gyoken's first destruction each game from another player's card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10487.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Experienced 3",
+        "Unique",
+        "Commander",
+        "Fallen",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    }
+  ],
+  "Decks": []
+}

@@ -26,6 +26,7 @@ public sealed partial class MatchEngine
     private void P3RecordDuelWinner(string? winnerId)
     {
         if (winnerId is not null) RecordActionEffect(winnerId, WonDuelKind);
+        Wave9601NoteDuelWon(winnerId); // issue #689 (Wave9601.cs): Lessons from the Heralds
     }
 
     /// <summary>FinishDuelResolution's duel-won window: what the duel's action affected is set aside while the window is open, and its after-action tracking runs when the window closes
