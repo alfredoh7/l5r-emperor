@@ -579,6 +579,7 @@ public sealed partial class MatchEngine
         var player = Player(search.PlayerId);
         SearchDeckList(player, search.Deck!).Remove(card.Id);
         player.DynastyDeck.Remove(card.Id);
+        if (card.OwnerId != player.Id) TakeControl(card, player.Id); // P20: a card found in the OTHER player's discard pile is controlled by the searcher while it is in play
         ResetCardState(card);
         EnterPlayFromRecruit(player, card, null, Definition(Card(search.SourceCardId)).Name);
         search.EnteredCardId = card.Id;

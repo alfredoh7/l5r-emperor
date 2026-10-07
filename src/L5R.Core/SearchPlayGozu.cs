@@ -33,7 +33,7 @@ public sealed partial class MatchEngine
     // FinishSearch's hook: the Terrain Gozu's search found is in the hand and is played now, or discarded.
     private void SearchPlayFinishSearch(PendingSearch search)
     {
-        if (search.SearchId != SearchPlaySpecs.GozuId || search.SelectedCardId is not { } foundId || !_state.Cards.TryGetValue(foundId, out var found) || found.Zone != Zone.Hand) return;
+        if (search.SearchId != SearchPlaySpecs.GozuId && !SearchExtPlaysAfter(search) || search.SelectedCardId is not { } foundId || !_state.Cards.TryGetValue(foundId, out var found) || found.Zone != Zone.Hand) return;
         var player = Player(search.PlayerId);
         if (!SearchPlayCardPlayable(player.Id, found.Id))
         {

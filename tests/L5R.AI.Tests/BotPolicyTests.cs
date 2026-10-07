@@ -19,6 +19,7 @@ internal static class BotPolicyTests
         ("Hoshoku-sha (issue #679): the bot never chooses to destroy himself or any Personality of its own with his Battle/Open action; an enemy target is played", HoshokuNeverSelf),
         ("Read the Essence (issue #699): the bot turns an enemy face-down province card, never its own for nothing, scouts with the optional second flip or declines it, and never stalls", ReadTheEssenceBot),
         ("P25 decision infrastructure (issue #723): the bot answers a multi-pick Either/Or with the fewest picks and Done, a hook-registered pending type with an offered option, and a choice among shown cards, and never stalls", DecisionInfraBot),
+        ("P20 search extensions (issue #728): the bot answers a multi-card province search, an attach follow-up and the other player's choice among shown cards, whichever seat decides, and never stalls", SearchExtensionsBot),
         ("Memory: copies seen in public zones count (three of a non-Unique card, one of a Unique), the roll is deterministic and fair", Memory),
     ];
 
@@ -281,6 +282,31 @@ internal static class BotPolicyTests
             }
             Check(engine.State.PendingChoice is null, $"{spec}: the decision is answered within {steps} steps (stalled)");
             if (kind == "p25-multi") Check(picks.Count == 2 && picks[1] == "done", "multi-pick: the bot takes the one pick it must and then Done: " + string.Join(",", picks));
+        }
+    }
+
+    private static void SearchExtensionsBot()
+    {
+        foreach (var kind in new[] { "p20-provinces", "p20-other", "p20-attach" })
+        {
+            var engine = MatchEngine.CreateSearchShowcase(kind);
+            Check(engine.State.PendingChoice is not null, $"{kind}: the showcase opens a decision");
+            var steps = 0; var answers = new List<string>();
+            while (engine.State.PendingChoice is not null && steps++ < 8)
+            {
+                var seat = engine.State.PendingChoice.PlayerId;
+                var actions = engine.QueryActions(seat);
+                Check(actions.Any(a => a.Enabled && a.Command is not null && a.Type != "concede"), $"{kind}: the engine offers seat {seat} an answer at {engine.State.PendingChoice.Type}");
+                var decision = TrainingOpponent.Choose(engine.GetView(seat), actions);
+                Check(decision.Command is not null && decision.Command.Type != "concede", $"{kind}: the bot answers ({decision.Reason})");
+                answers.Add(decision.Command!.Type);
+                var result = engine.Execute(decision.Command);
+                Check(result.Accepted, $"{kind}: the engine accepts the bot's answer {decision.Command.Type}: {result.Error}");
+            }
+            Check(engine.State.PendingChoice is null && engine.State.PendingSearch is null, $"{kind}: the search is answered within {steps} steps (stalled): {string.Join(",", answers)}");
+            if (kind == "p20-provinces") Check(answers is ["selectSearchCards"], "a province search takes the engine's default selection: " + string.Join(",", answers));
+            if (kind == "p20-other") Check(answers is ["selectSearchCards", "chooseShown"], "the searcher takes two Items and the other seat chooses one: " + string.Join(",", answers));
+            if (kind == "p20-attach") Check(answers is ["chooseSearchAttachTarget"], "the bot picks an attach target: " + string.Join(",", answers));
         }
     }
 
