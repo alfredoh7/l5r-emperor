@@ -224,7 +224,9 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player = Player(playerId);
-        if (_state.PendingChoice is { Type: "harshChoices" } harsh)
+        var registeredPending = RegisteredPendingActions(playerId); // P25 (DecisionInfra.cs): a hook-registered pending type lists its own actions
+        if (registeredPending is not null) result.AddRange(registeredPending);
+        else if (_state.PendingChoice is { Type: "harshChoices" } harsh)
         {
             Add("harshChoices", "Keep province", Command("harshChoices") with { Choice = "decline" }, cardId: harsh.CardId);
             var last = player.Provinces.Count(p => !p.Destroyed) == 1;

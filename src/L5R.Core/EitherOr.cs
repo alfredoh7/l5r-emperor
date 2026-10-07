@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace L5R.Core;
 
 // The opposing player's Either/Or choice (issue #338): a card whose text hands a decision to ANOTHER player -- "the player may pay 2 Gold.
@@ -105,6 +107,13 @@ public sealed class PendingEitherOr
     public int? OpponentHonorBefore { get; set; }
     public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
     public bool ChainAbilityLock { get; set; }
+    // P25 (DecisionInfra.cs): a multi-pick decision collects Min..Max of its options with a "Done" option. Max 0 is the ordinary single pick; all three are omitted from a saved game until used.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int Min { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int Max { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Picked { get; set; }
 }
 
 /// <summary>One thing the deciding player may choose. Detail says in plain words what it does; Gold is the payment quote for an option
@@ -261,7 +270,7 @@ public sealed partial class MatchEngine
     /// taken and announced -- and the caller finishes the action itself. <paramref name="origin"/>: "window" suspends the reaction window
     /// that is open right now, "action" is the tail of an ordinary action (bowedBefore is the snapshot of what was already bowed).</summary>
     private bool OpenEitherOr(string specId, CardInstance source, int actingPlayerId, int deciderId, CardInstance? affected, string origin,
-        IEnumerable<string>? bowedBefore = null, bool stayWithActor = false, string? performerId = null, int? resumePlayerId = null)
+        IEnumerable<string>? bowedBefore = null, bool stayWithActor = false, string? performerId = null, int? resumePlayerId = null, int min = 0, int max = 0)
     {
         var pending = new PendingEitherOr
         {
@@ -274,9 +283,12 @@ public sealed partial class MatchEngine
             BowedBefore = bowedBefore?.ToList(),
             StayWithActor = stayWithActor,
             PerformerId = performerId,
+            Min = min,
+            Max = max,
             ResumePlayerId = resumePlayerId ?? (origin == "window" ? source.OwnerId : actingPlayerId)
         };
         var options = EitherOrOptions(pending);
+        if (max > 0) { if (AutoResolveMultiPick(pending, source, deciderId, options)) return false; }
         var legal = options.Where(o => o.Legal).ToArray();
         // No decision when nothing is left to choose: exactly one option is legal and it costs nothing (a costed option still needs the
         // player to pick sources), or none is (the last, the consequence, stands).
@@ -289,7 +301,7 @@ public sealed partial class MatchEngine
         }
         pending.Suspended = origin == "window" ? _state.PendingChoice : null;
         _state.PendingEitherOr = pending;
-        _state.PendingChoice = new("eitherOr", deciderId, source.Id, EitherOrPrompt(pending), actingPlayerId);
+        _state.PendingChoice = new("eitherOr", deciderId, source.Id, EitherOrPrompt(pending) + MultiPickPromptSuffix(pending), actingPlayerId);
         _state.PriorityPlayerId = deciderId; _state.ConsecutivePasses = 0;
         Emit("eitherOrOffered", $"{Player(deciderId).Name} must choose ({Definition(source).Name}): {string.Join(" / ", options.Select(o => o.Label))}.", deciderId, source.Id);
         return true;
@@ -302,6 +314,7 @@ public sealed partial class MatchEngine
         var pending = _state.PendingEitherOr ?? throw new RuleViolation("No choice is pending.");
         Require(command.PlayerId == pending.DeciderPlayerId, "Only the player who must choose may answer.");
         Require(command.Type == "chooseEitherOr" && command.Choice is not null, "Choose one of the offered options.");
+        if (IsMultiPick(pending)) { ResolveMultiPickCommand(pending, command); return; }
         var option = EitherOrOptions(pending).FirstOrDefault(o => o.Key == command.Choice);
         Require(option is not null, "Choose one of the offered options.");
         Require(option!.Legal, option.Reason ?? "That option is not available.");
@@ -471,7 +484,7 @@ public sealed partial class MatchEngine
         if (_state.PendingEitherOr is not { } p || _state.PendingChoice is null) return null;
         var source = Card(p.SourceCardId);
         var decides = viewerId == p.DeciderPlayerId;
-        var options = EitherOrOptions(p).Select(o => new EitherOrOptionView(o.Key, o.Label, o.Detail, o.Kind, o.Legal, o.Legal ? null : o.Reason,
+        var options = EitherOrOffered(p).Select(o => new EitherOrOptionView(o.Key, o.Label, o.Detail, o.Kind, o.Legal, o.Legal ? null : o.Reason,
             decides && o.GoldCost > 0 ? EitherOrGoldQuote(p, o) : null)).ToArray();
         return new(p.SpecId, source.Id, source.DefinitionId, Definition(source).Name, p.ActingPlayerId, p.DeciderPlayerId, decides, p.AffectedCardId,
             p.AffectedCardId is null ? null : Definition(Card(p.AffectedCardId)).Name, _state.PendingChoice.Prompt, options);
@@ -487,7 +500,7 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> EitherOrActions(int playerId)
     {
         if (_state.PendingEitherOr is not { } p || p.DeciderPlayerId != playerId) yield break;
-        foreach (var o in EitherOrOptions(p))
+        foreach (var o in EitherOrOffered(p))
         {
             var command = new GameCommand("chooseEitherOr", playerId, _state.Version, CardId: p.SourceCardId, Choice: o.Key);
             GoldQuote? quote = null;

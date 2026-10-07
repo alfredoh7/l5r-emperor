@@ -256,7 +256,7 @@ public static partial class TrainingOpponent
             // The opposing player's Either/Or choice (issue #338): pay when the engine offers a payable Gold option (a modest bot keeps its action), then bow the
             // threatened Personality, then lose Honor, and only then take the consequence. Copying a keyword or ability
             // (Fukuzo): the first candidate the engine lists.
-            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => -100, /* "Lose 2 Honor": the bot never loses Honor by choice */ _ => 60 };
+            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => -100, /* "Lose 2 Honor": the bot never loses Honor by choice */ "done" => 61, /* P25: a multi-pick Either/Or takes the fewest options it must (Done is offered only once Min are picked) */ _ => 60 };
             case "chooseCopyKeyword": case "chooseCopyAbility": return 100;
             // The opposing player's variable payment (issue #373, Virtuous Charity): a modest bot answers with the engine's default, paying nothing.
             case "chooseOpponentPayment": return 100;

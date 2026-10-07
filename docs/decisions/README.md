@@ -85,3 +85,5 @@ interpretation this register's decision docs already settled.
 - [P13: phase and battle rule flags (#717)](2026-10-07-p13-rule-flags.md) — built, engine only, no card wired; the flags a later card wave sets and the choke points that read them.
 
 - [P19: rulebook-action modifiers (#717)](2026-10-07-p19-rulebook-modifiers.md) — built, engine only, no card wired; the RulebookModifier hook and card-free timing grants.
+
+- [P25: decision infrastructure (#723)](2026-10-07-p25-decision-infrastructure.md) — built, engine only, no card wired; multi-pick Either/Or, the PendingActions hook with generic client rendering of unknown pending types, slot cross-constraints and a shown-card choice.
