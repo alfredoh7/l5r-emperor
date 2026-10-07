@@ -44,7 +44,7 @@ public sealed partial class MatchEngine
         var actor = PerformingCard(command, ability);
         if (actor is null) return;
         foreach (var targetId in BarredTargetChannelIds(command))
-            if (_state.Cards.TryGetValue(targetId, out var target)) RequireTargetNotBarred(actor, target);
+            if (_state.Cards.TryGetValue(targetId, out var target)) RequireTargetNotBarredForAction(actor, target, command, ability);
     }
 
     // Every channel a target can arrive on, not just TargetId: ActionTargetIds' own set (TargetId, Kahoku's
@@ -56,6 +56,15 @@ public sealed partial class MatchEngine
 
     /// <summary>The one bar check: made wherever a target is chosen -- as the action is announced, later
     /// (a sequenced Attack target), or by redirection (AttackTargeting.RequireLegalAttackTarget).</summary>
+    private void RequireTargetNotBarredForAction(CardInstance? actor, CardInstance target, GameCommand command, AbilityDefinition ability)
+    {
+        var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var card) ? card : null;
+        foreach (var rule in BarRulesOn(target))
+            if (!rule.Forced && ActorMatches(rule.Actor, actor, command.PlayerId, ability, source, target))
+                Require(false, $"{Definition(target).Name} may not be targeted by this action ({rule.Label}).");
+        RequireTargetNotBarred(actor, target);
+    }
+
     private void RequireTargetNotBarred(CardInstance? actor, CardInstance target)
     {
         if (actor is null) return;

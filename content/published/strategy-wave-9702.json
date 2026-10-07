@@ -1,0 +1,76 @@
+{
+  "Profile": "strategy-wave-9702",
+  "Rules": "Emperor Edition; reviewed period printings; issue #689.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10713",
+      "Name": "A Welcome Reprieve",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your honorable Personality. Other players' actions may not target him this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10713.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w9701-reprieve"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10375",
+      "Name": "Generational Gap",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target two Personalities with the same Family name: They may not be assigned to the same battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10375.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "w9701-gap"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10396",
+      "Name": "Sudden Blockade",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is not the active player's first turn, target a province: Cards will not enter play from the province (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10396.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "w9701-blockade"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

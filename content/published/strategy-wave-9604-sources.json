@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10362",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10362",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10362-printing-1-image-1.webp",
+    "image_sha256": "57bcb7fb609880d654a507277da1dc83f38cbb13ecc2c50864ff2aec22e2d1ad"
+  },
+  {
+    "card_id": "oracle-l5r-10736",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10736",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10736-printing-1-image-1.webp",
+    "image_sha256": "d04316415c0b0fec73cbebe431ea0bd3c89333235757b4976171f459dc360dbe"
+  }
+]

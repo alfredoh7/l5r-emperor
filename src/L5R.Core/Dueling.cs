@@ -295,7 +295,7 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => (P2DuelStat(card) /* issue #503: Killing Intent */ ?? NikaruDuelStat(card) ?? WlPersCoilsDuelStat(card) /* issue #674: Hiruma Nikaru - exp2 */ ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => ((card.DefinitionId == "oracle-l5r-10442" ? Definition(card).Force : (int?)null) ?? P2DuelStat(card) /* issue #503: Killing Intent */ ?? NikaruDuelStat(card) ?? WlPersCoilsDuelStat(card) /* issue #674: Hiruma Nikaru - exp2 */ ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),

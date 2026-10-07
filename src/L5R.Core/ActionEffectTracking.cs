@@ -57,6 +57,7 @@ public sealed partial class MatchEngine
             FavorTakers = _state.CurrentActionFavorTakers,
             FavorDiscarders = TakeFavorDiscarders() // issue #667 (FavorMempo.cs)
         };
+        foreach (var hook in EngineHooks.AfterActionTraits.Items) hook(this, _state.LastResolvedAction); // #689: mandatory printed traits, before Reactions.
         QueueP1AfterActionTraits(_state.LastResolvedAction); // Issue #503 (EmperorP1.cs): Osote's owed discard is due, Bakishi's shield drops, Tamisu's and Shichiro's traits are queued.
         NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
         CountHandActionResolved(playerId, _state.CurrentActionHandRecipients); // Indecision (issue #501, EmperorMechD.cs): "actions which put cards into his hand this phase".

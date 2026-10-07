@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-9502",
+  "Rules": "Emperor Edition; reviewed period printings; issue #689.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10541",
+      "Name": "Blade of Storms",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to a Thunder Shugenja for 1 less Gold.\nThunder Battle, Bow this card: Give this Shugenja +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10541.jpg",
+      "Keywords": [
+        "Weapon",
+        "Thunder"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w9501-blade"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

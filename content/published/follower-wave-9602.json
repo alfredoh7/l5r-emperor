@@ -1,0 +1,33 @@
+{
+  "Profile": "follower-wave-9602",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10898",
+      "Name": "Legion of the Fallen",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Follower enters play, lose 3 Honor.\nBefore the first time this game another player's card destroys this Follower, negate the destruction.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10898.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Shadowlands",
+        "Undead"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    }
+  ],
+  "Decks": []
+}

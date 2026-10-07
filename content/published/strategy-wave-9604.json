@@ -1,0 +1,53 @@
+{
+  "Profile": "strategy-wave-9604",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10362",
+      "Name": "Avenging the Fallen",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: Straighten him. If another player's Battle action has destroyed one of your Personalities this battle, negate the performer's next destruction from cards' effects (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10362.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w9601-avenging-the-fallen"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10736",
+      "Name": "Lessons from the Heralds",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If one of your Personalities has won a duel this turn, look at the top three cards of your Fate deck. Put one into your hand. Put the rest back in any order.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10736.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "w9601-lessons-from-the-heralds"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

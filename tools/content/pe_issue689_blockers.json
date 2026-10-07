@@ -1,0 +1,86 @@
+{
+  "oracle-l5r-10273": {
+    "category": "LOCK",
+    "note": "Needs a controller choice when multiple attached Followers would be destroyed simultaneously; a per-card watch cannot choose which single destruction to negate."
+  },
+  "oracle-l5r-10296": {
+    "category": "LOCK",
+    "note": "Needs verified Butterfly proxy traits and alternative target selection with destruction after targeting."
+  },
+  "oracle-l5r-10300": {
+    "category": "LOCK",
+    "note": "Needs Personality/Follower actor scope and forced targets across slots and deferred Attack targets."
+  },
+  "oracle-l5r-10418": {
+    "category": "LOCK",
+    "note": "Needs attack/defend prohibition during movement and entry, not assignment alone."
+  },
+  "oracle-l5r-10473": {
+    "category": "LOCK",
+    "note": "Needs an effective Force cap after all bonuses and a source-unit action target restriction."
+  },
+  "oracle-l5r-10476": {
+    "category": "LOCK",
+    "note": "Needs same-army exclusions during movement and entry; a battlefield bar incorrectly forbids opposing armies."
+  },
+  "oracle-l5r-10481": {
+    "category": "LOCK",
+    "note": "Needs P9 (conditional -1F statics for Fallen, Nonhuman and attacking-you cards) and an after-next-attack Honor loss; not wired in #689."
+  },
+  "oracle-l5r-10496": {
+    "category": "LOCK",
+    "note": "Needs attack prohibition during movement and entry, not assignment alone."
+  },
+  "oracle-l5r-10497": {
+    "category": "LOCK",
+    "note": "Needs optional remain-bowed choice, return of control when source straightens/leaves and seppuku prohibition."
+  },
+  "oracle-l5r-10502": {
+    "category": "LOCK",
+    "note": "Not wired in #689 (a draft wiring was removed untested): the Nonhuman entry discount and \"move your target Personality at any location to Shakash's location\" (Home-capable) need their own card pass and tests."
+  },
+  "oracle-l5r-10512": {
+    "category": "LOCK",
+    "note": "Not wired in #689 (draft wiring removed untested): Ring of Water entry waiver plus straightening one or two cards in units, performed from Home, need their own card pass and tests."
+  },
+  "oracle-l5r-10522": {
+    "category": "LOCK",
+    "note": "Needs next-controller-turn copy-removal lifecycle and straightening/attack/defend holds; historical reading remains unconfirmed."
+  },
+  "oracle-l5r-10524": {
+    "category": "LOCK",
+    "note": "Needs Spell attachment-count limit, Shugenja grant and Focus-dependent bow-cost waiver."
+  },
+  "oracle-l5r-10624": {
+    "category": "LOCK",
+    "note": "Needs P6 (after-event records and windows); P7's watch half alone does not wire it."
+  },
+  "oracle-l5r-10659": {
+    "category": "LOCK",
+    "note": "Not wired in #689 (draft wiring removed untested): Invest cost by Clan (a P2 ability cost term) creating two 1F Followers on Kikumura needs its own card pass, the Follower proxy check and tests."
+  },
+  "oracle-l5r-10662": {
+    "category": "LOCK",
+    "note": "Needs action-source-card unit scope independent of the Personality performing a Strategy."
+  },
+  "oracle-l5r-10683": {
+    "category": "LOCK",
+    "note": "Needs attack prohibition during movement and entry, not assignment alone."
+  },
+  "oracle-l5r-10723": {
+    "category": "LOCK",
+    "note": "Needs P1 (a turn-long production adjustment on every non-Unique Holding) with the once-per-turn copy limit; not wired in #689."
+  },
+  "oracle-l5r-10821": {
+    "category": "LOCK",
+    "note": "Needs source-bound Event lifetime through two future owner turns and targeted-action Honor-loss filtering."
+  },
+  "oracle-l5r-10831": {
+    "category": "LOCK",
+    "note": "Needs same-army exclusions during movement and entry and unopposed Force/printed-cost accounting."
+  },
+  "oracle-l5r-10909": {
+    "category": "LOCK",
+    "note": "Needs action-source-card unit scope independent of performer and restriction against targeting the host unit."
+  }
+}

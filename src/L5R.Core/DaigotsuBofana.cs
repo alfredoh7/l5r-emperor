@@ -26,13 +26,20 @@ public sealed partial class MatchEngine
         if (resume is null) _state.AnnounceTraitEvaluated.Clear();
         var targeted = ActionTargetIds(command).ToArray();
         if (targeted.Length == 0) return false;
-        foreach (var bofana in _state.Cards.Values.Where(c => targeted.Contains(c.Id) && c.OwnerId != command.PlayerId && InPlay(c) && Definition(c).Effect == BofanaTargetedDiscardEffect)
+        foreach (var bofana in _state.Cards.Values.Where(c => targeted.Contains(c.Id) && c.OwnerId != command.PlayerId && InPlay(c) && (Definition(c).Effect == BofanaTargetedDiscardEffect || c.DefinitionId == "oracle-l5r-10328"))
                      .OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
         {
             if (_state.AnnounceTraitEvaluated.Contains(bofana.Id)) continue;
             _state.AnnounceTraitEvaluated.Add(bofana.Id);
-            if (!TrySpendPhaseUse(bofana.AbilityUses, BofanaTargetedDiscardEffect)) continue;
-            if (PerformingCardForce(command) >= Definition(bofana).Force) continue;
+            if (bofana.DefinitionId == "oracle-l5r-10328")
+            {
+                if (P2HandDiscardBlocked(command.PlayerId, bofana.OwnerId, false, "Shinjo Tselu")) continue;
+            }
+            else
+            {
+                if (!TrySpendPhaseUse(bofana.AbilityUses, BofanaTargetedDiscardEffect)) continue;
+                if (PerformingCardForce(command) >= Definition(bofana).Force) continue;
+            }
             if (!Player(command.PlayerId).Hand.Any(id => !CommandNamesCard(command, id))) continue;
             SuspendOpenWindow();
             _state.ForcedDiscardContinuation = command; _state.ForcedDiscardResume = resume;
