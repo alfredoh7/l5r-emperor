@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Reaction-flow implementation claimed for issue 722: authoritative public response context, contextual pass consequences, native decision UI and input protection.",
+  "validation": "Planning and live main/overlap inspection only; implementation and runtime checks pending.",
+  "remaining": "Implement, validate native normal/reduced motion and both seats, request rules-lead review, and deliver the playable preview.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/722",
+  "branch": "codex/722-reaction-flow",
+  "updated": "2026-10-07T18:48:38.913972+00:00"
+}
