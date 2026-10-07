@@ -14,6 +14,53 @@ public partial class Main
         _provinceTargetCaptureStarted = true; _ = CaptureProvinceTarget();
     }
     private IEnumerable<Button> ProvinceRows() => _inspector.GetChildren().OfType<Button>().Where(b => b.HasMeta("province_target_row"));
+    // Issue #699: Benediction, "Destroy your target Holding. Give a Province +3 strength." -- a card slot followed by a province slot, the second chosen with the same hover / face-up /
+    // face-down presentation. Real engine options drive the real sidebar: the Holding first (the board then waits for a province), then either player's province, face-down included.
+    private async Task CaptureBenedictionProvince()
+    {
+        var state = MatchEngine.CreatePublishedTestMatch(43).State;
+        state.Phase = Phase.Action; state.ActivePlayerId = state.PriorityPlayerId = 0; state.PendingChoice = null;
+        var benediction = SupportFixtureCard(state, 10930, 0, Zone.Hand);
+        var holding = SupportFixtureCard(state, 430, 0, Zone.Home);
+        var openProvince = state.Players[1].Provinces.First(p => !p.Destroyed && p.CardId is not null);
+        state.Cards[openProvince.CardId!].FaceUp = true;
+        var closedProvince = state.Players[1].Provinces.First(p => !p.Destroyed && p.CardId is not null && p.Index != openProvince.Index);
+        state.Cards[closedProvince.CardId!].FaceUp = false;
+        var engine = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [state])!;
+        await LoadSupportFixture(engine, 0);
+        var offered = Actions.First(a => a.Command?.AbilityId == "wlben-benediction");
+        SupportRequire(offered.Enabled && offered.Slots?.Any(s => s.Kind == TargetSlotKinds.Province) == true, "Benediction is not offered with a province slot");
+        SelectCard(FindCard(benediction.Id)!); await EventFrames(2);
+        Choose(offered); await EventFrames(4);
+        SupportRequire(MultiTargetActive, "Benediction did not open the multi-target chooser");
+        var opponent = View.Players.First(p => p.Id != View.ViewerId);
+        var rows = ProvinceRows().ToArray();
+        SupportRequire(rows.Length == View.Players.Sum(p => p.Provinces.Count(q => !q.Destroyed)), "A province is missing from Benediction's list");
+        var openRow = rows.Single(r => r.GetMeta("province_target_row").AsString() == $"{opponent.Id}:{openProvince.Index}");
+        var closedRow = rows.Single(r => r.GetMeta("province_target_row").AsString() == $"{opponent.Id}:{closedProvince.Index}");
+        SupportRequire(openRow.Text.Contains(CardCatalog.Get(engine.State.Cards[openProvince.CardId!].DefinitionId).Name, StringComparison.Ordinal), "A face-up province row lacks its card title: " + openRow.Text);
+        SupportRequire(closedRow.Text.Contains("Face down", StringComparison.Ordinal), "A face-down province row does not say so: " + closedRow.Text);
+        SupportRequire(_paymentConfirm is { Disabled: true }, "Confirm was available before the Holding and the province were chosen");
+        // The Holding first: the board then waits for a province.
+        ToggleMultiCard("holding", holding.Id); await EventFrames(2);
+        SupportRequire(MultiProvinceActive && _paymentConfirm is { Disabled: true }, "After the Holding the client did not wait for a province");
+        var openCards = ProvincePresentation.Cards(opponent.Provinces.Single(p => p.Index == openProvince.Index)).ToArray();
+        ProvinceRows().Single(r => r.GetMeta("province_target_row").AsString() == $"{opponent.Id}:{openProvince.Index}").EmitSignal(Control.SignalName.MouseEntered); await EventFrames(2);
+        SupportRequire(_tiles.Any(t => openCards.Any(c => ReferenceEquals(c, t.Card) || c.Id.Length > 0 && c.Id == t.Card.Id) && t.ForcedHover), "Hovering a row did not light the province's card");
+        await SupportCapture("-benediction-hover");
+        ProvinceRows().Single(r => r.GetMeta("province_target_row").AsString() == $"{opponent.Id}:{openProvince.Index}").EmitSignal(Control.SignalName.MouseExited); await EventFrames(2);
+        // A face-down enemy province by its row, then the face-up one by clicking it on the table.
+        ProvinceRows().Single(r => r.GetMeta("province_target_row").AsString() == $"{opponent.Id}:{closedProvince.Index}").EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(2);
+        SupportRequire(MultiReady && _paymentConfirm is { Disabled: false }, "Picking a face-down province row did not complete the selection");
+        SelectProvince(opponent.Id, openProvince.Index); await EventFrames(2);
+        SupportRequire(MultiCommand().Selections!.Single(s => s.Slot == "province") is { ProvinceOwner: { } o, Province: { } p } && o == opponent.Id && p == openProvince.Index, "Clicking the province on the table did not change the pick");
+        await SupportCapture("-benediction-picked");
+        var before = opponent.Provinces.Single(p => p.Index == openProvince.Index).Strength;
+        _paymentConfirm!.EmitSignal(BaseButton.SignalName.Pressed);
+        await WaitFor(() => View.Players.First(p => p.Id != View.ViewerId).Provinces.Single(p => p.Index == openProvince.Index).Strength == before + 3, "The picked province did not gain 3 strength");
+        SupportRequire(FindCard(holding.Id) is not { Zone: Zone.Home }, "The Holding was not destroyed");
+    }
+
     private async Task CaptureProvinceTarget()
     {
         try
@@ -71,7 +118,8 @@ public partial class Main
             _paymentConfirm!.EmitSignal(BaseButton.SignalName.Pressed);
             await WaitFor(() => View.Players.First(p => p.Id != View.ViewerId).Provinces.Single(p => p.Index == openProvince.Index).Strength == 0, "The picked province was not lowered to 0");
             SupportRequire(View.Players.First(p => p.Id != View.ViewerId).Provinces.Where(p => p.Index != openProvince.Index && !p.Destroyed).All(p => p.Strength > 0), "Another province was lowered");
-            GD.Print("PROVINCE_TARGET_PASS: out-of-play Tacticians not offered; one grouped action; provinces listed as Opponent's/Your with number and title or Face down; hover lights the province; the player picks, Confirm waits for the pick, and exactly that province resolves.");
+            await CaptureBenedictionProvince();
+            GD.Print("PROVINCE_TARGET_PASS: out-of-play Tacticians not offered; one grouped action; provinces listed as Opponent's/Your with number and title or Face down; hover lights the province; the player picks, Confirm waits for the pick, and exactly that province resolves; Benediction: Holding slot then province slot with the same rows, hover, face-down label and board click, Confirm waits for both.");
             GetTree().Quit();
         }
         catch (Exception e) { try { await SupportCapture("-failure"); } catch { } GD.PushError(e.ToString()); GetTree().Quit(1); }

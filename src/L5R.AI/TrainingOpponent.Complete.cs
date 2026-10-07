@@ -49,6 +49,15 @@ public static partial class TrainingOpponent
                 chosen.Add(new(slot.Slot, PlayerId: slot.PlayerIds.Contains(wanted) ? wanted : slot.PlayerIds.FirstOrDefault(wanted)));
                 continue;
             }
+            // A province slot (issue #699, Benediction): a harmful ability names the opponent's province, anything else the bot's own, the first the engine lists.
+            if (slot.Kind == TargetSlotKinds.Province)
+            {
+                var wantEnemy = intent.Rank >= EffectRank.Penalize && !slot.Label.Contains("+", StringComparison.Ordinal) || intent.Side == TargetSide.Enemy;
+                var owner = wantEnemy ? x.Opponent.Id : x.Self.Id;
+                var choice = slot.ProvinceChoices?.FirstOrDefault(p => p.Owner == owner) ?? slot.ProvinceChoices?.FirstOrDefault();
+                if (choice is not null) chosen.Add(new(slot.Slot, ProvinceOwner: choice.Owner, Province: choice.Index));
+                continue;
+            }
             // Take as many cards as the slot allows (at least what it requires, at most what is legal), best candidates first.
             var count = Math.Min(slot.CardIds.Length, Math.Max(slot.Min, Math.Min(slot.Max, slot.Min == 0 ? 1 : slot.Max)));
             var label = slot.Label.ToLowerInvariant();
