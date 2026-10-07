@@ -166,6 +166,7 @@ public sealed partial class MatchEngine
         if (ApplyEmperorP4BranchEffect(effect, command)) return; // Issue #503, group P4 (EmperorP4.cs).
         if (ApplyWlPersCoilsBranchEffect(effect, command)) return; // issue #674 (WlPersCoils.cs): Asako Chukage - exp2's removal of a Ring and the target from the game.
         if (ApplyEmperorMechABranchEffect(effect, command)) return; // issue #501 (EmperorMechA.cs): String of Victories' Ring, Aramasu's Legacy's bow // Emperor Edition ruling pass R2 (issue #492): The Honesty of the Phoenix's named card.
+        if (RegisteredBranchEffect(effect, command, source, target)) return; // P25 (DecisionInfra.cs)
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
@@ -249,6 +250,7 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 4: a choice with further steps (The Game Has Changed) opens its next step and waits.
         if (ContinueShadowsEmbraceBatch4Choice(pending, option!)) return;
         if (ContinueEmperorP4Choice(pending, option!)) return; // Issue #503 (EmperorP4More.cs): Secret Reserve's next Item, Power of Strength's deferred Attack.
+        if (RegisteredEffectChoiceContinue(pending, option!)) return; // P25 (DecisionInfra.cs): a chosen option that opens a further decision
         CompleteAbilityResolution(pending.Command, ability, pending.ConsumedGrant, pending.PlayedFromDiscard, pending.OpponentHonorBefore,
             pending.BowedBefore.ToHashSet(StringComparer.Ordinal), pending.PreExistingGrants);
     }

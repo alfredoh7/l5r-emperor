@@ -73,6 +73,10 @@ internal static partial class EngineHooks
         _ = KeywordRule.Items;
         _ = ActionEffectWatchFired.Items;
         _ = ActionMoveGates.Items;
+        _ = PendingActions.Items; // P25 (issue #723): decision infrastructure
+        _ = BranchEffects.Items;
+        _ = EffectChoiceContinuations.Items;
+        _ = ShownChoiceApply.Items;
         return true;
     }
 

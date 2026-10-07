@@ -27,6 +27,12 @@ public sealed record TargetSlot(string Id, string Category, string Label, int Mi
     /// candidates are never hidden behind one arbitrary default), the effect here always uses the one card actually named, so widening the later slot's offer past that single
     /// card would offer a choice (e.g. the Personality who could be destroyed) that is only ever legal against a target no one submitted.</summary>
     public bool ProbeDefaultOnlyForLaterSlots { get; init; }
+    /// <summary>P25 (issue #723): a predicate over the cards chosen for this slot and every earlier card slot, in order ("two Personalities that do not share a Clan alignment"). It runs after the per-slot
+    /// checks, refuses the whole selection with <see cref="CrossConstraintReason"/> when it returns false, and also filters the candidates this slot offers (a candidate is offered while some legal earlier
+    /// selection satisfies it). It is not part of the saved game: it lives on the ability's definition, like the slot itself.</summary>
+    public Func<MatchEngine, IReadOnlyList<CardInstance>, bool>? CrossConstraint { get; init; }
+    /// <summary>The words shown when <see cref="CrossConstraint"/> refuses a selection.</summary>
+    public string? CrossConstraintReason { get; init; }
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     /// <summary>The slot names a Province (either player's, face-up or face-down) rather than a card or a player (Benediction, issue #699): its selection is a province owner and index.</summary>
     public bool IsProvince => Category == TargetSlotKinds.Province;
@@ -126,6 +132,16 @@ public sealed partial class MatchEngine
             Require(slot.Repeatable || ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
             foreach (var id in ids) ValidateSlotCard(command, ability, slot, id);
         }
+        // P25: a slot's cross-constraint, over the cards of that slot and every earlier card slot.
+        if (slots.Any(s => s.CrossConstraint is not null))
+        {
+            var chosenCards = new List<CardInstance>();
+            foreach (var slot in slots.Where(s => !s.IsPlayer && !s.IsProvince && !s.AtResolution))
+            {
+                chosenCards.AddRange(SlotCards(command, slot.Id));
+                if (slot.CrossConstraint is { } constraint) Require(constraint(this, chosenCards), slot.CrossConstraintReason ?? $"{slot.Label}: that choice may not be made with the earlier ones.");
+            }
+        }
         // Dislodge the Foe: every performing Tactician stands at the SAME battlefield, and the one Personality they oppose stands there too.
         if (ability is { Move.Movers: MoveSpec.PerformingSlot }) ValidatePerformersTogether(command, ability);
     }
@@ -200,12 +216,20 @@ public sealed partial class MatchEngine
             // hiding every candidate that is legal beside a different one. Each earlier choice is probed, so a candidate is
             // offered when some legal earlier selection admits it; the combination itself is still validated on submission.
             var probes = SlotProbes(prototype, chosen, offered);
+            var firstProbe = new Dictionary<string, int>(StringComparer.Ordinal); // P25: the first probe (earlier selection) under which a candidate satisfies the slot's cross-constraint
             foreach (var candidate in SlotCandidateCards(prototype.PlayerId))
             {
                 RuleViolation? refused = null;
-                foreach (var probe in probes)
+                for (var probeIndex = 0; probeIndex < probes.Length; probeIndex++)
                 {
-                    try { ValidateSlotCard(probe, ability, slot, candidate.Id); refused = null; break; }
+                    var probe = probes[probeIndex];
+                    try
+                    {
+                        ValidateSlotCard(probe, ability, slot, candidate.Id);
+                        if (slot.CrossConstraint is { } cross && !cross(this, [.. (probe.Selections ?? []).SelectMany(s => s.CardIds ?? []).Select(Card), candidate]))
+                        { refused ??= new RuleViolation(slot.CrossConstraintReason ?? $"{slot.Label}: that choice may not be made with the earlier ones."); continue; }
+                        refused = null; firstProbe[candidate.Id] = probeIndex; break;
+                    }
                     catch (RuleViolation e) { refused ??= e; }
                 }
                 if (refused is null) legal.Add(candidate.Id);
@@ -221,6 +245,13 @@ public sealed partial class MatchEngine
                 // ability's own distinctness rule even though other, genuinely legal combinations exist. Prefer a candidate
                 // no earlier up-front slot already picked; only repeat one when the slot has no other legal candidate left
                 // (Repeatable slots, e.g. Suiteiru no Oni's hosts, still take the plain first-legal default).
+                // P25: a slot with a cross-constraint defaults to a candidate that satisfies it beside the default earlier choice, or else beside the first earlier choice that admits one.
+                if (slot.CrossConstraint is not null && legal.Count > 0 && !legal.Any(id => firstProbe.GetValueOrDefault(id, -1) == 0))
+                {
+                    var best = legal.Min(id => firstProbe.GetValueOrDefault(id, int.MaxValue));
+                    if (best < probes.Length) { chosen = (probes[best].Selections ?? []).ToList(); legal = legal.Where(id => firstProbe.GetValueOrDefault(id, -1) == best).ToList(); }
+                }
+                else if (slot.CrossConstraint is not null) legal = legal.Where(id => firstProbe.GetValueOrDefault(id, -1) == 0).ToList();
                 var alreadyChosen = chosen.SelectMany(c => c.CardIds ?? []).ToHashSet(StringComparer.Ordinal);
                 var distinct = legal.Where(id => !alreadyChosen.Contains(id)).ToArray();
                 chosen.Add(new(slot.Id, distinct.Length >= slot.Min ? distinct.Take(slot.Min).ToArray() : legal.Take(slot.Min).ToArray()));
