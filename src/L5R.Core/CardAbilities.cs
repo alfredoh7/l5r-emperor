@@ -4063,6 +4063,7 @@ public sealed partial class MatchEngine
         if (Delay(card, DelayedKinds.Bow, actingPlayerId)) return true; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): the bowing is recorded and applied when its trigger comes.
         if (P4ShieldNegatesBow(card)) return true; // Show of Restraint (issue #503, EmperorP4Watches.cs): the next card effect that bows him.
         if (BlessingsShieldNegates(card, "bowing")) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503): "Negate the next card effect that bows, destroys, or moves him".
+        if (ImmuneNegates(card, ImmunityKind.Bow, actingPlayerId, "bowing")) return true; // P12 (ImmunityLedger.cs): per card, even inside a unit bow (R-017); an immune effect is negated, not delayed
         if (TryConsumeWatch(WatchKind.Bow, card, actingPlayerId)) return true; // P7 (PeriodWatches.cs): after the delay and the shields above, before the effect
         if (TorchNegatesBow(card)) return true; // Torch's Flame Flickers (Emperor Edition remaining-cards pass, issue #492, group D): the next card effect that bows the player's Personalities there.
         if (card.OwnerId == actingPlayerId) return false;
@@ -5234,6 +5235,7 @@ public sealed partial class MatchEngine
         }
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): a delayed modifier is recorded and applied (and judged again) when its trigger comes.
         if (Delay(card, DelayedKinds.Modifier, stat: stat, amount: amount, text: effect, sourceId: source)) return;
+        if (stat == "Force" && amount < 0 && ImmuneNegates(card, ImmunityKind.ForcePenalty, ModifierSourcePlayer(source), "Force penalty")) return; // P12 (ImmunityLedger.cs)
         // Tireless Efforts: while it lasts no Force penalty is applied to the card at all (nor any penalty-watching card told of one).
         if (stat == "Force" && amount < 0 && card.ForcePenaltiesNegatedTurn == _state.TurnNumber && !CurrentActionUnnegatable())
         {
@@ -10795,6 +10797,7 @@ public sealed partial class MatchEngine
         }
         if (MovementLockNegates(card, MovementKinds.Home)) return;
         if (P4ShieldNegatesMoveHome(card)) return; // Show of Restraint, The Snow Has Teeth (issue #503, EmperorP4Watches.cs): one-shot shields.
+        if (BattlefieldMovementNegated(card, StandingBattlefield(card), null)) return; // P12 (ImmunityLedger.cs)
         if (TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer())) return; // P7 (PeriodWatches.cs)
         if (card.Zone == Zone.Battlefield && Delay(card, DelayedKinds.MoveHome, arg: bow ? "bow" : null)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): sent home later, if he still is at a battlefield.
         // I Cast Two Shadows (The Shadow's Embrace pass, issue #476 batch 3): the battlefield he is moved home FROM.
@@ -10893,6 +10896,7 @@ public sealed partial class MatchEngine
     private void DiscardTerrain(CardInstance terrain)
     {
         if (NegatesEffect(terrain, "destroy")) { Emit("destructionNegated", $"{Definition(terrain).Name}'s destruction was negated before it resolved.", terrain.OwnerId, terrain.Id); return; } // Interrogation (issue #653)
+        if (ImmuneNegates(terrain, ImmunityKind.TerrainDestroy, EffectSourcePlayer(), "destruction")) return; // P12 (ImmunityLedger.cs): the battle's own discard has no source player and is never stopped
         terrain.Zone = Zone.FateDiscard; terrain.ProvinceIndex = null; terrain.FaceUp = true;
         // Fields of Mercy (oracle-l5r-2530): "the count of destroyed personalities does not start
         // until Fields of Mercy are played" -- so a LATER copy entering play must start fresh, not
@@ -10949,6 +10953,7 @@ public sealed partial class MatchEngine
         if (P3FollowerShielded(card)) { Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Hida Fujita).", card.OwnerId, card.Id); return; } // issue #503
         if (Delay(card, DelayedKinds.Destroy)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (WideValleyNegatesDestruction(card)) return; // Seeds of Decay pass (issue #453), batch 1: an attachment's destruction is always an action's effect (see RecordActionEffect below).
+        if (ImmuneNegates(card, ImmunityKind.Destroy, EffectSourcePlayer(), "destruction")) return; // P12 (ImmunityLedger.cs)
         if (TryConsumeWatch(WatchKind.Destroy, card, EffectSourcePlayer())) return; // P7 (PeriodWatches.cs): after the delay and the protections above
         // Gift Armor (issue #492 group G): "Negate any destruction of this card, except for its Personality being destroyed" (DestroyUnits, which does not come through here).
         if (GiftArmorNegatesDestruction(card) && !HiromiUnnegatable()) // issue #496: an action whose destruction will not be negated (Hiromi's, Makito's, Suitengu's Torch's) is not stopped by Gift Armor either

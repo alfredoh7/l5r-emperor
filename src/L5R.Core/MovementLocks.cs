@@ -38,7 +38,7 @@ public sealed partial class MatchEngine
 
     private bool MovementLocked(CardInstance card, MovementKinds kind) =>
         // Too Close to Home (issue #503); Fudo's Charging tokens (issue #653)
-        card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l)) || PerfectMomentLocks(card) || P4GlobalMovementLock(kind) || SuikihimeMovementLocked(card, kind) || PromoMovementLocked(card, kind);
+        card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l) && !IsImmune(card, ImmunityKind.Prevention, l.ByPlayer)) || PerfectMomentLocks(card) || P4GlobalMovementLock(kind) || SuikihimeMovementLocked(card, kind) || PromoMovementLocked(card, kind);
 
     // A card whose movement of this kind is locked stays where it is; the effect that moved it goes on with whatever else it does.
     private bool MovementLockNegates(CardInstance card, MovementKinds kind)

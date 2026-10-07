@@ -2646,6 +2646,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (ImmuneNegates(card, ImmunityKind.Destroy, actingPlayerId, "destruction")) continue; // P12 (ImmunityLedger.cs)
             if (TryConsumeWatch(WatchKind.Destroy, card, actingPlayerId)) continue; // P7 (PeriodWatches.cs): after the delay and the protections above, before the effect
             if (promoNegated.Contains(card.Id)) continue; // issue #653: Expansion, The Topaz Championship's trait
             if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
