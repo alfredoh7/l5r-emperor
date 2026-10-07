@@ -49,6 +49,7 @@ internal static partial class EngineHooks
         _ = StandingImmunities.Items;
         _ = AbilityCostTerms.Items;
         _ = RefillFaceUp.Items;
+        _ = HonorChange.Items;
         _ = FactTraits.Items;
         _ = FactConditions.Items;
         _ = CelestialEntryChoices.Items;
@@ -68,6 +69,8 @@ internal static partial class EngineHooks
         _ = AfterPayment.Items;
         _ = RecruitGate.Items;
         _ = KeywordRule.Items;
+        _ = ActionEffectWatchFired.Items;
+        _ = ActionMoveGates.Items;
         return true;
     }
 

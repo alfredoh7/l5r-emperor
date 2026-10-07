@@ -58,7 +58,7 @@ public sealed partial class MatchEngine
         if (category != TfPersonalitiesAbilities.EnemyForceLteDiscardFocus) return false;
         // "an enemy card with Force": a Personality or Follower of another player. Until the discard is chosen the slot lists nothing (the discard slot is listed first).
         if (target.OwnerId == player.Id || Definition(target).Type is not (CardType.Personality or CardType.Follower)) return false;
-        return SlotCards(command, "discard").FirstOrDefault() is { } discarded && CardForce(target) <= Definition(discarded).Focus;
+        return SlotCards(command, "discard").FirstOrDefault() is { } discarded && CardForce(target) <= FocusValueOf(discarded);
     }
 
     private void ValidateTfPersonalities(string id, GameCommand command, PlayerState player)
@@ -85,7 +85,7 @@ public sealed partial class MatchEngine
                 return false;
             case TfPersonalitiesAbilities.PaikaoWeaken:
                 // The penalty is the discarded card's Focus Value (the card is in the discard pile now, its definition unchanged).
-                ApplyModifier(target!, source!.Id, id, "Force", -Definition(SlotCards(command, "discard").Single()).Focus);
+                ApplyModifier(target!, source!.Id, id, "Force", -FocusValueOf(SlotCards(command, "discard").Single()));
                 return false;
             case TfPersonalitiesAbilities.LaosheMove:
                 // "Move him to the current battlefield": nothing to do if he already stands there.

@@ -162,7 +162,7 @@ public sealed partial class MatchEngine
                 return false;
             case CreatedProxies677Abilities.MonkeyWeaken:
                 // The discard was paid as a cost; the penalty is the discarded card's Focus Value (its definition is unchanged in the discard pile), until the turn ends.
-                ApplyModifier(target!, source!.Id, id, "Force", -Definition(SlotCards(command, "discard").Single()).Focus);
+                ApplyModifier(target!, source!.Id, id, "Force", -FocusValueOf(SlotCards(command, "discard").Single()));
                 return false;
             case CreatedProxies677Abilities.BadgerMelee:
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, c.consumedGrant);

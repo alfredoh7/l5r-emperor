@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "P14 Honor-change modifier registry: EngineHooks.HonorChange channel (standing + applied stages), HonorModifiers store, Chugo reduction as first registrant; engine only, no cards wired. Shared edits: MatchEngine.GainHonor (two calls), EngineHookStartup (seal).",
+  "validation": "honor-modifiers 6/6; bash tools/check.sh --skip-client passed; check_format and comment-swallow lint clean; native Godot not run (engine-only)",
+  "remaining": "Cards wave (Court Scribe, Kimura, etc.); Rhetoric redirect not moved onto the channel",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/713",
+  "branch": "claude/713-p14-honor-modifiers",
+  "updated": "2026-10-07T16:26:40.129556+00:00"
+}
