@@ -698,7 +698,7 @@ public sealed partial class MatchEngine
             error = "Experienced Personalities may only overlay a Personality with the same title.";
         else if (higherLevel <= lowerLevel)
             error = "The overlaying Personality must have a higher Experience Level.";
-        else if (!LoyaltyAllowsControl(card, Player(playerId).Clan, playerId))
+        else if (!LoyaltyAllowsControl(card, Player(playerId).Clan, playerId, RecruitGateKind.Overlay))
             error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && _state.Cards.Values.Any(c => c.Id != target.Id && c.OwnerId == playerId && InPlay(c)
             && string.Equals(Experienced.BaseTitle(Definition(c).Name), Experienced.BaseTitle(Definition(card).Name), StringComparison.OrdinalIgnoreCase)))
@@ -925,17 +925,19 @@ public sealed partial class MatchEngine
         if (ProvinceEntryLockError(card) is { } entryLocked) return new(cardId, 0, clanDiscount, clanAllegiance, false, entryLocked, []); // P11 (CardRestrictions.cs): "cards will not enter play from the province" -- every province entry asks QuotePurchase
         string? error = null;
         var inClan = def.Type == CardType.Personality && ClanAlignments(card).Contains(player.Clan);
+        var gate = RecruitGateFor(card, playerId, player.Clan, viaReserve ? RecruitGateKind.Reserve : RecruitGateKind.Recruit); // P3 (issue #695, RecruitGates695.cs): a refusal, a waiver of the Honor Requirement
         if (fromDeadPile ? def.Type is not (CardType.Personality or CardType.Holding) : def.Type is not (CardType.Personality or CardType.Holding)) error = fromDeadPile ? "Only a Personality or a Holding can be recruited from a discard pile." : "This card cannot be purchased."; // a Holding too (issue #653: Govern the Land, Re-fortification)
         // Loyal (core rules Glossary): a Personality with one or more Clan affiliations may only be
         // controlled by a matching Clan. With none remaining it is Unaligned, so Loyal imposes no
         // Clan restriction, including for a player whose Stronghold represents no Clan.
+        else if (gate.RefuseReason is { } gateRefusal) error = gateRefusal;
         else if (def.Type == CardType.Personality && !LoyaltyAllowsControl(card, player.Clan, player.Id)) error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if ((clanDiscount || clanAllegiance) && !inClan) error = "Clan discount and allegiance require your Clan's Personality.";
         // Akodo Chiyo / Kitsu Ririko (issue #299): a Personality's own printed "Clan X players may ignore
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
         // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
-        else if (def.Type == CardType.Personality && def.HonorRequirement is int requirement && player.Honor < requirement + KazutoshiHonorRequirementIncrease(playerId)/*issue #503: Bayushi Kazutoshi*/ && !clanAllegiance && !HonorRequirementWaived(def, player) && !player.IgnoresHonorRequirements // Alter History (issue #492, group F)
+        else if (def.Type == CardType.Personality && def.HonorRequirement is int requirement && player.Honor < requirement + KazutoshiHonorRequirementIncrease(playerId)/*issue #503: Bayushi Kazutoshi*/ && !clanAllegiance && !HonorRequirementWaived(def, player) && !gate.IgnoreHonorRequirement && !player.IgnoresHonorRequirements // Alter History (issue #492, group F)
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card, waivedClan))
             && !RoninIgnoresHonorRequirement(card, playerId)) error = "Family Honor is below the Honor Requirement; Clan allegiance may allow purchase."; // Palace of the Breaking Dawn (issue #486, batch 2)
         var prosperous = def.Effect == "prosperous-discount" ? _state.Cards.Values.Count(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality) : 0;
@@ -979,7 +981,7 @@ public sealed partial class MatchEngine
         if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(playerId, def.Name)) error = $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.";
         error ??= AdditionalEntryCostUnpayable(card, playerId); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play he cannot pay bars the recruit.
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
-        var eligible = error is null && inClan && !clanDiscount && !fromDeadPile && !fromDynastyDeck && playerId == _state.ActivePlayerId && ProclaimAllowed(player, def);
+        var eligible = error is null && (inClan || def.Type == CardType.Personality && ProclaimGateEligible(card, player)) && !clanDiscount && !fromDeadPile && !fromDynastyDeck && playerId == _state.ActivePlayerId && ProclaimAllowed(player, def, card);
         return new(cardId, cost, clanDiscount, clanAllegiance, eligible, error, error is null ? PaymentOptions(playerId, cost, new PaymentSubject(card, PaymentKind.Recruit)) : [], basis, PaymentSourcesFor(playerId, new PaymentSubject(card, PaymentKind.Recruit))); // issue #501: the payment tokens
     }
 

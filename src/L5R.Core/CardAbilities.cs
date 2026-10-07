@@ -4103,8 +4103,9 @@ public sealed partial class MatchEngine
         }
         Emit("clanAlignmentRemoved", $"{Definition(card).Name} permanently loses his Clan Alignment keywords.", card.OwnerId, card.Id);
     }
-    private bool LoyaltyAllowsControl(CardInstance card, string clan, int? playerId = null) =>
-        (!Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan) || MrikaLoyalWaived(card, playerId)) && !ControlRefusedByClan(card, clan);
+    private bool LoyaltyAllowsControl(CardInstance card, string clan, int? playerId = null, RecruitGateKind kind = RecruitGateKind.ControlChange) => // P3 (issue #695, RecruitGates695.cs): the RecruitGate refuses or waives Loyal
+        RecruitGateFor(card, playerId ?? card.OwnerId, clan, kind) is { RefuseReason: null } gate
+        && (!Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan) || MrikaLoyalWaived(card, playerId) || gate.LoyalWaived);
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
     // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
     // "Permanent": only when the granting card's text says so; never auto-cleared.
