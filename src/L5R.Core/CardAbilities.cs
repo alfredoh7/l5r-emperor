@@ -7457,7 +7457,7 @@ public sealed partial class MatchEngine
                 break;
             case "veteran-advisor-draw": Draw(player); break;
             case "hired-legion-draw": Draw(player); break;
-            case "akodo-regulars-boost": ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
+            case "akodo-regulars-boost": ApplyModifier(source!, source!.Id, id, "Force", FocusValueOf(target!)); break;
             case "aberrations-boost": if (DiscardTopOfFateDeck(player) is int focus) ApplyModifier(source!, source!.Id, id, "Force", focus); break;
             case "heavy-chargers-boost": ApplyModifier(source!, source!.Id, id, "Force", 3); break;
             case "spitting-llama-force": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
@@ -8372,7 +8372,7 @@ public sealed partial class MatchEngine
             // Training-only (issue #309): "You have Reconnaissance at the current battlefield" (a Battle action of either side).
             case "training-gain-reconnaissance-here": GrantReconnaissanceAtCurrentBattlefield(player.Id); break;
             case "tactical-advantage":
-                ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
+                ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", FocusValueOf(target!));
 
                 break;
             case "training-keyword-conditional-force-boost": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 2); break;
@@ -8433,7 +8433,7 @@ public sealed partial class MatchEngine
             case "aimi-exp-discard":
                 {
 
-                    var discardFocus = Definition(target!).Focus;
+                    var discardFocus = FocusValueOf(target!);
                     DiscardFate(player, target!);
                     var shibaIaimikoBonus = _state.Cards.Values.Any(c => Definition(c).Name == "Shiba Iaimiko" && InPlay(c)) ? 1 : 0;
                     GainHonor(player.Id, discardFocus + shibaIaimikoBonus, "Ikoma Aimi");
@@ -9284,7 +9284,7 @@ public sealed partial class MatchEngine
                 CreateToken(source!, "Fire", id, "Force", 1);
                 CreateToken(source!, "Fire", id, "Force", 1);
                 break;
-            case "obote-boost": ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
+            case "obote-boost": ApplyModifier(source!, source!.Id, id, "Force", FocusValueOf(target!)); break;
             case "rikyou-move":
                 Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Rikyou may only reinforce a battlefield with enemy units present.");
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
@@ -10768,7 +10768,7 @@ public sealed partial class MatchEngine
         if (TryConsumeWatch(WatchKind.Move, card, EffectSourcePlayer())) return false; // P7 (PeriodWatches.cs)
         if (!MoveToBattlefield(card, province)) return false;
         Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to the battlefield at province {province + 1}.", card.OwnerId, card.Id);
-        RecordActionEffect(card.Id, MovedKind); // Action-effect tracking (issue #437)
+        RecordActionEffect(card.Id, MovedKind, toBattlefield: province); // Action-effect tracking (issue #437)
         return true;
     }
     // The Personalities an own-army-personalities action names: several on CardIds, or the one a plain click named as TargetId.
@@ -10879,6 +10879,7 @@ public sealed partial class MatchEngine
         var id = player.FateDeck[0]; player.FateDeck.RemoveAt(0);
         var card = Card(id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
         Emit("cardDiscarded", $"{player.Name} discarded {Definition(card).Name}, the top card of the Fate deck.", player.Id, id);
+        NoteDiscardedByAction(card); // P8 (ActionEffectWatch.cs): the action's record of what it discarded, with the Focus Value
         return Definition(card).Focus;
     }
     // Terrain (a Strategy played as a Battle action): leaves the battlefield either when destroyed by

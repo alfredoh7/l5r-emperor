@@ -2782,7 +2782,7 @@ public sealed partial class MatchEngine
         if (arrivedFromElsewhere) FireConsecrationWatches(card, province); // Consecration (issue #492, group E): "moves to an attacking army".
         // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "a Battle action that moved Mitsuo" -- every move an action makes is on the action's record, including the
         // unit that moves itself (its own source or performer), which TryMoveToBattlefield's target moves are not the only ones.
-        if (arrivedFromElsewhere && _runningCommand is not null) RecordActionEffect(card.Id, MovedKind);
+        if (arrivedFromElsewhere && _runningCommand is not null) RecordActionEffect(card.Id, MovedKind, toBattlefield: province);
         return true;
     }
 

@@ -1282,7 +1282,11 @@ public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string 
 // HostId (The Shadow's Embrace pass, issue #476 batch 6: Shieldman's "destroyed another card in this unit"): the Personality a destroyed attachment was attached to.
 /// FromBattlefield (The Shadow's Embrace pass, issue #476 batch 3): for a move home, the battlefield (province index) the card was moved home FROM; null when it was not at one
 /// (I Cast Two Shadows: "move him to a different battlefield than the one from which he was moved home").
-public sealed record AffectedCard(string CardId, string Kind, string? HostId = null, int? FromBattlefield = null);
+/// ToBattlefield / Side / Focus (P8, ActionEffectWatch.cs): where a "moved" card went ("attacking" or "defending" army there), and the Focus Value a "discarded" card had; omitted when unset.
+public sealed record AffectedCard(string CardId, string Kind, string? HostId = null, int? FromBattlefield = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ToBattlefield = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Side = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Focus = null);
 
 /// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
 /// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its
