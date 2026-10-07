@@ -208,7 +208,7 @@ public sealed partial class MatchEngine
         {
             var amount = Math.Max(0, Definition(card).GoldProduction + ShadowsEmbraceBatch6Production(card, playerId));
             yield return new(card.Id + PaymentTokenMark + "bamboo", card, WlHoldingsAbilities.BambooSource, amount, "bow",
-                $"Bow this card: {amount} Gold. It gains a +1 Gold Production Wealth token", null);
+                $"Bow this card: {amount} Gold. It gains a +1 Gold Production Wealth token", null, OnUse: static (engine, token, player) => engine.WlUsePaymentToken(token, player));
         }
     }
 
@@ -238,6 +238,7 @@ public sealed partial class MatchEngine
     internal static void RegisterWlHoldingsHooks()
     {
         EngineHooks.Abilities.Register("AddWlHoldings", 14900, static abilities => abilities.AddWlHoldings());
+        EngineHooks.PaymentTokens.Register("P1WlPaymentTokens", 16303, static (engine, context) => engine.WlPaymentTokens(context.PlayerId)); // issue #695: Bamboo Harvesters - exp2
         EngineHooks.RunEffects.Register("RunWlHoldings", 14901, static (engine, context) => engine.RunWlHoldings(context.id, context.command, context.player, context.source, context.target));
         EngineHooks.ValidateLate.Register("ValidateWlHoldings", 14902, static (engine, context) => engine.ValidateWlHoldings(context.id, context.player));
         EngineHooks.TargetAllows.Register("WlTargetAllows", 14903, static (engine, context) => engine.WlTargetAllows(context.ability.Target, context.target));

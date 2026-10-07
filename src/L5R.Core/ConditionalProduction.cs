@@ -42,12 +42,16 @@ public enum ProductionCondition
     /// <summary>Issue #503 (Shrine to Nimuro: "or 3 Gold if you control a Tactician"): a condition on the producing card's controller, already judged when the production was asked for.</summary>
     ControllerCondition,
     /// <summary>Issue #674 (Exotic Market: "When paying for an Item, it enters play for 3 less Gold"): an Item being attached and paid for (an Equip) -- never a Follower or Spell, nor an action.</summary>
-    PayingForItem
+    PayingForItem,
+    /// <summary>Issue #695 (P1): decided entirely by an EngineHooks.ProductionCondition callback (a card's own condition, such as "paying for a Personality of a different Clan").</summary>
+    Custom
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
 /// <paramref name="Amount"/> instead of its printed production. Data on the card's Effect, so a printed Holding of this kind needs no code of its own.</summary>
-public sealed record ConditionalProduction(int Amount, ProductionCondition When, string? Keyword = null, int? Threshold = null);
+/// <param name="AmountOf">Issue #695 (P1): when set, the amount is a function of what is being paid for (the engine and the payment subject) instead of the fixed Amount ("when paying for a non-Unique Samurai he enters
+/// play for 0 Gold" produces his cost). It is consulted only for a payment that has a subject and must not quote a price (that would ask for this production again).</param>
+public sealed record ConditionalProduction(int Amount, ProductionCondition When, string? Keyword = null, int? Threshold = null, Func<MatchEngine, PaymentSubject, int>? AmountOf = null);
 
 public static class ConditionalProductionCatalog
 {
@@ -86,10 +90,11 @@ public sealed partial class MatchEngine
     // Yasuki Dokansuto's production is a printed "Kolat Reaction": Cherry Blossom Festival bars it (Mendon's R4 ruling). Every other conditional production is a Holding's trait.
     // issues #503, #622, #653: P2ConditionalProduction (EmperorP2.cs), TfConditionalProduction (TfHoldings.cs), then PromoEmperorConditionalProduction (PromoEmperorHoldings.cs).
     private ConditionalProduction? ConditionalProductionOf(CardInstance card) =>
-        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card) ?? TfConditionalProduction(card) ?? PromoEmperorConditionalProduction(card);
+        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card) ?? TfConditionalProduction(card) ?? PromoEmperorConditionalProduction(card) ?? PaymentHookConditionalProduction(card);
 
-    private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying)
+    private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying, CardInstance? card = null)
     {
+        if (PaymentHookCondition(production, paying, card) is { } hooked) return hooked; // issue #695: EngineHooks.ProductionCondition (PaymentHooks695.cs)
         if (production.When == ProductionCondition.ControllerCondition) return true; // issue #503: judged by P2ConditionalProduction
         if (paying is null) return false;
         return production.When switch

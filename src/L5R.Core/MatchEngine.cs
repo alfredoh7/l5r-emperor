@@ -995,8 +995,8 @@ public sealed partial class MatchEngine
         var card = Card(cardId); var def = Definition(card);
         if (def.Effect == MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
-        var adjustment = (def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) + PromoProductionBonus(card, playerId) + PromoCelestialCProduction(card, playerId) : 0) + PromoEmperorProductionAdjustment(card, playerId, paying) + (def.Type == CardType.Holding && def.GoldProduction > 0 ? PromoFestivalProduction(card) : 0); // issue #653: Seppun Ritisharu (Holdings), The Imperial Treasury (PromoCelestialC.cs), Plantation (a Stronghold) and Kenro-ji-jin's Bounty (the Farms), the Festivals
-        if (ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional, paying)) return Math.Max(0, conditional.Amount + adjustment);
+        var adjustment = (def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) + PromoProductionBonus(card, playerId) + PromoCelestialCProduction(card, playerId) : 0) + PromoEmperorProductionAdjustment(card, playerId, paying) + (def.Type == CardType.Holding && def.GoldProduction > 0 ? PromoFestivalProduction(card) : 0) + PaymentHookAdjustment(card, playerId, paying); // issue #653; issue #695: EngineHooks.ProductionAdjustment and the turn modifiers (PaymentHooks695.cs): Seppun Ritisharu (Holdings), The Imperial Treasury (PromoCelestialC.cs), Plantation (a Stronghold) and Kenro-ji-jin's Bounty (the Farms), the Festivals
+        if (ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional, paying, card)) return Math.Max(0, ConditionalAmount(conditional, paying) + adjustment);
         // Library of Rebirth (Stronghold pass, issue #486 batch 1), Luxurious Silk, Seaside Bazaar: a Reaction's Gold is its own payment source (issue #501: "<card>#reaction", EmperorMechE.cs),
         // usable beside the card's bow; the card's own id is always its printed production.
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
@@ -1019,6 +1019,9 @@ public sealed partial class MatchEngine
         foreach (var tokenGroup in availableTokens.Where(t => !TfIsAltToken(t)).GroupBy(t => t.Card.Id))
             groups.Add(tokenGroup.Select(t => (t.Id, t.Amount)).ToArray());
         TfMergeAltIntoGroups(groups, availableTokens); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow joins the card's own group
+        // Issue #695: a token that requires something of the other chosen sources is tried last, so a combination is kept only when the sources already in it satisfy the token.
+        var requirements = availableTokens.Where(t => t.RequiresOtherSources is not null).ToDictionary(t => t.Id, StringComparer.Ordinal);
+        if (requirements.Count > 0) groups = [.. groups.Where(g => !g.Any(item => requirements.ContainsKey(item.Id))), .. groups.Where(g => g.Any(item => requirements.ContainsKey(item.Id)))];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal = new Dictionary<int, List<string[]>> { [0] = [[]] };
         foreach (var group in groups)
@@ -1031,13 +1034,13 @@ public sealed partial class MatchEngine
                     var total = pair.Key + production;
                     if (!byTotal.TryGetValue(total, out var combinations)) byTotal[total] = combinations = [];
                     foreach (var previous in pair.Value.ToArray())
-                        if (combinations.Count < 12) combinations.Add([.. previous, id]);
+                        if (combinations.Count < 12 && (!requirements.TryGetValue(id, out var needs) || needs.RequiresOtherSources!(this, playerId, [.. previous, id]))) combinations.Add([.. previous, id]);
                 }
             }
         }
         return byTotal.Where(p => p.Key >= cost).SelectMany(p => p.Value.Select(ids => new PaymentOption(ids, p.Key, cost, p.Key - cost)))
-            // Issue #667: the Coin Pouch is never suggested without its Holding; Near Miss, Profits and the Pouch are suggested only when nothing else pays as well (PromoPaymentSources.cs).
-            .Where(p => PromoPaymentOptionValid(p.SourceIds))
+            // Issue #667: the Coin Pouch is never suggested without its Holding; Near Miss, Profits and the Pouch are suggested only when nothing else pays as well (PromoPaymentSources.cs). Issue #695: nor is a token whose RequiresOtherSources the other sources fail (PaymentHooks695.cs).
+            .Where(p => PromoPaymentOptionValid(p.SourceIds) && PaymentTokenConditionError(p.SourceIds, playerId, availableTokens) is null)
             // Zlkyt's destruction of a Holding (issue #501) is suggested only when nothing else pays.
             .OrderBy(p => p.SourceIds.Count(IsDestroyingPaymentToken)).ThenBy(p => PromoOptionalSourceCount(p.SourceIds))
             // A payment that bows no alternate source (a Personality that can bow for Gold, issue #338) is always preferred to one that does:
@@ -1047,8 +1050,8 @@ public sealed partial class MatchEngine
             .ThenBy(p => p.SourceIds.Count(id => !IsPaymentToken(id))).ThenBy(p => p.SourceIds.Length).ThenBy(p => string.Join(",", p.SourceIds), StringComparer.Ordinal).Take(24).ToArray();
     }
 
-    private IEnumerable<CardInstance> Producers(int playerId, PaymentSubject? paying = null) => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
-        && !c.Bowed && (Definition(c).GoldProduction > 0 || MoneylenderTokens(c) > 0 || AlternateGoldSource(c, paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional, paying)));
+    private IEnumerable<CardInstance> Producers(int playerId, PaymentSubject? paying = null) => _state.Cards.Values.Where(c => ProducerControlledBy(c, playerId) && ProducerZone(c, Definition(c)) // issue #695 (PaymentHooks695.cs): a lent Holding, an Attached card, an in-play Strategy
+        && !c.Bowed && (Definition(c).GoldProduction > 0 || MoneylenderTokens(c) > 0 || AlternateGoldSource(c, paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional, paying, c)));
     // Library of Rebirth (issue #486, "Even if this card is bowed"), Luxurious Silk and Seaside Bazaar: their Reaction's Gold is a payment token (issue #501, PaymentSourceIds).
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
     private void ValidatePayment(int playerId, int cost, string[]? sourceIds, IReadOnlySet<string>? exclude = null, PaymentSubject? paying = null)
@@ -1060,6 +1063,7 @@ public sealed partial class MatchEngine
         var producers = PaymentSourceIds(playerId, paying); // issue #501: a card's own production, or one of the payment tokens (EmperorMechE.cs)
         Require(ids.All(producers.Contains), "Every Gold source must be yours, in play, unbowed and able to produce Gold.");
         RequirePaymentTokens(ids, exclude); // issue #501: one token per card, a Holding destroyed by Zlkyt not also paid as another cost
+        RequirePaymentTokenConditions(ids, playerId, paying); // issue #695: a token's RequiresOtherSources and a bowing token not also its card's own bow
         RequirePaymentDiscards(playerId, ids.Where(id => !IsPaymentToken(id)).ToArray(), paying); // Asahina Keigo (issue #477): the card each such source discards is named.
         var produced = ids.Sum(id => GoldProduced(id, playerId, paying));
         Require(produced >= cost, $"This payment needs {cost} Gold; selected sources produce {produced}.");
@@ -1072,9 +1076,6 @@ public sealed partial class MatchEngine
         var ids = allIds.Where(id => !IsPaymentToken(id)).ToArray();
         var produced = allIds.Sum(id => GoldProduced(id, playerId, paying));
         produced -= SpendMoneylenderTokens(ids, cost, playerId, paying); // Moneylender (issue #492, group F): only the Wealth tokens the payment needs are removed.
-        RecordGoldPaidForEntry(cost, paying); // Moneylender (issue #492, group F): "the amount of Gold you paid for it".
-        RecordVastPaddyPayment(ids, paying); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): "If this paid for a Farm Holding entering play from a province, refill the province face-up."
-        P3RecordEntryPayment(cost, paying); // Easy Persuasion (issue #503): what was paid for a Personality entering play
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
         var staysStraight = new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
@@ -1093,6 +1094,7 @@ public sealed partial class MatchEngine
         // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
         LoseHonorForProducers(playerId, ids);
         TfAfterProducersBowed(playerId, ids); // Temple Fortress (issue #622, TfHoldings.cs): "After the first time each turn you bow this card: Gain 1 Honor"
+        AfterPaymentHooks(playerId, cost, produced, paying, allIds, ids, tokens); // issue #695: EngineHooks.AfterPayment (the entry records of Moneylender, Vast Paddy Fields and Easy Persuasion, and the Gold ledger)
     }
 
     private void Proclaim(GameCommand command)

@@ -350,6 +350,7 @@ public sealed partial class MatchEngine
     internal static void RegisterEmperorRemainingFHooks()
     {
         EngineHooks.Abilities.Register("AddEmperorRemainingF", 900, static abilities => abilities.AddEmperorRemainingF());
+        EngineHooks.AfterPayment.Register("P1AfterPaymentMoneylender", 16300, static (engine, context) => engine.RecordGoldPaidForEntry(context.Cost, context.Subject)); // issue #695: was a call in Pay
         EngineHooks.Looks.Register("EmperorRemainingFLooks", 100, static () => EmperorRemainingFLooks.All);
         EngineHooks.ValidateLate.Register("ValidateEmperorRemainingF", 900, static (engine, context) => engine.ValidateEmperorRemainingF(context.id, context.ability, context.command, context.player, context.source));
     }
