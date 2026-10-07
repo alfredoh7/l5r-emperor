@@ -18,10 +18,8 @@ public sealed partial class MatchEngine
     // The action's effect: he enters play at home, the province refills, and his return is scheduled. True when an entry window opened.
     private bool SearchPlayMasayaRecruit(PlayerState player, CardInstance masaya)
     {
-        var quote = QuotePurchase(player.Id, masaya.Id);
-        Require(quote.Error is null, quote.Error ?? "");
-        var opened = BringProvincePersonalityIntoPlay(player, masaya, quote, null, Definition(masaya).Name, proclaimResumesTo: 1 - player.Id);
-        _state.SearchPlayReturns.Add(new(player.Id, masaya.Id, _state.TurnNumber));
+        var opened = RecruitFromProvince(player, masaya, proclaimResumesTo: 1 - player.Id); // P21 (ZoneExtensions.cs): the province recruit
+        ScheduleToDeck(masaya, "Top", DelayUntil.EndOfTurn, player.Id, "Masaya returns to the top of the Dynasty deck"); // P21: the to-deck delay
         return opened;
     }
 
@@ -48,12 +46,6 @@ public sealed partial class MatchEngine
 
     internal void SearchPlayTurnEndForTest() => ResolveSearchPlayTurnEnd();
 
-    // AbilitySourceZoneAllows' term: Masaya's Open action is taken by his own face-up province card. Null for every other ability.
-    private static bool? SearchPlaySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        AbilityCatalog.All.TryGetValue(SearchPlayAbilities.MasayaRecruit, out var masaya) && ReferenceEquals(masaya, ability)
-            ? source.Zone == Zone.Province && source.FaceUp && source.OwnerId == player.Id : null;
-
-    // AbilityActions' candidate sources: a face-up province card whose Personality carries the province-recruit action.
-    private static bool SearchPlayHasProvinceAction(CardInstance card) =>
-        card.Zone == Zone.Province && card.FaceUp && (Definition(card).Abilities ?? []).Contains(SearchPlayAbilities.MasayaRecruit);
+    // Masaya's province-source rule is the generic AbilityDefinition.FromProvince (ZoneExtensions.cs); the debt is the generic DelayedKinds.ToDeck. The legacy SearchPlayReturns above is still drained
+    // so a match saved before P21 resolves exactly as before.
 }

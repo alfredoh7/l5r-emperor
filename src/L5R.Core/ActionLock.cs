@@ -11,7 +11,7 @@ public sealed partial class MatchEngine
     // and counts only while that instance is the current one, so it lapses by itself when the phase ends, with nothing to clear.
     private string CurrentPhaseLock() => ActionLockPhasePrefix + PrintedPhases.Instance(_state.TurnNumber, _state.Phase);
     private bool LockInForce(ActionLock actionLock) => !actionLock.Duration.StartsWith(ActionLockPhasePrefix, StringComparison.Ordinal) || actionLock.Duration == CurrentPhaseLock();
-    private bool HasActionLock(CardInstance card) => card.ActionLocks.Any(LockInForce);
+    private bool HasActionLock(CardInstance card) => card.ActionLocks.Any(l => LockInForce(l) && !IsImmune(card, ImmunityKind.Prevention, LockSourcePlayer(l.Source))); // P12 (ImmunityLedger.cs): another player's lock does not apply to an immune card
 
     // Places the lock. A locked card can still be targeted, moved, bowed and so on; it only stops being able to perform. A card that
     // is locked twice is locked once as far as the rules go (the second entry just lasts as long as the first).

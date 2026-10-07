@@ -43,7 +43,7 @@ public static class SearchPlayAbilities
         // Masaya (oracle-l5r-4853): "Open: If Masaya is face-up in one of your provinces: Bring him into play, paying all costs and paying 2 less Gold. Before the turn ends, put him on top of your Dynasty deck."
         // The target is Masaya himself (Rise of the Dark Naga's province-card category; ValidateSearchPlay requires the source); the recruit price is the ordinary one less 2 (never below 0).
         all[MasayaRecruit] = new("Open", "If Masaya is face-up in one of your provinces: Bring him into play, paying all costs and paying 2 less Gold. Before the turn ends, put him on top of your Dynasty deck",
-            "own-personality-in-province-with-keyword", RequiredKeywords: ["Samurai"], Cost: GoldCostRule.TargetRecruit(-2, 0));
+            "own-personality-in-province-with-keyword", RequiredKeywords: ["Samurai"], Cost: GoldCostRule.TargetRecruit(-2, 0), FromProvince: true);
         // Heart of Fudo - exp2 (oracle-l5r-10523): "Limited: If this Personality is unbowed, search your Fate deck for a card and put it into your hand. Bow this Personality. Destroy this Item."
         all[FudoFetch] = new("Limited", "If this Personality is unbowed, search your Fate deck for a card and put it into your hand. Bow this Personality. Destroy this Item", "none");
         // The Sacred Rosary of the Constrictors (oracle-l5r-9982): "Limited: Discard all your Celestials in play. Search your Dynasty deck or discard pile for a Celestial. Put it into play. If you

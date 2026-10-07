@@ -120,7 +120,7 @@ public sealed partial class MatchEngine
         if (command.Province is int index && player.Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed) is { CardId: { } provinceCardId } province)
         {
             Require(Card(provinceCardId).FaceUp, "Choose one of your provinces holding a face-up card.");
-            Require(!province.HoldsNoDynastyCards, "That province holds no Dynasty cards.");
+            Require(!HoldsNoDynasty(province), "That province holds no Dynasty cards.");
         }
     }
 

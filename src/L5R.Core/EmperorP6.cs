@@ -161,18 +161,19 @@ public sealed partial class MatchEngine
     {
         switch (id)
         {
-            case EmperorP6Abilities.PerfectSacrificeBattle: case EmperorP6Abilities.PerfectSacrificeLimited:
-            {
-                var samurai = Card(command.PerformerId!);
-                // "a Force bonus equal to its current Force": each card's Force is read before any bonus is given, so one card's bonus never feeds another's.
-                var unit = Attachments(samurai.Id).Where(c => Definition(c).Type == CardType.Follower).Prepend(samurai).Select(c => (Card: c, Force: CardForce(c))).ToArray();
-                foreach (var (card, force) in unit)
-                    if (force > 0) ApplyModifier(card, source!.Id, id, "Force", force);
-                Emit("perfectSacrifice", $"{Definition(source!).Name}: each Personality and Follower in {Definition(samurai).Name}'s unit doubles its Force.", player.Id, samurai.Id);
-                ScheduleDelayedEffect(samurai, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, Definition(source!).Name, source!.Id); // the shared delay store (issue #492, EmperorRulingR2.cs)
-                Emit("destructionScheduled", $"{Definition(samurai).Name}'s unit will be destroyed before this turn ends.", player.Id, samurai.Id);
-                return false;
-            }
+            case EmperorP6Abilities.PerfectSacrificeBattle:
+            case EmperorP6Abilities.PerfectSacrificeLimited:
+                {
+                    var samurai = Card(command.PerformerId!);
+                    // "a Force bonus equal to its current Force": each card's Force is read before any bonus is given, so one card's bonus never feeds another's.
+                    var unit = Attachments(samurai.Id).Where(c => Definition(c).Type == CardType.Follower).Prepend(samurai).Select(c => (Card: c, Force: CardForce(c))).ToArray();
+                    foreach (var (card, force) in unit)
+                        if (force > 0) ApplyModifier(card, source!.Id, id, "Force", force);
+                    Emit("perfectSacrifice", $"{Definition(source!).Name}: each Personality and Follower in {Definition(samurai).Name}'s unit doubles its Force.", player.Id, samurai.Id);
+                    ScheduleDelayedEffect(samurai, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, Definition(source!).Name, source!.Id); // the shared delay store (issue #492, EmperorRulingR2.cs)
+                    Emit("destructionScheduled", $"{Definition(samurai).Name}'s unit will be destroyed before this turn ends.", player.Id, samurai.Id);
+                    return false;
+                }
             case EmperorP6Abilities.IetsunoBow:
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;
@@ -324,13 +325,20 @@ public sealed partial class MatchEngine
                 BeginSearch(EmperorP6Searches.InSearchOfGuidance, card, player.Id, "event");
                 return true;
             case DarkExperimentsEffect:
-            {
-                var candidates = _state.Players.SelectMany(p => p.Provinces.Where(q => !q.Destroyed).Select(q => $"{p.Id}:{q.Index}")).ToList();
-                if (candidates.Count == 0) { FinishRevealedEvent(card); return true; }
-                OpenEventChoice(new PendingEventChoice { Kind = "p6-dark", EventCardId = card.Id, PlayerId = player.Id, Origin = "reveal", Candidates = candidates,
-                    Prompt = $"{Definition(card).Name}: choose a province. It permanently has -2 strength and its Region is destroyed; until the game ends a Region attaching to it is destroyed and a Holding entering play from it gets a -1 Gold Production token." });
-                return true;
-            }
+                {
+                    var candidates = _state.Players.SelectMany(p => p.Provinces.Where(q => !q.Destroyed).Select(q => $"{p.Id}:{q.Index}")).ToList();
+                    if (candidates.Count == 0) { FinishRevealedEvent(card); return true; }
+                    OpenEventChoice(new PendingEventChoice
+                    {
+                        Kind = "p6-dark",
+                        EventCardId = card.Id,
+                        PlayerId = player.Id,
+                        Origin = "reveal",
+                        Candidates = candidates,
+                        Prompt = $"{Definition(card).Name}: choose a province. It permanently has -2 strength and its Region is destroyed; until the game ends a Region attaching to it is destroyed and a Holding entering play from it gets a -1 Gold Production token."
+                    });
+                    return true;
+                }
         }
         return false;
     }
@@ -349,7 +357,7 @@ public sealed partial class MatchEngine
     {
         if (!P6.SearchedRefills.Remove(eventCard.Id, out var senseiId)) return false;
         var sensei = Card(senseiId);
-        if (province.Destroyed || province.CardId is not null || province.HoldsNoDynastyCards)
+        if (province.Destroyed || province.CardId is not null || HoldsNoDynasty(province))
         {
             sensei.Zone = Zone.DynastyDiscard; sensei.FaceUp = true; sensei.ProvinceIndex = null;
             Emit("provinceDiscard", $"{Definition(sensei).Name} could not refill the province and was discarded.", player.Id, sensei.Id);
@@ -451,8 +459,17 @@ public sealed partial class MatchEngine
                 prompt = $"{Definition(Card(source)).Name}: you may switch the card that refilled {owner.Name}'s province {province.Index + 1} with a card of theirs in another province.";
             }
             P6.ResumePriority = _state.PriorityPlayerId; P6.ResumePasses = _state.ConsecutivePasses;
-            OpenEventChoice(new PendingEventChoice { Kind = next.Kind == "faceup" ? "p6-faceup" : "p6-ietsuno", EventCardId = source, PlayerId = next.PlayerId, Origin = "deferred",
-                ClosesTo = _state.PriorityPlayerId, Candidates = candidates, Data = [next.OwnerId.ToString(), next.Province.ToString(), next.CardId], Prompt = prompt });
+            OpenEventChoice(new PendingEventChoice
+            {
+                Kind = next.Kind == "faceup" ? "p6-faceup" : "p6-ietsuno",
+                EventCardId = source,
+                PlayerId = next.PlayerId,
+                Origin = "deferred",
+                ClosesTo = _state.PriorityPlayerId,
+                Candidates = candidates,
+                Data = [next.OwnerId.ToString(), next.Province.ToString(), next.CardId],
+                Prompt = prompt
+            });
         }
     }
 
@@ -468,32 +485,32 @@ public sealed partial class MatchEngine
                 FinishRevealedEvent(Card(pending.EventCardId));
                 return true;
             case "p6-faceup":
-            {
-                Require(command.Choice == "no" || command.Choice is not null && pending.Candidates.Contains(command.Choice), "Choose whether to refill the province face-up.");
-                CloseEmperorP6Choice();
-                var owner = Player(int.Parse(pending.Data[0])); var province = owner.Provinces.Single(p => p.Index == int.Parse(pending.Data[1])); var card = Card(pending.Data[2]);
-                if (command.Choice == "no") { Emit("refillFaceDownKept", $"{owner.Name} left province {province.Index + 1}'s refill face down.", owner.Id); return true; }
-                var parts = command.Choice!.Split(':'); var source = Card(parts[1]);
-                if (parts[0] == "susaiken") source.AbilityUses[SusaikenUseKey] = _state.TurnNumber;
-                else P6.DistantExpansionUses.Add($"{owner.Id}|{_state.TurnNumber}");
-                card.FaceUp = true;
-                Emit("provinceRefilled", $"{Definition(source).Name}: {owner.Name}'s province {province.Index + 1} was refilled face up with {Definition(card).Name}.", owner.Id, card.Id);
-                return true;
-            }
+                {
+                    Require(command.Choice == "no" || command.Choice is not null && pending.Candidates.Contains(command.Choice), "Choose whether to refill the province face-up.");
+                    CloseEmperorP6Choice();
+                    var owner = Player(int.Parse(pending.Data[0])); var province = owner.Provinces.Single(p => p.Index == int.Parse(pending.Data[1])); var card = Card(pending.Data[2]);
+                    if (command.Choice == "no") { Emit("refillFaceDownKept", $"{owner.Name} left province {province.Index + 1}'s refill face down.", owner.Id); return true; }
+                    var parts = command.Choice!.Split(':'); var source = Card(parts[1]);
+                    if (parts[0] == "susaiken") source.AbilityUses[SusaikenUseKey] = _state.TurnNumber;
+                    else P6.DistantExpansionUses.Add($"{owner.Id}|{_state.TurnNumber}");
+                    card.FaceUp = true;
+                    Emit("provinceRefilled", $"{Definition(source).Name}: {owner.Name}'s province {province.Index + 1} was refilled face up with {Definition(card).Name}.", owner.Id, card.Id);
+                    return true;
+                }
             case "p6-ietsuno":
-            {
-                Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a card to switch with, or none.");
-                CloseEmperorP6Choice();
-                if (command.Choice == "none" || command.TargetId is null) { Emit("ietsunoKept", $"{Definition(Card(pending.EventCardId)).Name}: nothing was switched.", pending.PlayerId); return true; }
-                var owner = Player(int.Parse(pending.Data[0])); var here = owner.Provinces.Single(p => p.Index == int.Parse(pending.Data[1]));
-                var refilled = Card(pending.Data[2]); var other = Card(command.TargetId);
-                var there = owner.Provinces.Single(p => p.CardId == other.Id);
-                here.CardId = other.Id; other.ProvinceIndex = here.Index;
-                there.CardId = refilled.Id; refilled.ProvinceIndex = there.Index;
-                if (!refilled.FaceUp) _state.ProvinceSights.Add(new(pending.PlayerId, owner.Id, there.Index, refilled.Id, refilled.DefinitionId, _state.TurnNumber));
-                Emit("provinceCardsSwitched", $"{Definition(Card(pending.EventCardId)).Name}: the cards in {owner.Name}'s provinces {here.Index + 1} and {there.Index + 1} were switched.", pending.PlayerId, pending.EventCardId);
-                return true;
-            }
+                {
+                    Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a card to switch with, or none.");
+                    CloseEmperorP6Choice();
+                    if (command.Choice == "none" || command.TargetId is null) { Emit("ietsunoKept", $"{Definition(Card(pending.EventCardId)).Name}: nothing was switched.", pending.PlayerId); return true; }
+                    var owner = Player(int.Parse(pending.Data[0])); var here = owner.Provinces.Single(p => p.Index == int.Parse(pending.Data[1]));
+                    var refilled = Card(pending.Data[2]); var other = Card(command.TargetId);
+                    var there = owner.Provinces.Single(p => p.CardId == other.Id);
+                    here.CardId = other.Id; other.ProvinceIndex = here.Index;
+                    there.CardId = refilled.Id; refilled.ProvinceIndex = there.Index;
+                    if (!refilled.FaceUp) _state.ProvinceSights.Add(new(pending.PlayerId, owner.Id, there.Index, refilled.Id, refilled.DefinitionId, _state.TurnNumber));
+                    Emit("provinceCardsSwitched", $"{Definition(Card(pending.EventCardId)).Name}: the cards in {owner.Name}'s provinces {here.Index + 1} and {there.Index + 1} were switched.", pending.PlayerId, pending.EventCardId);
+                    return true;
+                }
         }
         return false;
     }

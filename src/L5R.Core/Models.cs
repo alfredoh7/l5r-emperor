@@ -240,6 +240,12 @@ public sealed class CardInstance
     public Zone Zone { get; set; }
     public int? ProvinceIndex { get; set; }
     public bool FaceUp { get; set; }
+    // P21 (ZoneExtensions.cs, issue #697): the card this one sits UNDER (Zone.Underneath with a host: The Tachikaze's Followers); null for the cards under the owner's Stronghold and for every card not under a host.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? HostCardId { get; set; }
+    // P21: the turn this card entered play (stamped after the command that put it in play, cleared once it leaves play); null while not in play.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? EnteredPlayTurn { get; set; }
     // Issue #492 (Mendon's ruling R5): "Terrain may not be bowed or straightened." A Terrain (a Strategy with the Terrain keyword) is therefore never bowed, whichever path tries: every one of the
     // hundred-odd places that set a card bowed goes through this one property.
     private bool _bowed;
@@ -351,6 +357,9 @@ public sealed class ProvinceState
     // Issue #503 (EmperorP6.cs): Illusory Defense's created province "permanently does not hold Dynasty cards" (never refilled, nothing put into it); Dark Experiments' permanent mark ("until the
     // game ends, after a Region attaches to it, destroy the Region, and after a Holding enters play from it, give the Holding a -1GP token").
     public bool HoldsNoDynastyCards { get; set; }
+    // P21 (issue #697, Kokure's Lands): this province holds no Dynasty cards WHILE the named card is in play (MatchEngine.HoldsNoDynasty reads it with the permanent flag above).
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? HoldsNoDynastyCardsWhile { get; set; }
     public bool DarkExperimentsMarked { get; set; }
     // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
     // by player id, defaulted to false. No ability removes it directly; it resets to false for both
@@ -376,6 +385,9 @@ public sealed class PlayerState
     public string Clan { get; set; } = "";
     public int Honor { get; set; }
     public int TurnsTaken { get; set; }
+    // P21 (issue #697): the ids of this player's Personalities that were in play at the end of this player's last turn ("in play during your last turn"); null until a turn has ended.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? InPlayDuringLastTurn { get; set; }
     public int ProclaimUsedTurn { get; set; } = -1;
     /// <summary>The Personality whose entry Proclaim was taken this turn: a Personality whose Proclaim ignores the once-per-turn limit (Kakita Yusugi) may still be Proclaimed only ONCE per entry (issue #642: the bot soak found it offered forever).</summary>
     public string? ProclaimedCardId { get; set; }
@@ -1400,7 +1412,9 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // Issue #501 (control transfer): the card's OWNER when another player controls it (OwnerId is always the controller); null when its owner controls it.
     int? RealOwnerId = null,
     // Issue #611: the Personality's match-unique, public "Unit N" number, assigned when it first enters play; 0 for a card that has not (and for hidden cards).
-    int UnitNumber = 0);
+    int UnitNumber = 0,
+    // P21 (issue #697): the card a Zone.Underneath card sits under (null for the cards under the Stronghold and for any other card). A face-down under-card is redacted for the other seat.
+    string? UnderHostId = null);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
@@ -1437,7 +1451,7 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
     CardView[]? Celestials = null, int FocusCount = 0,
-    // Zone.Underneath (issue #503, The New Foundries): the cards face-up under the player's Stronghold -- public.
+    // Zone.Underneath (issue #503, The New Foundries): the cards under the player's Stronghold (public) and, since P21, under any host card (a face-down one is redacted for the other seat).
     CardView[]? Underneath = null)
 {
     public HandLimitView? HandLimit { get; init; }
