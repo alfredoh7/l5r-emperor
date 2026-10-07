@@ -28,7 +28,14 @@ public sealed partial class MatchEngine
     public const string DestroyedKind = "destroyed";
     public const string MovedKind = "moved";
 
-    private void RecordActionEffect(string cardId, string kind, string? hostId = null, int? fromBattlefield = null) => _state.CurrentActionAffected.Add(new(cardId, kind, hostId, fromBattlefield));
+    public const string DiscardedKind = "discarded";
+
+    private void RecordActionEffect(string cardId, string kind, string? hostId = null, int? fromBattlefield = null, int? toBattlefield = null, int? focus = null)
+    {
+        var fact = new AffectedCard(cardId, kind, hostId, fromBattlefield, toBattlefield, toBattlefield is null ? null : MovedSide(cardId), focus);
+        _state.CurrentActionAffected.Add(fact);
+        NoteWatchedFact(fact); // P8 (ActionEffectWatch.cs): a watch armed for this action hears the fact as it happens
+    }
 
     // Snapshots what the just-finished action affected into LastResolvedAction, opens the Reaction window naming it if anyone holds one that
     // applies, and clears the accumulator either way. Called from the three points an action (its own reaction windows included) is truly done,
@@ -44,6 +51,7 @@ public sealed partial class MatchEngine
         AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
         ApplyAgonyOfHerGaze(abilityId, playerId); // issue #503 (EmperorP2.cs): The Agony of Her Gaze's trait, before any Reaction to the same moment
         var affected = _state.CurrentActionAffected;
+        FireEndWatches(affected, playerId, abilityId); // P8 (ActionEffectWatch.cs): the watches that want the whole record, and the end of every watch of this action
         P4AfterActionResolved(affected, abilityId, playerId, sourceId); // Scars of War, The Menacing Sky (issue #503, EmperorP4Watches.cs)
         _state.LastResolvedAction = new ResolvedActionFacts
         {

@@ -153,10 +153,10 @@ public sealed partial class MatchEngine
                 return false;
             case WlPersAftermathAbilities.HeiraiBoost:
                 // The discard was paid as the cost; the bonus is the discarded card's Focus Value (its definition is unchanged in the discard pile), until the turn ends.
-                ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus);
+                ApplyModifier(source!, source!.Id, id, "Force", FocusValueOf(target!));
                 return false;
             case WlPersAftermathAbilities.TakadaInvest:
-                GainHonor(player.Id, Definition(target!).Focus, "Susumu Takada");
+                GainHonor(player.Id, FocusValueOf(target!), "Susumu Takada");
                 return false;
             case WlPersAftermathAbilities.BrokenManInvest:
                 CreateToken(source!, "Invest", id, "Force", 1);

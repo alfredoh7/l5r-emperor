@@ -50,6 +50,7 @@ internal static partial class EngineHooks
         _ = AbilityCostTerms.Items;
         _ = RefillFaceUp.Items;
         _ = AfterProvincesRevealed.Items; // P5 (issue #711)
+        _ = HonorChange.Items;
         _ = FactTraits.Items;
         _ = FactConditions.Items;
         _ = CelestialEntryChoices.Items;
@@ -69,6 +70,8 @@ internal static partial class EngineHooks
         _ = AfterPayment.Items;
         _ = RecruitGate.Items;
         _ = KeywordRule.Items;
+        _ = ActionEffectWatchFired.Items;
+        _ = ActionMoveGates.Items;
         return true;
     }
 
