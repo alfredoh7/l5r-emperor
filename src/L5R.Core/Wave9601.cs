@@ -144,30 +144,30 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case Wave9601Abilities.EarthsProtection:
-            {
-                var wielder = Card(command.PerformerId!);
-                var amount = EarthsProtectionAmount(command);
-                ApplyModifier(wielder, source!.Id, id, "Force", Math.Abs(amount));
-                if (Keyword(wielder, "Earth"))
                 {
-                    // "his next bowing or movement": ONE negation in all -- two linked watches, the first to fire removes the other (an "exclusive:" Arg, PeriodWatches.cs).
-                    var group = $"exclusive:{id}:{wielder.Id}:{_state.TurnNumber}";
-                    foreach (var kind in new[] { WatchKind.Bow, WatchKind.Move })
-                        AddNegationWatch(new NegationWatch { OwnerPlayerId = player.Id, Kind = kind, TargetCardId = wielder.Id, Source = WatchSource.OtherPlayers, Remaining = 1, LastTurn = _state.TurnNumber, Arg = group });
+                    var wielder = Card(command.PerformerId!);
+                    var amount = EarthsProtectionAmount(command);
+                    ApplyModifier(wielder, source!.Id, id, "Force", Math.Abs(amount));
+                    if (Keyword(wielder, "Earth"))
+                    {
+                        // "his next bowing or movement": ONE negation in all -- two linked watches, the first to fire removes the other (an "exclusive:" Arg, PeriodWatches.cs).
+                        var group = $"exclusive:{id}:{wielder.Id}:{_state.TurnNumber}";
+                        foreach (var kind in new[] { WatchKind.Bow, WatchKind.Move })
+                            AddNegationWatch(new NegationWatch { OwnerPlayerId = player.Id, Kind = kind, TargetCardId = wielder.Id, Source = WatchSource.OtherPlayers, Remaining = 1, LastTurn = _state.TurnNumber, Arg = group });
+                    }
+                    return false;
                 }
-                return false;
-            }
             case Wave9601Abilities.Avenging:
-            {
-                var performer = Card(command.PerformerId!);
-                Straighten(performer);
-                if (PeriodCountOf(BattleDestroyedCounter + player.Id, Period.Battle) > 0)
                 {
-                    AddNegationWatch(new NegationWatch { OwnerPlayerId = player.Id, Kind = WatchKind.Destroy, TargetCardId = performer.Id, Source = WatchSource.Any, Remaining = 1, LastTurn = _state.TurnNumber });
-                    Emit("destructionWatch", $"{Definition(performer).Name}'s next destruction from cards' effects this turn will be negated.", player.Id, performer.Id);
+                    var performer = Card(command.PerformerId!);
+                    Straighten(performer);
+                    if (PeriodCountOf(BattleDestroyedCounter + player.Id, Period.Battle) > 0)
+                    {
+                        AddNegationWatch(new NegationWatch { OwnerPlayerId = player.Id, Kind = WatchKind.Destroy, TargetCardId = performer.Id, Source = WatchSource.Any, Remaining = 1, LastTurn = _state.TurnNumber });
+                        Emit("destructionWatch", $"{Definition(performer).Name}'s next destruction from cards' effects this turn will be negated.", player.Id, performer.Id);
+                    }
+                    return false;
                 }
-                return false;
-            }
             default:
                 return null;
         }
