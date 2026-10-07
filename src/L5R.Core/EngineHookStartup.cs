@@ -52,6 +52,7 @@ internal static partial class EngineHooks
         _ = TurnBeginChoices.Items;
         _ = PlayerGrantAbilities.Items;
         _ = CostWaivers.Items;
+        _ = KeywordRule.Items;
         return true;
     }
 
