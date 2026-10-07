@@ -114,23 +114,23 @@ public sealed partial class MatchEngine
         {
             // Moto Naleesh: bow the unit, then destroy every card in it that had no attachments and no Cavalry when the action resolved (read before anything is destroyed).
             case "naleesh-overrun":
-            {
-                var unit = UnitMembers(target!).ToArray();
-                var doomed = unit.Where(c => !HasAttachments(c) && !Keyword(c, "Cavalry")).ToArray();
-                BowUnitByEffect(target!, player.Id);
-                foreach (var card in doomed.Where(c => c.Zone == Zone.Attached)) if (InPlay(card)) DestroyAttachment(card);
-                foreach (var personality in doomed.Where(c => c.Zone != Zone.Attached && Definition(c).Type == CardType.Personality)) if (InPlay(personality)) DestroyUnits([personality], false, player.Id);
-                return false;
-            }
+                {
+                    var unit = UnitMembers(target!).ToArray();
+                    var doomed = unit.Where(c => !HasAttachments(c) && !Keyword(c, "Cavalry")).ToArray();
+                    BowUnitByEffect(target!, player.Id);
+                    foreach (var card in doomed.Where(c => c.Zone == Zone.Attached)) if (InPlay(card)) DestroyAttachment(card);
+                    foreach (var personality in doomed.Where(c => c.Zone != Zone.Attached && Definition(c).Type == CardType.Personality)) if (InPlay(personality)) DestroyUnits([personality], false, player.Id);
+                    return false;
+                }
             // Moto Shigeru: negate the action, permanently reduce her Personal Honor by the number of other Personalities her controller controls, and if it is now 0 she commits seppuku.
             case "shigeru-negate":
-            {
-                NegateHeldAction(source!);
-                var others = _state.Cards.Values.Count(c => c.OwnerId == player.Id && c.Id != source!.Id && InPlay(c) && Definition(c).Type == CardType.Personality);
-                if (others > 0) AddPermanentModifier(source!, source!.Id, id, "PersonalHonor", -others);
-                if (InPlay(source!) && CardPersonalHonor(source!) <= 0) CommitSeppuku(source!, player.Id);
-                return false;
-            }
+                {
+                    NegateHeldAction(source!);
+                    var others = _state.Cards.Values.Count(c => c.OwnerId == player.Id && c.Id != source!.Id && InPlay(c) && Definition(c).Type == CardType.Personality);
+                    if (others > 0) AddPermanentModifier(source!, source!.Id, id, "PersonalHonor", -others);
+                    if (InPlay(source!) && CardPersonalHonor(source!) <= 0) CommitSeppuku(source!, player.Id);
+                    return false;
+                }
             case "itao-attach":
                 return ExecuteAttach(command, ability.Attach!, player, source, target);
             // Utaku Ryoko: a Force penalty equal to her Personal Honor as the action resolves.
@@ -140,7 +140,9 @@ public sealed partial class MatchEngine
             case "shunshi-lock":
                 LockMovement(target!, Definition(source!).Name, MovementKinds.ToBattlefield | MovementKinds.Assign);
                 return false;
-            case "samuru-attack": case "tomaru-attack-3": case "unmei-attack":
+            case "samuru-attack":
+            case "tomaru-attack-3":
+            case "unmei-attack":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             case "hama-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;

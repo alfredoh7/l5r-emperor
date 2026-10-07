@@ -304,17 +304,17 @@ internal static class AfterFactsTests
         Mode = "announce"; Log.Clear();
         try
         {
-        Accept(e, Open());
-        Check(e.State.PendingChoice is { Type: "announceReaction" } && e.State.PendingChoice.CardId == watcher.Id, "the announce window opened for the registered watcher: " + e.State.PendingChoice?.Type);
-        var offered = e.QueryActions(0).Where(a => a.Type == "useAbility" && a.CardId == watcher.Id && a.Enabled).ToArray();
-        Check(offered.Length > 0 && offered.All(a => a.Command!.PerformerId is not null), "the Reaction is offered once per performer it may name: " + string.Join("; ", e.QueryActions(0).Select(o => $"{o.Type}/{o.Label}/{o.Enabled}/{o.Reason}")));
-        Accept(e, offered[0].Command!);
-        Check(Log.Contains("reaction:test-p6-announce"), "the Reaction resolved");
-        Check(e.State.Cards[watcher.Id].Modifiers.Any(m => m.Effect == "test-announce") && e.State.ActionScopedModifiers is { Count: 1 }, "its +1 is in force while the announced action has not resolved");
-        for (var guard = 0; guard < 4 && e.State.PendingChoice is { Type: "announceReaction" }; guard++) Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
-        Check(Log.Contains("reaction:test-p6-open"), "the announced action went on to resolve");
-        PassAll(e);
-        Check(!e.State.Cards[watcher.Id].Modifiers.Any(m => m.Effect == "test-announce") && e.State.ActionScopedModifiers is null, "and the +1 ended with it");
+            Accept(e, Open());
+            Check(e.State.PendingChoice is { Type: "announceReaction" } && e.State.PendingChoice.CardId == watcher.Id, "the announce window opened for the registered watcher: " + e.State.PendingChoice?.Type);
+            var offered = e.QueryActions(0).Where(a => a.Type == "useAbility" && a.CardId == watcher.Id && a.Enabled).ToArray();
+            Check(offered.Length > 0 && offered.All(a => a.Command!.PerformerId is not null), "the Reaction is offered once per performer it may name: " + string.Join("; ", e.QueryActions(0).Select(o => $"{o.Type}/{o.Label}/{o.Enabled}/{o.Reason}")));
+            Accept(e, offered[0].Command!);
+            Check(Log.Contains("reaction:test-p6-announce"), "the Reaction resolved");
+            Check(e.State.Cards[watcher.Id].Modifiers.Any(m => m.Effect == "test-announce") && e.State.ActionScopedModifiers is { Count: 1 }, "its +1 is in force while the announced action has not resolved");
+            for (var guard = 0; guard < 4 && e.State.PendingChoice is { Type: "announceReaction" }; guard++) Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+            Check(Log.Contains("reaction:test-p6-open"), "the announced action went on to resolve");
+            PassAll(e);
+            Check(!e.State.Cards[watcher.Id].Modifiers.Any(m => m.Effect == "test-announce") && e.State.ActionScopedModifiers is null, "and the +1 ended with it");
         }
         finally { Mode = ""; }
 
