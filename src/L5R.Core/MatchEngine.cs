@@ -1991,13 +1991,14 @@ public sealed partial class MatchEngine
     {
         if (_state.Phase == Phase.Battle) RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1).
         var card = Card(command.CardId); var target = Card(command.TargetId); var def = Definition(card);
-        Require(card.OwnerId == command.PlayerId && card.Zone == Zone.Hand && def.Type is CardType.Item or CardType.Follower or CardType.Spell, "Choose a supported attachment from your hand.");
+        var fromDiscard = card.Zone == Zone.FateDiscard && RulebookDiscardSource("equip", command.PlayerId, command.TargetId, card); // P19 (RulebookModifiers.cs): the owner's discard pile, when a modifier allows it
+        Require(card.OwnerId == command.PlayerId && (card.Zone == Zone.Hand || fromDiscard) && def.Type is CardType.Item or CardType.Follower or CardType.Spell, "Choose a supported attachment from your hand.");
         // Equip (Limited) attaches a Spell too (Mendon's ruling, issue #501): only to a Shugenja (core rules Glossary), every other restriction as for any attachment. A Spell in a battle
         // is Equip (Battle)'s, a separate player ability with its own rules; the timing grants (Foothills Keep, Glory of the Shogun) name Weapons, Items and Followers only (EquipTimingError).
         Require(def.Type != CardType.Spell || Keyword(target, "Shugenja"), "Only a Shugenja can attach a Spell.");
         // Equip (Limited) -- or, with a player-level timing grant (Foothills Keep: "Equipping Weapons is a Battle/Open action for you", TimingGrants.cs), an
         // Open equip in any player's action segment or a Battle equip: then the wielder must be a Personality at the current battlefield, not at Home.
-        var equipTimingError = EquipTimingError(command.PlayerId, card);
+        var equipTimingError = ResolveEquipTiming(command.PlayerId, card, out var spentTimingGrant);
         Require(equipTimingError is null, equipTimingError ?? "");
         var inBattle = _state.Phase == Phase.Battle;
         // Cultist Infiltrator (oracle-l5r-1595): "You may attach this card to a Personality you do
@@ -2027,9 +2028,9 @@ public sealed partial class MatchEngine
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
         Pay(command.PlayerId, card, EquipGoldCost(command.PlayerId, card, target).Cost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Equip, Wielder: target)); // issue #501: the wielder
+        SpendPlayerTimingGrant(spentTimingGrant); // P19: a card-free once-per-turn grant is spent once the cost is paid
         _state.CurrentActionAffected = []; // Emperor Edition Personality pass (issue #477 batch 2): what Equip records (NoteAttachedFollowerFromHand) is this action's alone.
-        Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(command.PlayerId, card);
-        NoteAttachedFollowerFromHand(card, target);
+        if (!fromDiscard) { Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(command.PlayerId, card); NoteAttachedFollowerFromHand(card, target); } // P19: an attachment from a discard pile was not attached from a hand
         card.Zone = Zone.Attached; card.AttachedTo = target.Id; card.FaceUp = true;
         PromoPaymentAttached(card); // Coin Pouch (issue #667): "This card enters play bowed."
         if (inBattle) card.ProvinceIndex = target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him

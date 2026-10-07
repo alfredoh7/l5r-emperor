@@ -28,6 +28,7 @@ internal static partial class EngineHooks
         _ = ProvinceBonus.Items;
         _ = TargetedReaction.Items;
         _ = ExtraUsesPerTurn.Items;
+        _ = RulebookModifier.Items; // P19 (issue #717): rulebook-action modifiers
         _ = ValidateEarly.Items;
         _ = ValidateMiddle.Items;
         _ = ValidateLate.Items;

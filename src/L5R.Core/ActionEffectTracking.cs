@@ -104,7 +104,7 @@ public sealed partial class MatchEngine
     }
 
     // A Battle action: a Battle-timed ability, or a Battle/Open one resolved in a Combat Segment.
-    private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
+    private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && ability.Timing is "Battle" or "BattleOrOpen" && _state.Phase == Phase.Battle; // P19: a rulebook timing override can take a Battle action in the Action phase
 
     private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && (ability.Trigger is AfterActionReactionTriggers.AfterActionResolved or ReactionTriggers.RingEntersPlay || FactTriggers.IsFact(ability.Trigger)); // P6: a fact's Reaction is offered in the same window
 
