@@ -100,7 +100,11 @@ public partial class PersistentHomeProbe : Node
             var picker = Descendants<CardChoiceList>(_main).First(b => b.IsVisibleInTree()); // issue #635: the list of legal cards
             picker.Choose(0); await Settle();
         }
-        await Click(Button("Confirm action")); await Settle(.5);
+        // Generic reviewed actions use their stable commit field; Region/Celestial/
+        // Ring drafts retain their own separate, unchanged support controls.
+        var commit = Field<Button?>("_paymentConfirm") ?? Button("Confirm action");
+        Require(commit.IsVisibleInTree() && !commit.Disabled, "Reviewed ability has no visible enabled commit");
+        await Click(commit); await Settle(.5);
         Require(Engine.Version > version, id + " did not execute through native confirmation");
     }
     private async Task Pass()
@@ -174,8 +178,8 @@ public partial class PersistentHomeProbe : Node
             Require(reserveButton is not null, "Battle flow hid engine-provided Reserve recruitment");
             reserveButton!.EmitSignal(BaseButton.SignalName.Pressed); await Settle(.4);
             // The Reserve button opens the reviewed Gold payment panel (issue #303); the engine action is submitted on Confirm.
-            var confirmReserve = Descendants<Button>(_main).FirstOrDefault(b => b.Text.StartsWith("Confirm recruit", StringComparison.Ordinal) && b.IsVisibleInTree() && !b.Disabled);
-            Require(confirmReserve is not null, "Reserve did not open its reviewed payment with an enabled Confirm");
+            var confirmReserve = Field<Button?>("_paymentConfirm");
+            Require(confirmReserve is not null && confirmReserve.Name == "CommitAction" && confirmReserve.IsVisibleInTree() && !confirmReserve.Disabled, "Reserve did not open its reviewed payment with a visible enabled commit");
             await Click(confirmReserve!); await Settle(.5);
             Require(Engine.State.Cards[reserve.Id].Zone == Zone.Battlefield, "Reserve button did not submit the engine action");
             GD.Print("HOME_PASS: consolidated battle flow exposes and executes authoritative Reserve recruitment");

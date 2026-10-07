@@ -32,6 +32,7 @@ public partial class Main
     // cards (an alternative-cost action, or a Region/Celestial action), each legal performer maps to the option that selects it. Empty when there is nothing to choose between.
     private Dictionary<string, Action> PerformerClicks()
     {
+        if (ReactionPerformerClicks() is { Count: > 0 } reactionClicks) return reactionClicks;
         var clicks = new Dictionary<string, Action>();
         if (View.PendingChoice is not null || _chosen is not { CardId: { } sourceId, Command: { } command } chosen || FindCard(sourceId) is not { } source) return clicks;
         if (IsSupportCard(source))

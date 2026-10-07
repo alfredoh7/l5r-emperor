@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Reaction-flow implementation claimed for issue 722: authoritative public response context, contextual pass consequences, native decision UI and input protection.",
-  "validation": "Planning and live main/overlap inspection only; implementation and runtime checks pending.",
-  "remaining": "Implement, validate native normal/reduced motion and both seats, request rules-lead review, and deliver the playable preview.",
+  "summary": "Implement contextual reaction flow, direct offered reactions, explicit named preparation, guarded submission and prepared-review replay safety.",
+  "validation": "Full tools/check.sh --skip-client passed on base 8fce8053, including 12 reaction-presentation regressions and 21 transport checks. Client compilation passed with zero warnings/errors. Native target/cancel/closure/receipt/repeated-input checks passed before remaining matrix checks; full native and package checks pending.",
+  "remaining": "Integrate current main, finish both-seat normal/reduced native matrix and relevant chooser regressions, publish verified Windows preview, request mdornbrook review. Human rules and native Windows acceptance pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/722",
   "branch": "codex/722-reaction-flow",
-  "updated": "2026-10-07T18:48:38.913972+00:00"
+  "updated": "2026-10-07T19:30:06.059575+00:00"
 }

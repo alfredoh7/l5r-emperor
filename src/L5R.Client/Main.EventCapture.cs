@@ -7,7 +7,7 @@ namespace L5R.Client;
 public sealed partial class MatchSession
 {
     internal void StartEventProbe(MatchEngine engine, int seat)
-    { Disconnect(); _engine = engine; MatchKey = Guid.NewGuid().ToString("N"); _localSeat = seat; _practiceNameSeat = seat; RefreshLocal(); }
+        => StartPreparedReview(engine, seat);
 }
 public partial class Main
 {

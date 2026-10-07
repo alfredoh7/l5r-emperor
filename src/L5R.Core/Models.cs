@@ -1514,6 +1514,11 @@ public sealed record BattleStepView(string Segment, string Step, int? DecisionPl
 /// by a Battle action) or EffectReaction (a printed "Before a battle resolves" Reaction, optional); PlayerId is whose it is (the active player
 /// orders the whole set), CardId the card behind it when there is one, Label a name for it.</summary>
 public sealed record BeforeResolutionEffectView(string Id, string Kind, int PlayerId, string? CardId, string Label);
+/// <summary>Public presentation of the current response opportunity. It describes existing timing only: no commands,
+/// hidden candidates or prediction of the other player's available Reactions. A nested choice may have no decline label.
+/// Status describes the triggering moment, never a receipt claiming that the player's latest Reaction fully resolved.</summary>
+public sealed record ReactionPresentationView(string Title, string Context, string Status, string DeclineLabel,
+    string DeclineConsequence, string? ParentContext = null, bool IsNested = false);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
@@ -1545,6 +1550,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // Issue #503 (EmperorP5Hidden.cs): the cards of another player's hand this viewer looked at this turn (Scouting the Pass, The Price of Honor) -- PRIVATE to the looker, never an instance id.
     HandSightView[]? HandSights = null)
 {
+    // #722: Core-owned response context. Older snapshots omit this member; no response is inferred by the client.
+    public ReactionPresentationView? ReactionPresentation { get; init; }
     public ProvinceOrderView? PendingProvinceOrder { get; init; }
     // Harsh Choices (issue #581): what destroying the province would do, computed by the engine and PUBLIC -- both players see the same consequence. Null when no Harsh Choices decision is open.
     public HarshChoicesView? PendingHarshChoices { get; init; }

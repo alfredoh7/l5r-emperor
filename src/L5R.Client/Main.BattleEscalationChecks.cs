@@ -10,7 +10,7 @@ public partial class Main
         var action=BattleCasualtyAction()??throw new Exception("No legal Crushing Strength destruction in fixture.");
         var target=action.TargetIds![0]; var old=View;
         Choose(action); SelectCard(FindCard(target)!);
-        _decisionActions.GetChildren().OfType<Button>().Single(b=>b.Text.StartsWith("Confirm action",StringComparison.Ordinal)).EmitSignal(Button.SignalName.Pressed);
+        ReviewedCommitButton().EmitSignal(Button.SignalName.Pressed);
         _uiQueue.Clear(); Render();
         var actual=_session.Snapshot!.View;
         InkRequire(actual.Version==old.Version+1 && actual.Events.Any(e=>e.Sequence>(old.Events.LastOrDefault()?.Sequence??0) && e.Type=="attachmentDestroyed"),"Actual ability did not destroy its attachment.");

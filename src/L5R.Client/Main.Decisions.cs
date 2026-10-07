@@ -45,11 +45,16 @@ public partial class Main
         if (PresentationBusy || !GenericDecisionActive && _chosen?.AlternativeCost is null) return false;
         var pending = GenericDecisionActive ? View.PendingChoice : null;
         var own = pending is null || pending.PlayerId == View.ViewerId && View.PriorityPlayerId == View.ViewerId;
-        var options = pending is null ? AlternativeCosts(_chosen!) : Actions.Where(a => a.Type is not ("concede" or "wait") && a.Type != "orderSeppuku").ToArray();
+        var contextualDecline = pending is not null && HasContextualReactionDecline;
+        var options = pending is null ? AlternativeCosts(_chosen!) : Actions.Where(a => a.Type is not ("concede" or "wait") && a.Type != "orderSeppuku" &&
+            !(contextualDecline && a.Type == "declineReaction")).ToArray();
         _guide.Visible = false;
         var heading = Palette.Text(pending is null ? (_reviewingAlternativeCost || _alternativeCostConfirmed ? "HOW DO YOU PAY?" : "CHOOSE A TARGET") : own ? "YOUR CHOICE" : "OPPONENT’S CHOICE", 27, title: true);
-        heading.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(heading);
-        _sidebarHeader.AddChild(new HSeparator());
+        if (!contextualDecline)
+        {
+            heading.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(heading);
+            _sidebarHeader.AddChild(new HSeparator());
+        }
         if (pending?.Type is "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect") RenderBattleFacts(true);
         var sourceId = pending?.CardId ?? _chosen?.CardId;
         var source = sourceId is null ? null : FindCard(sourceId);
@@ -75,7 +80,7 @@ public partial class Main
             if (_alternativeCostConfirmed)
             {
                 var (required, ready) = RenderGoldPanel(draftAction);
-                AddConfirm("Confirm action", required, ready, () => draftCommand with { SourceIds = required > 0 ? _sources.ToArray() : [] }, "Cancel action"); return true;
+                AddConfirm(CommitActionLabel(draftAction), required, ready, () => draftCommand with { SourceIds = required > 0 ? _sources.ToArray() : [] }, "Cancel action"); return true;
             }
             var performers = Actions.Where(a => a.Enabled && a.CardId == draftAction.CardId && a.AlternativeCost?.AbilityId == draftAction.AlternativeCost!.AbilityId)
                 .Select(a => a.AlternativeCost!.PerformerId).Distinct().ToArray();
@@ -109,8 +114,10 @@ public partial class Main
         }
         if (pending?.Type == "budgetSelect") return RenderBudgetSelect(options); // Sleep (issue #667): the budgeted multi-select, Main.BudgetSelect.cs
         if (pending is not null && RenderCandidateChoices(options)) return true;
+        if (contextualDecline && options.Length == 0) return true;
         var rows = new List<(ActionOption Option, Button Button)>();
-        var confirm = SidebarSkin.Button("Confirm choice", CommitDecision, true);
+        var confirm = SidebarSkin.Button(contextualDecline ? _decisionSelection is { } selectedReaction ? CommitActionLabel(selectedReaction) : "Choose a reaction" : "Confirm choice", CommitDecision, true);
+        if (contextualDecline) confirm.Name = "CommitAction";
         foreach (var option in options)
         {
             // A cost option is usable only for the draft's engine-listed target. Never fabricate a disabled command.
@@ -120,6 +127,7 @@ public partial class Main
             button = SidebarSkin.Button(Placard(option, option.AlternativeCost?.Label ?? option.Label), () =>
             {
                 _decisionSelection = option;
+                if (contextualDecline) confirm.Text = CommitActionLabel(option);
                 if (pending is not null) { _chosen = null; _sources.Clear(); }
                 if (QuoteFor(option) is not null) { _chosen = option; ResuggestSources(); RenderInspector(); return; }
                 foreach (var row in rows)
