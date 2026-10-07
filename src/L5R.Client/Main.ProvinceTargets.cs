@@ -17,10 +17,10 @@ public partial class Main
         && a.Command.PerformerId == o.Command.PerformerId && a.Command.CostOption == o.Command.CostOption).ToArray();
 
     private bool ProvinceTargetLegal(int owner, int province) =>
-        ProvinceTargetActive && ProvinceSiblings(_chosen!).Any(s => s.Enabled && s.Command!.TargetPlayerId == owner && s.Provinces!.Contains(province));
+        ProvinceTargetActive && ProvinceSiblings(_chosen!).Any(s => s.Enabled && s.Command!.TargetPlayerId == owner && s.Provinces!.Contains(province)) || MultiProvinceLegal(owner, province);
 
     private bool ProvinceTargetChosen(int owner, int province) =>
-        ProvinceTargetActive && _chosen!.Command is { Province: { } chosen, TargetPlayerId: { } chosenOwner } && chosen == province && chosenOwner == owner;
+        ProvinceTargetActive && _chosen!.Command is { Province: { } chosen, TargetPlayerId: { } chosenOwner } && chosen == province && chosenOwner == owner || MultiProvinceChosen(owner, province);
 
     // The two owner phrases Core appends so that the per-owner options can be told apart; the grouped button and the picker say it better.
     private static string WithoutProvinceOwner(string label) =>

@@ -97,7 +97,7 @@ public sealed class BotContext
         && a.TargetPlayerId == b.TargetPlayerId && a.PerformerId == b.PerformerId && a.CostOption == b.CostOption
         && string.Join(",", a.CardIds ?? []) == string.Join(",", b.CardIds ?? [])
         && string.Join(",", (a.Assignments ?? []).OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + ">" + p.Value)) == string.Join(",", (b.Assignments ?? []).OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + ">" + p.Value))
-        && string.Join(",", (a.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId)) == string.Join(",", (b.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId));
+        && string.Join(",", (a.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId + "@" + x.ProvinceOwner + "." + x.Province)) == string.Join(",", (b.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId + "@" + x.ProvinceOwner + "." + x.Province));
 
     /// <summary>A reproducible weight roll in [0, 1): the same match state and the same ability always roll the same, so replays and tests are deterministic.</summary>
     public static double Roll(long version, string? abilityId, string? cardId)

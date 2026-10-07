@@ -7,6 +7,7 @@ public partial class Main
 {
     private readonly Dictionary<string, List<string>> _multiCards = [];
     private readonly Dictionary<string, int> _multiPlayers = [];
+    private readonly Dictionary<string, (int Owner, int Index)> _multiProvinces = [];
     private readonly HashSet<string> _multiExpanded = [];
     private string? _multiDraftKey, _multiActiveSlot, _multiMatch, _reactionCameraKey;
     private Window? _multiInspection;
@@ -18,7 +19,7 @@ public partial class Main
     private void ClearMultiTargets()
     {
         if (_multiInspection is not null && IsInstanceValid(_multiInspection)) { _multiInspection.Hide(); _multiInspection.QueueFree(); }
-        _multiInspection = null; _multiCards.Clear(); _multiPlayers.Clear(); _multiExpanded.Clear(); _multiDraftKey = _multiActiveSlot = _multiMatch = null;
+        _multiInspection = null; _multiCards.Clear(); _multiPlayers.Clear(); _multiProvinces.Clear(); _multiExpanded.Clear(); _multiDraftKey = _multiActiveSlot = _multiMatch = null;
     }
     private void BeginMultiTargets()
     {
@@ -26,15 +27,18 @@ public partial class Main
         _multiDraftKey = MultiKey; _multiMatch = _session.MatchKey;
         foreach (var slot in MultiUpFront.Where(s => s.Kind == TargetSlotKinds.Card)) _multiCards[slot.Slot] = [];
         _multiActiveSlot = MultiUpFront.FirstOrDefault()?.Slot;
+        foreach (var provinceSlot in MultiUpFront.Where(s => s.Kind == TargetSlotKinds.Province)) _multiExpanded.Add(provinceSlot.Slot); // a short list of provinces: shown at once
         if (_multiActiveSlot is not null) _multiExpanded.Add(_multiActiveSlot);
         _chosen = _chosen! with { Command = _chosen!.Command! with { Selections = [], TargetId = null } };
     }
-    private int MultiCount(TargetSlotOption slot) => slot.Kind == TargetSlotKinds.Card ? _multiCards.GetValueOrDefault(slot.Slot)?.Count ?? 0 : _multiPlayers.ContainsKey(slot.Slot) ? 1 : 0;
+    private int MultiCount(TargetSlotOption slot) => slot.Kind == TargetSlotKinds.Card ? _multiCards.GetValueOrDefault(slot.Slot)?.Count ?? 0
+        : slot.Kind == TargetSlotKinds.Province ? _multiProvinces.ContainsKey(slot.Slot) ? 1 : 0 : _multiPlayers.ContainsKey(slot.Slot) ? 1 : 0;
     private bool MultiReady => MultiUpFront.All(s => MultiCount(s) >= s.Min && MultiCount(s) <= s.Max);
     private IEnumerable<string> MultiSelectedIds => MultiUpFront.SelectMany(s => _multiCards.GetValueOrDefault(s.Slot) ?? []);
     private GameCommand MultiCommand()
     {
         var slots = MultiUpFront.Select(s => s.Kind == TargetSlotKinds.Card ? new SlotSelection(s.Slot, _multiCards[s.Slot].ToArray()) :
+            s.Kind == TargetSlotKinds.Province ? _multiProvinces.TryGetValue(s.Slot, out var province) ? new SlotSelection(s.Slot, ProvinceOwner: province.Owner, Province: province.Index) : new SlotSelection(s.Slot) :
             new SlotSelection(s.Slot, PlayerId: _multiPlayers.TryGetValue(s.Slot, out var player) ? player : null)).ToArray();
         return _chosen!.Command! with { Selections = slots, TargetId = slots.SelectMany(s => s.CardIds ?? []).FirstOrDefault() };
     }
@@ -58,7 +62,11 @@ public partial class Main
             if (selected.Count >= slot.Max) { SetNotice($"This group allows at most {slot.Max}. Remove a selection first."); return; }
             selected.Add(id);
         }
-        _multiActiveSlot = slotId; _multiExpanded.Add(slotId); RefreshMultiTargets(slotId + "/" + id);
+        _multiActiveSlot = slotId; _multiExpanded.Add(slotId);
+        // A full card group hands the board to a province slot that follows it (Benediction): the next click is the province.
+        if (selected.Count >= slot.Max && MultiUpFront.SkipWhile(s => s.Slot != slotId).Skip(1).FirstOrDefault() is { Kind: TargetSlotKinds.Province } next && !_multiProvinces.ContainsKey(next.Slot))
+        { _multiActiveSlot = next.Slot; _multiExpanded.Add(next.Slot); _multiExpanded.Remove(slotId); }
+        RefreshMultiTargets(slotId + "/" + id);
     }
     private bool SelectMultiCard(CardView card)
     {
@@ -68,6 +76,47 @@ public partial class Main
         // A Gold source can still be chosen through the existing payment panel. A board click during target
         // selection always belongs to the active group, including when the candidate is itself a Holding.
         SetNotice("Choose a gold-outlined card for the active group, or open another group in the sidebar."); return true;
+    }
+    // A province slot (Benediction, issue #699) reuses the province picker's presentation: one list in two groups (the opponent's provinces, then your own), each row naming the province
+    // number and the card in it or that it is face down, hovering a row highlights the province on the table, and a click on the table's province chooses it too. Core offers the
+    // legal provinces and validates the selection; the client only presents them.
+    private TargetSlotOption? MultiProvinceSlot => MultiTargetActive ? MultiUpFront.FirstOrDefault(s => s.Slot == _multiActiveSlot && s.Kind == TargetSlotKinds.Province) : null;
+    private bool MultiProvinceActive => MultiProvinceSlot is not null;
+    private bool MultiProvinceLegal(int owner, int province) => MultiProvinceSlot?.ProvinceChoices?.Any(c => c.Owner == owner && c.Index == province) == true;
+    private bool MultiProvinceChosen(int owner, int province) => MultiProvinceSlot is { } slot && _multiProvinces.TryGetValue(slot.Slot, out var chosen) && chosen.Owner == owner && chosen.Index == province;
+    private void ChooseMultiProvince(int owner, int index, string? slotId = null)
+    {
+        if (slotId is not null && MultiTargetActive && MultiUpFront.Any(s => s.Slot == slotId && s.Kind == TargetSlotKinds.Province)) _multiActiveSlot = slotId; // a row names its own slot
+        if (!DecisionCanSubmit || _multiDraftKey != MultiKey || MultiProvinceSlot is not { } slot || !MultiProvinceLegal(owner, index)) return;
+        if (!_multiProvinces.Remove(slot.Slot, out var old) || old != (owner, index)) _multiProvinces[slot.Slot] = (owner, index);
+        RefreshMultiTargets();
+    }
+    private void RenderMultiProvinceRows(TargetSlotOption slot)
+    {
+        _inspector.AddChild(Palette.Wrapped("Click a highlighted province on the table or choose below. Hover a row to find its province on the table.", 14, Palette.PaperDim));
+        foreach (var (heading, owner) in new[] { ("OPPONENT'S PROVINCES", View.Players.First(p => p.Id != View.ViewerId).Id), ("YOUR PROVINCES", View.ViewerId) })
+        {
+            var rows = (slot.ProvinceChoices ?? []).Where(c => c.Owner == owner).Select(c => c.Index).Distinct().Order().ToArray();
+            if (rows.Length == 0) continue;
+            _inspector.AddChild(Palette.Text(heading, 11, Palette.Gold));
+            foreach (var index in rows)
+            {
+                var (ownerId, provinceIndex) = (owner, index);
+                var chosen = _multiProvinces.TryGetValue(slot.Slot, out var current) && current == (ownerId, provinceIndex);
+                var label = ProvinceLabel(ownerId, provinceIndex);
+                var row = SidebarSkin.Button((chosen ? "✓  " : "○  ") + label, () => ChooseMultiProvince(ownerId, provinceIndex, slot.Slot));
+                row.Alignment = HorizontalAlignment.Left; row.AutowrapMode = TextServer.AutowrapMode.WordSmart; row.ClipText = true;
+                row.SetMeta("province_target_row", $"{ownerId}:{provinceIndex}"); row.SetMeta("slot", slot.Slot);
+                row.Disabled = !DecisionCanSubmit; row.TooltipText = label;
+                if (chosen) row.AddThemeStyleboxOverride("normal", SidebarSkin.Surface(true, tint: new Color(1.35f, 1.2f, .9f)));
+                row.MouseEntered += () => HoverProvinceTarget(ownerId, provinceIndex, true);
+                row.MouseExited += () => HoverProvinceTarget(ownerId, provinceIndex, false);
+                row.FocusEntered += () => HoverProvinceTarget(ownerId, provinceIndex, true);
+                row.FocusExited += () => HoverProvinceTarget(ownerId, provinceIndex, false);
+                row.TreeExiting += () => HoverProvinceTarget(ownerId, provinceIndex, false);
+                _inspector.AddChild(row);
+            }
+        }
     }
     private bool RenderMultiTargets()
     {
@@ -118,6 +167,7 @@ public partial class Main
                     button.SetMeta("slot", slot.Slot); button.SetMeta("player", playerId); button.Disabled = !DecisionCanSubmit; _inspector.AddChild(button);
                 }
             }
+            else if (slot.Kind == TargetSlotKinds.Province) RenderMultiProvinceRows(slot);
             else
             {
                 var grid = new GridContainer { Columns = 2 }; grid.AddThemeConstantOverride("h_separation", 10); grid.AddThemeConstantOverride("v_separation", 10); _inspector.AddChild(grid);
@@ -193,6 +243,7 @@ public partial class Main
     }
     private bool MultiSelectionsAllowed(ActionOption option) => option.Slots is not null && option.Slots.Where(s => s.Timing == TargetSlotTimings.UpFront).All(s =>
         s.Kind == TargetSlotKinds.Card ? _multiCards.TryGetValue(s.Slot, out var selected) && selected.Count >= s.Min && selected.Count <= s.Max && selected.All(s.CardIds.Contains) :
+        s.Kind == TargetSlotKinds.Province ? _multiProvinces.TryGetValue(s.Slot, out var province) ? s.ProvinceChoices?.Any(c => c.Owner == province.Owner && c.Index == province.Index) == true : s.Min == 0 :
         _multiPlayers.TryGetValue(s.Slot, out var player) ? s.PlayerIds.Contains(player) : s.Min == 0);
     private void FocusMultiTargets()
     {

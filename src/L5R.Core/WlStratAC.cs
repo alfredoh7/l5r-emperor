@@ -36,7 +36,7 @@ namespace L5R.Core;
 //   * THOUGHTLESS SACRIFICE (10960): your unbowed Personality and an enemy unit whose total Force is at most his Force (plus his Personal Honor while he is defending); both destroyed.
 //   * UNPLEASANT TRUTHS (10964): a Force penalty equal to the target's PRINTED Personal Honor, and he is bowed if dishonorable.
 //
-// BLOCKED: Benediction (10930) -- see tools/content/pe_wl_strat-aftermath-coils_blockers.json.
+// Benediction (10930) is in strategy-wave-120 (issue #699, WlBenediction.cs).
 // ======================================================================================================================================================================================
 
 public static class WlStratACAbilities
