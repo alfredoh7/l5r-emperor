@@ -110,6 +110,8 @@ public partial class Main : Node
             var review = new InteractionReview(this, _captureMode, _capturePath);
             _capturePath = null; AddChild(review); return;
         }
+        if (OS.GetCmdlineUserArgs().Contains("--battle-values-review") || _captureMode == "battle-values-review")
+        { StartBattleValuesReview(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode is "open-battlefield-review" or "open-battlefield-correction-review")
         {
             var startupCapture = _capturePath; _capturePath = null; StartOpenBattlefieldReview();
@@ -147,6 +149,7 @@ public partial class Main : Node
         ProcessShownCards(delta);
         LayoutProvinceReview();
         LayoutOpenBattlefieldReview();
+        LayoutBattleValuesReview();
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
         foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;

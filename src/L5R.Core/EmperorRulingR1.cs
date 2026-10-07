@@ -15,7 +15,11 @@ namespace L5R.Core;
 //
 // "Unless stated otherwise, the player who declared the attack phase is the attacker" (Mendon): a Retribution's player declares its additional Attack Phase (already so), Chikushudo's Trickery names its
 // Attacker (the other player), and Surprise Attack does not declare an attack at all -- the Attacker and Defender stay the battle's current ones.
-public sealed record BattlefieldView(int Index, int? Province);
+public sealed record BattlefieldView(int Index, int? Province)
+{
+    /// <summary>Public resolution totals for the currently engaged battle only. Older payloads omit this.</summary>
+    public BattleValuesView? Values { get; init; }
+}
 
 /// <summary>The battle a card fights inside the Action Phase, and the action that is finished when it is over.</summary>
 public sealed class AsideBattle
@@ -129,7 +133,8 @@ public sealed partial class MatchEngine
         var occupied = _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex is >= 0).Select(c => c.ProvinceIndex!.Value);
         var battlefields = _state.UnresolvedBattlefields.Concat(_state.CurrentBattleProvince is int current ? [current] : []).Concat(occupied).Distinct().Order().ToArray();
         if (battlefields.Length == 0) return null;
-        return battlefields.Select(b => new BattlefieldView(b, BattlefieldProvinceIndex(b))).ToArray();
+        return battlefields.Select(b => new BattlefieldView(b, BattlefieldProvinceIndex(b))
+        { Values = _state.WinnerId is null && b == _state.CurrentBattleProvince ? CurrentBattleValues(b) : null }).ToArray();
     }
 
     // ---- Reconnaissance ------------------------------------------------------------------------------------------------------------------------------------------------
