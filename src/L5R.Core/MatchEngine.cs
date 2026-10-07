@@ -199,7 +199,7 @@ public sealed partial class MatchEngine
     {
         var turnAtStart = _state.TurnNumber;
         var result = ExecuteOne(command);
-        if (result.Accepted) { SweepZoneHistory(turnAtStart); SweepFactsAfterCommand(); } // P6 (AfterFacts.cs): facts only a comparison sees, and the drain when nothing is open // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
+        if (result.Accepted) { SweepFortifications(); /* P15 (FortificationHoldings.cs) */ SweepZoneHistory(turnAtStart); SweepFactsAfterCommand(); } // P6 (AfterFacts.cs): facts only a comparison sees, and the drain when nothing is open // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
         return result.Accepted ? RunPassAllBattles(result) : result; // "Pass all battles" (issue #628, PassAllBattles.cs)
     }
 
@@ -2746,6 +2746,7 @@ public sealed partial class MatchEngine
         // A Region attaches to the province itself -- it cannot outlive the province it is attached to.
         if (province.RegionId is string regionId) { var region = Card(regionId); region.Zone = Zone.DynastyDiscard; region.ProvinceIndex = null; }
         province.RegionId = null;
+        DiscardFortificationsOf(owner, province.Index); // P15 (FortificationHoldings.cs): the Fortifications that guarded it go with it
         Emit("provinceDestroyed", $"{Player(owner).Name}'s province {province.Index + 1} was destroyed.", owner);
         if (Player(owner).Provinces.All(p => p.Destroyed)) Win(1 - owner, "Military victory");
     }
