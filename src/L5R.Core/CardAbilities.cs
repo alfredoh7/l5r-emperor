@@ -827,9 +827,9 @@ public static class AbilityCatalog
         ["kano-token"] = new("Limited", "Give Kano a Master token", "none"),
         ["kano-destroy-token"] = new("Battle", "Bow: Destroy a Master token on Kano to take two additional Battle actions", "none", Costs: ActionCost.BowSource),
         ["michitsu-destroy"] = new("Battle", "Destroy a target enemy attachment", "enemy-attachment"),
-        // Simplified from the printed "You may discard a card to ignore the cost of bowing Kamina"
-        // (issue #198) -- the discard-instead-of-bow cost alternative is not modeled this pass.
-        ["kamina-boost"] = new("Open", "Bow: Give a target Personality +4F", "personality", Costs: ActionCost.BowSource),
+        // Akodo Kamina: "Tactical Open, bow: Give a target Personality +4F. You may discard a card to ignore the cost of bowing Kamina." (issue #198 had simplified the discard away.)
+        // Two ways to pay (AlternativeCosts.cs): bow Kamina, or discard a card from the hand, in which case Kamina is not bowed. The discard option is listed once per hand card.
+        ["kamina-boost"] = new("Open", "Give a target Personality +4F", "personality", CostOptions: [new("bow", "Bow Kamina", CostVerb.Bow, CostSubject.Source), AlternativeDiscard.Option]),
         // "Tireless" (issue #198, Akodo Tsudoken's own reminder): usable even while bowed -- see the
         // bowed-exemption list below. The self-straighten happens regardless of which target choice
         // is taken, matching the printed "Even if bowed: Straighten him" applying to both halves.
@@ -6183,6 +6183,7 @@ public sealed partial class MatchEngine
                 || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
                 || SearchPlayCarriesCostCard(id)
                 || WlCarriesCostCard(id)
+                || AlternativeDiscard.CarriesCostCard(id) // Akodo Kamina: the hand card a discard cost option spends
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
             // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
@@ -11237,7 +11238,7 @@ public sealed partial class MatchEngine
             foreach (var performer in performers)
                 foreach (var costOption in costOptions)
                     foreach (var createChoice in createChoices)
-                        foreach (var shownChoice in shownChoices)
+                        foreach (var shownChoice in AlternativeDiscard.Choices(costOption, shownChoices, player, source))
                             foreach (var compareChoice in compareChoices)
                             {
                                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
@@ -11353,7 +11354,7 @@ public sealed partial class MatchEngine
                                     var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                                         ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                                     var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                                        + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
+                                        + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
                                         + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                                         + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                                     yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
@@ -11368,7 +11369,7 @@ public sealed partial class MatchEngine
                                         Gold: firstQuote, TargetGold: targetQuotes,
                                         // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
                                         NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
-                                        AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label, ability.Label),
+                                        AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label + (costOption.Verb == CostVerbs.Discard && shownChoice is not null ? ": " + Definition(Card(shownChoice)).Name : ""), ability.Label),
                                         Movement: MovementPreview(id, ability, source, performer),
                                         Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
                                 }

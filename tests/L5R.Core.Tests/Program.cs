@@ -7256,7 +7256,7 @@ static void LionClanPersonalityReview()
         var kamina = Add(s, "oracle-l5r-224", 0, Zone.Home);
         var target = Add(s, "training-crane-samurai", 0, Zone.Home);
         var e = MatchEngine.FromTestState(s);
-        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: kamina.Id, TargetId: target.Id, AbilityId: "kamina-boost"));
+        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: kamina.Id, TargetId: target.Id, AbilityId: "kamina-boost", CostOption: "bow"));
         Check(e.State.Cards[kamina.Id].Bowed, "Bows itself as the cost");
         Check(e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Force" && m.Amount == 4), "+4F applied");
     }

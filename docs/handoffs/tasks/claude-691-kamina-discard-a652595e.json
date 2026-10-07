@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Akodo Kamina (#691): his 'discard a card to ignore the cost of bowing' alternative is built: kamina-boost now has two cost options (Bow Kamina, Discard a card), the discard listed once per hand card; the cost review shows both and a hand-card click selects its discard.",
+  "validation": "kamina-discard suite 6/6; native check-decision-chooser kamina probe passes; full Core, AI and the other decision probes still running at this handoff.",
+  "remaining": "Finish full verification, then push and merge when CI is green.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/691",
+  "branch": "claude/691-kamina-discard",
+  "updated": "2026-10-07T00:37:17.937735+00:00"
+}
