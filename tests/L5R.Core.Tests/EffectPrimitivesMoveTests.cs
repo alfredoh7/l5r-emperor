@@ -137,7 +137,7 @@ internal static class EffectPrimitivesMoveTests
         string[] Questions(string body) => asked.Matches(body).Select(m => m.Groups[1].Value).Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray();
         var home = Questions(Body("CardAbilities.cs", "private void MoveHome(CardInstance card, bool bow)"));
         var toBattle = Questions(Body("CardAbilities.cs", "private bool TryMoveToBattlefield(CardInstance card, int province)") + Body("MatchEngine.cs", "private bool MoveToBattlefield(CardInstance card, int province)"));
-        Eq(string.Join(",", home), "Delay,EnemyActionMovementAutoNegated,MovementLockNegates,NegatesEffect,P4ShieldNegatesMoveHome,TryConsumeWatch", "MoveHome's questions");
+        Eq(string.Join(",", home), "BattlefieldMovementNegated,Delay,EnemyActionMovementAutoNegated,MovementLockNegates,NegatesEffect,P4ShieldNegatesMoveHome,TryConsumeWatch", "MoveHome's questions"); // P12: BattlefieldMovementNegated (ImmunityLedger.cs)
         Eq(string.Join(",", toBattle),
             "AsukaNegatesMove,Delay,EnemyActionMovementAutoNegated,HoteiNegatesMove,KitsuneNegatesMovement,MovementLockNegates,MovementToBattlefieldNegated,NegatesEffect,P4NegatesMoveToBattlefield,ShieldmanNegatesMove,StarCrossedNegatesMove,TryConsumeWatch,UguluNegatesMovement",
             "TryMoveToBattlefield's and MoveToBattlefield's questions");

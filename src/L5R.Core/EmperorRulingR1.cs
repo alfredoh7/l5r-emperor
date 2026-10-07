@@ -189,6 +189,7 @@ public sealed partial class MatchEngine
     /// <summary>"Negate all movement to it" (Chikushudo's Trickery): MoveToBattlefield's first question.</summary>
     private bool MovementToBattlefieldNegated(CardInstance card, int battlefield)
     {
+        if (BattlefieldMovementNegated(card, StandingBattlefield(card), battlefield)) return true; // P12 (ImmunityLedger.cs): a movement by an effect from or to a battlefield that is immune to it
         if (P3MoveToBattlefieldNegated(card, battlefield)) { Emit("moveNegated", $"{Definition(card).Name}'s movement to the current battlefield was negated.", card.OwnerId, card.Id); return true; } // Request Authorization (issue #503)
         if (SledBarsBattlefieldNegation(card, battlefield)) return false; // Winter Sled (issue #667, PerformersSled.cs): Chikushudo's Trickery and Ambush are another player's cards
         if (!R1.MovementNegated.Contains(battlefield) && !IvoryAmbushNegatesMove(card, battlefield)) return false; // Ambush (issue #622, IvoryMovement.cs): "Other Personalities will not move there."

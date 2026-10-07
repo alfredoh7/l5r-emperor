@@ -38,8 +38,12 @@ public sealed partial class MatchEngine
     }
 
     // What the province's bonuses from cards still in play add to its current strength.
-    private int ProvinceSourceBonuses(ProvinceState province) =>
-        province.SourceBonuses.Where(b => _state.Cards.TryGetValue(b.SourceId, out var source) && InPlay(source)).Sum(b => b.Amount);
+    private int ProvinceSourceBonuses(ProvinceState province)
+    {
+        var ownerId = _state.Players.First(p => p.Provinces.Contains(province)).Id;
+        var ignoresOthers = ProvinceIgnoresOthersCards(ownerId); // P12 (ImmunityLedger.cs): other players' cards do not affect these provinces
+        return province.SourceBonuses.Where(b => _state.Cards.TryGetValue(b.SourceId, out var source) && InPlay(source) && !(ignoresOthers && source.OwnerId != ownerId)).Sum(b => b.Amount);
+    }
 
     // Test seam (L5R.Core.Tests has InternalsVisibleTo): a card's current Force, Personality or Follower.
     internal int CardForceForTest(string cardId) => CardForce(Card(cardId));

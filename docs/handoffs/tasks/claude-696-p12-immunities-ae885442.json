@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Primitive P12: the immunity ledger (ImmunityLedger.cs): IsImmune(card, kind, sourcePlayer), stored Immunity records and standing rules (EngineHooks.StandingImmunities) for bow, destroy, destroy-in-resolution, move-negation, prevention, force-penalty, province-strength, terrain-destroy and movement-at-battlefield, consulted at the existing choke points ahead of P7 watches. Engine only; cards are wired in a later wave.",
+  "validation": "immunities suite 13/13; bash tools/check.sh --skip-client result recorded in the PR; format and comment-swallow gates run before push.",
+  "remaining": "No card wired; P11 stored restrictions have no source player so Prevention does not stop them; negators that never ask MovementNegationBarred are not covered; Flooded Pass province bonus not filtered; DestroyInResolution not driven through a full battle resolution. Readings in docs/decisions/2026-10-06-p12-immunities.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/696",
+  "branch": "claude/696-p12-immunities",
+  "updated": "2026-10-07T04:31:28.646554+00:00"
+}

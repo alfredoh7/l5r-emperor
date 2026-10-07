@@ -46,6 +46,7 @@ internal static partial class EngineHooks
         _ = CardTargetBars.Items;
         _ = AfterActionTraits.Items;
         _ = EntryCostTerms.Items;
+        _ = StandingImmunities.Items;
         _ = AbilityCostTerms.Items;
         _ = StandingWatches.Items;
         _ = TurnBegins.Items;
