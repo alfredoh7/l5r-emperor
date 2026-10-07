@@ -108,7 +108,7 @@ public sealed partial class MatchEngine
         card.AbilityUses.TryGetValue(AttackVictoryTurnKey, out var turn) && turn >= _state.TurnNumber - 2;
 
     // "[Card] will not be controlled by a [Clan] player": a Loyal-like refusal keyed on the controlling player's Clan, read wherever Loyal is (recruiting, overlaying).
-    private static bool ControlRefusedByClan(CardInstance card, string clan) => Definition(card).Effect == TanemonoNoPhoenixControlEffect && clan == "Phoenix";
+    // P3 (issue #695, RecruitGates695.cs): this refusal is now a registered RecruitGate (RegisterSeedsOfDecayBatch3Hooks); its words are the Loyal refusal QuotePurchase always gave for him.
 }
 
 public sealed partial class MatchEngine
@@ -118,6 +118,7 @@ public sealed partial class MatchEngine
     [System.Runtime.CompilerServices.ModuleInitializer]
     internal static void RegisterSeedsOfDecayBatch3Hooks()
     {
+        EngineHooks.RecruitGate.Register("P3TanemonoNoPhoenixControl", 16400, static (_, context) => Definition(context.Card).Effect == TanemonoNoPhoenixControlEffect && context.Clan == "Phoenix" ? new RecruitGateResult(LoyalRecruitRefusal) : null);
         EngineHooks.ValidateLate.Register("ValidateSeedsOfDecayBatch3", 100, static (engine, context) => engine.ValidateSeedsOfDecayBatch3(context.id, context.command, context.ability, context.player, context.source));
     }
 }

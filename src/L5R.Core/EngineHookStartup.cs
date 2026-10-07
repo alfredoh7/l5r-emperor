@@ -57,6 +57,7 @@ internal static partial class EngineHooks
         _ = ConditionalProductions.Items;
         _ = ProductionAdjustment.Items;
         _ = AfterPayment.Items;
+        _ = RecruitGate.Items;
         return true;
     }
 

@@ -198,8 +198,8 @@ public sealed partial class MatchEngine
     private bool ProclaimLocked(int playerId) => _state.ProclaimLocks.Any(l => l.PlayerId == playerId && Player(l.OwnerId).TurnsTaken < l.UntilTurnsTaken);
 
     // Kakita Yusugi: "even if you have already used the Proclaim ability once this turn".
-    private bool ProclaimAllowed(PlayerState player, CardDefinition entering) =>
-        (player.ProclaimUsedTurn != _state.TurnNumber || entering.Effect == "proclaim-ignores-turn-limit") && !ProclaimLocked(player.Id);
+    private bool ProclaimAllowed(PlayerState player, CardDefinition entering, CardInstance? card = null) =>
+        (player.ProclaimUsedTurn != _state.TurnNumber || entering.Effect == "proclaim-ignores-turn-limit") && !ProclaimLocked(player.Id) && (card is null || ProclaimGateFor(card, player).RefuseReason is null); // P3 (issue #695, RecruitGates695.cs)
 
     private string? ProclaimRejection(PlayerState player, CardDefinition entering, string? enteringId = null) =>
         ReactionsBarred() ? "Cherry Blossom Festival: no players may take Reactions." // issue #492, group F
