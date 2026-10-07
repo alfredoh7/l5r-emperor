@@ -90,20 +90,20 @@ public sealed partial class MatchEngine
                     holdingProduces ??= Producers(playerId, paying).Any(c => Definition(c).Type == CardType.Holding && GoldProduced(c.Id, playerId, paying) > 0);
                     if (holdingProduces == true)
                         yield return new(card.Id + PaymentTokenMark + PromoPaymentSourceAbilities.PouchKind, card, PromoPaymentSourceAbilities.PouchGold, 1, "reaction",
-                            $"{name}: bow it, a Holding bowed in this payment produces 1 additional Gold", null);
+                            $"{name}: bow it, a Holding bowed in this payment produces 1 additional Gold", null, OnUse: static (engine, token, player) => engine.PromoUsePaymentToken(token, player));
                     break;
                 case PromoPaymentSourceAbilities.NearMissEffect when card.Zone == Zone.Hand && forAttachment && card.Id != paying.Card.Id && PromoPaymentUsable(card, PromoPaymentSourceAbilities.NearMissGold, true):
                     yield return new(card.Id + PaymentTokenMark + PromoPaymentSourceAbilities.NearMissKind, card, PromoPaymentSourceAbilities.NearMissGold, 2, "reaction",
-                        $"{name}: discard it from your hand, produce 2 Gold for the attachment", null);
+                        $"{name}: discard it from your hand, produce 2 Gold for the attachment", null, OnUse: static (engine, token, player) => engine.PromoUsePaymentToken(token, player), AllowedZones: [Zone.Hand]);
                     break;
                 case PromoPaymentSourceAbilities.ProfitsEffect when card.Zone == Zone.Home:
                     if (forCard && payingDefinition.GoldCost >= 1 && PromoPaymentUsable(card, PromoPaymentSourceAbilities.ProfitsReduce, false))
                         yield return new(card.Id + PaymentTokenMark + PromoPaymentSourceAbilities.ProfitsReduceKind, card, PromoPaymentSourceAbilities.ProfitsReduce, -1, "reduce",
-                            $"Use {name}: produce 1 less Gold; it gains a Wealth token once {payingDefinition.Name} enters play", null);
+                            $"Use {name}: produce 1 less Gold; it gains a Wealth token once {payingDefinition.Name} enters play", null, OnUse: static (engine, token, player) => engine.PromoUsePaymentToken(token, player));
                     var wealth = card.Tokens.Count(t => t.Type == PromoPaymentSourceAbilities.WealthToken);
                     if (wealth > 0 && PromoPaymentUsable(card, PromoPaymentSourceAbilities.ProfitsGold, true))
                         yield return new(card.Id + PaymentTokenMark + PromoPaymentSourceAbilities.ProfitsGoldKind, card, PromoPaymentSourceAbilities.ProfitsGold, wealth, "reaction",
-                            $"{name}: discard it, produce {wealth} Gold (its Wealth tokens)", null);
+                            $"{name}: discard it, produce {wealth} Gold (its Wealth tokens)", null, OnUse: static (engine, token, player) => engine.PromoUsePaymentToken(token, player));
                     break;
             }
         }
@@ -203,6 +203,7 @@ public sealed partial class MatchEngine
     internal static void RegisterPromoPaymentSourceHooks()
     {
         EngineHooks.Abilities.Register("AddPromoPaymentSources", 12200, static abilities => abilities.AddPromoPaymentSources());
+        EngineHooks.PaymentTokens.Register("P1PromoPaymentTokens", 16302, static (engine, context) => engine.PromoPaymentSourceTokens(context.PlayerId, context.Paying)); // issue #695: Coin Pouch, Near Miss, Profits
         EngineHooks.TargetedReaction.Register("PromoPaymentSourcesTargeted", 12200, static (engine, context) =>
             context.abilityId == PromoPaymentSourceAbilities.NearMissNegate && engine.PromoNearMissApplies(context.card, context.subject, context.affected));
         EngineHooks.ValidateMiddle.Register("ValidatePromoPaymentSources", 12200, static (engine, context) => engine.ValidatePromoPaymentSources(context.id, context.source, context.player));

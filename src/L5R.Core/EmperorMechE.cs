@@ -127,7 +127,10 @@ public sealed partial class MatchEngine
     // ==== PAYMENT TOKENS ================================================================================================================================================================================
 
     private const char PaymentTokenMark = '#';
-    private sealed record PaymentToken(string Id, CardInstance Card, string AbilityId, int Amount, string Kind, string Label, CardInstance? Subject);
+    // Issue #695 (P1, PaymentHooks695.cs): a token may also say it Bows its card as it is used, name the zones its card may be in, require something of the OTHER sources chosen with it
+    // (RequiresOtherSources: engine, the paying player, every chosen source id) and run an OnUse callback (engine, the token, the paying player) -- the channel every feature's tokens now share (EngineHooks.PaymentTokens).
+    internal sealed record PaymentToken(string Id, CardInstance Card, string AbilityId, int Amount, string Kind, string Label, CardInstance? Subject,
+        bool Bows = false, Func<MatchEngine, int, string[], bool>? RequiresOtherSources = null, Action<MatchEngine, PaymentToken, int>? OnUse = null, Zone[]? AllowedZones = null, string? RequirementMessage = null);
 
     private static bool IsPaymentToken(string id) => id.IndexOf(PaymentTokenMark) >= 0;
     private static bool IsDestroyingPaymentToken(string id) => id.Contains("#destroy:", StringComparison.Ordinal);
@@ -145,33 +148,63 @@ public sealed partial class MatchEngine
         _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Holding && (Keyword(c, "Mine") || Keyword(c, "Farm")) && !WillNotBeDestroyed(c))
             .OrderByDescending(c => Definition(c).GoldCost).ThenBy(c => c.Id, StringComparer.Ordinal);
 
-    /// <summary>Every payment token the player may name for this payment: the Reactions' Gold first (in card order), Moto Rani's discounts, then Zlkyt's destructions (highest Gold Cost first).</summary>
+    /// <summary>Every payment token the player may name for this payment: the Reactions' Gold first (in card order), then the tokens every feature file registers on EngineHooks.PaymentTokens (issue #695: Moto Rani's
+    /// discounts and Zlkyt's destructions here in EmperorMechE.cs, Jade Mine and Slave Pits, Coin Pouch, Near Miss, Profits, Bamboo Harvesters, each in its own file).</summary>
     private List<PaymentToken> PaymentTokens(int playerId, PaymentSubject? paying)
     {
-        var reactions = new List<PaymentToken>(); var destroys = new List<PaymentToken>();
+        var reactions = new List<PaymentToken>();
         foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Celestial or Zone.Attached).OrderBy(c => c.Id, StringComparer.Ordinal)) // a Celestial (Kenro-ji-jin's Bounty) and an attached Item (Mantle of the Jade Champion), issue #653
         {
-            var name = Definition(card).Name;
             if (ReactiveGoldSource(card, paying) is { } reactive)
             {
                 var adjustment = Definition(card).Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) : 0;
                 var amount = Math.Max(0, reactive.Amount + adjustment);
-                reactions.Add(new(card.Id + PaymentTokenMark + "reaction", card, reactive.AbilityId, amount, "reaction", $"{name}: Reaction, produce {amount} Gold{(card.Bowed ? " (while bowed)" : " (without bowing)")}", null));
+                reactions.Add(new(card.Id + PaymentTokenMark + "reaction", card, reactive.AbilityId, amount, "reaction", $"{Definition(card).Name}: Reaction, produce {amount} Gold{(card.Bowed ? " (while bowed)" : " (without bowing)")}", null));
             }
+        }
+        return [.. reactions, .. HookPaymentTokens(playerId, paying)];
+    }
+
+    // Moto Rani's discounts, then Zlkyt's destructions (highest Gold Cost first): EngineHooks.PaymentTokens' entry for these two cards (issue #695; they were hard-coded in PaymentTokens).
+    private IEnumerable<PaymentToken> MechEPaymentTokens(int playerId, PaymentSubject? paying)
+    {
+        var discounts = new List<PaymentToken>(); var destroys = new List<PaymentToken>();
+        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Celestial or Zone.Attached).OrderBy(c => c.Id, StringComparer.Ordinal))
+        {
+            var name = Definition(card).Name;
             foreach (var abilityId in AbilityIdsOf(card))
             {
                 if (abilityId == EmperorMechEAbilities.ZlkytGold && PaymentReactionUsable(card, abilityId))
                     foreach (var holding in ZlkytHoldings(playerId))
                         destroys.Add(new($"{card.Id}{PaymentTokenMark}destroy:{holding.Id}", card, abilityId, Definition(holding).GoldCost, "destroy",
-                            $"{name}: destroy {Definition(holding).Name} and produce {Definition(holding).GoldCost} Gold", holding));
+                            $"{name}: destroy {Definition(holding).Name} and produce {Definition(holding).GoldCost} Gold", holding, OnUse: static (engine, token, player) => engine.MechEUseToken(token, player)));
                 if (abilityId == EmperorMechEAbilities.RaniDiscount && PaymentReactionUsable(card, abilityId)
                     && paying is { Kind: PaymentKind.Equip, Wielder: { } wielder } && wielder.Id == card.Id && Definition(paying.Card).Type == CardType.Spell)
                     foreach (var dead in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Dead && Definition(c).Type == CardType.Personality).OrderBy(c => c.Id, StringComparer.Ordinal))
-                        reactions.Add(new($"{card.Id}{PaymentTokenMark}discount:{dead.Id}", card, abilityId, Definition(dead).Chi, "discount",
-                            $"{name}: remove {Definition(dead).Name} from the game, the Spell costs {Definition(dead).Chi} less", dead));
+                        discounts.Add(new($"{card.Id}{PaymentTokenMark}discount:{dead.Id}", card, abilityId, Definition(dead).Chi, "discount",
+                            $"{name}: remove {Definition(dead).Name} from the game, the Spell costs {Definition(dead).Chi} less", dead, OnUse: static (engine, token, player) => engine.MechEUseToken(token, player)));
             }
         }
-        return [.. reactions, .. destroys, .. TfAltProductionTokens(playerId, paying), .. PromoPaymentSourceTokens(playerId, paying), .. WlPaymentTokens(playerId)]; // Jade Mine, Slave Pits (issue #622, TfHoldings.cs); Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
+        return [.. discounts, .. destroys];
+    }
+
+    // Zlkyt's and Rani's tokens are spent: the card's Reaction is used for the turn; Zlkyt destroys its Holding, Rani removes its dead Personality from the game.
+    private void MechEUseToken(PaymentToken token, int playerId)
+    {
+        var ability = AbilityCatalog.All[token.AbilityId];
+        token.Card.AbilityUses[ability.UsageKey ?? token.AbilityId] = _state.TurnNumber;
+        var name = Definition(token.Card).Name;
+        switch (token.Kind)
+        {
+            case "destroy":
+                Emit("goldSourceUsed", $"{name} destroyed {Definition(token.Subject!).Name} to produce {token.Amount} Gold.", playerId, token.Card.Id);
+                if (InPlay(token.Subject!)) DestroyUnits([token.Subject!], false, playerId);
+                break;
+            case "discount":
+                Emit("goldSourceUsed", $"{name} removed {Definition(token.Subject!).Name} from the game: the Spell costs {token.Amount} less.", playerId, token.Card.Id);
+                if (token.Subject!.Zone == Zone.Dead) RemoveFromGame(token.Subject);
+                break;
+        }
     }
 
     private HashSet<string> PaymentSourceIds(int playerId, PaymentSubject? paying) =>
@@ -207,26 +240,11 @@ public sealed partial class MatchEngine
     {
         foreach (var token in tokens)
         {
-            if (TfIsAltToken(token)) { TfUseAltToken(token, playerId); continue; } // Jade Mine, Slave Pits (issue #622, TfHoldings.cs)
-            if (WlUsePaymentToken(token, playerId)) continue; // Bamboo Harvesters - exp2 (issue #674, WlHoldings.cs)
-            if (PromoUsePaymentToken(token, playerId)) continue; // Coin Pouch, Near Miss, Profits (issue #667, PromoPaymentSources.cs)
-            var ability = AbilityCatalog.All[token.AbilityId];
-            token.Card.AbilityUses[ability.UsageKey ?? token.AbilityId] = _state.TurnNumber;
-            var name = Definition(token.Card).Name;
-            switch (token.Kind)
-            {
-                case "reaction":
-                    Emit("goldSourceUsed", $"{name} produced {token.Amount} Gold{(token.Card.Bowed ? " while bowed" : "")}.", playerId, token.Card.Id);
-                    break;
-                case "destroy":
-                    Emit("goldSourceUsed", $"{name} destroyed {Definition(token.Subject!).Name} to produce {token.Amount} Gold.", playerId, token.Card.Id);
-                    if (InPlay(token.Subject!)) DestroyUnits([token.Subject!], false, playerId);
-                    break;
-                case "discount":
-                    Emit("goldSourceUsed", $"{name} removed {Definition(token.Subject!).Name} from the game: the Spell costs {token.Amount} less.", playerId, token.Card.Id);
-                    if (token.Subject!.Zone == Zone.Dead) RemoveFromGame(token.Subject);
-                    break;
-            }
+            // Issue #695: a token from EngineHooks.PaymentTokens bows its card when it says so and runs its own OnUse (Zlkyt, Rani, Jade Mine, Slave Pits, Coin Pouch, Near Miss, Profits, Bamboo Harvesters).
+            if (token.Bows) token.Card.Bowed = true;
+            if (token.OnUse is not null) { token.OnUse(this, token, playerId); continue; }
+            if (AbilityCatalog.All.TryGetValue(token.AbilityId, out var ability)) token.Card.AbilityUses[ability.UsageKey ?? token.AbilityId] = _state.TurnNumber; // a hook token with no catalogue ability has no use to spend
+            if (token.Kind == "reaction") Emit("goldSourceUsed", $"{Definition(token.Card).Name} produced {token.Amount} Gold{(token.Card.Bowed ? " while bowed" : "")}.", playerId, token.Card.Id);
         }
     }
 
@@ -245,7 +263,7 @@ public sealed partial class MatchEngine
         });
         return ordinary.Concat(tokens.Select(t => new PaymentSource(t.Id, t.Card.Id, t.Kind, t.Label, t.Amount, t.Subject?.Id,
             tokens.Where(other => other.Id != t.Id && (other.Card.Id == t.Card.Id ||
-                t.Subject is not null && other.Subject?.Id == t.Subject.Id)).Select(other => other.Id).Concat(TfIsAltToken(t) ? [t.Card.Id] : []).ToArray()))).ToArray(); // issue #622: an alternative conflicts with its card's own bow
+                t.Subject is not null && other.Subject?.Id == t.Subject.Id)).Select(other => other.Id).Concat(TfIsAltToken(t) || t.Bows ? [t.Card.Id] : []).ToArray()))).ToArray(); // issue #622: an alternative conflicts with its card's own bow
     }
 
     // Seaside Bazaar's payment condition (ReactivePaymentConditionMet's fall-through): "When paying a Gold Cost" -- any payment.
@@ -403,6 +421,7 @@ public sealed partial class MatchEngine
     internal static void RegisterEmperorMechEHooks()
     {
         EngineHooks.Abilities.Register("AddEmperorMechE", 2200, static abilities => abilities.AddEmperorMechE());
+        EngineHooks.PaymentTokens.Register("P1MechEPaymentTokens", 16300, static (engine, context) => engine.MechEPaymentTokens(context.PlayerId, context.Paying)); // issue #695: Moto Rani's discounts, Zlkyt's destructions
         EngineHooks.PerformerAllows.Register("MechEPerformerAllows", 600, static (engine, context) => engine.MechEPerformerAllows(context.ability, context.performer));
         EngineHooks.PerformerCandidates.Register("MechEPerformers", 600, static (engine, context) => engine.MechEPerformers(context.ability, context.playerId));
         EngineHooks.DestroysTarget.Register("MechEDestroysTarget", 400, static context => MechEDestroysTarget(context.abilityId));

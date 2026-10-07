@@ -73,9 +73,7 @@ public sealed partial class MatchEngine
     private bool HoruContributesNothing(CardInstance card, CardInstance[] army) => Definition(card).Effect == HoruEffect && army.Length >= 2;
 
     // ---- Hida Watari: "While Watari has exactly one Follower, that Follower has Cavalry." (a live grant read by Keyword()) ----------------------------------------------------
-    private bool WatariGrantsCavalry(CardInstance follower) =>
-        follower.Zone == Zone.Attached && Definition(follower).Type == CardType.Follower && follower.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host)
-        && Definition(host).Effect == WatariEffect && Attachments(host.Id).Count(a => Definition(a).Type == CardType.Follower) == 1;
+    // Now a keyword rule (KeywordRules695Legacy.cs): the Follower is in Watari's unit and he has exactly one Follower.
 
     // ---- Matsu Yuuto: "Ranged Attacks may not target cards in this unit." -------------------------------------------------------------------------------------------------
     private bool UnitImmuneToRangedAttacks(CardInstance target) => _state.Cards.TryGetValue(UnitHostId(target), out var head) && Definition(head).Effect == YuutoEffect;

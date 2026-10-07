@@ -148,7 +148,7 @@ public sealed partial class MatchEngine
             var label = effect == TfHoldingsAbilities.JadeMineEffect
                 ? $"Bow this card: {amount} Gold. It will not straighten until after your next Action Phase"
                 : $"Bow this card: {amount} Gold. Lose 2 Honor";
-            yield return new(card.Id + AltProductionMark, card, effect, amount, "bow", label, null);
+            yield return new(card.Id + AltProductionMark, card, effect, amount, "bow", label, null, OnUse: static (engine, token, player) => engine.TfUseAltToken(token, player));
         }
     }
 
@@ -253,6 +253,7 @@ public sealed partial class MatchEngine
     internal static void RegisterTfHoldingsHooks()
     {
         EngineHooks.Abilities.Register("AddTfHoldings", 11400, static abilities => abilities.AddTfHoldings());
+        EngineHooks.PaymentTokens.Register("P1TfPaymentTokens", 16301, static (engine, context) => engine.TfAltProductionTokens(context.PlayerId, context.Paying)); // issue #695: Jade Mine, Slave Pits
         EngineHooks.RunEffects.Register("RunTfHoldings", 11400, static (engine, context) => engine.RunTfHoldings(context.id, context.ability, context.command, context.player, context.source, context.target, context.bowedBeforeAction));
         EngineHooks.ValidateLate.Register("ValidateTfHoldings", 11400, static (engine, context) => engine.ValidateTfHoldings(context.id, context.player));
         EngineHooks.TargetAllows.Register("TfHoldingsTargetAllows", 11400, static (engine, context) => engine.TfTargetAllows(context.ability.Target, context.command, context.player, context.target));
