@@ -1,0 +1,32 @@
+{
+  "Profile": "holding-wave-80",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #737.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4795",
+      "Name": "Magistrate's Stipend",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if paying for a Magistrate which may only pay for that card.\nReaction: After you announce a non-Iaijutsu action, choose your performing Magistrate to give him +1C until the action ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4795.jpg",
+      "Keywords": [
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-stipend-announce"
+      ],
+      "Effect": "w737-stipend"
+    }
+  ],
+  "Decks": []
+}

@@ -202,7 +202,8 @@ public sealed partial class MatchEngine
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting)) return false;
         if (!(InPlay(card) || card.Zone == Zone.Hand) || HeldActionNegated(subject)) return false;
         if (abilityId == "mochitoko-negate") return MochitokoFollowers(card, subject).Any();
-        if (subject.TargetId is null || !_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
+        if (subject.TargetId is null) return RegisteredUntargetedReaction(card, abilityId, subject); // issue #737 (P8): an Interrupt to what the held action does, which names no card
+        if (!_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
         switch (abilityId)
         {
             case "ezuno-redirect":
