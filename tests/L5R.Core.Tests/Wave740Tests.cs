@@ -648,6 +648,19 @@ internal static class Wave740Tests
         Accept(c, Batch336Support.Use(c, 1, "w737-kuroko-favor", kuroko2.Id));
         for (var guard = 0; guard < 6 && c.State.PendingChoice is not null; guard++) Accept(c, new GameCommand("declineReaction", c.State.PriorityPlayerId, c.Version));
         Eq(c.State.FavorPlayerId, 1, "declined: the Political action resolved and took the Imperial Favor");
+        // A Political action that names a card is held the same way: Soshi House Guard's bow of a Personality of Hantei's controller.
+        var x = Table(Phase.Battle, 1); x.PriorityPlayerId = 1;
+        var host = Add(x, LionSamurai, 1, Zone.Battlefield, province: 0);
+        var soshi = Add(x, "oracle-l5r-7347", 1, Zone.Attached, province: 0, parent: host.Id);
+        var victim = Add(x, CraneSamurai, 0, Zone.Battlefield, province: 0);
+        var celestial2 = Add(x, Hantei, 0, Zone.Celestial);
+        var y = MatchEngine.FromTestState(x);
+        Accept(y, new GameCommand("useAbility", 1, y.Version, CardId: soshi.Id, TargetId: victim.Id, AbilityId: "soshi-conditional-bow"));
+        Eq(y.State.PendingChoice?.Type, "beforeActionReaction", "the held targeted Political action opens a reaction window");
+        Accept(y, y.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command?.AbilityId == Wave740Abilities.HanteiNegate && a.Enabled).Command!);
+        for (var spin = 0; spin < 6 && y.State.PendingChoice is not null; spin++) Accept(y, new GameCommand("declineReaction", y.State.PriorityPlayerId, y.Version));
+        Check(!y.State.Cards[victim.Id].Bowed, "negated: the Personality was not bowed");
+        Check(y.State.Cards[celestial2.Id].Zone != Zone.Celestial, "and the Celestial was discarded");
         // Nothing held: no Interrupt is offered.
         var v = Table(Phase.Action, 1);
         Add(v, Hantei, 0, Zone.Celestial);
