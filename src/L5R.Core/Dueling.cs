@@ -579,6 +579,7 @@ public sealed partial class MatchEngine
                 break;
             // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
             case "aerie-duel": AerieDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            case Wave740Abilities.HakusekiDuel: case Wave740Abilities.FlameDuel: case Wave740Abilities.MagistrateDuel: case Wave740Abilities.DemonstratingDuel: ApplyWave740DuelOutcome(abilityId, winnerId, loserIds, challengerPlayerId); break; // issue #740 (Wave740.cs)
             case EmperorP1Abilities.OchiaiDuel: QueueOchiaiDestruction(loserIds, challengerPlayerId); break; // Ochiai's Bravery (issue #503, EmperorP1.cs)
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
@@ -670,6 +671,7 @@ public sealed partial class MatchEngine
                 ApplyTfStrategiesBFocusEffect(abilityId, ownerId, winnerPlayerId); // Strategic Withdrawal (TfStrategiesB.cs)
                 ApplyWlStratGatesFocusEffect(abilityId, ownerId); // Boiling Point (issue #674, WlStratGates.cs)
                 ApplyMechEFocusEffect(abilityId);
+                ApplyWave740FocusEffect(abilityId, winnerPlayerId); // issue #740: Fortune's Charm
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;
         }

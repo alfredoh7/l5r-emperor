@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-10849",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10849",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10849-printing-1-image-1.webp",
+    "image_sha256": "9fe547e16554112a8908b4a6da1ef014dd75fec2314ee0fc90b44b16341f35e9"
+  },
+  {
+    "card_id": "oracle-l5r-10445",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10445",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10445-printing-1-image-1.webp",
+    "image_sha256": "d39a733e445cac46df7e87c072777402f3ea293dbf1c196e28c0b92727a5db46"
+  },
+  {
+    "card_id": "oracle-l5r-10638",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10638",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10638-printing-1-image-1.webp",
+    "image_sha256": "fe78ccaff47c7551625d5c1110cebe339b6dfd79246aa2cb126201068d3fe41b"
+  },
+  {
+    "card_id": "oracle-l5r-10845",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10845",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10845-printing-1-image-1.webp",
+    "image_sha256": "6dfc1f4b1787e4e418731a0317a2c0ee331fef08a6c6e6f5f240150bbfe0f215"
+  },
+  {
+    "card_id": "oracle-l5r-10324",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10324",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10324-printing-1-image-1.webp",
+    "image_sha256": "9b3e8fd5b17d08b42741579f1a7d7031341e2c84e7e18f0b30c26475078ab72d"
+  },
+  {
+    "card_id": "oracle-l5r-10298",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10298",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10298-printing-1-image-1.webp",
+    "image_sha256": "1ea3c66a5bf3d72eeb7e64d403acae1ae689239b1bd2243c9184753379b05b22"
+  }
+]

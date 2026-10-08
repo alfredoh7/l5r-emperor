@@ -1,0 +1,185 @@
+{
+  "Profile": "personality-wave-191",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #740.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10849",
+      "Name": "Akodo Kano",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kano's Force bonuses from the rulebook Tactical Advantage action are increased by 2.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10849.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Lion Clan",
+        "Master Tactician",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w740-kano"
+    },
+    {
+      "Id": "oracle-l5r-10445",
+      "Name": "Doji Hakuseki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you Proclaim another Personality: Gain 1 Honor.\nIaijutsu Battle: Hakuseki challenges a target enemy Personality. Bow the duel's loser. Destroy the duel's loser if the duel was against The Dark Naga.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10445.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 3",
+        "Unique",
+        "Crane Clan",
+        "First Magistrate",
+        "Imperial",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w740-hakuseki-duel"
+      ],
+      "Effect": "w740-hakuseki"
+    },
+    {
+      "Id": "oracle-l5r-10638",
+      "Name": "Ikoma Ayumu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will not gain Fallen or Shadowlands.\nThe rulebook Tactical Advantage is an Open action for you if you target Ayumu with it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10638.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Hero",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w740-ayumu"
+    },
+    {
+      "Id": "oracle-l5r-10845",
+      "Name": "Mirumoto Kalen",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Battle: Ranged 3 Attack. You may take an additional action to use Kalen's second printed ability.\nFire Battle, Bow this card: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10845.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w740-kalen-attack",
+        "w740-kalen-attack2"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10324",
+      "Name": "Seppun Ryota",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before an action resolves that targeted a Personality at Ryota's location: He enters any duel created by its effects instead of the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10324.jpg",
+      "Keywords": [
+        "Duelist",
+        "Imperial",
+        "Paragon",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w740-ryota-substitute"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10298",
+      "Name": "Yoritomo Harumi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Once per battle, Harumi may perform the Equip Battle action even if bowed and even if unopposed.\nBattle: Target an enemy Follower or Personality without Followers: Give it -5F. Gain 2 Honor. If its Force is now 0 or you control Yoritomo Hiromi, destroy it. If it is still in play, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10298.jpg",
+      "Keywords": [
+        "Loyal",
+        "Naval",
+        "Unique",
+        "Earth",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w740-harumi-attack"
+      ],
+      "Effect": "w740-harumi"
+    }
+  ],
+  "Decks": []
+}

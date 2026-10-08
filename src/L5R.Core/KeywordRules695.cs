@@ -69,6 +69,8 @@ internal enum KeywordConditionKind
     SubjectInPlay,
     /// <summary>The card is attached to another card.</summary>
     SubjectAttached,
+    /// <summary>The card is the challenger of the pending duel the ability Arg issued ("during the duel", Focus on the Flame).</summary>
+    SubjectChallengesWithAbility,
 }
 
 internal readonly record struct KeywordCondition(KeywordConditionKind Kind, string? Arg = null);
@@ -310,6 +312,7 @@ public sealed partial class MatchEngine
                 return false;
             case KeywordConditionKind.SubjectInPlay: return InPlay(subject);
             case KeywordConditionKind.SubjectAttached: return subject.Zone == Zone.Attached && subject.AttachedTo is not null;
+            case KeywordConditionKind.SubjectChallengesWithAbility: return _state.PendingDuel is { } duel && duel.AbilityId == condition.Arg && duel.ChallengerId == subject.Id;
             default: throw new InvalidOperationException($"Unknown keyword condition: {condition.Kind}");
         }
     }
