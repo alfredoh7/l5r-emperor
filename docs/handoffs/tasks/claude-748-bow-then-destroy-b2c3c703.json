@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Hiroto and Moshi Rukia - exp: bow the target first, then destroy it if it is an attachment, as separate effects (Mendon's GC-2 ruling, R-031). Shared change: Core ability plus decision docs; no client or message changes.",
+  "validation": "bash tools/check.sh --skip-client: All requested checks passed (includes the updated Hiroto test and a new Rukia test where a negated destruction leaves the attachment bowed). Bow-negated case not separately tested.",
+  "remaining": "None; ready to merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/748",
+  "branch": "claude/748-bow-then-destroy",
+  "updated": "2026-10-08T05:08:08.961277+00:00"
+}
