@@ -103,3 +103,4 @@ interpretation this register's decision docs already settled.
 - [Wave batch 7: turn boundaries and rule flags (#738)](2026-10-08-wave-batch-7-turn-boundaries-and-rule-flags.md) — proposed readings: 16 cards wired on P4/P13/P6 (the scans print no P5 clause, so the Events are ordinary); Revelations and The Onyx Championship deferred.
 
 - [Wave batch 8: zones, search and decisions (#739)](2026-10-08-wave-batch-8-zones-search-and-decisions.md) — proposed readings: all 17 cards wired on P20/P21/P22/P25 (one new search disposition, RefillProvince); nothing deferred.
+- [Foothold of the Mad (#766)](2026-10-08-foothold-of-the-mad.md) — Mendon's ruling: counts as 39 Honor for going first, then 0, silently; Madness tokens are -1F tokens while it is in play; wired with its Honor-loss immunity, Fallen discount and two Limited abilities

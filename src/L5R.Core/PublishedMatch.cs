@@ -31,7 +31,7 @@ public sealed partial class MatchEngine
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength, PrintedStrength = stronghold.ProvinceStrength }).ToList();
         }
         state.RngState = random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
-        state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
+        state.ActivePlayerId = FirstPlayerAtSetup(state, 0); ApplyFootholdStartHonor(state); // Foothold of the Mad (issue #766, Foothold.cs)
         Add(1 - state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
         OrderCardsById(state);
         var engine = new MatchEngine(state, seed, scenario);

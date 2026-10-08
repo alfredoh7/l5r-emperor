@@ -11018,12 +11018,16 @@ public sealed partial class MatchEngine
             Emit("tokenNegated", $"A {type} token's {stat} penalty on {Definition(card).Name} was negated (Aka-beko).", card.OwnerId, card.Id);
             return null;
         }
+        // Foothold of the Mad (issue #766, Foothold.cs; Mendon's ruling): while one is a Stronghold in play, a Madness token on a Personality or Follower is a -1F token. Placed after the Force-penalty
+        // negations above on purpose: the penalty is the Stronghold's rule, not an effect of the action that gave the token.
+        var footholdPenalty = type == "Madness" && stat is null && Definition(card).Type is CardType.Personality or CardType.Follower && FootholdInPlay();
+        if (footholdPenalty) { stat = "Force"; amount = -1; }
         var token = new CardToken($"token-{++_state.TokenSequence:D4}", type, source, stat, amount);
         card.Tokens.Add(token);
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
         Emit("tokenCreated", $"{Definition(card).Name} gained a {type} token.", card.OwnerId, card.Id);
         // A stat token with a negative amount (Cultist Infiltrator's -1 Chi) is a stat penalty like any modifier (issue #336).
-        if (stat is not null) NoteStatPenalty(card, source, type, stat, amount);
+        if (stat is not null && !footholdPenalty) NoteStatPenalty(card, source, type, stat, amount);
         return token;
     }
     private void MoveToken(CardInstance from, CardToken token, CardInstance to)
