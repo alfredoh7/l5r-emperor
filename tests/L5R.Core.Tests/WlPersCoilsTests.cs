@@ -44,11 +44,11 @@ internal static class WlPersCoilsTests
         ("Moshi Tomiko - exp: bows your unbowed Ring or Moto Ming-Gwok and draws a card; a bowed one, an opponent's Ring and another Personality are refused", TomikoBowAndDraw),
         ("Moto Ming-Gwok - exp: Water Battle Ranged 3 Attack only with a dead Personality in a discard pile; Open: bow or straighten a Ring or Moshi Tomiko (the acting player's choice)", MingGwok_Actions),
         ("Shiba Iaimiko - exp: bow your Shugenja or Ikoma Aimi for +1F, Cavalry or Conqueror, three times a turn in all, never a fourth", IaimikoThreeUses),
-        ("Shinjo Tselu - exp: search the Fate deck for a non-Unique Cavalry Follower, show it, put it in hand, then discard another card", TseluSearch),
+        ("Shinjo Tselu - exp: search the Fate deck for a non-Unique Cavalry Follower, show it, put it in hand, then discard a card (the found one allowed)", TseluSearch),
         ("Shosuro Kameyoi - exp: Political Open, bow: a target player loses 1 Honor; Political Limited, bow: dishonor a Personality not named Yasuki Tono", KameyoiActions),
         ("Yasuki Tono - exp: Open, bow: straighten a Holding or Shosuro Kameyoi (either side's), never another card", TonoStraightens),
         ("Tonbo Inuyama: Void Limited: look at the top card of any of the four decks and may put it on the bottom; the viewer alone sees it", TonboLook),
-        ("Kitsuki Daisuke - exp2: look at the top three Fate cards; an Iaijutsu Strategy may be shown and taken, then a different card is discarded; the rest go back in the order chosen", DaisukeLook),
+        ("Kitsuki Daisuke - exp2: look at the top three Fate cards; an Iaijutsu Strategy may be shown and taken, then a card (the found one allowed) is discarded; the rest go back in the order chosen", DaisukeLook),
         ("Yoritomo Minori - exp: put a discarded (not dead) Personality face-up into one of your Provinces, discarding the card there, then discard a card from your hand", MinoriRefill),
         ("The Dark Naga - exp: Equip a Nonhuman Follower from the hand or discard pile paying 4 less; Pearl Battle, bow: Ranged 9 Attack; loses 3 Honor on entering play", DarkNagaActions),
         ("Daigotsu Arakan - exp: Equip a non-Unique Follower from the discard pile to Arakan or Zansho, make it Shadowlands and Undead for good, lose 2 Honor; one use in either timing", ArakanEquip),
@@ -593,12 +593,19 @@ internal static class WlPersCoilsTests
         Check(e.State.Players[0].Hand.Contains(bird.Id), "shown and put in the hand");
         Check(e.State.ShownCards.Any(c => c.DefinitionId == HorseArchers), "and shown to the opponent");
         Eq(e.State.PendingChoice?.Type, "searchDiscard", "then discard a card");
-        Reject(e, new GameCommand("chooseSearchDiscard", 0, e.Version, TargetId: bird.Id));
         Accept(e, new GameCommand("chooseSearchDiscard", 0, e.Version, TargetId: hand2.Id));
         Eq(e.State.Cards[hand2.Id].Zone, Zone.FateDiscard, "the discarded card");
         Check(e.State.Players[0].Hand.Contains(hand1.Id) && e.State.Players[0].Hand.Contains(bird.Id), "the rest of the hand stays");
         Check(e.State.PendingChoice is null && !CanUse(e, 0, WlPersCoilsAbilities.TseluSearch, tselu.Id), "done; Limited, once a turn");
         Check(!e.State.Players[0].FateDeck.Contains(bird.Id) && e.State.Players[0].FateDeck.Count == 3, "the Fate deck lost the Follower");
+        // Mendon's CM-9 ruling (#757): the card just found may itself be the card discarded.
+        var s5 = DeckTable(); var t5 = Add(s5, Tselu, 0, Zone.Home); var bird5 = Put(s5, HorseArchers, 0, Zone.FateDeck); Put(s5, "training-rally", 0, Zone.Hand);
+        var e5 = MatchEngine.FromTestState(s5);
+        Accept(e5, Enabled(e5, 0, WlPersCoilsAbilities.TseluSearch, t5.Id).Command!);
+        Accept(e5, new GameCommand("selectSearchCard", 0, e5.Version, Choice: HorseArchers));
+        Check(e5.QueryActions(0).Any(x => x.Type == "chooseSearchDiscard" && x.Command!.TargetId == bird5.Id), "the card found is offered as the discard");
+        Accept(e5, new GameCommand("chooseSearchDiscard", 0, e5.Version, TargetId: bird5.Id));
+        Eq(e5.State.Cards[bird5.Id].Zone, Zone.FateDiscard, "the card found was discarded");
         // Nothing qualifies: pass is legal, nothing is taken or discarded.
         var s2 = DeckTable();
         var t2 = Add(s2, Tselu, 0, Zone.Home); Put(s2, MotoHouseGuard, 0, Zone.FateDeck); Put(s2, "training-follower", 0, Zone.FateDeck);
@@ -741,8 +748,7 @@ internal static class WlPersCoilsTests
         Eq(e.State.PendingChoice?.Type, "searchDiscard", "then discard a card");
         Check(e.GetView(0).PendingSearch is { Stage: "ChooseDiscard" } && e.GetView(1).PendingSearch is null, "the viewer sees the discard step, the opponent nothing");
         Check(Top(e, 0, "Fate", 3).SequenceEqual([SteelOnSteel, "training-follower", "training-item"]), "the rest are back in the order given, nothing shuffled");
-        Reject(e, new GameCommand("chooseSearchDiscard", 0, e.Version, TargetId: duel.Id));
-        Check(e.QueryActions(0).Where(x => x.Type == "chooseSearchDiscard").Select(x => x.Command!.TargetId).OrderBy(x => x).SequenceEqual(new[] { a.Id, b.Id }.OrderBy(x => x)), "the card found cannot be the one discarded: only the other hand cards are offered");
+        Check(e.QueryActions(0).Where(x => x.Type == "chooseSearchDiscard").Select(x => x.Command!.TargetId).OrderBy(x => x).SequenceEqual(new[] { a.Id, b.Id, duel.Id }.OrderBy(x => x)), "Mendon's CM-8 ruling (#757): the card found may be the one discarded, so every hand card is offered");
         Accept(e, new GameCommand("chooseSearchDiscard", 0, e.Version, TargetId: a.Id));
         Eq(e.State.Cards[a.Id].Zone, Zone.FateDiscard, "discarded");
         Check(e.State.PendingChoice is null && e.State.Players[0].Hand.Contains(duel.Id) && e.State.Players[0].Hand.Contains(b.Id), "done");
@@ -755,12 +761,14 @@ internal static class WlPersCoilsTests
         Accept(n, new GameCommand("arrangeTopCards", 0, n.Version, CardIds: ["2:top", "1:top", "0:top"]));
         Check(n.State.PendingChoice is null && n.State.Players[0].Hand.SequenceEqual([a2.Id, b2.Id]), "no card shown: nothing is asked and nothing discarded");
         Check(Top(n, 0, "Fate", 3).SequenceEqual([SteelOnSteel, "training-follower", SanctionedDuel]), "back in any order");
-        // The found card is the only one in hand: nothing to discard, no error.
+        // The found card is the only one in hand: it is the card discarded.
         var s3 = DeckTable(); var d3 = Add(s3, Daisuke, 0, Zone.Home); var duel3 = Put(s3, SanctionedDuel, 0, Zone.FateDeck); Put(s3, "training-follower", 0, Zone.FateDeck); Put(s3, "training-item", 0, Zone.FateDeck);
         var solo = MatchEngine.FromTestState(s3);
         Accept(solo, Enabled(solo, 0, WlPersCoilsAbilities.DaisukeLook, d3.Id).Command!);
         Accept(solo, new GameCommand("arrangeTopCards", 0, solo.Version, CardIds: ["0:show", "1:top", "2:top"]));
-        Check(solo.State.PendingChoice is null && solo.State.Players[0].Hand.SequenceEqual([duel3.Id]), "with no other card the discard cannot be satisfied: it is skipped");
+        Eq(solo.State.PendingChoice?.Type, "searchDiscard", "the discard is asked even though the found card is the only one in hand");
+        Accept(solo, new GameCommand("chooseSearchDiscard", 0, solo.Version, TargetId: duel3.Id));
+        Check(solo.State.PendingChoice is null && solo.State.Cards[duel3.Id].Zone == Zone.FateDiscard, "the found card was discarded");
         // A deck of one card: the look is of what is there.
         var s4 = DeckTable(); var d4 = Add(s4, Daisuke, 0, Zone.Home); Put(s4, "training-follower", 0, Zone.FateDeck);
         var e4 = MatchEngine.FromTestState(s4);
@@ -1035,6 +1043,18 @@ internal static class WlPersCoilsTests
         Settle(e);
         Eq(e.State.Players[1].Hand.Count, handBefore - 1, "a card was discarded");
         Check(e.State.PendingChoice is null, "and nothing else is owed");
+
+        // Mendon's CM-13 ruling (#757): a Strategy has no unit, so the Personality who performs it stands for it: his Madness tokens decide, and his controller owes the discard.
+        var ss = Table(Phase.Battle, 1); ss.PriorityPlayerId = 1; ss.ActivePlayerId = 1;
+        Add(ss, Adachi, 0, Zone.Battlefield, province: 0);
+        var performer = Add(ss, "training-battle-bower", 1, Zone.Battlefield, province: 0); GiveTokens(performer, "Madness", 2);
+        Add(ss, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var strategy = Add(ss, "training-performer-strategy", 1, Zone.Hand); Add(ss, "training-rally", 1, Zone.Hand); Add(ss, "training-item", 1, Zone.Hand);
+        var sx = MatchEngine.FromTestState(ss);
+        Accept(sx, Enabled(sx, 1, "training-performer-boost", strategy.Id, performerId: performer.Id).Command!);
+        for (var guard = 0; guard < 6 && sx.State.PendingChoice is { Type: not "forcedDiscard" }; guard++) Settle(sx, 1);
+        Eq(sx.State.PendingChoice?.Type, "forcedDiscard", "a Strategy performed by a unit opposing Adachi owes the discard");
+        Eq(sx.State.PendingChoice?.PlayerId, 1, "by the performer's controller");
 
         // Tokens equal to his printed Personal Honor: not more. None either.
         foreach (var tokens in new[] { 1, 0 })
