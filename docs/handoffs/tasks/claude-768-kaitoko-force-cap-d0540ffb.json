@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Force cap primitive (live maximum-Force rule: lowers never raises, lapses with its source, negated by Force-penalty negations and immunities) and Asako Kaitoko - exp wired on it with its keyword-conditioned target bar (personality-wave-301). Art pack r1 on Foothold's pack.",
+  "validation": "force-cap 6/6 and kaitoko 7/7 suites; art pack validated (archive and verify-only); full check.sh and CI pending; no native playtest",
+  "remaining": "Publish the art-pack release, CI, merge. Readings in docs/decisions/2026-10-08-force-cap-and-kaitoko.md await Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/768",
+  "branch": "claude/768-kaitoko-force-cap",
+  "updated": "2026-10-08T23:17:32.642151+00:00"
+}

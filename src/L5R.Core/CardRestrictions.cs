@@ -62,9 +62,10 @@ public enum RestrictionUntil
 public sealed record CardRestriction(string Id, RestrictionKind Kind, string? CardId = null, int? ProvinceIndex = null, int? PlayerId = null, string? Arg = null, string? OtherCardId = null,
     RestrictionUntil Until = RestrictionUntil.Turn, int UntilTurn = 0, Phase? UntilPhase = null, int Max = 0, int Count = 0);
 
-/// <summary>Who is acting. Players: "any", "controller" (the target's controller) or "others" (every other player). ActionKeyword restricts to actions carrying it ("Political"); CardId names the performing
+/// <summary>Who is acting. (Issue #768: UnitHeadKeywordsAny requires the Personality heading the performing card's unit to have one of the keywords; UnitHeadOpposesCardId that he opposes that card: at the same battlefield, on the other side.) Players: "any", "controller" (the target's controller) or "others" (every other player). ActionKeyword restricts to actions carrying it ("Political"); CardId names the performing
 /// card; UnitOfCardId matches the card or any card in the unit it heads (his attachments); UnitCardsOnly requires the performing card to be a Personality or an attachment (a Strategy, Holding or Ring is not "a card in a unit").</summary>
-public sealed record ActorSpec(string Players = "any", string? ActionKeyword = null, string? CardId = null, string? UnitOfCardId = null, bool UnitCardsOnly = false);
+public sealed record ActorSpec(string Players = "any", string? ActionKeyword = null, string? CardId = null, string? UnitOfCardId = null, bool UnitCardsOnly = false,
+    string[]? UnitHeadKeywordsAny = null, string? UnitHeadOpposesCardId = null);
 
 /// <summary>A stored target bar (or, with Forced, a forced-target rule). The bar holds on TargetCardId, or on every card in the unit TargetCardId heads when TargetUnit is set.</summary>
 public sealed record TargetBarRule(string Id, string TargetCardId, ActorSpec Actor, bool TargetUnit = false, bool Forced = false,
@@ -358,6 +359,21 @@ public sealed partial class MatchEngine
 
     // ---- Target bars and forced targets ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    /// <summary>The Personality that heads the unit a card is in: the card itself, or the Personality an attachment (a Follower, Item or Spell) is attached to.</summary>
+    private CardInstance? UnitHeadOf(CardInstance card) =>
+        Definition(card).Type == CardType.Personality ? card
+        : card.Zone == Zone.Attached && card.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && Definition(host).Type == CardType.Personality ? host : null;
+
+    /// <summary>The unit-head half of an ActorSpec (issue #768): the Personality heading the actor's unit has one of the keywords and/or opposes the named card.</summary>
+    private bool UnitHeadMatches(ActorSpec spec, CardInstance? actorCard)
+    {
+        if (actorCard is null || UnitHeadOf(actorCard) is not { } head) return false;
+        if (spec.UnitHeadKeywordsAny is { } keywords && !keywords.Any(k => Keyword(head, k))) return false;
+        if (spec.UnitHeadOpposesCardId is { } otherId)
+            return _state.Cards.TryGetValue(otherId, out var other) && head.Zone == Zone.Battlefield && other.Zone == Zone.Battlefield && head.ProvinceIndex == other.ProvinceIndex && head.OwnerId != other.OwnerId;
+        return true;
+    }
+
     private bool InUnitOf(CardInstance card, string headId) => card.Id == headId || card.Zone == Zone.Attached && card.AttachedTo == headId;
 
     /// <summary>Does this actor match the spec, judged against the card being targeted? The ability and its source card are null when only the performing card is known (a redirect): the keyword test is then skipped.</summary>
@@ -369,6 +385,7 @@ public sealed partial class MatchEngine
         if (spec.CardId is not null && actorCard?.Id != spec.CardId) return false;
         if (spec.UnitOfCardId is not null && (actorCard is null || !InUnitOf(actorCard, spec.UnitOfCardId))) return false;
         if (spec.UnitCardsOnly && (actorCard is null || !(Definition(actorCard).Type == CardType.Personality || actorCard.Zone == Zone.Attached && InPlay(actorCard)))) return false;
+        if ((spec.UnitHeadKeywordsAny is not null || spec.UnitHeadOpposesCardId is not null) && !UnitHeadMatches(spec, actorCard)) return false; // issue #768 (Asako Kaitoko - exp)
         return true;
     }
 
