@@ -49,8 +49,8 @@ public static class Wave739Abilities
     /// <summary>The Either/Or spec of Poison the Cup's token choice.</summary>
     public const string PoisonCupSpec = "w739-poison-cup-token";
 
-    /// <summary>Jeiku's Invest has no "Reaction:" designator: a trait modelled with Reaction timing (Mendon's R4 ruling; TraitReactions.Is asks this).</summary>
-    public static bool IsTrait(string abilityId) => abilityId == JeikuInvest;
+    /// <summary>Jeiku's Invest and The Tachikaze's collect print no "Reaction:" designator: traits modelled with Reaction timing (Mendon's R4 ruling; TraitReactions.Is asks this).</summary>
+    public static bool IsTrait(string abilityId) => abilityId is JeikuInvest or TachikazeCollect;
 
     private static readonly SearchCriteria FudoCelestial = new("Fudo Celestial", [CardType.Celestial], ["Fudo"]);
 
