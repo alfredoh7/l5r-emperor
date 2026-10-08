@@ -32,7 +32,7 @@ public static class Wave734Abilities
         Barrier = "w734-barrier";
 
     // Target categories of this file (TargetAllows).
-    public const string JiYunTarget = "w734-jiyun-target";
+    public const string JiYunTarget = "w734-jiyun-target", AllianceTarget = "w734-alliance-target";
 
     // Hantei XVI's rule is P3's "favor-ignores-honor-requirement" Effect (RecruitGates695.cs); the other cards' Effects follow.
 
@@ -75,8 +75,8 @@ public static class Wave734Abilities
             Costs: [new(CostVerbs.Sacrifice)]);
         all[ReadyDefenses] = new("Open", "Open: Choose your performing Personality and target a province: While at the province's battlefields, other players' Personalities and Followers have -1F and, if your performer is a Tactician, your Personalities and Followers have +1F",
             "any-province", Performer: "own-personality");
-        all[AllianceBow] = new("Open", "Political Open: Bow your target unbowed Courtier. All Personalities have -1F for each Clan Alignment in their army (this turn)", "own-unbowed-personality",
-            RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"]);
+        all[AllianceBow] = new("Open", "Political Open: Bow your target unbowed Courtier. All Personalities have -1F for each Clan Alignment in their army (this turn)", AllianceTarget,
+            ActionKeywords: ["Political"]);
         return all;
     }
 }
@@ -123,6 +123,9 @@ public sealed partial class MatchState
 
 public sealed partial class MatchEngine
 {
+    // Test seams (L5R.Core.Tests has InternalsVisibleTo).
+    internal bool KeywordForTest(string cardId, string keyword) => Keyword(Card(cardId), keyword);
+
     // ---- helpers -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private IEnumerable<CardInstance> Wave734InPlayWith(int playerId, string effect) =>
@@ -181,7 +184,8 @@ public sealed partial class MatchEngine
         var total = 0;
         foreach (var defense in defenses)
         {
-            if (defense.Turn != _state.TurnNumber || defense.ProvinceIndex != battlefield || unit.OwnerId == defense.ProvinceOwnerId) continue;
+            // The province is a battlefield only while its owner is the Defender; the units there are the Attacker's and the Defender's, and "other players'" are all the Defense's player does not control.
+            if (defense.Turn != _state.TurnNumber || defense.ProvinceIndex != battlefield || defense.ProvinceOwnerId != 1 - _state.ActivePlayerId) continue;
             if (unit.OwnerId != defense.PlayerId) total--;
             else if (defense.Tactician) total++;
         }
@@ -265,6 +269,9 @@ public sealed partial class MatchEngine
 
     private bool Wave734TargetAllows(TargetAllowsContext context)
     {
+        // "Your target unbowed Courtier" (Unseemly Alliance): a Personality of the player's in play with the Courtier keyword, unbowed.
+        if (context.ability.Target == Wave734Abilities.AllianceTarget)
+            return Definition(context.target).Type == CardType.Personality && InPlay(context.target) && context.target.OwnerId == context.player.Id && !context.target.Bowed && Keyword(context.target, "Courtier");
         if (context.ability.Target != Wave734Abilities.JiYunTarget) return false;
         // "A Personality opposing her": an enemy Personality in play at the battlefield Ji-Yun is at.
         var target = context.target;
@@ -307,6 +314,8 @@ public sealed partial class MatchEngine
                 caps.RemoveAll(e => e.Turn != _state.TurnNumber);
                 caps.Add(new() { CardId = chizuruTarget.Id, Cap = 4, Turn = _state.TurnNumber });
                 return false;
+            case Wave734Abilities.NitoshiAttack:
+                return ResolveOrDeferAttack(id, c.player, c.target?.Id, source!.Id, c.consumedGrant);
             case Wave734Abilities.KarasuSwitch:
                 var first = SlotCards(c.command, "first").Single();
                 var second = SlotCards(c.command, "second").Single();
