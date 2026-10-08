@@ -9,7 +9,7 @@ public partial class Main
     {
         if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
-        Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null;
+        Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null; _goldMeter.Dismiss();
         RenderEitherOrNotice();
         if (View.PendingAttack is { } pendingAttack)
             _sidebarHeader.AddChild(Palette.Wrapped(pendingAttack.Kind + " Attack · " +
@@ -232,9 +232,12 @@ public partial class Main
     // the chosen amount changes; the player's own selection is only ever replaced by such a deliberate change).
     private void ResuggestSources()
     {
-        _sources.Clear();
-        if (_chosen is null || QuoteFor(_chosen) is not { } quote) return;
-        foreach (var id in PaymentsFor(quote, AmountFor(_chosen, quote)).FirstOrDefault()?.SourceIds ?? []) _sources.Add(id);
+        if (_chosen is null || QuoteFor(_chosen) is not { } quote) { _sources.Clear(); return; }
+        // The player's own picks survive a new quote when still offered; nothing is re-selected for them.
+        var offered = PaymentMethods(quote).Select(m => m.Id).ToHashSet();
+        _sources.RemoveWhere(id => !offered.Contains(id));
+        SyncPaymentAmount();
+        if (!PreviewBowedCards().SetEquals(_previewBows)) RenderBoard();
     }
 
     // Retarget the reviewed action: its command, the quote it is priced by and (when that quote is target-specific)
@@ -275,7 +278,8 @@ public partial class Main
             _inspector.AddChild(Palette.Text("PAYMENT · " + KindLabel(quote.Kind), 11, Palette.Gold));
             _inspector.AddChild(Palette.Wrapped($"{required} Gold", 24, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(quote.Basis)) _inspector.AddChild(Palette.Wrapped(quote.Basis, 13, Palette.PaperDim));
-            if (quote.Kind == GoldCostKind.Variable) RenderAmountControl(required, quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0);
+            if (quote.Kind == GoldCostKind.Variable)
+                _inspector.AddChild(Palette.Wrapped($"Bow holdings to choose the amount: you pay the Gold you contribute ({quote.MinAmount ?? 0}–{quote.MaxAmount ?? quote.MinAmount ?? 0}).", 14, Palette.PaperDim));
         }
         if (quote.Error is { } error) _inspector.AddChild(Palette.Wrapped(error, 14, Palette.Error));
         var payments = PaymentsFor(quote, required);
@@ -287,12 +291,19 @@ public partial class Main
                 var p = payments[i];
                 suggestions.AddItem($"{(i == 0 ? "Suggested" : "Alternative " + i)} · {p.SourceIds.Length} sources · {p.Excess} excess");
             }
-            suggestions.ItemSelected += i => { _sources.Clear(); foreach (var id in payments[(int)i].SourceIds) _sources.Add(id); RenderInspector(); Highlight(); };
+            suggestions.ItemSelected += i => { _sources.Clear(); foreach (var id in payments[(int)i].SourceIds) _sources.Add(id); RefreshPaymentSelection(); };
             suggestions.Selected = Array.FindIndex(payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
             _inspector.AddChild(suggestions);
         }
-        if (required > 0 || opponent) RenderPaymentMethods(required, quote);
+        var variable = quote.Kind == GoldCostKind.Variable && !opponent;
+        if (required > 0 || opponent || variable) RenderPaymentMethods(required, quote);
         else _inspector.AddChild(Palette.Wrapped("No Gold sources are needed.", 15, Palette.Crane));
+        if (required > 0 || opponent || variable)
+        {
+            var picked = PaymentMethods(quote).Where(m => _sources.Contains(m.Id)).ToArray();
+            var cost = variable ? (int?)null : Math.Max(0, required - picked.Where(m => m.Kind == "discount").Sum(m => m.Produced));
+            UpdateGoldMeter(PaidGold(quote), cost);
+        }
         return (required, quote.Error is null && PaymentSelectionReady(required, quote));
     }
 
@@ -312,8 +323,18 @@ public partial class Main
     // sources; a costed one names its cost and waits until the chosen sources cover it.
     private void AddConfirm(string verb, int required, bool ready, Func<GameCommand> build, string cancel, bool enabled = true)
     {
-        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () => _ = Submit(build()), true);
+        // A variable cost (the player's choice of Gold) is offered at once; a zero-Gold pick must be confirmed deliberately.
+        var variable = _chosen is { Type: not "chooseOpponentPayment" } chosen && QuoteFor(chosen) is { Kind: GoldCostKind.Variable };
+        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () =>
+        {
+            var command = build();
+            if (variable && required == 0)
+                Confirm("Pay 0 gold?", "You have elected to pay 0 gold. Are you sure you would like to proceed?", () => _ = Submit(command), "Yes", "No");
+            else _ = Submit(command);
+        }, true);
         _paymentConfirm.Disabled = !enabled || !ready || _session.Busy;
+        // A fixed cost shows Confirm only once the holdings bowed so far cover it.
+        _paymentConfirm.Visible = ready || required == 0 || variable;
         _decisionActions.AddChild(_paymentConfirm);
         _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
     }
