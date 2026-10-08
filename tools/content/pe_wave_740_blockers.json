@@ -1,0 +1,6 @@
+{
+  "oracle-l5r-10423": {
+    "note": "The Empire's Foe Exposed (Event, issue #740): \"Limited: Target two Unique Personalities in play, exactly one of which is yours. Your Personality challenges the other Personality. Destroy the duel's loser.\" The scan prints no \"After you reveal\" clause, so it is an ordinary Event that resolves when it is revealed in the Events Phase. Every merged duel starts from an ability a player uses (IssueChallenge is reached only from the IssuesDuel branch of an ability's effects, in a battle or the Action Phase), and P18's rules, refusal and focus windows resume play with NextAction for the challenger. Starting a duel from inside an Event's reveal (a pause on two chosen Unique Personalities, then a duel whose end must resume the Events Phase's reveal loop) is not a merged path, and the Event has no ability a player could use later. Publishing it as a reveal-time duel would need that resumption built and tested, so the card is left unpublished rather than approximated.",
+    "category": "DUEL"
+  }
+}

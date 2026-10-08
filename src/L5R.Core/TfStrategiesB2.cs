@@ -47,8 +47,10 @@ public sealed partial class MatchEngine
 
     // Whether the duel's own printed outcome destroys this loser. Every duel-issuing ability is classified in TfStrategiesBTests (a new duel must be added here or there on purpose). Ochiai's Bravery
     // queues its destruction until after the duel's action, which a negation of the outcome does not reach, so it is not listed.
-    private static bool TfStrategiesBDuelDestroysLoser(PendingDuel duel, CardInstance loser) =>
+    // Issue #740: Doji Hakuseki - exp3's duel against The Dark Naga destroys its loser too (Wave740DuelDestroysLoser).
+    private bool TfStrategiesBDuelDestroysLoser(PendingDuel duel, CardInstance loser) =>
         duel.IchigikuDestroysLoser // Kakita Ichigiku: "destroy that duel's loser in addition to other consequences of losing"
+        || Wave740DuelDestroysLoser(duel, loser)
         || TfStrategiesBDuelAbilityDestroysLoser(duel.AbilityId, loser.Dishonorable);
 
     internal static bool TfStrategiesBDuelAbilityDestroysLoser(string abilityId, bool loserDishonorable) => abilityId switch
@@ -56,6 +58,7 @@ public sealed partial class MatchEngine
         "steel-on-steel-duel" or "sword-for-hire-create" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" or "insult-answered-duel" or "kudome-exp-duel" or "sanctioned-duel" or "fusako-duel" or WlStratTornAbilities.EyeDuel => true, // Sanctioned Duel (issue #622, IvorySpells.cs): "Destroy the duel's loser"
         Wave734Abilities.HoturiDuel or Wave734Abilities.TsukeDuel => true, // issue #734 (Wave734.cs): "Destroy the duel's loser"
         WlPersTornAbilities.IzaDuel or WlPersTornAbilities.KyoshiroDuel or WlPersTornAbilities.RikuDuel => true, // issue #674 (WlPersTorn.cs): "Destroy the duel's loser"
+        Wave740Abilities.MagistrateDuel => true, // issue #740: A Magistrate Falls, "Destroy the duel's loser"
         "hakuseki-duel" => loserDishonorable, // "destroy him if he is dishonorable"
         _ => false
     };

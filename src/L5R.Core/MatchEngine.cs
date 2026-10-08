@@ -497,6 +497,7 @@ public sealed partial class MatchEngine
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
         ApplyWave734EntryEffects(playerId, card); // Bayushi Nitoshi - exp (issue #734, Wave734.cs): "After Nitoshi enters play, all players lose 3 Honor."
+        ApplyWave740EntryEffects(card); // Ikoma Ayumu - exp (issue #740, Wave740.cs): "will not gain Fallen or Shadowlands".
         ApplyWave739EntryEffects(card); // Iweko Seiken (issue #739, Wave739.cs): "will not gain a Clan Alignment".
         ApplyWave737EntryEffects(playerId, card); // Iweko Shibatsu (issue #737, Wave737.cs): "After Shibatsu enters play, gain 3 Honor." and his Clan-alignment block.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
@@ -2041,6 +2042,7 @@ public sealed partial class MatchEngine
         if (inBattle) card.ProvinceIndex = target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(target, granted, card.Id, "Attachment");
         Emit("equipped", $"{def.Name} attached to {Definition(target).Name}.", command.PlayerId, card.Id);
+        AfterWave740Equip(command.PlayerId, card, fromDiscard); // issue #740 (Wave740.cs): Harbingers of War's draw
         if (OpenEntryReactionWindow(command.PlayerId, card, 1 - command.PlayerId)) return;
         if (inBattle)
         {

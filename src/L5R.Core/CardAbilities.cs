@@ -4967,11 +4967,11 @@ public sealed partial class MatchEngine
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
     private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false, string? rangedTargetId = null, string? performerId = null, bool baseAbilityOnly = false,
-        string? requiredActionKeyword = null, string? tag = null, string? id = null, bool mandatory = false)
+        string? requiredActionKeyword = null, string? tag = null, string? id = null, bool mandatory = false, string[]? scopeAbilityIds = null)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
         if (MechAGrantLocked(playerId, battle)) return; // One Action, Two Strikes (issue #501, EmperorMechA.cs): "You will not take any other additional Battle actions this battle."
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId, performerId, baseAbilityOnly, requiredActionKeyword, tag, id, mandatory));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId, performerId, baseAbilityOnly, requiredActionKeyword, tag, id, mandatory, scopeAbilityIds));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional {(anyDiscardTiming ? "" : "Battle ")}action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -5087,6 +5087,7 @@ public sealed partial class MatchEngine
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
         AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
         AfterKoshinKeepAttack(abilityId, playerId, targetId, strength, targetInPlayBefore); // Emperor Edition Stronghold pass (issue #486), batch 1: Koshin Keep's additional effects.
+        AfterWave740Attack(abilityId, playerId, sourceId); // issue #740 (Wave740.cs): Mirumoto Kalen - exp's additional action for his second printed ability.
         AfterWlStratTornAttack(abilityId, sourceId); // issue #674 (WlStratTorn.cs): Ambush Tactics' "You may move him home".
         AfterEmperorStrongholdBatch3Attack(abilityId, sourceId); // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "You may move your Ninja home".
         AfterEmperorRemainingGAttack(abilityId, playerId, targetId, targetInPlayBefore, sourceId); // Emperor Edition remaining-cards pass (issue #492), group G: Ikoma House Guard's "gain 1 Honor".

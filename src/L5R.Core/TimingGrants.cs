@@ -68,7 +68,7 @@ public sealed partial class MatchEngine
         var actionClass = EquipActionClass(attachment);
         // A Spell (Equip (Limited) since issue #501) takes no granted timing: in a battle a Spell is attached with Equip (Battle), unchanged.
         var grants = Definition(attachment).Type == CardType.Spell ? [] : (actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray()).Concat(GloryOfTheShogunGrants()).ToArray(); // Glory of the Shogun (issue #492, group F)
-        var free = Definition(attachment).Type == CardType.Spell ? [] : FreeTimingGrantsOf(playerId, actionClass); // P19: grants that belong to the player, not to a card
+        var free = Definition(attachment).Type == CardType.Spell ? [] : FreeTimingGrantsOf(playerId, actionClass, attachment); // P19: grants that belong to the player, not to a card
         if (_state.Phase == Phase.Action)
         {
             if (playerId == _state.ActivePlayerId || grants.Any(x => x.Grant.GrantsOpen)) return null;
