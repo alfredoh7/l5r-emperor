@@ -1,0 +1,55 @@
+{
+  "Profile": "strategy-wave-132",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #734.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10389",
+      "Name": "Ready the Defenses",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Personality and target a province: While at the province's battlefields, other players' Personalities and Followers have -1F and, if your performer is a Tactician, your Personalities and Followers have +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10389.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "w734-ready-defenses"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10965",
+      "Name": "Unseemly Alliance",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Bow your target unbowed Courtier. All Personalities have -1F for each Clan Alignment in their army (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10965.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w734-alliance-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

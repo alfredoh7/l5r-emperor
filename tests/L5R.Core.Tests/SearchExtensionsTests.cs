@@ -687,8 +687,8 @@ internal static class SearchExtensionsTests
         foreach (var field in viewAdded) Check(!view.Contains(field, StringComparison.Ordinal), $"the view shows {field} only when used");
         Accept(e, One(e, Item));
         foreach (var field in added) Check(!Json(e).Contains(field, StringComparison.Ordinal), $"nor afterwards: {field}");
-        // Every catalogued spec but the fixtures carries the defaults, and the old specs behave as before.
-        var fixtures = SearchCatalog.All.Values.Where(x => x.Id.StartsWith("training-p20-", StringComparison.Ordinal) || x.Id.StartsWith("p20-showcase-", StringComparison.Ordinal)).Select(x => x.Id).ToHashSet();
+        // Every catalogued spec but the fixtures (and Hantei XVI, issue #734: "your discard pile or Fate deck", the searcher picks the source) carries the defaults, and the old specs behave as before.
+        var fixtures = SearchCatalog.All.Values.Where(x => x.Id.StartsWith("training-p20-", StringComparison.Ordinal) || x.Id.StartsWith("p20-showcase-", StringComparison.Ordinal) || x.Id == "w734-hantei-search").Select(x => x.Id).ToHashSet();
         Check(fixtures.Count >= 20, "the fixtures are catalogued");
         // Dark Audience (a set of two, the other player chooses) and Jade Pearl Inn (a Gold-producing Holding) are the published cards that use the extensions (issue #739).
         var wired = new[] { "w739-dark-audience", "w739-inn" };

@@ -519,6 +519,7 @@ public sealed partial class MatchEngine
     {
         switch (abilityId)
         {
+            case Wave734Abilities.HoturiDuel or Wave734Abilities.TsukeDuel: Wave734DuelOutcome(abilityId, loserIds, challengerPlayerId); break; // issue #734
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "training-duel-force":
