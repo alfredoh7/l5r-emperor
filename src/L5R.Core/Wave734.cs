@@ -337,8 +337,14 @@ public sealed partial class MatchEngine
             case Wave734Abilities.ReadyDefenses:
                 var defenses = _state.Wave734Defenses ??= [];
                 defenses.RemoveAll(e => e.Turn != _state.TurnNumber);
-                defenses.Add(new() { ProvinceOwnerId = c.command.TargetPlayerId!.Value, ProvinceIndex = c.command.Province!.Value, PlayerId = c.player.Id,
-                    Tactician = c.command.PerformerId is not null && Keyword(Card(c.command.PerformerId), "Tactician"), Turn = _state.TurnNumber });
+                defenses.Add(new()
+                {
+                    ProvinceOwnerId = c.command.TargetPlayerId!.Value,
+                    ProvinceIndex = c.command.Province!.Value,
+                    PlayerId = c.player.Id,
+                    Tactician = c.command.PerformerId is not null && Keyword(Card(c.command.PerformerId), "Tactician"),
+                    Turn = _state.TurnNumber
+                });
                 return false;
             case Wave734Abilities.AllianceBow:
                 c.target!.Bowed = true;
