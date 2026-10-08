@@ -1,0 +1,32 @@
+{
+  "Profile": "strategy-wave-191",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #735.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10557",
+      "Name": "Suikihime's Sanction",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nLimited: Permanently give your target non-Loyal, face-up Personality in or out of play your Clan Alignment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10557.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w735-sanction-grant"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
