@@ -496,6 +496,7 @@ public sealed partial class MatchEngine
         ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
+        ApplyWave737EntryEffects(playerId, card); // Iweko Shibatsu (issue #737, Wave737.cs): "After Shibatsu enters play, gain 3 Honor." and his Clan-alignment block.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
@@ -1755,6 +1756,7 @@ public sealed partial class MatchEngine
     {
         P5.FirstConquerorId = null; // issue #503: The Plain of Glass's pending first choice is spent
         var willNotBow = _state.ResolutionWillNotBowPlayerIds.ToArray();
+        Wave737NatsuMarksUnbowed(a); // Natsu-Togumara's Guidance (issue #737, Wave737.cs): "battle resolution does not bow cards in that Personality's unit."
         // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
         var hikazuSpared = HikazuSparedPersonalities(a);
         var aramasuUnbowed = AramasuResolutionActive(attacker) ? AramasuUnbowedByResolution(a.Where(c => c.Zone == Zone.Battlefield)) : null; // Aramasu's Legacy (issue #501): "does not bow your Mantis Clan Magistrates or your attachments"

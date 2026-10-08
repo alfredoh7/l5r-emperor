@@ -156,7 +156,7 @@ public sealed partial class MatchEngine
     }
 
     // A target category exempt from "every Battle-timing target must be at the current battlefield" (its own location rule is part of the category).
-    private static bool P4TargetAtAnyLocation(string category) => category == EmperorP4Abilities.OwnFollowerForPerformer || Wave736Abilities.IsAnyLocationTarget(category);
+    private static bool P4TargetAtAnyLocation(string category) => category == EmperorP4Abilities.OwnFollowerForPerformer || Wave736Abilities.IsAnyLocationTarget(category) || Wave737Abilities.IsAnyLocationTarget(category);
 
     // Performer categories (validation and the QueryActions listing).
     private bool? EmperorP4PerformerAllows(AbilityDefinition ability, CardInstance performer, bool actingAsBattle) => ability.Performer switch
