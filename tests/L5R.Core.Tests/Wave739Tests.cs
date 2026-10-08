@@ -278,7 +278,7 @@ internal static class Wave739Tests
         var disciples = Add(s, Disciples, 0, Zone.Attached, parent: host.Id); disciples.EnteredPlayTurn = s.TurnNumber - 1;
         var cheap = Fx(s, Marketplace, "w739-cheap", 0, Zone.Home, d => d with { GoldCost = 4 }, bowed: true);
         var dear = Fx(s, Marketplace, "w739-dear", 0, Zone.Home, d => d with { GoldCost = 5 }, bowed: true);
-                var e = MatchEngine.FromTestState(s);
+        var e = MatchEngine.FromTestState(s);
         var option = Batch336Support.Options(e, 0, Wave739Abilities.DisciplesStraighten, disciples.Id).Single(o => o.Enabled);
         Check(option.TargetIds!.Contains(cheap.Id) && !option.TargetIds.Contains(dear.Id), "a Holding of Gold Cost 4 or less, not 5");
         NoChange(e, Batch336Support.Use(e, 0, Wave739Abilities.DisciplesStraighten, disciples.Id, dear.Id), "a Holding that costs more");
@@ -677,7 +677,7 @@ internal static class Wave739Tests
         Accept(f, new GameCommand("passSearch", 0, f.Version));
         var kept = f.State.Cards[f.State.Players[0].Provinces[0].CardId!];
         Check(!kept.FaceUp, "no qualifying Holding: the Province keeps its face-down refill");
-        
+
     }
 
     private static void TachikazeCard()
