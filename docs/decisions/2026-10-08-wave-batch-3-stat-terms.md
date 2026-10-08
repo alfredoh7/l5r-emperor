@@ -60,4 +60,4 @@ Each has a blocker note in `tools/content/pe_wave_734_blockers.json` and is not 
 
 ## Art pack
 
-The new scans are covered by `catalogue-art-issue734-20261007-r1` (4,497 images, 601,836,978 bytes, SHA-256 `b9f34b360de7f470aa74df19b305d4a8c63f61efd0f10410038a18f59ea56e1c`), built from the batch 1 pack `catalogue-art-issue732-20261007-r1` (4,478 images) with `--base-archive`. Native visual and playability review has not been done.
+The new scans are covered by `catalogue-art-issue734-20261008-r2` (4,509 images, 603,290,626 bytes, SHA-256 `dd6069dd6fb7998f4727eeef045943ef0ff10e9ec50f19a487bba5c89cf44c88`), built with `--base-archive` from batch 2's pack `catalogue-art-issue733-20261008-r1` (4,490 images). An earlier candidate, `catalogue-art-issue734-20261007-r1` (4,497 images, built on batch 1's pack), was published before batch 2 merged and is superseded; it is not referenced. Native visual and playability review has not been done.
