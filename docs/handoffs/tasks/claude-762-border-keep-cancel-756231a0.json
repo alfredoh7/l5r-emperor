@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
+  "lane": "shared",
   "summary": "Border Keep refresh panel buttons relabelled Confirm and Cancel (the Cancel button already existed as 'Cancel refresh').",
   "validation": "One-string client change; not built or viewed locally, CI builds the client; no native playtest.",
   "remaining": "Mendon to confirm whether Cancel was actually missing on his screen; if so the cause is something other than the label.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/762",
   "branch": "claude/762-border-keep-cancel",
-  "updated": "2026-10-08T19:24:26.572306+00:00"
+  "updated": "2026-10-08T19:24:39.043882+00:00"
 }
