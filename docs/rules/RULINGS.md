@@ -330,3 +330,24 @@ Togashi Hiroto and Moshi Rukia - exp bow a target card without attachments and d
 - **Cards/primitives:** Togashi Hiroto, Moshi Rukia - exp; `hiroto-bow` (CardAbilities.cs).
 - **Date:** 2026-10-07
 - **Source:** Mendon's ruling on the PR #676 readings (GC-2), issue #748.
+
+### R-032 — A printed "If" before an effect is a conditional cost: unmet, the action cannot be taken
+A condition written as "If ..." before an effect (Daidoji Ichigiku's Family Honor test, Moto Ming-Gwok's "If there is a dead Personality in any discard pile") must be met to take the action at all. Costs must be paid to take an action; an unmet condition bars it, so the action is not offered.
+
+- **Cards/primitives:** Ichigiku, Moto Ming-Gwok - exp (personality-wave-135); `WlPersCoils.cs` requirement checks.
+- **Date:** 2026-10-07
+- **Source:** Mendon's ruling on the PR #676 readings (CM-1), issue #757.
+
+### R-033 — "Then discard a card" after a search or look: the card just found may be discarded (Daisuke, Tselu, Shizuka)
+For Kitsuki Daisuke - exp2, Shinjo Tselu - exp and Ikoma Shizuka (Terrain search) the card just taken into the hand may be the card discarded, and when it is the only card in hand it is discarded. This reverses the issue #368 answer for Shizuka (the found Terrain could not be discarded); Asahina Kitiaru - exp (#679) already followed this rule.
+
+- **Cards/primitives:** Daisuke (oracle-l5r-10452), Tselu (oracle-l5r-10511), Ikoma Shizuka (oracle-l5r-10292); `SearchSpec.DiscardMayBeFound`.
+- **Date:** 2026-10-07
+- **Source:** Mendon's ruling on the PR #676 readings (CM-8, CM-9) and his follow-up on Shizuka (2026-10-08), issue #757.
+
+### R-034 — A card without a unit that needs a performer is performed by the Personality in that unit (Daidoji Adachi)
+Adachi's "opposing" counts a card with no unit of its own that requires a performer (a Strategy, a Holding): the performing Personality's unit stands for it, and the Personality's Madness tokens are compared to his printed Personal Honor. Pillowbook bars the discard.
+
+- **Cards/primitives:** Daidoji Adachi (oracle-l5r-10449); `ApplyWlPersCoilsAfterAction`.
+- **Date:** 2026-10-07
+- **Source:** Mendon's ruling on the PR #676 readings (CM-13), issue #757.
