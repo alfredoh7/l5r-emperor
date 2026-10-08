@@ -95,3 +95,11 @@ interpretation this register's decision docs already settled.
 - [Wave batch 1: payment and cost cards (#732)](2026-10-08-wave-batch-1-payment-and-cost.md) — proposed readings: 15 cards wired on P1/P2/P3/P12 (Chiyurei's Axe and Duty Over All Things deferred); the art-pack candidate is unpublished.
 - [Wave batch 3: stat-term and Experienced cards (#734)](2026-10-08-wave-batch-3-stat-terms.md) — proposed readings: 19 cards wired on P9/P23 with P3/P16/P18/P25 (Kachiko, Kokujin and Warded Premises deferred); art pack `catalogue-art-issue734-20261007-r1`.
 - [Wave batch 2: recruit gates, Proclaim and Honor (#733)](2026-10-08-wave-batch-2-recruit-gates-and-honor.md) — proposed readings: 12 cards wired on P3/P14/P18/P10/P2; Zansho, Merchant Patronage, The Heavens' Blessing and Marriage of the Emerald Champion deferred.
+
+- [Wave batch 5: card restrictions and immunities (#736)](2026-10-08-wave-batch-5-card-restrictions-and-immunities.md) — proposed readings: 14 cards wired on P11/P12; seven deferred (A Cleansing Breath needs a ruling).
+
+- [Wave batch 6: after-event windows and period watches (#737)](2026-10-08-wave-batch-6-after-event-windows-and-watches.md) — proposed readings: 15 cards wired on P6/P7/P8 (with P4's draw rule); Koan's Robes and Imperial Deployment deferred.
+
+- [Wave batch 7: turn boundaries and rule flags (#738)](2026-10-08-wave-batch-7-turn-boundaries-and-rule-flags.md) — proposed readings: 16 cards wired on P4/P13/P6 (the scans print no P5 clause, so the Events are ordinary); Revelations and The Onyx Championship deferred.
+
+- [Wave batch 8: zones, search and decisions (#739)](2026-10-08-wave-batch-8-zones-search-and-decisions.md) — proposed readings: all 17 cards wired on P20/P21/P22/P25 (one new search disposition, RefillProvince); nothing deferred.

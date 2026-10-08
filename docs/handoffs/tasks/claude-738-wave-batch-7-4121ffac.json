@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 7 (#738): 16 turn-boundary, rule-flag and Events-Phase cards wired on P4/P13/P6 (personality-wave-175, item-wave-75, strategy-wave-159, holding-wave-88, event-wave-56, celestial-wave-53). The scans print no P5 clause, so the four 'after you reveal' Events are ordinary Events carrying the scan's text; Revelations and The Onyx Championship deferred with blocker notes. Shared change: EngageActionBarred also reads Lantern Oil's host battlefield; one line in each default arm of the Event-choice resolver and its actions; one call in EventsPhase (Suck the Marrow) and one beside the battle resolution's void-recruit line (Journey's End Siege); one term in TerrainPlaysThroughOwnAbility; MatchState.Wave738Drains (22940) and Wave738JadeShugenja (22941), omitted until used; SeppukuTiming tripwire reads An Empire of Madness; art-pack descriptor and manifest for catalogue-art-issue738-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures: comment lint, python suites including content, all dotnet test projects including wave-738 17/17); changed-C# formatting check and comment lint clean; art-pack candidate verified locally (ensure_catalogue_art archive install and verify-only, sha256 and size). Client not built or playtested.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-7-turn-boundaries-and-rule-flags.md; Revelations and The Onyx Championship stay blocked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/738",
+  "branch": "claude/738-wave-batch-7",
+  "updated": "2026-10-08T10:33:20.244761+00:00"
+}

@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Wave batch 3 (#734): 19 stat-term/Experienced cards wired in six waves (Wave734.cs); Kachiko, Kokujin and Warded Premises deferred with blocker notes; art pack catalogue-art-issue734-20261007-r1 (published, SHA-256 verified). Shared lines edited and listed in the decision doc: ProvinceStrengthMax, CardPersonalHonor cap, Paragon override, ArmyForces contribution, entry effects, ApplyDuelOutcome, TraitReactions, duel-inventory and search-extensions tests.",
-  "validation": "wave-734 19/19; tools/content unittest 189 OK; bash tools/check.sh --skip-client passed; formatting fixed after CI; no native/Windows playtest",
-  "remaining": "Native visual/playability review; readings in docs/decisions/2026-10-08-wave-batch-3-stat-terms.md await Mendon; three deferred cards need rulings/primitives.",
+  "summary": "Batch 3 (#734) merged with main after batches 5-8; art pack rebuilt as r3 on batch 8's pack",
+  "validation": "check.sh --skip-client green on merged tree; ensure_catalogue_art archive + verify-only OK; no native playtest",
+  "remaining": "Publish r3 release, CI, merge",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/734",
   "branch": "claude/734-wave-batch-3",
-  "updated": "2026-10-08T05:29:44.821591+00:00"
+  "updated": "2026-10-08T14:01:20.573956+00:00"
 }

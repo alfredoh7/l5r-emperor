@@ -1,0 +1,168 @@
+{
+  "Profile": "event-wave-56",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #738.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10259",
+      "Name": "A Dangerous Game",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may discard your hand (even if it is empty). If you did, draw four cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10259.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-dangerous-game"
+    },
+    {
+      "Id": "oracle-l5r-10426",
+      "Name": "An Empire of Madness",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until the game ends, each player has the ability, \"Open: Your target Personality with a Madness token commits Seppuku\" and any player who ends his turn with 20 or more Madness tokens on his Personalities loses the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10426.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-empire-of-madness"
+    },
+    {
+      "Id": "oracle-l5r-10604",
+      "Name": "Journey's End Siege",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Defending players may not play Terrains (this turn). After the first time you destroy a Province in battle this turn, if you do not have more Provinces than the Defender (at that time), gain a Province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10604.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-journeys-end"
+    },
+    {
+      "Id": "oracle-l5r-5762",
+      "Name": "Open Recruitment",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until your Events Phase two turns from now begins, after each time an unaligned Human Personality turns face-up in one of your provinces, permanently give him your Clan alignment. He has sworn fealty to you.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5762.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-open-recruitment"
+    },
+    {
+      "Id": "oracle-l5r-10261",
+      "Name": "Rejected Mediation",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Any player who controls the Imperial Favor discards it. Until your second turn from now begins, negate the effects of the first Political action taken each turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10261.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-rejected-mediation"
+    },
+    {
+      "Id": "oracle-l5r-8163",
+      "Name": "The Jade Championship",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Choose one of your Shugenja in play. Permanently give him the traits, \"Shadowlands Personalities and Followers have -1F while at this Personality's location\" and \"After the resolution of an action from a Spell: Straighten this Personality.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8163.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-jade-championship"
+    },
+    {
+      "Id": "oracle-l5r-10419",
+      "Name": "The Madness Spreads",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Until your second turn from now begins, once per turn, you may take a Limited action on a Strategy as an Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10419.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-madness-spreads"
+    }
+  ],
+  "Decks": []
+}

@@ -5329,6 +5329,7 @@ public sealed partial class MatchEngine
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
         ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
         : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
+        : Wave739SourceZoneAllows(ability, source, player) is bool w739Zone ? w739Zone // issue #739 (Wave739.cs): Paneki's Mask is used from its player's hand
         : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)

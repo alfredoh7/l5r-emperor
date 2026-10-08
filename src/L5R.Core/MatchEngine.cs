@@ -497,6 +497,8 @@ public sealed partial class MatchEngine
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
         ApplyWave734EntryEffects(playerId, card); // Bayushi Nitoshi - exp (issue #734, Wave734.cs): "After Nitoshi enters play, all players lose 3 Honor."
+        ApplyWave739EntryEffects(card); // Iweko Seiken (issue #739, Wave739.cs): "will not gain a Clan Alignment".
+        ApplyWave737EntryEffects(playerId, card); // Iweko Shibatsu (issue #737, Wave737.cs): "After Shibatsu enters play, gain 3 Honor." and his Clan-alignment block.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
@@ -1702,6 +1704,7 @@ public sealed partial class MatchEngine
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Forgotten Legacy pass (issue #467 batch 4).
+        Wave738ProvinceDestroyed(attacker, provinceDestroyedNow); // issue #738 (Wave738.cs): Journey's End Siege, "after the first time you destroy a Province in battle this turn".
         WlGrantVoidRecruit(attacker, provinceDestroyedNow); // issue #674 (WlSpellsRings.cs): False Ring of the Void's recruit, "after a battle resolves where you destroyed a Province"
         FireCowedAndDefeatedBattleWatches(a, d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
         PromoApplyEventResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // A Great Victory (issue #653)
@@ -1756,6 +1759,7 @@ public sealed partial class MatchEngine
     {
         P5.FirstConquerorId = null; // issue #503: The Plain of Glass's pending first choice is spent
         var willNotBow = _state.ResolutionWillNotBowPlayerIds.ToArray();
+        Wave737NatsuMarksUnbowed(a); // Natsu-Togumara's Guidance (issue #737, Wave737.cs): "battle resolution does not bow cards in that Personality's unit."
         // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
         var hikazuSpared = HikazuSparedPersonalities(a);
         var aramasuUnbowed = AramasuResolutionActive(attacker) ? AramasuUnbowedByResolution(a.Where(c => c.Zone == Zone.Battlefield)) : null; // Aramasu's Legacy (issue #501): "does not bow your Mantis Clan Magistrates or your attachments"
@@ -2994,6 +2998,7 @@ public sealed partial class MatchEngine
     {
         SetPhase(Phase.Events, player.Id);
         ExpireEmperorRemainingFEventsAtEventsPhase(player); // Cherry Blossom Festival, Disgrace, Successful Bounty (issue #492, group F): "until your Events Phase ... begins".
+        Wave738EventsPhaseBegins(); // issue #738 (Wave738.cs): Suck the Marrow, "after each Events Phase begins".
         _state.EventsRevealNext = 0;
         ContinueEventsReveal(player);
     }

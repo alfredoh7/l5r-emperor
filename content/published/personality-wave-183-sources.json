@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-10493",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10493",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10493-printing-1-image-1.webp",
+    "image_sha256": "4e8ec3124cca84cd074832a52d4fdd8e87732fc20c09f318fa0ce04a10eaa56a"
+  },
+  {
+    "card_id": "oracle-l5r-10639",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10639",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10639-printing-1-image-1.webp",
+    "image_sha256": "1d5445bc9efc166882f5c3673f3fe951659151f96c634448267c22913534d45f"
+  },
+  {
+    "card_id": "oracle-l5r-10886",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10886",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10886-printing-1-image-1.webp",
+    "image_sha256": "1fd9ad07771e6092be7f3f07426e694e7932e7c81617c45d506659a1971b2dee"
+  },
+  {
+    "card_id": "oracle-l5r-10881",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10881",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10881-printing-1-image-1.webp",
+    "image_sha256": "430566239f560847fa33217730adb8be4ac9d335c276b5920b9762810daec3d6"
+  },
+  {
+    "card_id": "oracle-l5r-10293",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10293",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10293-printing-1-image-1.webp",
+    "image_sha256": "2c13cc6cdeedd55b9fe1e8bd67886e5acb3d0c7a41b3e111a16ee831182d0585"
+  },
+  {
+    "card_id": "oracle-l5r-10645",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10645",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10645-printing-1-image-1.webp",
+    "image_sha256": "416f60034c8302804025c2655ee8ae1dc106cd7c46c535cc1be8dd6bea11e312"
+  }
+]

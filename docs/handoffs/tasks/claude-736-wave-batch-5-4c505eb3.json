@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 5 (#736): 14 card-restriction and immunity cards wired on P11/P12 (personality-wave-159, follower-wave-71, item-wave-67, spell-wave-74, strategy-wave-143, holding-wave-72, event-wave-40, celestial-wave-37); seven deferred with blocker notes (A Cleansing Breath needs a ruling). Shared change: P12 gains the AttachedHost scope and StandingImmunity.EventCarrier; one term each in P4TargetAtAnyLocation and TerrainPlaysThroughOwnAbility; MatchState.OracleFaceUpRefills (order 22920, omitted until used); the Naval-carrier list and the attack-assignment audit updated for Naoto and Suikihime; art-pack descriptor and manifest for catalogue-art-issue736-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures): comment lint, python test suites including content, and all five dotnet test projects including wave-736 15/15 and the full Core suite. Art-pack candidate verified locally (sha256, size, members, coverage); published separately. Client not built or playtested.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-5-card-restrictions-and-immunities.md; A Cleansing Breath needs a ruling on 'centers himself'; the other six deferred cards stay blocked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/736",
+  "branch": "claude/736-wave-batch-5",
+  "updated": "2026-10-08T07:20:07.026035+00:00"
+}

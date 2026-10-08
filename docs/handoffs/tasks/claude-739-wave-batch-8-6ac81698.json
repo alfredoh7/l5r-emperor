@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 8 (#739): all 17 zone, search and decision cards wired on P20/P21/P22/P25 (personality-wave-183, follower-wave-79, item-wave-83, spell-wave-90, strategy-wave-167, holding-wave-96, event-wave-64, region-wave-38); nothing deferred. One new search disposition (RefillProvince) and a province-discard cost verb. Shared change: one term in DeckSearch's default search-effect arm, HoldsNoDynasty (Kokure's Lands), AbilitySourceZoneAllows (Paneki's Mask from the hand), AfterActionResolvedApplies (The Tachikaze), ApplyMandatoryEntryEffects (Seiken's gain block), TraitReactions.Is (Jeiku's Invest, The Tachikaze), one line in the cost payer; MatchState.Wave739Refills (22950), omitted until used; guard tests for the new Unlimited abilities and the P20 extension users; art-pack descriptor and manifest for catalogue-art-issue739-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures: comment lint, python suites including content, all dotnet test projects including wave-739 18/18); changed-C# formatting check and comment lint clean; art-pack candidate verified locally (ensure_catalogue_art archive install and verify-only, sha256 and size). Client not built or playtested.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-8-zones-search-and-decisions.md; none of the 17 cards is deferred.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/739",
+  "branch": "claude/739-wave-batch-8",
+  "updated": "2026-10-08T12:24:50.233296+00:00"
+}

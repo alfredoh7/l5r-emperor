@@ -246,7 +246,10 @@ internal static class SeppukuTimingTests
         // (this turn); it grants the action in no other phase.
         // Dying Remonstration (oracle-l5r-10936, issue #674) read for a phase allowance: "Your target unbowed Human Personality commits seppuku" is an EFFECT of its own Political Open action
         // (CommitSeppuku: rehonor, destroy), not the rulebook Order Seppuku action, so it grants nothing in another phase.
-        var mentioning = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Text.Contains("seppuku", StringComparison.OrdinalIgnoreCase) && c.Id != "oracle-l5r-5370" && c.Id != "oracle-l5r-8268" && c.Id != "oracle-l5r-10936").Select(c => c.Id).ToArray();
+        // Yogo Katsuta (oracle-l5r-10482, issue #737) read for a phase allowance: "After a Personality commits seppuku, his controller loses 1 Honor" only REACTS to a seppuku (a P6 fact trait); it grants the action in no phase.
+        // An Empire of Madness (oracle-l5r-10426, issue #738) read for a phase allowance: "Your target Personality with a Madness token commits Seppuku" is the granted player ability's EFFECT (CommitSeppuku: rehonor, destroy),
+        // an Open action of its own, not the rulebook Order Seppuku action, so it neither uses nor changes the rulebook action's timing.
+        var mentioning = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Text.Contains("seppuku", StringComparison.OrdinalIgnoreCase) && c.Id != "oracle-l5r-5370" && c.Id != "oracle-l5r-8268" && c.Id != "oracle-l5r-10936" && c.Id != "oracle-l5r-10482" && c.Id != "oracle-l5r-10426").Select(c => c.Id).ToArray();
         Check(mentioning.Length == 0, "Published cards now mention seppuku -- check each for a phase allowance for Order Seppuku (SeppukuTiming.cs): " + string.Join(", ", mentioning));
     }
 }

@@ -1,0 +1,10 @@
+{
+  "oracle-l5r-10525": {
+    "note": "Koan's Robes (Item, issue #737): \"This Personality has a Force bonus equal to the number of other Koan cards in this unit. This Personality need not bow for his Spells with an even Focus Value (0 is even). Negate the first destruction each turn of cards in this unit from another player's card.\" The destruction negation is a P7 standing watch (a unit scope is the only gap, and a Condition could stand in for it), but the other two sentences are not buildable on what is merged: a Force bonus counted from the Koan cards in the unit needs a P9 stat term that counts a keyword in the unit (batch 3 owns the stat terms and none is merged), and \"need not bow for his Spells\" is a waiver of the bow cost of a Spell's own ability, which no merged cost waiver covers (the same gap that deferred Koan's Jingasa in batch 5). Publishing it with only the negation would drop two printed sentences.",
+    "category": "COST"
+  },
+  "oracle-l5r-10378": {
+    "note": "Imperial Deployment (Strategy, issue #737): \"Open: Choose your performing Personality: The Empress dispatches him to the Colonies. Negate other players' cards' effects that prevent him assigning. After the next time this turn an attack is declared, straighten his unit.\" Two gaps: no P12 immunity kind covers an effect that prevents a Personality from being assigned (Prevention covers performing actions only; the assignment bars are P11 restrictions and the Attacker's own flags), and P6 has no fact for \"an attack is declared\" (its facts are per-Personality assignments, not the declaration). Needs an assignment-prevention immunity and a declared-attack fact before it is built; \"dispatches him to the Colonies\" is flavor text with no rule.",
+    "category": "WATCH"
+  }
+}

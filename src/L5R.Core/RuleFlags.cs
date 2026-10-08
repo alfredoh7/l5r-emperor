@@ -214,8 +214,9 @@ public sealed partial class MatchEngine
     /// <summary>True while the Engage window is open at a battlefield a live flag covers and <paramref name="playerId"/> is the Attacker.</summary>
     internal bool EngageActionBarred(int playerId)
     {
-        if (_state.RuleFlags is null || _state.PendingEngage is not { } engage || engage.Attacker != playerId) return false;
-        return LiveRuleFlags(RuleFlagKinds.NoEngageForAttacker).Any(f => f.Battlefield is null || f.Battlefield == engage.ProvinceIndex);
+        if (_state.PendingEngage is not { } engage || engage.Attacker != playerId) return false;
+        if (Wave738LanternOilBars(engage.ProvinceIndex)) return true; // issue #738 (Wave738.cs): Lantern Oil's bar follows its host's battlefield
+        return _state.RuleFlags is not null && LiveRuleFlags(RuleFlagKinds.NoEngageForAttacker).Any(f => f.Battlefield is null || f.Battlefield == engage.ProvinceIndex);
     }
 
     // ---- negate-battle-action-without-units ------------------------------------------------------------------------------------------------------------------------------------------------

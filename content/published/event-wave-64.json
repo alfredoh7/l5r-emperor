@@ -1,0 +1,30 @@
+{
+  "Profile": "event-wave-64",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10420",
+      "Name": "Dark Audience",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Search your Fate deck for two attachments with different titles. Show them. Another player chooses one of them and removes it from the game. Put the other attachment in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10420.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w739-dark-audience"
+    }
+  ],
+  "Decks": []
+}

@@ -266,8 +266,10 @@ public sealed partial class MatchEngine
         foreach (var watch in _state.ConsecrationWatches.Where(w => w.PlayerId == defender && w.Turn == _state.TurnNumber && w.Provinces.Contains(province)).ToArray())
         {
             _state.ConsecrationWatches.Remove(watch);
-            Emit("consecration", $"{Definition(personality).Name} joined the attacking army at province {province + 1} (Consecration).", defender, personality.Id);
-            GainHonor(defender, 2, "Consecration", _state.Cards.TryGetValue(watch.SourceId, out var spell) ? spell : null);
+            var watcher = _state.Cards.TryGetValue(watch.SourceId, out var spell) ? spell : null;
+            var watchName = watcher is null ? "Consecration" : Definition(watcher).Name; // Asahina Shigemitsu - exp (issue #737, Wave737.cs) sets the same watch
+            Emit("consecration", $"{Definition(personality).Name} joined the attacking army at province {province + 1} ({watchName}).", defender, personality.Id);
+            GainHonor(defender, 2, watchName, watcher);
         }
     }
 

@@ -1,0 +1,53 @@
+{
+  "Profile": "event-wave-48",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #737.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10424",
+      "Name": "An End to Hostilities",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Until the game ends, each player draws two cards instead of one at the end of his turn if he put no other cards in his hand that turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10424.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w737-end-to-hostilities"
+    },
+    {
+      "Id": "oracle-l5r-10263",
+      "Name": "Unseasonable Weather",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until your next turn begins, after each time a Personality is assigned to attack, negate his straightening during his controller's next Straighten Phase (after he assigns).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10263.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w737-unseasonable-weather"
+    }
+  ],
+  "Decks": []
+}
