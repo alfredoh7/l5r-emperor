@@ -89,3 +89,5 @@ interpretation this register's decision docs already settled.
 - [P25: decision infrastructure (#723)](2026-10-07-p25-decision-infrastructure.md) — built, engine only, no card wired; multi-pick Either/Or, the PendingActions hook with generic client rendering of unknown pending types, slot cross-constraints and a shown-card choice.
 
 - [P20: search and look extensions (#728)](2026-10-07-p20-search-look-extensions.md) — built, engine only, no card wired; province and any-player search sources, multi-select, new criteria and dispositions, other-player-chooses and reveal-until looks.
+
+- [Wirable-card wave plan](2026-10-07-wirable-card-wave-plan.md) — proposed: the 182 wirable unwired cards in ten batches (issues #732 to #741, umbrella #742); 13 cards wait on rulings.
