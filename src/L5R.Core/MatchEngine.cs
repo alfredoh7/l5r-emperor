@@ -496,6 +496,7 @@ public sealed partial class MatchEngine
         ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
+        ApplyWave734EntryEffects(playerId, card); // Bayushi Nitoshi - exp (issue #734, Wave734.cs): "After Nitoshi enters play, all players lose 3 Honor."
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
@@ -2202,14 +2203,16 @@ public sealed partial class MatchEngine
     // is not removed by this and resumes applying once honorable again. The handful of rules that
     // deliberately key off the *printed* value regardless of current status (Dishonorable death's
     // Honor penalty, Proclaim's grant) intentionally do not use this helper.
-    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor + StatModifier(card, "PersonalHonor")
+    private int CardPersonalHonor(CardInstance card) => Wave734PersonalHonorCap(card) is int cap ? Math.Min(CardPersonalHonorUncapped(card), cap) : CardPersonalHonorUncapped(card); // Armor of the Mad, Shosuro Chizuru (issue #734)
+    private int CardPersonalHonorUncapped(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor + StatModifier(card, "PersonalHonor")
         + StaticPersonalHonorBonus(card); // Akodo Hotaka (issue #453, batch 2): "+1PH if any other player is Dragon Clan".
     // Utaku Chikako's own passive (issue #186): "Your dishonorable Battle Maidens do not have a
     // maximum Personal Honor of 0" -- a Personality's own passive (not a Stronghold's), so checked
     // generically against any in-play Personality the SAME owner controls carrying this Effect,
     // rather than fixed to one specific card.
     private bool DishonorablePersonalHonorOverridden(CardInstance card) =>
-        Keyword(card, "Battle Maiden") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == "battle-maiden-dishonor-immunity");
+        Keyword(card, "Battle Maiden") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == "battle-maiden-dishonor-immunity")
+        || Wave734ParagonsOverride(card); // Utaku Ji-Yun - exp (issue #734)
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
@@ -2437,7 +2440,7 @@ public sealed partial class MatchEngine
     {
         int af = 0, df = 0;
         // Hida Horu (Emperor Edition Personality pass, issue #477 batch 2): he contributes no Force while his army has two or more units (his Followers still do).
-        int Contribution(CardInstance c, CardInstance[] army) => HoruContributesNothing(c, army) ? 0 : StatTermContribution(c, PersonalityBattleContribution(c)); // StatTermContribution: "contributes his Force twice" (StatTerms.cs, issue #672)
+        int Contribution(CardInstance c, CardInstance[] army) => HoruContributesNothing(c, army) || Wave734ContributesNothing(c) ? 0 : StatTermContribution(c, PersonalityBattleContribution(c)); // StatTermContribution: "contributes his Force twice" (StatTerms.cs, issue #672)
         foreach (var c in a) { if (RedirectsTo(c, attacker, defender, a, d) == defender) df += Contribution(c, a); else af += Contribution(c, a); af += FollowerBattleContribution(c); }
         foreach (var c in d) { if (RedirectsTo(c, attacker, defender, a, d) == attacker) af += Contribution(c, d); else df += Contribution(c, d); df += FollowerBattleContribution(c); }
         // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).

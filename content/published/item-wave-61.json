@@ -1,0 +1,81 @@
+{
+  "Profile": "item-wave-61",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #734.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10529",
+      "Name": "Armor of the Mad",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Fallen and a maximum Personal Honor of 0.\nBattle, Bow this card: Give one or two target enemy cards a Madness token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10529.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w734-armor-madness"
+      ],
+      "Effect": "w734-armor",
+      "AttachGrantsKeyword": "Fallen"
+    },
+    {
+      "Id": "oracle-l5r-10691",
+      "Name": "Kshatriya Artifacts",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fudo and Fallen Personalities have -1F while opposing this Item.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10691.jpg",
+      "Keywords": [
+        "Gaijin"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "w734-kshatriya"
+    },
+    {
+      "Id": "oracle-l5r-10908",
+      "Name": "Stonemason's Hammer",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has +1F while he is Siege.\nBattle, Bow this card: Give this Province +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10908.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "w734-hammer-province"
+      ],
+      "Effect": "w734-hammer"
+    }
+  ],
+  "Decks": []
+}
