@@ -2210,9 +2210,10 @@ public sealed partial class MatchEngine
     // maximum Personal Honor of 0" -- a Personality's own passive (not a Stronghold's), so checked
     // generically against any in-play Personality the SAME owner controls carrying this Effect,
     // rather than fixed to one specific card.
+    // Utaku Ji-Yun - exp (issue #734): "Your dishonorable Paragons do not have a maximum Personal Honor of 0 from the rulebook."
     private bool DishonorablePersonalHonorOverridden(CardInstance card) =>
         Keyword(card, "Battle Maiden") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == "battle-maiden-dishonor-immunity")
-        || Wave734ParagonsOverride(card); // Utaku Ji-Yun - exp (issue #734)
+        || Wave734ParagonsOverride(card);
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.

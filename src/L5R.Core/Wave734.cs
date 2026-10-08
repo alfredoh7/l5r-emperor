@@ -7,7 +7,7 @@ namespace L5R.Core;
 // docs/decisions/2026-10-08-wave-batch-3-stat-terms.md. Waves personality/item/spell/strategy/holding/event (tools/content/package_wave_734.py).
 //
 //   Mumoku no Oni, Shosuro Tanihara   "While [it] is attacking at a battlefield, its Province has a maximum strength equal to its printed strength."   ProvinceStrengthMax (TerrainStatics.cs)
-//   Usagi Seki, the Untouchable        "Seki has +5F while other players' actions are resolving."                                                    PersonalityForce, against the resolving command
+//   Usagi Seki, the Untouchable        "Seki has +5F while other players' cards are resolving."                                                     PersonalityForce, against the resolving command
 //   Isawa Norimichi - exp              "Your other Earth Shugenja have +1F." / "Battle: Give this Province +2 or -2 strength."                        PersonalityForce; w734-norimichi-raise / -lower
 //   Kshatriya Artifacts                "Fudo and Fallen Personalities have -1F while opposing this Item."                                            PersonalityForce, read off the opposing attachments
 //   Stonemason's Hammer                "This Personality has +1F while he is Siege." / "Battle, Bow this card: Give this Province +2 strength."      PersonalityForce; w734-hammer-province
@@ -153,7 +153,7 @@ public sealed partial class MatchEngine
         if (Definition(card).Type != CardType.Personality || !InPlay(card)) return 0;
         var total = 0;
         var effect = Definition(card).Effect;
-        // Seki: the resolving action is another player's (an ability, or an Attack). Rulebook and Battle-resolution Force totals outside any action are his printed 2F.
+        // Seki (the scan says "cards", the catalogue "actions"): another player's card is resolving -- one of its abilities or an Attack it made. Force totals outside any such resolution are his printed 2F.
         if (effect == Wave734Abilities.Seki && Wave734ResolvingCommand() is { } resolving && resolving.PlayerId != card.OwnerId) total += 5;
         // Norimichi: "Your other Earth Shugenja have +1F", once for each Norimichi (not himself).
         if (Keyword(card, "Earth") && Keyword(card, "Shugenja"))

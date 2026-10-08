@@ -93,3 +93,4 @@ interpretation this register's decision docs already settled.
 - [Wirable-card wave plan](2026-10-07-wirable-card-wave-plan.md) — proposed: the 182 wirable unwired cards in ten batches (issues #732 to #741, umbrella #742); 13 cards wait on rulings.
 
 - [Wave batch 1: payment and cost cards (#732)](2026-10-08-wave-batch-1-payment-and-cost.md) — proposed readings: 15 cards wired on P1/P2/P3/P12 (Chiyurei's Axe and Duty Over All Things deferred); the art-pack candidate is unpublished.
+- [Wave batch 3: stat-term and Experienced cards (#734)](2026-10-08-wave-batch-3-stat-terms.md) — proposed readings: 19 cards wired on P9/P23 with P3/P16/P18/P25 (Kachiko, Kokujin and Warded Premises deferred); art pack `catalogue-art-issue734-20261007-r1`.

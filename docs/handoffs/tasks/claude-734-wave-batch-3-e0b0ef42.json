@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wave batch 3 (#734): 19 stat-term/Experienced cards wired in six waves (Wave734.cs); Kachiko, Kokujin and Warded Premises deferred with blocker notes; art pack catalogue-art-issue734-20261007-r1 built from the batch 1 pack.",
+  "validation": "dotnet suite wave-734 19/19; python unittest tools/content 189 OK; bash tools/check.sh --skip-client passed; scans read against catalogue text; no native/Windows playtest",
+  "remaining": "Native visual/playability review; readings in docs/decisions/2026-10-08-wave-batch-3-stat-terms.md await Mendon; deferred cards need rulings/primitives.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/734",
+  "branch": "claude/734-wave-batch-3",
+  "updated": "2026-10-08T05:02:58.639885+00:00"
+}

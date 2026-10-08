@@ -1,0 +1,14 @@
+{
+  "oracle-l5r-10481": {
+    "note": "Bayushi Kachiko: \"After the next time this turn a target Personality attacks, his controller loses 2 Honor\" needs a ruling (does \"attacks\" mean he is declared into an attacking army, or that he makes an Attack action?) and a one-shot turn watch keyed to it. Her static -1F term is plain P9 data once the reading is chosen.",
+    "category": "WATCH"
+  },
+  "oracle-l5r-10486": {
+    "note": "Kokujin: \"if Kokujin wins, you may destroy one of your Personalities (at any location) to take control of the loser (he joins Kokujin's army)\" is a choice made after the duel resolves, among one option per Personality of yours plus plain destruction. Duel outcomes in this engine apply directly; a deferred outcome decision needs the P1 after-action trait queue extended (EmperorP1.cs) or a new post-duel decision hook.",
+    "category": "TRIG-AFTER"
+  },
+  "oracle-l5r-10404": {
+    "note": "Warded Premises: \"Negate all Force bonuses from actions to cards at this battlefield\" needs the engine to tell an action's Force modifier from a token, an Item, a Permanent modifier (\"Permanently give him +2F\") and a static term, and a ruling on whether a permanent bonus is negated for good. Its second ability (put this Terrain into play at a battlefield with no Terrain, even without a unit there) is wireable.",
+    "category": "EFFECT"
+  }
+}
