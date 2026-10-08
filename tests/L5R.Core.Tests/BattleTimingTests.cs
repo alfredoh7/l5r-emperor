@@ -125,6 +125,7 @@ internal static class BattleTimingTests
         // + oracle-l5r-10643 (issue #672, primitive P16: Moshi Sasako - exp, printed Naval). Added on its own line so parallel waves do not collide on the list above.
         expected = [.. expected, "oracle-l5r-10643", "oracle-l5r-10859"]; // 10859: Yoritomo Toganin (P9), printed Naval
         expected = [.. expected, "oracle-l5r-10300"]; // issue #736 (personality-wave-159): Yoritomo Naoto - exp, printed Naval
+        expected = [.. expected, "oracle-l5r-10298"]; // issue #740 (personality-wave-191): Yoritomo Harumi, printed Naval
         expected = [.. expected, "oracle-l5r-10467", "oracle-l5r-10470"]; // issue #689 (personality-wave-9501): Okazaki, Breaker of Wills and Yoritomo Kanaye - exp, each printed Naval
         Eq(string.Join(",", navalCarriers), string.Join(",", expected.Append("oracle-l5r-4464").OrderBy(x => x, StringComparer.Ordinal)), "Every wired Naval carrier");
         var pinned = PublishedContent.Snapshot.Cards.Concat(PublishedContent.TestSnapshot.Cards).Select(c => c.Id).ToHashSet();
