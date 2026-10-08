@@ -1,0 +1,83 @@
+{
+  "Profile": "holding-wave-96",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10574",
+      "Name": "Hidden Weapons",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may Equip Weapons from under this Holding as a Battle/Limited action.\nLimited: Put a Weapon in your hand under this Holding (face-down).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10574.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "w739-hidden-battle",
+        "w739-hidden-limited",
+        "w739-hidden-store"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10826",
+      "Name": "Jade Pearl Inn",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Interrupt: After you Recruit this Holding from a Province, search your Dynasty deck for a non-Unique, Gold-producing Holding with a printed Gold Cost of 1 and refill the Province face-up with it.\nBow this card: Produce 3 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10826.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "w739-inn-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10270",
+      "Name": "The Tachikaze",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After an action resolves whose effects destroyed your Follower with a Gold Cost of 1 or more: You may put it face-up under this card.\nBattle/Limited: Any number of times per turn, target your Personality: Attach a Follower from under this card to him, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10270.jpg",
+      "Keywords": [
+        "Boat",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-tachikaze-collect",
+        "w739-tachikaze-battle",
+        "w739-tachikaze-limited"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

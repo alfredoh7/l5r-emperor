@@ -1,0 +1,32 @@
+{
+  "Profile": "region-wave-38",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10331",
+      "Name": "Kokure's Lands",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Province does not hold Dynasty cards.\nLimited, Bow this card: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10331.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-kokure-draw"
+      ],
+      "Effect": "w739-kokure"
+    }
+  ],
+  "Decks": []
+}
