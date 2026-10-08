@@ -323,3 +323,10 @@ Open action during the Battle Phase, it may be played then.
 - **Cards/primitives:** Regret (oracle-l5r-9923); the engine's Open timing (`AbilityActions`, `ValidateAbility`).
 - **Date:** 2026-10-04
 - **Source:** Mendon's ruling on the PR #621 readings (issue #619).
+
+### R-031 — "Bow it ... Destroy it if it is an attachment": bow first, then destroy, as separate effects
+Togashi Hiroto and Moshi Rukia - exp bow a target card without attachments and destroy it if it is an attachment. The card is bowed first, then destroyed. The two are separate effects: a Stalwart-style negation of the bow does not save the attachment from destruction, and a negation of the destruction does not undo the bow.
+
+- **Cards/primitives:** Togashi Hiroto, Moshi Rukia - exp; `hiroto-bow` (CardAbilities.cs).
+- **Date:** 2026-10-07
+- **Source:** Mendon's ruling on the PR #676 readings (GC-2), issue #748.

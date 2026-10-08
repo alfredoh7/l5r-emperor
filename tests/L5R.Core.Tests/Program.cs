@@ -8219,7 +8219,7 @@ static void DragonClanPersonalityReview()
         // Togashi Hiroto: Reaction entry Fire tokens (four, unlike Meiyu/Torazu's three) --
         // exercised through a real Purchase, same as Bojan/Kazuya above -- then Battle: target an
         // enemy card without attachments (the bare enemy-card category plus RequireNoAttachments)
-        // -- bow it, or destroy it instead if it is itself an attachment.
+        // -- bow it, then also destroy it if it is itself an attachment (#748).
         var s = MatchEngine.CreateEconomyScenario().State;
         for (var i = 0; i < 5; i++) Add(s, "training-marketplace", 0, Zone.Home);
         var hirotoId = PublishedContent.PersonalityWave9.Cards.Single(c => c.Name == "Togashi Hiroto").Id;
@@ -8237,7 +8237,7 @@ static void DragonClanPersonalityReview()
         var e2 = MatchEngine.FromTestState(s2);
         Reject(e2, new GameCommand("useAbility", 0, e2.Version, CardId: hiroto.Id, TargetId: host.Id, AbilityId: "hiroto-bow")); // host has an attachment
         Accept(e2, new GameCommand("useAbility", 0, e2.Version, CardId: hiroto.Id, TargetId: attachedItem.Id, AbilityId: "hiroto-bow"));
-        Equal(e2.State.Cards[attachedItem.Id].Zone, Zone.FateDiscard, "Destroyed instead of bowed, since the target was itself an attachment");
+        Equal(e2.State.Cards[attachedItem.Id].Zone, Zone.FateDiscard, "Bowed, then destroyed, since the target was itself an attachment");
     }
     {
         // Togashi Korimi, Experienced: while defending, always negates her own bowing (an unlimited

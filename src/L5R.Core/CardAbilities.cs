@@ -1020,7 +1020,7 @@ public static class AbilityCatalog
         // Togashi Hiroto: here the lack of attachments genuinely IS the targeting restriction (an
         // attachment itself always qualifies, having none of its own), unlike Muzu just above.
         ["hiroto-fire-tokens"] = new("Reaction", "After entering play, gain four +1F Fire tokens", "none", Trigger: "own-enters-play"),
-        ["hiroto-bow"] = new("Battle", "Target an enemy card without attachments: bow it (destroy it instead if it is an attachment)", "enemy-card", RequireNoAttachments: true),
+        ["hiroto-bow"] = new("Battle", "Target an enemy card without attachments: bow it, then destroy it if it is an attachment", "enemy-card", RequireNoAttachments: true),
         // Togashi Kasuru: simplified -- the optional "you may discard a card to straighten Kasuru"
         // sub-choice is dropped (no generic "optional secondary cost" primitive exists yet); the core
         // "if attacking, draw a card" half is preserved.
@@ -9247,8 +9247,9 @@ public sealed partial class MatchEngine
                 CreateToken(source!, "Fire", id, "Force", 1);
                 break;
             case "hiroto-bow":
+                // Mendon's ruling (#748): the bow comes first, then an attachment is destroyed; the two are separate effects, so negating one never negates the other.
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (target!.Zone == Zone.Attached) DestroyAttachment(target);
-                else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
                 break;
             // Gates of Chikushudo: the copy is created first, then this Spell is destroyed (printed order); a window the copy's entry opens ends the action after the Spell is gone.
             case "gates-of-chikushudo-copy":
