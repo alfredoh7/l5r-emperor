@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 9 (#740): 14 of 15 duel and rulebook-modifier cards wired on P17/P18/P19 (personality-wave-191, follower-wave-87, item-wave-91, spell-wave-98, strategy-wave-175, event-wave-72, celestial-wave-61); The Empire's Foe Exposed deferred with a blocker note (no merged path starts a duel from an Event's reveal). Shared change: a KeywordConditionKind (SubjectChallengesWithAbility), GrantAdditionalAction takes scopeAbilityIds, an after-attack call (Kalen), ApplyDuelOutcome/ApplyDuelFocusEffectCore terms, ApplyMandatoryEntryEffects (Ayumu's gain block), an after-equip call (Harbingers' draw), a Filter on card-free timing grants (FreeTimingGrantsOf now sees the attachment and prunes Practicing Kata's grant), TfStrategiesBDuelDestroysLoser an instance method; MatchState.Wave740KataGrants (22960), omitted until used; guard tests for the duel inventory and the Naval carriers; art-pack descriptor and manifest for catalogue-art-issue740-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures: comment lint, python suites including content, all dotnet test projects including wave-740 16/16); changed-C# formatting check clean; art-pack candidate verified locally (ensure_catalogue_art archive install and verify-only, sha256 and size). Client not built or playtested.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-9-duels-and-rulebook-modifiers.md; The Empire's Foe Exposed stays unpublished until a reveal-time duel path exists.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/740",
+  "branch": "claude/740-wave-batch-9",
+  "updated": "2026-10-08T13:54:26.894983+00:00"
+}
