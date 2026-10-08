@@ -1,5 +1,5 @@
 {
-  "lane": "rules",
+  "lane": "shared",
   "summary": "Wired Bonds of Hospitality (strategy-wave-199) and Marriage of the Emerald Champion (event-wave-80) on merged primitives: a straighten hold and a granted player ability tied to a Strategy kept in play, and an Event decision at reveal with a P11 dishonor bar and a P14 Honor-change registrant. Shared edits: KeptInPlay in StraightenHolds.cs/TurnBoundaryGrants.cs, one validation branch and candidate term in CardAbilities.cs, two default-arm lines in EmperorRemainingFEvents.cs. Art pack catalogue-art-issue742-20261008-r2 extends catalogue-art-issue766-20261008-r1 (4,625 images).",
   "validation": "dotnet run --project tests/L5R.Core.Tests -- --filter wave-742 (5/5); bash tools/check.sh --skip-client (see PR); art pack built on the verified 735 base and installed locally",
   "remaining": "None; ready for review. Readings in docs/decisions/2026-10-08-bonds-of-hospitality-and-marriage-of-the-emerald-champion.md await Mendon. Client not built or playtested.",
