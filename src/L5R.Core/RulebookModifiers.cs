@@ -34,6 +34,9 @@ public sealed class PlayerTimingGrant
     /// <summary>"Battle", "Open" or "BattleOrOpen", as <see cref="TimingGrant.Timing"/>.</summary>
     public string Timing { get; set; } = "BattleOrOpen";
     public bool OncePerTurn { get; set; }
+    /// <summary>Narrows the grant to some of the attachments of its class (Harbingers of War's "Followers and Items with a base Gold Cost of 1 to 4"): a key a feature answers in TimingGrantFilterAllows. Null: every one.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Filter { get; set; }
     /// <summary>The turn it lapses after; null for game-long.</summary>
     public int? ExpiresAfterTurn { get; set; }
     /// <summary>The turn number it was last spent on (OncePerTurn only).</summary>
@@ -158,21 +161,24 @@ public sealed partial class MatchEngine
     // ---- card-free timing grants --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>Gives a player a timing for a class of action that no card in play gives (Practicing Kata: Equip as Battle/Open once per turn). With <paramref name="thisTurnOnly"/> it lapses with the turn; otherwise it is game-long. Returns its id.</summary>
-    internal string GrantPlayerTiming(int playerId, string actionClass, string timing, bool oncePerTurn = false, bool thisTurnOnly = false)
+    internal string GrantPlayerTiming(int playerId, string actionClass, string timing, bool oncePerTurn = false, bool thisTurnOnly = false, string? filter = null)
     {
         _state.PlayerTimingGrants ??= [];
         var id = $"timing-grant-{++_state.PlayerTimingGrantSequence}";
-        _state.PlayerTimingGrants.Add(new PlayerTimingGrant { Id = id, PlayerId = playerId, ActionClass = actionClass, Timing = timing, OncePerTurn = oncePerTurn, ExpiresAfterTurn = thisTurnOnly ? _state.TurnNumber : null });
+        _state.PlayerTimingGrants.Add(new PlayerTimingGrant { Id = id, PlayerId = playerId, ActionClass = actionClass, Timing = timing, OncePerTurn = oncePerTurn, Filter = filter, ExpiresAfterTurn = thisTurnOnly ? _state.TurnNumber : null });
         return id;
     }
 
     internal void RemovePlayerTimingGrant(string id) => _state.PlayerTimingGrants?.RemoveAll(g => g.Id == id);
 
     // The grants this player holds now for this class (or for every equip), unspent, in id order.
-    private PlayerTimingGrant[] FreeTimingGrantsOf(int playerId, string? actionClass) =>
-        _state.PlayerTimingGrants is not { Count: > 0 } grants ? []
-            : grants.Where(g => g.PlayerId == playerId && (g.ExpiresAfterTurn is null || g.ExpiresAfterTurn >= _state.TurnNumber) && (!g.OncePerTurn || g.UsedOnTurn != _state.TurnNumber)
+    private PlayerTimingGrant[] FreeTimingGrantsOf(int playerId, string? actionClass, CardInstance? attachment = null)
+    {
+        PruneWave740KataGrants();
+        return _state.PlayerTimingGrants is not { Count: > 0 } grants ? []
+            : grants.Where(g => g.PlayerId == playerId && (g.Filter is null || attachment is not null && TimingGrantFilterAllows(g.Filter, attachment)) && (g.ExpiresAfterTurn is null || g.ExpiresAfterTurn >= _state.TurnNumber) && (!g.OncePerTurn || g.UsedOnTurn != _state.TurnNumber)
                 && (g.ActionClass == ActionClass.EquipAny || g.ActionClass == actionClass)).OrderBy(g => g.Id, StringComparer.Ordinal).ToArray();
+    }
 
     private void SpendPlayerTimingGrant(PlayerTimingGrant? grant) { if (grant is { OncePerTurn: true }) grant.UsedOnTurn = _state.TurnNumber; }
 

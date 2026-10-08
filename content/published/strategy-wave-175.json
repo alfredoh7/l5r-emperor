@@ -1,0 +1,83 @@
+{
+  "Profile": "strategy-wave-175",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #740.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10559",
+      "Name": "A Magistrate Falls",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Limited, :g2:: Your target unbowed Personality challenges a target Personality. The challenge may be refused unless exactly one of the targets is Fallen or The Dark Naga. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10559.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "w740-magistrate-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10933",
+      "Name": "Demonstrating Technique",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Political Limited: Your target unbowed Personality challenges another player's target Personality. Each Personality must focus exactly once, if possible. The winner draws a card. Dishonor the loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10933.jpg",
+      "Keywords": [
+        "Iaijutsu",
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w740-demonstrating-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10731",
+      "Name": "Practicing Kata",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may Equip as a Battle/Open action once per turn.\nLimited: Put this Kata into play. Discard all your other Kata in play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10731.jpg",
+      "Keywords": [
+        "Kata"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w740-kata-enter"
+      ],
+      "Effect": "w740-kata"
+    }
+  ],
+  "Decks": []
+}

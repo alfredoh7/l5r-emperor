@@ -1,0 +1,30 @@
+{
+  "Profile": "follower-wave-87",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #740.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10681",
+      "Name": "Frontier Farmer",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may Equip this Follower from your discard pile.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10681.jpg",
+      "Keywords": [
+        "Ashigaru"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "w740-farmer"
+    }
+  ],
+  "Decks": []
+}

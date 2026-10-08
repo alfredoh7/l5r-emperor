@@ -1,0 +1,35 @@
+{
+  "Profile": "item-wave-91",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #740.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10904",
+      "Name": "Fortune's Charm",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, the duel's winner may take an additional action.\nRanged and Melee Attacks targeting this Personality have -2 strength. \nBefore another player's card destroys this Personality during the Action Phase, negate the destruction and destroy this Item.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10904.jpg",
+      "Keywords": [
+        "Nemuranai"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w740-charm-focus"
+      ],
+      "Effect": "w740-charm",
+      "AttackDefenseKind": "Both",
+      "AttackDefenseAmount": -2,
+      "AttackDefenseScope": "Wielder"
+    }
+  ],
+  "Decks": []
+}
