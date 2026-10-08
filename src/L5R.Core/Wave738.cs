@@ -245,7 +245,13 @@ public sealed partial class MatchEngine
                     // turn before this player's second turn from now begins is three turns on.
                     AddNegationWatch(new NegationWatch
                     {
-                        Id = "w738-rejected-mediation-" + card.Id, OwnerPlayerId = player.Id, Kind = WatchKind.PoliticalAction, Source = WatchSource.Any, Remaining = -1, Refresh = Period.Turn, LastTurn = _state.TurnNumber + 3
+                        Id = "w738-rejected-mediation-" + card.Id,
+                        OwnerPlayerId = player.Id,
+                        Kind = WatchKind.PoliticalAction,
+                        Source = WatchSource.Any,
+                        Remaining = -1,
+                        Refresh = Period.Turn,
+                        LastTurn = _state.TurnNumber + 3
                     });
                     Emit("watchSet", $"{name}: until {player.Name}'s second turn from now begins, the effects of the first Political action taken each turn are negated.", player.Id, card.Id);
                     return DiscardResolvedEvent(player, province, card);
