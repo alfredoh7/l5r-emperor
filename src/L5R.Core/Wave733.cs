@@ -195,8 +195,15 @@ public sealed partial class MatchEngine
             case Wave733Abilities.Invocation:
                 // "Until your next turn begins": through the opponent's turn, lapsing when the turn number moves on again.
                 SpendHandPlayedCard(player, source);
-                AddHonorModifier(new HonorModifier { OwnerPlayerId = player.Id, Kind = HonorModifierKinds.EachGain, Delta = -1, Filters = [HonorModifierFilters.UnlessControlsPrefix + "Spirit"],
-                    UntilTurn = _state.TurnNumber + 1, SourceCardId = source?.Id });
+                AddHonorModifier(new HonorModifier
+                {
+                    OwnerPlayerId = player.Id,
+                    Kind = HonorModifierKinds.EachGain,
+                    Delta = -1,
+                    Filters = [HonorModifierFilters.UnlessControlsPrefix + "Spirit"],
+                    UntilTurn = _state.TurnNumber + 1,
+                    SourceCardId = source?.Id
+                });
                 return false;
             case Wave733Abilities.Gamble:
                 {

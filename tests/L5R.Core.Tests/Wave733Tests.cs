@@ -67,11 +67,17 @@ internal static class Wave733Tests
     {
         var expected = new Dictionary<string, (CardType Type, string[] Abilities, string Effect)>
         {
-            [Hamada] = (CardType.Personality, [], "crab-players-may-control"), [Shindo] = (CardType.Personality, [], "will-not-join-spider-player"),
-            [Kimura] = (CardType.Personality, ["w733-kimura-proclaim"], "none"), [Natsu] = (CardType.Personality, ["w733-natsu-cavalry"], "will-not-join-unicorn-player"),
-            [Otani] = (CardType.Personality, ["w733-otani-duel"], "will-not-enter-honor-nonnegative"), [Hayamizu] = (CardType.Personality, [], "will-not-join-scorpion-player"),
-            [Asp] = (CardType.Personality, [], "will-not-join-human-controller"), [Yashinko] = (CardType.Personality, [], "crane-players-may-proclaim"),
-            [Scribe] = (CardType.Follower, ["w733-scribe-honor"], "none"), [Gamble] = (CardType.Strategy, ["w733-gamble"], "none"), [Invocation] = (CardType.Strategy, ["w733-invocation"], "none"),
+            [Hamada] = (CardType.Personality, [], "crab-players-may-control"),
+            [Shindo] = (CardType.Personality, [], "will-not-join-spider-player"),
+            [Kimura] = (CardType.Personality, ["w733-kimura-proclaim"], "none"),
+            [Natsu] = (CardType.Personality, ["w733-natsu-cavalry"], "will-not-join-unicorn-player"),
+            [Otani] = (CardType.Personality, ["w733-otani-duel"], "will-not-enter-honor-nonnegative"),
+            [Hayamizu] = (CardType.Personality, [], "will-not-join-scorpion-player"),
+            [Asp] = (CardType.Personality, [], "will-not-join-human-controller"),
+            [Yashinko] = (CardType.Personality, [], "crane-players-may-proclaim"),
+            [Scribe] = (CardType.Follower, ["w733-scribe-honor"], "none"),
+            [Gamble] = (CardType.Strategy, ["w733-gamble"], "none"),
+            [Invocation] = (CardType.Strategy, ["w733-invocation"], "none"),
             [FalsePath] = (CardType.Stronghold, ["w733-falsepath-search"], "w733-false-path")
         };
         Eq(expected.Count, 12, "twelve cards");
