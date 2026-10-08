@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Coils rulings: Daisuke and Tselu may discard the card just found (R-033); Adachi counts a Strategy or Holding performed by a Personality in an opposing unit (R-034); 'If' before an effect is a conditional cost (R-032, no code change). #368 Shizuka ruling flagged to revisit in the deck-search decision doc.",
-  "validation": "Core test executable: 3305 PASS, no FAIL, updated Tselu/Daisuke tests and new Adachi Strategy-performer test; full tools/check.sh and CI to follow on the PR.",
+  "summary": "Coils rulings: Daisuke, Tselu and Ikoma Shizuka may discard the card just found (R-033, reverses #368 for Shizuka); Adachi counts a Strategy or Holding performed by a Personality in an opposing unit (R-034); 'If' before an effect is a conditional cost (R-032, no code change).",
+  "validation": "Core test executable: 3305 PASS, 0 FAIL, EXIT 0 (updated Tselu, Daisuke and Shizuka tests; new Adachi Strategy-performer test); full tools/check.sh via CI.",
   "remaining": "None; ready to merge after CI.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/757",
   "branch": "claude/757-coils-rulings",
-  "updated": "2026-10-08T14:17:38.450307+00:00"
+  "updated": "2026-10-08T14:37:45.663772+00:00"
 }

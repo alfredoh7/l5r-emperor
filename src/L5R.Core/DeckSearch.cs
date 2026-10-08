@@ -138,7 +138,7 @@ public static class SearchCatalog
     [
         new(SearchDeck.Dynasty, new("Region", [CardType.Region]), SearchEffect.AttachRegion),
         new(SearchDeck.Fate, new("Terrain", [CardType.Strategy], ["Terrain"]), SearchEffect.ToHandThenDiscard)
-    ]);
+    ], DiscardMayBeFound: true); // Mendon, issue #757: the Terrain just found may be the card discarded (reverses #368).
 
     /// <summary>Imperial Gift (oracle-l5r-3694): "Gain 2 Honor and search your Fate deck for an Item, show it, and
     /// put it into your hand." The Honor is the Event's own step; this is the search half.</summary>
@@ -421,7 +421,7 @@ public sealed partial class MatchEngine
                 break;
             case SearchEffect.ToHandThenDiscard:
                 MoveSearchedCardToHand(search, card);
-                // Mendon's ruling (issue #368): the Terrain that was just found cannot be the card discarded to its own effect (it is not
+                // Mendon's ruling (issue #368, reversed for Ikoma Shizuka in #757; a spec's DiscardMayBeFound lifts it): the card just found cannot be the card discarded to its own effect (it is not
                 // "a card in your hand" for this purpose). When no OTHER card is in the hand the discard cannot be satisfied: nothing is
                 // discarded and there is no error -- the search simply carries on to its shuffle.
                 if (SearchDiscardCandidates(search).Length == 0)

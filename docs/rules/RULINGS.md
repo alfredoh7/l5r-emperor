@@ -338,12 +338,12 @@ A condition written as "If ..." before an effect (Daidoji Ichigiku's Family Hono
 - **Date:** 2026-10-07
 - **Source:** Mendon's ruling on the PR #676 readings (CM-1), issue #757.
 
-### R-033 — "Then discard a card" after a search or look: the card just found may be discarded (Daisuke, Tselu)
-For Kitsuki Daisuke - exp2 and Shinjo Tselu - exp the card just taken into the hand may be the card discarded, and when it is the only card in hand it is discarded. Ikoma Shizuka's Terrain search (#368: the found card cannot be discarded) is unchanged but Mendon has flagged it to revisit; Asahina Kitiaru - exp (#679) already follows this rule.
+### R-033 — "Then discard a card" after a search or look: the card just found may be discarded (Daisuke, Tselu, Shizuka)
+For Kitsuki Daisuke - exp2, Shinjo Tselu - exp and Ikoma Shizuka (Terrain search) the card just taken into the hand may be the card discarded, and when it is the only card in hand it is discarded. This reverses the issue #368 answer for Shizuka (the found Terrain could not be discarded); Asahina Kitiaru - exp (#679) already followed this rule.
 
-- **Cards/primitives:** Daisuke (oracle-l5r-10452), Tselu (oracle-l5r-10511); `SearchSpec.DiscardMayBeFound`.
+- **Cards/primitives:** Daisuke (oracle-l5r-10452), Tselu (oracle-l5r-10511), Ikoma Shizuka (oracle-l5r-10292); `SearchSpec.DiscardMayBeFound`.
 - **Date:** 2026-10-07
-- **Source:** Mendon's ruling on the PR #676 readings (CM-8, CM-9), issue #757.
+- **Source:** Mendon's ruling on the PR #676 readings (CM-8, CM-9) and his follow-up on Shizuka (2026-10-08), issue #757.
 
 ### R-034 — A card without a unit that needs a performer is performed by the Personality in that unit (Daidoji Adachi)
 Adachi's "opposing" counts a card with no unit of its own that requires a performer (a Strategy, a Holding): the performing Personality's unit stands for it, and the Personality's Madness tokens are compared to his printed Personal Honor. Pillowbook bars the discard.

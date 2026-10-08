@@ -2,7 +2,7 @@
 
 Status: accepted for the engine (Mendon, standing authority; the rules lead's own specification, issue #312). The rules interpretations under "Open rules questions" were decisions the engine had to make to be complete; **Mendon has answered every one (issue #368)**, and the section below records each answer. Lane: shared (rules engine, wire contract; the two UIs are Alfredo's #314 and #315). Issue #312.
 
-> **REVISIT (Mendon, 2026-10-07, issue #757):** the issue #368 ruling that the card just found cannot be the card discarded (Ikoma Shizuka's Terrain search, the `searchDiscard` row above and the "Rules questions" answer) is flagged for review. Mendon has already ruled the opposite for Kitsuki Daisuke - exp2 and Shinjo Tselu - exp (CM-8, CM-9; R-033) and, earlier, Asahina Kitiaru - exp (#679): the found card MAY be discarded (`SearchSpec.DiscardMayBeFound`). Shizuka is unchanged until he decides.
+> **SUPERSEDED (Mendon, 2026-10-08, issue #757, R-033):** the issue #368 ruling below that the Terrain just found cannot be the card discarded is reversed for Ikoma Shizuka. The Terrain found MAY be discarded, as for Kitsuki Daisuke - exp2, Shinjo Tselu - exp and Asahina Kitiaru - exp (`SearchSpec.DiscardMayBeFound`); with no other card in hand it is the card discarded. The text below records the original #368 answer.
 
 
 ## Decision
