@@ -1756,6 +1756,7 @@ public sealed partial class MatchEngine
     {
         P5.FirstConquerorId = null; // issue #503: The Plain of Glass's pending first choice is spent
         var willNotBow = _state.ResolutionWillNotBowPlayerIds.ToArray();
+        Wave737NatsuMarksUnbowed(a); // Natsu-Togumara's Guidance (issue #737, Wave737.cs): "battle resolution does not bow cards in that Personality's unit."
         // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
         var hikazuSpared = HikazuSparedPersonalities(a);
         var aramasuUnbowed = AramasuResolutionActive(attacker) ? AramasuUnbowedByResolution(a.Where(c => c.Zone == Zone.Battlefield)) : null; // Aramasu's Legacy (issue #501): "does not bow your Mantis Clan Magistrates or your attachments"

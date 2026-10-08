@@ -292,13 +292,14 @@ public sealed partial class MatchEngine
             static (engine, entry, chosen) => { if (chosen is not null) (engine._state.NatsuChoices ??= [])[entry.Celestial.Id] = chosen; }, Optional: true);
     }
 
-    /// <summary>"While this card remains in play, battle resolution does not bow cards in that Personality's unit": read where a battle's resolution returns the attackers home.</summary>
-    private bool Wave737NatsuWillNotBow(CardInstance unitHead)
+    /// <summary>"While this card remains in play, battle resolution does not bow cards in that Personality's unit": at the resolution of a battle, the chosen Personality of each Natsu-Togumara's Guidance in play who is
+    /// in the returning army is named among the cards the resolution will not bow (the same list Redoubled Attack uses, cleared when the battle ends).</summary>
+    private void Wave737NatsuMarksUnbowed(IEnumerable<CardInstance> returning)
     {
-        if (_state.NatsuChoices is not { Count: > 0 } choices) return false;
+        if (_state.NatsuChoices is not { Count: > 0 } choices) return;
         foreach (var (celestialId, chosen) in choices)
-            if (chosen == unitHead.Id && _state.Cards.TryGetValue(celestialId, out var celestial) && celestial.Zone == Zone.Celestial) return true;
-        return false;
+            if (_state.Cards.TryGetValue(celestialId, out var celestial) && celestial.Zone == Zone.Celestial && returning.Any(c => c.Id == chosen) && !_state.ResolutionWillNotBowCardIds.Contains(chosen))
+                _state.ResolutionWillNotBowCardIds.Add(chosen);
     }
 
     // ---- Magistrate's Stipend --------------------------------------------------------------------------------------------------------------------------------------------------------------

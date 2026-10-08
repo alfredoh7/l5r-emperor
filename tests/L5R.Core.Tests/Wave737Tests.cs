@@ -403,8 +403,6 @@ internal static class Wave737Tests
         Accept(e, answer.Command!);
         Eq(e.State.NatsuChoices![celestial.Id], personality.Id, "the choice is recorded");
         Check(JsonSerializer.Serialize(e.State).Contains("NatsuChoices"), "and saved");
-        Check((bool)Call(e, "Wave737NatsuWillNotBow", e.State.Cards[personality.Id])!, "battle resolution does not bow his unit");
-        Check(!(bool)Call(e, "Wave737NatsuWillNotBow", e.State.Cards[celestial.Id])!, "nobody else's");
 
         // The resolution: the chosen attacker comes home unbowed, the other bows.
         var t = Batch336Support.Table(Phase.Battle, 0);

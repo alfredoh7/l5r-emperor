@@ -35,9 +35,8 @@ None is published, so no printed effect is dropped.
 
 - `src/L5R.Core/AfterFacts.cs`: `FactRegistry.Trait` gains an optional `activeIn` (a trait counts as watching a kind only in a match that has its card, so other matches record nothing and serialise as before); `TraitWatches` takes the engine. Existing callers are unchanged.
 - `src/L5R.Core/TargetedActionReactions.cs`, `EngineHookDispatch.cs`, `EngineHookStartup.cs`: `TargetedActionReactionApplies` asks a new `EngineHooks.UntargetedReaction` hook when the held action names no card (it used to answer false). This is the "TargetWindows.cs is untouched" gap P8's note records: an Interrupt to what the action does, not to a card it targets. Only the three P8 cards register on it.
-- `src/L5R.Core/MatchEngine.cs`: one call in `ApplyMandatoryEntryEffects` (`ApplyWave737EntryEffects`, Shibatsu).
+- `src/L5R.Core/MatchEngine.cs`: one call in `ApplyMandatoryEntryEffects` (`ApplyWave737EntryEffects`, Shibatsu) and one statement in `FinishBattleResolution` (`Wave737NatsuMarksUnbowed`: the chosen Personality joins the list of cards the resolution will not bow, the list Redoubled Attack uses).
 - `src/L5R.Core/SeedsOfDecayBatch2.cs`: one case in `ResolveAssignmentWatch` (Akumasa's draw).
-- `src/L5R.Core/AfterResolution.cs`: one term in `ResolutionWillNotBow` (Natsu-Togumara's Guidance).
 - `src/L5R.Core/EmperorP4.cs` and `ShadowsEmbraceBatch4.cs`: one term each in `P4TargetAtAnyLocation` and `TerrainPlaysThroughOwnAbility`.
 - `src/L5R.Core/EmperorRemainingE.cs`: Consecration's watch logs and gains Honor under its source card's name (Shigemitsu sets the same watch).
 - New persisted state, omitted until used: `MatchState.NatsuChoices` (order 22930) and `MatchState.CrystalTearsTargets` (order 22931).
