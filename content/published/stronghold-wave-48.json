@@ -1,0 +1,31 @@
+{
+  "Profile": "stronghold-wave-48",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10562",
+      "Name": "Foothold of the Mad",
+      "Type": "Stronghold",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "If there is no other Foothold of the Mad player, you go first. You do not lose Honor from cards you own. Fallen Personalities join you for 2 less Gold. Personalities and Followers have -1F for each of their Madness tokens.\nLimited, bow: Give a target card a Madness token.\nLimited, bow: Your Holdings enter play paying 2 less Gold (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10562.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "foothold-madness",
+        "foothold-holdings"
+      ],
+      "Effect": "foothold-of-the-mad"
+    }
+  ],
+  "Decks": []
+}

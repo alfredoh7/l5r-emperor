@@ -110,7 +110,7 @@ public sealed partial class MatchEngine
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength, PrintedStrength = stronghold.ProvinceStrength }).ToList();
         }
         // Same starting-Honor ordering as the published setup; seeded tie break.
-        state.ActivePlayerId = state.Players[0].Honor == state.Players[1].Honor ? (int)(seed % 2) : state.Players.OrderByDescending(p => p.Honor).First().Id;
+        state.ActivePlayerId = FirstPlayerAtSetup(state, (int)(seed % 2)); ApplyFootholdStartHonor(state); // Foothold of the Mad (issue #766, Foothold.cs): counts as 39 here, then 0
         var second = 1 - state.ActivePlayerId;
         Add(second, drafts[second].Cards.Single(c => c.SetupSlot == "Bamboo Harvesters").Id, Zone.Home, true, true);
         OrderCardsById(state);

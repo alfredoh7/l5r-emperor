@@ -3347,6 +3347,7 @@ public sealed partial class MatchEngine
     {
         if (source is null || source.OwnerId != playerId) return false;
         var stronghold = Definition(Card(Player(playerId).StrongholdId)).Effect;
+        if (FootholdNegatesLoss(stronghold)) return true; // Foothold of the Mad (issue #766, Foothold.cs): "You do not lose Honor from cards you own."
         if (HonorLossNegatedByKeyword(stronghold, source)) return true; // Seeds of Decay pass (issue #453), batch 1: The Castle of Order's "Ninja cards you own".
         if (!HonorLossImmunity.TryGetValue(stronghold, out var rule)) return false;
         var def = Definition(source);
