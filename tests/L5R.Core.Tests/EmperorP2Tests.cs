@@ -418,7 +418,8 @@ internal static partial class EmperorP2Tests
             var held = Add(battle, Brothers, 1, Zone.Hand);
             var inBattle = Edit(MatchEngine.FromTestState(battle), st => { st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; });
             var offered = Options(inBattle, 1, "p2-brothers-in-battle", held.Id);
-            var why = string.Join("; ", offered.Select(o => $"{o.Label} [{o.Enabled}] {o.Reason} {string.Join(",", o.Slots?.Single().CardIds ?? [])} gold={o.Gold?.Kind}/{o.Gold?.Error}/{o.Gold?.Payments.Length}"));            Check(offered.Any(o => o.Enabled && o.Slots?.Single().CardIds.Contains(x.Id) == true && o.Slots.Single().CardIds.Contains(y.Id)), $"bowed={bowed} offered in battle with both Samurai: {why}");
+            var why = string.Join("; ", offered.Select(o => $"{o.Label} [{o.Enabled}] {o.Reason} {string.Join(",", o.Slots?.Single().CardIds ?? [])} gold={o.Gold?.Kind}/{o.Gold?.Error}/{o.Gold?.Payments.Length}"));
+            Check(offered.Any(o => o.Enabled && o.Slots?.Single().CardIds.Contains(x.Id) == true && o.Slots.Single().CardIds.Contains(y.Id)), $"bowed={bowed} offered in battle with both Samurai: {why}");
             Check(offered.First(o => o.Enabled).Slots!.Single().NotPrimary, "a performing slot is marked, so a viewer never sends its first card as the target");
             Check(Rejected(inBattle, offered.First(o => o.Enabled).Command! with { Selections = [Pick("samurai", x.Id, y.Id)], TargetId = x.Id }), "a performer sent as the target is refused");
             var result = inBattle.Execute(offered.First(o => o.Enabled).Command! with { Selections = [Pick("samurai", x.Id, y.Id)] });
