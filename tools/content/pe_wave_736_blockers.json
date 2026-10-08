@@ -22,9 +22,5 @@
   "oracle-l5r-10831": {
     "note": "Hida Kaiji - exp (Personality, issue #736): \"Will not attack or defend with other Personalities, and other Personalities will not attack or defend with Kaiji. Kaiji has +2F while unopposed, or +1F for each Personality opposing him with 6 or lower printed Force.\" The Force terms are available (a PersonalityForce hook), but the first sentence is an assignment rule over the whole army (Kaiji alone in his army, and no army that holds him holds another Personality); P11's pair restriction judges every card at the battlefield on both sides, so it would also bar him from being opposed.",
     "category": "LOCK"
-  },
-  "oracle-l5r-10364": {
-    "note": "Bonds of Hospitality (Strategy, issue #736): \"Limited: Target a bowed Personality: Put this card into play. While this card remains in play, negate the target's straightening, and his controller has the ability, 'Open: Pay 4 Gold: Discard a Bonds of Hospitality.'\" Needs a card in play bound to its target (the Strategy sits in play tied to one Personality), a straighten bar that lasts while that card does (StraightenHolds are timed, not bound to a card), and a player-level granted ability that costs Gold and discards any copy (P4's granted abilities have a turn duration only).",
-    "category": "WATCH"
   }
 }
