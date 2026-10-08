@@ -6531,6 +6531,7 @@ public sealed partial class MatchEngine
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
                 else if (ability.Target == Wave735Abilities.SanctionTarget) Require(Wave735SanctionTargetAllows(target), "Choose a non-Loyal, face-up Personality in or out of play."); // issue #735: Suikihime's Sanction
+                else if (ability.Target == Wave742Abilities.BondsCard) Require(Wave742BondsTargetAllows(target), "Choose a Bonds of Hospitality in play."); // issue #765: the granted discard names a Strategy kept in play
                 else if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
                 // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
                 else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
@@ -11353,7 +11354,7 @@ public sealed partial class MatchEngine
                                     // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                     EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                     "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? inPlay
+                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? inPlay
                                 }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                    // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                    // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

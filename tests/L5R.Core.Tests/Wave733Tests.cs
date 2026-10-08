@@ -91,7 +91,7 @@ internal static class Wave733Tests
         Check(path.GoldProduction == 3 && path.ProvinceStrength == 9 && path.StartingHonor == 0, "The False Path: production 3, strength 9, starting Honor 0");
         var hamada = CardCatalog.Get(Hamada);
         Check(hamada.Force == 5 && hamada.Chi == 3 && hamada.PersonalHonor == 2 && hamada.GoldCost == 8 && hamada.HonorRequirement is null, "Hamada's stats");
-        foreach (var id in new[] { Zansho, Patronage, Blessing, Marriage }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published");
+        foreach (var id in new[] { Zansho, Patronage, Blessing }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // Marriage was wired afterwards (Wave742.cs, issue #765)
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w733-", StringComparison.Ordinal)), 7, "seven w733 abilities");
         Check(!TraitReactions.Is("w733-kimura-proclaim"), "Kimura's action is not a trait");
     }
