@@ -101,3 +101,5 @@ interpretation this register's decision docs already settled.
 - [Wave batch 6: after-event windows and period watches (#737)](2026-10-08-wave-batch-6-after-event-windows-and-watches.md) — proposed readings: 15 cards wired on P6/P7/P8 (with P4's draw rule); Koan's Robes and Imperial Deployment deferred.
 
 - [Wave batch 7: turn boundaries and rule flags (#738)](2026-10-08-wave-batch-7-turn-boundaries-and-rule-flags.md) — proposed readings: 16 cards wired on P4/P13/P6 (the scans print no P5 clause, so the Events are ordinary); Revelations and The Onyx Championship deferred.
+
+- [Wave batch 8: zones, search and decisions (#739)](2026-10-08-wave-batch-8-zones-search-and-decisions.md) — proposed readings: all 17 cards wired on P20/P21/P22/P25 (one new search disposition, RefillProvince); nothing deferred.

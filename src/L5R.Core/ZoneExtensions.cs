@@ -101,8 +101,9 @@ public sealed partial class MatchEngine
     // ---- history and province locks -----------------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>"This province holds no Dynasty cards": the permanent flag (Illusory Defense) or the while-a-card-is-in-play one (Kokure's Lands).</summary>
+    // Kokure's Lands (issue #739, Wave739.cs) is read from the Region the province carries.
     internal bool HoldsNoDynasty(ProvinceState province) =>
-        province.HoldsNoDynastyCards || province.HoldsNoDynastyCardsWhile is { } whileId && _state.Cards.TryGetValue(whileId, out var holder) && InPlay(holder);
+        province.HoldsNoDynastyCards || province.HoldsNoDynastyCardsWhile is { } whileId && _state.Cards.TryGetValue(whileId, out var holder) && InPlay(holder) || Wave739KokureHolds(province);
 
     /// <summary>The one sweep after every accepted command: a card now in play that has no entry turn gets <paramref name="turnAtStart"/>; a card not in play loses it; a card whose host left play is discarded.</summary>
     private void SweepZoneHistory(int turnAtStart)

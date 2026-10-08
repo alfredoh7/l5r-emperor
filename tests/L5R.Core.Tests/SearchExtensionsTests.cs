@@ -690,7 +690,9 @@ internal static class SearchExtensionsTests
         // Every catalogued spec but the fixtures carries the defaults, and the old specs behave as before.
         var fixtures = SearchCatalog.All.Values.Where(x => x.Id.StartsWith("training-p20-", StringComparison.Ordinal) || x.Id.StartsWith("p20-showcase-", StringComparison.Ordinal)).Select(x => x.Id).ToHashSet();
         Check(fixtures.Count >= 20, "the fixtures are catalogued");
-        foreach (var spec in SearchCatalog.All.Values.Where(x => !fixtures.Contains(x.Id)))
+        // Dark Audience (a set of two, the other player chooses) and Jade Pearl Inn (a Gold-producing Holding) are the published cards that use the extensions (issue #739).
+        var wired = new[] { "w739-dark-audience", "w739-inn" };
+        foreach (var spec in SearchCatalog.All.Values.Where(x => !fixtures.Contains(x.Id) && !wired.Contains(x.Id)))
         {
             Check(!spec.ChooseOne && spec.SelectCount is null && spec.OtherPlayerChooses is null, $"{spec.Id}: the new spec fields are unused");
             foreach (var option in spec.Decks) Check(!option.Criteria.GoldProducing && !option.Criteria.DifferentTitles && option.Deck is not (SearchDeck.OwnProvinces or SearchDeck.AnyPlayerFateDiscard or SearchDeck.AnyPlayerDynastyDiscard), $"{spec.Id}: the new criteria and sources are unused");

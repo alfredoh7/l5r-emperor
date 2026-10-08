@@ -463,7 +463,7 @@ public sealed partial class MatchEngine
                 FinishSearch(search);
                 break;
             default:
-                if (!SearchPlayApplyEffect(search, card, option.Effect) && !WlItemsMiscApplySearchEffect(search, card, option.Effect) && !SearchExtApplyEffect(search, card, option.Effect)) throw new RuleViolation("Unknown search effect."); // issue #667 (SearchPlayRosary.cs): a Celestial put into play with no province; issue #674 (WlItemsMiscEvents.cs): Changing the Game's removal for Honor
+                if (!SearchPlayApplyEffect(search, card, option.Effect) && !WlItemsMiscApplySearchEffect(search, card, option.Effect) && !SearchExtApplyEffect(search, card, option.Effect) && !Wave739ApplySearchEffect(search, card, option.Effect)) throw new RuleViolation("Unknown search effect."); // issue #667 (SearchPlayRosary.cs): a Celestial put into play with no province; issue #674 (WlItemsMiscEvents.cs): Changing the Game's removal for Honor
                 break;
         }
     }
