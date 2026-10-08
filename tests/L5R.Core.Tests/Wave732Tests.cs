@@ -89,11 +89,20 @@ internal static class Wave732Tests
     {
         var expected = new Dictionary<string, (CardType Type, string[] Abilities, string Effect, int Production)>
         {
-            [Veil] = (CardType.Spell, [], "none", 0), [Truce] = (CardType.Strategy, [], "none", 0), [Dojo] = (CardType.Holding, [], "none", 0),
-            [Chambers] = (CardType.Holding, ["w732-chambers-honor"], "none", 2), [Asukai] = (CardType.Personality, [], "none", 0), [Inoue] = (CardType.Personality, ["w732-inoue-lend"], "none", 0),
-            [Sengmai] = (CardType.Personality, ["w732-sengmai-kiho"], "will-not-enter-honor-nonnegative", 0), [Kikumura] = (CardType.Personality, ["w732-kikumura-invest"], "none", 0),
-            [Embargo] = (CardType.Strategy, ["w732-embargo"], "none", 0), [Treasures] = (CardType.Strategy, ["w732-treasures-play"], "none", 0), [Court] = (CardType.Holding, [], "none", 2),
-            [Kurohime] = (CardType.Personality, ["w732-kurohime-straighten"], "none", 0), [BlackRiders] = (CardType.Follower, ["w732-riders-lend"], "none", 0), [Coin] = (CardType.Item, [], "none", 2),
+            [Veil] = (CardType.Spell, [], "none", 0),
+            [Truce] = (CardType.Strategy, [], "none", 0),
+            [Dojo] = (CardType.Holding, [], "none", 0),
+            [Chambers] = (CardType.Holding, ["w732-chambers-honor"], "none", 2),
+            [Asukai] = (CardType.Personality, [], "none", 0),
+            [Inoue] = (CardType.Personality, ["w732-inoue-lend"], "none", 0),
+            [Sengmai] = (CardType.Personality, ["w732-sengmai-kiho"], "will-not-enter-honor-nonnegative", 0),
+            [Kikumura] = (CardType.Personality, ["w732-kikumura-invest"], "none", 0),
+            [Embargo] = (CardType.Strategy, ["w732-embargo"], "none", 0),
+            [Treasures] = (CardType.Strategy, ["w732-treasures-play"], "none", 0),
+            [Court] = (CardType.Holding, [], "none", 2),
+            [Kurohime] = (CardType.Personality, ["w732-kurohime-straighten"], "none", 0),
+            [BlackRiders] = (CardType.Follower, ["w732-riders-lend"], "none", 0),
+            [Coin] = (CardType.Item, [], "none", 2),
             [Copse] = (CardType.Holding, [], "none", 0)
         };
         Eq(expected.Count, 15, "fifteen cards");
