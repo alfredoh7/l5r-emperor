@@ -1,0 +1,18 @@
+{
+  "oracle-l5r-10505": {
+    "note": "Zansho - exp (Personality, issue #733): the scan reads \"Battle: Bow Zansho's target unbowed Follower. Ranged Attack with strength equal to its Force, plus 2 if the Ranged Attack targets Daigotsu Arakan.\" It does not say whose Follower is bowed: any unbowed Follower at the battlefield (the other player's included), only one of the controller's, or one attached to Zansho himself. The three readings are three different cards (bowing an enemy Follower as a cost is a strong effect). Needs Mendon's ruling before it is built; the gate (\"will not join a Spider Clan player\") and the Attack strength hook are available.",
+    "category": "RULES"
+  },
+  "oracle-l5r-10720": {
+    "note": "Merchant Patronage (Strategy, issue #733): \"Political Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it. If you control a Courtier, you may bow him to increase the gain or loss by 1.\" Two gaps: an Interrupt window before ANY action targeting a Holding resolves (the before-action windows only predict movers and a few curated destroy and bow ids, P8), and a choice of who takes an Honor change made inside it (the P14 channel supports a redirect, but nothing asks the acting player at that point). Its Kharmic reminder text is the engine's.",
+    "category": "TRIG-ANN"
+  },
+  "oracle-l5r-10558": {
+    "note": "The Heavens' Blessing (Strategy, issue #733): two Open effects. \"No player can gain Honor in Action Phases (this turn)\" is a P14 no-gain modifier with the action-phase-only filter, but the first, \"Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase\", has no home: Draw has no source, so a draw made by a Strategy's effect cannot be told from any other, and a payment asked in the middle of an effect (declinable, with the draw lost) has no decision for it. Publishing only the second sentence would drop printed text.",
+    "category": "COST"
+  },
+  "oracle-l5r-10821": {
+    "note": "Marriage of the Emerald Champion (Event, issue #733): \"Limited: Put this Event into play. Target your Personality. While this Event remains in play, he will not be dishonored and you will not lose Honor from other players' actions that have targeted him. After your second turn from now begins, discard this Event.\" The pieces exist (KeepEventInPlay with turnBeginsIn 2, a P11 dishonor bar, a P14 no-loss filter targeted-by-other), but the target is chosen when the Event is revealed and the Event then leaves its province for play, and the Event decision machinery that answers a custom choice (ResolveEventChoiceCommand's default arm) is wired only for P5's Events that stay in their province. A new kind needs one hook in that arm and a record binding the Event to its target; a shared-interface change in the Events Phase.",
+    "category": "TARGET"
+  }
+}

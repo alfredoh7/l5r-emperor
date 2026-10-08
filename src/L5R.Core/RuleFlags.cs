@@ -280,9 +280,9 @@ public sealed partial class MatchEngine
 
     // ---- no-enlightenment-victory ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    /// <summary>StartTurn's Enlightenment test: true when a live flag says <paramref name="playerId"/> may not win by Enlightenment.</summary>
+    /// <summary>StartTurn's Enlightenment test: true when a live flag says <paramref name="playerId"/> may not win by Enlightenment. Issue #733: also true for a player who controls The False Path.</summary>
     internal bool EnlightenmentBarred(int playerId) =>
-        _state.RuleFlags is not null && LiveRuleFlags(RuleFlagKinds.NoEnlightenmentVictory).Any(f => f.PlayerId is null || f.PlayerId == playerId);
+        _state.RuleFlags is not null && LiveRuleFlags(RuleFlagKinds.NoEnlightenmentVictory).Any(f => f.PlayerId is null || f.PlayerId == playerId) || Wave733EnlightenmentBarred(playerId);
 
     // ---- madness-loss ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

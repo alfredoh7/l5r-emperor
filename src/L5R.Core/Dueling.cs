@@ -574,6 +574,7 @@ public sealed partial class MatchEngine
             case "first-blood-duel-battle":
             case "first-blood-duel-limited":
             case "watchful-eye-duel":
+            case Wave733Abilities.OtaniDuel: // issue #733: Ichiro Otani, "Bow the duel's loser."
                 foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
             // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.

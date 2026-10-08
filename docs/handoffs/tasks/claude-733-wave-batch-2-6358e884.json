@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 2 (#733): 12 recruit-gate, Proclaim and Honor cards wired on P3/P14/P18/P10/P2 (personality-wave-151, follower-wave-63, strategy-wave-135, stronghold-wave-47); Zansho - exp, Merchant Patronage, The Heavens' Blessing and Marriage of the Emerald Champion deferred with blocker notes. Shared change: one case label in ApplyDuelOutcome (Dueling.cs), one term in EnlightenmentBarred (RuleFlags.cs), MatchState.Wave733HonorBoosts (order 22910, omitted until used), two guard tests updated (duel inventory, Gold-production allowlist), art-pack descriptor and manifest for catalogue-art-issue733-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures): comment lint, python test suites including content, and all five dotnet test projects including wave-733 12/12 and the full Core suite. Art-pack candidate verified locally (sha256, size, members, coverage); published separately. Client not built or playtested.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-2-recruit-gates-and-honor.md; Zansho needs a ruling; Merchant Patronage, The Heavens' Blessing and Marriage stay blocked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/733",
+  "branch": "claude/733-wave-batch-2",
+  "updated": "2026-10-08T05:10:35.704411+00:00"
+}
