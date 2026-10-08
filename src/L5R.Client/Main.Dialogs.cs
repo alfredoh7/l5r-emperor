@@ -28,9 +28,11 @@ public partial class Main
         dialog.PopupCentered(new Vector2I(Mathf.RoundToInt(width * scale), Mathf.RoundToInt(height * scale)));
     }
 
-    private void Confirm(string title, string message, Action yes)
+    private void Confirm(string title, string message, Action yes, string? yesText = null, string? noText = null)
     {
         var dialog = new ConfirmationDialog { Title = title, DialogText = message, Theme = SidebarSkin.Theme(), Exclusive = true, Transient = true };
+        if (yesText is not null) dialog.OkButtonText = yesText;
+        if (noText is not null) dialog.CancelButtonText = noText;
         AddChild(dialog); dialog.Confirmed += () => { yes(); dialog.QueueFree(); }; dialog.Canceled += dialog.QueueFree;
         dialog.CloseRequested += dialog.QueueFree; PresentDialog(dialog, 540, 170);
     }
