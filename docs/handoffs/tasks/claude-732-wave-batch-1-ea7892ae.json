@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 1 (#732): 15 payment/cost cards wired on P1/P2/P3/P12 (personality-wave-146, follower-wave-59, item-wave-59, spell-wave-66, strategy-wave-130, holding-wave-64); Chiyurei's Axe and Duty Over All Things deferred with blocker notes. Shared change: one term in TraitReactions.Is (EmperorRulingR4.cs), Whispering Archive's discount reads ProducerControlledBy (ShadowsEmbraceBatch6.cs), MatchState.EmbargoPlayTurns (order 22900, omitted until used), two existing guard tests updated (Kikumura now published; three token producers on the Gold-production allowlist), local art-pack candidate descriptor and manifest (unpublished).",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures): comment lint, collaboration/content(189, 2 skipped)/hooks/quality/bootstrap python tests, and all five dotnet test projects including the wave-732 suite 16/16 and the full Core suite. Local art-pack candidate verified (sha256, size, 4478 members, manifest coverage). Client not built or playtested; no graphical check.",
+  "remaining": "Publish catalogue-art-issue732-20261007-r1 and verify a clean download before merging (descriptor names an unpublished release). Mendon to confirm the 15 readings in the decision doc. Chiyurei's Axe and Duty Over All Things stay blocked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/732",
+  "branch": "claude/732-wave-batch-1",
+  "updated": "2026-10-08T02:11:28.321824+00:00"
+}

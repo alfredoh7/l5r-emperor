@@ -1,0 +1,145 @@
+{
+  "Profile": "personality-wave-146",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #732.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10444",
+      "Name": "Asukai, the Tireless",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Asukai enters play ignoring Gold Cost if you control the Ring of Earth.\nOther players' cards will not affect your Provinces' strengths.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10444.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Unique",
+        "Crane Clan",
+        "Earth",
+        "Monk"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10464",
+      "Name": "Morito Inoue, Scourge of the Plains",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Straighten another player's target Holding whose Gold Cost is lower than Inoue's Force. You, and not its owner, may use its Gold-producing traits (this turn) as if you controlled it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10464.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Lion Clan",
+        "Ox Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w732-inoue-lend"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10499",
+      "Name": "Sengmai, the Unbreakable",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Sengmai enters play ignoring Gold Cost if you control the Ring of Fire.\nSengmai will not enter play if your Family Honor is 0 or above.\nAfter Sengmai enters play, put a Kiho in your discard pile into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10499.jpg",
+      "Keywords": [
+        "Unique",
+        "Fire",
+        "Monk",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w732-sengmai-kiho"
+      ],
+      "Effect": "will-not-enter-honor-nonnegative"
+    },
+    {
+      "Id": "oracle-l5r-10659",
+      "Name": "Daigotsu Kikumura",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "If you are a Dragon Clan player, Kikumura's Invest is :g2:.\nInvest :g4:: Create two 1F Followers attach them to Kikumura. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10659.jpg",
+      "Keywords": [
+        "Commander",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w732-kikumura-invest"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10840",
+      "Name": "Doji Kurohime",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, Bow this card: Straighten a target Honor-producing Holding that has not produced Gold this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10840.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w732-kurohime-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

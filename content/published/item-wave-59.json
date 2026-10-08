@@ -1,0 +1,28 @@
+{
+  "Profile": "item-wave-59",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #732.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10911",
+      "Name": "Tsujiken's Coin",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10911.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

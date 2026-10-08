@@ -1,0 +1,74 @@
+{
+  "Profile": "strategy-wave-130",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #732.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10401",
+      "Name": "Truce",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying for a Personality with a Clan alignment different than your own: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10401.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10723",
+      "Name": "Trade Embargo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may only play one copy of Trade Embargo per turn.\nOpen, :g4:: All non-Unique Holdings produce 1 less Gold (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10723.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w732-embargo"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10751",
+      "Name": "Uncovering Treasures",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold. Discard this Strategy from play.\nLimited, :g2:: Put this Strategy into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10751.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "w732-treasures-play"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

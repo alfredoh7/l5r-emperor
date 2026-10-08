@@ -1,0 +1,32 @@
+{
+  "Profile": "follower-wave-59",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #732.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10892",
+      "Name": "Black Riders",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Straighten another player's target Holding with Gold Cost equal to or lower than this Follower's Force. You, and not its owner, may use its Gold-producing and cost-reducing traits (this turn) as if you controlled it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10892.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w732-riders-lend"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
