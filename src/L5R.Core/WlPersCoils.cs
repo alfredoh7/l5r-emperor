@@ -120,13 +120,13 @@ public static class WlPersCoilsLooks
 
 public static class WlPersCoilsSearches
 {
-    /// <summary>Shinjo Tselu - exp: a non-Unique Cavalry Follower from the Fate deck, shown and put in the hand; then the searcher discards a card (never the one found, Mendon's ruling on the Terrain search).</summary>
+    /// <summary>Shinjo Tselu - exp: a non-Unique Cavalry Follower from the Fate deck, shown and put in the hand; then the searcher discards a card (the one found may be discarded, Mendon's CM-9 ruling, issue #757).</summary>
     public static SearchSpec Tselu { get; } = new("wl-pc-tselu", "Search your Fate deck for a non-Unique Cavalry Follower",
-        [new(SearchDeck.Fate, new("non-Unique Cavalry Follower", [CardType.Follower], ["Cavalry"], NonUnique: true), SearchEffect.ToHandThenDiscard)]);
+        [new(SearchDeck.Fate, new("non-Unique Cavalry Follower", [CardType.Follower], ["Cavalry"], NonUnique: true), SearchEffect.ToHandThenDiscard)], DiscardMayBeFound: true);
     /// <summary>Kitsuki Daisuke - exp2's "then discard a card": the search flow's own discard decision over the hand. It is opened as his look ends, never started by an ability, so its deck is the hand
     /// (a search of the hand shuffles nothing) and its effect the same "to hand, then discard".</summary>
     public static SearchSpec DaisukeDiscard { get; } = new("wl-pc-daisuke-discard", "Discard a card",
-        [new(SearchDeck.Hand, new("Iaijutsu Strategy", [CardType.Strategy], ["Iaijutsu"]), SearchEffect.ToHandThenDiscard)]);
+        [new(SearchDeck.Hand, new("Iaijutsu Strategy", [CardType.Strategy], ["Iaijutsu"]), SearchEffect.ToHandThenDiscard)], DiscardMayBeFound: true);
 
     public static IEnumerable<SearchSpec> All => [Tselu, DaisukeDiscard];
 }
@@ -354,8 +354,7 @@ public sealed partial class MatchEngine
         var found = player.Hand.Select(Card).LastOrDefault(c => c.DefinitionId == _state.ShownCards[^1].DefinitionId);
         if (found is null) return false;
         var name = Definition(Card(look.SourceCardId)).Name;
-        // The card found cannot be the one discarded (Mendon's ruling on the Terrain search, issue #368); with no other card in hand nothing is discarded.
-        if (player.Hand.All(id => id == found.Id)) { Emit("searchDiscardSkipped", $"{player.Name} has no other card in hand to discard.", player.Id); return false; }
+        // The card found may be the one discarded (Mendon's CM-8 ruling, issue #757; unlike the Terrain search of #368), so the hand always holds a card to discard.
         _state.PendingLook = null;
         _state.PendingSearch = new PendingSearch
         {
@@ -369,7 +368,7 @@ public sealed partial class MatchEngine
             BowedBefore = look.BowedBefore,
             Command = _runningCommand
         };
-        _state.PendingChoice = new("searchDiscard", look.PlayerId, look.SourceCardId, $"{name}: discard a card from your hand other than the card you found.");
+        _state.PendingChoice = new("searchDiscard", look.PlayerId, look.SourceCardId, $"{name}: discard a card from your hand.");
         _state.PriorityPlayerId = look.PlayerId; _state.ConsecutivePasses = 0;
         return true;
     }
@@ -405,8 +404,13 @@ public sealed partial class MatchEngine
     // discard is (PendingForcedDiscards); WlPersCoilsDrainDiscards asks it once no Reaction window has opened over the action.
     private void ApplyWlPersCoilsAfterAction(string? sourceId)
     {
-        if (sourceId is null || !_state.Cards.TryGetValue(sourceId, out var source) || !InPlay(source)) return;
-        var leader = Card(UnitHostId(source));
+        if (sourceId is null || !_state.Cards.TryGetValue(sourceId, out var source)) return;
+        // Mendon's ruling (CM-13, issue #757): a source card with no unit of its own (a Strategy, a Holding) that needs a performer is performed by the Personality in that unit, who satisfies the condition.
+        var unitCard = InPlay(source) && (Definition(source).Type == CardType.Personality || source.Zone == Zone.Attached);
+        var leaderId = unitCard ? UnitHostId(source)
+            : _state.LastResolvedAction?.PerformerId is { } performerId && _state.Cards.TryGetValue(performerId, out var performer) && InPlay(performer) ? UnitHostId(performer) : null;
+        if (leaderId is null) return;
+        var leader = Card(leaderId);
         if (Definition(leader).Type != CardType.Personality || leader.Zone != Zone.Battlefield || leader.ProvinceIndex is not int battlefield) return;
         if (TokenCount(leader, WlPersCoilsAbilities.MadnessToken) <= Definition(leader).PersonalHonor) return;
         foreach (var adachi in _state.Cards.Values.Where(c => c.OwnerId != leader.OwnerId && c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && Definition(c).Effect == WlPersCoilsAbilities.AdachiEffect)
