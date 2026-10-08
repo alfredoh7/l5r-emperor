@@ -1,0 +1,34 @@
+{
+  "Profile": "item-wave-99",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #741.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10689",
+      "Name": "Watersteel Sword",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Water Open: Target a non-Unique Weapon attached to this Personality. Copy an ability on it that does not itself copy ability, to this Weapon (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10689.jpg",
+      "Keywords": [
+        "Weapon",
+        "Nemuranai",
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "w741-watersteel-copy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

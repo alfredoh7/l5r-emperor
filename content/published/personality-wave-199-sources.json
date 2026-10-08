@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-10855",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10855",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10855-printing-1-image-1.webp",
+    "image_sha256": "00bd404394afbb87a6ab6ce30553787fb412b41ccbf84f5948f8626af55f46ec"
+  },
+  {
+    "card_id": "oracle-l5r-10296",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10296",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10296-printing-1-image-1.webp",
+    "image_sha256": "ee31c300d913b09507ecf7ed3cccfcae9139acf67cb6cc8cdcdf852e4a0a7f14"
+  },
+  {
+    "card_id": "oracle-l5r-10319",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10319",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10319-printing-1-image-1.webp",
+    "image_sha256": "fa28bd4dde7b204adba906ef5b84458b07a526d66ed9b83205ea10cdd05377c3"
+  },
+  {
+    "card_id": "oracle-l5r-10888",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10888",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10888-printing-1-image-1.webp",
+    "image_sha256": "67b53a30ccaf1d7c7d715c916a1d7a28bdb608ac51486b616b66b3d504ea96f5"
+  },
+  {
+    "card_id": "oracle-l5r-10288",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10288",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10288-printing-1-image-1.webp",
+    "image_sha256": "223720ede80dcad0421e9d73ece182e719723e8eb0aef90e04e9a7dd13c9379f"
+  }
+]
