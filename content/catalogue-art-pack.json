@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "repository": "alfredoh7/l5r-emperor",
-  "tag": "catalogue-art-issue737-20261008-r1",
+  "tag": "catalogue-art-issue738-20261008-r1",
   "asset": "L5R-Catalogue-WebP85.zip",
-  "sha256": "e8d7da12df3c6d3faf18ea5e4b83431dddb8bccc859e44092dc3e064a639f650",
-  "bytes": 604351756,
-  "images": 4519,
+  "sha256": "4a91b307ed5f83b33cb34717528c1b59fe61212005e4eb54d5bc90eb753da87e",
+  "bytes": 606342896,
+  "images": 4535,
   "quality": 85
 }

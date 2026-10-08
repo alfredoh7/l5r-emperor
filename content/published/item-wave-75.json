@@ -1,0 +1,52 @@
+{
+  "Profile": "item-wave-75",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #738.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10903",
+      "Name": "Dagger of Crystal Wind",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After your turn begins, give this Personality a +1F Obsession token; then, if he has more Obsession tokens than printed Chi, destroy him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10903.jpg",
+      "Keywords": [
+        "Weapon",
+        "Nemuranai"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "w738-dagger"
+    },
+    {
+      "Id": "oracle-l5r-10692",
+      "Name": "Lantern Oil",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "The Attacker may not take Engage actions at this Item's battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10692.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "w738-lantern-oil"
+    }
+  ],
+  "Decks": []
+}
