@@ -14,6 +14,7 @@ public partial class Main
     private void RenderBoard()
     {
         ObserveStatChanges();
+        _previewBows = PreviewBowedCards();
         var motion = BeginTableMotion();
         if (_statTokenLayer is null) { _statTokenLayer = new Control { MouseFilter = Control.MouseFilterEnum.Ignore }; _tableViewport.AddChild(_statTokenLayer); }
         Palette.Clear(_statTokenLayer);

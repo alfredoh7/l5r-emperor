@@ -37,6 +37,7 @@ public partial class Main
         useBox.EmitSignal(Control.SignalName.MouseExited);
         GoldRequire(!_tiles.Single(t => t.Card.Id == reduce[0].CardId).Highlighted, "the highlight was not released.");
 
+        GoldClickHoldings(quote.Payments[0].SourceIds);
         var suggested = _sources.ToArray();
         GoldRequire(!suggested.Any(id => reduce.Any(m => m.Id == id)), "the engine suggested giving up Gold with Profits.");
         // Choosing and confirming run on later idle steps (the harness re-renders the board right after this method; the checkbox's own Toggled handler also moves focus on the idle step after it).
@@ -51,7 +52,7 @@ public partial class Main
             // Choose "Use Profits" through the real checkbox, beside the engine's suggested Holding(s): the panel still covers the cost, so Confirm stays enabled.
             // A Holding bowed for 2 Gold covers the cost alone, so giving up 1 Gold needs a second Holding: add one the way the other Gold probes do, then use the real checkbox for Profits.
             var covered = methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced);
-            if (covered - 1 < 2) { _sources.Add(methods.First(m => m.Kind == "bow" && !_sources.Contains(m.Id)).Id); RenderInspector(); Highlight(); }
+            if (covered - 1 < 2) { _sources.Add(methods.First(m => m.Kind == "bow" && !_sources.Contains(m.Id)).Id); RefreshPaymentSelection(); }
             var box = _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().First(c => c.GetMeta("payment_source_id", "").AsString() == reduceId);
             box.ButtonPressed = true;
             GoldRequire(_sources.Contains(reduceId), "toggling 'Use Profits' did not choose it.");
