@@ -1,0 +1,152 @@
+{
+  "Profile": "personality-wave-199",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #741.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10855",
+      "Name": "Kitsune Merihiko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Nonhuman Spirits have the ability, \"Battle, Bow this card: Ranged 3 Attack.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10855.jpg",
+      "Keywords": [
+        "Unique",
+        "Earth",
+        "Experienced",
+        "Ivory Champion's Advisor",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w741-merihiko"
+    },
+    {
+      "Id": "oracle-l5r-10296",
+      "Name": "Kitsune Yuribara",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Yuribara enters play: Create a 0F/2C/3PH Mantis Clan • Nonhuman • Butterfly • Cavalry • Spirit Personality with the traits, \"Other player's Battle actions must target a Butterfly Personality at this battlefield, if legal,\" and \"After another player's Battle action targets this card: Destroy this card.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10296.jpg",
+      "Keywords": [
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w741-yuribara-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10319",
+      "Name": "Ninube Tsukau",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Tsukau enters play, lose 3 Honor.\nNinja Open: Once per game, target a non-Unique Human Personality. Tsukau permanently copies his Force, one of his keywords, and one of his printed abilities which does not itself copy abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10319.jpg",
+      "Keywords": [
+        "Ninja",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w741-tsukau-copy"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10888",
+      "Name": "Shinjo Kinto",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target two Personalities at different locations controlled by the same player. Switch their locations. After they move, straighten their units if you do not control them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10888.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Experienced 2",
+        "Unique",
+        "Commander",
+        "Commander of the 9th Legion",
+        "Imperial",
+        "Samurai",
+        "Scout",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w741-kinto-switch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10288",
+      "Name": "Tamori Tsuchiya",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If Tsuchiya is defending, destroy one of his Spells: Give him Stalwart and a Force bonus equal to his current Force. (Stalwart cards negate their first bowing each turn by other players' cards).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10288.jpg",
+      "Keywords": [
+        "Alchemist",
+        "Dragon Clan",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w741-tsuchiya-stalwart"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -1539,6 +1539,8 @@ public sealed partial class MatchEngine
             case "hard-pressed-move": if (BeginHardPressed(source, pending)) return; break;
             // Lakeside Retreat (issue #622, TfStrategiesB.cs): its controller straightens a Personality or Follower.
             case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
+            // A Moving Battle (issue #741, Wave741.cs): its controller may move one of his opposed attacking Personalities to an adjacent unresolved battlefield.
+            case Wave741Abilities.MovingBattle: if (BeginWave741MovingBattle(source)) return; break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1553,6 +1555,7 @@ public sealed partial class MatchEngine
         else if (IsExtendedManeuversChoice(pending)) ResolveExtendedManeuvers(command, pending, choice.PlayerId); // Extended Maneuvers (issue #492)
         else if (IsHardPressedChoice(pending)) ResolveHardPressed(command, pending, choice.PlayerId);
         else if (IsLakesideRetreatChoice(pending)) ResolveLakesideRetreat(command, choice.PlayerId); // Lakeside Retreat (issue #622)
+        else if (IsWave741MovingBattleChoice(pending)) ResolveWave741MovingBattle(command, choice.PlayerId); // A Moving Battle (issue #741)
         else if (command.Choice == "use")
         {
             var target = Card(command.TargetId);
@@ -2085,7 +2088,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def)) { DiscardTerrain(existingTerrain); if (existingTerrain.Zone != Zone.Battlefield) Player(command.PlayerId).TerrainDestroyedThisBattle = true; } // P6: the Terrain this one replaced was destroyed (Ring of Water's condition)
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def) || Wave741TerrainReplaces(def)) { DiscardTerrain(existingTerrain); if (existingTerrain.Zone != Zone.Battlefield) Player(command.PlayerId).TerrainDestroyedThisBattle = true; } // P6: the Terrain this one replaced was destroyed (Ring of Water's condition)
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }
