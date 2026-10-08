@@ -12,7 +12,7 @@
     "category": "COST"
   },
   "oracle-l5r-10821": {
-    "note": "Marriage of the Emerald Champion (Event, issue #733): \"Limited: Put this Event into play. Target your Personality. While this Event remains in play, he will not be dishonored and you will not lose Honor from other players' actions that have targeted him. After your second turn from now begins, discard this Event.\" The pieces exist (KeepEventInPlay with turnBeginsIn 2, a P11 dishonor bar, a P14 no-loss filter targeted-by-other), but the target is chosen when the Event is revealed and the Event then leaves its province for play, and the Event decision machinery that answers a custom choice (ResolveEventChoiceCommand's default arm) is wired only for P5's Events that stay in their province. A new kind needs one hook in that arm and a record binding the Event to its target; a shared-interface change in the Events Phase.",
-    "category": "TARGET"
+    "note": "Marriage of the Emerald Champion (Event, issue #733): \"Limited: Put this Event into play. Target your Personality. While this Event remains in play, he will not be dishonored and you will not lose Honor from other players' actions that have targeted him. After your second turn from now begins, discard this Event.\" Wirable now on merged pieces: KeepEventInPlay with turnBeginsIn 2, a P11 dishonor bar and a P14 targeted-by-other filter. The binding the first note thought missing exists: an Event that chooses its target at reveal and stays in play is built for Delayed Arrival (a PendingEventChoice answered in ResolveEventChoiceCommand, the target kept in EventTargets, FinishRevealedEvent with keep and turnBeginsIn), and later waves add their Event answers with one hook line in that method's default arm (ResolveWave738EventChoice, ResolveP5EventChoice). This card needs the same one hook and its own record, not a new shared mechanism. The pieces have not been exercised together.",
+    "category": "WIRE"
   }
 }

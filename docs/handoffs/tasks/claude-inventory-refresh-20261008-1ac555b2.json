@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Regenerated docs/CARD_INVENTORY.xlsx (2217 cards, 2175 wired, 42 unwired); wired cards no longer show blocker notes; audited all 42 unwired blocker notes (17 stale/partly stale rewritten, 7 missing added, Green Nightshade shadowing removed).",
+  "validation": "python tools/content/build_card_inventory.py; python -m unittest discover tools/content (189 OK, 2 skipped)",
+  "remaining": "None; ready for review. Bonds of Hospitality and Marriage of the Emerald Champion identified as wirable (separate task).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/742",
+  "branch": "claude/inventory-refresh-20261008",
+  "updated": "2026-10-08T20:15:29.031402+00:00"
+}
