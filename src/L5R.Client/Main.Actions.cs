@@ -429,7 +429,7 @@ public partial class Main
         _inspector.AddChild(Palette.Wrapped(action.Label, 18, Palette.Gold));
         _inspector.AddChild(Palette.Wrapped("Select one or more province cards in the order you want them placed on the bottom of the Dynasty deck. Replacements will be revealed face-up.", 14, Palette.PaperDim));
         var order = Palette.Wrapped("No cards selected.", 13, Palette.Crane);
-        var confirm = SidebarSkin.Button("Refresh selected provinces", () => _ = Submit(action.Command! with { CardIds = selected.ToArray() }), true);
+        var confirm = SidebarSkin.Button("Confirm", () => _ = Submit(action.Command! with { CardIds = selected.ToArray() }), true);
         confirm.Disabled = true;
         foreach (var id in action.TargetIds ?? [])
         {
@@ -445,7 +445,7 @@ public partial class Main
             _inspector.AddChild(check);
         }
         _inspector.AddChild(order); _decisionActions.AddChild(confirm);
-        _decisionActions.AddChild(SidebarSkin.Button("Cancel refresh", CancelChoice));
+        _decisionActions.AddChild(SidebarSkin.Button("Cancel", CancelChoice));
     }
 
     private void RenderHandDiscard()
