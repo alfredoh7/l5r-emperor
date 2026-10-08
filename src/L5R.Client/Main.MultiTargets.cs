@@ -40,7 +40,7 @@ public partial class Main
         var slots = MultiUpFront.Select(s => s.Kind == TargetSlotKinds.Card ? new SlotSelection(s.Slot, _multiCards[s.Slot].ToArray()) :
             s.Kind == TargetSlotKinds.Province ? _multiProvinces.TryGetValue(s.Slot, out var province) ? new SlotSelection(s.Slot, ProvinceOwner: province.Owner, Province: province.Index) : new SlotSelection(s.Slot) :
             new SlotSelection(s.Slot, PlayerId: _multiPlayers.TryGetValue(s.Slot, out var player) ? player : null)).ToArray();
-        return _chosen!.Command! with { Selections = slots, TargetId = slots.SelectMany(s => s.CardIds ?? []).FirstOrDefault() };
+        return _chosen!.Command! with { Selections = slots, TargetId = MultiUpFront.Where(s => s.Kind == TargetSlotKinds.Card && !s.NotPrimary).SelectMany(s => _multiCards[s.Slot]).FirstOrDefault() }; // Core's primary target skips performing and cost-only slots
     }
     private void RefreshMultiTargets(string? focus = null)
     {

@@ -59,7 +59,7 @@ public sealed record ProvinceSlotChoice(int Owner, int Index);
 /// the command's Selections; Timing "at-resolution" slots (Kind "follow-up", Min 0, Max 0) are NOT: Condition names when the engine will ask
 /// (BranchCondition) and OptionLabels lists what the acting player will then be offered, so a viewer can say so beforehand.</summary>
 public sealed record TargetSlotOption(string Slot, string Label, string Kind, int Min, int Max, string[] CardIds, int[] PlayerIds,
-    string Timing = TargetSlotTimings.UpFront, string? Condition = null, string[]? OptionLabels = null, ProvinceSlotChoice[]? ProvinceChoices = null);
+    string Timing = TargetSlotTimings.UpFront, string? Condition = null, string[]? OptionLabels = null, ProvinceSlotChoice[]? ProvinceChoices = null, bool NotPrimary = false);
 
 public static class TargetSlotTimings
 {
@@ -235,7 +235,7 @@ public sealed partial class MatchEngine
                 if (refused is null) legal.Add(candidate.Id);
                 else refusals[refused.Message] = refusals.GetValueOrDefault(refused.Message) + 1;
             }
-            options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), []));
+            options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), [], NotPrimary: slot.Performing || slot.CostOnly));
             if (!slot.ProbeDefaultOnlyForLaterSlots) offered.Add((slot.Id, legal.ToArray()));
             if (legal.Count < slot.Min) complete = false;
             else if (slot.Min > 0)
