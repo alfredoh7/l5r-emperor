@@ -1,0 +1,30 @@
+{
+  "Profile": "stronghold-wave-47",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #733.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10561",
+      "Name": "The False Path",
+      "Type": "Stronghold",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 9,
+      "StartingHonor": 0,
+      "Text": "Your non-Unique Monk and Fudo Personalities in and out of play have Monk • Fudo. Fudo Personalities join you for 2 less Gold. You ignore Honor Requirements of your Fudo cards. You do not lose Honor from Fudo cards you own. You may not win by Enlightenment. \nLimited, Bow this card: Search your discard pile or deck for a Fudo Ring, show it, and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10561.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "w733-falsepath-search"
+      ],
+      "Effect": "w733-false-path"
+    }
+  ],
+  "Decks": []
+}
