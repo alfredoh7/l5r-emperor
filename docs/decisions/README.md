@@ -97,3 +97,5 @@ interpretation this register's decision docs already settled.
 - [Wave batch 2: recruit gates, Proclaim and Honor (#733)](2026-10-08-wave-batch-2-recruit-gates-and-honor.md) — proposed readings: 12 cards wired on P3/P14/P18/P10/P2; Zansho, Merchant Patronage, The Heavens' Blessing and Marriage of the Emerald Champion deferred.
 
 - [Wave batch 5: card restrictions and immunities (#736)](2026-10-08-wave-batch-5-card-restrictions-and-immunities.md) — proposed readings: 14 cards wired on P11/P12; seven deferred (A Cleansing Breath needs a ruling).
+
+- [Wave batch 6: after-event windows and period watches (#737)](2026-10-08-wave-batch-6-after-event-windows-and-watches.md) — proposed readings: 15 cards wired on P6/P7/P8 (with P4's draw rule); Koan's Robes and Imperial Deployment deferred.

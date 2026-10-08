@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 6 (#737): 15 after-event window and period watch cards wired on P6/P7/P8 with P4's End Phase draw rule (personality-wave-167, spell-wave-82, strategy-wave-151, holding-wave-80, event-wave-48, celestial-wave-45, region-wave-30); Koan's Robes and Imperial Deployment deferred with blocker notes. Shared change: FactRegistry.Trait gains an engine-aware activeIn; the targeted-action reaction check consults a new UntargetedReaction hook when the held action names no card (P8 Interrupts); one entry-effect call, one AssignmentWatch case, one ResolutionWillNotBow term, one term each in P4TargetAtAnyLocation and TerrainPlaysThroughOwnAbility; Consecration's watch logs under its source card; MatchState.NatsuChoices (22930) and CrystalTearsTargets (22931), omitted until used; BattleAbsentMoves and SeppukuTiming guards updated; art-pack descriptor and manifest for catalogue-art-issue737-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0, no failures): comment lint, python test suites including content, and all five dotnet test projects including wave-737 17/17 and the full Core suite; changed-C# formatting check clean. Art-pack candidate verified locally (sha256, size, coverage, offline install); published separately. Client not built or playtested.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-6-after-event-windows-and-watches.md; Koan's Robes and Imperial Deployment stay blocked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/737",
+  "branch": "claude/737-wave-batch-6",
+  "updated": "2026-10-08T08:44:25.840804+00:00"
+}
