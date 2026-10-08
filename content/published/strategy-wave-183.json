@@ -1,0 +1,274 @@
+{
+  "Profile": "strategy-wave-183",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #741.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10739",
+      "Name": "A Doomseeker's Tomb",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, :g1:: Give your target Personality a +1F/+1C/+1PH token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10739.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "w741-tomb-token"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10377",
+      "Name": "Harmony",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Monk: Permanently give him the trait, \"You may bow this card instead of bowing a Ring to pay a cost.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10377.jpg",
+      "Keywords": [
+        "Kiho",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w741-harmony"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10382",
+      "Name": "Kitsuki Judgment",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Magistrate, target a Human Personality, and pay Gold equal to his unit's total Gold Cost, +8 unless he is dishonorable, Kolat, Ninja, or Shadowlands: He commits seppuku.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10382.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w741-judgment"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10549",
+      "Name": "Overwhelming Chaos",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Each player shuffles his hand into his deck, then draws as many cards as he shuffled into his deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10549.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w741-chaos"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10392",
+      "Name": "Shifting Waves",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Henshin and target a Personality: Switch the target's Force and Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10392.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w741-shifting-waves"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10745",
+      "Name": "Sorrowful Prayer",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Shuffle one to three target non-Unique Strategies in your discard pile into your deck. Remove this card from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10745.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "w741-prayer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10393",
+      "Name": "Spiritual Coalescence",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy your performing Spirit Personality and target another Spirit Personality: Give it a permanent Force bonus equal to the performer's Force. It permanently copies the performer's abilities which do not themselves copy abilities. You may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10393.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "w741-coalescence"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10556",
+      "Name": "Strength in the Earth",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Earth Battle: Target your unbowed Monk. Melee Attack with strength equal to his Force, which may target a card in the Defender's home.\n.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10556.jpg",
+      "Keywords": [
+        "Earth",
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "w741-strength-earth"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10925",
+      "Name": "A Moving Battle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle resolves, you may move one of your opposed attacking Personalities at this battlefield to an adjacent, unresolved battlefield.\nBattle: Destroy a Terrain (if able). Put this Terrain into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10925.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w741-moving-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10730",
+      "Name": "Unexpected Discovery",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Move your target opposed Personality (at the current battlefield) to an adjacent battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10730.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "w741-discovery"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10711",
+      "Name": "Unsettling Gathering",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, :gstar:: Target an attachment with Gold Cost equal to or lower than the amount paid. Transfer it to any player's target Personality (this may change control of the attachment).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10711.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w741-gathering"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
