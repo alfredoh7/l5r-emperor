@@ -1791,6 +1791,7 @@ public sealed partial class MatchEngine
             DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince = null;
         R1.MovementNegated.Remove(provinceIndex); // Chikushudo's Trickery: "negate all movement to it" ends with the battlefield.
+        Wave735EndBattle(); // The Inevitable Grasp of Conquest (issue #735, Wave735.cs): "this battle" ends here.
         // After This Battle Resolves (issue #272): stashed here since CurrentBattleProvince is
         // already cleared above, and the Overconfident draw window (below) may defer this whole tail
         // across a command boundary before FinishBattleReturnHomeAndTransition ever reads it back --

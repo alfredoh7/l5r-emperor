@@ -217,7 +217,7 @@ public sealed partial class MatchEngine
         i.CardId is not null ? card is not null && i.CardId == card.Id
         : i.Battlefield is not null ? battlefield == i.Battlefield
         : i.PlayerId is not null && (card is null ? playerId == i.PlayerId
-            : card.OwnerId == i.PlayerId && i.TargetKeyword is not null && InPlay(card) && Keyword(card, i.TargetKeyword) && (i.TargetType is null || Definition(card).Type == i.TargetType));
+            : card.OwnerId == i.PlayerId && (i.TargetKeyword is not null || i.TargetType is not null) && InPlay(card) && (i.TargetKeyword is null || Keyword(card, i.TargetKeyword)) && (i.TargetType is null || Definition(card).Type == i.TargetType)); // a type alone names the cards too (issue #735: The Inevitable Grasp of Conquest)
 
     private bool StandingImmunityCovers(StandingImmunity rule, CardInstance carrier, CardInstance? card, int? playerId, int? battlefield) => rule.Scope switch
     {

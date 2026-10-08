@@ -5607,7 +5607,7 @@ public sealed partial class MatchEngine
             // effect cases so an ability that moves a Personality to a battlefield cannot be added without it. Munefusa's move-home keeps its old
             // no-presence clause as an explicit Absent.
             var reinforcesFromElsewhere = ability.Absent || ability.MovesToBattle || DojiWaivesFavorPresence(id, player); // Doji's Guidance (Emperor Edition remaining-cards pass, issue #492, group E).
-            if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
+            if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any() || Wave735WaivesPresence(player.Id) /* issue #735: Doji Tatsuzo */, "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
             // The check above only ever applies to a Personality-type source -- a Spell/Item's own
@@ -6530,6 +6530,7 @@ public sealed partial class MatchEngine
                     ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                else if (ability.Target == Wave735Abilities.SanctionTarget) Require(Wave735SanctionTargetAllows(target), "Choose a non-Loyal, face-up Personality in or out of play."); // issue #735: Suikihime's Sanction
                 else if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
                 // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
                 else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
@@ -11247,7 +11248,7 @@ public sealed partial class MatchEngine
             // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
             // is listed exactly as before with the choice left off the command.
             // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): a Favor-discard action is also offered with a Favor token discarded in place of the Imperial Favor.
-            CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).Concat(FavorTokenAlternative(ability, playerId)).ToArray() // issue #501: a Favor token for an alternative Favor discard
+            CostOption?[] costOptions = ability.CostOptions is { } manyOptions && (manyOptions.Length > 1 || manyOptions.Any(AlternativeDiscard.IsDiscardOption) /* issue #735: Daidoji Gensai, a lone discard */) ? manyOptions.Select(o => (CostOption?)o).Concat(FavorTokenAlternative(ability, playerId)).ToArray() // issue #501: a Favor token for an alternative Favor discard
                 : IsFavorDiscardAbility(id) && FavorTokenSource(playerId) is not null ? [null, FavorTokenOption] : [null];
             costOptions = [.. costOptions, .. CostSubstitutionOffers(ability, playerId, source)]; // issue #690 (P24, EffectPrimitivesCosts.cs): one more offered action per card that may be bowed in a Ring's place
             // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
@@ -11340,7 +11341,7 @@ public sealed partial class MatchEngine
                                     // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                     EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                     "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? inPlay
+                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? inPlay
                                 }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                    // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                    // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
