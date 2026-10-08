@@ -8,7 +8,7 @@
     "category": "TRIG-AFTER"
   },
   "oracle-l5r-10404": {
-    "note": "Warded Premises: \"Negate all Force bonuses from actions to cards at this battlefield\" needs the engine to tell an action's Force modifier from a token, an Item, a Permanent modifier (\"Permanently give him +2F\") and a static term, and a ruling on whether a permanent bonus is negated for good. Its second ability (put this Terrain into play at a battlefield with no Terrain, even without a unit there) is wireable.",
+    "note": "Warded Premises (Strategy): \"Before this battle's resolution: Negate all Force bonuses from actions to cards at this battlefield.\" Part of the first gap is closed: Creating Order's NegateActionForceModifiers and ActionForceModifierNegated (ForgottenLegacyBatch3.cs) already tell a Force modifier given by an action (a Modifier whose Effect is an action ability) from a trait's standing modifier, and leave tokens alone, and the Terrain's before-resolution timing exists (BeforeResolution.cs). What remains: a bonuses-only variant applied to every card at a battlefield (the existing helper negates penalties too and covers one card for the rest of the turn), and a ruling from Mendon on whether a Permanent bonus (\"Permanently give him +2F\") is negated for good or only suspended and whether Item and token bonuses count. Its second ability (put this Terrain into play at a battlefield with no Terrain, even without a unit there) is wireable.",
     "category": "EFFECT"
   }
 }
