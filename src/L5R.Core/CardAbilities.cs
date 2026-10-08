@@ -6141,7 +6141,7 @@ public sealed partial class MatchEngine
         else if (ability.Target == "provinces")
         {
             Require(command.TargetId is null, "Select province cards together.");
-            var ids = command.CardIds ?? [];
+            var ids = OwnProvinceCardIds(player, command.CardIds ?? []); // a face-down card is named by its place, "hidden-p{owner}-province{n}" (issue #586)
             Require(ids.Length is >= 1 and <= 4 && ids.Distinct().Count() == ids.Length, "Choose one or more different province cards.");
             Require(ids.All(id => _state.Cards.TryGetValue(id, out var c) && c.OwnerId == player.Id && c.Zone == Zone.Province &&
                 player.Provinces.Any(p => !p.Destroyed && p.CardId == id)), "Choose cards in your provinces.");
@@ -10660,8 +10660,16 @@ public sealed partial class MatchEngine
         NextAction(pending.ActingPlayerId!.Value);
     }
 
+    // A face-down province card is named by the id every view gives it ("hidden-p{owner}-province{n}", EmperorP5Hidden.cs), never its real id (issue #586: Border Keep's refresh,
+    // Doubts of Refill). A face-up card keeps its own id; a real id is still accepted, so a caller that already holds one is unchanged.
+    private string OwnProvinceTargetId(PlayerState player, ProvinceState province) =>
+        Card(province.CardId!).FaceUp ? province.CardId! : HiddenProvinceId(player.Id, province.Index);
+    private string[] OwnProvinceCardIds(PlayerState player, string[] ids) =>
+        ids.Select(id => player.Provinces.FirstOrDefault(p => !p.Destroyed && p.CardId is not null && !Card(p.CardId).FaceUp && HiddenProvinceId(player.Id, p.Index) == id)?.CardId ?? id).ToArray();
+
     private void CycleProvinces(PlayerState player, string[] ids)
     {
+        ids = OwnProvinceCardIds(player, ids);
         // The submitted order is the bottom-of-deck order; replacements are revealed together.
         var provinces = ids.Select(id => player.Provinces.Single(p => p.CardId == id)).ToArray();
         foreach (var id in ids)
@@ -11265,7 +11273,7 @@ public sealed partial class MatchEngine
                         foreach (var shownChoice in AlternativeDiscard.Choices(costOption, shownChoices, player, source))
                             foreach (var compareChoice in compareChoices)
                             {
-                                var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
+                                var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
                                 var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
                                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
                                     CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
