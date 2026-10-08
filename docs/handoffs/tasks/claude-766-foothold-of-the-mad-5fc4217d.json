@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Foothold of the Mad (stronghold-wave-48) per Mendon's ruling: 39 Honor for going first then 0 silently at setup, -1F Madness tokens while it is in play, Honor-loss immunity, Fallen discount, two Limited bow abilities. Art pack r1 on batch 4's pack.",
+  "validation": "foothold-of-the-mad suite 7/7; art pack validated (archive and verify-only); full check.sh and CI pending; no native playtest",
+  "remaining": "Publish the art-pack release, CI, merge. Readings in docs/decisions/2026-10-08-foothold-of-the-mad.md await Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/766",
+  "branch": "claude/766-foothold-of-the-mad",
+  "updated": "2026-10-08T20:37:59.376765+00:00"
+}
