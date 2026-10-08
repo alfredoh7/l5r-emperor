@@ -33,6 +33,7 @@ public sealed partial class MatchEngine
         if (ControlsEventEffect(0, "times-of-strife") || ControlsEventEffect(1, "times-of-strife")) Cap(province.PrintedStrength);
         // Ancient Feud (issue #418): "This battlefield's province has a maximum strength equal to its base strength" -- while the Terrain is in play there.
         if (ProvinceIsBattlefieldOfCurrentBattle(province) && TerrainsAtBattlefield(province.Index).Any(t => Definition(t).Effect == "ancient-feud")) Cap(province.PrintedStrength);
+        if (Wave734ProvinceCapped(province)) Cap(province.PrintedStrength); // Mumoku no Oni, Shosuro Tanihara (issue #734): "While attacking at a battlefield, its Province has a maximum strength equal to its printed strength."
         if (P4ProvinceCapped(province)) Cap(province.PrintedStrength); // The Snow Has Teeth (issue #503): "a maximum strength equal to its base strength until the end of the battle".
         return max;
     }

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Batch 3 (#734) merged with main after batches 5-10; art pack r5 on batch 10's pack",
+  "validation": "check.sh --skip-client green on earlier merge; ensure_catalogue_art OK on r5; CI on head; no native playtest",
+  "remaining": "None once CI is green and r5 is published.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/734",
+  "branch": "claude/734-wave-batch-3",
+  "updated": "2026-10-08T17:02:22.876752+00:00"
+}
