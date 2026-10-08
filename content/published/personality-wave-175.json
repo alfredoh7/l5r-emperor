@@ -1,0 +1,65 @@
+{
+  "Profile": "personality-wave-175",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #738.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10841",
+      "Name": "Doji Tatsuki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After another player's turn begins, straighten Tatsuki.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10841.jpg",
+      "Keywords": [
+        "Unique",
+        "Artisan",
+        "Courtier",
+        "Crane Clan",
+        "Experienced",
+        "Orator",
+        "Samurai",
+        "Turquoise Champion"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w738-tatsuki"
+    },
+    {
+      "Id": "oracle-l5r-10872",
+      "Name": "Shosuro Takazaki",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)\nPolitical Engage: Other players do not gain Honor for destroying your cards in this battle's resolution.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10872.jpg",
+      "Keywords": [
+        "Expendable",
+        "Courtier",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w738-takazaki-engage"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

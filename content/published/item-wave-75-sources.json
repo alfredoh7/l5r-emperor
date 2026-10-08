@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10903",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10903",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10903-printing-1-image-1.webp",
+    "image_sha256": "16988914fbfb4170338af7fc453904a51f1f92b0cc4101dddf5b97ff04a2c7d3"
+  },
+  {
+    "card_id": "oracle-l5r-10692",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10692",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10692-printing-1-image-1.webp",
+    "image_sha256": "13b0cca0140891fd4f69001beb1529176aa7285968afa5003d71d46a0832baee"
+  }
+]

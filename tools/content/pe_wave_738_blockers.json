@@ -1,0 +1,10 @@
+{
+  "oracle-l5r-10262": {
+    "note": "Revelations (Event, issue #738): \"Show the top five cards of your Dynasty deck. Choose another player who may discard one of the cards. Put the rest back in any order. Refill this province face-up.\" The scan prints no \"After you reveal\" clause, so it is an ordinary Event that resolves when revealed, but its three steps are not covered by what is merged: P20's \"other player chooses\" belongs to a deck search (a set of picked cards), not to a look at the top of a deck; the look (DeckLook.cs) lets its own player rearrange but has no step in which another player discards one of the shown cards before the rest go back; and the Event's own province must then refill face up from the reordered deck. It needs a look disposition with an other-player discard and a reorder, which is decision-UI work for batch 8 (#739), not a card-level guess.",
+    "category": "SEARCH"
+  },
+  "oracle-l5r-8242": {
+    "note": "The Onyx Championship (Event, issue #738): \"Choose one of your Shugenja in play. Permanently give him Shadowlands and the ability, 'Maho Limited: Bow this Shugenja and destroy your target Personality: Search your discard pile, then deck, then provinces for an Oni Personality. Bring him into play, paying all costs. Lose 3 Honor.'\" The permanent keyword and ability grant are built (GrantKeyword, GrantAbility Permanent), and the ordered search of a discard pile, a deck and the provinces is P20's, but P20 lets a card found in a province enter play only ignoring its costs (SearchEffect.RecruitFromProvinceIgnoringCosts is the sole province recruit and ValidateSearchSpec refuses any other disposition for a province source), while the card prints \"paying all costs\" for every source. The pay-all-costs recruit from a province is not built; publishing the card with the ignoring-costs recruit would change a printed cost.",
+    "category": "SEARCH"
+  }
+}
