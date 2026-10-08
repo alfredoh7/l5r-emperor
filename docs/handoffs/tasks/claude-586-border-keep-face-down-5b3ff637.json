@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Border Keep (first-turn refresh) and Doubts of Refill now offer, accept and resolve face-down province cards by place (hidden-p{owner}-province{n}); real ids still accepted. Client picker labels a face-down card as such.",
+  "validation": "border-keep-face-down suite: 2 of 3 tests fail on the old code, 3 of 3 pass with the fix; published, honor-and-treachery, wl-holdings, emperor-p5 and forgotten-legacy suites pass. Client change is one label string, not built locally (CI only); no native playtest.",
+  "remaining": "Doubts of Refill shares the code but has no dedicated test. Full check.sh and CI pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/586",
+  "branch": "claude/586-border-keep-face-down",
+  "updated": "2026-10-08T18:10:43.368948+00:00"
+}

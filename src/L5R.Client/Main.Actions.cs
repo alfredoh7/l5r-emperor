@@ -434,7 +434,7 @@ public partial class Main
         foreach (var id in action.TargetIds ?? [])
         {
             var card = FindCard(id)!;
-            var check = new CheckBox { Text = $"Province {card.ProvinceIndex + 1} · {ShortName(card)}" };
+            var check = new CheckBox { Text = $"Province {card.ProvinceIndex + 1} · {(card.Definition is null ? "face-down card" : ShortName(card))}" };
             check.AddThemeFontSizeOverride("font_size", 13);
             check.Toggled += yes =>
             {
