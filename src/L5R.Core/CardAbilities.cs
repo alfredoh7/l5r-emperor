@@ -10663,9 +10663,9 @@ public sealed partial class MatchEngine
     // A face-down province card is named by the id every view gives it ("hidden-p{owner}-province{n}", EmperorP5Hidden.cs), never its real id (issue #586: Border Keep's refresh,
     // Doubts of Refill). A face-up card keeps its own id; a real id is still accepted, so a caller that already holds one is unchanged.
     private string OwnProvinceTargetId(PlayerState player, ProvinceState province) =>
-        Card(province.CardId!).FaceUp ? province.CardId! : HiddenProvinceId(player.Id, province.Index);
+        _state.Cards.TryGetValue(province.CardId!, out var held) && !held.FaceUp ? HiddenProvinceId(player.Id, province.Index) : province.CardId!;
     private string[] OwnProvinceCardIds(PlayerState player, string[] ids) =>
-        ids.Select(id => player.Provinces.FirstOrDefault(p => !p.Destroyed && p.CardId is not null && !Card(p.CardId).FaceUp && HiddenProvinceId(player.Id, p.Index) == id)?.CardId ?? id).ToArray();
+        ids.Select(id => player.Provinces.FirstOrDefault(p => !p.Destroyed && p.CardId is not null && _state.Cards.TryGetValue(p.CardId, out var held) && !held.FaceUp && HiddenProvinceId(player.Id, p.Index) == id)?.CardId ?? id).ToArray();
 
     private void CycleProvinces(PlayerState player, string[] ids)
     {
