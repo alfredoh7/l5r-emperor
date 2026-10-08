@@ -1,0 +1,31 @@
+{
+  "Profile": "spell-wave-66",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #732.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10350",
+      "Name": "Opening the Veil",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Stronghold has +1 Gold Production for each Spirit you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10350.jpg",
+      "Keywords": [
+        "Earth",
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

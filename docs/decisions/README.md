@@ -91,3 +91,5 @@ interpretation this register's decision docs already settled.
 - [P20: search and look extensions (#728)](2026-10-07-p20-search-look-extensions.md) — built, engine only, no card wired; province and any-player search sources, multi-select, new criteria and dispositions, other-player-chooses and reveal-until looks.
 
 - [Wirable-card wave plan](2026-10-07-wirable-card-wave-plan.md) — proposed: the 182 wirable unwired cards in ten batches (issues #732 to #741, umbrella #742); 13 cards wait on rulings.
+
+- [Wave batch 1: payment and cost cards (#732)](2026-10-08-wave-batch-1-payment-and-cost.md) — proposed readings: 15 cards wired on P1/P2/P3/P12 (Chiyurei's Axe and Duty Over All Things deferred); the art-pack candidate is unpublished.

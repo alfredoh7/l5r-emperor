@@ -27,7 +27,9 @@ internal static class HoldingProductionTests
          // Issue #667 (PromoPaymentSources.cs): Near Miss (5523) is a 2 Gold payment source from the hand when paying for an attachment.
          "oracle-l5r-5523",
          // Issue #653 (Promotional-Emperor): Imperial Charter prints the CREATED Holding's "Produce 2 Gold" (the published Charter Holding, oracle-l5r-10806, carries it), as Basic Lesson does.
-         "oracle-l5r-9990"];
+         "oracle-l5r-9990",
+         // Issue #732 (Wave732.cs): Ever-Winter Copse (2391) bows for 1 Gold beside another Holding, Truce (10401) is a 2 Gold hand source and Uncovering Treasures (10751) bows for 2 Gold and is discarded: all payment tokens (P1).
+         "oracle-l5r-2391", "oracle-l5r-10401", "oracle-l5r-10751"];
 
     public static void Run(TestRunner runner) => runner.Run("holding-production", [
         ("The four holding-wave-1 Holdings produce the Gold they print: the field carries it and each one alone funds a payment of that size", PrintedProductionIsUsable),
