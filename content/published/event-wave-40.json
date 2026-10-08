@@ -1,0 +1,28 @@
+{
+  "Profile": "event-wave-40",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #736.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10421",
+      "Name": "Rampant Paranoia",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Until your next turn begins, other players' cards will not destroy your Personalities in a defending army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10421.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w736-rampant-paranoia"
+    }
+  ],
+  "Decks": []
+}

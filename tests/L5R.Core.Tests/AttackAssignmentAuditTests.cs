@@ -51,7 +51,7 @@ internal static class AttackAssignmentAuditTests
     private static void EveryPersonality()
     {
         var failures = new List<string>();
-        foreach (var c in CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Type == CardType.Personality && !c.Text.Contains("may not assign", StringComparison.OrdinalIgnoreCase)))
+        foreach (var c in CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Type == CardType.Personality && !c.Text.Contains("may not assign", StringComparison.OrdinalIgnoreCase) && !c.Text.Contains("Suikihime may not attack", StringComparison.OrdinalIgnoreCase))) // issue #736: Otomo Suikihime - exp prints "Suikihime may not attack"
         {
             var r = TryAssign(c.Id);
             if (r is not null) failures.Add($"{c.Name} ({c.Id}): {r}");
