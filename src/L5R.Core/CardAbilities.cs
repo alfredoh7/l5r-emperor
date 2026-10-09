@@ -1378,9 +1378,8 @@ public static class AbilityCatalog
         ["scorn-the-weak"] = new("Battle", "Target an enemy Personality: Give him -5F. If his Force is now 0, his controller loses 1 Honor and you may target and dishonor a Personality", "enemy-personality"),
         // Strength in Terror (oracle-l5r-7538): "Battle: Choose your performing Paragon and target
         // an enemy Personality: Reduce his Force by an amount equal to your Paragon's Force. You
-        // may target and destroy one of the Personality's attachments. Lose 3 Honor." No "unbowed"
-        // qualifier on the Performer, the same shape surety-of-purpose already established for a
-        // bare "Choose your performing Paragon." The dynamic Force reduction reads the chosen
+        // may target and destroy one of the Personality's attachments. Lose 3 Honor." No "unbowed" qualifier on the Performer, so a bowed Paragon may perform it (Mendon, 2026-10:
+        // a card that does not say unbowed may be performed by a bowed Personality). The dynamic Force reduction reads the chosen
         // Performer's own live CardForce, the same self-referential shape legulus-legion-attack
         // already established for a Follower's own Force, just against a separately-chosen
         // Performer instead of the source card itself. The optional attachment-destroy is CardIds'
@@ -7639,6 +7638,8 @@ public sealed partial class MatchEngine
                     ApplyModifier(target!, source!.Id, id, "Force", -CardForce(performer));
                     if (command.CardIds is { Length: 1 } terrorAttachmentIds) DestroyAttachment(Card(terrorAttachmentIds[0]));
                     GainHonor(player.Id, -3, "Strength in Terror", source);
+                    // "You may destroy one of his attachments": asked now unless the command already named one.
+                    if (command.CardIds is not { Length: 1 } && BeginStrengthInTerrorChoice(command, source, target!, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                     break;
                 }
             case "strength-of-purity": ApplyModifier(Card(command.PerformerId!), source!.Id, id, "Force", 3); break;
