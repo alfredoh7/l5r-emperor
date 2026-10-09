@@ -45,4 +45,4 @@ Adding Kaitoko to the card pool changed the random decks of CI's bot soak (seed 
 
 ## Art pack
 
-The new scan (`oracle-l5r-10473.jpg`) is covered by `catalogue-art-issue768-20261008-r1` (4,624 images, 617,655,294 bytes, SHA-256 `83ac52fb6a1690efd06cd20e56d08336411e9fc827303817a53b28c1632f11bc`), built with `--base-archive` from Foothold of the Mad's pack `catalogue-art-issue766-20261008-r1` (4,623 images). Native visual and playability review has not been done.
+The new scan (`oracle-l5r-10473.jpg`) is covered by `catalogue-art-issue768-20261008-r2` (4,627 images, 618,037,080 bytes, SHA-256 `635d3e16f660aa67f2ff43a3e8a6ac64141ceba9dd667e6963477564c55eb0d2`), built with `--base-archive` from Journey's End Keep's pack `catalogue-art-issue771-20261008-r1` (4,626 images). Native visual and playability review has not been done.

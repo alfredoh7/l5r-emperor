@@ -10,9 +10,5 @@
   "oracle-l5r-10558": {
     "note": "The Heavens' Blessing (Strategy, issue #733): two Open effects. \"No player can gain Honor in Action Phases (this turn)\" is a P14 no-gain modifier with the action-phase-only filter, but the first, \"Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase\", has no home: Draw has no source, so a draw made by a Strategy's effect cannot be told from any other, and a payment asked in the middle of an effect (declinable, with the draw lost) has no decision for it. Publishing only the second sentence would drop printed text.",
     "category": "COST"
-  },
-  "oracle-l5r-10821": {
-    "note": "Marriage of the Emerald Champion (Event, issue #733): \"Limited: Put this Event into play. Target your Personality. While this Event remains in play, he will not be dishonored and you will not lose Honor from other players' actions that have targeted him. After your second turn from now begins, discard this Event.\" Wirable now on merged pieces: KeepEventInPlay with turnBeginsIn 2, a P11 dishonor bar and a P14 targeted-by-other filter. The binding the first note thought missing exists: an Event that chooses its target at reveal and stays in play is built for Delayed Arrival (a PendingEventChoice answered in ResolveEventChoiceCommand, the target kept in EventTargets, FinishRevealedEvent with keep and turnBeginsIn), and later waves add their Event answers with one hook line in that method's default arm (ResolveWave738EventChoice, ResolveP5EventChoice). This card needs the same one hook and its own record, not a new shared mechanism. The pieces have not been exercised together.",
-    "category": "WIRE"
   }
 }

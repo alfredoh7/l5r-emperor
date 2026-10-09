@@ -110,7 +110,7 @@ public sealed partial class MatchEngine
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength, PrintedStrength = stronghold.ProvinceStrength }).ToList();
         }
         // Same starting-Honor ordering as the published setup; seeded tie break.
-        state.ActivePlayerId = FirstPlayerAtSetup(state, (int)(seed % 2)); ApplyFootholdStartHonor(state); // Foothold of the Mad (issue #766, Foothold.cs): counts as 39 here, then 0
+        state.ActivePlayerId = FirstPlayerAtSetup(state, (int)(seed % 2)); ApplyFootholdStartHonor(state); ApplyImperialSetup(state); // Foothold of the Mad (issue #766, Foothold.cs); Journey's End Keep's Favor (issue #771, Wave771.cs): counts as 39 here, then 0
         var second = 1 - state.ActivePlayerId;
         Add(second, drafts[second].Cards.Single(c => c.SetupSlot == "Bamboo Harvesters").Id, Zone.Home, true, true);
         OrderCardsById(state);

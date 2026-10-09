@@ -63,7 +63,7 @@ public sealed partial class MatchEngine
     private bool StraightenHeld(CardInstance card)
     {
         SeedPrintedStraightenHolds(card);
-        card.StraightenHolds.RemoveAll(h => h.WhileInPlay is { } source && !(_state.Cards.TryGetValue(source, out var held) && InPlay(held)));
+        card.StraightenHolds.RemoveAll(h => h.WhileInPlay is { } source && !(_state.Cards.TryGetValue(source, out var held) && KeptInPlay(held)));
         return card.StraightenHolds.Count > 0;
     }
 
@@ -73,7 +73,7 @@ public sealed partial class MatchEngine
     // The same for the view, which must not change the state: a printed hold not yet seeded counts when it would be created standing.
     private bool StraightenRefusedInView(CardInstance card) =>
         card.StraightenLockedTurn == _state.TurnNumber || IsTerrainCard(card)
-        || card.StraightenHolds.Any(h => h.WhileInPlay is not { } source || _state.Cards.TryGetValue(source, out var held) && InPlay(held))
+        || card.StraightenHolds.Any(h => h.WhileInPlay is not { } source || _state.Cards.TryGetValue(source, out var held) && KeptInPlay(held))
         || !card.PrintedHoldsSeeded && InPlay(card) && PrintedStraightenTurn(Definition(card)) is > 0 and var turn && turn - 1 - Player(card.OwnerId).TurnsTaken >= 0;
 
     // A point of the active player's turn has come: the holds waiting for it count it, and a hold whose count is spent is released.

@@ -40,7 +40,7 @@ public sealed partial class MatchEngine
         _playerGrantAbilityIds ??= new HashSet<string>(EngineHooks.PlayerGrantAbilities.Items.SelectMany(ids => ids()), StringComparer.Ordinal);
 
     private bool PlayerGrantLive(PlayerAbilityGrant grant) =>
-        !UntilPassed(grant.Until) && (grant.WhileInPlay is not { } cardId || _state.Cards.TryGetValue(cardId, out var card) && InPlay(card));
+        !UntilPassed(grant.Until) && (grant.WhileInPlay is not { } cardId || _state.Cards.TryGetValue(cardId, out var card) && KeptInPlay(card));
 
     /// <summary>Whether <paramref name="playerId"/> holds a live grant of the ability.</summary>
     internal bool PlayerAbilityGranted(int playerId, string abilityId) =>

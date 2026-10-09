@@ -91,7 +91,7 @@ internal static class Wave736Tests
             Check(d.Type == want.Type && (d.Abilities ?? []).SequenceEqual(want.Abilities) && d.Effect == want.Effect && d.EntryHonorLoss == want.EntryLoss, $"{d.Name} is published as wired");
             Check(!d.CreatedOnly && !string.IsNullOrWhiteSpace(d.Text), $"{d.Name} prints its text and is playable");
         }
-        foreach (var id in new[] { CleansingBreath, Ryuzo, PanKuExp, Jingasa, Kaiji, Bonds }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published");
+        foreach (var id in new[] { CleansingBreath, Ryuzo, PanKuExp, Jingasa, Kaiji }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
         Check(CardCatalog.Cards.ContainsKey(Kaitoko), "Asako Kaitoko - exp, deferred by this batch for want of a stat cap, was published by issue #768");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w736-", StringComparison.Ordinal)), 11, "eleven w736 abilities");
     }
