@@ -19,7 +19,7 @@ public static partial class TrainingOpponent
     private static double AbilityScore(Ctx x, ActionOption action, GameCommand command)
     {
         var id = command.AbilityId;
-        if (id is "border-first" or "border-game") return id == "border-first" ? 140 : 35;
+        if (id is "border-first" or "border-game") return id == "border-first" ? 140 : BorderRefreshWanted(x) ? 175 : 35;
         if (id == "shunya-honor") return 100;
         // Deck search (issue #312): a modest bot uses Ikoma Shizuka's search when nothing more useful is on offer (just above passing), which is what lets a whole
         // AI-vs-AI match exercise the full search flow.

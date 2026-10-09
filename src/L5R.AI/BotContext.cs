@@ -19,9 +19,14 @@ public sealed class BotContext
     private readonly Dictionary<string, bool> _uniqueByName = new(StringComparer.Ordinal);
     private int _lobbyTurn = -1;
     private int _favorTakenTurn = -1;
+    private int _borderRefreshTurn = -1;
 
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
+
+    /// <summary>Remembers that the Border Keep's refresh was used this turn, so the bot recruits Personalities with the fresh cards (issue #788).</summary>
+    public void NoteBorderRefresh(int turn) => _borderRefreshTurn = turn;
+    public bool BorderRefreshedRecently(int turn) => _borderRefreshTurn >= 0 && turn - _borderRefreshTurn <= 1;
 
     /// <summary>Records every face-up card in a public zone of either player. Safe to call on every decision.</summary>
     public void Observe(MatchView view)

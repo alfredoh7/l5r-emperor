@@ -25,7 +25,7 @@ public static partial class TrainingOpponent
         memory.Observe(view);
         var self = view.Players.Single(p => p.Id == view.ViewerId);
         var opponent = view.Players.Single(p => p.Id != view.ViewerId);
-        var x = new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view));
+        var x = new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view)) { Actions = actions, Odds = BattlePolicy.Assess(view) };
         var candidates = actions.Where(a => a.Enabled && a.Type is not ("concede" or "wait"))
             .Select(a => (Action: a, Command: Prepare(x, a)))
             .Where(p => p.Command is not null && !memory.IsRejected(view.Version, p.Command))
@@ -42,6 +42,10 @@ public static partial class TrainingOpponent
     /// <summary>Everything one decision reads, built once from the permitted view.</summary>
     private sealed record Ctx(MatchView View, PlayerView Self, PlayerView Opponent, BotProfile Profile, BotContext Memory, Dictionary<string, CardView> Cards)
     {
+        /// <summary>Every action offered at this decision (issue #788: a rule may need to know whether a better one exists).</summary>
+        public ActionOption[] Actions { get; init; } = [];
+        /// <summary>The Force picture of the battle in progress, or null outside one.</summary>
+        public BattlePolicy.Odds? Odds { get; init; }
         public int MaxHand => Self.HandLimit?.Maximum ?? 8;
         public CardView? Card(string? id) => id is not null && Cards.TryGetValue(id, out var c) ? c : null;
     }
@@ -114,6 +118,12 @@ public static partial class TrainingOpponent
         }
         if (action.Type == "useAbility")
         {
+            // Issue #788 (rule 6): with 22 or more Gold and most provinces holding holdings or unseen cards, the once-per-game refresh cycles exactly those.
+            if (command.AbilityId == "border-game" && BorderRefreshWanted(x) && BorderRefreshCards(x, action.TargetIds ?? []) is { Length: > 0 } cycled)
+            {
+                x.Memory.NoteBorderRefresh(view.TurnNumber);
+                return command with { CardIds = cycled };
+            }
             if (command.AbilityId is "border-first" or "border-game")
             {
                 var ready = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
@@ -138,7 +148,10 @@ public static partial class TrainingOpponent
                 if (legal.Length == 0) return null;
                 var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view)))
                     .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
-                var target = known.Card ?? PickCard(x, legal, intent, action.Label);
+                // Issue #788: an Attack takes the highest-Force target it can destroy, and a bow takes the unit with the most attachments (or the most dangerous printed ability).
+                var ruled = intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
+                    : intent.Rank == EffectRank.Bow && intent.Side == TargetSide.Enemy ? PickBowTarget(x, legal, command.AbilityId) : null;
+                var target = ruled ?? known.Card ?? PickCard(x, legal, intent, action.Label);
                 if (target is not null) command = WithTarget(command, action, target.Id);
                 else if (command.TargetId is null) command = WithTarget(command, action, legal[0]);
                 if (command is null) return null;
@@ -150,7 +163,8 @@ public static partial class TrainingOpponent
             var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id) && !refusedTargets.Contains(c.Id)).ToArray();
             if (targetCards.Length == 0) return refusedTargets.Count > 0 ? null : Complete(x, action, command);
             var ordered = targetCards.OrderBy(c => c.Bowed).ThenByDescending(c => c.Force);
-            var withTarget = WithTarget(command, action, ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
+            var bowStrategy = action.Type == "playStrategy" && x.Card(command.CardId)?.Definition?.Effect == "bow-small" ? PickBowTarget(x, targetCards.Select(c => c.Id).ToArray(), null) : null;
+            var withTarget = WithTarget(command, action, bowStrategy?.Id ?? ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
             return withTarget is null ? null : Complete(x, action, withTarget);
         }
         return Complete(x, action, command);
@@ -167,7 +181,9 @@ public static partial class TrainingOpponent
         return command;
     }
 
-    private static double Score(Ctx x, ActionOption action, GameCommand command)
+    private static double Score(Ctx x, ActionOption action, GameCommand command) => Adjust(x, action, command, ScoreCore(x, action, command));
+
+    private static double ScoreCore(Ctx x, ActionOption action, GameCommand command)
     {
         var view = x.View; var self = x.Self; var opponent = x.Opponent;
         var card = self.Provinces.Select(p => p.Card).Concat(self.Hand).FirstOrDefault(c => c?.Id == command.CardId);
@@ -196,7 +212,7 @@ public static partial class TrainingOpponent
                 var holdings = self.Home.Count(c => c.Definition?.Type == CardType.Holding);
                 if (def.Type == CardType.Holding)
                     return holdings < 5 ? 160 - holdings * 10 : holdings < 8 ? 70 - holdings : 5;
-                var baseScore = 110 + def.Force * 2 + def.PersonalHonor * 2;
+                var baseScore = 110 + def.Force * 2 + def.PersonalHonor * 2 + (x.Memory.BorderRefreshedRecently(view.TurnNumber) ? 30 : 0); // issue #788: recruit Personalities from a refresh
                 var cost = action.Quote?.Cost ?? def.GoldCost;
                 var ready = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
                 var stance = x.Profile.StanceFor(self.Honor, opponent.Honor, ready - cost >= 2);
@@ -248,7 +264,7 @@ public static partial class TrainingOpponent
             case "selectSearchCards": case "chooseSearchAttachTarget": return 100; // P20 (SearchExtensions.cs): the engine's default legal selection; the first Personality it can be attached to
             // "Put it into play or your hand" (issue #498): a modest bot puts the found Ring into play; the Attack target selection step: any offered target over none.
             case "chooseSearchDestination": return command.Choice == "play" ? 100 : 90;
-            case "chooseAttackTarget": return command.TargetId is null ? 50 : 100;
+            case "chooseAttackTarget": return AttackTargetChoiceScore(x, command);
             // Goju Asuka / Only a Shadow (issue #501): the Personality kept bowed is the engine's first listed candidate (every answer is legal and one is owed).
             case "chooseInfiltratorStraighten": return 100;
             // Look at the top N cards (issue #322): a modest bot answers a look with the first arrangement the engine offers -- the

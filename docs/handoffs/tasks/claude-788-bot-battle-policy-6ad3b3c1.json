@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Implements Mendon's six practice-bot battle changes inside src/L5R.AI only: pass once a battle is decided (exceptions: Honor gain/loss, safe move to an opposed battlefield, removing a threatening enemy Personality; in-play abilities before hand cards), melee/ranged target = highest Force the attack can destroy with augments and unit gold tiebreak, bow target priority by attachments or printed threat, losing-defender send-home rule, first-action reactions only when the battle is not decided (destroy>bow>move>penalize>other), Border Keep once-per-game refresh at 22+ Gold. Decision record docs/decisions/2026-10-09-bot-battle-policy.md lists the interpretations. No UI, Core or message change; no open PR touched L5R.AI.",
+  "validation": "dotnet run --project tests/L5R.AI.Tests: all suites pass including 9/9 new battle-policy cases and the random-deck bot soak (no stalls/rejections). tools/check.sh --skip-client result recorded in the PR. Not validated: expert review of bot play quality in real matches; the bot's decisions in a full native practice match were not watched.",
+  "remaining": "Owner playtest of the new behaviour; confirm the interpretations in the decision record (random tie-break as fixed id order, cannot-win approximation for rule 4).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/788",
+  "branch": "claude/788-bot-battle-policy",
+  "updated": "2026-10-09T20:56:58.150300+00:00"
+}

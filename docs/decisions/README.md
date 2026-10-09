@@ -105,3 +105,5 @@ interpretation this register's decision docs already settled.
 - [Foothold of the Mad (#766)](2026-10-08-foothold-of-the-mad.md) — Mendon's ruling: counts as 39 Honor for going first, then 0, silently; Madness tokens are -1F tokens while it is in play; wired with its Honor-loss immunity, Fallen discount and two Limited abilities
 - [Force cap primitive and Asako Kaitoko - exp (#768)](2026-10-08-force-cap-and-kaitoko.md) — a live maximum-Force rule (lowers, never raises, lapses with its source, negated by Force-penalty negations and immunities) and the card that uses it, with its keyword-conditioned target bar
 - [Bayushi Kachiko (#778)](2026-10-09-bayushi-kachiko.md) — Mendon's broad reading of "attacks": the first assignment to, or move into, an attacking army costs the target's controller 2 Honor; wired with her -1F term
+
+- [Practice bot battle policy](2026-10-09-bot-battle-policy.md) — accepted (owner spec): pass when the battle is decided, attack/bow target priorities, send-home rule, first-action reactions and the Border Keep refresh.
