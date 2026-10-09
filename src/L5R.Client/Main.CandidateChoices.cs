@@ -39,7 +39,7 @@ public partial class Main
             if (candidate.Cards.FirstOrDefault() is { } card)
             {
                 var face = new DecisionSourceFace(card, 172, context: "Available choice", interactionHint: "Click to select this option. Confirm choice commits the decision.");
-                face.Pressed += () => SelectCandidateOption(option);
+                face.Pressed += () => SelectCandidateOption(option); LinkToTable(face, candidate.Cards.Select(c => (string?)c.Id));
                 face.Disabled = !option.Enabled || option.Command is null || !DecisionCanSubmit;
                 var outline = new PanelContainer();
                 var border = SidebarSkin.Inset(); border.ModulateColor = ReferenceEquals(_decisionSelection, option) ? new Color(1.12f, 1.06f, .94f) : Colors.White;
@@ -49,7 +49,7 @@ public partial class Main
                 () => SelectCandidateOption(option));
             button.SetMeta("candidate_key", option.Command?.Choice ?? option.Command?.TargetId ?? option.Label);
             button.CustomMinimumSize = new(220, 88); button.Disabled = !option.Enabled || option.Command is null || !DecisionCanSubmit;
-            button.AddThemeFontSizeOverride("font_size", 15); box.AddChild(button);
+            button.AddThemeFontSizeOverride("font_size", 15); box.AddChild(button); LinkToTable(button, candidate.Cards.Select(c => (string?)c.Id));
             if (!option.Enabled) box.AddChild(Palette.Wrapped(option.Reason ?? "Unavailable", 14, Palette.PaperDim));
         }
         FitCandidateChoices();

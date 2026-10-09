@@ -658,6 +658,7 @@ public partial class Main : Node
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is { Type: "harshChoices", CardId: { } harshCard } && tile.Card.Id == harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
             tile.Highlighted |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
+            tile.Highlighted |= _chosen?.Command?.PerformerId == tile.Card.Id; // issue #789: the performer of the prepared action is marked on the table
             tile.Highlighted |= _hoveredPaymentCardId == tile.Card.Id; // issue #667: the payment method under the pointer names its card
             tile.LegalTarget |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;

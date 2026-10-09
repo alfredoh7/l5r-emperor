@@ -41,7 +41,7 @@ public partial class Main
         var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 14); _inspector.AddChild(row);
         if (source?.Definition is not null)
         {
-            var face = new DecisionSourceFace(source, 172); row.AddChild(face);
+            var face = new DecisionSourceFace(source, 172); row.AddChild(face); LinkToTable(face, source.Id);
             face.Pressed += () => { var (_, body) = Dialog(payment.SourceName, 720, 720); body.AddChild(CardPreview.Face(source, 510)); body.AddChild(Palette.Wrapped(source.Definition.Text, 17)); };
         }
         var context = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
