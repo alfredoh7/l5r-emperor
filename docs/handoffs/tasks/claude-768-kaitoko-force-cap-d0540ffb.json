@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Force cap and Kaitoko wired; Mendon's 2026-10-09 rulings applied: Peace of the Kami lifts the cap, Creating Order does not, a Strategy with a performer is barred by the performer's keywords; Foothold's two Limited abilities usable after a straighten (tested). Art pack still needs rebuilding on main's latest before merge.",
-  "validation": "force-cap 6/6, kaitoko 9/9, foothold-of-the-mad 8/8; full check.sh --skip-client passed on f2c6a093 before this change; CI and a final full check pending; no native playtest",
-  "remaining": "Merge main, rebuild art pack r2 on main's latest, publish release, CI, full check, merge. See the PR comment.",
+  "summary": "Merged current main (Journey's End Keep, Bonds of Hospitality, Otosan Uchi second-slot fix taken from main); art pack rebuilt as catalogue-art-issue768-20261008-r2 on issue771-r1.",
+  "validation": "Pending: full check.sh --skip-client and CI after merge",
+  "remaining": "Publish r2 release, CI, merge",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/768",
   "branch": "claude/768-kaitoko-force-cap",
-  "updated": "2026-10-09T00:49:35.908610+00:00"
+  "updated": "2026-10-09T02:17:58.490191+00:00"
 }
