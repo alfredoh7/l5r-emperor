@@ -20,6 +20,8 @@ try
     {
         ("current battle values survive both public server envelopes; review export stays unavailable", BattleValuesProjection),
         ("payment source methods and private entry candidates survive the server envelope", () => { GameplayControlsProjection(); return Task.CompletedTask; }),
+        ("public response context survives server state and client projection without changing actions or exposing a hand", () => { ReactionPresentationProjection(); return Task.CompletedTask; }),
+        ("prepared review positions retain replay export restrictions until ordinary practice starts", PreparedReviewTests.Run),
         ("private duel round trip retains own focus, result and priority through reconnect", () => PrivateDuel(url,duelRoom,duelTokens)),
         ("live duel queue preserves immediate results, reconnects and back-to-back presentations", DuelQueue),
         ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),
@@ -74,6 +76,38 @@ static void GameplayControlsProjection()
             if (kind == "entry")
                 Check(received.Any(a => a.DecisionCandidateIds?.Length > 0) == (viewer == seat), "Private entry candidates were dropped or exposed to the waiting seat");
         }
+    }
+}
+
+static void ReactionPresentationProjection()
+{
+    var engine = MatchEngine.CreateGameplayControlsShowcase("honor-reaction");
+    Check(engine.State.PendingChoice?.Type == "honorChangeReaction", "Fixture must offer a real optional Honor response");
+    var web = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    ReactionPresentationView? publicContext = null;
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        var view = engine.GetView(viewer);
+        Check(view.ReactionPresentation is not null, "Server omitted the active response context");
+        if (publicContext is null) publicContext = view.ReactionPresentation;
+        else Check(publicContext == view.ReactionPresentation, "Response context exposed seat-specific information");
+        var actions = engine.QueryActions(viewer);
+        var message = new StateMessage("state", "ROOM", viewer, engine.Version, view,
+            actions.Select(AvailableAction.FromCore).ToArray(), [true, true]);
+        var json = JsonSerializer.Serialize(message, Protocol.Json);
+        var current = JsonSerializer.Deserialize<StateMessage>(json, Protocol.Json)!;
+        Check(current.View.ReactionPresentation == view.ReactionPresentation, "Strict current server state lost the response context");
+        using var document = JsonDocument.Parse(json);
+        var receivedView = document.RootElement.GetProperty("view").Deserialize<MatchView>(web)!;
+        Check(receivedView.ReactionPresentation == view.ReactionPresentation, "Actual client Web projection lost response context");
+        Check(receivedView.Players.Single(p => p.Id != viewer).Hand.Length == 0, "Response context exposed opponent hand");
+        var receivedActions = document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!;
+        receivedActions = receivedActions.Select(a => a with { Command = a.Command is null ? null : a.Command with { PlayerId = viewer, ExpectedVersion = engine.Version } }).ToArray();
+        Check(JsonSerializer.Serialize(receivedActions, Protocol.Json) == JsonSerializer.Serialize(actions, Protocol.Json), "Presentation changed the authoritative offered commands");
+        var older = JsonSerializer.SerializeToNode(message, Protocol.Json)!;
+        older["view"]!.AsObject().Remove("reactionPresentation");
+        Check(older.Deserialize<StateMessage>(Protocol.Json)!.View.ReactionPresentation is null,
+            "Older state payload must remain accepted without inventing response context");
     }
 }
 

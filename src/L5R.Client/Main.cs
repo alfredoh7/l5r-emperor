@@ -69,6 +69,7 @@ public partial class Main : Node
             _uiQueue.Enqueue(() =>
             {
                 if (generation != _session.Generation) return;
+                ObserveDecisionSession(snapshot);
                 if (_matchDuelGeneration != generation) { _matchDuelFlow.Reset(); _matchDuelGeneration = generation; }
                 _matchDuelFlow.Observe(snapshot); Render(); if (snapshot is not null) AutoProclaim(snapshot);
             });
@@ -173,6 +174,7 @@ public partial class Main : Node
             _session.StepPracticeReaction();
         }
         if (_capturePath is not null && _captureMode.StartsWith("published-decisions", StringComparison.Ordinal)) { ProcessDecisionCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-reaction-flow", StringComparison.Ordinal)) { ProcessReactionFlowCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal)) { ProcessDirectPlayCapture(delta); return; }
@@ -488,6 +490,8 @@ public partial class Main : Node
         else if (key.Keycode == Key.Escape && _playProceed is not null) { ProceedCardPlay(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
+        else if (key.Keycode == Key.Escape && (_chosen is not null || _decisionSelection is not null || _reviewingAlternativeCost))
+        { CancelChoice(); ClearMultiTargets(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _battleSequenceOpen)
         { _battleSequenceOpen = false; RenderInspector(); _battleProgressStrip?.Present(ProgressSegment, false); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
@@ -499,6 +503,7 @@ public partial class Main : Node
 
     private void Render()
     {
+        ObserveDecisionSession(_session.Snapshot);
         if (_transitionReview && _transitionRoom is not null) return;
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
         if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
@@ -731,15 +736,22 @@ public partial class Main : Node
 
     private async Task Submit(GameCommand command)
     {
+        if (_session.Snapshot is null || _submissionInFlight || _session.Busy ||
+            command.ExpectedVersion != _session.Snapshot.View.Version || command.PlayerId != _session.Snapshot.View.ViewerId) return;
         if (_provinceReviewView is not null || _battlefieldReviewView is not null) { SetNotice("Presentation preview · game actions are disabled."); return; }
         if (PresentationBusy || _playHeld) return;
         if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))
         {
             SetNotice("Both players need to be connected before continuing."); return;
         }
+        var token = ++_submissionToken;
+        _submissionInFlight = true;
+        RememberSubmissionInput();
+        TrackReactionSubmission(command);
         _chosen = null; _playPrompt = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
         Highlight();
-        await _session.Submit(command);
+        try { await _session.Submit(command); }
+        finally { if (_submissionToken == token) _submissionInFlight = false; }
     }
 
     private static string ShortName(CardView card) => card.Definition?.Name.Replace("training ", "").Replace("Training ", "") ?? "Hidden card";

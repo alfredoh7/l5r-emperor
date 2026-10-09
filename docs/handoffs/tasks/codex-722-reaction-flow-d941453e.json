@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Integrated main into the reaction-flow branch; reaction button now reads Skip Reaction / Play Reaction / Resolve Reaction; the target step is announced and scrolled into view; fixed confirm-first prompt hijacking reaction-window options; added a Forest Cover review scene; updated native captures for table-click Gold payment.",
+  "validation": "check.sh --skip-client passed on the merge; Core tests exit 0 after label changes; native reaction-flow 4/4, direct-play, stabilization all modes, multi-target, gold-payment, action-lock, attack-targets, card-deselection, created-copies, decision-chooser, event-decisions, movement, opponent-payment, province-target, either-or, copy-ui (normal+reduced) pass; Mendon played the Forest Cover and Horibe/Ruya scenes on Windows and confirmed attaching a Follower and Ruya work",
+  "remaining": "Native checks failing on main as well and not fixed here: persistent-home (Choose reflection ambiguity), battle-sequence-ui (generic Confirm choice flow vs contextual reaction UI), interactions, support-cards. Follow-up PR: bidirectional sidebar/table highlight.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/722",
+  "branch": "codex/722-reaction-flow",
+  "updated": "2026-10-09T20:05:37.367912+00:00"
+}

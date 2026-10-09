@@ -74,7 +74,7 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId), BuildShownCards(), BuildLookView(playerId), BuildCopyView(playerId), BuildEitherOrView(playerId), BuildOpponentPaymentView(playerId),
             _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildPendingAttackCue(), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
-        { PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
+        { ReactionPresentation = BuildReactionPresentation(), PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
     }
 
     // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
@@ -167,9 +167,9 @@ public sealed partial class MatchEngine
                 Add("useAbility", text, command, why, card.Id, provinces: destinations, gold: gold);
             }
         }
-        // An entering-play Reaction that targets a card in play (Mastering the Elements, issue #420: "target your Spell"): one option carrying every legal target, each with its own Gold quote when the
+        // A Reaction that targets a card in play (Mastering the Elements' entry, Tamori Ruya's bow): one option carrying every legal target, each with its own Gold quote when the
         // cost comes from the target, the way an ordinary ability is listed; disabled, with the first reason, when no target is legal.
-        void AddTargetedEntryReaction(CardInstance card, string abilityId, string? reason)
+        void AddTargetedReaction(CardInstance card, string abilityId, string? reason)
         {
             var ability = AbilityCatalog.All[abilityId];
             var legal = new List<(GameCommand Command, GoldQuote? Gold)>(); string? firstError = null;
@@ -265,7 +265,7 @@ public sealed partial class MatchEngine
                         continue;
                     }
                     if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
-                    else AddTargetedEntryReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
+                    else AddTargetedReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
                 // only relevant once a Personality is what entered.
@@ -276,7 +276,7 @@ public sealed partial class MatchEngine
                         AddReaction(card, watchId);
                 // The Spider's Web (issue #486, batch 3): the controller's own Stronghold watching the entry, one option per legal Weapon in the hand.
                 foreach (var watchId in StrongholdEntryWatchers(playerId, enteringCard))
-                    AddTargetedEntryReaction(Card(player.StrongholdId), watchId, null);
+                    AddTargetedReaction(Card(player.StrongholdId), watchId, null);
                 // Shinjo Ki-Chang - exp (issue #492, proxy group Y): an in-play Personality watching the entry, listed disabled with the reason while it cannot be used (spent, bowed).
                 foreach (var (watcher, watchId) in InPlayEntryWatchers(playerId, enteringCard))
                     AddReaction(watcher, watchId, validate: true);
@@ -402,6 +402,8 @@ public sealed partial class MatchEngine
                     if (AbilityCatalog.All[reactionId].Target == "bow-reaction-candidate")
                         foreach (var candidateId in _state.BowReactionCandidateIds)
                             AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null, targetId: candidateId, label: $"{AbilityCatalog.All[reactionId].Label} · {Definition(Card(candidateId)).Name} ({candidateId})", validate: true);
+                    else if (AbilityCatalog.All[reactionId].Target is not ("none" or "player"))
+                        AddTargetedReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
                     else AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
                 }
             }

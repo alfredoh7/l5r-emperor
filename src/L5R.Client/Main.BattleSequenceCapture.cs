@@ -93,7 +93,9 @@ public partial class Main
     private async Task SequenceNativePhase(string type)
     {
         await SequenceSeat(); var action = Actions.Single(a => a.Enabled && a.Type == type);
-        var button = StabilizationButtons(_phaseActions).Single(b => b.Text == action.Label);
+        var button = type == "declineReaction"
+            ? StabilizationButtons(_decisionActions).Single(b => b.Name == "ReactionDecline" && b.IsVisibleInTree() && !b.Disabled)
+            : StabilizationButtons(_phaseActions).Single(b => b.Text == action.Label);
         var version = View.Version; await SupportClick(button); await WaitDecisionPresentation(); await EventFrames(18);
         SupportRequire(View.Version > version, "Native phase button did not submit " + type);
     }
@@ -132,9 +134,9 @@ public partial class Main
             _battleProgressStrip!.StepButton(3).GrabFocus(); await LookKey(Key.Enter);
             SupportRequire(_battleSequenceOpen && View.Version == version, "Keyboard sequence inspection changed game"); await SupportCapture("-sequence");
             await SupportClick(_battleProgressStrip.StepButton(3)); SupportRequire(!_battleSequenceOpen, "Sequence did not close");
-            await SupportClick(StabilizationButtons(_inspector).Single(b => b.Text.StartsWith("Naval Invasion:")));
+            await SupportClick(StabilizationButtons(_inspector).Single(b => b.IsVisibleInTree() && !b.Disabled && b.HasMeta("reaction_ability") && b.GetMeta("reaction_ability").AsString() == "naval-invasion"));
             SupportRequire(_chosen?.Command?.AbilityId == "naval-invasion", "Naval action button did not prepare the real command");
-            await SupportClick(StabilizationButtons(_decisionActions).Single(b => b.Text == "Confirm action")); await WaitDecisionPresentation(); await EventFrames(18);
+            await SupportClick(ReviewedCommitButton()); await WaitDecisionPresentation(); await EventFrames(18);
             while (View.PendingChoice?.Type == "engageReaction") await SequenceNativePhase("declineReaction");
             await SequenceSeat(); CheckSequenceLayout();
             SupportRequire(View.BattleStep is { FirstActionReason: BattleSteps.ReasonNaval, FirstActionLimit: BattleSteps.LimitPerformerOnly }, "Naval result not displayed"); await SupportCapture("-naval");

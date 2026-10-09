@@ -27,6 +27,9 @@ public sealed partial class MatchSession : IDisposable
     public string MatchKey { get; private set; } = Guid.NewGuid().ToString("N");
     public RoomSeat? Seat { get; private set; }
     private MatchEngine? _engine;
+    // FromTestState review positions have no reconstructible replay initial state.
+    // Keep this lifecycle flag in the session, including across hotseat changes.
+    private bool _preparedReview;
     private ClientWebSocket? _socket;
     private CancellationTokenSource? _connection;
     private readonly SemaphoreSlim _sendLock = new(1, 1);
@@ -43,6 +46,7 @@ public sealed partial class MatchSession : IDisposable
         // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
         _engine = published ? MatchEngine.CreatePublishedMatch(seed) : economy ? MatchEngine.CreateEconomyScenario(seed) : MatchEngine.CreateStarterMatch(seed);
+        _preparedReview = false;
         MatchKey = Guid.NewGuid().ToString("N");
         _localSeat = published ? seat : _engine.State.ActivePlayerId;
         _practiceNameSeat = _localSeat;
@@ -55,6 +59,7 @@ public sealed partial class MatchSession : IDisposable
         if (seat is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(seat));
         Generation++; Disconnect();
         _engine = MatchEngine.CreateDuelDemo(scenario, seed);
+        _preparedReview = false;
         _localSeat = _practiceNameSeat = seat;
         RefreshLocal();
     }
@@ -72,7 +77,7 @@ public sealed partial class MatchSession : IDisposable
     public void LeavePrivateTable()
     {
         if (!Online) return;
-        Generation++; Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
+        Generation++; Disconnect(); Seat = null; Snapshot = null; _engine = null; _preparedReview = false; Changed?.Invoke();
     }
 
     /// <summary>Scripted UI verification only (issue #303): a real engine state built to put one kind of Gold cost
@@ -81,6 +86,7 @@ public sealed partial class MatchSession : IDisposable
     {
         Disconnect();
         _engine = MatchEngine.CreateGoldPaymentShowcase(kind);
+        _preparedReview = false;
         MatchKey = Guid.NewGuid().ToString("N");
         _localSeat = 0; _practiceNameSeat = 0;
         RefreshLocal();
@@ -88,12 +94,19 @@ public sealed partial class MatchSession : IDisposable
 
     public bool BattleValuesReview { get; private set; }
 
+    internal void StartPreparedReview(MatchEngine engine, int seat, bool battleValues = false)
+    {
+        ArgumentNullException.ThrowIfNull(engine);
+        if (seat is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(seat));
+        Generation++; Disconnect(); _engine = engine; _preparedReview = true; BattleValuesReview = battleValues;
+        MatchKey = Guid.NewGuid().ToString("N"); _localSeat = _practiceNameSeat = seat;
+        RefreshLocal();
+    }
+
     public void StartBattleValuesReview(string scenario)
     {
         var engine = MatchEngine.CreateBattleValuesShowcase(scenario);
-        Generation++; Disconnect(); _engine = engine; BattleValuesReview = true;
-        MatchKey = Guid.NewGuid().ToString("N"); _localSeat = _practiceNameSeat = 0;
-        RefreshLocal();
+        StartPreparedReview(engine, 0, battleValues: true);
     }
 
     public void SwitchPracticeSeat()
@@ -108,7 +121,7 @@ public sealed partial class MatchSession : IDisposable
         // Construct and validate before disconnecting/replacing a running session.
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
         var engine = MatchEngine.CreateCustomMatch(seed, yourDeck, opponentDeck);
-        Disconnect(); _engine = engine; MatchKey = Guid.NewGuid().ToString("N"); _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
+        Disconnect(); _engine = engine; _preparedReview = false; MatchKey = Guid.NewGuid().ToString("N"); _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
     }
 
     public void FollowPracticePriority()
@@ -125,7 +138,8 @@ public sealed partial class MatchSession : IDisposable
         Changed?.Invoke();
     }
 
-    public string? ExportPracticeReplay() => _engine is null || BattleValuesReview ? null : JsonSerializer.Serialize(_engine.ExportReplay(), new JsonSerializerOptions(Json) { WriteIndented = true });
+    public bool CanExportPracticeReplay => _engine is not null && !Online && !_preparedReview && !BattleValuesReview;
+    public string? ExportPracticeReplay() => !CanExportPracticeReplay ? null : JsonSerializer.Serialize(_engine!.ExportReplay(), new JsonSerializerOptions(Json) { WriteIndented = true });
 
     /// <summary>One move of the practice opponent. Issue #642: like a player whose action is refused, it chooses again: each refusal is reported to <paramref name="refused"/> (the
     /// bot remembers it) and the opponent is asked once more at the same position, up to a dozen tries. Without a callback a refusal is shown as a notice, as before.</summary>
@@ -257,6 +271,7 @@ public sealed partial class MatchSession : IDisposable
         if (_engine is not null || Seat?.RoomCode != seat.RoomCode || Seat.PlayerId != seat.PlayerId) Generation++;
         Disconnect();
         _engine = null;
+        _preparedReview = false;
         Snapshot = null;
         Seat = seat;
         MatchKey = server.AbsoluteUri + seat.RoomCode;

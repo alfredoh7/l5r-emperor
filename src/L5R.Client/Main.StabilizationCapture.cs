@@ -56,6 +56,8 @@ public partial class Main
         c is Button b ? new[] { b }.Concat(StabilizationButtons(c)) : StabilizationButtons(c));
     private Button StabilizationButton(string text) => StabilizationButtons(this).FirstOrDefault(b => b.IsVisibleInTree() && !b.Disabled && b.Text.StartsWith(text, StringComparison.Ordinal))
         ?? throw new Exception("Missing enabled native button: " + text);
+    private Button ReviewedCommitButton() => _paymentConfirm is { Disabled: false } button && button.IsVisibleInTree() && button.Name == "CommitAction"
+        ? button : throw new Exception($"Missing visible enabled reviewed action commit (button: {(_paymentConfirm is null ? "none" : $"name={_paymentConfirm.Name} text={_paymentConfirm.Text} disabled={_paymentConfirm.Disabled} visible={_paymentConfirm.IsVisibleInTree()}")}; chosen: {_chosen?.Type}; sources: {_sources.Count})");
     private async Task StabilizationClick(Control target)
     {
         // Scroll the control fully into view first, as a player would: the centre of a partly clipped button can sit under the pinned footer (SupportClick does the same).
@@ -116,7 +118,9 @@ public partial class Main
                 Check(_playPrompt is not null, "Selecting the equipment did not ask to confirm play");
                 await StabilizationClick(StabilizationButton("Confirm play")); // direct play: confirm first, then choose the target and pay
                 ChooseTarget(fixture.Target!); await EventFrames();
-                var button = StabilizationButton(cost == 0 ? "Confirm action" : "Confirm action · 2 Gold");
+                if (cost > 0 && QuoteFor(_chosen!) is { Payments.Length: > 0 } quote) { GoldClickHoldings(quote.Payments[0].SourceIds); await EventFrames(3); } // the player bows holdings to pay (#731)
+                var button = ReviewedCommitButton();
+                Check(cost == 0 ? !button.Text.Contains("Gold", StringComparison.Ordinal) : button.Text.EndsWith(" · 2 Gold", StringComparison.Ordinal), "Reviewed attachment commit has the wrong Gold caption");
                 Check(_chosen is not null && QuoteFor(_chosen)?.Cost == cost, "Client did not retain authoritative quote");
                 GetViewport().GetTexture().GetImage().SavePng(_capturePath!); await StabilizationClick(button);
                 Check(View.Version == before + 1 && FindCard(fixture.Source!)?.Zone == Zone.Attached, "Discounted equip did not execute");
@@ -129,15 +133,15 @@ public partial class Main
                 GetViewport().GetTexture().GetImage().SavePng(_capturePath!);
                 if (!_captureMode.Contains("pass"))
                 {
-                    await StabilizationClick(StabilizationButton(option.Label));
+                    await StabilizationClick(ReactionOption(option.CardId!, option.Command!.AbilityId!, option.Command.PerformerId));
                     // Both reactions open their reviewed action first and execute on Confirm (the Tamoko reaction lists no plain targets, so it takes the same review path as the Hizumi bow).
-                    Check(View.Version == before, "Opening the reaction mutated the match"); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".target.png"); await StabilizationClick(StabilizationButton("Confirm action"));
+                    Check(View.Version == before, "Opening the reaction mutated the match"); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".target.png"); await StabilizationClick(ReviewedCommitButton());
                     Check(View.Version == before + 1, "Reaction did not execute exactly once");
                 }
                 for (var n = 0; n < 4 && View.PendingChoice is not null; n++)
                 {
                     if (View.ViewerId != View.PriorityPlayerId) { await StabilizationClick(StabilizationButton("Pass device")); await StabilizationClick(StabilizationButton("I'm ready")); await EventFrames(); }
-                    await StabilizationClick(StabilizationButton("Pass reaction"));
+                    await StabilizationClick(StabilizationButtons(_decisionActions).Single(b => b.Name == "ReactionDecline" && b.IsVisibleInTree() && !b.Disabled));
                 }
                 Check(View.PendingChoice is null, "Reaction failed to resume");
                 var target = FindCard(fixture.Target)!;

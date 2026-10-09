@@ -114,7 +114,7 @@ public partial class Main
             var opposingTarget = _tiles.Single(t => t.Card.OwnerId == 1 && t.Card.Definition?.Id == "training-lion-samurai");
             await SupportClick(opposingTarget);
             var target = _chosen!.Command!.TargetId!; await SupportCapture("-activation");
-            await SupportClick(StabilizationButtons(_decisionActions).First(b => b.Text.StartsWith("Confirm", StringComparison.Ordinal))); await WaitDecisionPresentation();
+            await SupportClick(ReviewedCommitButton()); await WaitDecisionPresentation();
             SupportRequire(_copyFixture.State.Cards[target].Bowed, "Copied action could not execute through ordinary UI");
             await _session.Submit(_copyFixture.QueryActions(1).First(a => a.Enabled && a.Type == "pass").Command!); await WaitDecisionPresentation();
             if (_selected?.Id != _copyReceiverId) SelectCard(CopyReceiver()); await EventFrames(8);

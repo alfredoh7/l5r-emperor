@@ -206,11 +206,12 @@ public partial class Main
         else
         {
             var (required, ready) = RenderGoldPanel(action);
-            _paymentConfirm = SidebarSkin.Button((total == 0 ? MultiReady ? "Confirm without targets" : "Choose required targets" : $"Confirm {total} target{(total == 1 ? "" : "s")}") + (required > 0 ? $" · {required} Gold" : ""), () =>
+            _paymentConfirm = SidebarSkin.Button(CommitButtonLabel(action) + (total > 0 ? $" · {total} target{(total == 1 ? "" : "s")}" : "") + (required > 0 ? $" · {required} Gold" : ""), () =>
             {
                 if (!DecisionCanSubmit || !MultiTargetActive || key != _multiDraftKey || !MultiReady || !ready) return;
                 _ = Submit(MultiCommand() with { SourceIds = required > 0 ? _sources.ToArray() : [] });
             }, true);
+            _paymentConfirm.Name = "CommitAction";
             _paymentConfirm.Disabled = !DecisionCanSubmit || !MultiReady || !ready; _decisionActions.AddChild(_paymentConfirm);
         }
         _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice)); return true;

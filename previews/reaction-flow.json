@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "slug": "reaction-flow",
+  "title": "Seamless Reaction Flow",
+  "source_pr": 724,
+  "source_commit": "e124307bafddcf8c91aee44c261e17f4c0d3eee4",
+  "revision": 3,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo has built the reaction-flow preview and would like Mendon to review the decision clarity and response timing.",
+  "review_steps": [
+    "Extract the complete package and open Start Review.cmd. The prepared table uses real published cards and opens directly to Tamori Ruya’s reaction to Yoritomo Horibe’s bow.",
+    "Choose Ruya’s offered reaction, select a highlighted Personality, and use the named action button. Check that the exchange returns to play without a dismissal when no responses remain.",
+    "Cancel preparation with Escape and change targets before committing. Check the response context, continuation wording and stable decision area.",
+    "Use Other previews for the opposite seat and reduced motion. Open Full Game opens normal menus for broader play.",
+    "Record expected and actual behavior using Send Feedback.url. This scene is a test fixture; export is disabled because its initial position cannot be reconstructed as a normal replay."
+  ],
+  "known_limitations": [
+    "Review candidate; rules-lead acceptance and native Windows graphical play remain pending.",
+    "Prepared review positions use published cards in an isolated fixture, rather than the pinned Lion/Crane deck list.",
+    "Authoritative reaction timing and optional passes are preserved. The package does not add a pass preference or change when responses are legal.",
+    "The Mac native input matrix is incomplete because the test desktop was locked. This preview remains a draft candidate pending those checks and human review."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "published-reaction-flow-review"
+    },
+    {
+      "name": "Other previews/Opposite Seat",
+      "mode": "published-reaction-flow-review-seat1"
+    },
+    {
+      "name": "Other previews/Reduced Motion",
+      "mode": "published-reaction-flow-review-reduced"
+    },
+    {
+      "name": "Other previews/Reduced Motion Opposite Seat",
+      "mode": "published-reaction-flow-review-reduced-seat1"
+    },
+    {
+      "name": "Other previews/Forest Cover (performer and Gold)",
+      "mode": "published-reaction-flow-review-forest"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}
