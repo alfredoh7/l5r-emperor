@@ -125,7 +125,7 @@ public sealed partial class MatchEngine
         switch (context.ability.Target)
         {
             case Wave741Abilities.NonUniqueHuman:
-                return InPlay(target) && Wave741IsHuman(target) && !Keyword(target, "Unique");
+                return InPlay(target) && Wave741IsHuman(target) && !Keyword(target, "Unique") && target.Id != context.source?.Id; // a card never copies its own stats (core rules, Copy)
             case Wave741Abilities.HumanPersonality:
                 return InPlay(target) && Wave741IsHuman(target);
             case Wave741Abilities.OtherSpirit:
