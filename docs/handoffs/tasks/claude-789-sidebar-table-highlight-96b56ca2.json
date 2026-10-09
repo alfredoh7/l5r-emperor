@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Hovering, focusing or selecting a sidebar choice highlights the table card(s) it acts through or on, and hovering a card lights its sidebar entry, across reaction/action buttons, the candidate tray and decision faces. The prepared action's performer is marked on the table. Found while playtesting #724: two identical Ikoma Shika could not be told apart from the sidebar.",
+  "validation": "Client builds with zero warnings. Native reaction-flow 4/4 incl. a new two-direction assertion on Forest Cover's two identical Scouts; direct-play, stabilization, multi-targets, gold-payment, either-or, decision-chooser, movement, opponent-payment, created-copies, event-decisions, province-target, action-lock, attack-targets, card-deselection pass. No human playtest of this PR yet.",
+  "remaining": "copy-ui still fails (hover and reduced-mode commit-button state; also fails on main). persistent-home, battle-sequence-ui, interactions, support-cards fail on main too. Payment-method rows keep their existing #667 hover link; copy-choice panel and province rows not changed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/789",
+  "branch": "claude/789-sidebar-table-highlight",
+  "updated": "2026-10-09T21:38:40.368857+00:00"
+}
