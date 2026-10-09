@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wired Bayushi Kachiko on Mendon's broad reading of attacks (first assignment to, or move into, an attacking army costs the target's controller 2 Honor, expiring with the turn) plus her -1F term; art pack catalogue-art-issue778-20261008-r1.",
+  "validation": "bash tools/check.sh --skip-client: 3631 PASS, 0 FAIL, all requested checks passed; kachiko suite 5/5. No native playtest.",
+  "remaining": "Publish the r1 art release, CI, merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/778",
+  "branch": "claude/778-bayushi-kachiko",
+  "updated": "2026-10-09T04:50:09.455422+00:00"
+}

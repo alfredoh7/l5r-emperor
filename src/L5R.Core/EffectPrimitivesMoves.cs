@@ -81,6 +81,7 @@ public sealed partial class MatchEngine
         foreach (var attachment in Attachments(card.Id)) attachment.ProvinceIndex = province;
         _state.PendingMoveReactionCardId = card.Id;
         FireConsecrationWatches(card, province);
+        FireKachikoJoinWatches(card);
         Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to {BattlefieldLabel(province)}.", card.OwnerId, card.Id);
         RecordActionEffect(card.Id, MovedKind, toBattlefield: province);
     }
