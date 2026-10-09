@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Record Mendon's confirmation of all eight Journey's End Keep / Imperial clan readings in the decision doc (docs only).",
+  "validation": "Docs only; no code changed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/771",
+  "branch": "claude/confirm-jek-readings",
+  "updated": "2026-10-09T01:14:45.290797+00:00"
+}
