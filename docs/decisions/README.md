@@ -81,9 +81,8 @@ interpretation this register's decision docs already settled.
 - [699, the "essence" follow-up: Read the Essence (spell-wave-56)](2026-10-06-699-essence.md) — proposed readings for the #699 follow-up (essence); Mendon's rulings applied, remaining readings to confirm.
 - [699, the "rings" cluster: how a Ring enters play (spell-wave-57, celestial-wave-29)](2026-10-06-699-rings.md) — proposed readings for the #699 follow-up (rings); Mendon's rulings applied, remaining readings to confirm.
 - [Battle placards](2026-10-07-battle-placards.md) — replaces #710's court rails: province placards, left-edge stack, katana when the province falls
-
+- [Direct play from the hand](2026-10-07-direct-play-from-hand.md) — select a playable card, confirm first, assume the single legal action, clickable action text when several
 - [P13: phase and battle rule flags (#717)](2026-10-07-p13-rule-flags.md) — built, engine only, no card wired; the flags a later card wave sets and the choke points that read them.
-
 - [P19: rulebook-action modifiers (#717)](2026-10-07-p19-rulebook-modifiers.md) — built, engine only, no card wired; the RulebookModifier hook and card-free timing grants.
 
 - [P25: decision infrastructure (#723)](2026-10-07-p25-decision-infrastructure.md) — built, engine only, no card wired; multi-pick Either/Or, the PendingActions hook with generic client rendering of unknown pending types, slot cross-constraints and a shown-card choice.
@@ -104,3 +103,5 @@ interpretation this register's decision docs already settled.
 
 - [Wave batch 8: zones, search and decisions (#739)](2026-10-08-wave-batch-8-zones-search-and-decisions.md) — proposed readings: all 17 cards wired on P20/P21/P22/P25 (one new search disposition, RefillProvince); nothing deferred.
 - [Foothold of the Mad (#766)](2026-10-08-foothold-of-the-mad.md) — Mendon's ruling: counts as 39 Honor for going first, then 0, silently; Madness tokens are -1F tokens while it is in play; wired with its Honor-loss immunity, Fallen discount and two Limited abilities
+- [Force cap primitive and Asako Kaitoko - exp (#768)](2026-10-08-force-cap-and-kaitoko.md) — a live maximum-Force rule (lowers, never raises, lapses with its source, negated by Force-penalty negations and immunities) and the card that uses it, with its keyword-conditioned target bar
+- [Bayushi Kachiko (#778)](2026-10-09-bayushi-kachiko.md) — Mendon's broad reading of "attacks": the first assignment to, or move into, an attacking army costs the target's controller 2 Honor; wired with her -1F term

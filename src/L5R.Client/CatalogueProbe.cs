@@ -72,6 +72,21 @@ public partial class CatalogueProbe : Node
             Check(_screen.Browser.ExcludedClans.SetEquals(["Crane"]), "unchecking the Crane box excludes only Crane");
             Click(FindButton(b => b.AccessibilityName == "Remove filter Clans")); await Wait(.2);
             Check(_screen.Browser.ExcludedClans.Count == 0 && _screen.Browser.Types.Active, "removable clan tag checks only the clans again");
+            {
+                var bar = _screen.Browser; bool Imp(CatalogueData.Card c) => c.Types.Contains("Personality") && c.Keywords.Contains("Imperial");
+                bar.Reset(); bar.OnlyClans("Imperial"); await Wait(.2);
+                Check(bar.Results.Length > 0 && bar.Results.All(Imp), "Imperial clan box shows only Imperial Personalities, whatever their Clan");
+                bar.ExcludedClans.Clear(); bar.ExcludedClans.Add("Imperial"); bar.Refresh(); await Wait(.2);
+                Check(_screen.Data.Cards.Where(c => Imp(c) && c.Clans.Contains("Crane")).All(c => bar.Results.Contains(c)), "unchecking Imperial keeps Imperial Personalities that have another Clan");
+                bar.Reset(); bar.Sets.Only("Embers of War"); bar.ExcludedClans.Add("Lion"); bar.Search.Text = "a"; bar.Refresh(); await Wait(.2);
+                Click(FindButton(b => b.AccessibilityName == "Choose filters to clear")); await Wait(.3); await Capture("clear-all-menu");
+                Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Printing set" && c.IsVisibleInTree())); await Wait(.2); PressKey(Godot.Key.Escape); await Wait(.2);
+                Check(bar.KeptOnClear.SetEquals(["Printing set"]), "the Clear All menu lists Printing set and unchecking it keeps it");
+                Click(FindButton(b => b.Text == "Clear All")); await Wait(.3);
+                Check(bar.Sets.Active && bar.ExcludedClans.Count == 0 && bar.Search.Text == "", "Clear All resets checked filters and preserves an unchecked one");
+                bar.KeptOnClear.Clear(); bar.ClearSelected(); await Wait(.2);
+                Check(!bar.Sets.Active, "Clear All resets every filter once all are checked");
+            }
             _screen.ResetFilters(); await Wait(.2);
             Search("Akodo"); await Wait(3); Check(_screen.Grid.Cards.All(c => c.SearchText.Contains("Akodo", StringComparison.OrdinalIgnoreCase)), "live search");
             var tile = _screen.Grid.Tile("oracle-l5r-229") ?? throw new Exception("Akodo Kisho tile absent"); _screen.Grid.EnsureControlVisible(tile); await Wait(.5); Click(tile); await Wait(1);

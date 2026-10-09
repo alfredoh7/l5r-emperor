@@ -37,12 +37,17 @@ public partial class CatalogueBrowserBar : Control
     private FilterChecklist[] Menus => [Types, Keywords, Sets, Gold, Support, Collection, Focus, Actions];
     public float BarHeight => _families.Count == 2 ? 206 : 254;
     private const string Owned = "Owned", Unowned = "Unowned", Playable = "Playable now", NotPlayable = "Not yet playable", OtherSet = "Other", NoneChoice = "None", NoKeywords = "No keywords";
-    private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned"];
+    private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Imperial", "Unaligned"];
     private readonly CatalogueData _data;
     private readonly Func<CatalogueData.Card, bool> _eligible;
     private readonly string _initialFamily;
     private readonly Dictionary<string, Button> _clans = [], _families = [];
-    private readonly Button _selectAll, _deselectAll, _reset, _alphabetical, _common;
+    private readonly Button _selectAll, _deselectAll, _reset, _resetChoices, _alphabetical, _common;
+    private readonly PopupPanel _resetPopup;
+    private readonly VBoxContainer _resetRows;
+    private readonly Dictionary<string, CheckBox> _resetChecks = [];
+    /// <summary>Filters the player unchecked in the Clear All menu; Clear All leaves these as they are.</summary>
+    public HashSet<string> KeptOnClear { get; } = [];
     private readonly OptionButton _sort;
     private readonly Label _count, _sizeLabel, _notice;
     private readonly ScrollContainer _tagScroll;
@@ -90,7 +95,13 @@ public partial class CatalogueBrowserBar : Control
         _sort.TooltipText = "Set uses Mendon's presentation order; reprints sort by their earliest recognized set.";
         _tagScroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Auto, VerticalScrollMode = ScrollContainer.ScrollMode.Disabled };
         _tags = new HBoxContainer { SizeFlagsVertical = SizeFlags.ExpandFill }; _tags.AddThemeConstantOverride("separation", 8); _tagScroll.AddChild(_tags); AddChild(_tagScroll);
-        _reset = AddButton("Clear filters", Reset);
+        _reset = AddButton("Clear All", ClearSelected); _reset.AccessibilityName = "Clear all filters"; _reset.TooltipText = "Resets every filter that is checked in the menu beside this button.";
+        _resetChoices = AddButton("▾", ToggleResetMenu); _resetChoices.AccessibilityName = "Choose filters to clear"; _resetChoices.TooltipText = "Uncheck a filter to keep it when you press Clear All.";
+        _resetPopup = new PopupPanel { Theme = Theme, Name = "ClearAllChecklist" }; AddChild(_resetPopup);
+        _resetPopup.AddThemeStyleboxOverride("panel", Palette.Box(new Color("0e171d"), CatalogueArt.Gold, 18, 5));
+        var resetBox = new VBoxContainer(); resetBox.AddThemeConstantOverride("separation", 8); _resetPopup.AddChild(resetBox);
+        resetBox.AddChild(CatalogueArt.Label("Clear All resets", 23, true)); resetBox.AddChild(CatalogueArt.Label("Uncheck a filter to keep it.", 15));
+        _resetRows = new VBoxContainer(); _resetRows.AddThemeConstantOverride("separation", 4); resetBox.AddChild(_resetRows);
         _count = CatalogueArt.Label("", 17); AddChild(_count);
         _sizeLabel = CatalogueArt.Label("Card size", 16); AddChild(_sizeLabel);
         CardSize = new HSlider { Name = "CardSize", MinValue = 120, MaxValue = 300, Step = 2, Value = _preferredCardWidth ?? (families.Length == 2 ? 196 : 250), AccessibilityName = "Card size", TooltipText = "Drag to resize full card faces. Arrow keys also adjust size." };
@@ -119,6 +130,40 @@ public partial class CatalogueBrowserBar : Control
     public void Reset()
     {
         _refreshing = true; ExcludedClans.Clear(); foreach (var menu in Menus) menu.Clear(); Search.Text = ""; Family = _initialFamily;
+        _refreshing = false; _notice.Text = ""; Refresh();
+    }
+    private IEnumerable<(string Name, bool Shown)> ClearChoices()
+    {
+        yield return ("Search", true); yield return ("Deck type", _families.Count > 1); yield return ("Clans", true);
+        foreach (var menu in Menus) yield return (menu.Label, menu.Trigger.Visible);
+    }
+    private void ToggleResetMenu()
+    {
+        if (_resetPopup.Visible) { _resetPopup.Hide(); return; }
+        foreach (var menu in Menus) if (menu.IsOpen) menu.Close();
+        Palette.Clear(_resetRows); _resetChecks.Clear();
+        foreach (var (name, shown) in ClearChoices().Where(c => c.Shown))
+        {
+            var check = new CheckBox { Text = name, ButtonPressed = !KeptOnClear.Contains(name), CustomMinimumSize = new Vector2(280, 32), AccessibilityName = "Clear " + name };
+            check.AddThemeColorOverride("font_color", CatalogueArt.Ivory); check.AddThemeFontSizeOverride("font_size", 18);
+            check.AddThemeIconOverride("checked", DeckSkin.Icon("checked")); check.AddThemeIconOverride("unchecked", DeckSkin.Icon("unchecked"));
+            foreach (var state in new[] { "normal", "hover", "pressed", "hover_pressed", "disabled" }) check.AddThemeStyleboxOverride(state, new StyleBoxEmpty());
+            var key = name; check.Toggled += on => { if (on) KeptOnClear.Remove(key); else KeptOnClear.Add(key); };
+            _resetRows.AddChild(check); _resetChecks[name] = check;
+        }
+        var rect = _resetChoices.GetGlobalRect(); var viewport = _resetChoices.GetViewport().GetVisibleRect();
+        var size = new Vector2I(320, 70 + 36 * _resetChecks.Count);
+        _resetPopup.Popup(new Rect2I(Math.Clamp((int)rect.End.X - size.X, 4, Math.Max(4, (int)viewport.End.X - size.X - 4)), Math.Min((int)rect.End.Y + 6, Math.Max(4, (int)viewport.End.Y - size.Y - 4)), size.X, size.Y));
+    }
+    /// <summary>Clear All: resets every filter except the ones unchecked in its menu.</summary>
+    public void ClearSelected()
+    {
+        bool Clears(string name) => !KeptOnClear.Contains(name);
+        _refreshing = true;
+        if (Clears("Clans")) ExcludedClans.Clear();
+        foreach (var menu in Menus) if (Clears(menu.Label)) menu.Clear();
+        if (Clears("Search")) Search.Text = "";
+        if (Clears("Deck type")) Family = _initialFamily;
         _refreshing = false; _notice.Text = ""; Refresh();
     }
     public void Refresh(bool notify = true)
@@ -167,8 +212,14 @@ public partial class CatalogueBrowserBar : Control
     }
     private static string[] KeywordFeatures(CatalogueData.Card c) => c.Keywords.Length == 0 ? [NoKeywords] : c.Keywords;
     private bool KeywordPasses(CatalogueData.Card c) => Keywords.Passes(KeywordFeatures(c));
-    /// <summary>The clan boxes a card belongs to; a card with no clan, or only clans without a box of their own, is Unaligned.</summary>
-    private static string[] ClanFeatures(CatalogueData.Card c) { var boxes = c.Clans.Where(ClanNames.Contains).ToArray(); return boxes.Length == 0 ? ["Unaligned"] : boxes; }
+    /// <summary>The clan boxes a card belongs to; a card with no clan, or only clans without a box of their own, is Unaligned. An Imperial Personality is also in the Imperial box.</summary>
+    private static string[] ClanFeatures(CatalogueData.Card c)
+    {
+        var boxes = c.Clans.Where(ClanNames.Contains).ToList(); if (boxes.Count == 0) boxes.Add("Unaligned");
+        // Imperial is a keyword on Personalities rather than a Clan: it adds a box to a Personality without removing the Clan it also has.
+        if (c.Types.Contains("Personality") && c.Keywords.Contains("Imperial") && !boxes.Contains("Imperial")) boxes.Add("Imperial");
+        return [.. boxes];
+    }
     private static string[] GoldFeature(CatalogueData.Card c) => [c.Numeric("cost") is var cost && cost != double.MaxValue ? (cost >= 10 ? "10+" : ((int)cost).ToString()) : NoneChoice];
     private static string[] SetFeatures(CatalogueData.Card c)
     {
@@ -221,7 +272,7 @@ public partial class CatalogueBrowserBar : Control
         Place(Types.Trigger, 0, filterY, 174, compact ? 38 : 44); Place(Keywords.Trigger, 184, filterY, 192, compact ? 38 : 44); Place(Sets.Trigger, 386, filterY, 245, compact ? 38 : 44); Place(Gold.Trigger, 641, filterY, 140, compact ? 38 : 44);
         Place(Support.Trigger, 799, filterY, 184, compact ? 38 : 44);
         Place(_count, compact ? 1173 : w - 320, compact ? filterY + 3 : tagsY + 5, compact ? Math.Max(130, w - 1173) : 320, 32);
-        Place(_tagScroll, tagX, tagsY, Math.Max(80, w - 655 - tagX), compact ? 38 : 44); Place(_reset, w - 644, tagsY, 124, compact ? 38 : 44);
+        Place(_tagScroll, tagX, tagsY, Math.Max(80, w - 695 - tagX), compact ? 38 : 44); Place(_reset, w - 684, tagsY, 112, compact ? 38 : 44); Place(_resetChoices, w - 568, tagsY, 44, compact ? 38 : 44);
         Place(_sort, w - 506, tagsY, 170, compact ? 38 : 44); Place(_sizeLabel, w - 320, compact ? tagsY + 5 : filterY + 12, 78, 25); Place(CardSize, w - 238, compact ? tagsY + 6 : filterY + 13, 230, 24);
         if (ExtraRow) Place(Actions.Trigger, 0, tagsY, 190, compact ? 38 : 44);
         if (Focus.Trigger.Visible) Place(Focus.Trigger, 200, tagsY, 176, compact ? 38 : 44);
@@ -232,5 +283,5 @@ public partial class CatalogueBrowserBar : Control
     {
         DrawLine(new Vector2(0, 77), new Vector2(Size.X, 77), new Color(.56f, .43f, .22f, .55f), 1);
     }
-    public void CloseMenus() { foreach (var menu in Menus) if (menu.IsOpen) menu.Close(); }
+    public void CloseMenus() { foreach (var menu in Menus) if (menu.IsOpen) menu.Close(); _resetPopup.Hide(); }
 }

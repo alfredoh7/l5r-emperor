@@ -93,6 +93,21 @@ public static partial class TrainingOpponent
     {
         var unitForces = units.Select(c => new AttackPlanner.Unit(c.Id, ArmyForce(x.Self.Home.Where(h => h.Id == c.Id || h.AttachedTo == c.Id)))).ToArray();
         var targets = x.Opponent.Provinces.Where(p => !p.Destroyed && provinces.Contains(p.Index)).Select(p => new AttackPlanner.Target(p.Index, p.Strength)).ToArray();
-        return AttackPlanner.Plan(unitForces, targets, ArmyForce(x.Opponent.Home));
+        // The opponent's Honor victory is coming (Mendon's rule, playtest 2026-10): the bot attacks as many Provinces as it can beat, whatever the enemy army could do in reply.
+        return AttackPlanner.Plan(unitForces, targets, HonorRace(x) ? 0 : ArmyForce(x.Opponent.Home));
+    }
+
+    /// <summary>The opponent already holds the Honor it needs and will win it at the start of its next turn, so the bot cannot afford a cautious attack.</summary>
+    private static bool HonorRace(Ctx x) => x.Opponent.Honor >= 40;
+
+    /// <summary>When the attackers can destroy EVERY Province the bot has left, the battlefield where its defense is likeliest to save one (the largest Strength plus its own Force over the attackers'); otherwise null.</summary>
+    private static int? LastStandProvince(Ctx x, int[] offered)
+    {
+        var remaining = x.Self.Provinces.Where(p => !p.Destroyed).ToArray();
+        if (remaining.Length == 0) return null;
+        int Attackers(int index) => ArmyForce(x.Opponent.Army.Where(c => c.ProvinceIndex == index));
+        if (remaining.Any(p => Attackers(p.Index) <= p.Strength)) return null;
+        var own = ArmyForce(x.Self.Home);
+        return remaining.Where(p => offered.Contains(p.Index)).OrderByDescending(p => p.Strength + own - Attackers(p.Index)).ThenBy(p => p.Index).Select(p => (int?)p.Index).FirstOrDefault();
     }
 }

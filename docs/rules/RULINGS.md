@@ -351,3 +351,10 @@ Adachi's "opposing" counts a card with no unit of its own that requires a perfor
 - **Cards/primitives:** Daidoji Adachi (oracle-l5r-10449); `ApplyWlPersCoilsAfterAction`.
 - **Date:** 2026-10-07
 - **Source:** Mendon's ruling on the PR #676 readings (CM-13), issue #757.
+
+### R-035 — A performer may be bowed unless the card says "unbowed"
+A card that names a performing Personality without the word "unbowed" may be performed by a bowed Personality (Strength in Terror, Surety of Purpose). Only a printed "unbowed" requires it to be straightened.
+
+- **Cards/primitives:** Strength in Terror (oracle-l5r-7538); Performer categories without "unbowed".
+- **Date:** 2026-10-08
+- **Source:** Mendon, during playtest (QoL batch).

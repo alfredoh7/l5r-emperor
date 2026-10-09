@@ -110,6 +110,7 @@ public partial class Main
             if (_selected.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
             if (_selected.StraightenBlocked) details.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(def.Text)) details.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
+            AddActionTextBlocks(details, _selected);
             if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) details.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
             if (_selected.AttachedTo is { } parent) details.AddChild(Palette.Wrapped("Attached to " + (FindCard(parent)?.Definition?.Name ?? parent), 13, Palette.Crane));
         }
@@ -125,6 +126,7 @@ public partial class Main
             help.MouseFilter = Control.MouseFilterEnum.Stop; help.TooltipText = RulesHelp.PhaseGuide(View.Phase);
             _inspector.AddChild(help);
         }
+        if (_playPrompt is not null && _chosen is null && RenderPlayPrompt()) return;
         if (_chosen is { Type: "purchase" or "recruitReserve", Quote: not null }) { RenderPurchase(); return; }
         if (_chosen is { Type: "attack" or "assignDefense" }) { RenderAssignments(); return; }
         if (_chosen is { Type: "useAbility", Command.CardIds: not null }) { RenderProvinceRefresh(); return; }
@@ -182,7 +184,7 @@ public partial class Main
                 modes.AddItem($"{q.Cost} Gold · {mode}");
             }
             modes.Selected = Array.IndexOf(variants, choice);
-            modes.ItemSelected += index => Choose(variants[(int)index]);
+            modes.ItemSelected += index => Choose(variants[(int)index], false, true); // switching Proclaim / Clan discount keeps the bowed holdings
             _inspector.AddChild(modes);
         }
         _inspector.AddChild(Palette.Wrapped(quote.ClanDiscount ? "Clan discount reduces the Gold cost by 2. This purchase cannot trigger Proclaim." : quote.ProclaimEligible ? "Paying without the Clan discount Proclaims the Personality as soon as it is paid for." : "This card is not eligible for Proclaim.", 13, Palette.PaperDim));
@@ -423,28 +425,21 @@ public partial class Main
         RenderInspector(); Highlight();
     }
 
+    // Border Keep's refresh: the Dynasty cards to refresh are picked by clicking them in their provinces (a second click deselects); the list keeps the order they were chosen in.
+    private readonly List<string> _refreshSelected = [];
+    private bool ProvinceRefreshActive => _chosen is { Type: "useAbility", Command.CardIds: not null };
+
     private void RenderProvinceRefresh()
     {
-        var action = _chosen!; var selected = new List<string>();
+        var action = _chosen!;
+        _refreshSelected.RemoveAll(id => action.TargetIds?.Contains(id) != true);
         _inspector.AddChild(Palette.Wrapped(action.Label, 18, Palette.Gold));
-        _inspector.AddChild(Palette.Wrapped("Select one or more province cards in the order you want them placed on the bottom of the Dynasty deck. Replacements will be revealed face-up.", 14, Palette.PaperDim));
-        var order = Palette.Wrapped("No cards selected.", 13, Palette.Crane);
-        var confirm = SidebarSkin.Button("Confirm", () => _ = Submit(action.Command! with { CardIds = selected.ToArray() }), true);
-        confirm.Disabled = true;
-        foreach (var id in action.TargetIds ?? [])
-        {
-            var card = FindCard(id)!;
-            var check = new CheckBox { Text = $"Province {card.ProvinceIndex + 1} · {(card.Definition is null ? "face-down card" : ShortName(card))}" };
-            check.AddThemeFontSizeOverride("font_size", 13);
-            check.Toggled += yes =>
-            {
-                if (yes) selected.Add(id); else selected.Remove(id);
-                confirm.Disabled = selected.Count == 0;
-                order.Text = selected.Count == 0 ? "No cards selected." : "Bottom order: " + string.Join(" → ", selected.Select(id => "P" + (FindCard(id)!.ProvinceIndex + 1)));
-            };
-            _inspector.AddChild(check);
-        }
-        _inspector.AddChild(order); _decisionActions.AddChild(confirm);
+        _inspector.AddChild(Palette.Wrapped("Click the highlighted Dynasty cards in your provinces to select them (click again to deselect). They go to the bottom of the Dynasty deck in the order you choose; replacements are revealed face-up.", 14, Palette.PaperDim));
+        _inspector.AddChild(Palette.Wrapped(_refreshSelected.Count == 0 ? "No cards selected."
+            : "Bottom order: " + string.Join(" → ", _refreshSelected.Select(id => "P" + ((FindCard(id)?.ProvinceIndex ?? 0) + 1))), 13, Palette.Crane));
+        var confirm = SidebarSkin.Button("Confirm", () => _ = Submit(action.Command! with { CardIds = _refreshSelected.ToArray() }), true);
+        confirm.Disabled = _refreshSelected.Count == 0;
+        _decisionActions.AddChild(confirm);
         _decisionActions.AddChild(SidebarSkin.Button("Cancel", CancelChoice));
     }
 
@@ -477,7 +472,7 @@ public partial class Main
         _decisionActions.AddChild(SidebarSkin.Button("Cancel selection", CancelChoice));
     }
 
-    private void CancelChoice() { ResetDecisionSelection(); SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
+    private void CancelChoice() { _playPrompt = null; ResetDecisionSelection(); SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
@@ -499,6 +494,7 @@ public partial class Main
         var button = SidebarSkin.Button(label, () =>
         {
             if (option.Type == "useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is { Length: 0 } && option.Command is { } reaction && QuoteFor(option) is null) _ = Submit(reaction);
+            else if (_chosen is null && option.Type is "equip" or "playStrategy" or "useAbility" && IsOwnHandCard(option.CardId) && option.Command is not null) BeginPlayPrompt(option);
             else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility" or "chooseOpponentPayment") Choose(option);
             else if (option.Type == "discardProvince") ConfirmDiscardProvince(option);
             else if (option.Type == "endDynasty" && option.Command is { } endCommand && NeedsEndDynastyConfirmation())
@@ -539,7 +535,7 @@ public partial class Main
             return;
         }
         if (View.WinnerId is not null) return;
-        if (_chosen is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive || OpponentPaymentActive || CopyDecisionActive || LookDecisionActive) return;
+        if (_chosen is not null || _playPrompt is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive || OpponentPaymentActive || CopyDecisionActive || LookDecisionActive) return;
         _phaseActions.AddChild(new HSeparator());
         if (_session.Online && !_session.Connected)
         {

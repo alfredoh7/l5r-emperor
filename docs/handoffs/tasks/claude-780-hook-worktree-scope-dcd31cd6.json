@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Stop-hook handoff reminder now judges this session's engine edits on the git worktree they live in (a sibling task checkout is its own branch, not the project root's), skips a branch already merged into origin/main, and logs each decision, including swallowed errors, when L5R_HOOK_DEBUG names a file.",
+  "validation": "python -m unittest discover -s tools/hooks -p test_*.py: 34 tests OK, including four new ones (sibling worktree with and without a handoff, merged branch, debug trace). The real firing could not be reproduced from the saved transcript; the root cause of the repeated reminders is not proven, only the two defects found.",
+  "remaining": "None; ready for review. If the reminder still repeats, set L5R_HOOK_DEBUG to a file path and read the logged payload and decision.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/781",
+  "branch": "claude/780-hook-worktree-scope",
+  "updated": "2026-10-09T06:13:38.924535+00:00"
+}
