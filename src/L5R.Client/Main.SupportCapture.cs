@@ -92,10 +92,8 @@ public partial class Main
             foreach (var province in owner.Provinces.Where(p => p.Region is not null && !p.Destroyed))
             {
                 var r = _tiles.Single(t => t.Card.Id == province.Region!.Id); var d = _tiles.Single(t => t.Card.Id == province.Card!.Id);
-                SupportRequire(!r.GetGlobalRect().Intersects(d.GetGlobalRect()), "Region overlaps its Dynasty card");
+                SupportRequire(r.GetGlobalRect().Position.Y < d.GetGlobalRect().Position.Y, "Region is not attached under its Dynasty card");
                 SupportRequire(r.Card.OwnerId == owner.Id && r.Card.ProvinceIndex == province.Index, "Region ownership/position drift");
-                var boundary = _matTargets.Single(t => t.Id == $"province:{owner.Id}:{province.Index}");
-                SupportRequire(boundary.RegionPair, "Region pair is missing its common province boundary");
             }
         foreach (var tile in _tiles.Where(t => t.Card.Zone is Zone.Region or Zone.Celestial))
             SupportRequire(tile.FaceCornersOnViewport().All(p => _tableViewport.GetGlobalRect().Grow(2).HasPoint(p)), "Support card clipped outside fitted table");

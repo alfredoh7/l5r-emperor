@@ -190,7 +190,7 @@ public partial class Main
                 _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
                     new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
-                    ProvinceNumber: province.Index + 1, RegionPair: province.Region is not null, ConnectionAbove: player.Id == Self.Id,
+                    ProvinceNumber: province.Index + 1, RegionPair: false, ConnectionAbove: player.Id == Self.Id,
                     Connected: BattleActive && player.Id != View.ActivePlayerId &&
                         CourtConnectsToProvince(province.Index) &&
                         (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()) || MovementDestination(player.Id, province.Index))));

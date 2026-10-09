@@ -6,13 +6,9 @@ namespace L5R.Client;
 
 public partial class Main
 {
-    private const float RegionCardGap = 12;
     private static bool IsSupportCard(CardView card) => card.Definition?.Type is CardType.Region or CardType.Celestial;
-    // Reserve the sideways extent while ready, so bowing cannot push the Dynasty card away.
-    private float RegionSlotWidth(CardView region) => Math.Max(CardHeight, CardFootprint(region, CardHeight));
-    private float ProvinceCardWidth(ProvinceView province) => province.Region is { } region && !province.Destroyed
-        ? RegionSlotWidth(region) + RegionCardGap + (province.Card is { } card ? CardFootprint(card, CardHeight) : 158) + 16
-        : CardHeight;
+    // A Region sits under its province's Dynasty card (Board.cs), so it no longer widens the province.
+    private float ProvinceCardWidth(ProvinceView province) => CardHeight;
 
     private string SupportContext(CardView card)
     {

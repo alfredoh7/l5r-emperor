@@ -182,7 +182,7 @@ public partial class Main
                 modes.AddItem($"{q.Cost} Gold · {mode}");
             }
             modes.Selected = Array.IndexOf(variants, choice);
-            modes.ItemSelected += index => Choose(variants[(int)index]);
+            modes.ItemSelected += index => Choose(variants[(int)index], false, true); // switching Proclaim / Clan discount keeps the bowed holdings
             _inspector.AddChild(modes);
         }
         _inspector.AddChild(Palette.Wrapped(quote.ClanDiscount ? "Clan discount reduces the Gold cost by 2. This purchase cannot trigger Proclaim." : quote.ProclaimEligible ? "Paying without the Clan discount Proclaims the Personality as soon as it is paid for." : "This card is not eligible for Proclaim.", 13, Palette.PaperDim));
@@ -423,28 +423,21 @@ public partial class Main
         RenderInspector(); Highlight();
     }
 
+    // Border Keep's refresh: the Dynasty cards to refresh are picked by clicking them in their provinces (a second click deselects); the list keeps the order they were chosen in.
+    private readonly List<string> _refreshSelected = [];
+    private bool ProvinceRefreshActive => _chosen is { Type: "useAbility", Command.CardIds: not null };
+
     private void RenderProvinceRefresh()
     {
-        var action = _chosen!; var selected = new List<string>();
+        var action = _chosen!;
+        _refreshSelected.RemoveAll(id => action.TargetIds?.Contains(id) != true);
         _inspector.AddChild(Palette.Wrapped(action.Label, 18, Palette.Gold));
-        _inspector.AddChild(Palette.Wrapped("Select one or more province cards in the order you want them placed on the bottom of the Dynasty deck. Replacements will be revealed face-up.", 14, Palette.PaperDim));
-        var order = Palette.Wrapped("No cards selected.", 13, Palette.Crane);
-        var confirm = SidebarSkin.Button("Confirm", () => _ = Submit(action.Command! with { CardIds = selected.ToArray() }), true);
-        confirm.Disabled = true;
-        foreach (var id in action.TargetIds ?? [])
-        {
-            var card = FindCard(id)!;
-            var check = new CheckBox { Text = $"Province {card.ProvinceIndex + 1} · {(card.Definition is null ? "face-down card" : ShortName(card))}" };
-            check.AddThemeFontSizeOverride("font_size", 13);
-            check.Toggled += yes =>
-            {
-                if (yes) selected.Add(id); else selected.Remove(id);
-                confirm.Disabled = selected.Count == 0;
-                order.Text = selected.Count == 0 ? "No cards selected." : "Bottom order: " + string.Join(" → ", selected.Select(id => "P" + (FindCard(id)!.ProvinceIndex + 1)));
-            };
-            _inspector.AddChild(check);
-        }
-        _inspector.AddChild(order); _decisionActions.AddChild(confirm);
+        _inspector.AddChild(Palette.Wrapped("Click the highlighted Dynasty cards in your provinces to select them (click again to deselect). They go to the bottom of the Dynasty deck in the order you choose; replacements are revealed face-up.", 14, Palette.PaperDim));
+        _inspector.AddChild(Palette.Wrapped(_refreshSelected.Count == 0 ? "No cards selected."
+            : "Bottom order: " + string.Join(" → ", _refreshSelected.Select(id => "P" + ((FindCard(id)?.ProvinceIndex ?? 0) + 1))), 13, Palette.Crane));
+        var confirm = SidebarSkin.Button("Confirm", () => _ = Submit(action.Command! with { CardIds = _refreshSelected.ToArray() }), true);
+        confirm.Disabled = _refreshSelected.Count == 0;
+        _decisionActions.AddChild(confirm);
         _decisionActions.AddChild(SidebarSkin.Button("Cancel", CancelChoice));
     }
 

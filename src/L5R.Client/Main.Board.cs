@@ -76,10 +76,11 @@ public partial class Main
     private readonly Dictionary<int, float> _homeHeights = [];
     private readonly Dictionary<int, float> _armyHeights = [];
     private readonly Dictionary<int, CardView[][]> _homeRows = [];
+    private const float RegionStrip = 26; // how much of an attached Region shows above its Dynasty card
     private float PlaneHeight(float side) => side - 4;
     private float ProvinceRowY(PlayerView player) => player.Id == View.ViewerId ? _selfProvinceY : _enemyProvinceY;
     private static float ProvinceContentWidth(ProvinceView province) =>
-        Math.Max(CardHeight, ProvincePresentation.Slots(province).Length * 164 + (province.Region is null ? 0 : 184));
+        Math.Max(CardHeight, ProvincePresentation.Slots(province).Length * 164);
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
@@ -243,19 +244,12 @@ public partial class Main
             Place(area, button, 0, -28, width, PlaneHeight(CardHeight) + 28); _provinceButtons[(owner.Id, province.Index)] = button;
             var slots = ProvincePresentation.Slots(province);
             AddProvincePlacard(area, owner, province, width);
-            var x = (width - slots.Length * 164 - (province.Region is null ? 0 : 184)) / 2;
+            var x = (width - slots.Length * 164) / 2;
+            // A Region is attached to the Dynasty card in its province the way a Follower or Item is to a Personality: it sits underneath, showing a strip above the card (Mendon, 2026-10).
             if (province.Region is { } region)
             {
-                Place(area, Tile(region, true, 164, CardHeight), x, 0, 164, PlaneHeight(CardHeight));
-                if (slots.Length > 1)
-                {
-                    var label = Palette.Text("REGION", 16, Palette.PaperDim);
-                    label.HorizontalAlignment = HorizontalAlignment.Center;
-                    Place(area, label, x, -30, 164, 25);
-                }
-                var divider = new ColorRect { Color = new Color(.62f, .49f, .27f, .65f), MouseFilter = Control.MouseFilterEnum.Ignore };
-                Place(area, divider, x + 175, 8, 1, PlaneHeight(CardHeight) - 16);
-                x += 184;
+                var host = Math.Max(0, slots.ToList().FindIndex(s => s.Card is not null));
+                Place(area, Tile(region, true, 164, CardHeight), x + host * 164, -RegionStrip, 164, PlaneHeight(CardHeight));
             }
             foreach (var slot in slots)
             {

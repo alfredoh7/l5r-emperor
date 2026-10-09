@@ -167,7 +167,7 @@ public partial class Main
         if (!_reducedMotion)
         {
             _cameraTo = _cameraCenter; _zoomTo = _cameraZoom; _cameraFrom = from; _zoomFrom = zoom;
-            _cameraGlideTime = 0; _cameraGlide = true; _cameraCenter = from; _cameraZoom = zoom; ApplyTableCamera();
+            _cameraGlideTime = 0; _cameraGlide = true; _glideEndsFitted = false; _cameraCenter = from; _cameraZoom = zoom; ApplyTableCamera();
         }
         RenderInspector();
     }
