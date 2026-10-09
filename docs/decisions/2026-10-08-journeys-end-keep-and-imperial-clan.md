@@ -1,6 +1,6 @@
 # Journey's End Keep - exp and the Imperial Clan (issue #771)
 
-Status: **implemented on `claude/771-journeys-end-keep`; the readings below await Mendon.** Lane: shared (rules, plus the clan emblem asset the clan placard and the battle placard draw). Follow-up to [the wirable-card wave plan](2026-10-07-wirable-card-wave-plan.md); the card was one of the 13 awaiting a ruling, and Mendon's rules for it were given with the task and are quoted below.
+Status: **implemented and merged in #772; all eight readings below were confirmed by Mendon on 2026-10-08.** Lane: shared (rules, plus the clan emblem asset the clan placard and the battle placard draw). Follow-up to [the wirable-card wave plan](2026-10-07-wirable-card-wave-plan.md); the card was one of the 13 awaiting a ruling, and Mendon's rules for it were given with the task and are quoted below.
 
 ## What is wired
 
@@ -28,7 +28,9 @@ Status: **implemented on `claude/771-journeys-end-keep`; the readings below awai
 
 The clan emblem is built from Mendon's supplied mon (a flat green silhouette cut from the card scan, with yellow and green speckle along its edge). Only its shape is used: its alpha is thresholded, every piece far smaller than the mon (the speckle and six stray dots, all under 2,000 px²) is dropped, and the edge is re-antialiased. It is then set as gold relief on green enamel inside a dark bronze bezel, the construction of the Mantis emblem (1254 x 1254, round, transparent outside). It was checked beside the Mantis and Spider emblems at the 94 px placard size and the 42 px list size. The client was not run, so it has not been seen in the native placard or battle placard.
 
-## Readings for Mendon to confirm or correct
+## Readings (confirmed by Mendon, 2026-10-08)
+
+Mendon reviewed all eight and confirmed them as built, including that the lock follows the catalogue sentence rather than the scan's (reading 1) and that Imperial is a Clan for both players (reading 2).
 
 1. **The scan prints a different Gold sentence from the catalogue; the lock follows your rule, not the scan.** The scan of Journey's End Keep says: "This card does not produce Gold when paying for Personalities." The catalogue's current text says: "When this Stronghold produces Gold, you may not Recruit Personalities until the phase ends or until after you have spent 5 total Gold for non-Recruit costs or payments." Your rule for this task is the second, with excess counting as spent, and that is what is built; the published `Text` is the catalogue's, so it describes what the engine does. If you want the scan's sentence instead, it is a one-line payment term (JEK may not be a producer for a Personality's recruit) and the lock would go; say so and I will swap it. The scan's other sentences (the Clan alignment, the Clan discount bar, the Favor) match the catalogue.
 2. **Imperial is a Clan of the match, for both players.** "Playing with" the card makes Imperial the 10th Clan for the whole match, so the other player's Imperial Personalities are Imperial-aligned too. That matters only to Loyal and to Clan effects that read alignments: no Imperial-keyword Personality in the catalogue is both Loyal and Unaligned, so no recruit is newly barred for the other player. An Imperial-keyword Personality with no other alignment is no longer Unaligned in such a match.
