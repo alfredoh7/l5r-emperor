@@ -29,7 +29,7 @@ internal static class EmbersOfWarBatch5Tests
         ("Inescapable Snare: bows itself and a target enemy card; gains 2 Honor only while its wielder is Earth", SnareBowAndHonor),
         ("Incite the Phantoms: a controller's Spirits contribute Force even while bowed only while the Spell's wielder is Earth and it is in play; the Battle bow reaches an enemy card from any location through a performing Spirit", IncitePhantomsForceAndBow),
         ("Sudden Guardian: bows the wielder (not the chosen Spirit performer) to move an enemy Personality home from any location; gains 1 Honor only while its wielder is Water", SuddenGuardianMoveAndHonor),
-        ("The Swell of Strength: a Water Shugenja wielder has +2F while it is attached; its Battle reduces an enemy Personality's or Follower's Force to 0; it will only attach to a Water Shugenja", SwellOfStrengthForceAndAttack),
+        ("The Swell of Strength: a Water Shugenja wielder has +2F while it is attached; its Battle reduces an enemy Personality's or Follower's Force to 0; only its Focus Effect is limited to Water Shugenja (an ordinary Equip is not)", SwellOfStrengthForceAndAttack),
         ("The Ki-Rin's Path: every Tactician of its controller's, present or future, has the granted Tactical Open self-boost -- gone the moment it leaves play, absent for a non-Tactician or the opponent's Tactician", KiRinsPathGrant),
         ("The Distant Reaches: bows one or two target attachments of either owner, at the cost of bowing itself", DistantReachesBow),
     ]);
@@ -57,7 +57,7 @@ internal static class EmbersOfWarBatch5Tests
         var guardian = CardCatalog.Get(SuddenGuardian);
         Check(guardian.Type == CardType.Spell && Keywords(SuddenGuardian) == "Water" && guardian.Abilities!.SequenceEqual(["sudden-guardian-move"]), "Sudden Guardian");
         var swell = CardCatalog.Get(SwellOfStrength);
-        Check(swell.Type == CardType.Spell && swell.AttachRequiresKeyword == "Water" && swell.Effect == "swell-of-strength-force"
+        Check(swell.Type == CardType.Spell && swell.AttachRequiresKeyword is null && swell.Effect == "swell-of-strength-force"
             && swell.Abilities!.SequenceEqual(["swell-of-strength-focus", "swell-of-strength-attack"]), "The Swell of Strength");
         Manifest(root, "spell-wave-20", Snare, IncitePhantoms, SuddenGuardian, SwellOfStrength);
 

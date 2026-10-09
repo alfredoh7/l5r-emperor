@@ -3019,8 +3019,8 @@ public static class AbilityCatalog
             Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Spirit"], Costs: ActionCost.BowWielder, Absent: true, Move: new(MoveSpec.Target, MoveSpec.Home), MovesToBattle: false),
         // The Swell of Strength (oracle-l5r-8366): "As a Focus Effect: After this duel ends, you may attach this card to one of your Water
         // Shugenja, ignoring Gold cost" is Hiromi's Vassals/Shamsir's own attach-self Focus Effect shape (FocusEffectChoice.cs), narrowed to
-        // Water wielders via the plain AttachRequiresKeyword field (no new candidate filter needed -- AttachWielderCandidates already calls
-        // AttachmentLegalTarget, which already reads it). "This Shugenja has +2F" is Scouring Flood's own Spell-Effect-keyed static Force bonus
+        // Water wielders by AttachWielderCandidates (FocusEffectChoice.cs) for the Focus Effect ONLY: the Spell's ordinary Equip may go to any Shugenja, so
+        // the card carries no AttachRequiresKeyword. "This Shugenja has +2F" is Scouring Flood's own Spell-Effect-keyed static Force bonus
         // shape (MatchEngine.PersonalityForce). "Battle: Bow this card and target an enemy Personality or Follower: Reduce its Force to 0" is
         // Kaido's own delta-to-value Force override ("kaido-force-zero").
         ["swell-of-strength-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, you may attach this card to one of your Water Shugenja, ignoring Gold cost", "none"),
