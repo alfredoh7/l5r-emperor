@@ -48,7 +48,8 @@ Choose either Clan (Lion or Crane) from Practice to play solo against the
 built-in opponent, or use Private Match to play online with a friend.
 
 STARTER DECKS AND YOUR OWN DECKS
-Eight ready-made decks (Crab Control, Crane Dominance, Dragon Destruction,
+Nine ready-made decks (Crab Control, Crane Dominance, Dragon Destruction,
+Mantis Manipulation,
 Phoenix Talons, Scorpion Lethargy, Scottish Lion Deck, Spider Conquer and
 Unicorn Maidens) are added to your deck list the first time you open this
 version. Choose them in Practice, or open them in the Deck Builder.
