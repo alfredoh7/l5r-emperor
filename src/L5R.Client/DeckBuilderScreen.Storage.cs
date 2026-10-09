@@ -38,8 +38,9 @@ public partial class DeckBuilderScreen
                 var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 12); box.AddChild(row);
                 row.AddChild(CatalogueArt.Button("Open in builder", () => OpenFile(path))); row.AddChild(CatalogueArt.Button("Duplicate", () => { if (!OpenFile(path)) return; _name.Text = name + " copy"; _currentPath = null; Dirty = true; UpdateStatus(); }));
                 row.AddChild(CatalogueArt.Button("Export", () => ExportFile(draft.ToDeck(), name)));
+                row.AddChild(CatalogueArt.Button("Delete Deck", () => ConfirmDelete(path, name)));
             }
-            catch (Exception e) { box.AddChild(Palette.Wrapped("Needs repair: " + e.Message, 18, new Color("e8a896"))); var repair = new HBoxContainer(); repair.AddThemeConstantOverride("separation", 12); box.AddChild(repair); repair.AddChild(CatalogueArt.Button("Troubleshoot", () => { if (!TryTroubleshoot(path)) Notice("Nothing to suggest: " + e.Message); })); repair.AddChild(CatalogueArt.Button("Open folder", () => OS.ShellOpen(Store.DirectoryPath))); }
+            catch (Exception e) { box.AddChild(Palette.Wrapped("Needs repair: " + e.Message, 18, new Color("e8a896"))); var repair = new HBoxContainer(); repair.AddThemeConstantOverride("separation", 12); box.AddChild(repair); repair.AddChild(CatalogueArt.Button("Troubleshoot", () => { if (!TryTroubleshoot(path)) Notice("Nothing to suggest: " + e.Message); })); repair.AddChild(CatalogueArt.Button("Open folder", () => OS.ShellOpen(Store.DirectoryPath))); repair.AddChild(CatalogueArt.Button("Delete Deck", () => ConfirmDelete(path, Path.GetFileNameWithoutExtension(path)))); }
         }
         Put(_library, CatalogueArt.Button("Open deck folder", () => { Directory.CreateDirectory(Store.DirectoryPath); OS.ShellOpen(Store.DirectoryPath); }), 20, _library.Size.Y - 44, 220, 38);
         Put(_library, CatalogueArt.Button("Back to menu", () => Closed?.Invoke()), _library.Size.X - 230, _library.Size.Y - 44, 210, 38);
@@ -116,6 +117,16 @@ public partial class DeckBuilderScreen
             catch (Exception e) { Notice("Could not export deck: " + e.Message); }
             dialog.QueueFree();
         }; dialog.Canceled += dialog.QueueFree; dialog.PopupCentered(new Vector2I(900, 650));
+    }
+    private void ConfirmDelete(string path, string name)
+    {
+        var dialog = new ConfirmationDialog { Title = "Delete deck?", DialogText = $"Delete \"{name}\"? The deck file is removed from this device and this cannot be undone.", Theme = Theme }; AddChild(dialog); dialog.GetOkButton().Text = "Delete";
+        dialog.Confirmed += () =>
+        {
+            dialog.QueueFree();
+            try { Store.Delete(path); if (_currentPath == path) { _currentPath = null; _savedFingerprint = ""; } BuildDeckList(); }
+            catch (Exception e) { Notice("Could not delete the deck: " + e.Message); }
+        }; dialog.Canceled += dialog.QueueFree; dialog.PopupCentered(new Vector2I(570, 170));
     }
     private void ConfirmOverwrite(string message, Action yes)
     {

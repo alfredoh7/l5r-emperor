@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Imperial clan box in the shared catalogue filter bar (Imperial-keyword Personalities, still in their own clan boxes); Delete Deck with confirmation plus a path-restricted DeckFileStore.Delete in Core (the shared change); Clear All button with a menu of filters to reset or keep, in Card Library and Deck Builder.",
+  "validation": "Card Library native probe passes (new Imperial and Clear All checks); Deck Builder native probe passes; new Core regression for DeckFileStore.Delete passes; screenshots reviewed. Full tools/check.sh --skip-client was still running at handoff time (no failures so far). Delete confirm dialog not clicked natively.",
+  "remaining": "Confirm full check.sh result and CI before merge; user's request item 4 was blank.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/774",
+  "branch": "claude/774-library-filters-delete-deck",
+  "updated": "2026-10-09T02:49:14.750120+00:00"
+}
