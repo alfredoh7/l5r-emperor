@@ -1468,6 +1468,8 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     public HandLimitView? HandLimit { get; init; }
     /// <summary>True once this player bought, overlaid or discarded a province card since the current Dynasty Phase began (public; absent/false in older payloads).</summary>
     public bool DynastyActionTaken { get; init; }
+    /// <summary>True only in the owning seat's own view, while Plans Within Plans lets this player take a Limited action in place of an Open one right now. Lets a client treat that out-of-phase Limited action as the one being played.</summary>
+    public bool PlansWithinPlansArmed { get; init; }
 }
 public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
 public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);

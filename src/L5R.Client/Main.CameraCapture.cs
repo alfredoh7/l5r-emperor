@@ -23,6 +23,7 @@ public partial class Main
          _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal) && !_captureMode.EndsWith("-review", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-shown", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-province-target", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-search", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||

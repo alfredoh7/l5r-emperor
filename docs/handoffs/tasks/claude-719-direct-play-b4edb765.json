@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Direct play from the hand: selecting a playable hand card asks to confirm play first; one legal action is assumed (engine legality, or the Limited action while Plans Within Plans is armed via new PlayerView.PlansWithinPlansArmed); automatic actions play with nothing else chosen; several legal actions show as clickable action text blocks with cancel/switch.",
+  "validation": "Core direct-play-view 1/1; native check-direct-play-ui; existing native checks passed: gold-payment, stabilization (equip updated to confirm first), province-target, multi-targets, movement, attack-targets, opponent-payment, copy, created-copies, either-or, decision-chooser, event-decisions, action-lock, card-deselection. interactions and support-cards fail identically on the baseline checkout. Full check recorded in PR.",
+  "remaining": "Printed action text on the card scan is not clickable (no text layout data); province purchases and in-play card abilities keep their existing flow; Plans Within Plans client path only covered by the view flag test; no Mac/Windows human playtest.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pulls",
+  "branch": "claude/719-direct-play",
+  "updated": "2026-10-07T20:48:23.060765+00:00"
+}
