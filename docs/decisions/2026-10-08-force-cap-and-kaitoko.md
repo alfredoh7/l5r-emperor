@@ -31,8 +31,12 @@ Each keyword is proved alone on a test-only Personality (a training Lion samurai
 1. **"Opposing"** is the core-rules sense already used by P9: at the same battlefield, on the other side. Her own player's Personalities, ones at home and ones at another battlefield are not capped. There is no "during battle" test beyond that: a unit is at a battlefield only during the Battle phase.
 2. **The cap is a Force penalty from another player's card.** An immunity to "other players' cards" therefore stops it, and an immunity that only covers the Personality's own player's cards does not.
 3. **Incense Mill's cleanse covers the cap for the rest of the turn,** not only the instant it resolves, as Tireless Efforts' mark covers new penalties; it names the source, so a second Kaitoko's cap still binds.
-4. **Not covered:** Peace of the Kami's "negate all current effects from other players' cards" and Creating Order's action-modifier negation are not Force-penalty negations; neither is read by the cap.
-5. **"Actions from cards in their units"** is read as the existing P11 unit-card rule: the Personality, and an attachment (Follower, Item, Spell) attached to him. A Strategy a Personality performs is not a card in his unit.
+4. **Peace of the Kami and Creating Order (Mendon, 2026-10-09).** Peace of the Kami's "negate all current effects on it from other players' cards" negates Kaitoko's cap: `NegateOtherPlayersEffects` now records the caps whose source another player controls, as Incense Mill does, for the turn. Creating Order does not: it negates Force modifiers from actions, and the cap is a trait, not an action. Tested: `kaitoko/PeaceAndCreatingOrder`.
+5. **"Actions from cards in their units" (Mendon, 2026-10-09).** The existing P11 unit-card rule (the Personality, and an attachment attached to him), and a Strategy with a performer is performed by the performer, so a Strategy whose performer has one of the keywords and opposes her may not target her; a Strategy with no performer is not a card in anyone's unit. Tested: `kaitoko/StrategyWithPerformer`.
+
+## Rulings confirmed by Mendon (2026-10-09)
+
+Readings 1, 2, 3 and 6 are confirmed ("everything else is okay"); 4 and 5 are as corrected above.
 6. **Both clauses name the same Personalities,** so the target bar applies only while they are opposed to her, with the same keywords.
 
 ## A separate bug the soak found

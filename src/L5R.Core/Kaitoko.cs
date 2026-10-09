@@ -39,9 +39,9 @@ public sealed partial class MatchEngine
     }
 
     /// <summary>Whether the announce-time target bars refuse this action from this source against this target.</summary>
-    internal bool TargetBarredForTest(int playerId, string sourceId, string targetId, AbilityDefinition ability)
+    internal bool TargetBarredForTest(int playerId, string sourceId, string targetId, AbilityDefinition ability, string? performerId = null)
     {
-        try { RequireRestrictionRulesAllow(new GameCommand("useAbility", playerId, _state.Version, sourceId, AbilityId: "test-ability", TargetId: targetId), ability); return false; }
+        try { RequireRestrictionRulesAllow(new GameCommand("useAbility", playerId, _state.Version, sourceId, AbilityId: "test-ability", TargetId: targetId, PerformerId: performerId), ability); return false; }
         catch (RuleViolation) { return true; }
     }
 

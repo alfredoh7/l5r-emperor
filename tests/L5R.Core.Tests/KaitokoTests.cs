@@ -20,6 +20,8 @@ internal static class KaitokoTests
         ("Only a Personality opposing her at her battlefield is capped: not her own side, not at home, not at another battlefield, not while she is home", OnlyOpposed),
         ("The cap ends when Kaitoko leaves the battlefield (moved home, destroyed) or the Personality does; the Force is returned", Leaves),
         ("Whatever negates Force penalties negates the cap: on one card (Tireless Efforts, Incense Mill), by a Force-penalty immunity on one card or broadly on a player's cards", Negations),
+        ("Peace of the Kami's negation of all current effects from other players' cards negates the cap; Creating Order (an action modifier negation, a trait is not an action) does not", PeaceAndCreatingOrder),
+        ("A Strategy with a performer is performed by the performer: one whose performer has the keywords and opposes her may not target her; an ordinary Strategy and a performer without the keywords may", StrategyWithPerformer),
         ("Actions from cards in the unit of such a Personality (him, his Follower) may not target Kaitoko; a Personality without the keywords, one not opposing her and her own side's actions may", TargetBar),
     ]);
 
@@ -142,6 +144,37 @@ internal static class KaitokoTests
         Eq(e.CardForceForTest(control.Id), 3, "an untouched Personality stays capped");
         e.RemoveImmunity(grant.Id);
         Eq(e.CardForceForTest(single.Id), 3, "the cap binds him again when the immunity goes");
+    }
+
+    private static void PeaceAndCreatingOrder()
+    {
+        var s = Table(); Kait(s);
+        var peace = Made(s, "peace", 1, 4, keywords: "Ninja"); var order = Made(s, "order", 1, 4, keywords: "Fallen"); var control = Made(s, "control", 1, 4, keywords: "Kolat");
+        var e = MatchEngine.FromTestState(s);
+        e.NegateOtherPlayersEffectsForTest(peace.Id);
+        Eq(e.CardForceForTest(peace.Id), 4, "Peace of the Kami's negation of all current effects from other players' cards lifts the cap (Kaitoko is another player's card)");
+        Eq(e.CardForceForTest(control.Id), 3, "and only on the card it was used on");
+        var saved = System.Text.Json.JsonSerializer.Serialize(e.State);
+        Eq(MatchEngine.FromTestState(System.Text.Json.JsonSerializer.Deserialize<MatchState>(saved)!).CardForceForTest(peace.Id), 4, "it survives a save");
+        var later = e.State; later.TurnNumber++;
+        Eq(MatchEngine.FromTestState(later).CardForceForTest(peace.Id), 3, "next turn the cap binds again");
+        // Creating Order: no Force bonus or penalty from an ACTION is applied to him this turn. The cap is a trait of Kaitoko, not an action, so it still applies.
+        var creating = Edit(e, st => st.Cards[order.Id].ForceModifiersNegatedTurn = st.TurnNumber);
+        Eq(creating.CardForceForTest(order.Id), 3, "Creating Order does not lift the cap");
+    }
+
+    private static void StrategyWithPerformer()
+    {
+        var s = Table();
+        var kaitoko = Kait(s);
+        var ninja = Made(s, "ninja", 1, 4, keywords: "Ninja"); var samurai = Made(s, "samurai", 1, 4, keywords: "Samurai"); var homeNinja = Made(s, "homeNinja", 1, 4, Zone.Home, 0, "Ninja");
+        var strategy = Batch336Support.Add(s, "training-honor-cost-strategy", 1, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        var withPerformer = new AbilityDefinition("Open", "Test Strategy", "personality", Performer: "own-personality");
+        Check(e.TargetBarredForTest(1, strategy.Id, kaitoko.Id, withPerformer, ninja.Id), "a Strategy performed by a Ninja opposing her may not target her");
+        Check(!e.TargetBarredForTest(1, strategy.Id, kaitoko.Id, withPerformer, samurai.Id), "one performed by a Personality without the keywords may");
+        Check(!e.TargetBarredForTest(1, strategy.Id, kaitoko.Id, withPerformer, homeNinja.Id), "one performed by a Ninja who is not opposing her may");
+        Check(!e.TargetBarredForTest(1, strategy.Id, kaitoko.Id, Plain), "a Strategy with no performer is not a card in anyone's unit and may");
     }
 
     private static readonly AbilityDefinition Plain = new("Open", "Test action", "personality");

@@ -10,6 +10,8 @@ namespace L5R.Core;
 // A cap is a Force penalty, so whatever negates Force penalties negates it, and only for the Personality that has the protection:
 //   * "Negate all current and new Force penalties on him" (Tireless Efforts, Incense Mill, Deep Roots, ...): CardInstance.ForcePenaltiesNegatedTurn, a per-card mark for the turn;
 //   * "Negate all current Force penalties on him" without the "new" (Incense Mill): a one-shot cleanse, so the caps in force when it resolves are recorded for the turn (ForceCapCleanse), by source;
+//   * "Negate all current effects on it from other players' cards" (Peace of the Kami): the same one-shot record, for the caps whose source another player controls (Mendon, 2026-10-09). The cap is a
+//     trait, not an action, so Creating Order ("no Force bonus or penalty from an action") does not touch it;
 //   * a P12 Force-penalty immunity (ImmunityKind.ForcePenalty), stored on one card, on a player's cards (a keyword or type filter) or standing on a card while it is in play: asked as
 //     IsImmune(card, ForcePenalty, the cap's source controller, the source card), so an immunity to "other players' cards" does not stop a cap from the Personality's own player's card.
 // Both are read where the Force is asked, not when the cap begins, so a protection given after the cap began lifts it at once and one that ends restores it.
@@ -64,16 +66,18 @@ public sealed partial class MatchEngine
         return force;
     }
 
-    /// <summary>"Negate all current Force penalties on him" (Incense Mill): the caps binding him now are cleansed for the turn.</summary>
-    private void CleanseForceCaps(CardInstance card)
+    /// <summary>"Negate all current Force penalties on him" (Incense Mill), or with otherPlayersOnly "negate all current effects on it from other players' cards" (Peace of the Kami): the caps binding him now
+    /// (those whose source another player controls, when otherPlayersOnly) are cleansed for the turn.</summary>
+    private void CleanseForceCaps(CardInstance card, bool otherPlayersOnly = false)
     {
-        var caps = ForceCapsOn(card).ToArray();
+        var caps = ForceCapsOn(card).Where(cap => !otherPlayersOnly || !_state.Cards.TryGetValue(cap.SourceCardId, out var source) || source.OwnerId != card.OwnerId).ToArray();
         if (caps.Length == 0) return;
         var list = _state.ForceCapCleanses ??= [];
         list.RemoveAll(c => c.Turn != _state.TurnNumber);
         foreach (var cap in caps) list.Add(new(card.Id, cap.SourceCardId, _state.TurnNumber));
     }
 
+    internal void NegateOtherPlayersEffectsForTest(string cardId) => NegateOtherPlayersEffects(Card(cardId));
     internal void NegateForcePenaltiesForTest(string cardId) => NegateForcePenalties(Card(cardId));
     internal int ForceUncappedForTest(string cardId) => PersonalityForceUncapped(Card(cardId));
 }

@@ -17,6 +17,7 @@ internal static class FootholdTests
         ("Fallen Personalities join the Foothold player for 2 less Gold, never below 0; others and the opponent's Fallen pay in full", FallenDiscount),
         ("Madness tokens are -1F tokens while a Foothold is in play (either player's): each token, Personalities and Followers, stacking; none without one or on other cards", MadnessTokens),
         ("Limited, bow: a target card gets a Madness token (a -1F one), once, as the Stronghold's own action", MadnessAbility),
+        ("Both Limited abilities bow the Stronghold, so after one is taken a straighten lets the other be taken too; each is still once per turn (Mendon, 2026-10-09)", BothAbilitiesAfterStraightening),
         ("Limited, bow: Holdings enter play paying 2 less this turn only, Holdings only, the user's only; the mark survives a save", HoldingDiscount),
     ]);
 
@@ -158,6 +159,25 @@ internal static class FootholdTests
         Eq(e.State.Cards[target.Id].Tokens.Count(t => t.Type == "Madness"), 1, "the target has a Madness token");
         Eq(e.CardForceForTest(target.Id), Math.Max(0, before - 1), "and it is -1F");
         Check(!Batch336Support.CanUse(e, 0, FootholdAbilities.MadnessAbility, stronghold) && !Batch336Support.CanUse(e, 0, FootholdAbilities.HoldingsAbility, stronghold), "a bowed Stronghold offers neither Limited ability");
+    }
+
+    private static void BothAbilitiesAfterStraightening()
+    {
+        var s = Table(Foothold, null, Phase.Action);
+        var target = Batch336Support.Add(s, "training-lion-samurai", 1, Zone.Home);
+        var e = MatchEngine.FromTestState(s);
+        var stronghold = e.State.Players[0].StrongholdId;
+        // Priority passes to the opponent after an action; the tests hand it back so only the Stronghold's own state decides what is offered.
+        MatchEngine Mine(MatchEngine engine, bool straighten = false) => Batch336Support.Edit(engine, st => { st.PriorityPlayerId = 0; st.ActivePlayerId = 0; if (straighten) st.Cards[stronghold].Bowed = false; });
+        Accept(e, Batch336Support.Offer(e, 0, FootholdAbilities.MadnessAbility, stronghold, target.Id));
+        e = Mine(e);
+        Check(e.State.Cards[stronghold].Bowed && !Batch336Support.CanUse(e, 0, FootholdAbilities.HoldingsAbility, stronghold), "bowed by the first action, the other is not available");
+        e = Mine(e, straighten: true);
+        Check(!e.State.Cards[stronghold].Bowed && Batch336Support.CanUse(e, 0, FootholdAbilities.HoldingsAbility, stronghold), "once something straightens it, the other action can be taken by bowing it again");
+        Accept(e, Batch336Support.Enabled(e, 0, FootholdAbilities.HoldingsAbility, stronghold).Command!);
+        e = Mine(e, straighten: true);
+        Check(!Batch336Support.CanUse(e, 0, FootholdAbilities.MadnessAbility, stronghold) && !Batch336Support.CanUse(e, 0, FootholdAbilities.HoldingsAbility, stronghold),
+            "straightened again, each ability has still been taken once this turn and is not offered a second time");
     }
 
     private static void HoldingDiscount()

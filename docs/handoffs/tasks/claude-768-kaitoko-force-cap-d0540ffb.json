@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Force cap primitive (live maximum-Force rule: lowers never raises, lapses with its source, negated by Force-penalty negations and immunities) and Asako Kaitoko - exp wired on it with its keyword-conditioned target bar (personality-wave-301). Art pack r1 on Foothold's pack.",
-  "validation": "force-cap 6/6 and kaitoko 7/7 suites; art pack validated (archive and verify-only); full check.sh and CI pending; no native playtest",
-  "remaining": "Publish the art-pack release, CI, merge. Readings in docs/decisions/2026-10-08-force-cap-and-kaitoko.md await Mendon.",
+  "summary": "Force cap and Kaitoko wired; Mendon's 2026-10-09 rulings applied: Peace of the Kami lifts the cap, Creating Order does not, a Strategy with a performer is barred by the performer's keywords; Foothold's two Limited abilities usable after a straighten (tested). Art pack still needs rebuilding on main's latest before merge.",
+  "validation": "force-cap 6/6, kaitoko 9/9, foothold-of-the-mad 8/8; full check.sh --skip-client passed on f2c6a093 before this change; CI and a final full check pending; no native playtest",
+  "remaining": "Merge main, rebuild art pack r2 on main's latest, publish release, CI, full check, merge. See the PR comment.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/768",
   "branch": "claude/768-kaitoko-force-cap",
-  "updated": "2026-10-08T23:17:32.642151+00:00"
+  "updated": "2026-10-09T00:49:35.908610+00:00"
 }
