@@ -20,7 +20,10 @@ is not worth ever blocking or erroring a session over.
 
 Session scope: when the payload's transcript_path is readable, the reminder
 fires only if THIS session edited an engine file (Edit/Write/MultiEdit/
-NotebookEdit tool calls in the transcript). Otherwise a session that merely sits
+NotebookEdit tool calls in the transcript), and then only for the worktree
+(branch) that file lives in, so a task checkout beside the project root is
+judged on its own branch (issue #781). A branch already merged into origin/main
+has nothing to hand off. Set L5R_HOOK_DEBUG to a file path to log each decision. Otherwise a session that merely sits
 on a branch carrying someone else's engine changes is nagged for a handoff it
 cannot honestly write. Edits made through Bash are invisible to this check; when
 the transcript is missing or unreadable the branch-level check applies as before.
@@ -83,30 +86,98 @@ def session_edited_paths(transcript_path):
     return edited
 
 
-def is_engine_path(path, root):
-    candidate = Path(path)
+def worktree_of(path):
+    """The git worktree root holding `path` (the nearest existing parent), or None outside a repository."""
+    directory = Path(path).parent
+    while not directory.is_dir():
+        if directory.parent == directory:
+            return None
+        directory = directory.parent
     try:
-        candidate = candidate.resolve().relative_to(Path(root).resolve())
-    except (OSError, ValueError):
-        pass
-    return candidate.as_posix().startswith(ENGINE_PREFIXES)
+        top = import_collab().git(directory, "rev-parse", "--show-toplevel")
+    except Exception:  # noqa: BLE001
+        return None
+    return Path(top) if top else None
 
 
-def needs_reminder(root, transcript_path=None):
-    collab = import_collab()
+def engine_edits_by_worktree(edited, root):
+    """{worktree root: engine files this session edited there}. A sibling worktree of the same repository
+    (a task checkout beside the project root) is its own branch, so its edits are checked against it and not
+    against whatever branch the project root is on."""
+    groups = {}
+    for path in edited:
+        top = worktree_of(path)
+        if top is None:
+            top = Path(root)
+        try:
+            relative = Path(path).resolve().relative_to(top.resolve()).as_posix()
+        except (OSError, ValueError):
+            continue
+        if relative.startswith(ENGINE_PREFIXES):
+            groups.setdefault(str(top.resolve()), []).append(relative)
+    return groups
+
+
+def branch_merged(collab, root):
+    """The branch's commits are all in origin/main already: there is nothing left to hand off."""
+    try:
+        collab.git(root, "merge-base", "--is-ancestor", "HEAD", "origin/main")
+        return not collab.git(root, "status", "--porcelain")
+    except Exception:  # noqa: BLE001  (a non-zero exit means not an ancestor)
+        return False
+
+
+def branch_needs_handoff(collab, root, only_files=None):
     name = collab.branch(root)
     if name in ("main", "master", ""):
+        return False
+    if branch_merged(collab, root):
         return False
     paths = collab.paths_changed(root, "origin/main", working=True)
     if not any(p.startswith(prefix) for p in paths for prefix in ENGINE_PREFIXES):
         return False
-    if transcript_path:
-        edited = session_edited_paths(transcript_path)
-        if edited is not None and not any(is_engine_path(p, root) for p in edited):
-            return False
     result = collab.audit(root, "origin/main", name=name, working=True)
     handoff_errors = ("Missing changed task handoff", "Handoff belongs to another branch")
     return any(any(marker in error for marker in handoff_errors) for error in result["errors"])
+
+
+def needs_reminder(root, transcript_path=None, trace=None):
+    collab = import_collab()
+    note = trace if trace is not None else (lambda *_: None)
+    edited = session_edited_paths(transcript_path) if transcript_path else None
+    note("edited", None if edited is None else sorted(edited))
+    if edited is None:
+        # The session's edits cannot be known (no readable transcript): the project root's branch decides, as before.
+        decision = branch_needs_handoff(collab, root)
+        note("branch-level", str(root), decision)
+        return decision
+    for top, files in engine_edits_by_worktree(edited, root).items():
+        decision = branch_needs_handoff(collab, Path(top))
+        note("worktree", top, files, decision)
+        if decision:
+            return True
+    return False
+
+
+def make_trace():
+    """Opt-in: set L5R_HOOK_DEBUG to a file path to append one JSON line per decision."""
+    target = os.environ.get("L5R_HOOK_DEBUG")
+    if not target:
+        return None
+    lines = []
+
+    def note(*parts):
+        lines.append(parts)
+
+    def flush(payload, result):
+        try:
+            with open(target, "a", encoding="utf-8") as handle:
+                handle.write(json.dumps({"cwd": payload.get("cwd"), "has_transcript": bool(payload.get("transcript_path")),
+                                         "events": lines, "reminder": result}, default=str) + chr(10))
+        except OSError:
+            pass
+    note.flush = flush
+    return note
 
 
 def allow(additional_context=None):
@@ -123,10 +194,21 @@ def main():
         return 0
     try:
         root = project_root(payload)
-        if needs_reminder(root, payload.get("transcript_path")):
+        trace = make_trace()
+        result = needs_reminder(root, payload.get("transcript_path"), trace)
+        if trace is not None:
+            trace.flush(payload, result)
+        if result:
             allow(HANDOFF_HINT)
     except Exception:  # noqa: BLE001  a reminder is never worth blocking or erroring a session over
-        pass
+        target = os.environ.get("L5R_HOOK_DEBUG")
+        if target:
+            import traceback  # noqa: PLC0415
+            try:
+                with open(target, "a", encoding="utf-8") as handle:
+                    handle.write(json.dumps({"error": traceback.format_exc()}) + chr(10))
+            except OSError:
+                pass
     return 0
 
 
