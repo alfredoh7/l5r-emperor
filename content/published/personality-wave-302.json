@@ -1,0 +1,38 @@
+{
+  "Profile": "personality-wave-302",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10481",
+      "Name": "Bayushi Kachiko",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Personalities and Followers have -1F while they are Fallen, Nonhuman, or attacking you.\nPolitical Open, bow: After the next time this turn a target Personality attacks, his controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10481.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Empress",
+        "ExperiencedCoM",
+        "Imperial",
+        "Scorpion Clan",
+        "Seductress"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kachiko-watch"
+      ],
+      "Effect": "kachiko"
+    }
+  ],
+  "Decks": []
+}

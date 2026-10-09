@@ -30,7 +30,7 @@ internal static partial class Wave734Tests
     }
 
     public static void Run(TestRunner runner) => runner.Run("wave-734", [
-        ("Published as printed: nineteen cards in six profiles with their stats, abilities and effects; Kachiko, Kokujin and Warded Premises are not published", PublishedShape),
+        ("Published as printed: nineteen cards in six profiles with their stats, abilities and effects; Kokujin and Warded Premises are not published (Kachiko was wired afterwards, issue #778)", PublishedShape),
         ("Mumoku no Oni and Shosuro Tanihara: while attacking, the Province reads no higher than its printed strength", ProvinceCeiling),
         ("Usagi Seki: +5F only while another player's action is resolving", SekiResolving),
         ("Isawa Norimichi: other Earth Shugenja of his controller +1F; Battle: this Province +2 or -2 strength", NorimichiTerms),
@@ -90,7 +90,7 @@ internal static partial class Wave734Tests
         Check(seki.Force == 2 && seki.Chi == 2 && seki.GoldCost == 4, "Seki's stats");
         Check(CardCatalog.Get(Armor).AttachGrantsKeyword == "Fallen", "Armor of the Mad gives its wielder Fallen");
         Check(CardCatalog.Get(Farm).GoldProduction == 2, "Well-Defended Farm produces 2 Gold");
-        Check(!CardCatalog.Cards.ContainsKey(Kachiko) && !CardCatalog.Cards.ContainsKey(Kokujin) && !CardCatalog.Cards.ContainsKey(Warded), "Kachiko, Kokujin and Warded Premises are deferred, not published");
+        Check(!CardCatalog.Cards.ContainsKey(Kokujin) && !CardCatalog.Cards.ContainsKey(Warded), "Kokujin and Warded Premises are deferred, not published (Kachiko was wired afterwards, issue #778)");
         Check(TraitReactions.Is("w734-hantei-search") && !TraitReactions.Is("w734-jiyun-lock"), "Hantei's search is a trait; Ji-Yun's Reaction is not");
         Check(Experienced.Level(CardCatalog.Get(Hoturi).Keywords) == 0 && Experienced.IsInexperienced(CardCatalog.Get(Hoturi).Keywords) && Experienced.Level(CardCatalog.Get(Tsuke).Keywords) == 1, "Inexperienced is level 0, ExperiencedCoM is level 1");
     }
