@@ -154,6 +154,14 @@ public sealed class DeckFileStore(string directory)
         return File.ReadAllText(path);
     }
     public static string Fingerprint(string path) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Read(path))));
+    /// <summary>Deletes one saved deck file; only a .txt file directly inside this store's folder may be removed.</summary>
+    public void Delete(string path)
+    {
+        var full = Path.GetFullPath(path);
+        if (!string.Equals(Path.GetDirectoryName(full), DirectoryPath.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase) || !full.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("Only a saved deck in the deck folder can be deleted.");
+        File.Delete(full);
+    }
     public string Save(string name, Deck deck, bool overwrite = false)
     {
         var target = PathFor(name); Directory.CreateDirectory(DirectoryPath);
