@@ -64,11 +64,11 @@ internal static class ReactionPresentationTests
     {
         var e = Attack(true, out _);
         var before = JsonSerializer.Serialize(e.State);
-        Eq(Flow(e).DeclineLabel, "Pass this response");
+        Eq(Flow(e).DeclineLabel, "Skip Reaction");
         Eq(JsonSerializer.Serialize(e.State), before, "describing the pass must not take it");
         Decline(e);
         Eq(e.State.ConsecutivePasses, 1); Eq(e.State.PriorityPlayerId, 1);
-        Eq(Flow(e).DeclineLabel, "Continue resolving attack");
+        Eq(Flow(e).DeclineLabel, "Resolve Reaction");
         Check(Flow(e).DeclineConsequence.Contains("Closes this response round", StringComparison.Ordinal));
         Check(e.State.PendingAttack is not null, "the first pass did not resolve the attack");
         Decline(e);
@@ -239,7 +239,7 @@ internal static class ReactionPresentationTests
         Check(flow.Context.Contains(CardCatalog.Get(performer.DefinitionId).Name, StringComparison.Ordinal));
         Check(!flow.Context.Contains("Stormless Fury", StringComparison.Ordinal), "the unplayed response in hand is not the public trigger");
         Eq(flow, Flow(e, 1));
-        Eq(flow.DeclineLabel, "Pass this response");
+        Eq(flow.DeclineLabel, "Skip Reaction");
         Accept(e, Enabled(e, 0, "stormless-fury-attach", storm.Id).Command!);
         Eq(e.State.Cards[storm.Id].Zone, Zone.Attached); Eq(e.State.Cards[storm.Id].AttachedTo, performer.Id);
         Check(e.State.PendingChoice is null && e.GetView(0).ReactionPresentation is null, "Core still settles the spent single-watcher response");

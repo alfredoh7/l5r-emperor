@@ -215,6 +215,12 @@ public partial class Main
         };
     }
 
+    // The stateful action button: while a reaction window is open, committing a prepared reaction reads "Play Reaction"; the window's own decline reads
+    // "Skip Reaction" before anything is played and "Resolve Reaction" once the round is closing (both come from Core's presentation metadata).
+    private string CommitButtonLabel(ActionOption action) =>
+        View.ReactionPresentation is { DeclineLabel.Length: > 0 } && View.PendingChoice is not null && action.CardId is not null && action.Command is not null
+            && action.Type is "useAbility" or "playStrategy" ? "Play Reaction" : CommitActionLabel(action);
+
     private sealed record ReactionSubmission(long Version, int PlayerId, string? CardId, string Name, long EventSequence);
     private ReactionSubmission? _reactionSubmission;
     private string? _reactionReceipt;

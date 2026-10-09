@@ -193,7 +193,7 @@ public partial class Main
         _inspector.AddChild(Palette.Wrapped(quote.ClanDiscount ? "Clan discount reduces the Gold cost by 2. This purchase cannot trigger Proclaim." : quote.ProclaimEligible ? "Paying without the Clan discount Proclaims the Personality as soon as it is paid for." : "This card is not eligible for Proclaim.", 13, Palette.PaperDim));
         if (quote.ClanAllegiance) _inspector.AddChild(Palette.Wrapped("Clan allegiance adds 2 Gold and ignores the Honor requirement.", 13, Palette.Crane));
         var (required, ready) = RenderGoldPanel(choice);
-        AddConfirm(CommitActionLabel(choice), required, ready,
+        AddConfirm(CommitButtonLabel(choice), required, ready,
             () =>
             {
                 _autoProclaimCardId = choice.Type == "purchase" && quote.ProclaimEligible ? choice.CardId : null; // issue #639
@@ -375,6 +375,15 @@ public partial class Main
     /// <summary>Issue #635: a list of legal cards whose rows and table tiles highlight each other (see CardChoiceList).</summary>
     private CardChoiceList NewChoiceList(bool enabled = true) => new(id => _tiles.Where(t => IsInstanceValid(t) && t.Card.Id == id).ToArray()) { Enabled = enabled };
 
+    // Scrolls the sidebar to a control once layout has settled, so a pending choice is never hidden below the fold.
+    private async void ScrollInspectorTo(Control target)
+    {
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        if (!IsInstanceValid(target) || !target.IsInsideTree()) return;
+        for (Node? parent = target.GetParent(); parent is not null; parent = parent.GetParent())
+            if (parent is ScrollContainer scroll) { scroll.EnsureControlVisible(target); return; }
+    }
+
     private void RenderTargeted()
     {
         var action = _chosen!;
@@ -386,7 +395,8 @@ public partial class Main
         var needsTarget = targets.Length > 0 && target is null;
         var needsProvince = IsProvinceTarget(action) && command.Province is null; // the player picks the province
         _inspector.AddChild(Palette.Wrapped(Placard(action, IsProvinceTarget(action) ? WithoutProvinceOwner(action.Label) : null), 17, Palette.Gold));
-        if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table or below. Review the arrow, then use the action button.", 13, Palette.PaperDim));
+        if (needsTarget) _inspector.AddChild(Palette.Wrapped("Next: choose a target. Pick a highlighted card on the table or in your hand, or a row in the list below.", 17, Palette.Gold));
+        else if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table or below. Review the arrow, then use the action button.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
         if (IsProvinceTarget(action)) RenderProvincePicker(action);
@@ -405,6 +415,7 @@ public partial class Main
             picker.ItemSelected += i => { if (targets[i] == _chosen?.Command?.TargetId) ClearTarget(); else ChooseTarget(targets[i]); }; // choosing the chosen row again clears it
             _inspector.AddChild(picker);
             if (needsTarget) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 13, Palette.Error));
+            if (needsTarget) ScrollInspectorTo(picker); // the list can sit below a long card text; bring the choice into view
         }
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {
@@ -415,10 +426,10 @@ public partial class Main
         }
         if (needsTarget && action.TargetGold is not null)
         { // a target-derived cost belongs to the target: none is shown until the player picks one (issue #581)
-            AddConfirm(CommitActionLabel(action), 0, false, () => command, "Cancel action", false); return;
+            AddConfirm(CommitButtonLabel(action), 0, false, () => command, "Cancel action", false); return;
         }
         var (required, ready) = RenderGoldPanel(action);
-        AddConfirm(CommitActionLabel(action), required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince);
+        AddConfirm(CommitButtonLabel(action), required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince);
     }
 
     // Back to "Choose a target…": the action keeps its legal targets but none is selected.
@@ -505,7 +516,7 @@ public partial class Main
         {
             SelectReactionSource(option);
             if (option.Type == "useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is { Length: 0 } && option.Command is { } reaction && QuoteFor(option) is null) _ = Submit(reaction);
-            else if (_chosen is null && option.Type is "equip" or "playStrategy" or "useAbility" && IsOwnHandCard(option.CardId) && option.Command is not null) BeginPlayPrompt(option);
+            else if (_chosen is null && View.PendingChoice is null && option.Type is "equip" or "playStrategy" or "useAbility" && IsOwnHandCard(option.CardId) && option.Command is not null) BeginPlayPrompt(option); // a reaction window's options are already a deliberate pick
             else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility" or "chooseOpponentPayment") Choose(option);
             else if (option.Type == "discardProvince") ConfirmDiscardProvince(option);
             else if (option.Type == "endDynasty" && option.Command is { } endCommand && NeedsEndDynastyConfirmation())

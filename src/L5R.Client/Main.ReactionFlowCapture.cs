@@ -238,7 +238,7 @@ public partial class Main
         await ReactionNativeClick(ReactionOption(fixture.Source, "ruya-bow"));
         SupportRequire(_chosen?.Command is { AbilityId: "ruya-bow", TargetId: null } && View.Version == version, "Reaction selection submitted or chose a target implicitly");
         var commit = ReactionControl<Button>("CommitAction");
-        SupportRequire(commit.Disabled && commit.Text.Contains("Tamori Ruya"), "Incomplete reaction may be committed or its commit is unnamed");
+        SupportRequire(commit.Disabled && commit.Text == "Play Reaction", "Incomplete reaction may be committed or its commit is not the stateful Play Reaction button");
         var target = _tiles.Single(t => t.Card.Id == fixture.Target);
         SupportRequire(target.LegalTarget, "The actual legal target is not highlighted");
         await ReactionNativeClick(target);
@@ -253,13 +253,15 @@ public partial class Main
             var seat = _captureMode.Contains("seat1") ? 1 : 0;
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); _preferences.PausedAnimation = false; ApplyPreferences(false);
             var layout = _captureMode.Contains("layout");
-            var fixture = ReactionCaptureBow(seat); await PrepareReactionCapture(fixture, seat, input: !layout);
+            var forestReview = _captureMode.Contains("review") && _captureMode.Contains("forest");
+            var fixture = forestReview ? ReactionCaptureForest(seat) : ReactionCaptureBow(seat); await PrepareReactionCapture(fixture, seat, input: !layout);
             CheckReactionCaptureLayout(); await SupportCapture("-offer");
             if (layout)
             {
                 GD.Print("REACTION_FLOW_LAYOUT_PASS: rendered public context and decision bounds; seat=" + seat + "; reduced=" + _preferences.ReducedMotion + "; input not exercised.");
                 GetTree().Quit(); return;
             }
+            if (forestReview) { GD.Print("REACTION_FLOW_REVIEW_READY: real Forest Cover offered by two Scouts; choose a performer, the Follower target, then bow holdings to pay 2 Gold."); return; }
             if (_captureMode.Contains("review")) { GD.Print("REACTION_FLOW_REVIEW_READY: real Horibe action resolved; Ruya may respond without inspecting her source first."); return; }
             var before = View.Version;
             var pending = View.PendingChoice;
@@ -360,7 +362,8 @@ public partial class Main
             await ReactionNativeClick(_tiles.Single(t => t.Card.Id == fixture.Target));
             var quote = QuoteFor(_chosen!); SupportRequire(quote is { Cost: 2 } && _chosen?.Command?.TargetId == fixture.Target,
                 "Follower target did not obtain its authoritative Gold quote");
-            SupportRequire(!ReactionControl<Button>("CommitAction").Disabled && ReactionControl<Button>("CommitAction").Text.Contains("Forest Cover"), "Prepared paid reaction lacks its named single commit");
+            if (quote is { Payments.Length: > 0 }) { GoldClickHoldings(quote.Payments[0].SourceIds); await EventFrames(3); } // the player bows holdings to pay (#731)
+            SupportRequire(!ReactionControl<Button>("CommitAction").Disabled && ReactionControl<Button>("CommitAction").Text.StartsWith("Play Reaction", StringComparison.Ordinal), "Prepared paid reaction lacks its single Play Reaction commit");
             await SupportCapture("-performer-cost"); await ReactionNativeClick(ReactionControl<Button>("CommitAction")); await WaitReactionCapture();
             SupportRequire(View.Version == before + 1 && fixture.Engine.State.Cards[fixture.Target] is { Zone: Zone.Attached } follower && follower.AttachedTo == fixture.Performer &&
                 fixture.Engine.State.Cards[fixture.Source].Zone == Zone.FateDiscard && fixture.Engine.State.ExtraEndPhaseDraws[seat] == 1,

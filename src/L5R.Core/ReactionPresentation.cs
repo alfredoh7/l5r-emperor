@@ -69,21 +69,21 @@ public sealed partial class MatchEngine
             return ("Finish Dynasty phase", "Declines these end-of-Dynasty responses and completes the Dynasty phase.");
         if (_state.ConsecutivePasses == 1)
         {
-            if (nested) return ("Finish these responses", "Closes this response round. The pending reaction and the original round continue in order.");
+            if (nested) return ("Resolve Reaction", "Closes this response round. The pending reaction and the original round continue in order.");
             return pending.Type switch
             {
-                "attackReaction" => ("Continue resolving attack", "Closes this response round and continues the pending attack, including any remaining choices."),
+                "attackReaction" => ("Resolve Reaction", "Closes this response round and continues the pending attack, including any remaining choices."),
                 "beforeActionReaction" or "additionalActionReaction" or "announceReaction" or "unimpeachableNameReaction" or "honorChangeReaction" or "proclaimNegateReaction"
-                    => ("Continue resolving action", "Closes this response round and continues the pending action, including any remaining choices."),
+                    => ("Resolve Reaction", "Closes this response round and continues the pending action, including any remaining choices."),
                 "duelReaction" when _state.PendingDuel is { Stage: "FocusEffectsReaction" }
-                    => ("Continue resolving Focus Effects", "Closes this response round and continues the duel's Focus Effects, including any remaining choices."),
-                "duelReaction" => ("Continue to the duel", "Closes this response round and continues the duel."),
-                _ => ("Finish responses", "Closes this response round and continues play, including any remaining choices.")
+                    => ("Resolve Reaction", "Closes this response round and continues the duel's Focus Effects, including any remaining choices."),
+                "duelReaction" => ("Resolve Reaction", "Closes this response round and continues the duel."),
+                _ => ("Resolve Reaction", "Closes this response round and continues play, including any remaining choices.")
             };
         }
         if (SettledReactionWindows.Contains(pending.Type) && _state.PendingNegatableAbility is null)
-            return ("Pass this response", "Declines this opportunity. Any remaining responses happen before play continues.");
-        return ("Pass this response", "Declines this opportunity and gives the other player a response opportunity.");
+            return ("Skip Reaction", "Declines this opportunity. Any remaining responses happen before play continues.");
+        return ("Skip Reaction", "Declines this opportunity and gives the other player a response opportunity.");
     }
 
     private GameCommand? CurrentReactionCommand() => _state.PendingHonorChange?.Command ?? _state.PendingAnnouncedAction

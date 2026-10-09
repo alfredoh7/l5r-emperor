@@ -134,7 +134,7 @@ public partial class Main
             _battleProgressStrip!.StepButton(3).GrabFocus(); await LookKey(Key.Enter);
             SupportRequire(_battleSequenceOpen && View.Version == version, "Keyboard sequence inspection changed game"); await SupportCapture("-sequence");
             await SupportClick(_battleProgressStrip.StepButton(3)); SupportRequire(!_battleSequenceOpen, "Sequence did not close");
-            await SupportClick(StabilizationButtons(_inspector).Single(b => b.Text.StartsWith("Naval Invasion:")));
+            await SupportClick(StabilizationButtons(_inspector).Single(b => b.IsVisibleInTree() && !b.Disabled && b.HasMeta("reaction_ability") && b.GetMeta("reaction_ability").AsString() == "naval-invasion"));
             SupportRequire(_chosen?.Command?.AbilityId == "naval-invasion", "Naval action button did not prepare the real command");
             await SupportClick(ReviewedCommitButton()); await WaitDecisionPresentation(); await EventFrames(18);
             while (View.PendingChoice?.Type == "engageReaction") await SequenceNativePhase("declineReaction");

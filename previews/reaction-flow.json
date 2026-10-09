@@ -8,8 +8,8 @@
   "reviewer": "mdornbrook",
   "summary": "Alfredo has built the reaction-flow preview and would like Mendon to review the decision clarity and response timing.",
   "review_steps": [
-    "Extract the complete package and open Start Review.cmd. The prepared table uses real published cards and opens directly to Tamori Ruya\u2019s reaction to Yoritomo Horibe\u2019s bow.",
-    "Choose Ruya\u2019s offered reaction, select a highlighted Personality, and use the named action button. Check that the exchange returns to play without a dismissal when no responses remain.",
+    "Extract the complete package and open Start Review.cmd. The prepared table uses real published cards and opens directly to Tamori Ruya’s reaction to Yoritomo Horibe’s bow.",
+    "Choose Ruya’s offered reaction, select a highlighted Personality, and use the named action button. Check that the exchange returns to play without a dismissal when no responses remain.",
     "Cancel preparation with Escape and change targets before committing. Check the response context, continuation wording and stable decision area.",
     "Use Other previews for the opposite seat and reduced motion. Open Full Game opens normal menus for broader play.",
     "Record expected and actual behavior using Send Feedback.url. This scene is a test fixture; export is disabled because its initial position cannot be reconstructed as a normal replay."
@@ -36,6 +36,10 @@
     {
       "name": "Other previews/Reduced Motion Opposite Seat",
       "mode": "published-reaction-flow-review-reduced-seat1"
+    },
+    {
+      "name": "Other previews/Forest Cover (performer and Gold)",
+      "mode": "published-reaction-flow-review-forest"
     },
     {
       "name": "Open Full Game",

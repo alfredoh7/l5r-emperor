@@ -96,7 +96,7 @@ public partial class Main
             if (_alternativeCostConfirmed)
             {
                 var (required, ready) = RenderGoldPanel(draftAction);
-                AddConfirm(CommitActionLabel(draftAction), required, ready, () => draftCommand with { SourceIds = required > 0 ? _sources.ToArray() : [] }, "Cancel action"); return true;
+                AddConfirm(CommitButtonLabel(draftAction), required, ready, () => draftCommand with { SourceIds = required > 0 ? _sources.ToArray() : [] }, "Cancel action"); return true;
             }
             var performers = Actions.Where(a => a.Enabled && a.CardId == draftAction.CardId && a.AlternativeCost?.AbilityId == draftAction.AlternativeCost!.AbilityId)
                 .Select(a => a.AlternativeCost!.PerformerId).Distinct().ToArray();
@@ -133,7 +133,7 @@ public partial class Main
         if (pending is not null && RenderCandidateChoices(options)) return true;
         if (contextualDecline && options.Length == 0) return true;
         var rows = new List<(ActionOption Option, Button Button)>();
-        var confirm = SidebarSkin.Button(contextualDecline ? _decisionSelection is { } selectedReaction ? CommitActionLabel(selectedReaction) : "Choose a reaction" : "Confirm choice", CommitDecision, true);
+        var confirm = SidebarSkin.Button(contextualDecline ? _decisionSelection is { } selectedReaction ? CommitButtonLabel(selectedReaction) : "Choose a reaction" : "Confirm choice", CommitDecision, true);
         if (contextualDecline) confirm.Name = "CommitAction";
         foreach (var option in options)
         {
@@ -144,7 +144,7 @@ public partial class Main
             button = SidebarSkin.Button(Placard(option, option.AlternativeCost?.Label ?? option.Label), () =>
             {
                 _decisionSelection = option;
-                if (contextualDecline) confirm.Text = CommitActionLabel(option);
+                if (contextualDecline) confirm.Text = CommitButtonLabel(option);
                 if (pending is not null) { _chosen = null; _sources.Clear(); }
                 if (QuoteFor(option) is not null) { _chosen = option; ResuggestSources(); RenderInspector(); return; }
                 foreach (var row in rows)
