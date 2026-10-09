@@ -16,6 +16,12 @@ public partial class Main
     }
     private async Task PrepareSearchReview(string mode = "shizuka")
     {
+        if (mode == "p20") // P20 (SearchExtensions.cs): the real engine's isolated review position, a private multi-card search of the viewer's own provinces
+        {
+            _searchFixture = MatchEngine.CreateSearchShowcase("p20-provinces");
+            await LoadSupportFixture(_searchFixture, 0); await WaitDecisionPresentation(); await EventFrames(15);
+            return;
+        }
         var state = MatchEngine.CreatePublishedTestMatch(42).State;
         state.Phase = mode == "gift" ? Phase.Dynasty : Phase.Action; state.ActivePlayerId = state.PriorityPlayerId = 0; state.PendingChoice = null;
         var owner = mode == "gift" ? 1 : 0;
@@ -106,6 +112,35 @@ public partial class Main
         await SupportCapture("-followup-" + View.PendingSearch!.Stage + (QuoteFor(action) is null ? "" : "-payment"));
         await SupportClick(StabilizationButtons(_decisionActions).First(b => b.Text.StartsWith("Confirm", StringComparison.Ordinal))); await WaitDecisionPresentation(); await EventFrames(12);
     }
+    // P20: a search of the viewer's own provinces that takes one or two cards with different titles. Nothing is chosen for the player, the confirmation stays explicit, the draft honours the stated limits, and one
+    // command is sent for the whole set.
+    private async Task CaptureProvinceSearch()
+    {
+        await PrepareSearchReview("p20");
+        SupportRequire(_searchPanel is not null && View.PendingSearch is { Stage: SearchStage.Select, MinSelect: 1, MaxSelect: 2, DifferentTitles: true, Place: "provinces" }, "The province search must open its private list with a one-to-two count and the titles rule");
+        var panel = _searchPanel!; var entries = View.PendingSearch!.Entries!;
+        SupportRequire(panel.Cards.Count == entries.Length && entries.All(e => e.Eligible) && entries.Length >= 3, "Every card of the viewer's own provinces must be listed and selectable");
+        SupportRequire(panel.ConfirmButton.Disabled && panel.Selection is null, "A multi-card search must start without a selection");
+        await SupportCapture("-provinces");
+        var version = View.Version;
+        var first = panel.Cards[0]; var second = panel.Cards.First(c => c.Entry.Definition.Name != first.Entry.Definition.Name);
+        await SupportClick(first.Button);
+        SupportRequire(View.Version == version && !panel.ConfirmButton.Disabled && panel.Selection?.Command?.CardIds is [var onlyOne] && onlyOne == first.Entry.DefinitionId, "One card satisfies the minimum and must not submit before confirm");
+        await SupportClick(second.Button);
+        SupportRequire(View.Version == version && panel.Selection?.Command?.CardIds is [var a, var b] && a == first.Entry.DefinitionId && b == second.Entry.DefinitionId, "The second pick must join the draft in the order picked");
+        var sameTitle = panel.Cards.Skip(2).FirstOrDefault(c => c.Entry.Definition.Name == first.Entry.Definition.Name || c.Entry.Definition.Name == second.Entry.Definition.Name);
+        if (sameTitle.Button is not null) { await SupportClick(sameTitle.Button); SupportRequire(panel.Selection?.Command?.CardIds?.Length <= 2, "A third pick must never exceed the maximum"); }
+        SupportRequire(GetViewport().GetVisibleRect().Encloses(panel.GetGlobalRect()) && panel.GetGlobalRect().Encloses(panel.ConfirmButton.GetGlobalRect()), "The search panel or its confirmation leaves the window");
+        await SupportCapture("-provinces-selected");
+        _session.SwitchPracticeSeat(); await EventFrames(15);
+        SupportRequire(_searchPanel is null && View.PendingSearch is null, "The private province list must not survive a seat switch");
+        _session.SwitchPracticeSeat(); await EventFrames(15);
+        SupportRequire(_searchPanel is not null && _searchPanel.Selection is null, "The searcher must regain a fresh private list with no stale draft");
+        await SupportClick(_searchPanel!.Cards[0].Button); await SupportClick(_searchPanel.ConfirmButton);
+        await WaitDecisionPresentation(); await EventFrames(12);
+        SupportRequire(View.PendingSearch is null && View.ShownCards!.Length == 1 && !View.Events.Any(e => e.Type == "deckShuffled"), "The confirmed province card must be shown, and no deck is shuffled");
+    }
+
     private async Task CaptureSearch()
     {
         try
@@ -161,7 +196,8 @@ public partial class Main
             SupportRequire(View.PendingSearch!.Optional && View.PendingSearch.CanPass && _searchPanel!.Cards.Any(c => c.Entry.Eligible), "Optional fixture missing legal cards or Pass");
             await SupportClick(StabilizationButtons(_searchPanel!).Single(b => b.Text.StartsWith("Pass", StringComparison.Ordinal))); await SupportCapture("-optional");
             await SupportClick(_searchPanel!.ConfirmButton); await WaitDecisionPresentation(); SupportRequire(View.PendingSearch is null && View.ShownCards!.Length == 0, "Optional pass revealed a card or failed to finish");
-            GD.Print("DECK_SEARCH_PASS: single-click deck navigation, explicit card confirmation, full-card inspection, grouping, filter, ineligible reasons, both seats, Region, Terrain discard, no-match Pass, Imperial Gift and quoted payment"); GetTree().Quit();
+            await CaptureProvinceSearch();
+            GD.Print("DECK_SEARCH_PASS: single-click deck navigation, explicit card confirmation, full-card inspection, grouping, filter, ineligible reasons, both seats, Region, Terrain discard, no-match Pass, Imperial Gift, quoted payment and a multi-card province search"); GetTree().Quit();
         }
         catch (Exception e) { await SupportCapture("-failure"); GD.PushError(e.ToString()); GetTree().Quit(1); }
     }

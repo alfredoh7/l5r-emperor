@@ -332,12 +332,12 @@ internal static class CreatedProxies677Tests
     {
         // These proxies are published for their art and data; nothing creates them until their creator is wired. Yuribara's Butterflies prints two traits the engine does not have: a creator
         // that resolved to it would put a card into play with printed text that does nothing.
-        var unwiredProxies = new[] { Butterflies, MinorIllusion, TowerGuard, TsumaroIllusion };
+        var unwiredProxies = new[] { TsumaroIllusion }; // Yuribara's Butterflies, Minor Illusion and Tower Guard are created by their creators since wave batch 10 (issue #741)
         foreach (var (abilityId, spec) in CreatedCards.Creators)
             foreach (var alternative in spec.Alternatives.Where(a => !a.CopyOfTarget))
                 Check(!unwiredProxies.Contains(CreatedCards.Resolve(alternative).Id), $"{abilityId} creates {CreatedCards.Resolve(alternative).Name}, whose creator is not wired");
-        // Constructing the Self, The Tower of Vigilance, Kitsune Yuribara, Isawa Tsumaro, Daigotsu Kikumura: left unwired, so not published.
-        foreach (var id in new[] { "oracle-l5r-10700", "oracle-l5r-10612", "oracle-l5r-10296", "oracle-l5r-10863", "oracle-l5r-10659" })
+        // Isawa Tsumaro: left unwired, so not published. (Constructing the Self, The Tower of Vigilance and Kitsune Yuribara were wired by wave batch 10, issue #741.) (Daigotsu Kikumura was wired by wave batch 1, issue #732.)
+        foreach (var id in new[] { "oracle-l5r-10863" })
             Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is not published");
         // No created-only card is in any deck pool or deck (the general guard is in CreatedCardTests); the new ones are created-only.
         foreach (var id in Waves.Values.SelectMany(x => x).Where(id => CardCatalog.Get(id).CreatedOnly)) Check(CardCatalog.PlayableFromDecks.All(c => c.Id != id), $"{id} is not playable from a deck");

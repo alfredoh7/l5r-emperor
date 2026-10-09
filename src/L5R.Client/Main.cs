@@ -12,6 +12,7 @@ public partial class Main : Node
     private readonly ConcurrentQueue<Action> _uiQueue = new();
     private Control _root = null!;
     private Control _board = null!, _hand = null!, _unitDetail = null!;
+    private GoldPaymentMeter _goldMeter = null!;
     private VBoxContainer _inspector = null!, _phaseActions = null!, _decisionActions = null!;
     private PhaseTrack _timeline = null!;
     private Control _clanHud = null!, _pileHud = null!;
@@ -240,7 +241,7 @@ public partial class Main : Node
                     if (_captureMode == "published-refresh-confirm")
                     {
                         var before = Self.Provinces[0].Card!.Id;
-                        _inspector.GetChildren().OfType<CheckBox>().First().ButtonPressed = true;
+                        SelectCard(Self.Provinces[0].Card!); SelectCard(Self.Provinces[0].Card!); SelectCard(Self.Provinces[0].Card!); // select, deselect, select again
                         _decisionActions.GetChildren().OfType<Button>().First().EmitSignal(Button.SignalName.Pressed);
                         if (View.Version != 1 || View.PendingChoice is not null || Self.Provinces[0].Card!.Id == before)
                             throw new InvalidOperationException("Published province refresh UI smoke failed.");
@@ -277,6 +278,7 @@ public partial class Main : Node
                     Choose(option);
                     if (_captureMode == "purchase")
                     {
+                        foreach (var id in QuoteFor(option)!.Payments[0].SourceIds) SelectCard(FindCard(PaymentMethods(QuoteFor(option)!).First(m => m.Id == id).CardId)!); // the player bows holdings; nothing is pre-selected (#731)
                         _paymentConfirm!.EmitSignal(Button.SignalName.Pressed);
                         if (View.PendingChoice?.Type != "proclaim") throw new InvalidOperationException("UI purchase smoke failed: no Proclaim reaction.");
                         GD.Print("UI_SMOKE_PASS: confirmed payment through button handler; Proclaim reaction opened.");
@@ -372,6 +374,7 @@ public partial class Main : Node
         if (_board is null) return;
         FitTableViewport();
         _hand.Position = new Vector2(250, 1060 - HandCardSide); _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
+        _goldMeter.Position = new Vector2(_hand.Position.X + 8, _hand.Position.Y - 74);
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         FitShownCards();
@@ -426,6 +429,7 @@ public partial class Main : Node
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);
+        _goldMeter = new GoldPaymentMeter(); _root.AddChild(_goldMeter);
         var inspectorPanel = Place(_root, new PanelContainer { Theme = SidebarSkin.Theme() }, 1488, 94, SidebarWidth, 960);
         _inspectorPanel = inspectorPanel;
         inspectorPanel.AddThemeStyleboxOverride("panel", SidebarSkin.Surface());
@@ -566,7 +570,10 @@ public partial class Main : Node
 
     private CardTile Tile(CardView card, bool compact, float width, float height)
     {
-        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        var previewFlip = _previewBowFlip == card.Id; if (previewFlip) _previewBowFlip = null;
+        var previewBowed = _previewBows.Contains(card.Id) && !card.Bowed;
+        if (previewBowed) card = card with { Bowed = true };
+        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = previewFlip ? !card.Bowed : Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
@@ -597,6 +604,8 @@ public partial class Main : Node
             if (card.Zone == Zone.Province && card.OwnerId == 1 - View.ActivePlayerId && card.ProvinceIndex is int province) { SelectProvince(card.OwnerId, province); return; }
             SetNotice("Choose one of your highlighted units, then a highlighted province. Cancel to inspect other cards."); return;
         }
+        if (ProvinceRefreshActive && _chosen!.TargetIds?.Contains(card.Id) == true)
+        { if (!_refreshSelected.Remove(card.Id)) _refreshSelected.Add(card.Id); RenderInspector(); Highlight(); return; } // Border Keep's refresh: a click selects the province's card, a second click deselects it
         if (ChooseSupportTarget(card)) return;
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility", Command.CardIds: null } targeted && targeted.TargetIds?.Contains(card.Id) == true)
         {
@@ -604,13 +613,15 @@ public partial class Main : Node
         }
         if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.TryGetValue(card.Id, out var selectPerformer))
         { if (_chosen?.Command?.PerformerId != card.Id) selectPerformer(); return; }
-        if (_chosen is { Type: "purchase" or "recruitReserve" or "equip" or "useAbility" or "playStrategy" or "chooseOpponentPayment" } && card.OwnerId == View.ViewerId && Production(card, Self) > 0 && !card.Bowed && card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield)
+        if (_chosen is not null && card.OwnerId == View.ViewerId && HoldingPaymentMethod(card) is { } holdingMethod)
         {
             if (_chosen.Type == "chooseOpponentPayment" && QuoteFor(_chosen) is { } paymentQuote && AmountFor(_chosen, paymentQuote) == 0)
             { SetNotice("Choose how much Gold to pay before selecting sources."); return; }
-            if (!_sources.Add(card.Id)) _sources.Remove(card.Id);
-            RenderInspector(); Highlight(); return;
+            ToggleHoldingPayment(holdingMethod, card.Id); return;
         }
+        // Clicking another card that has its own flow (a playable hand card, a purchasable province card) abandons the current review and starts that card's.
+        if (_chosen is not null && (OwnFlowAction(card) is not null || Actions.Any(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled)))
+        { ResetDecisionSelection(); _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
         // A misclick during a reviewed action must not silently discard its target or payment.
         if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
         if (_selected?.Id == card.Id) { DeselectCard(); return; }
@@ -651,7 +662,7 @@ public partial class Main : Node
             tile.LegalTarget |= AlternativeCostCards().Contains(tile.Card.Id); // a hand card a discard way to pay may spend (Akodo Kamina)
             tile.DecisionSelected |= _reviewingAlternativeCost && _decisionSelection?.Command?.CardIds?.Contains(tile.Card.Id) == true;
             tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
-            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
+            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id) || _sources.Any(id => id.StartsWith(tile.Card.Id + "#", StringComparison.Ordinal)); tile.QueueRedraw(); // a payment token ("<card>#reaction") marks its card
         }
         foreach (var (key, button) in _provinceButtons)
@@ -678,6 +689,25 @@ public partial class Main : Node
         option is { Type: "equip" or "playStrategy" or "useAbility", Command: { TargetId: not null }, TargetIds: { Length: > 0 } } && (option.Command!.CardIds is null || option.AlternativeCost is not null) && !HasAttackTargets(option)
         && !(option.CardId is { } sourceId && FindCard(sourceId) is { } source && IsSupportCard(source));
 
+    // Choose(...) for a card's other recruitment/payment variant keeps the Gold already gathered (and its holdings bowed) that the new quote still offers.
+    private void Choose(ActionOption option, bool keepTarget, bool keepSources)
+    {
+        var kept = keepSources ? _sources.ToArray() : [];
+        Choose(option, keepTarget);
+        if (kept.Length == 0 || _chosen is null || !PlayerPicksPayment(_chosen) || QuoteFor(_chosen) is not { } quote) return;
+        var offered = PaymentMethods(quote).Select(m => m.Id).ToHashSet();
+        foreach (var id in kept) if (offered.Contains(id)) _sources.Add(id);
+        ResuggestSources(); RenderInspector(); Highlight();
+    }
+
+    // The card a click starts its own flow for (a playable hand card; a purchasable province card is handled in SelectCard itself), or null.
+    private ActionOption? OwnFlowAction(CardView card)
+    {
+        if (card.Zone != Zone.Hand || card.OwnerId != View.ViewerId || View.PendingChoice is not null) return null;
+        var candidates = Actions.Where(a => a.Enabled && a.CardId == card.Id && a.Command is not null && a.Type is "playStrategy" or "equip" or "useAbility" or "recruitReserve").ToArray();
+        return candidates.Length == 1 || candidates.Length > 1 && candidates.All(a => a.Type == "equip") ? candidates[0] : null;
+    }
+
     private void Choose(ActionOption option, bool keepTarget = false)
     {
         if (_shownOpen) ToggleShownCards(false);
@@ -688,8 +718,9 @@ public partial class Main : Node
         if (IsProvinceTarget(option) && option.Command is { } provinceCommand) option = option with { Command = provinceCommand with { Province = null } }; // the player picks the province, not Core's first legal one
         _attackChoice = AttackChoice.Unselected;
         if (HasAttackTargets(option)) option = option with { Command = option.Command! with { TargetId = null, Province = null } };
-        _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
-        foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
+        _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; _refreshSelected.Clear();
+        if (!PlayerPicksPayment(option)) foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
+        SyncPaymentAmount();
         if (HasMultiTargets(option)) BeginMultiTargets(); else ClearMultiTargets();
         if (option.Type is "attack" or "assignDefense") _assignmentUnit = option.TargetIds?.FirstOrDefault();
         RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();

@@ -1,0 +1,37 @@
+{
+  "Profile": "personality-wave-301",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10473",
+      "Name": "Asako Kaitoko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Personalities with Fallen, Kolat, Ninja, Nonhuman, or Shadowlands opposing Kaitoko have a maximum Force of 3, and actions from cards in their units may not target Kaitoko.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10473.jpg",
+      "Keywords": [
+        "Unique",
+        "Emerald Champion's Advisor",
+        "Experienced",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "kaitoko-force-cap"
+    }
+  ],
+  "Decks": []
+}

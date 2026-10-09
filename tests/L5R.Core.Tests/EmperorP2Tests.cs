@@ -409,6 +409,22 @@ internal static partial class EmperorP2Tests
         Accept(target, Offer(target, 1, "p2-brothers-ranged-4", a.Id, "fx-t"));
         Settle(target);
         Check(!InPlayZone(target, "fx-t"), "the granted Ranged 4 Attack destroyed a 2F Personality");
+        // Offered the way the client sees it: in a battle (the Samurai bowed or not), with the slot's candidates and a default command that validates.
+        foreach (var bowed in new[] { false, true })
+        {
+            var battle = Table(Phase.Battle, 1);
+            var x = Add(battle, "training-samurai", 1, Zone.Battlefield, bowed: bowed, province: 0);
+            var y = Add(battle, "training-samurai", 1, Zone.Battlefield, bowed: bowed, province: 0);
+            var held = Add(battle, Brothers, 1, Zone.Hand);
+            var inBattle = Edit(MatchEngine.FromTestState(battle), st => { st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; });
+            var offered = Options(inBattle, 1, "p2-brothers-in-battle", held.Id);
+            var why = string.Join("; ", offered.Select(o => $"{o.Label} [{o.Enabled}] {o.Reason} {string.Join(",", o.Slots?.Single().CardIds ?? [])} gold={o.Gold?.Kind}/{o.Gold?.Error}/{o.Gold?.Payments.Length}"));
+            Check(offered.Any(o => o.Enabled && o.Slots?.Single().CardIds.Contains(x.Id) == true && o.Slots.Single().CardIds.Contains(y.Id)), $"bowed={bowed} offered in battle with both Samurai: {why}");
+            Check(offered.First(o => o.Enabled).Slots!.Single().NotPrimary, "a performing slot is marked, so a viewer never sends its first card as the target");
+            Check(Rejected(inBattle, offered.First(o => o.Enabled).Command! with { Selections = [Pick("samurai", x.Id, y.Id)], TargetId = x.Id }), "a performer sent as the target is refused");
+            var result = inBattle.Execute(offered.First(o => o.Enabled).Command! with { Selections = [Pick("samurai", x.Id, y.Id)] });
+            Check(result.Accepted, $"bowed={bowed} confirming both Samurai in battle: {result.Error}");
+        }
         // One Samurai is not enough.
         Check(Rejected(MatchEngine.FromTestState(s), Use(MatchEngine.FromTestState(s), 1, "p2-brothers-in-battle", card.Id, selections: Pick("samurai", a.Id))), "one Samurai is refused");
     }

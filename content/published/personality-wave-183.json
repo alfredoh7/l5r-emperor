@@ -1,0 +1,178 @@
+{
+  "Profile": "personality-wave-183",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10493",
+      "Name": "Asako Usohara",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 5,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Usohara's abilities will not be copied.\nLimited, Bow this card: Search your Dynasty discard pile, then deck, for a Fudo Celestial. Put it into play.\nLimited: Put a Fudo Ring from your hand into play. This counts as playing it by its own text. Remove Usohara from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10493.jpg",
+      "Keywords": [
+        "Unique",
+        "Fudo",
+        "Monk",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-usohara-search",
+        "w739-usohara-ring"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10639",
+      "Name": "Ikoma Jeiku",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g1:: Refill the Province Jeiku entered play from face-up. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10639.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-jeiku-invest"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10886",
+      "Name": "Iuchi Wattu",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If Wattu is face-up in your Province, put him in your discard pile, honorably dead. If there are no other dead copies of Wattu there, refill the Province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10886.jpg",
+      "Keywords": [
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-wattu-dead"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10881",
+      "Name": "Iweko Seiken",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Seiken will not be dishonored or gain a Clan Alignment.\nInterrupt: After you Recruit Seiken, Recruit a non-Unique Samurai with lower Gold Cost, ignoring costs.\nPolitical Open, Bow this card: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10881.jpg",
+      "Keywords": [
+        "Unique",
+        "Heir",
+        "Imperial",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-seiken-recruit",
+        "w739-seiken-favor"
+      ],
+      "Effect": "w739-seiken"
+    },
+    {
+      "Id": "oracle-l5r-10293",
+      "Name": "Kitsu Miwa",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If Miwa is face-up in your province, discard her and pay 2 Gold: Search your Dynasty deck for a non-Unique Lion Clan Shugenja. Refill this province with him, face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10293.jpg",
+      "Keywords": [
+        "Apprentice",
+        "Lion Clan",
+        "Messenger",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-miwa-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10645",
+      "Name": "Yoritomo Mikaru",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nLimited, :gstar:: Recruit a target Holding in your Province (entering play bowed), for 1 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10645.jpg",
+      "Keywords": [
+        "Destined",
+        "Charitable",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-mikaru-recruit"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

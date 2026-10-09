@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-10432",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10432",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10432-printing-1-image-1.webp",
+    "image_sha256": "359e285faa10eaaaee5310a66412a9f0e112f3ed586da63ad33cb1c561c69d3d"
+  },
+  {
+    "card_id": "oracle-l5r-10436",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10436",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10436-printing-1-image-1.webp",
+    "image_sha256": "cd5ab485e622e374cf786afcb76e93e69b1480b57354032c553df4e692f5f862"
+  },
+  {
+    "card_id": "oracle-l5r-10752",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10752",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-10752-printing-1-image-1.webp",
+    "image_sha256": "e7780016ec17942b0625afb2d248fc240a45a7170f4de4b1f0d4704a81fd2509"
+  },
+  {
+    "card_id": "oracle-l5r-2391",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2391",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-2391-printing-1-image-1.webp",
+    "image_sha256": "1cb93c22e202681b38b286065b62e4ae3c5b60faffa92d1cb9fab16cf2877c3f"
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "Profile": "region-wave-30",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #737.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9142",
+      "Name": "Verdant Jungle",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Nonhuman Personalities enter play from this Province for 1 less Gold.\nReaction, Bow this card: Before an action resolves, negate its effects that move any Personalities into an attacking army at this Province's battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9142.jpg",
+      "Keywords": [
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-jungle-interrupt"
+      ],
+      "Effect": "w737-verdant-jungle"
+    }
+  ],
+  "Decks": []
+}

@@ -156,7 +156,7 @@ public sealed partial class MatchEngine
     }
 
     // A target category exempt from "every Battle-timing target must be at the current battlefield" (its own location rule is part of the category).
-    private static bool P4TargetAtAnyLocation(string category) => category == EmperorP4Abilities.OwnFollowerForPerformer;
+    private static bool P4TargetAtAnyLocation(string category) => category == EmperorP4Abilities.OwnFollowerForPerformer || Wave736Abilities.IsAnyLocationTarget(category) || Wave737Abilities.IsAnyLocationTarget(category);
 
     // Performer categories (validation and the QueryActions listing).
     private bool? EmperorP4PerformerAllows(AbilityDefinition ability, CardInstance performer, bool actingAsBattle) => ability.Performer switch
@@ -210,34 +210,34 @@ public sealed partial class MatchEngine
         {
             case EmperorP4Abilities.TenzanBattle:
             case EmperorP4Abilities.TenzanLimited:
-            {
-                var targets = SlotCards(command, "targets").ToArray();
-                foreach (var personality in targets.Where(InPlay)) ApplyModifier(personality, source!.Id, id, "Force", -3);
-                // "If this is the Combat Segment" -- the Battle designator's use.
-                if (id == EmperorP4Abilities.TenzanBattle)
-                    foreach (var personality in targets.Where(InPlay)) Dishonor(personality, player.Id);
-                return false;
-            }
-            case EmperorP4Abilities.GozaruBow:
-            {
-                var targets = SlotCards(command, "targets").ToArray();
-                foreach (var card in targets.Where(InPlay)) BowByEffect(card, player.Id);
-                // "If you only targeted one card, destroy it" -- the number of targets chosen, whatever became of them.
-                if (targets.Length == 1 && InPlay(targets[0])) DestroyTargetCard(targets[0], player.Id);
-                return false;
-            }
-            case EmperorP4Abilities.SarangTransfer:
-            {
-                var performer = Card(command.PerformerId!);
-                if (target is null || target.Zone != Zone.Attached || !InPlay(performer) || !CanTransferTo(target, performer))
                 {
-                    Emit("transferFailed", $"{name}: the Follower can no longer be transferred to {Definition(performer).Name}.", player.Id, source?.Id);
+                    var targets = SlotCards(command, "targets").ToArray();
+                    foreach (var personality in targets.Where(InPlay)) ApplyModifier(personality, source!.Id, id, "Force", -3);
+                    // "If this is the Combat Segment" -- the Battle designator's use.
+                    if (id == EmperorP4Abilities.TenzanBattle)
+                        foreach (var personality in targets.Where(InPlay)) Dishonor(personality, player.Id);
                     return false;
                 }
-                TransferAttachment(target, performer, name);
-                if (Opposed(performer) || HasClanAffiliation(performer, "Spider")) Straighten(target);
-                return false;
-            }
+            case EmperorP4Abilities.GozaruBow:
+                {
+                    var targets = SlotCards(command, "targets").ToArray();
+                    foreach (var card in targets.Where(InPlay)) BowByEffect(card, player.Id);
+                    // "If you only targeted one card, destroy it" -- the number of targets chosen, whatever became of them.
+                    if (targets.Length == 1 && InPlay(targets[0])) DestroyTargetCard(targets[0], player.Id);
+                    return false;
+                }
+            case EmperorP4Abilities.SarangTransfer:
+                {
+                    var performer = Card(command.PerformerId!);
+                    if (target is null || target.Zone != Zone.Attached || !InPlay(performer) || !CanTransferTo(target, performer))
+                    {
+                        Emit("transferFailed", $"{name}: the Follower can no longer be transferred to {Definition(performer).Name}.", player.Id, source?.Id);
+                        return false;
+                    }
+                    TransferAttachment(target, performer, name);
+                    if (Opposed(performer) || HasClanAffiliation(performer, "Spider")) Straighten(target);
+                    return false;
+                }
             case EmperorP4Abilities.NobukatsuRanged:
                 P4.AttackDestroyedACard = false;
                 if (ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant)) return true;
@@ -246,58 +246,58 @@ public sealed partial class MatchEngine
                 if (target is not null && InPlay(target)) BowByEffect(target, player.Id);
                 return false;
             case EmperorP4Abilities.GamesOfWillNegate:
-            {
-                var performer = Card(command.PerformerId!);
-                NegateForcePenalties(performer);
-                P4.ContributionShields[performer.Id] = _state.TurnNumber;
-                Emit("forceContributionShielded", $"{name}: effects from other players' cards that prevent {Definition(performer).Name} from contributing Force to his army are negated this turn.", player.Id, performer.Id);
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    NegateForcePenalties(performer);
+                    P4.ContributionShields[performer.Id] = _state.TurnNumber;
+                    Emit("forceContributionShielded", $"{name}: effects from other players' cards that prevent {Definition(performer).Name} from contributing Force to his army are negated this turn.", player.Id, performer.Id);
+                    return false;
+                }
             case EmperorP4Abilities.PillarTattoo:
-            {
-                var monk = Card(command.PerformerId!);
-                ApplyModifier(monk, source!.Id, id, "Force", 3);
-                if (!InPlay(monk) || !Keyword(monk, "Earth")) return false;
-                var candidates = _state.Cards.Values.Where(c => c.OwnerId != player.Id && InPlay(c) && AtBattle(c)
-                    && (Definition(c).Type == CardType.Follower || Definition(c).Type == CardType.Personality && !HasAttachments(c))).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
-                if (candidates.Length == 0) return false;
-                var options = candidates.Select(c => new EffectOption($"bow-{c.Id}", $"Bow {Definition(c).Name} ({c.Id})", [P4BowEffect + c.Id]))
-                    .Append(new EffectOption("none", "Bow nothing", [])).ToArray();
-                SpendHandPlayedCard(player, source);
-                return BeginP4ListedChoice(command, player.Id, options, $"{name}: {Definition(monk).Name} is Earth -- you may target and bow an enemy card without attachments.",
-                    consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            }
+                {
+                    var monk = Card(command.PerformerId!);
+                    ApplyModifier(monk, source!.Id, id, "Force", 3);
+                    if (!InPlay(monk) || !Keyword(monk, "Earth")) return false;
+                    var candidates = _state.Cards.Values.Where(c => c.OwnerId != player.Id && InPlay(c) && AtBattle(c)
+                        && (Definition(c).Type == CardType.Follower || Definition(c).Type == CardType.Personality && !HasAttachments(c))).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+                    if (candidates.Length == 0) return false;
+                    var options = candidates.Select(c => new EffectOption($"bow-{c.Id}", $"Bow {Definition(c).Name} ({c.Id})", [P4BowEffect + c.Id]))
+                        .Append(new EffectOption("none", "Bow nothing", [])).ToArray();
+                    SpendHandPlayedCard(player, source);
+                    return BeginP4ListedChoice(command, player.Id, options, $"{name}: {Definition(monk).Name} is Earth -- you may target and bow an enemy card without attachments.",
+                        consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
+                }
             case EmperorP4Abilities.PrecedingReputation:
                 if (target is not null && InPlay(target))
                     foreach (var member in UnitMembers(target).ToArray())
                         if (InPlay(member) && !HasAttachments(member)) BowByEffect(member, player.Id);
                 return false;
             case EmperorP4Abilities.TooMuchForMortals:
-            {
-                if (target is null || !InPlay(target)) return false;
-                var attachments = Attachments(target.Id).Where(InPlay).OrderBy(a => a.Id, StringComparer.Ordinal).ToArray();
-                var options = new[] { new EffectOption("bow", $"Bow {Definition(target).Name}", [P4BowEffect + target.Id]) }
-                    .Concat(attachments.Select(a => new EffectOption($"destroy-{a.Id}", $"Destroy {Definition(a).Name} ({a.Id})", [P4DestroyEffect + a.Id]))).ToArray();
-                SpendHandPlayedCard(player, source);
-                return BeginP4ListedChoice(command, player.Id, options, $"{name}: bow {Definition(target).Name} or destroy one of his attachments.",
-                    consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            }
+                {
+                    if (target is null || !InPlay(target)) return false;
+                    var attachments = Attachments(target.Id).Where(InPlay).OrderBy(a => a.Id, StringComparer.Ordinal).ToArray();
+                    var options = new[] { new EffectOption("bow", $"Bow {Definition(target).Name}", [P4BowEffect + target.Id]) }
+                        .Concat(attachments.Select(a => new EffectOption($"destroy-{a.Id}", $"Destroy {Definition(a).Name} ({a.Id})", [P4DestroyEffect + a.Id]))).ToArray();
+                    SpendHandPlayedCard(player, source);
+                    return BeginP4ListedChoice(command, player.Id, options, $"{name}: bow {Definition(target).Name} or destroy one of his attachments.",
+                        consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
+                }
             case EmperorP4Abilities.YojimboAssemble:
                 if (target is null || !InPlay(target)) return false;
                 BowByEffect(target, player.Id);
                 if (InPlay(target) && !HasAttachments(target)) DestroyTargetCard(target, player.Id);
                 return false;
             case EmperorP4Abilities.RideTheBreeze:
-            {
-                if (target is null || !InPlay(target)) return false;
-                var wasAway = target.Zone == Zone.Battlefield;
-                MoveHome(target, false);
-                var moved = wasAway && target.Zone == Zone.Home;
-                var monk = Card(command.PerformerId!);
-                // "negate the Personality's (future) movement": the movement after the one the card caused, until the end of the turn (Strength of the Tsunami's ruling, MovementLocks.cs).
-                if (moved && Keyword(monk, "Air")) LockMovement(target, source!.Id, MovementKinds.Home | MovementKinds.ToBattlefield);
-                return false;
-            }
+                {
+                    if (target is null || !InPlay(target)) return false;
+                    var wasAway = target.Zone == Zone.Battlefield;
+                    MoveHome(target, false);
+                    var moved = wasAway && target.Zone == Zone.Home;
+                    var monk = Card(command.PerformerId!);
+                    // "negate the Personality's (future) movement": the movement after the one the card caused, until the end of the turn (Strength of the Tsunami's ruling, MovementLocks.cs).
+                    if (moved && Keyword(monk, "Air")) LockMovement(target, source!.Id, MovementKinds.Home | MovementKinds.ToBattlefield);
+                    return false;
+                }
             default:
                 return RunEmperorP4Watches(id, command, player, source, target) ?? RunEmperorP4Units(id, ability, command, player, source, target)
                     ?? RunEmperorP4More(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
@@ -318,8 +318,15 @@ public sealed partial class MatchEngine
         }
         _state.PendingEffectChoice = new()
         {
-            Command = command, PlayerId = deciderId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant, PlayedFromDiscard = playedFromDiscard,
-            OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList(), Options = options.ToList()
+            Command = command,
+            PlayerId = deciderId,
+            Negated = _state.NegatedEffects.ToList(),
+            ConsumedGrant = consumedGrant,
+            PlayedFromDiscard = playedFromDiscard,
+            OpponentHonorBefore = opponentHonorBefore,
+            BowedBefore = bowedBefore.ToList(),
+            PreExistingGrants = preExistingGrants.ToList(),
+            Options = options.ToList()
         };
         _state.PendingChoice = new("effectChoice", deciderId, command.CardId, prompt, command.PlayerId);
         _state.PriorityPlayerId = deciderId; _state.ConsecutivePasses = 0;

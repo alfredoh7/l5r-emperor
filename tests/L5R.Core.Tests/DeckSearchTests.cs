@@ -24,7 +24,7 @@ internal static class DeckSearchTests
             ("An ineligible pick, a card not in the deck, an early pass and a stray command are rejected with the state unchanged; only the searcher may answer", IneligibleSelectionRejected),
             ("Pass is rejected while any card qualifies and accepted when nothing does (or the deck is empty): no effect, the deck is still shuffled, the action resolves", PassOnlyWhenNothingQualifies),
             ("Order Seppuku is refused and not offered while a search is open, and only at the player's own turn to act afterwards (issue #368)", SeppukuCannotInterruptASearch),
-            ("A found Terrain cannot be discarded to its own effect (issue #368): excluded from the offered and accepted discards, another copy may be discarded, and with no other card in hand nothing is discarded and there is no error", TerrainCannotBeDiscardedToItsOwnEffect),
+            ("A found Terrain may be discarded to its own effect (issue #757, reversing #368): offered and accepted among the discards, another copy may be discarded, and with no other card in hand it is the card discarded", TerrainMayBeDiscardedToItsOwnEffect),
             ("Shizuka, Dynasty deck: a Region goes to the only free province automatically, or to the chosen one among several; destroyed and already-regioned provinces are never offered", DynastyRegionAttach),
             ("Shizuka, Dynasty deck: with every province already holding a Region (or destroyed), the found Region is shown, discarded and the deck reshuffled", DynastyRegionDiscardedWhenNoProvince),
             ("Shizuka, Fate deck: a Terrain is shown, put in the hand, then a discard-a-card choice, then the deck is reshuffled", FateTerrainToHandAndDiscard),
@@ -401,10 +401,8 @@ internal static class DeckSearchTests
         Check(Array.FindIndex(e.GetView(0).Events, ev => ev.Type == "deckShuffled") < 0, "The deck is shuffled only after the discard: the effect includes it");
         Check(e.GetView(0).PendingSearch!.Selected!.Id == Terrain, "The searcher sees which card is being resolved");
         var options = e.QueryActions(0).Where(a => a.Type == "chooseSearchDiscard").ToArray();
-        Equal(options.Length, handBefore, "One discard option per hand card OTHER than the found Terrain (issue #368)");
-        Check(options.All(a => a.Command!.TargetId != terrain), "The found Terrain is not offered for its own discard");
-        Reject(e, Discard(e, terrain));
-        Equal(e.State.PendingChoice?.Type, "searchDiscard", "and the refusal leaves the choice open");
+        Equal(options.Length, handBefore + 1, "One discard option per hand card, the found Terrain included (issue #757)");
+        Check(options.Any(a => a.Command!.TargetId == terrain), "The found Terrain is offered for its own discard");
         Reject(e, Discard(e, "not-a-card")); Reject(e, Discard(e, mid.Players[1].Hand[0])); Reject(e, Discard(e, mid.Players[0].FateDeck[0]));
         Reject(e, new("chooseSearchDiscard", 0, e.Version)); Reject(e, PassSearch(e)); Reject(e, Select(e, Terrain));
         var discarded = mid.Players[0].Hand.First(id => id != terrain);
@@ -419,58 +417,41 @@ internal static class DeckSearchTests
         Equal(after.PriorityPlayerId, 1);
     }
 
-    // Mendon's ruling (issue #368): a Terrain that is found is placed in play and is no longer in the hand, so it cannot be the card discarded to its own
-    // effect. Every other card in the hand still can (including another copy of the same Terrain), and when there is none the discard cannot be
-    // satisfied: nothing is discarded and there is no error -- the search carries on to its shuffle.
-    private static void TerrainCannotBeDiscardedToItsOwnEffect()
+    // Mendon's ruling (issue #757, reversing #368): the Terrain that was just found MAY be the card discarded to its own effect. Every card in the hand, the Terrain included, is offered
+    // and accepted; when it is the only card in the hand it is the card discarded.
+    private static void TerrainMayBeDiscardedToItsOwnEffect()
     {
-        // (1) With other cards in hand the found Terrain is excluded from the offered discards and from the accepted ones -- through QueryActions.
+        // (1) The found Terrain is offered among the discards and accepted -- through QueryActions.
         var s = TwoDeckState();
         var e = Searching(s); Accept(e, ChooseDeck(e, "Fate")); Accept(e, Select(e, Terrain));
         var found = e.State.PendingSearch!.SelectedCardId!;
         var offered = e.QueryActions(0).Where(a => a.Type == "chooseSearchDiscard").Select(a => a.Command!.TargetId!).ToArray();
-        Equal(offered.Length, e.State.Players[0].Hand.Count - 1, "every hand card but the found Terrain");
-        Check(!offered.Contains(found) && e.State.Players[0].Hand.Contains(found), "the Terrain is in the hand but not among the discards offered");
+        Equal(offered.Length, e.State.Players[0].Hand.Count, "every hand card, the found Terrain included");
+        Check(offered.Contains(found) && e.State.Players[0].Hand.Contains(found), "the Terrain is in the hand and among the discards offered");
         Check(e.QueryActions(0).Where(a => a.Type == "chooseSearchDiscard").All(a => a.Enabled), "and every offered discard is enabled");
-        var before = Json(e.State);
-        Reject(e, Discard(e, found));
-        Equal(Json(e.State), before, "the refused discard leaves the state untouched");
-        Check(e.State.Players[0].Hand.Contains(found) && e.State.Cards[found].Zone == Zone.Hand, "the Terrain stays in the hand");
-        Accept(e, Discard(e, offered[0]));
-        Equal(e.State.Cards[offered[0]].Zone, Zone.FateDiscard); Equal(e.State.PendingChoice, null);
+        Accept(e, Discard(e, found));
+        Equal(e.State.Cards[found].Zone, Zone.FateDiscard, "the Terrain just found was discarded"); Equal(e.State.PendingChoice, null);
 
-        // (2) A second copy of the same Terrain already in the hand may be discarded: only the ONE just found is excluded.
+        // (2) Another card may still be discarded and the found Terrain stays in the hand.
         var two = TwoDeckState();
         var held = Put(two, Terrain, 0, Zone.Hand);
         var e2 = Searching(two); Accept(e2, ChooseDeck(e2, "Fate")); Accept(e2, Select(e2, Terrain));
         var found2 = e2.State.PendingSearch!.SelectedCardId!;
         Check(found2 != held.Id, "the copy found is a different instance");
         Check(e2.QueryActions(0).Any(a => a.Type == "chooseSearchDiscard" && a.Command!.TargetId == held.Id), "the copy already held is offered");
-        Reject(e2, Discard(e2, found2)); Accept(e2, Discard(e2, held.Id));
+        Accept(e2, Discard(e2, held.Id));
         Equal(e2.State.Cards[held.Id].Zone, Zone.FateDiscard); Check(e2.State.Players[0].Hand.Contains(found2));
 
-        // (3) Exactly one other card: it is the only discard offered.
-        var one = TwoDeckState(); one.Players[0].Hand.Skip(1).ToList().ForEach(id => { one.Players[0].Hand.Remove(id); one.Cards.Remove(id); });
-        var e3 = Searching(one); Accept(e3, ChooseDeck(e3, "Fate")); Accept(e3, Select(e3, Terrain));
-        var only = e3.QueryActions(0).Where(a => a.Type == "chooseSearchDiscard").ToArray();
-        Equal(only.Length, 1, "exactly one discard is offered"); Check(only[0].Command!.TargetId != e3.State.PendingSearch!.SelectedCardId);
-
-        // (4) No other card in the hand: the discard cannot be satisfied -- nothing is discarded, no error, no stage to answer; the deck is
-        // still shuffled, the Terrain stays in the hand, and the action resolves.
+        // (3) No other card in the hand: the found Terrain is the only discard offered, and the discard is asked.
         var empty = TwoDeckState();
         foreach (var id in empty.Players[0].Hand.ToArray()) { empty.Players[0].Hand.Remove(id); empty.Cards.Remove(id); }
         var e4 = Searching(empty); Accept(e4, ChooseDeck(e4, "Fate"));
-        var deckBefore = e4.State.Players[0].FateDeck.ToArray(); var pileBefore = e4.State.Cards.Values.Count(c => c.Zone == Zone.FateDiscard);
         var result = e4.Execute(Select(e4, Terrain)); Check(result.Accepted, "no error: " + result.Error);
-        Equal(e4.State.PendingChoice, null, "nothing left to answer"); Equal(e4.State.PendingSearch, null);
-        Equal(e4.State.Players[0].Hand.Count, 1, "only the found Terrain is in the hand");
-        Equal(e4.State.Cards[e4.State.Players[0].Hand[0]].DefinitionId, Terrain);
-        Equal(e4.State.Cards.Values.Count(c => c.Zone == Zone.FateDiscard), pileBefore, "nothing was discarded");
-        AssertOrder(e4, "cardShown", "searchToHand", "searchDiscardSkipped", "deckShuffled");
-        Check(e4.State.Players[0].FateDeck.OrderBy(x => x).SequenceEqual(deckBefore.Where(x => x != e4.State.Players[0].Hand[0]).OrderBy(x => x)) && !e4.State.Players[0].FateDeck.SequenceEqual(deckBefore.Where(x => x != e4.State.Players[0].Hand[0])), "the deck was still shuffled");
-        Equal(e4.State.PriorityPlayerId, 1, "the action resolved and the opportunity passed");
-        Check(!e4.QueryActions(0).Any(a => a.Type == "chooseSearchDiscard"), "no discard is offered");
-        // The same holds for a bot that answers whatever is offered: it never stalls in the empty case (no offered answer is needed).
+        var lone = e4.QueryActions(0).Where(a => a.Type == "chooseSearchDiscard").ToArray();
+        Equal(lone.Length, 1, "exactly one discard is offered"); Equal(lone[0].Command!.TargetId, e4.State.Players[0].Hand[0]);
+        Accept(e4, Discard(e4, e4.State.Players[0].Hand[0]));
+        Equal(e4.State.Players[0].Hand.Count, 0, "the Terrain was discarded");
+        AssertOrder(e4, "cardShown", "searchToHand", "fateDiscarded", "deckShuffled");
         Check(e4.GetView(0).PendingSearch is null, "and the searcher's view holds no search");
     }
 

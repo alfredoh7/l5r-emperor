@@ -1,0 +1,28 @@
+{
+  "Profile": "event-wave-80",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #765.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10821",
+      "Name": "Marriage of the Emerald Champion",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Put this Event into play. Target your Personality. While this Event remains in play, he will not be dishonored and you will not lose Honor from other players' actions that have targeted him . After your second turn from now begins, discard this Event.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10821.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w742-marriage"
+    }
+  ],
+  "Decks": []
+}

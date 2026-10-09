@@ -1,0 +1,31 @@
+{
+  "Profile": "stronghold-wave-56",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #771.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10406",
+      "Name": "Journey's End Keep",
+      "Type": "Stronghold",
+      "Clan": "Imperial",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 8,
+      "Text": "\"Imperial\" is a Clan Alignment, and it is your Clan Alignment. If no other player has an Imperial Stronghold, you begin the game with the Imperial Favor. When this Stronghold produces Gold, you may not Recruit Personalities until the phase ends or until after you have spent 5 total Gold for non-Recruit costs or payments. You may not buy Personalities with Clan discount if Imperial is their only Clan Alignment (this trait only has effect when using the Clan Discount optional rule).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10406.jpg",
+      "Keywords": [
+        "Experienced",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w771-journeys-end-keep"
+    }
+  ],
+  "Decks": []
+}

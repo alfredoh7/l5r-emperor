@@ -99,9 +99,11 @@ public static partial class TrainingOpponent
                 if (plan is not null) return command with { Assignments = plan };
                 if (command.Assignments is { Count: > 0 }) return command; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
+            // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
+            var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
-                : provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
+                : lastStand ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
             return command with { Assignments = units.ToDictionary(c => c.Id, _ => target) };
         }
         if (action.Type == "discardHand")
@@ -226,12 +228,14 @@ public static partial class TrainingOpponent
                 var homeDefense = ArmyForce(opponent.Home);
                 // Every army in the assignment must beat its own province plus every unit that could defend it.
                 var armies = command.Assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
+                if (HonorRace(x) && armies.Length > 0) return 150 + armies.Length; // the opponent wins on Honor at the start of its turn: destroy every Province the army can
                 var weakestArmyMargin = armies.Length == 0 ? int.MinValue : armies.Min(a => a.Force - (opponent.Provinces.FirstOrDefault(p => p.Index == a.Province)?.Strength ?? int.MaxValue / 2) - homeDefense);
                 return weakestArmyMargin > 0 ? 90 + force - homeDefense : armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0 ? 80 : 0;
             case "assignDefense":
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
                 if (enemyForce == 0) return 0;
+                if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
             case "pass": return PassScore;
             // A convenience for a human who wants to skip every remaining battle in one go; the bot simply passes when its turn comes (and it is refused while a window is open).
@@ -241,6 +245,7 @@ public static partial class TrainingOpponent
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
             // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
             case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            case "selectSearchCards": case "chooseSearchAttachTarget": return 100; // P20 (SearchExtensions.cs): the engine's default legal selection; the first Personality it can be attached to
             // "Put it into play or your hand" (issue #498): a modest bot puts the found Ring into play; the Attack target selection step: any offered target over none.
             case "chooseSearchDestination": return command.Choice == "play" ? 100 : 90;
             case "chooseAttackTarget": return command.TargetId is null ? 50 : 100;

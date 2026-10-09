@@ -1,0 +1,83 @@
+{
+  "Profile": "strategy-wave-159",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #738.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10369",
+      "Name": "Drain of Effort",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Until this phase ends or a player has discarded two cards from this effect, after each action other than this one resolves, its player discards a card.\nOpen: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10369.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "w738-drain-watch",
+        "w738-drain-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10395",
+      "Name": "Suck the Marrow",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow and destroy your performing Shugenja and target a Personality: Give the target a -1F/-1C Poison token. Lose 3 Honor. Until the game ends, after each Events Phase begins, give the target a -1F/-1C Poison token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10395.jpg",
+      "Keywords": [
+        "Maho",
+        "Plague"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w738-marrow-curse"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10554",
+      "Name": "Temple Grounds",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "If you do not control a Cavalry unit here, negate each Battle action taken by a player without units here.\nBattle/Engage: Destroy a Terrain (if able). Put this Terrain into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10554.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w738-temple-battle",
+        "w738-temple-engage"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

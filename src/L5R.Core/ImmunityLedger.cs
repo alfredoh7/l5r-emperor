@@ -107,6 +107,8 @@ public enum ImmunityScope
     Player,
     /// <summary>The battlefield the carrier stands at (a Terrain there, a Region on that province): movement from or to it.</summary>
     Battlefield,
+    /// <summary>The card the carrier is attached to: "this Shugenja" of a Spell, "this Personality" of an Item (issue #736).</summary>
+    AttachedHost,
 }
 
 /// <summary>What a choke point tells a rule about the effect: the subject (a card, a player or a battlefield) and the effect's source.</summary>
@@ -121,7 +123,8 @@ internal sealed record StandingImmunity(
     string? TargetKeyword = null,
     CardType? TargetType = null,
     ImmunitySource Source = ImmunitySource.OtherPlayers,
-    Func<MatchEngine, ImmunityContext, CardInstance, bool>? Condition = null)
+    Func<MatchEngine, ImmunityContext, CardInstance, bool>? Condition = null,
+    bool EventCarrier = false)
 {
     /// <summary>The rule for the cards whose catalogue Effect is `effect` (how a card names its own traits).</summary>
     public static Func<CardDefinition, bool> OnEffect(string effect) => d => d.Effect == effect;
@@ -214,7 +217,7 @@ public sealed partial class MatchEngine
         i.CardId is not null ? card is not null && i.CardId == card.Id
         : i.Battlefield is not null ? battlefield == i.Battlefield
         : i.PlayerId is not null && (card is null ? playerId == i.PlayerId
-            : card.OwnerId == i.PlayerId && i.TargetKeyword is not null && InPlay(card) && Keyword(card, i.TargetKeyword) && (i.TargetType is null || Definition(card).Type == i.TargetType));
+            : card.OwnerId == i.PlayerId && (i.TargetKeyword is not null || i.TargetType is not null) && InPlay(card) && (i.TargetKeyword is null || Keyword(card, i.TargetKeyword)) && (i.TargetType is null || Definition(card).Type == i.TargetType)); // a type alone names the cards too (issue #735: The Inevitable Grasp of Conquest)
 
     private bool StandingImmunityCovers(StandingImmunity rule, CardInstance carrier, CardInstance? card, int? playerId, int? battlefield) => rule.Scope switch
     {
@@ -222,6 +225,7 @@ public sealed partial class MatchEngine
         ImmunityScope.OwnersCards => card is not null && card.OwnerId == carrier.OwnerId && InPlay(card) && (rule.TargetKeyword is null || Keyword(card, rule.TargetKeyword)) && (rule.TargetType is null || Definition(card).Type == rule.TargetType),
         ImmunityScope.AttachedFollowers => card is not null && card.Zone == Zone.Attached && card.AttachedTo == carrier.Id && Definition(card).Type == CardType.Follower,
         ImmunityScope.Player => card is null && playerId == carrier.OwnerId,
+        ImmunityScope.AttachedHost => card is not null && carrier.Zone == Zone.Attached && carrier.AttachedTo == card.Id,
         _ => card is null && battlefield is not null && CarrierBattlefield(carrier) == battlefield // ImmunityScope.Battlefield
     };
 
@@ -245,7 +249,7 @@ public sealed partial class MatchEngine
         foreach (var rule in rules)
         {
             if (rule.Kind != kind) continue;
-            foreach (var carrier in _state.Cards.Values.Where(c => InPlay(c) && rule.OwnerIs(Definition(c))))
+            foreach (var carrier in _state.Cards.Values.Where(c => (InPlay(c) || rule.EventCarrier && c.Zone == Zone.EventInPlay) && rule.OwnerIs(Definition(c))))
             {
                 if (!StandingImmunityCovers(rule, carrier, card, playerId, battlefield)) continue;
                 if (!ImmunitySourceMatches(rule.Source, kind, controller ?? carrier.OwnerId, card, sourcePlayerId, sourceCard)) continue;

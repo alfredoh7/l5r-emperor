@@ -53,7 +53,7 @@ public partial class Main
     {
         _battleVisualTime += delta;
         if (!PresentationBusy && _defeatBanner.Visible && _battleVisualTime >= _staticOutcomeUntil) RenderBattleFeedback();
-        if (!PresentationBusy) return;
+        if (!PresentationBusy) { if (_framedDynasty is null) FrameDynasty(); return; } // retried until the table has settled after the battle
         if (_session.Snapshot is null) { _battlePresentationStage = 0; _presentationSnapshot = null; return; }
         _battlePresentationClock += delta;
         if (_reducedMotion || _battlePresentationStage == 1 && _battlePresentationClock >= _outcomeHold)
@@ -74,7 +74,7 @@ public partial class Main
             _battlePresentationStage = 3; _battlePresentationClock = 0;
             foreach (var key in _fallTimes.Keys.ToArray()) if (_fallTimes[key] == -1) _fallTimes[key] = _battleVisualTime;
         }
-        if (_battlePresentationStage == 3 && _battlePresentationClock >= 1.25)
+        if (_battlePresentationStage == 3 && _battlePresentationClock >= .45)
         { _battlePresentationStage = 0; FrameDynasty(); RenderInspector(); RenderPhaseActions(); RenderTimeline(); RenderBattleFeedback(); FrameNewBattle(); }
 
     }

@@ -236,7 +236,7 @@ public partial class ClanPlaque : Control
             "Dragon" => new Rect2(340, 220, 224, 223),
             _ => new Rect2(114, 225, 224, 218)
         };
-        var extra = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-" + clan.ToLowerInvariant() + ".png") : null;
+        var extra = clan is "Mantis" or "Spider" or "Imperial" ? GD.Load<Texture2D>("res://Art/clan-" + clan.ToLowerInvariant() + ".png") : null;
         return Decal(extra is null ? "clan-reference.png" : "clan-" + clan.ToLowerInvariant() + ".png", extra is null ? emblemRegion : new Rect2(Vector2.Zero, extra.GetSize()), Vector2.Zero, size, false);
     }
     private static TextureRect Decal(string file, Rect2 region, Vector2 position, Vector2 size, bool coin)

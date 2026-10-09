@@ -488,6 +488,11 @@ public sealed partial class MatchEngine
             // Lakeside Retreat (issue #622, TfStrategiesB.cs): the bowed Personality or Follower to straighten.
             foreach (var option in LakesideRetreatOptions(playerId, lakesidePending.CardId)) result.Add(option);
         }
+        else if (_state.PendingChoice is { Type: "beforeBattleOptional" } movingPending && _state.PendingBeforeBattleResolve is { } movingResolve && IsWave741MovingBattleChoice(movingResolve))
+        {
+            // A Moving Battle (issue #741, Wave741.cs): decline, or the Personality and the adjacent unresolved battlefield to move him to.
+            foreach (var option in Wave741MovingBattleOptions(playerId, movingPending.CardId)) result.Add(option);
+        }
         else if (_state.PendingChoice is { Type: "beforeBattleOptional" } optionalPending)
         {
             // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.

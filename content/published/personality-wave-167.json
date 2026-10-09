@@ -1,0 +1,240 @@
+{
+  "Profile": "personality-wave-167",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #737.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10495",
+      "Name": "Akumasa",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Akumasa enters play, lose 2 Honor.\nOpen: Target another player's Personality who has a Madness token. After the target attacks this turn, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10495.jpg",
+      "Keywords": [
+        "Disciple of P'an Ku",
+        "Fallen",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-akumasa-watch"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10624",
+      "Name": "Asahina Shigemitsu",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open, Bow this card: Target one or two of your Provinces. After the first time this turn a Personality attacks one of those Provinces, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10624.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Air",
+        "Crane Clan",
+        "Experienced",
+        "Favored of the Air Dragon",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-shigemitsu-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10618",
+      "Name": "Hida Tadama",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the first time each phase Tadama is destroyed, bring him into play in your home, ignoring costs, and bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10618.jpg",
+      "Keywords": [
+        "Unique",
+        "Berserker",
+        "Commander",
+        "Crab Clan",
+        "Favored of the Celestial Dragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w737-tadama"
+    },
+    {
+      "Id": "oracle-l5r-10273",
+      "Name": "Hiruma Ikeuchi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before the first time each battle any of Ikeuchi's Followers are destroyed by another player's card's effect: If you have Reconnaissance, negate the destruction of one such Follower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10273.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Imperial",
+        "Samurai",
+        "Scout",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w737-ikeuchi"
+    },
+    {
+      "Id": "oracle-l5r-10882",
+      "Name": "Iweko Shibatsu",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Spider Clan players ignore Shibatsu's Honor Requirement. Will not gain a Clan Alignment.\nAfter Shibatsu enters play, gain 3 Honor.\nAfter Shibatsu leaves play, lose 10 Honor.\nLimited, Bow this card: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10882.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Heir",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-shibatsu-honor"
+      ],
+      "Effect": "w737-shibatsu",
+      "HonorRequirementWaiverClan": "Spider"
+    },
+    {
+      "Id": "oracle-l5r-10510",
+      "Name": "Moto Taigo, the Skull Taker",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Taigo enters play, lose 3 Honor.\nInterrupt, Bow this card: If the action moves any units, you may destroy a target card without attachments in one of them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10510.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Conqueror",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Fallen",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-taigo-interrupt"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10489",
+      "Name": "Susumu Kuroko",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you Proclaim Susumu Takuan, gain 2 Honor.\nPolitical Limited, Bow this card: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10489.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Courtier",
+        "Daimyo",
+        "Magistrate",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w737-kuroko-favor"
+      ],
+      "Effect": "w737-kuroko"
+    },
+    {
+      "Id": "oracle-l5r-10482",
+      "Name": "Yogo Katsuta",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Katsuta enters play, lose 2 Honor.\nAfter a Personality commits seppuku, his controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10482.jpg",
+      "Keywords": [
+        "Fallen",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w737-katsuta",
+      "EntryHonorLoss": 2
+    }
+  ],
+  "Decks": []
+}

@@ -21,6 +21,48 @@ public partial class Main
         _hoveredPaymentCardId = cardId; Highlight();
     }
 
+    // Holdings the player has chosen to bow for the payment in progress: drawn bowed on the table before anything is committed.
+    private HashSet<string> _previewBows = [];
+    private string? _previewBowFlip;
+
+    private HashSet<string> PreviewBowedCards() => _chosen is { } chosen && QuoteFor(chosen) is { } quote
+        ? PaymentMethods(quote).Where(m => m.Kind == "bow" && _sources.Contains(m.Id)).Select(m => m.CardId).ToHashSet() : [];
+
+    // Gold chosen sources contribute: producers and reactions add, a "reduce" source subtracts; cost reductions are not Gold.
+    private int PaidGold(GoldQuote quote) => PaymentMethods(quote).Where(m => _sources.Contains(m.Id) && m.Kind != "discount").Sum(m => m.Produced);
+
+    // The engine's payment method behind a click on this holding (null when the card is not a payment source for the open cost).
+    private string? HoldingPaymentMethod(CardView card) => _chosen is { } chosen && QuoteFor(chosen) is { } quote &&
+        (quote.Kind == GoldCostKind.Variable || chosen.Type == "chooseOpponentPayment" || AmountFor(chosen, quote) > 0)
+        ? PaymentMethods(quote).FirstOrDefault(m => m.CardId == card.Id && m.Kind == "bow" && PaymentMethodUnderstood(m))?.Id : null;
+
+    // The player chooses the holdings to bow, so a costed action opens with nothing pre-selected (the engine's suggestion stays one click away).
+    private static bool PlayerPicksPayment(ActionOption option) => QuoteFor(option) is { } quote && (quote.Kind == GoldCostKind.Variable || quote.Cost > 0);
+
+    private void ToggleHoldingPayment(string methodId, string cardId)
+    {
+        if (!DecisionCanSubmit) return;
+        if (!_sources.Add(methodId)) _sources.Remove(methodId);
+        _previewBowFlip = cardId; RefreshPaymentSelection();
+    }
+
+    // A cost the player chooses is exactly the Gold they contribute (within the engine's range).
+    private void SyncPaymentAmount()
+    {
+        if (_chosen is not { Command: { } command } chosen || chosen.Type == "chooseOpponentPayment" || QuoteFor(chosen) is not { Kind: GoldCostKind.Variable } quote) return;
+        var amount = Math.Clamp(PaidGold(quote), quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0);
+        if (command.GoldAmount != amount) _chosen = chosen with { Command = command with { GoldAmount = amount } };
+    }
+
+    private void RefreshPaymentSelection()
+    {
+        SyncPaymentAmount();
+        _previewBows = PreviewBowedCards();
+        RenderBoard(); RenderInspector(); Highlight();
+    }
+
+    private void UpdateGoldMeter(int paid, int? cost) => _goldMeter.Present(paid, cost);
+
     private bool PaymentSelectionReady(int required, GoldQuote quote)
     {
         var methods = PaymentMethods(quote);
@@ -70,7 +112,7 @@ public partial class Main
                 {
                     if (!DecisionCanSubmit || !PaymentMethodUnderstood(method) || _chosen is null || QuoteFor(_chosen) != quote) return;
                     if (on) _sources.Add(method.Id); else _sources.Remove(method.Id);
-                    RenderInspector(); Highlight();
+                    _previewBowFlip = method.Kind == "bow" ? method.CardId : null; RefreshPaymentSelection();
                     _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>()
                         .FirstOrDefault(c => c.GetMeta("payment_source_id", "").AsString() == method.Id)?.CallDeferred(Control.MethodName.GrabFocus);
                 };

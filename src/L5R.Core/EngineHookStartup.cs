@@ -45,6 +45,7 @@ internal static partial class EngineHooks
         _ = StatTerms.Items;
         _ = CardRestrictions.Items;
         _ = CardTargetBars.Items;
+        _ = ForceCaps.Items; // issue #768: the Force cap channel
         _ = AfterActionTraits.Items;
         _ = EntryCostTerms.Items;
         _ = StandingImmunities.Items;
@@ -73,6 +74,7 @@ internal static partial class EngineHooks
         _ = KeywordRule.Items;
         _ = ActionEffectWatchFired.Items;
         _ = ActionMoveGates.Items;
+        _ = UntargetedReaction.Items; // issue #737 (P8): an Interrupt to an action that names no card
         _ = PendingActions.Items; // P25 (issue #723): decision infrastructure
         _ = BranchEffects.Items;
         _ = EffectChoiceContinuations.Items;

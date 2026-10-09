@@ -519,6 +519,7 @@ public sealed partial class MatchEngine
     {
         switch (abilityId)
         {
+            case Wave734Abilities.HoturiDuel or Wave734Abilities.TsukeDuel: Wave734DuelOutcome(abilityId, loserIds, challengerPlayerId); break; // issue #734
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "training-duel-force":
@@ -574,10 +575,12 @@ public sealed partial class MatchEngine
             case "first-blood-duel-battle":
             case "first-blood-duel-limited":
             case "watchful-eye-duel":
+            case Wave733Abilities.OtaniDuel: // issue #733: Ichiro Otani, "Bow the duel's loser."
                 foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
             // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
             case "aerie-duel": AerieDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            case Wave740Abilities.HakusekiDuel: case Wave740Abilities.FlameDuel: case Wave740Abilities.MagistrateDuel: case Wave740Abilities.DemonstratingDuel: ApplyWave740DuelOutcome(abilityId, winnerId, loserIds, challengerPlayerId); break; // issue #740 (Wave740.cs)
             case EmperorP1Abilities.OchiaiDuel: QueueOchiaiDestruction(loserIds, challengerPlayerId); break; // Ochiai's Bravery (issue #503, EmperorP1.cs)
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
@@ -669,6 +672,7 @@ public sealed partial class MatchEngine
                 ApplyTfStrategiesBFocusEffect(abilityId, ownerId, winnerPlayerId); // Strategic Withdrawal (TfStrategiesB.cs)
                 ApplyWlStratGatesFocusEffect(abilityId, ownerId); // Boiling Point (issue #674, WlStratGates.cs)
                 ApplyMechEFocusEffect(abilityId);
+                ApplyWave740FocusEffect(abilityId, winnerPlayerId); // issue #740: Fortune's Charm
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;
         }

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Engine primitive P20 (search and look extensions) from the #668/#671 plan (#728), engine only, no cards wired: SearchSpec sources OwnProvinces (private to the searcher, nothing reshuffled, replaced face down), AnyPlayerFateDiscard/AnyPlayerDynastyDiscard and ChooseOne (Ordered still wins per R-011); criteria GoldProducing and DifferentTitles; SelectCount min/max multi-select; dispositions AttachToPersonality (follow-up target), Bottom, CelestialIntoPlay (reuses #667 EnterCelestialPlay), RecruitFromProvinceIgnoringCosts, PlayAsAdditionalAction (reuses #667 and P17), Discard, RemoveFromGame; OtherPlayerChooses via P25 shown choice; LookSpec.RevealUntil. ValidateSearchSpec refuses unsupported combinations before any state change. Client: deck search panel multi-select and place names. Shared change: DeckSearch.cs, DeckLook.cs, SearchPlayGozu.cs, EmperorRemainingE.cs, TrainingOpponent.cs, client DeckSearchPanel/Main.DeckSearch.",
+  "validation": "search-extensions 15/15; full Core 3210/3210 0 FAIL; AI 98/98 incl bot-policy 14/14 and bot-soak 3/3; Server 9/9; Transport 19/19; format and comment-swallow lint clean; native check-deck-search-ui (normal and reduced, new province scenario), check-either-or-ui and check-decision-chooser (11 modes) pass on Windows with the shared Godot. Final merged-tree check.sh result in the PR.",
+  "remaining": "Cards that use it (Onyx Championship, Iweko Seiken, Dark Audience, Jade Pearl Inn, Unbound Essence, Asako Usohara, Revelations, Hantei XVI inexperienced, The False Path) are a later wave; readings in docs/decisions/2026-10-07-p20-search-look-extensions.md to confirm.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/728",
+  "branch": "claude/728-p20-pr",
+  "updated": "2026-10-07T21:58:23.960714+00:00"
+}

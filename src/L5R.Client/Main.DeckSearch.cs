@@ -64,7 +64,8 @@ public partial class Main
                 _searchPanel.Populate(search, Actions, View.ViewerId, DecisionCanSubmit, FindCard(search.SourceCardId)); _searchViewKey = key;
                 _searchPanel.Confirmed += action =>
                 {
-                    if (!DecisionCanSubmit || _searchViewKey != key || !Actions.Contains(action) || action.Command is null) return;
+                    // P20: a set of cards is a draft the panel builds from the engine's default "selectSearchCards" action, so it is not itself in Actions.
+                    if (!DecisionCanSubmit || _searchViewKey != key || action.Command is null || !(Actions.Contains(action) || action.Type == "selectSearchCards" && Actions.Any(a => a.Type == "selectSearchCards"))) return;
                     _ = Submit(action.Command);
                 };
             }

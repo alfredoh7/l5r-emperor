@@ -143,6 +143,7 @@ public partial class Main
             _session.SwitchPracticeSeat(); await EventFrames(15);
             SupportRequire(_chosen?.Command?.GoldAmount == 0 && _sources.Count == 0, "Seat switch retained private stale choices");
             await SetOpponentPaymentAmount(4);
+            GoldClickHoldings(PaymentsFor(QuoteFor(_chosen!)!, 4)[0].SourceIds); await EventFrames(3); // the player bows holdings (#731)
             var honor = Self.Honor; var paying = _sources.ToArray();
             await SupportClick(_paymentConfirm!); await WaitDecisionPresentation();
             SupportRequire(View.PendingOpponentPayment is null && Self.Honor == honor + 1 && paying.All(id => FindCard(id)?.Bowed == true), "Chosen payment did not resolve and bow selected sources");

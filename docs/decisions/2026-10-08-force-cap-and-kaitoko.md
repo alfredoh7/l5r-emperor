@@ -1,0 +1,48 @@
+# Force cap primitive and Asako Kaitoko - exp (issue #768)
+
+Status: **implemented on `claude/768-kaitoko-force-cap`; the readings below await Mendon.** Lane: rules (mdornbrook, standing cross-lane authority). Card: oracle-l5r-10473, Coils of Madness, profile `personality-wave-301` (`tools/content/package_personality_wave_301.py`). Engine: `src/L5R.Core/ForceCaps.cs` (the primitive), `src/L5R.Core/Kaitoko.cs` (the card). Tests: `ForceCapTests` (suite `force-cap`, 6) and `KaitokoTests` (suite `kaitoko`, 7). Batch 5 (#736) deferred the card for the missing stat cap and the keyword-conditioned target bar; P9 had left stat caps out.
+
+## The Force cap (Mendon's request)
+
+A cap is a live rule yielded on `EngineHooks.ForceCaps`; `PersonalityForce` applies the lowest one once (`ApplyForceCaps`), so every reader of a Personality's Force (the army totals, the table, costs that read Force) sees the same number.
+
+- **Lowers, never raises.** The Force becomes `min(Force, maximum)`. A Personality at or under the maximum is untouched.
+- **Lives with its source.** Nothing is stored on the Personality: when the source leaves the battlefield (moved home, destroyed) or the Personality does, the next read is his uncapped Force again.
+- **Negated by what negates Force penalties,** read where the Force is asked, so a protection given after the cap began lifts it and one that ends restores it:
+  - "Negate all current and new Force penalties on him" (Tireless Efforts, Deep Roots, Shadow's Embrace and Wave 736's cards): `ForcePenaltiesNegatedTurn`, per card, for the turn;
+  - "Negate all current Force penalties on him" (Incense Mill): a one-shot, so the caps binding the card when it resolves are recorded for the turn (`MatchState.ForceCapCleanses`, order 23200, omitted until used);
+  - P12 Force-penalty immunity: on one card, on a player's cards by keyword or type, or standing on a card in play, asked as `IsImmune(card, ForcePenalty, the cap source's controller, the source card)`.
+
+## Kaitoko
+
+| Printed text | Built as |
+|---|---|
+| "Personalities with Fallen, Kolat, Ninja, Nonhuman, or Shadowlands opposing Kaitoko have a maximum Force of 3" | a `ForceCaps` registrant: a Personality at Kaitoko's battlefield on the other side with any of the five keywords (read live, so a keyword a card gives counts) is capped at 3 |
+| "and actions from cards in their units may not target Kaitoko" | a P11 `CardTargetBars` registrant; `ActorSpec` gained `UnitHeadKeywordsAny` and `UnitHeadOpposesCardId` (plain data, so a stored bar can carry them): the Personality heading the actor's unit has a keyword and opposes her |
+
+Each keyword is proved alone on a test-only Personality (a training Lion samurai with 4F and that one keyword), because no published Personality has exactly one of the five and 4F.
+
+## Shared lines edited
+
+`MatchEngine.PersonalityForce` is now `ApplyForceCaps(card, PersonalityForceUncapped(card))` (identical when no cap binds); `EngineHookStartup` seals the new channel; `CardRestrictions.cs` (`ActorSpec`, `ActorMatches`, `UnitHeadOf`, `UnitHeadMatches`); `SeedsOfDecayBatch4.CleanseForcePenaltiesAndLocks` records the cleansed caps.
+
+## Readings for Mendon to confirm or correct
+
+1. **"Opposing"** is the core-rules sense already used by P9: at the same battlefield, on the other side. Her own player's Personalities, ones at home and ones at another battlefield are not capped. There is no "during battle" test beyond that: a unit is at a battlefield only during the Battle phase.
+2. **The cap is a Force penalty from another player's card.** An immunity to "other players' cards" therefore stops it, and an immunity that only covers the Personality's own player's cards does not.
+3. **Incense Mill's cleanse covers the cap for the rest of the turn,** not only the instant it resolves, as Tireless Efforts' mark covers new penalties; it names the source, so a second Kaitoko's cap still binds.
+4. **Peace of the Kami and Creating Order (Mendon, 2026-10-09).** Peace of the Kami's "negate all current effects on it from other players' cards" negates Kaitoko's cap: `NegateOtherPlayersEffects` now records the caps whose source another player controls, as Incense Mill does, for the turn. Creating Order does not: it negates Force modifiers from actions, and the cap is a trait, not an action. Tested: `kaitoko/PeaceAndCreatingOrder`.
+5. **"Actions from cards in their units" (Mendon, 2026-10-09).** The existing P11 unit-card rule (the Personality, and an attachment attached to him), and a Strategy with a performer is performed by the performer, so a Strategy whose performer has one of the keywords and opposes her may not target her; a Strategy with no performer is not a card in anyone's unit. Tested: `kaitoko/StrategyWithPerformer`.
+
+## Rulings confirmed by Mendon (2026-10-09)
+
+Readings 1, 2, 3 and 6 are confirmed ("everything else is okay"); 4 and 5 are as corrected above.
+6. **Both clauses name the same Personalities,** so the target bar applies only while they are opposed to her, with the same keywords.
+
+## A separate bug the soak found
+
+Adding Kaitoko to the card pool changed the random decks of CI's bot soak (seed 1, turn 11) and it hit an existing crash: an action that recruits a card from a province (Masaya's `sp-masaya-recruit`, Shinden Shorai, a province Holding) looked the card up as the province's first slot (`Provinces.Single(p => p.CardId == card.Id)`), so a card in the second slot of a Plains of Otosan Uchi province threw "Sequence contains no matching element". It reproduces on unmodified code (confirmed by reverting the fix under the new test). `BringProvincePersonalityIntoPlay` and `BringProvinceCardIntoPlay` now find the card's slot (`FindProvinceSlot`), clear that slot and refill it, as Purchase and RecruitReserve already did. The other `Provinces.Single(p => p.CardId == ...)` sites noted in `OtosanUchiPlains.cs`'s scope note are untouched. Regression test: `otosan-uchi-plains/AbilityRecruitFromSecondSlot`.
+
+## Art pack
+
+The new scan (`oracle-l5r-10473.jpg`) is covered by `catalogue-art-issue768-20261008-r2` (4,627 images, 618,037,080 bytes, SHA-256 `635d3e16f660aa67f2ff43a3e8a6ac64141ceba9dd667e6963477564c55eb0d2`), built with `--base-archive` from Journey's End Keep's pack `catalogue-art-issue771-20261008-r1` (4,626 images). Native visual and playability review has not been done.

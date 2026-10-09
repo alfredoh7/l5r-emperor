@@ -130,6 +130,15 @@ public sealed partial class MatchEngine
             case IvorySpellAbilities.WordsOfConsecrationWatchKind:
                 ResolveWordsOfConsecrationWatch(watch, card);
                 break;
+            // Bayushi Kachiko (issue #778, Kachiko.cs): "his controller loses 2 Honor".
+            case KachikoAbilities.WatchKind:
+                ResolveKachikoWatch(watch, card, what);
+                break;
+            // Akumasa (issue #737, Wave737.cs): "After the target attacks this turn, draw a card."
+            case Wave737Abilities.AkumasaWatchKind:
+                Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
+                Draw(Player(watch.BeneficiaryPlayerId));
+                break;
             // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn), his controller loses 1 Honor."
             case WatchVeiledMenace:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);

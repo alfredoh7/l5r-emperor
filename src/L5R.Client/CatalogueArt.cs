@@ -48,7 +48,7 @@ public static class CatalogueArt
     public static TextureRect Clan(string clan)
     {
         var region = clan switch { "Lion" => new Rect2(114, 225, 224, 218), "Crane" => new Rect2(574, 220, 225, 223), "Phoenix" => new Rect2(0, 0, 222, 222), "Scorpion" => new Rect2(234, 0, 219, 222), "Crab" => new Rect2(465, 0, 218, 222), "Unicorn" => new Rect2(689, 0, 220, 222), "Dragon" => new Rect2(340, 220, 224, 223), _ => new Rect2(5, 10, 548, 560) };
-        Texture2D tex = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-" + clan.ToLowerInvariant() + ".png") : new AtlasTexture { Atlas = GD.Load<Texture2D>("res://Art/" + (clan is "All" or "Unaligned" ? "koku-reference.png" : "clan-reference.png")), Region = region };
+        Texture2D tex = clan is "Mantis" or "Spider" or "Imperial" ? GD.Load<Texture2D>("res://Art/clan-" + clan.ToLowerInvariant() + ".png") : new AtlasTexture { Atlas = GD.Load<Texture2D>("res://Art/" + (clan is "All" or "Unaligned" ? "koku-reference.png" : "clan-reference.png")), Region = region };
         var r = new TextureRect { Texture = tex, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, MouseFilter = Control.MouseFilterEnum.Ignore, TextureFilter = CanvasItem.TextureFilterEnum.LinearWithMipmaps };
         var material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/aged-emblem.gdshader") }; material.SetShaderParameter("decal_size", new Vector2(40, 40)); material.SetShaderParameter("white_cutout", clan is "All" or "Unaligned"); material.SetShaderParameter("saturation", .65f); r.Material = material; return r;
     }

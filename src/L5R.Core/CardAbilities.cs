@@ -1020,7 +1020,7 @@ public static class AbilityCatalog
         // Togashi Hiroto: here the lack of attachments genuinely IS the targeting restriction (an
         // attachment itself always qualifies, having none of its own), unlike Muzu just above.
         ["hiroto-fire-tokens"] = new("Reaction", "After entering play, gain four +1F Fire tokens", "none", Trigger: "own-enters-play"),
-        ["hiroto-bow"] = new("Battle", "Target an enemy card without attachments: bow it (destroy it instead if it is an attachment)", "enemy-card", RequireNoAttachments: true),
+        ["hiroto-bow"] = new("Battle", "Target an enemy card without attachments: bow it, then destroy it if it is an attachment", "enemy-card", RequireNoAttachments: true),
         // Togashi Kasuru: simplified -- the optional "you may discard a card to straighten Kasuru"
         // sub-choice is dropped (no generic "optional secondary cost" primitive exists yet); the core
         // "if attacking, draw a card" half is preserved.
@@ -1378,9 +1378,8 @@ public static class AbilityCatalog
         ["scorn-the-weak"] = new("Battle", "Target an enemy Personality: Give him -5F. If his Force is now 0, his controller loses 1 Honor and you may target and dishonor a Personality", "enemy-personality"),
         // Strength in Terror (oracle-l5r-7538): "Battle: Choose your performing Paragon and target
         // an enemy Personality: Reduce his Force by an amount equal to your Paragon's Force. You
-        // may target and destroy one of the Personality's attachments. Lose 3 Honor." No "unbowed"
-        // qualifier on the Performer, the same shape surety-of-purpose already established for a
-        // bare "Choose your performing Paragon." The dynamic Force reduction reads the chosen
+        // may target and destroy one of the Personality's attachments. Lose 3 Honor." No "unbowed" qualifier on the Performer, so a bowed Paragon may perform it (Mendon, 2026-10:
+        // a card that does not say unbowed may be performed by a bowed Personality). The dynamic Force reduction reads the chosen
         // Performer's own live CardForce, the same self-referential shape legulus-legion-attack
         // already established for a Follower's own Force, just against a separately-chosen
         // Performer instead of the source card itself. The optional attachment-destroy is CardIds'
@@ -4967,11 +4966,11 @@ public sealed partial class MatchEngine
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
     private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false, string? rangedTargetId = null, string? performerId = null, bool baseAbilityOnly = false,
-        string? requiredActionKeyword = null, string? tag = null, string? id = null, bool mandatory = false)
+        string? requiredActionKeyword = null, string? tag = null, string? id = null, bool mandatory = false, string[]? scopeAbilityIds = null)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
         if (MechAGrantLocked(playerId, battle)) return; // One Action, Two Strikes (issue #501, EmperorMechA.cs): "You will not take any other additional Battle actions this battle."
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId, performerId, baseAbilityOnly, requiredActionKeyword, tag, id, mandatory));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId, performerId, baseAbilityOnly, requiredActionKeyword, tag, id, mandatory, scopeAbilityIds));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional {(anyDiscardTiming ? "" : "Battle ")}action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -5087,6 +5086,7 @@ public sealed partial class MatchEngine
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
         AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
         AfterKoshinKeepAttack(abilityId, playerId, targetId, strength, targetInPlayBefore); // Emperor Edition Stronghold pass (issue #486), batch 1: Koshin Keep's additional effects.
+        AfterWave740Attack(abilityId, playerId, sourceId); // issue #740 (Wave740.cs): Mirumoto Kalen - exp's additional action for his second printed ability.
         AfterWlStratTornAttack(abilityId, sourceId); // issue #674 (WlStratTorn.cs): Ambush Tactics' "You may move him home".
         AfterEmperorStrongholdBatch3Attack(abilityId, sourceId); // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "You may move your Ninja home".
         AfterEmperorRemainingGAttack(abilityId, playerId, targetId, targetInPlayBefore, sourceId); // Emperor Edition remaining-cards pass (issue #492), group G: Ikoma House Guard's "gain 1 Honor".
@@ -5329,6 +5329,7 @@ public sealed partial class MatchEngine
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
         ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
         : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
+        : Wave739SourceZoneAllows(ability, source, player) is bool w739Zone ? w739Zone // issue #739 (Wave739.cs): Paneki's Mask is used from its player's hand
         : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)
@@ -5605,7 +5606,7 @@ public sealed partial class MatchEngine
             // effect cases so an ability that moves a Personality to a battlefield cannot be added without it. Munefusa's move-home keeps its old
             // no-presence clause as an explicit Absent.
             var reinforcesFromElsewhere = ability.Absent || ability.MovesToBattle || DojiWaivesFavorPresence(id, player); // Doji's Guidance (Emperor Edition remaining-cards pass, issue #492, group E).
-            if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
+            if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any() || Wave735WaivesPresence(player.Id) /* issue #735: Doji Tatsuzo */, "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
             // The check above only ever applies to a Personality-type source -- a Spell/Item's own
@@ -6139,7 +6140,7 @@ public sealed partial class MatchEngine
         else if (ability.Target == "provinces")
         {
             Require(command.TargetId is null, "Select province cards together.");
-            var ids = command.CardIds ?? [];
+            var ids = OwnProvinceCardIds(player, command.CardIds ?? []); // a face-down card is named by its place, "hidden-p{owner}-province{n}" (issue #586)
             Require(ids.Length is >= 1 and <= 4 && ids.Distinct().Count() == ids.Length, "Choose one or more different province cards.");
             Require(ids.All(id => _state.Cards.TryGetValue(id, out var c) && c.OwnerId == player.Id && c.Zone == Zone.Province &&
                 player.Provinces.Any(p => !p.Destroyed && p.CardId == id)), "Choose cards in your provinces.");
@@ -6528,6 +6529,8 @@ public sealed partial class MatchEngine
                     ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                else if (ability.Target == Wave735Abilities.SanctionTarget) Require(Wave735SanctionTargetAllows(target), "Choose a non-Loyal, face-up Personality in or out of play."); // issue #735: Suikihime's Sanction
+                else if (ability.Target == Wave742Abilities.BondsCard) Require(Wave742BondsTargetAllows(target), "Choose a Bonds of Hospitality in play."); // issue #765: the granted discard names a Strategy kept in play
                 else if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
                 // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
                 else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
@@ -7635,6 +7638,8 @@ public sealed partial class MatchEngine
                     ApplyModifier(target!, source!.Id, id, "Force", -CardForce(performer));
                     if (command.CardIds is { Length: 1 } terrorAttachmentIds) DestroyAttachment(Card(terrorAttachmentIds[0]));
                     GainHonor(player.Id, -3, "Strength in Terror", source);
+                    // "You may destroy one of his attachments": asked now unless the command already named one.
+                    if (command.CardIds is not { Length: 1 } && BeginStrengthInTerrorChoice(command, source, target!, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                     break;
                 }
             case "strength-of-purity": ApplyModifier(Card(command.PerformerId!), source!.Id, id, "Force", 3); break;
@@ -9247,8 +9252,9 @@ public sealed partial class MatchEngine
                 CreateToken(source!, "Fire", id, "Force", 1);
                 break;
             case "hiroto-bow":
+                // Mendon's ruling (#748): the bow comes first, then an attachment is destroyed; the two are separate effects, so negating one never negates the other.
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (target!.Zone == Zone.Attached) DestroyAttachment(target);
-                else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
                 break;
             // Gates of Chikushudo: the copy is created first, then this Spell is destroyed (printed order); a window the copy's entry opens ends the action after the Spell is gone.
             case "gates-of-chikushudo-copy":
@@ -10657,8 +10663,16 @@ public sealed partial class MatchEngine
         NextAction(pending.ActingPlayerId!.Value);
     }
 
+    // A face-down province card is named by the id every view gives it ("hidden-p{owner}-province{n}", EmperorP5Hidden.cs), never its real id (issue #586: Border Keep's refresh,
+    // Doubts of Refill). A face-up card keeps its own id; a real id is still accepted, so a caller that already holds one is unchanged.
+    private string OwnProvinceTargetId(PlayerState player, ProvinceState province) =>
+        _state.Cards.TryGetValue(province.CardId!, out var held) && !held.FaceUp ? HiddenProvinceId(player.Id, province.Index) : province.CardId!;
+    private string[] OwnProvinceCardIds(PlayerState player, string[] ids) =>
+        ids.Select(id => player.Provinces.FirstOrDefault(p => !p.Destroyed && p.CardId is not null && _state.Cards.TryGetValue(p.CardId, out var held) && !held.FaceUp && HiddenProvinceId(player.Id, p.Index) == id)?.CardId ?? id).ToArray();
+
     private void CycleProvinces(PlayerState player, string[] ids)
     {
+        ids = OwnProvinceCardIds(player, ids);
         // The submitted order is the bottom-of-deck order; replacements are revealed together.
         var provinces = ids.Select(id => player.Provinces.Single(p => p.CardId == id)).ToArray();
         foreach (var id in ids)
@@ -11005,12 +11019,16 @@ public sealed partial class MatchEngine
             Emit("tokenNegated", $"A {type} token's {stat} penalty on {Definition(card).Name} was negated (Aka-beko).", card.OwnerId, card.Id);
             return null;
         }
+        // Foothold of the Mad (issue #766, Foothold.cs; Mendon's ruling): while one is a Stronghold in play, a Madness token on a Personality or Follower is a -1F token. Placed after the Force-penalty
+        // negations above on purpose: the penalty is the Stronghold's rule, not an effect of the action that gave the token.
+        var footholdPenalty = type == "Madness" && stat is null && Definition(card).Type is CardType.Personality or CardType.Follower && FootholdInPlay();
+        if (footholdPenalty) { stat = "Force"; amount = -1; }
         var token = new CardToken($"token-{++_state.TokenSequence:D4}", type, source, stat, amount);
         card.Tokens.Add(token);
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
         Emit("tokenCreated", $"{Definition(card).Name} gained a {type} token.", card.OwnerId, card.Id);
         // A stat token with a negative amount (Cultist Infiltrator's -1 Chi) is a stat penalty like any modifier (issue #336).
-        if (stat is not null) NoteStatPenalty(card, source, type, stat, amount);
+        if (stat is not null && !footholdPenalty) NoteStatPenalty(card, source, type, stat, amount);
         return token;
     }
     private void MoveToken(CardInstance from, CardToken token, CardInstance to)
@@ -11244,7 +11262,7 @@ public sealed partial class MatchEngine
             // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
             // is listed exactly as before with the choice left off the command.
             // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): a Favor-discard action is also offered with a Favor token discarded in place of the Imperial Favor.
-            CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).Concat(FavorTokenAlternative(ability, playerId)).ToArray() // issue #501: a Favor token for an alternative Favor discard
+            CostOption?[] costOptions = ability.CostOptions is { } manyOptions && (manyOptions.Length > 1 || manyOptions.Any(AlternativeDiscard.IsDiscardOption) /* issue #735: Daidoji Gensai, a lone discard */) ? manyOptions.Select(o => (CostOption?)o).Concat(FavorTokenAlternative(ability, playerId)).ToArray() // issue #501: a Favor token for an alternative Favor discard
                 : IsFavorDiscardAbility(id) && FavorTokenSource(playerId) is not null ? [null, FavorTokenOption] : [null];
             costOptions = [.. costOptions, .. CostSubstitutionOffers(ability, playerId, source)]; // issue #690 (P24, EffectPrimitivesCosts.cs): one more offered action per card that may be bowed in a Ring's place
             // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
@@ -11262,7 +11280,7 @@ public sealed partial class MatchEngine
                         foreach (var shownChoice in AlternativeDiscard.Choices(costOption, shownChoices, player, source))
                             foreach (var compareChoice in compareChoices)
                             {
-                                var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
+                                var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
                                 var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
                                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
                                     CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
@@ -11337,7 +11355,7 @@ public sealed partial class MatchEngine
                                     // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                     EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                     "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? inPlay
+                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? inPlay
                                 }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                    // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                    // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

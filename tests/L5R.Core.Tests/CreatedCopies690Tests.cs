@@ -717,7 +717,7 @@ internal static class CreatedCopies690Tests
             Check(!Has(e2, mine.Id, A.SelfBoost) && Has(e2, theirs.Id, A.SelfBoost), "'your' is the grantor's controller");
         }
         finally { CreatedCopies690Catalog.Clear(rule); CreatedCopies690Catalog.Clear(others); CreatedCopies690Catalog.Clear(anyType); CreatedCopies690Catalog.Clear(trait); }
-        Eq(CreatedCopies690Catalog.FilterGrantRules.Length, 0, "no rule is registered outside a test: no card is wired");
+        Eq(CreatedCopies690Catalog.FilterGrantRules.Count(r => !r.Id.StartsWith("w741-", StringComparison.Ordinal)), 0, "no rule is registered outside a test but a wired card's own (Kitsune Merihiko - exp, issue #741: w741-)");
     }
 
     // ---- traits ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -831,7 +831,7 @@ internal static class CreatedCopies690Tests
         Check(fixtures.Length >= 20, "the fixtures are catalogued");
         Check(!CardCatalog.Cards.Values.Any(c => (c.Abilities ?? []).Any(a => a.StartsWith("training-p22-", StringComparison.Ordinal)) || c.Effect.StartsWith("training-p22-", StringComparison.Ordinal)),
             "no card in the catalogue carries a P22 fixture: no card is wired by this primitive");
-        Eq(CreatedCopies690Catalog.FilterGrantRules.Length + CreatedCopies690Catalog.Traits.Length, 0, "no rule is registered outside a test");
+        Eq(CreatedCopies690Catalog.FilterGrantRules.Count(r => !r.Id.StartsWith("w741-", StringComparison.Ordinal)) + CreatedCopies690Catalog.Traits.Length, 0, "no rule is registered outside a test but a wired card's own (Kitsune Merihiko - exp, issue #741: w741-)");
         // The two migrated creators declare their value instead of minting it.
         Check(CreatedProxies677Abilities.MajorIllusion.Values!.Single() is { Stat: CreatedStat.Force, From: CreatedSubject.Wielder, Read: CreatedStat.Chi, Current: true, Keyword: "Air", PlusWithKeyword: 1 },
             "The Wind's Champion: Force from the wielder's current Chi, plus 1 if he is Air");

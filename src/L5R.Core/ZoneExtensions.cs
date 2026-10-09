@@ -80,11 +80,11 @@ public sealed partial class MatchEngine
     // A province Holding (or other non-Personality) recruited by an action: the same sequence without a battlefield or a Proclaim.
     private bool BringProvinceCardIntoPlay(PlayerState player, CardInstance card, PurchaseQuote quote, bool bowed)
     {
-        var province = player.Provinces.Single(p => p.CardId == card.Id);
-        province.CardId = null;
+        var (province, slot) = FindProvinceSlot(player, card.Id); // either slot of a two-slot province (bot soak, issue #768)
+        ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index;
         EnterPlayFromRecruit(player, card, null, Definition(card).Name);
-        Refill(player, province);
+        RefillProvinceSlot(player, province, slot);
         return OpenRecruitEntryWindows(player, card, false, null);
     }
 
@@ -101,8 +101,9 @@ public sealed partial class MatchEngine
     // ---- history and province locks -----------------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>"This province holds no Dynasty cards": the permanent flag (Illusory Defense) or the while-a-card-is-in-play one (Kokure's Lands).</summary>
+    // Kokure's Lands (issue #739, Wave739.cs) is read from the Region the province carries.
     internal bool HoldsNoDynasty(ProvinceState province) =>
-        province.HoldsNoDynastyCards || province.HoldsNoDynastyCardsWhile is { } whileId && _state.Cards.TryGetValue(whileId, out var holder) && InPlay(holder);
+        province.HoldsNoDynastyCards || province.HoldsNoDynastyCardsWhile is { } whileId && _state.Cards.TryGetValue(whileId, out var holder) && InPlay(holder) || Wave739KokureHolds(province);
 
     /// <summary>The one sweep after every accepted command: a card now in play that has no entry turn gets <paramref name="turnAtStart"/>; a card not in play loses it; a card whose host left play is discarded.</summary>
     private void SweepZoneHistory(int turnAtStart)

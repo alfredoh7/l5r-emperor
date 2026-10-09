@@ -290,6 +290,8 @@ public sealed partial class MatchEngine
                 if (ResolveEmperorP6Choice(pending, command)) return; // issue #503 (EmperorP6.cs): Dark Experiments, the face-up refills, Ietsuno's switch
                 if (ResolveP6EventChoice(pending, command)) return; // primitive P6 (issue #705, AfterFacts.cs): a Celestial's entry decision
                 if (ResolveP5EventChoice(pending, command)) return; // primitive P5 (issue #711, ProvinceRevealEvents.cs): a province-reveal Event's decision
+                if (ResolveWave738EventChoice(pending, command)) return; // issue #738 (Wave738.cs): A Dangerous Game's yes/no, The Jade Championship's Shugenja
+                if (ResolveWave742EventChoice(pending, command)) return; // issue #765 (Wave742.cs): Marriage of the Emerald Champion's Personality
                 if (ResolveFortifyChoice(pending, command)) return; // primitive P15 (issue #719, FortificationHoldings.cs): which province a Fortification guards
                 if (ResolveWatchEventChoice(pending, command)) return; // primitive P8 (issue #712, ActionEffectWatch.cs): a watch's choice
                 throw new RuleViolation("Unknown Event decision.");
@@ -338,6 +340,8 @@ public sealed partial class MatchEngine
                 foreach (var option in EmperorP6ChoiceActions(pending, playerId)) yield return option; // issue #503 (EmperorP6.cs)
                 foreach (var option in P6EventChoiceActions(pending, playerId)) yield return option; // primitive P6 (issue #705, AfterFacts.cs)
                 foreach (var option in P5EventChoiceActions(pending, playerId)) yield return option; // primitive P5 (issue #711, ProvinceRevealEvents.cs)
+                foreach (var option in Wave738EventChoiceActions(pending, playerId)) yield return option; // issue #738 (Wave738.cs)
+                foreach (var option in Wave742EventChoiceActions(pending, playerId)) yield return option; // issue #765 (Wave742.cs)
                 foreach (var option in FortifyChoiceActions(pending, playerId)) yield return option; // primitive P15 (issue #719, FortificationHoldings.cs)
                 foreach (var option in WatchEventChoiceActions(pending, playerId)) yield return option; // primitive P8 (issue #712, ActionEffectWatch.cs)
                 break;

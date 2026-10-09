@@ -19,16 +19,17 @@ public partial class Main
     {
         var state = MatchEngine.CreatePublishedTestMatch(42).State;
         foreach (var p in state.Players) { foreach (var id in p.Hand) state.Cards.Remove(id); p.Hand.Clear(); }
-        var battle = mode is "yoshitada" or "honorable" or "reactions" or "fear";
+        var battle = mode is "yoshitada" or "honorable" or "reactions" or "fear" or "brothers";
         state.Phase = battle ? Phase.Battle : Phase.Action; state.ActivePlayerId = state.PriorityPlayerId = 0; state.PendingChoice = null;
         state.CurrentBattleProvince = battle ? 0 : null; state.UnresolvedBattlefields = battle ? [0] : [];
         var zone = battle ? Zone.Battlefield : Zone.Home; int? province = battle ? 0 : null;
-        var own = SupportFixtureCard(state, mode is "yoshitada" or "honorable" or "fear" ? 2179 : 3636, 0, zone, province);
+        var own = mode == "brothers" ? SupportFixtureCard(state, "training-samurai", 0, zone, province) : SupportFixtureCard(state, mode is "yoshitada" or "honorable" or "fear" ? 2179 : 3636, 0, zone, province);
+        if (mode == "brothers") SupportFixtureCard(state, "training-samurai", 0, zone, province);
         var enemy = SupportFixtureCard(state, mode == "reactions" ? 223 : 2060, 1, zone, province); _multiEnemy = enemy.Id;
-        var source = mode is "yoshitada" or "honorable" ? own : mode == "bonds" ? SupportFixtureCard(state, 1092, 0, Zone.Hand) :
+        var source = mode == "brothers" ? SupportFixtureCard(state, 1164, 0, Zone.Hand) : mode is "yoshitada" or "honorable" ? own : mode == "bonds" ? SupportFixtureCard(state, 1092, 0, Zone.Hand) :
             mode == "fear" ? SupportFixtureCard(state, 2493, 0, Zone.Hand) : SupportFixtureCard(state, "training-slots-source", 0, zone, province);
         _multiSource = source.Id;
-        var ability = mode switch { "bonds" => "bonds-of-coin-destroy", "yoshitada" or "honorable" => "yoshitada-bow", "fear" => "fear-me-move", "mixed" => "training-slots-mixed", "hand" => "training-slots-discard", "reactions" => "training-slots-two-personalities", _ => "training-slots-up-to-three" };
+        var ability = mode switch { "brothers" => "p2-brothers-in-battle", "bonds" => "bonds-of-coin-destroy", "yoshitada" or "honorable" => "yoshitada-bow", "fear" => "fear-me-move", "mixed" => "training-slots-mixed", "hand" => "training-slots-discard", "reactions" => "training-slots-two-personalities", _ => "training-slots-up-to-three" };
         if (mode == "yoshitada") enemy.Dishonorable = true;
         if (mode is "bonds" or "optional")
         {
@@ -84,7 +85,16 @@ public partial class Main
     {
         try
         {
-            _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false); await PrepareMultiReview();
+            _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false);
+            if (_captureMode.Contains("brothers"))
+            {
+                await PrepareMultiReview("brothers"); var brothers = MultiUpFront.Single(); var samurai = brothers.CardIds.Take(2).ToArray();
+                foreach (var id in samurai) await SupportClick(MultiFace(brothers.Slot, id));
+                SupportRequire(MultiReady && _paymentConfirm is { Disabled: false }, "Brothers in Battle: Confirm disabled with two Samurai chosen: " + _paymentConfirm?.Text);
+                await ConfirmMulti(); SupportRequire(_multiFixture.State.Cards[samurai[0]].Zone == Zone.Battlefield && _multiFixture.State.P2.BrothersGroups.Count == 1, "Brothers in Battle did not resolve: groups=" + _multiFixture.State.P2.BrothersGroups.Count + " pending=" + View.PendingChoice?.Type + " notice=" + _notice.Text + " events=" + string.Join("|", _multiFixture.State.Events.TakeLast(4).Select(e => e.Type)));
+                GD.Print("MULTI_TARGETS_PASS"); GetTree().Quit(); return;
+            }
+            await PrepareMultiReview();
             if (_captureMode.EndsWith("-review", StringComparison.Ordinal)) { GD.Print("MULTI_TARGETS_REVIEW_READY: published actions and clearly marked training fixtures."); return; }
             var slot = MultiUpFront.Single(); var ids = slot.CardIds; var version = View.Version;
             SupportRequire(ids.Length == 4 && _paymentConfirm!.Disabled && !MultiSelectedIds.Any(), "Required targets defaulted or fixture candidates wrong");

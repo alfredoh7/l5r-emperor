@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace L5R.Core;
 
 // Deck search (issue #312): ONE reusable "search a deck, select a legal card, show it, apply the effect,
@@ -36,6 +38,8 @@ public static class SearchDeck
     /// <summary>The searcher's own hand (Emperor Edition follow-ups, issue #498: Asako Chukage's "search your discard pile, then hand, then deck"). Known to its owner, listed like a discard pile, never
     /// shuffled; a card taken from it leaves the hand by changing zone (put into play), or simply stays there (put into the hand).</summary>
     public const string Hand = "Hand";
+    // P20 (SearchExtensions.cs, issue #728): the searcher's own province cards (face-up or face-down: only the searcher sees the list), and either player's discard piles.
+    public const string OwnProvinces = "OwnProvinces", AnyPlayerFateDiscard = "AnyPlayerFateDiscard", AnyPlayerDynastyDiscard = "AnyPlayerDynastyDiscard";
 }
 
 /// <summary>What happens to the chosen card once it has been shown (the card's own printed effect).</summary>
@@ -67,6 +71,9 @@ public static class SearchEffect
     public const string RingIntoPlayOrHand = "ring-into-play-or-hand";
     /// <summary>In Search of Guidance (issue #503): "Refill this province with him, face-up" -- the found card is held until the revealed Event leaves its province, then refills it face-up (EmperorP6.cs).</summary>
     public const string RefillSourceProvinceFaceUp = "refill-source-province-face-up";
+    // P20 (SearchExtensions.cs, issue #728). See that file for each disposition.
+    public const string AttachToPersonality = "attach-to-personality", Bottom = "bottom", CelestialIntoPlay = "celestial-into-play", RecruitFromProvinceIgnoringCosts = "recruit-from-province-ignoring-costs",
+        PlayAsAdditionalAction = "play-as-additional-action", Discard = "discard", RemoveFromGame = "remove-from-game";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -78,6 +85,8 @@ public static class SearchStage
     public const string ChooseDiscard = "ChooseDiscard";     // PendingChoice "searchDiscard"
     public const string ChoosePayment = "ChoosePayment";     // PendingChoice "searchRecruitPay" (issue #476 batch 6, Versatile Farm)
     public const string ChooseDestination = "ChooseDestination"; // PendingChoice "searchDestination" (issue #498: "put it into play or your hand")
+    public const string ChooseAttachTarget = "ChooseAttachTarget"; // PendingChoice "searchAttachTarget" (P20: AttachToPersonality's follow-up target slot)
+    public const string OtherPlayerChooses = "OtherPlayerChooses"; // PendingChoice "shownChoice" (P25), decided by the other player (P20)
 }
 
 /// <summary>One numeric condition on a candidate card (Focus Value, Gold Cost, ...). Stat is one of
@@ -98,7 +107,9 @@ public sealed record SearchCriteria(string Noun, CardType[]? Types = null, strin
     bool BattleStrategy = false,
     // "A Strategy with a Political ability" (Gaining Advantage, issue #503): one of the card's printed actions is an action with this keyword (EmperorP2Search.cs).
     // "A card with a Recon ability" (Daidoji Akeha, issue #503): one of the card's printed actions carries the keyword (its own tag, or the card's keyword).
-    string? AbilityKeyword = null);
+    string? AbilityKeyword = null,
+    // P20 (SearchExtensions.cs): "a Gold-producing Holding" (HasGoldProducingTrait: a printed Gold production or a Gold-producing trait), and "cards with different titles" (a condition on the SET picked).
+    bool GoldProducing = false, bool DifferentTitles = false);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -113,7 +124,10 @@ public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Deck
     // opened (and its cards shown) only when the current one held no qualifying card and the searcher goes on; a deck that was searched is reshuffled, found or not, as the search leaves it.
     bool Ordered = false,
     // Asahina Kitiaru - exp (issue #679, Mendon's ruling): "Show it and put it in your hand. Discard a card." -- the card just found MAY be the card discarded (a ToHandThenDiscard search otherwise excludes it, issue #368).
-    bool DiscardMayBeFound = false);
+    bool DiscardMayBeFound = false,
+    // P20 (SearchExtensions.cs, issue #728). ChooseOne: the searcher picks the source (the default of a spec with several; Ordered still forces the first, R-011). SelectCount: take between Min and Max cards
+    // (null: exactly one, as always). OtherPlayerChooses: after the picks are shown the OTHER player chooses one of them.
+    bool ChooseOne = false, SearchSelectCount? SelectCount = null, SearchOtherChoice? OtherPlayerChooses = null);
 
 public static class SearchCatalog
 {
@@ -124,7 +138,7 @@ public static class SearchCatalog
     [
         new(SearchDeck.Dynasty, new("Region", [CardType.Region]), SearchEffect.AttachRegion),
         new(SearchDeck.Fate, new("Terrain", [CardType.Strategy], ["Terrain"]), SearchEffect.ToHandThenDiscard)
-    ]);
+    ], DiscardMayBeFound: true); // Mendon, issue #757: the Terrain just found may be the card discarded (reverses #368).
 
     /// <summary>Imperial Gift (oracle-l5r-3694): "Gain 2 Honor and search your Fate deck for an Item, show it, and
     /// put it into your hand." The Honor is the Event's own step; this is the search half.</summary>
@@ -229,6 +243,19 @@ public sealed class PendingSearch
     public int? ResumeTo { get; set; }
     /// <summary>Issue #503 (Delving into History): a card qualifies only if it shares one of these keywords (the performer's); null for no such condition.</summary>
     public string[]? SharedKeywords { get; set; }
+    // P20 (SearchExtensions.cs, issue #728). All omitted from a saved game until a search uses them; 22800-22899 is reserved for P20.
+    /// <summary>The instances taken by a multi-card selection, in the order picked (every one is shown first).</summary>
+    [JsonPropertyOrder(22800)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? PickedCardIds { get; set; }
+    /// <summary>ShownCard.Sequence of each picked card, parallel to <see cref="PickedCardIds"/>: what the other player chooses among.</summary>
+    [JsonPropertyOrder(22801)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<int>? ShownSequences { get; set; }
+    /// <summary>The cards put on the bottom of the searched deck once it has been shuffled (SearchEffect.Bottom).</summary>
+    [JsonPropertyOrder(22802)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? PutOnBottomIds { get; set; }
 }
 
 /// <summary>One entry of the public, append-only record of cards shown to the other player. Deliberately holds
@@ -255,14 +282,19 @@ public sealed record SearchEntryView(string DefinitionId, CardDefinition Definit
 /// Optional), ChooseProvince / ChooseDiscard (Selected is the shown card; the choices are ordinary actions).</summary>
 public sealed record SearchView(string Stage, string SourceCardId, string SourceName, string Label, string Prompt,
     string? Deck, string? Criteria, int CardsRemaining, SearchDeckChoiceView[]? DeckChoices, SearchEntryView[]? Entries,
-    bool Optional, bool CanPass, CardDefinition? Selected);
+    bool Optional, bool CanPass, CardDefinition? Selected,
+    // P20 (SearchExtensions.cs): how many cards the searcher takes (a selection of several), whether their titles must differ, and the name of a place that is not a deck. Omitted from the view for a classic search.
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? MinSelect = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? MaxSelect = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? DifferentTitles = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Place = null);
 
 public sealed partial class MatchEngine
 {
     /// <summary>The Choice of a "passSearch" that ends an ordered search where no card qualified, instead of going on to the next place.</summary>
     public const string SearchStopChoice = "stop";
 
-    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard" or "searchRecruitPay" or "searchDestination";
+    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard" or "searchRecruitPay" or "searchDestination" or "searchAttachTarget";
 
     private sealed record SearchGroup(string DefinitionId, CardInstance Card, int Count, bool Eligible, string? Reason);
 
@@ -276,11 +308,13 @@ public sealed partial class MatchEngine
         SearchDeck.FateDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.FateDiscard).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
         SearchDeck.DynastyDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone is Zone.DynastyDiscard or Zone.Dead).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
         SearchDeck.Hand => player.Hand.ToList(), // issue #498: a copy, like a discard pile's -- a card leaves the hand by changing zone
+        SearchDeck.OwnProvinces or SearchDeck.AnyPlayerFateDiscard or SearchDeck.AnyPlayerDynastyDiscard => SearchExtList(player, deck), // P20 (SearchExtensions.cs): copies, like a discard pile's
         _ => player.FateDeck
     };
 
     // "your Fate deck" / "your Fate discard pile": how a searched place is named in prompts and the log.
-    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : deck == SearchDeck.DynastyDiscard ? "Dynasty discard pile" : deck == SearchDeck.Hand ? "hand" : $"{deck} deck";
+    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : deck == SearchDeck.DynastyDiscard ? "Dynasty discard pile" : deck == SearchDeck.Hand ? "hand"
+        : SearchExtPlace(deck) ?? $"{deck} deck";
 
     private SearchSpec SearchSpecOf(PendingSearch search) => SearchCatalog.All.TryGetValue(search.SearchId, out var spec) ? spec
         : throw new RuleViolation("Unknown search.");
@@ -295,6 +329,7 @@ public sealed partial class MatchEngine
     private void BeginSearch(SearchSpec spec, CardInstance source, int playerId, string origin, IEnumerable<string>? bowedBefore = null)
     {
         var player = Player(playerId);
+        ValidateSearchSpec(spec); // P20 (SearchExtensions.cs): a spec combining things the flow cannot do is refused before anything changes
         var search = new PendingSearch { SearchId = spec.Id, SourceCardId = source.Id, PlayerId = playerId, Origin = origin, BowedBefore = bowedBefore?.ToList(), Command = _runningCommand };
         _state.PendingSearch = search;
         _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
@@ -329,6 +364,7 @@ public sealed partial class MatchEngine
             case SearchStage.ChooseDiscard: ChooseSearchDiscard(search, command); break;
             case SearchStage.ChoosePayment: ChooseSearchRecruitPayment(search, command); break; // ShadowsEmbraceBatch6.cs
             case SearchStage.ChooseDestination: ChooseSearchDestination(search, command); break; // EmperorFollowupsSearch.cs (issue #498)
+            case SearchStage.ChooseAttachTarget: ChooseSearchAttachTarget(search, command); break; // SearchExtensions.cs (P20)
             default: throw new RuleViolation("Unknown search stage.");
         }
     }
@@ -352,7 +388,7 @@ public sealed partial class MatchEngine
             // Pass is legal ONLY when nothing qualifies (or the printed text says "you may search"): a player
             // cannot skip a card they are obliged to take -- in an ordered search ("your discard pile, then Fate deck") too: he takes it from the first place found (Mendon's R4 ruling).
             var nextPlace = NextOrderedSearchPlace(spec, option);
-            Require(!anyEligible || spec.Optional, "A card in the deck qualifies, so you must choose one.");
+            Require(!anyEligible || spec.Optional || SearchMayTakeNone(spec), "A card in the deck qualifies, so you must choose one.");
             // Nothing qualified here: he may search the next named place (the default of a pass), or stop -- "stop" is the pass's Choice.
             if (!anyEligible && nextPlace is not null && command.Choice != SearchStopChoice)
             {
@@ -367,6 +403,7 @@ public sealed partial class MatchEngine
             FinishSearch(search);
             return;
         }
+        if (spec.SelectCount is not null) { SelectManySearch(search, spec, option, groups, command); return; } // P20 (SearchExtensions.cs): a selection of several cards
         Require(command.Type == "selectSearchCard" && !string.IsNullOrEmpty(command.Choice), "Choose a card from the deck list.");
         var group = groups.FirstOrDefault(g => g.DefinitionId == command.Choice);
         Require(group is not null, "That card is not in the deck being searched.");
@@ -384,7 +421,7 @@ public sealed partial class MatchEngine
                 break;
             case SearchEffect.ToHandThenDiscard:
                 MoveSearchedCardToHand(search, card);
-                // Mendon's ruling (issue #368): the Terrain that was just found cannot be the card discarded to its own effect (it is not
+                // Mendon's ruling (issue #368, reversed for Ikoma Shizuka in #757; a spec's DiscardMayBeFound lifts it): the card just found cannot be the card discarded to its own effect (it is not
                 // "a card in your hand" for this purpose). When no OTHER card is in the hand the discard cannot be satisfied: nothing is
                 // discarded and there is no error -- the search simply carries on to its shuffle.
                 if (SearchDiscardCandidates(search).Length == 0)
@@ -426,7 +463,7 @@ public sealed partial class MatchEngine
                 FinishSearch(search);
                 break;
             default:
-                if (!SearchPlayApplyEffect(search, card, option.Effect) && !WlItemsMiscApplySearchEffect(search, card, option.Effect)) throw new RuleViolation("Unknown search effect."); // issue #667 (SearchPlayRosary.cs): a Celestial put into play with no province; issue #674 (WlItemsMiscEvents.cs): Changing the Game's removal for Honor
+                if (!SearchPlayApplyEffect(search, card, option.Effect) && !WlItemsMiscApplySearchEffect(search, card, option.Effect) && !SearchExtApplyEffect(search, card, option.Effect) && !Wave739ApplySearchEffect(search, card, option.Effect)) throw new RuleViolation("Unknown search effect."); // issue #667 (SearchPlayRosary.cs): a Celestial put into play with no province; issue #674 (WlItemsMiscEvents.cs): Changing the Game's removal for Honor
                 break;
         }
     }
@@ -532,6 +569,7 @@ public sealed partial class MatchEngine
             var deck = SearchDeckList(Player(search.PlayerId), search.Deck!);
             if (deck.Remove(topId)) { deck.Insert(0, topId); Emit("searchedCardOnTop", $"{Player(search.PlayerId).Name} put the found card on top of their {SearchPlace(search.Deck!)} after shuffling.", search.PlayerId); }
         }
+        SearchExtPutOnBottom(search); // P20: SearchEffect.Bottom, after the shuffle
         _state.PendingSearch = null;
         if (ContinueWisdomGained(search)) return; // issue #622 (IvorySpells.cs): the other player's search, or the Event's end.
         if (search.EnteredCardId is { } enteredId && _state.WinnerId is null)
@@ -578,7 +616,7 @@ public sealed partial class MatchEngine
     /// server restart. Announces only that it happened.</summary>
     private void ShuffleDeck(PlayerState player, string deck)
     {
-        if (deck is SearchDeck.FateDiscard or SearchDeck.DynastyDiscard or SearchDeck.Hand) return; // a discard pile is not shuffled (issue #476 batch 6), nor is a hand (issue #498)
+        if (deck is SearchDeck.FateDiscard or SearchDeck.DynastyDiscard or SearchDeck.Hand or SearchDeck.OwnProvinces or SearchDeck.AnyPlayerFateDiscard or SearchDeck.AnyPlayerDynastyDiscard) return; // a discard pile is not shuffled (issue #476 batch 6), nor is a hand (issue #498)
         var random = new StableRandom(_state.RngState);
         random.Shuffle(SearchDeckList(player, deck));
         _state.RngState = random.State;
@@ -600,6 +638,7 @@ public sealed partial class MatchEngine
                 var (eligible, reason) = SearchEligibility(option.Criteria, representative, search.GoldLimit);
                 if (eligible && search.FocusBelow is int below && SearchStat(representative, "Focus") >= below) (eligible, reason) = (false, $"Focus {SearchStat(representative, "Focus")}, needs < {below}");
                 (eligible, reason) = P2SearchFilter(search, representative, eligible, reason); // issue #503: Delving into History
+                (eligible, reason) = SearchExtGate(search, option, representative, eligible, reason); // P20 (SearchExtensions.cs): what the disposition can do with a card from this place
                 return new SearchGroup(g.Key, representative, g.Count(), eligible, reason);
             })
             .OrderBy(g => (int)Definition(g.Card).Type).ThenBy(g => Definition(g.Card).Name, StringComparer.Ordinal).ThenBy(g => g.DefinitionId, StringComparer.Ordinal).ToList();
@@ -614,6 +653,7 @@ public sealed partial class MatchEngine
         if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
         if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen") && !Keyword(card, "Terrain")) return (false, notA); // a Terrain's printed "Battle:" is how it is played (issue #622)
         if (criteria.AbilityKeyword is { } abilityKeyword && !HasAbilityWithKeyword(card, abilityKeyword)) return (false, notA); // issue #503: Gaining Advantage
+        if (criteria.GoldProducing && !HasGoldProducingTrait(def)) return (false, notA); // P20
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");
@@ -667,11 +707,11 @@ public sealed partial class MatchEngine
         var remaining = SearchDeckList(player, search.Deck!).Count;
         var selected = search.SelectedCardId is null ? null : Copy(Definition(Card(search.SelectedCardId)));
         if (search.Stage != SearchStage.Select)
-            return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null, null, spec.Optional, false, selected);
+            return SearchExtView(spec, option, new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null, null, spec.Optional, false, selected));
         var groups = SearchGroups(search);
-        return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null,
+        return SearchExtView(spec, option, new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null,
             groups.Select(g => new SearchEntryView(g.DefinitionId, Copy(Definition(g.Card)), g.Count, g.Eligible, g.Reason)).ToArray(),
-            spec.Optional, spec.Optional || groups.All(g => !g.Eligible), null);
+            spec.Optional || SearchMayTakeNone(spec), spec.Optional || SearchMayTakeNone(spec) || groups.All(g => !g.Eligible), null));
     }
 
     /// <summary>The public shown-cards record, identical in both players' views.</summary>
@@ -696,6 +736,9 @@ public sealed partial class MatchEngine
             case SearchStage.ChooseDeck:
                 foreach (var d in spec.Decks)
                     yield return new("chooseSearchDeck", $"Search your {SearchPlace(d.Deck)} for {Article(d.Criteria.Noun)}", true, null, Command("chooseSearchDeck", choice: d.Deck));
+                break;
+            case SearchStage.Select when spec.SelectCount is not null: // P20 (SearchExtensions.cs): a selection of several cards
+                foreach (var many in SearchSelectManyActions(search, spec, SearchGroups(search), playerId)) yield return many;
                 break;
             case SearchStage.Select:
                 var groups = SearchGroups(search);
@@ -729,6 +772,9 @@ public sealed partial class MatchEngine
                 break;
             case SearchStage.ChooseDestination:
                 foreach (var option in SearchDestinationActions(search, playerId)) yield return option; // EmperorFollowupsSearch.cs (issue #498)
+                break;
+            case SearchStage.ChooseAttachTarget:
+                foreach (var option in SearchAttachActions(search, playerId)) yield return option; // SearchExtensions.cs (P20)
                 break;
         }
     }

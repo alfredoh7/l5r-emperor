@@ -34,7 +34,7 @@ internal static class WlPersGates2Tests
     public static void Run(TestRunner runner) => runner.Run("wl-pers-gates-2", [
         ("Published shape: the thirteen Personalities carry their scans' stats, keywords, text, entry Honor loss and abilities, name Gates of Chaos, ship art and are in personality-wave-134's manifest", PublishedShape),
         ("Mirumoto Katagi - exp: equips a non-Unique Weapon from your own discard pile as a Battle action, paying its cost; not a Unique or another player's Weapon, not away from the battle", KatagiEquip),
-        ("Moshi Rukia - exp: bows an enemy card without attachments, destroying it instead when it is an attachment; a card with attachments or your own is refused", RukiaBow),
+        ("Moshi Rukia - exp: bows an enemy card without attachments, bowing it, then destroying it when it is an attachment; a card with attachments or your own is refused", RukiaBow),
         ("Shiba Tsurao: -2F to an enemy Personality or Follower; refuses your own cards", TsuraoWeaken),
         ("Shinjo Yoshie: -3F to an enemy Infantry (non-Cavalry) Personality or Follower; she enters play for 1 Honor and draws (Destined)", YoshieWeaken),
         ("Shosuro Nigawa and Utaku Sayaka: Invest 3 as they enter play gives two +1F tokens; declining or an unpaid Invest changes nothing", InvestTokens),
@@ -132,6 +132,14 @@ internal static class WlPersGates2Tests
         var kill = MatchEngine.FromTestState(s);
         Accept(kill, Offer(kill, 0, "hiroto-bow", rukia.Id, follower.Id)); CloseWindows(kill);
         Check(kill.State.Cards[follower.Id].Zone != Zone.Attached && !kill.State.Cards[host.Id].Bowed, "an attachment is destroyed; its host is untouched");
+        // #748: the bow and the destruction are separate effects. A destruction that is negated (Gift Armor protects itself) still leaves the attachment bowed.
+        var gift = CardCatalog.Cards.Values.First(c => c.Effect == "gift-armor");
+        var s2 = Table(Phase.Battle, 0);
+        var rukia2 = Add(s2, Rukia, 0, Zone.Battlefield, province: 0);
+        var host2 = Add(s2, Lion, 1, Zone.Battlefield, province: 0); var armor = Add(s2, gift.Id, 1, Zone.Attached, province: 0, parent: host2.Id);
+        var keep = MatchEngine.FromTestState(s2);
+        Accept(keep, Offer(keep, 0, "hiroto-bow", rukia2.Id, armor.Id)); CloseWindows(keep);
+        Check(keep.State.Cards[armor.Id].Zone == Zone.Attached && keep.State.Cards[armor.Id].Bowed, "a negated destruction does not undo the attachment's bow");
     }
 
     // ---- Tsurao, Yoshie ---------------------------------------------------------------------------------------------------------------------------------------------------

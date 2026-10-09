@@ -1,0 +1,207 @@
+{
+  "Profile": "personality-wave-207",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #735.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10665",
+      "Name": "Chuda Hikano",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Hikano enters play, lose 1 Honor.\nHome Battle, Bow this card: Straighten your target Oni. (Home actions may be taken from home.)\nMaho Limited: Destroy a target Ikoma Ayumu. Destroy Hikano.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10665.jpg",
+      "Keywords": [
+        "Shadowlands",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-hikano-straighten",
+        "w735-hikano-maho"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10321",
+      "Name": "Chun",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Human Personalities in Chun's army have Naval.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10321.jpg",
+      "Keywords": [
+        "Naval",
+        "Captain of The Tachikaze",
+        "Mercenary"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w735-chun"
+    },
+    {
+      "Id": "oracle-l5r-10838",
+      "Name": "Daidoji Gensai",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Battle: If Gensai would be opposed, move him to the current battlefield. After he moves, you may discard a card to make a Ranged Attack with strength equal to the card's Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10838.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-gensai-move",
+        "w735-gensai-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10283",
+      "Name": "Doji Tatsuzo",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target a Personality: While he is at the current battlefield (later this turn), you may take a Battle action even if you control no units there. After that action ends, end this action's effects on him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10283.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-tatsuzo-grant"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10502",
+      "Name": "The Shakash",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While you control three or fewer Personalities, your other Nonhuman Personalities and Followers enter play for 1 less Gold.\nHome Battle: Move your target Personality at any location to The Shakash's location. (Home actions may be used from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10502.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Naga",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-shakash-move"
+      ],
+      "Effect": "w735-shakash"
+    },
+    {
+      "Id": "oracle-l5r-10873",
+      "Name": "The Sorrow",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While you control a Courtier, The Sorrow's printed ability is Battle/Limited.\nBattle: Give a target Personality -4F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10873.jpg",
+      "Keywords": [
+        "Experienced Bayushi Tenzan",
+        "Loyal",
+        "Unique",
+        "Magistrate",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-sorrow-battle",
+        "w735-sorrow-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10512",
+      "Name": "Tsiang, the Benevolent",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tsiang enters play ignoring Gold Cost if you control the Ring of Water.\nHome Water Battle, Bow this card: Straighten one or two target cards in units. (Home actions may be used from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10512.jpg",
+      "Keywords": [
+        "Unique",
+        "Monk",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-tsiang-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
