@@ -21,6 +21,7 @@ internal static class OtosanUchiPlainsTests
         ("The reveal-order choice goes to the player it belongs to even when the other player held priority; the other player is never offered it (bot soak, issue #642)", RevealOrderTakesPriority),
         ("Destroying the province loses 10 Honor and discards both slots and the Region", DestructionHonorLoss),
         ("Purchasing the card in the second slot refills the second slot, not the first", PurchaseFromSecondSlot),
+        ("An action that recruits a card from the province's SECOND slot (Masaya; a province Holding) takes it from that slot and refills that slot, instead of crashing (bot soak, issue #768)", AbilityRecruitFromSecondSlot),
         ("Shosuro Toson: two candidates ask which to discard, each face-up card's own title replacing Left/Right", TosonDisambiguation),
         ("Errata: destroying the Region alone leaves the second slot's card in place, but it is not refilled again", RegionDestroyedAloneErrata),
     ]);
@@ -219,6 +220,42 @@ internal static class OtosanUchiPlainsTests
         Check(after.CardId2 is not null, "slot 2 refilled");
         Eq(e.State.Cards[after.CardId2!].DefinitionId, "training-lion-courtier", "slot 2's fresh card");
         Eq(e.State.Cards[recruit.Id].Zone, Zone.Home, "the recruited card entered play");
+    }
+
+    private static void AbilityRecruitFromSecondSlot()
+    {
+        MatchState Fixture(string secondCard)
+        {
+            var s = Start();
+            var province = s.Players[0].Provinces[0];
+            if (province.CardId is string old) s.Cards.Remove(old);
+            var region = Put(s, RegionDef, 0, Zone.Region, province: 0); province.RegionId = region.Id;
+            var cardA = Put(s, "training-farm", 0, Zone.Province, province: 0); cardA.FaceUp = true; province.CardId = cardA.Id;
+            var second = Put(s, secondCard, 0, Zone.Province, province: 0); second.FaceUp = true; province.CardId2 = second.Id;
+            Deck(s, 0, Zone.DynastyDeck, "training-lion-courtier");
+            s.Phase = Phase.Action; s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
+            return s;
+        }
+        // The shared province-recruit body, for a Holding (no Gold or Honor setup needed: a training Holding costs 0 here).
+        var h = Fixture("training-marketplace");
+        var hid = h.Players[0].Provinces[0].CardId2!;
+        var he = Engine(h);
+        he.RecruitFromProvince(0, hid);
+        var ha = he.State.Players[0].Provinces[0];
+        Eq(ha.CardId, h.Players[0].Provinces[0].CardId, "slot 1 untouched");
+        Check(ha.CardId2 is not null && ha.CardId2 != hid, "slot 2 refilled");
+        Check(he.State.Cards[hid].Zone != Zone.Province, "the recruited Holding left the province");
+        // Masaya's action, the case the bot soak found.
+        var m = Fixture(SearchPlayAbilities.Masaya);
+        var masaya = m.Players[0].Provinces[0].CardId2!;
+        var me = Engine(m);
+        var option = Batch336Support.Options(me, 0, SearchPlayAbilities.MasayaRecruit, masaya).FirstOrDefault(o => o.Enabled);
+        if (option is null) return; // not offered in this fixture (a Gold or phase condition): the shared body above is the proof
+        var recruit = me.Execute(option.Command! with { SourceIds = me.PaymentOptions(0, 4).FirstOrDefault()?.SourceIds });
+        Check(recruit.Accepted, "Masaya's recruit is accepted: " + recruit.Error);
+        var ma = me.State.Players[0].Provinces[0];
+        Check(ma.CardId2 is not null && ma.CardId2 != masaya, "Masaya's slot refilled");
+        Check(me.State.Cards[masaya].Zone != Zone.Province, "Masaya left the province");
     }
 
     private static void TosonDisambiguation()

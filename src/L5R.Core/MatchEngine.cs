@@ -621,11 +621,11 @@ public sealed partial class MatchEngine
     // like every other Action-phase action).
     private bool BringProvincePersonalityIntoPlay(PlayerState player, CardInstance card, PurchaseQuote quote, int? battlefield, string via, int? proclaimResumesTo = null)
     {
-        var province = player.Provinces.Single(p => p.CardId == card.Id);
-        province.CardId = null;
+        var (province, slot) = FindProvinceSlot(player, card.Id); // a card in a two-slot province's second slot (Plains of Otosan Uchi) leaves that slot, and that slot is refilled (bot soak, issue #768)
+        ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an ability recruit from a province "enters play from a province" too (Soshi Kodanshi, issue #622), as Purchase and RecruitReserve record
         EnterPlayFromRecruit(player, card, battlefield, via);
-        Refill(player, province);
+        RefillProvinceSlot(player, province, slot);
         return OpenRecruitEntryWindows(player, card, quote.ProclaimEligible, proclaimResumesTo);
     }
 

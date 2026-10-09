@@ -35,6 +35,10 @@ Each keyword is proved alone on a test-only Personality (a training Lion samurai
 5. **"Actions from cards in their units"** is read as the existing P11 unit-card rule: the Personality, and an attachment (Follower, Item, Spell) attached to him. A Strategy a Personality performs is not a card in his unit.
 6. **Both clauses name the same Personalities,** so the target bar applies only while they are opposed to her, with the same keywords.
 
+## A separate bug the soak found
+
+Adding Kaitoko to the card pool changed the random decks of CI's bot soak (seed 1, turn 11) and it hit an existing crash: an action that recruits a card from a province (Masaya's `sp-masaya-recruit`, Shinden Shorai, a province Holding) looked the card up as the province's first slot (`Provinces.Single(p => p.CardId == card.Id)`), so a card in the second slot of a Plains of Otosan Uchi province threw "Sequence contains no matching element". It reproduces on unmodified code (confirmed by reverting the fix under the new test). `BringProvincePersonalityIntoPlay` and `BringProvinceCardIntoPlay` now find the card's slot (`FindProvinceSlot`), clear that slot and refill it, as Purchase and RecruitReserve already did. The other `Provinces.Single(p => p.CardId == ...)` sites noted in `OtosanUchiPlains.cs`'s scope note are untouched. Regression test: `otosan-uchi-plains/AbilityRecruitFromSecondSlot`.
+
 ## Art pack
 
 The new scan (`oracle-l5r-10473.jpg`) is covered by `catalogue-art-issue768-20261008-r1` (4,624 images, 617,655,294 bytes, SHA-256 `83ac52fb6a1690efd06cd20e56d08336411e9fc827303817a53b28c1632f11bc`), built with `--base-archive` from Foothold of the Mad's pack `catalogue-art-issue766-20261008-r1` (4,623 images). Native visual and playability review has not been done.

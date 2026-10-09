@@ -80,11 +80,11 @@ public sealed partial class MatchEngine
     // A province Holding (or other non-Personality) recruited by an action: the same sequence without a battlefield or a Proclaim.
     private bool BringProvinceCardIntoPlay(PlayerState player, CardInstance card, PurchaseQuote quote, bool bowed)
     {
-        var province = player.Provinces.Single(p => p.CardId == card.Id);
-        province.CardId = null;
+        var (province, slot) = FindProvinceSlot(player, card.Id); // either slot of a two-slot province (bot soak, issue #768)
+        ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index;
         EnterPlayFromRecruit(player, card, null, Definition(card).Name);
-        Refill(player, province);
+        RefillProvinceSlot(player, province, slot);
         return OpenRecruitEntryWindows(player, card, false, null);
     }
 
