@@ -226,6 +226,35 @@ public partial class Main
         SupportRequire(View.PendingChoice is null, "Explicit continuations did not finish the engine's remaining reaction windows");
     }
 
+    // Issue #789: hovering a sidebar option marks the table copy it would act through, and hovering that copy lights the option.
+    private async Task CheckReactionTableLink(ReactionCaptureFixture fixture)
+    {
+        // One option per performing Scout is enough: the engine may offer several (for example, the Follower from hand or from the discard pile) for each.
+        var options = StabilizationButtons(_inspector).Where(b => b.IsVisibleInTree() && b.HasMeta("reaction_performer") && b.GetMeta("reaction_performer").AsString().Length > 0)
+            .GroupBy(b => b.GetMeta("reaction_performer").AsString()).Select(g => g.First()).ToArray();
+        SupportRequire(options.Length == 2, $"Forest Cover does not list both performing Scouts as sidebar options (found {options.Length})");
+        async Task Point(Vector2 p) { PushCaptureMouse(new InputEventMouseMotion { Position = p, GlobalPosition = p }); await EventFrames(6); }
+        foreach (var option in options)
+        {
+            var performer = option.GetMeta("reaction_performer").AsString();
+            for (Node? parent = option.GetParent(); parent is not null; parent = parent.GetParent())
+                if (parent is ScrollContainer scroll) scroll.EnsureControlVisible(option);
+            await EventFrames(5);
+            await Point(option.GetGlobalTransformWithCanvas() * (option.Size / 2));
+            // An option may also name its target or source card; the point is that the OTHER identical Scout is never marked.
+            var otherScout = options.Select(o => o.GetMeta("reaction_performer").AsString()).Single(id => id != performer);
+            SupportRequire(_tiles.Where(t => t.Card.Id == performer).All(t => t.ForcedHover) && _tiles.Where(t => t.Card.Id == otherScout).All(t => !t.ForcedHover),
+                "Hovering a Forest Cover option did not mark its performing Scout, or marked the other identical Scout, on the table");
+            await Point(new Vector2(4, 4));
+            SupportRequire(_tiles.All(t => !t.ForcedHover), "Leaving a Forest Cover option left a table card marked");
+            var tile = _tiles.Single(t => t.Card.Id == performer);
+            await Point(ScreenCenter(tile)); await EventFrames(6);
+            SupportRequire(option.Modulate != Colors.White, "Hovering the performing Scout on the table did not light its option");
+            await Point(new Vector2(4, 4));
+            SupportRequire(option.Modulate == Colors.White, "Leaving the performing Scout left its option lit");
+        }
+    }
+
     private async Task SwitchReactionCaptureSeat()
     {
         _session.SwitchPracticeSeat(); await EventFrames(16);
@@ -351,6 +380,7 @@ public partial class Main
                 "Nested responses did not restore and finish the original action");
 
             fixture = ReactionCaptureForest(seat); await PrepareReactionCapture(fixture, seat); CheckReactionCaptureLayout(); before = View.Version;
+            await CheckReactionTableLink(fixture);
             SupportRequire(Actions.Where(a => a.Enabled && a.Command?.AbilityId == "wl-forest-cover-attach").Select(a => a.Command!.PerformerId).Distinct().Count() == 2,
                 "The real Forest Cover fixture does not offer both performing Scouts");
             await ReactionNativeClick(ReactionOption(fixture.Source, "wl-forest-cover-attach", fixture.SecondSource));

@@ -503,7 +503,7 @@ public partial class Main
                 SelectReactionSource(representative); Choose(representative);
             });
             grouped.SetMeta("alternative_cost_group", key); grouped.Disabled = !representative.Enabled || !DecisionCanSubmit;
-            IdentifyReactionOption(grouped, representative);
+            IdentifyReactionOption(grouped, representative); LinkToTable(grouped, ActionCards(representative));
             grouped.TooltipText = representative.Reason ?? cost.ActionLabel;
             container.AddChild(grouped);
             if (!representative.Enabled) container.AddChild(Palette.Wrapped(representative.Reason ?? "No available way to pay.", 15, Palette.PaperDim));
@@ -524,7 +524,7 @@ public partial class Main
             else if (option.Command is { } command) _ = Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
         button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;
-        IdentifyReactionOption(button, option);
+        IdentifyReactionOption(button, option); LinkToTable(button, ActionCards(option));
         button.TooltipText = RulesHelp.Tooltip((option.Reason is { } reasonText ? "Unavailable: " + reasonText + "\n\n" : option.Label + "\n\n") + RulesHelp.ActionGuide(option.Type));
         button.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         button.ClipText = true; container.AddChild(button);

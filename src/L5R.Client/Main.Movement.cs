@@ -53,7 +53,7 @@ public partial class Main
         if (source?.Definition is not null)
         {
             var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 14); _inspector.AddChild(row);
-            var face = new DecisionSourceFace(source, 180); row.AddChild(face);
+            var face = new DecisionSourceFace(source, 180); row.AddChild(face); LinkToTable(face, source.Id);
             face.Pressed += () => { var (_, body) = Dialog(source.Definition.Name, 680, 720); body.AddChild(CardPreview.Face(source, 510)); body.AddChild(Palette.Wrapped(source.Definition.Text, 17)); };
             var words = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; row.AddChild(words);
             words.AddChild(Palette.Wrapped(source.Definition.Name, 21, Palette.Gold));
