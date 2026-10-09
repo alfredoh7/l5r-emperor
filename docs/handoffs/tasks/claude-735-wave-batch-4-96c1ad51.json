@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wave batch 4 (#735): 16 keyword-rule, Home and Tireless cards wired on P10/P16/P2/P12/P24 (personality-wave-207, follower-wave-95, spell-wave-114, strategy-wave-191, celestial-wave-69); Isawa Tsumaro and Blood of Isawa's Tribe deferred with blocker notes. Shared edits: presence waiver and lone discard cost option in CardAbilities.cs, type-only stored player immunities in ImmunityLedger.cs, one battle-end call in MatchEngine.cs. Art pack catalogue-art-issue735-20261008-r1 extends catalogue-art-issue741-20261008-r1 (4,603 images).",
+  "validation": "bash tools/check.sh --skip-client exit 0 (All requested checks passed); wave-735 suite 17/17; comment lint and changed-C# formatting clean; client not built or playtested",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-08-wave-batch-4-keyword-rules-home-and-tireless.md; Tsumaro and Blood deferred (see tools/content/pe_wave_735_blockers.json); no native playtest",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/735",
+  "branch": "claude/735-wave-batch-4",
+  "updated": "2026-10-08T17:55:10.874106+00:00"
+}

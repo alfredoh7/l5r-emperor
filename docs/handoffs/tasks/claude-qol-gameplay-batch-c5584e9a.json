@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Gameplay QoL batch (#780): Border Keep refresh by clicking province cards, steady card hover, Strength in Terror optional attachment destroy as a real choice, bot takes it/defends last provinces/attacks in an Honor race, Region under its Dynasty card, hand-card click starts its flow, Gold kept when switching recruit mode, one clean Dynasty camera move. Ruling R-035: a performer may be bowed unless the card says unbowed.",
+  "validation": "Full tools/check.sh passed (exit 0, 'All requested checks passed'): Python suites, Core, AI (16/16 bot-policy), Server, client build, Godot import and smoke. Region layout, hover steadiness and the Dynasty camera glide were not seen in the running game; no Windows graphical playtest.",
+  "remaining": "Finish and record the full check.sh result; playtest Region strip placement, hover steadiness and Dynasty camera glide; rebase onto origin/main once Excel releases docs/CARD_INVENTORY.xlsx; push and open PR.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/780",
+  "branch": "claude/qol-gameplay-batch",
+  "updated": "2026-10-09T05:31:56.639028+00:00"
+}

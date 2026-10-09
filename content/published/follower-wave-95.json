@@ -1,0 +1,87 @@
+{
+  "Profile": "follower-wave-95",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #735.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10679",
+      "Name": "Elephant Cavalry",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Human. Cards in this unit have Cavalry.\nMelee and Ranged Attacks targeting cards in this unit have -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10679.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Elephant",
+        "Nonhuman"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "w735-elephant",
+      "AttachRequiresKeyword": "Human",
+      "AttackDefenseKind": "Both",
+      "AttackDefenseAmount": -2,
+      "AttackDefenseScope": "Unit"
+    },
+    {
+      "Id": "oracle-l5r-10900",
+      "Name": "Long-Range Scouts",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Battle/Open: Transfer this card to your target Personality. (Home actions may be used from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10900.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Scout"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w735-scouts-transfer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10339",
+      "Name": "Uji's Saboteurs",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Naval while he is Crane Clan.\nBattle: Target an enemy attachment: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10339.jpg",
+      "Keywords": [
+        "Scout"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w735-uji-destroy"
+      ],
+      "Effect": "w735-uji"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,32 @@
+{
+  "Profile": "strategy-wave-151",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #737.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10718",
+      "Name": "The Crystal Tears",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy a Terrain (if able). Put this Terrain into play. You may target and bow a Personality with 4 or more Force or a Fallen, Ninja, or Shadowlands card. After this Terrain is destroyed, straighten the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10718.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w737-crystal-tears-play"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

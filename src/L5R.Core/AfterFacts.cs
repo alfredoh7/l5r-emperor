@@ -94,19 +94,20 @@ internal static partial class EngineHooks
 /// <summary>The one-line registration API of the fact windows. Call from a feature's module initializer (priority at least 10000).</summary>
 internal static class FactRegistry
 {
-    private static readonly Dictionary<string, List<Func<bool>>> TraitKinds = [];
+    private static readonly Dictionary<string, List<Func<MatchEngine, bool>>> TraitKinds = [];
 
     /// <summary>A mandatory trait: <paramref name="trait"/> runs, with no window, once for each fact of <paramref name="kind"/>, before any Reaction to it. <paramref name="active"/> (default: always) says
-    /// whether the trait counts as watching the kind right now: a fact nobody watches is never recorded.</summary>
-    internal static void Trait(string hookId, int priority, string kind, Action<MatchEngine, FactRecord> trait, Func<bool>? active = null)
+    /// whether the trait counts as watching the kind right now: a fact nobody watches is never recorded. <paramref name="activeIn"/> says the same of one match (a trait of a card that is not in this match
+    /// watches nothing there), so a match without the card records nothing and serialises as before.</summary>
+    internal static void Trait(string hookId, int priority, string kind, Action<MatchEngine, FactRecord> trait, Func<bool>? active = null, Func<MatchEngine, bool>? activeIn = null)
     {
-        lock (TraitKinds) { if (!TraitKinds.TryGetValue(kind, out var list)) TraitKinds[kind] = list = []; list.Add(active ?? (() => true)); }
-        EngineHooks.FactTraits.Register(hookId, priority, (engine, fact) => { if (fact.Kind == kind && (active?.Invoke() ?? true)) trait(engine, fact); });
+        lock (TraitKinds) { if (!TraitKinds.TryGetValue(kind, out var list)) TraitKinds[kind] = list = []; list.Add(engine => (active?.Invoke() ?? true) && (activeIn?.Invoke(engine) ?? true)); }
+        EngineHooks.FactTraits.Register(hookId, priority, (engine, fact) => { if (fact.Kind == kind && (active?.Invoke() ?? true) && (activeIn?.Invoke(engine) ?? true)) trait(engine, fact); });
     }
 
-    internal static bool TraitWatches(string kind)
+    internal static bool TraitWatches(string kind, MatchEngine engine)
     {
-        lock (TraitKinds) return TraitKinds.TryGetValue(kind, out var list) && list.Any(active => active());
+        lock (TraitKinds) return TraitKinds.TryGetValue(kind, out var list) && list.Any(active => active(engine));
     }
 
     /// <summary>The condition of the Reaction <paramref name="abilityId"/> beyond "a fact of its kind, held by its owner": true when it may be used for this fact.</summary>
@@ -164,7 +165,7 @@ public sealed partial class MatchEngine
 
     private bool FactHasInterest(string kind)
     {
-        if (FactRegistry.TraitWatches(kind)) return true;
+        if (FactRegistry.TraitWatches(kind, this)) return true;
         var trigger = FactTriggers.For(kind);
         foreach (var card in _state.Cards.Values)
         {

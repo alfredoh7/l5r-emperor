@@ -401,7 +401,7 @@ public sealed partial class MatchEngine
             case EmperorP5ZoneAbilities.DoubtsRefill:
                 {
                     var emptied = new List<ProvinceState>();
-                    foreach (var card in (command.CardIds ?? []).Select(Card).ToArray())
+                    foreach (var card in OwnProvinceCardIds(player, command.CardIds ?? []).Select(Card).ToArray())
                     {
                         if (card.Zone != Zone.Province) continue;
                         var province = player.Provinces.Single(p => p.CardId == card.Id);

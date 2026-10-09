@@ -1,0 +1,85 @@
+{
+  "Profile": "spell-wave-106",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #741.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10708",
+      "Name": "Befriend the Tides",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Water Battle, Bow this card: Move this Shugenja from the current battlefield to an adjacent battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10708.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w741-tides-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10700",
+      "Name": "Constructing the Self",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Air Limited, Bow this card: This Spell may remain bowed. Create a 0F Illusion • Nonhuman • Cavalry • Shugenja Personality with this Shugenja's Chi and Personal Honor. After the next time this game this Spell straightens or leaves play, remove the Illusion from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10700.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w741-self-create"
+      ],
+      "Effect": "choose-straighten"
+    },
+    {
+      "Id": "oracle-l5r-10540",
+      "Name": "Koan's Whisper",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Void Limited, Bow this card: Reduce a Province's strength to 0. If its player has two or more Provinces, you may remove five Koan cards you control from the game to destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10540.jpg",
+      "Keywords": [
+        "Unique",
+        "Koan",
+        "Void"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w741-whisper-reduce",
+        "w741-whisper-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

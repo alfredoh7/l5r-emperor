@@ -1,0 +1,104 @@
+{
+  "Profile": "spell-wave-114",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #735.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10346",
+      "Name": "Anchored in Earth",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if this unit is not at the current battlefield, bow this card and target your defending Spirit: Give it +3F and Elite (Elite cards contribute Force even if bowed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10346.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w735-anchored-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10915",
+      "Name": "Chikushudo's Infusion",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has Cavalry while he is Shadowlands.\nOpen, Bow this card: Give a target Nonhuman card Cavalry.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10915.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w735-infusion-cavalry"
+      ],
+      "Effect": "w735-infusion"
+    },
+    {
+      "Id": "oracle-l5r-10916",
+      "Name": "Drawing on All Things",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has the element keywords of every Ring you control.\nOpen, Bow this card: Bow your target unbowed Ring. Straighten this Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10916.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w735-drawing-bow"
+      ],
+      "Effect": "w735-drawing"
+    },
+    {
+      "Id": "oracle-l5r-10353",
+      "Name": "Scorching Lash",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has Duelist while he is Fire.\nBattle/Open: Remove a non-Ring card in any discard pile from the game, and target a Personality: Give him +3F or -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10353.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w735-lash-plus",
+        "w735-lash-minus"
+      ],
+      "Effect": "w735-lash"
+    }
+  ],
+  "Decks": []
+}

@@ -4,7 +4,7 @@ namespace L5R.Core;
 // "PERS-GATES-2" (issue #674, personality-wave-134): thirteen Gates of Chaos Personalities wired from the PRINTED text of their scans, with the engine's existing mechanisms.
 //
 //   * MIRUMOTO KATAGI - EXP   "Battle, X: Equip a target non-Unique Weapon in your discard pile to Katagi."  -- Foothills Keep's / Agasha Kurou's attach-from-discard (AttachSpec), priced as an Equip.
-//   * MOSHI RUKIA - EXP       "Battle: Bow a target enemy card without attachments. Destroy it if it is an attachment."  -- Hiroto's own ability (hiroto-bow), reused verbatim.
+//   * MOSHI RUKIA - EXP       "Battle: Bow a target enemy card without attachments. Destroy it if it is an attachment."  -- Hiroto's own ability (hiroto-bow), reused verbatim: bow first, then destroy an attachment (separate effects, #748).
 //   * SHIBA TSURAO            "Battle: Give a target enemy Personality or Follower -2F."  (Expendable is the engine's keyword.)
 //   * SHINJO YOSHIE           "After Yoshie enters play, lose 1 Honor." (EntryHonorLoss) and "Battle: Give a target enemy Infantry Personality or Follower -3F." -- Mirumoto Hatsuto's ability
 //                             (hatsuto-weaken), reused verbatim: Infantry is "not Cavalry" in this engine (core rules glossary). Destined is the engine's keyword.

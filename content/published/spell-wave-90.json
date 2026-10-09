@@ -1,0 +1,57 @@
+{
+  "Profile": "spell-wave-90",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10702",
+      "Name": "Poison the Cup",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has Shadowlands.\nMaho Limited, Bow this card: Remove a target token from a Personality and give him a -1C Plague token. Lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10702.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w739-poison-cup"
+      ],
+      "Effect": "w739-poison-cup"
+    },
+    {
+      "Id": "oracle-l5r-10356",
+      "Name": "Unbound Essence",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja, destroy this card, and target a Personality who must be non-Unique unless this Shugenja is Void: Show cards from the top of the target's controller's Dynasty deck until you show a Personality or you show all cards in the deck. If you showed a Personality, overlay him on the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10356.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w739-unbound-essence"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

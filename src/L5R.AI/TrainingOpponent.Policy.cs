@@ -126,6 +126,11 @@ public static partial class TrainingOpponent
         // Read the Essence's optional second flip (issue #699): an enemy face-down card is scouted, the bot's own is never turned, and declining beats the latter.
         if (command.Choice is { } essence && essence.StartsWith(WlEssenceAbilities.SecondFlipPrefix, StringComparison.Ordinal))
             return essence[WlEssenceAbilities.SecondFlipPrefix.Length..].StartsWith(x.Self.Id + ":", StringComparison.Ordinal) ? -100 : 110;
+        // Mendon's rule (playtest 2026-10): offered the destruction of an opponent's attachment (Strength in Terror's "may destroy one of his attachments"), the bot always takes it;
+        // declining is only chosen if nothing else is offered.
+        if (command.Choice == "sit-decline") return 20;
+        if (command.Choice is { } destroy && destroy.StartsWith("sit-destroy:", StringComparison.Ordinal))
+            return x.Card(destroy["sit-destroy:".Length..]) is { AttachedTo: not null } attachment && attachment.OwnerId != x.Self.Id ? 125 : -100;
         var gain = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
         return command.Choice switch
         {
@@ -143,6 +148,7 @@ public static partial class TrainingOpponent
         var provinces = x.Opponent.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray();
         var plan = PlanAttack(x, units, provinces);
         if (plan is null) return units.Length == 0 ? -100 : 0;
+        if (HonorRace(x)) return 200; // the opponent wins on Honor next turn: always attack
         var force = ArmyForce(x.Self.Home.Where(c => plan.ContainsKey(c.Id) || c.AttachedTo is not null && plan.ContainsKey(c.AttachedTo)));
         return 90 + force - ArmyForce(x.Opponent.Home);
     }

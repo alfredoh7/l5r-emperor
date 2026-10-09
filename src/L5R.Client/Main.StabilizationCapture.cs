@@ -115,7 +115,8 @@ public partial class Main
                 var cost = _captureMode.Contains("free") ? 0 : 2;
                 var option = Actions.Single(a => a.Type == "equip" && a.CardId == fixture.Source && a.Enabled);
                 Check(option.TargetIds!.Contains(fixture.Target), "Expected target missing from quoted group");
-                await StabilizationClick(StabilizationButton(option.Label));
+                Check(_playPrompt is not null, "Selecting the equipment did not ask to confirm play");
+                await StabilizationClick(StabilizationButton("Confirm play")); // direct play: confirm first, then choose the target and pay
                 ChooseTarget(fixture.Target!); await EventFrames();
                 var button = ReviewedCommitButton();
                 Check(cost == 0 ? !button.Text.Contains("Gold", StringComparison.Ordinal) : button.Text.EndsWith(" · 2 Gold", StringComparison.Ordinal), "Reviewed attachment commit has the wrong Gold caption");

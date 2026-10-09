@@ -33,7 +33,7 @@ public sealed partial class MatchEngine
 
     // ---- Whispering Archive: "Your Spells enter play paying 1 less Gold." (EquipGoldCost's term; every Spell entry that pays is priced there) ------------------
     private int WhisperingArchiveDiscount(CardInstance entering, int playerId) =>
-        Definition(entering).Type == CardType.Spell ? _state.Cards.Values.Count(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Effect == WhisperingArchiveEffect) : 0;
+        Definition(entering).Type == CardType.Spell ? _state.Cards.Values.Count(c => ProducerControlledBy(c, playerId) && InPlay(c) && Definition(c).Effect == WhisperingArchiveEffect) /* issue #732: Black Riders lends the traits */ : 0;
 
     // ---- Clearing Crew: "After this card enters play from your hand: Draw an additional card during your next End Phase." ---------------------------------
     // A trait (no designator), so mandatory: ApplyMandatoryEntryEffects' hook. An attach from a discard pile (ExecuteAttach) is not an entry from the hand; it marks itself here.

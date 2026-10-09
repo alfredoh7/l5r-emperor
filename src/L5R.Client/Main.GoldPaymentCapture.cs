@@ -28,6 +28,22 @@ public partial class Main
         button.EmitSignal(Button.SignalName.Pressed);
     }
 
+    // Pays the way a player does: clicks each suggested holding on the table (issue #731). The hold-over from the engine's suggestion is a probe convenience only.
+    private void GoldClickHoldings(IEnumerable<string> methodIds)
+    {
+        var methods = PaymentMethods(QuoteFor(_chosen!)!);
+        foreach (var id in methodIds)
+        {
+            var method = methods.First(m => m.Id == id);
+            SelectCard(FindCard(method.CardId)!);
+            GoldRequire(_sources.Contains(id), $"clicking the table holding for {id} did not select it.");
+            GoldRequire(_tiles.Single(t => t.Card.Id == method.CardId).Card.Bowed, "a payment holding was not drawn bowed.");
+        }
+    }
+
+    private void GoldRequireMeter(int paid, int? cost, string what)
+        => GoldRequire(_goldMeter.Visible && _goldMeter.Paid == paid && _goldMeter.Cost == cost, $"{what}: the coin meter shows {(_goldMeter.Visible ? _goldMeter.Paid + "/" + _goldMeter.Cost : "nothing")}, not {paid}/{cost}.");
+
     private void PrepareGoldPaymentCapture()
     {
         var parts = _captureMode.Split('-');
@@ -54,13 +70,20 @@ public partial class Main
         var text = GoldPanelText();
         GoldRequire(text.Contains("PAYMENT · FIXED COST") && text.Contains("2 Gold"), "the panel does not name the fixed cost.");
         GoldRequire(GoldButtons(_inspector).Any(b => b is CheckBox), "the panel lists no Gold sources to bow.");
-        GoldRequire(SelectedProduction() >= 2 && _paymentConfirm is { Disabled: false }, "the engine's suggested payment did not cover the cost.");
+        GoldRequire(_sources.Count == 0 && _paymentConfirm is { Disabled: true, Visible: false }, "the payment opened pre-selected, or Confirm showed before the cost was covered.");
+        GoldRequireMeter(0, 2, "fresh payment");
+        GoldClickHoldings(QuoteFor(_chosen!)!.Payments[0].SourceIds);
+        GoldRequire(SelectedProduction() >= 2 && _paymentConfirm is { Disabled: false, Visible: true }, "the clicked holdings did not cover the cost and reveal Confirm.");
+        GoldRequireMeter(SelectedProduction(), 2, "covered payment");
         GoldRequire(View.Version == version, "opening the panel changed the match.");
-        // Un-choosing every source leaves the action unconfirmable until the cost is covered again.
+        // Clicking a bowed holding on the table straightens it, takes its Gold off the numerator and hides Confirm again.
         var chosen = _sources.ToArray();
-        PressGold(b => b is CheckBox { ButtonPressed: true }, "selected source");
-        GoldRequire(_paymentConfirm is { Disabled: true } || SelectedProduction() >= 2, "confirm stayed enabled below the cost.");
-        _sources.Clear(); foreach (var id in chosen) _sources.Add(id); RenderInspector(); Highlight();
+        var bowedCard = PaymentMethods(QuoteFor(_chosen!)!).First(m => m.Id == chosen[0]).CardId;
+        SelectCard(_tiles.Single(t => t.Card.Id == bowedCard).Card);
+        GoldRequire(!_sources.Contains(chosen[0]) && _goldMeter.Paid < 2 && !_tiles.Single(t => t.Card.Id == bowedCard).Card.Bowed, "straightening a source did not lower the numerator and unbow the holding.");
+        GoldRequire(_paymentConfirm is { Disabled: true, Visible: false }, "Confirm stayed offered below the cost.");
+        GoldClickHoldings([chosen[0]]);
+        GoldRequire(_paymentConfirm is { Disabled: false, Visible: true }, "Confirm did not return once the cost was covered again.");
         if (stage == "confirm")
         {
             var paying = _sources.ToArray();
@@ -99,7 +122,9 @@ public partial class Main
             _inspector.FindChildren("*", "VBoxContainer", true, false).OfType<CardChoiceList>().First().Choose(Array.IndexOf(action.TargetIds!, costliest.Key));
             GoldRequire(_chosen!.Command!.TargetId == costliest.Key && QuoteFor(_chosen)!.Cost == costliest.Value.Cost, "changing the target did not swap in its own quote.");
             GoldRequire(GoldPanelText().Contains($"{costliest.Value.Cost} Gold"), "the panel does not show the new target's cost.");
-            GoldRequire(_sources.ToHashSet().SetEquals(costliest.Value.Payments[0].SourceIds) && SelectedProduction() >= costliest.Value.Cost, "sources were not re-suggested for the new target's quote.");
+            GoldRequireMeter(0, costliest.Value.Cost, "retargeted payment");
+            GoldClickHoldings(costliest.Value.Payments[0].SourceIds);
+            GoldRequire(SelectedProduction() >= costliest.Value.Cost, "clicked holdings did not cover the new target's quote.");
             GoldRequire(View.Version == version, "retargeting changed the match.");
             if (stage == "confirm")
             {
@@ -123,24 +148,31 @@ public partial class Main
         PressGold(b => b.Text.StartsWith("Training (Virtuous Charity shape)", StringComparison.Ordinal), "variable-cost action");
         GoldRequire(_chosen is not null && QuoteFor(_chosen) is { Kind: GoldCostKind.Variable, MinAmount: 0 } quote && quote.MaxAmount > 0, "the ability did not open with a variable quote.");
         var quoteNow = QuoteFor(_chosen!)!;
-        GoldRequire(GoldPanelText().Contains("PAYMENT · YOU CHOOSE THE AMOUNT") && GoldPanelText().Contains("HOW MUCH GOLD"), "the panel has no amount control.");
-        GoldRequire(AmountFor(_chosen!, quoteNow) == 0 && _paymentConfirm is { Disabled: false }, "the free default amount is not immediately confirmable.");
+        GoldRequire(GoldPanelText().Contains("PAYMENT · YOU CHOOSE THE AMOUNT"), "the panel does not name a player-chosen cost.");
+        GoldRequire(AmountFor(_chosen!, quoteNow) == 0 && _paymentConfirm is { Disabled: false, Visible: true }, "a variable cost is not immediately confirmable.");
+        GoldRequireMeter(0, null, "variable cost with nothing bowed");
         var honor = Self.Honor;
+        if (stage == "")
+        { // Confirming 0 Gold asks first; "No" keeps the payment open.
+            _paymentConfirm!.EmitSignal(Button.SignalName.Pressed);
+            var dialog = GetChildren().OfType<ConfirmationDialog>().FirstOrDefault(d => d.DialogText.Contains("pay 0 gold", StringComparison.Ordinal));
+            GoldRequire(dialog is not null && dialog.OkButtonText == "Yes" && dialog.CancelButtonText == "No" && View.Version == version, "confirming 0 Gold did not ask first.");
+            dialog!.EmitSignal(ConfirmationDialog.SignalName.Canceled);
+            GoldRequire(_chosen is not null && View.Version == version, "answering No dropped the payment.");
+        }
         if (stage is "raised" or "confirm")
         {
-            for (var i = 0; i < 4; i++) PressGold(b => b.Text == "+", "raise-amount");
-            GoldRequire(_chosen!.Command!.GoldAmount == 4 && GoldPanelText().Contains("4 Gold"), "the + control did not raise the chosen amount.");
-            GoldRequire(_sources.ToHashSet().SetEquals(quoteNow.PaymentsByAmount![4][0].SourceIds) && SelectedProduction() >= 4, "sources were not re-suggested for the chosen amount.");
-            // The panel validates against the chosen amount: dropping a source below it disables confirm.
-            var suggested = _sources.ToArray();
-            _sources.Clear(); RenderInspector();
-            GoldRequire(_paymentConfirm is { Disabled: true }, "confirm stayed enabled with no sources for 4 Gold.");
-            _sources.Clear(); foreach (var id in suggested) _sources.Add(id); RenderInspector(); Highlight();
-            GoldRequire(_paymentConfirm is { Disabled: false }, "confirm did not re-enable once the sources covered the amount.");
-            PressGold(b => b.Text == "−", "lower-amount");
-            GoldRequire(_chosen.Command!.GoldAmount == 3, "the − control did not lower the amount.");
-            PressGold(b => b.Text == "+", "raise-amount");
-            GoldRequire(View.Version == version, "adjusting the amount changed the match.");
+            GoldClickHoldings(quoteNow.PaymentsByAmount![4][0].SourceIds);
+            GoldRequire(_chosen!.Command!.GoldAmount == 4 && GoldPanelText().Contains("PAYMENT SUMMARY"), "bowing holdings did not set the chosen amount to the Gold contributed.");
+            GoldRequireMeter(4, null, "variable cost after bowing");
+            // Clicking a payment-bowed holding straightens it and takes its Gold back.
+            var first = quoteNow.PaymentsByAmount![4][0].SourceIds[0];
+            var before = _goldMeter.Paid;
+            SelectCard(_tiles.Single(t => t.Card.Id == PaymentMethods(quoteNow).First(m => m.Id == first).CardId).Card);
+            GoldRequire(!_sources.Contains(first) && _goldMeter.Paid < before && _chosen.Command!.GoldAmount < 4, "clicking a bowed payment holding did not straighten it and lower the numerator.");
+            GoldClickHoldings([first]);
+            GoldRequire(_goldMeter.Paid == before && _chosen.Command!.GoldAmount == 4, "re-bowing the holding did not restore the Gold.");
+            GoldRequire(View.Version == version, "adjusting the payment changed the match.");
             if (stage == "confirm")
             {
                 var paying = _sources.ToArray();

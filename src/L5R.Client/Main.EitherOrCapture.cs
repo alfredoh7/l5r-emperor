@@ -83,6 +83,7 @@ public partial class Main
         }
         else await SupportClick(button);
         SupportRequire(View.Version == version && _chosen?.Command?.Choice == key, "Selecting an option must not submit it");
+        if (_paymentConfirm is { Disabled: true } && _chosen is not null && QuoteFor(_chosen) is { Payments.Length: > 0 } eitherQuote) GoldClickHoldings(eitherQuote.Payments[0].SourceIds); // the player bows holdings (#731)
         SupportRequire(_paymentConfirm is { Disabled: false } && GetViewport().GetVisibleRect().Encloses(_paymentConfirm.GetGlobalRect()), "Confirmation unavailable or outside the window");
     }
     private async Task ConfirmEither()

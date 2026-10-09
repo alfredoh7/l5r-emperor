@@ -1,0 +1,32 @@
+{
+  "Profile": "follower-wave-79",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10335",
+      "Name": "Disciples of Master Coin",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If this card did not enter play this turn, bow it and target a Holding with equal or lower Gold Cost: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10335.jpg",
+      "Keywords": [
+        "Kolat"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "w739-disciples-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

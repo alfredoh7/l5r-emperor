@@ -136,6 +136,7 @@ public sealed partial class MatchEngine
         if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
         if (WlPersTornAfterActionApplies(source, abilityId, playerId, facts) is { } wlPersTorn) return wlPersTorn; // Shinjo Sihung (issue #674, WlPersTorn.cs): "after your Tactical action resolves"
         if (CreatedProxies677AfterActionApplies(source, abilityId, facts) is { } proxy677) return proxy677; // Goju Kaxt (issue #677, CreatedProxies677.cs): "an action ... during which this card was destroyed"
+        if (Wave739AfterActionApplies(source, abilityId, playerId, facts) is { } wave739) return wave739; // The Tachikaze (issue #739, Wave739.cs): "after an action resolves whose effects destroyed your Follower"
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;

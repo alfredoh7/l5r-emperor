@@ -8219,7 +8219,7 @@ static void DragonClanPersonalityReview()
         // Togashi Hiroto: Reaction entry Fire tokens (four, unlike Meiyu/Torazu's three) --
         // exercised through a real Purchase, same as Bojan/Kazuya above -- then Battle: target an
         // enemy card without attachments (the bare enemy-card category plus RequireNoAttachments)
-        // -- bow it, or destroy it instead if it is itself an attachment.
+        // -- bow it, then also destroy it if it is itself an attachment (#748).
         var s = MatchEngine.CreateEconomyScenario().State;
         for (var i = 0; i < 5; i++) Add(s, "training-marketplace", 0, Zone.Home);
         var hirotoId = PublishedContent.PersonalityWave9.Cards.Single(c => c.Name == "Togashi Hiroto").Id;
@@ -8237,7 +8237,7 @@ static void DragonClanPersonalityReview()
         var e2 = MatchEngine.FromTestState(s2);
         Reject(e2, new GameCommand("useAbility", 0, e2.Version, CardId: hiroto.Id, TargetId: host.Id, AbilityId: "hiroto-bow")); // host has an attachment
         Accept(e2, new GameCommand("useAbility", 0, e2.Version, CardId: hiroto.Id, TargetId: attachedItem.Id, AbilityId: "hiroto-bow"));
-        Equal(e2.State.Cards[attachedItem.Id].Zone, Zone.FateDiscard, "Destroyed instead of bowed, since the target was itself an attachment");
+        Equal(e2.State.Cards[attachedItem.Id].Zone, Zone.FateDiscard, "Bowed, then destroyed, since the target was itself an attachment");
     }
     {
         // Togashi Korimi, Experienced: while defending, always negates her own bowing (an unlimited
@@ -9315,11 +9315,40 @@ static void StrategyWave13Primitives()
         var offTarget = Add(s, "training-item", 1, Zone.Attached, province: 0, attachedTo: filler.Id);
         var e = MatchEngine.FromTestState(s);
         var honorBefore = e.State.Players[0].Honor;
+        e.State.Cards[performer.Id].Bowed = true; // no "unbowed" printed: a bowed Paragon may perform it
         Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: target.Id, AbilityId: "strength-in-terror", PerformerId: performer.Id, CardIds: [offTarget.Id])); // not one of the TARGET's own attachments
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: target.Id, AbilityId: "strength-in-terror", PerformerId: performer.Id, CardIds: [attachment.Id]));
         Equal(e.GetView(0).Players[1].Army.Single(c => c.Id == target.Id).Force, 3, "6 - 3 (the Paragon's own live Force) = 3");
         Equal(e.State.Cards[attachment.Id].Zone, Zone.FateDiscard, "The optional attachment was destroyed");
         Equal(e.State.Players[0].Honor, honorBefore - 3, "Loses 3 Honor");
+    }
+    // Strength in Terror: the "may destroy an attachment" is a real choice the acting player is offered (and may decline); a target with no attachments is asked nothing.
+    {
+        var s = StrongholdBattle("oracle-l5r-1218");
+        var strat = Add(s, "oracle-l5r-7538", 0, Zone.Hand);
+        var performer = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        performer.GrantedKeywords = [new("Paragon", "test-fixture", "Permanent")];
+        var target = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0);
+        var attachment = Add(s, "training-item", 1, Zone.Attached, province: 0, attachedTo: target.Id);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: target.Id, AbilityId: "strength-in-terror", PerformerId: performer.Id));
+        Equal(e.GetView(0).PendingChoice?.Type, "effectChoice", "The optional attachment destroy is offered");
+        var offered = e.QueryActions(0).Where(a => a.Type == "chooseEffect").ToArray();
+        Equal(offered.Length, 2, "One option per attachment plus decline");
+        Accept(e, offered.First(a => a.Command!.Choice!.StartsWith("sit-destroy:", StringComparison.Ordinal)).Command!);
+        Equal(e.State.Cards[attachment.Id].Zone, Zone.FateDiscard, "The chosen attachment was destroyed");
+    }
+    {
+        var s = StrongholdBattle("oracle-l5r-1218");
+        var strat = Add(s, "oracle-l5r-7538", 0, Zone.Hand);
+        var performer = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        performer.GrantedKeywords = [new("Paragon", "test-fixture", "Permanent")];
+        var target = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0);
+        Add(s, "training-item", 1, Zone.Attached, province: 0, attachedTo: target.Id);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: target.Id, AbilityId: "strength-in-terror", PerformerId: performer.Id));
+        Accept(e, e.QueryActions(0).Single(a => a.Type == "chooseEffect" && a.Command!.Choice == "sit-decline").Command!);
+        Check(e.State.Cards.Values.Any(c => c.Zone == Zone.Attached && c.AttachedTo == target.Id), "Declining keeps the attachment");
     }
     // Strength of Purity (oracle-l5r-7546): "Choose your performing Personality with 3 or higher
     // Personal Honor: Give him +3F."

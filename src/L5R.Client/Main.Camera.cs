@@ -94,7 +94,7 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool _cameraGlide;
+    private bool _cameraGlide, _glideEndsFitted;
     private Vector2 _cameraFrom, _cameraTo;
     private float _zoomFrom, _zoomTo;
     private double _cameraGlideTime;
@@ -110,7 +110,7 @@ public partial class Main
         FocusBattle();
         if (_reducedMotion) return;
         _cameraTo = _cameraCenter; _zoomTo = _cameraZoom;
-        _cameraFrom = from; _zoomFrom = zoom; _cameraGlideTime = 0; _cameraGlide = true;
+        _cameraFrom = from; _zoomFrom = zoom; _cameraGlideTime = 0; _cameraGlide = true; _glideEndsFitted = false;
         _cameraCenter = from; _cameraZoom = zoom; ApplyTableCamera();
     }
 
@@ -123,15 +123,20 @@ public partial class Main
         if (_capturePath is not null && !_captureMode.Contains("dynasty-flow", StringComparison.Ordinal) || _session.Snapshot is null) return;
         if (View.Phase != L5R.Core.Phase.Dynasty) { _framedDynasty = null; return; }
         if (PresentationBusy || View.ActivePlayerId != View.ViewerId) return;
+        if (_capturePath is null && !TableMotionsSettled()) return; // the battle's province cleanup and refills finish first, so the camera makes one clean move (retried every frame until then)
         var key = (_session.MatchKey, View.ViewerId, View.TurnNumber, View.ActivePlayerId);
         if (_framedDynasty == key) return;
         _framedDynasty = key;
-        ResetTableCamera(); // an instant snap, so reduced motion needs no special case
+        if (_capturePath is not null || _reducedMotion || _cameraFitted) { ResetTableCamera(); return; } // an instant snap
+        // One short glide to the fitted view; it ends fitted so later layout changes keep following the table.
+        _cameraFrom = _cameraCenter; _zoomFrom = _cameraZoom;
+        _cameraTo = new Vector2(WorldWidth / 2, _worldHeight / 2); _zoomTo = FitZoom;
+        _cameraGlideTime = 0; _cameraGlide = true; _glideEndsFitted = true; _cameraDragging = false;
     }
 
     private void ResetTableCamera()
     {
-        _cameraGlide = false; _cameraFitted = true; _cameraDragging = false;
+        _cameraGlide = false; _glideEndsFitted = false; _cameraFitted = true; _cameraDragging = false;
         ApplyTableCamera();
     }
 
@@ -299,9 +304,10 @@ public partial class Main
         if (_cameraGlide && !CameraBlocked)
         {
             _cameraGlideTime += delta;
-            var t = _reducedMotion ? 1 : Mathf.SmoothStep(0, 1, (float)(_cameraGlideTime / .7));
+            var t = _reducedMotion ? 1 : Mathf.SmoothStep(0, 1, (float)(_cameraGlideTime / (_glideEndsFitted ? .45 : .7)));
             _cameraCenter = _cameraFrom.Lerp(_cameraTo, t); _cameraZoom = Mathf.Lerp(_zoomFrom, _zoomTo, t);
-            ApplyTableCamera(); if (t >= 1) _cameraGlide = false;
+            ApplyTableCamera();
+            if (t >= 1) { _cameraGlide = false; if (_glideEndsFitted) { _glideEndsFitted = false; _cameraFitted = true; ApplyTableCamera(); } }
         }
         ProcessTableTooltip(delta);
         if (_world is null || CameraBlocked)

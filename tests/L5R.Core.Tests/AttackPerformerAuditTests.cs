@@ -37,7 +37,9 @@ internal static class AttackPerformerAuditTests
         "pe-bar-fight-attack", "pe-tamori-potion-attack"];
     private static readonly string[] NotANamedPerformer = ["carpenter-castle-siege", "cleansing-path-attack", "haruma-attack", "strength-of-the-divine-force", "strength-of-the-divine-honor", "thunders-wrath-attack", "tomiko-attack", "yayu-bow-attack", "yayu-destroy-attack",
         // Issue #566: Tempest of Flame ("Bow this Shugenja: Ranged 5 Attack") prints no named performer -- its own-wielder Performer only names the Spell's wielder, the core rules' performer of a Spell's action anyway.
-        "tempest-of-flame-attack"];
+        "tempest-of-flame-attack",
+        // Issue #741: Strength in the Earth ("Target your unbowed Monk. Melee Attack with strength equal to his Force") names its Monk as a target, not as a "performing" card -- Strength of the Divine's shape.
+        "w741-strength-earth"];
 
     public static void Run(TestRunner runner) => runner.Run("attack-performer-audit", [
         ("Every Melee/Ranged Attack ability with an explicit Performer is one reviewed against its printed text", ExplicitPerformersAreReviewed),

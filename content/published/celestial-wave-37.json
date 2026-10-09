@@ -1,0 +1,34 @@
+{
+  "Profile": "celestial-wave-37",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #736.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10418",
+      "Name": "P'an Ku's Madness",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Give a target card a Madness token.\nOpen: Discard this Celestial. A target Personality with a Madness token cannot attack or defend.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10418.jpg",
+      "Keywords": [
+        "Unique",
+        "Dragon"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w736-madness-token",
+        "w736-madness-bar"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

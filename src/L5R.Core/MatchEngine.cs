@@ -496,6 +496,10 @@ public sealed partial class MatchEngine
         ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
+        ApplyWave734EntryEffects(playerId, card); // Bayushi Nitoshi - exp (issue #734, Wave734.cs): "After Nitoshi enters play, all players lose 3 Honor."
+        ApplyWave740EntryEffects(card); // Ikoma Ayumu - exp (issue #740, Wave740.cs): "will not gain Fallen or Shadowlands".
+        ApplyWave739EntryEffects(card); // Iweko Seiken (issue #739, Wave739.cs): "will not gain a Clan Alignment".
+        ApplyWave737EntryEffects(playerId, card); // Iweko Shibatsu (issue #737, Wave737.cs): "After Shibatsu enters play, gain 3 Honor." and his Clan-alignment block.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
@@ -617,11 +621,11 @@ public sealed partial class MatchEngine
     // like every other Action-phase action).
     private bool BringProvincePersonalityIntoPlay(PlayerState player, CardInstance card, PurchaseQuote quote, int? battlefield, string via, int? proclaimResumesTo = null)
     {
-        var province = player.Provinces.Single(p => p.CardId == card.Id);
-        province.CardId = null;
+        var (province, slot) = FindProvinceSlot(player, card.Id); // either of Otosan Uchi's two slots (found by the bot soak, issue #765: Masaya in a second slot)
+        ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an ability recruit from a province "enters play from a province" too (Soshi Kodanshi, issue #622), as Purchase and RecruitReserve record
         EnterPlayFromRecruit(player, card, battlefield, via);
-        Refill(player, province);
+        RefillProvinceSlot(player, province, slot);
         return OpenRecruitEntryWindows(player, card, quote.ProclaimEligible, proclaimResumesTo);
     }
 
@@ -937,6 +941,7 @@ public sealed partial class MatchEngine
         else if (gate.RefuseReason is { } gateRefusal) error = gateRefusal;
         else if (def.Type == CardType.Personality && !LoyaltyAllowsControl(card, player.Clan, player.Id)) error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if ((clanDiscount || clanAllegiance) && !inClan) error = "Clan discount and allegiance require your Clan's Personality.";
+        else if (clanDiscount && ImperialBarsClanDiscount(card, playerId)) error = "Journey's End Keep: Personalities whose only Clan alignment is Imperial cannot be bought with Clan discount."; // issue #771 (Wave771.cs)
         // Akodo Chiyo / Kitsu Ririko (issue #299): a Personality's own printed "Clan X players may ignore
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
@@ -1536,6 +1541,8 @@ public sealed partial class MatchEngine
             case "hard-pressed-move": if (BeginHardPressed(source, pending)) return; break;
             // Lakeside Retreat (issue #622, TfStrategiesB.cs): its controller straightens a Personality or Follower.
             case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
+            // A Moving Battle (issue #741, Wave741.cs): its controller may move one of his opposed attacking Personalities to an adjacent unresolved battlefield.
+            case Wave741Abilities.MovingBattle: if (BeginWave741MovingBattle(source)) return; break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1550,6 +1557,7 @@ public sealed partial class MatchEngine
         else if (IsExtendedManeuversChoice(pending)) ResolveExtendedManeuvers(command, pending, choice.PlayerId); // Extended Maneuvers (issue #492)
         else if (IsHardPressedChoice(pending)) ResolveHardPressed(command, pending, choice.PlayerId);
         else if (IsLakesideRetreatChoice(pending)) ResolveLakesideRetreat(command, choice.PlayerId); // Lakeside Retreat (issue #622)
+        else if (IsWave741MovingBattleChoice(pending)) ResolveWave741MovingBattle(command, choice.PlayerId); // A Moving Battle (issue #741)
         else if (command.Choice == "use")
         {
             var target = Card(command.TargetId);
@@ -1701,6 +1709,7 @@ public sealed partial class MatchEngine
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Forgotten Legacy pass (issue #467 batch 4).
+        Wave738ProvinceDestroyed(attacker, provinceDestroyedNow); // issue #738 (Wave738.cs): Journey's End Siege, "after the first time you destroy a Province in battle this turn".
         WlGrantVoidRecruit(attacker, provinceDestroyedNow); // issue #674 (WlSpellsRings.cs): False Ring of the Void's recruit, "after a battle resolves where you destroyed a Province"
         FireCowedAndDefeatedBattleWatches(a, d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
         PromoApplyEventResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // A Great Victory (issue #653)
@@ -1755,6 +1764,7 @@ public sealed partial class MatchEngine
     {
         P5.FirstConquerorId = null; // issue #503: The Plain of Glass's pending first choice is spent
         var willNotBow = _state.ResolutionWillNotBowPlayerIds.ToArray();
+        Wave737NatsuMarksUnbowed(a); // Natsu-Togumara's Guidance (issue #737, Wave737.cs): "battle resolution does not bow cards in that Personality's unit."
         // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
         var hikazuSpared = HikazuSparedPersonalities(a);
         var aramasuUnbowed = AramasuResolutionActive(attacker) ? AramasuUnbowedByResolution(a.Where(c => c.Zone == Zone.Battlefield)) : null; // Aramasu's Legacy (issue #501): "does not bow your Mantis Clan Magistrates or your attachments"
@@ -1782,6 +1792,7 @@ public sealed partial class MatchEngine
             DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince = null;
         R1.MovementNegated.Remove(provinceIndex); // Chikushudo's Trickery: "negate all movement to it" ends with the battlefield.
+        Wave735EndBattle(); // The Inevitable Grasp of Conquest (issue #735, Wave735.cs): "this battle" ends here.
         // After This Battle Resolves (issue #272): stashed here since CurrentBattleProvince is
         // already cleared above, and the Overconfident draw window (below) may defer this whole tail
         // across a command boundary before FinishBattleReturnHomeAndTransition ever reads it back --
@@ -2036,6 +2047,7 @@ public sealed partial class MatchEngine
         if (inBattle) card.ProvinceIndex = target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(target, granted, card.Id, "Attachment");
         Emit("equipped", $"{def.Name} attached to {Definition(target).Name}.", command.PlayerId, card.Id);
+        AfterWave740Equip(command.PlayerId, card, fromDiscard); // issue #740 (Wave740.cs): Harbingers of War's draw
         if (OpenEntryReactionWindow(command.PlayerId, card, 1 - command.PlayerId)) return;
         if (inBattle)
         {
@@ -2079,7 +2091,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def)) { DiscardTerrain(existingTerrain); if (existingTerrain.Zone != Zone.Battlefield) Player(command.PlayerId).TerrainDestroyedThisBattle = true; } // P6: the Terrain this one replaced was destroyed (Ring of Water's condition)
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def) || WlStratACTerrainReplaces(def) || Wave741TerrainReplaces(def)) { DiscardTerrain(existingTerrain); if (existingTerrain.Zone != Zone.Battlefield) Player(command.PlayerId).TerrainDestroyedThisBattle = true; } // P6: the Terrain this one replaced was destroyed (Ring of Water's condition)
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }
@@ -2202,18 +2214,23 @@ public sealed partial class MatchEngine
     // is not removed by this and resumes applying once honorable again. The handful of rules that
     // deliberately key off the *printed* value regardless of current status (Dishonorable death's
     // Honor penalty, Proclaim's grant) intentionally do not use this helper.
-    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor + StatModifier(card, "PersonalHonor")
+    private int CardPersonalHonor(CardInstance card) => Wave734PersonalHonorCap(card) is int cap ? Math.Min(CardPersonalHonorUncapped(card), cap) : CardPersonalHonorUncapped(card); // Armor of the Mad, Shosuro Chizuru (issue #734)
+    private int CardPersonalHonorUncapped(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor + StatModifier(card, "PersonalHonor")
         + StaticPersonalHonorBonus(card); // Akodo Hotaka (issue #453, batch 2): "+1PH if any other player is Dragon Clan".
     // Utaku Chikako's own passive (issue #186): "Your dishonorable Battle Maidens do not have a
     // maximum Personal Honor of 0" -- a Personality's own passive (not a Stronghold's), so checked
     // generically against any in-play Personality the SAME owner controls carrying this Effect,
     // rather than fixed to one specific card.
+    // Utaku Ji-Yun - exp (issue #734): "Your dishonorable Paragons do not have a maximum Personal Honor of 0 from the rulebook."
     private bool DishonorablePersonalHonorOverridden(CardInstance card) =>
-        Keyword(card, "Battle Maiden") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == "battle-maiden-dishonor-immunity");
+        Keyword(card, "Battle Maiden") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == "battle-maiden-dishonor-immunity")
+        || Wave734ParagonsOverride(card);
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
+    // A Force cap (issue #768, ForceCaps.cs) lowers the total below; it is applied here, once, so every reader of a Personality's Force sees it.
+    private int PersonalityForce(CardInstance card) => ApplyForceCaps(card, PersonalityForceUncapped(card));
+    private int PersonalityForceUncapped(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2437,7 +2454,7 @@ public sealed partial class MatchEngine
     {
         int af = 0, df = 0;
         // Hida Horu (Emperor Edition Personality pass, issue #477 batch 2): he contributes no Force while his army has two or more units (his Followers still do).
-        int Contribution(CardInstance c, CardInstance[] army) => HoruContributesNothing(c, army) ? 0 : StatTermContribution(c, PersonalityBattleContribution(c)); // StatTermContribution: "contributes his Force twice" (StatTerms.cs, issue #672)
+        int Contribution(CardInstance c, CardInstance[] army) => HoruContributesNothing(c, army) || Wave734ContributesNothing(c) ? 0 : StatTermContribution(c, PersonalityBattleContribution(c)); // StatTermContribution: "contributes his Force twice" (StatTerms.cs, issue #672)
         foreach (var c in a) { if (RedirectsTo(c, attacker, defender, a, d) == defender) df += Contribution(c, a); else af += Contribution(c, a); af += FollowerBattleContribution(c); }
         foreach (var c in d) { if (RedirectsTo(c, attacker, defender, a, d) == attacker) af += Contribution(c, d); else df += Contribution(c, d); df += FollowerBattleContribution(c); }
         // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
@@ -2784,6 +2801,7 @@ public sealed partial class MatchEngine
         foreach (var attachment in Attachments(card.Id)) attachment.ProvinceIndex = province;
         if (arrivedFromElsewhere) _state.PendingMoveReactionCardId = card.Id;
         if (arrivedFromElsewhere) FireConsecrationWatches(card, province); // Consecration (issue #492, group E): "moves to an attacking army".
+        if (arrivedFromElsewhere) FireKachikoJoinWatches(card); // Bayushi Kachiko (issue #778): "joins an attacking army".
         // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "a Battle action that moved Mitsuo" -- every move an action makes is on the action's record, including the
         // unit that moves itself (its own source or performer), which TryMoveToBattlefield's target moves are not the only ones.
         if (arrivedFromElsewhere && _runningCommand is not null) RecordActionEffect(card.Id, MovedKind, toBattlefield: province);
@@ -2990,6 +3008,7 @@ public sealed partial class MatchEngine
     {
         SetPhase(Phase.Events, player.Id);
         ExpireEmperorRemainingFEventsAtEventsPhase(player); // Cherry Blossom Festival, Disgrace, Successful Bounty (issue #492, group F): "until your Events Phase ... begins".
+        Wave738EventsPhaseBegins(); // issue #738 (Wave738.cs): Suck the Marrow, "after each Events Phase begins".
         _state.EventsRevealNext = 0;
         ContinueEventsReveal(player);
     }
@@ -3332,6 +3351,7 @@ public sealed partial class MatchEngine
     {
         if (source is null || source.OwnerId != playerId) return false;
         var stronghold = Definition(Card(Player(playerId).StrongholdId)).Effect;
+        if (FootholdNegatesLoss(stronghold)) return true; // Foothold of the Mad (issue #766, Foothold.cs): "You do not lose Honor from cards you own."
         if (HonorLossNegatedByKeyword(stronghold, source)) return true; // Seeds of Decay pass (issue #453), batch 1: The Castle of Order's "Ninja cards you own".
         if (!HonorLossImmunity.TryGetValue(stronghold, out var rule)) return false;
         var def = Definition(source);

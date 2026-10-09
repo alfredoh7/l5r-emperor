@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Force cap primitive and Asako Kaitoko - exp, merged with current main (Journey's End Keep, Bonds of Hospitality, Otosan Uchi second-slot fix taken from main); art pack rebuilt as catalogue-art-issue768-20261008-r2 on issue771-r1.",
+  "validation": "bash tools/check.sh --skip-client on the merged head: 3625 PASS, 0 FAIL, all requested checks passed. No native playtest.",
+  "remaining": "Publish r2 release, CI, merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/768",
+  "branch": "claude/768-kaitoko-force-cap",
+  "updated": "2026-10-09T02:52:45.121609+00:00"
+}

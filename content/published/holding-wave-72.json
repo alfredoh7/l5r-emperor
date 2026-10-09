@@ -1,0 +1,37 @@
+{
+  "Profile": "holding-wave-72",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #736.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10408",
+      "Name": "Oracle of the Void",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card cannot be destroyed.\nLimited, Bow this card: The next two cards in provinces you refill (this turn) may be refilled face-up.\nLimited, Bow this card: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10408.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Oracle",
+        "Retainer",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w736-oracle-refill",
+        "w736-oracle-draw"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

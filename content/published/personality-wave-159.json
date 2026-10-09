@@ -1,0 +1,128 @@
+{
+  "Profile": "personality-wave-159",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #736.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10664",
+      "Name": "Susumu Haikaro",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Negate Haikaro's destruction from battle resolution.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10664.jpg",
+      "Keywords": [
+        "Courtier",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10662",
+      "Name": "Ninube Onchi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Onchi enters play, lose 2 Honor.\nActions from cards in other players' units may not target Onchi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10662.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Experienced",
+        "Imperial",
+        "Imperial Explorer",
+        "Ninja",
+        "Scout",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10496",
+      "Name": "Otomo Suikihime, Queen of Fools",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Suikihime enters play, lose 3 Honor.\nOther players' Political actions may not target Suikihime. Suikihime may not attack.\nLimited, Bow this card: Search your Dynasty deck for a Fallen Personality. Put him into one of your Provinces face-up, discarding any card currently there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10496.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Experienced",
+        "Fallen",
+        "Imperial",
+        "Second City Governor"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w736-suikihime-search"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10300",
+      "Name": "Yoritomo Naoto",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Actions he or his Followers perform must target Naoto, if legal. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10300.jpg",
+      "Keywords": [
+        "Naval",
+        "Stalwart",
+        "Unique",
+        "Experienced",
+        "Imperial",
+        "Imperial Explorer",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w736-naoto-taunt"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

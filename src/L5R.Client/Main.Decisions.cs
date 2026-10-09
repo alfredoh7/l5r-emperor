@@ -11,7 +11,23 @@ public partial class Main
     private bool _reviewingAlternativeCost;
     private bool _alternativeCostConfirmed;
     private bool GenericDecisionActive => View.WinnerId is null && !EventDecisionActive &&
-        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect" or "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten" or "budgetSelect";
+        (View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect" or "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten" or "budgetSelect"
+            || UnknownPendingDecision);
+
+    // P25 (issue #723): a pending type the client has no screen of its own for (a feature registered it through EngineHooks.PendingActions) is presented as a generic decision: the engine's own options, one
+    // selected, then confirmed. The set below is every type that existed before P25; each keeps the screen it already had, so a new decision kind needs no edit here.
+    private static readonly HashSet<string> KnownPendingTypes = new(StringComparer.Ordinal)
+    {
+        "additionalActionReaction", "afterActionResolvedReaction", "afterResolutionReaction", "announceReaction", "attackPhaseEndReaction", "attackReaction", "attackTargetSelect", "battleActionReaction", "battleRecruit",
+        "beforeActionReaction", "beforeBattleOptional", "beforeBattleOrder", "beforeBattleReaction", "bowReaction", "brashDraw", "budgetSelect", "conqueror", "copyAbility", "copyKeyword", "deciderChoice", "declineStraighten",
+        "discardHand", "duelReaction", "duelWonReaction", "effectChoice", "eitherOr", "encircledOrder", "encircledSelect", "engageReaction", "entryCostDecision", "entryReaction", "eventChoice", "focusEffectChoice",
+        "forcedDiscard", "harshChoices", "honorChangeReaction", "honorLossDecision", "infiltratorStraighten", "killingGroundsSelect", "lookArrange", "lookDeck", "moveReaction", "nikutaiReaction", "nitoshiHold",
+        "offeringReverence", "opponentPayment", "overconfidentDraw", "p3AroruMove", "p3BeforeEventReaction", "p3DarkVirtueDiscard", "p3EntryReaction", "p3MikiDarkVirtue", "p5BlessingsTop", "preservingHonor", "proclaim",
+        "proclaimNegateReaction", "provinceCardChoice", "provinceOrder", "rentatsuLoss", "rikateDetach", "rinShame", "searchDeck", "searchDestination", "searchDiscard", "searchRecruitPay", "searchRegionProvince", "searchSelect",
+        "sequencedTarget", "shinden", "starCrossedLovers", "testedLandProvince", "turnBeginsChoice", "twistOfFateReaction", "unimpeachableNameReaction", "yourClanNeedsYouProvince"
+    };
+    private bool UnknownPendingDecision => View.PendingChoice is { } pending && !KnownPendingTypes.Contains(pending.Type) &&
+        (pending.PlayerId != View.ViewerId || Actions.Any(a => a.Type is not ("concede" or "wait" or "orderSeppuku")));
     private bool DecisionCanSubmit => !_session.Busy && !PresentationBusy && !_playHeld && (!_session.Online ||
         _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false));
 
@@ -113,6 +129,7 @@ public partial class Main
             return true;
         }
         if (pending?.Type == "budgetSelect") return RenderBudgetSelect(options); // Sleep (issue #667): the budgeted multi-select, Main.BudgetSelect.cs
+        if (pending?.Type == "shownChoice") return RenderShownChoice(options); // P25 (Main.ShownChoice.cs): the shown cards' faces
         if (pending is not null && RenderCandidateChoices(options)) return true;
         if (contextualDecline && options.Length == 0) return true;
         var rows = new List<(ActionOption Option, Button Button)>();

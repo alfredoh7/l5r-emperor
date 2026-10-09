@@ -95,6 +95,13 @@ public sealed partial class MatchEngine
             total += hook(this, context);
         return total;
     }
+    private bool RegisteredUntargetedReaction(CardInstance card, string abilityId, ReactionSubject subject)
+    {
+        var context = new UntargetedReactionContext(card, abilityId, subject);
+        foreach (var hook in EngineHooks.UntargetedReaction.Items)
+            if (hook(this, context)) return true;
+        return false;
+    }
     internal readonly record struct TargetedReactionContext(CardInstance card, string abilityId, ReactionSubject subject, CardInstance affected);
     private bool RegisteredTargetedReaction(CardInstance card, string abilityId, ReactionSubject subject, CardInstance affected)
     {

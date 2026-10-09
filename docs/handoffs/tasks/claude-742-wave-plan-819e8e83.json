@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wirable-card wave plan: 182 wirable unwired cards grouped into ten batches by rarest primitive, with ten batch issues and an umbrella. Docs only; no card wired. Shared change: one new decision doc and one line in docs/decisions/README.md, which the audit counts as crossing lanes; no code, content or client files touched.",
+  "validation": "Counts from the regenerated inventory at 15fc74d0 joined to the #668 appendix; Kimura and Crystal Tears receipt sha256 verified. No code or tests run (docs only).",
+  "remaining": "Per-batch wiring not started; primitive codes are the #668 assessment's and unbuilt per card.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/742",
+  "branch": "claude/742-wave-plan",
+  "updated": "2026-10-08T00:28:08.282972+00:00"
+}

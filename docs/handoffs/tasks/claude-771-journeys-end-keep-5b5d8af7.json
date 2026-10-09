@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wired Journey's End Keep - exp (stronghold-wave-56) and the Imperial Clan: Imperial alignment for Imperial-keyword Personalities while a JEK is a Stronghold in the match (Proclaim at full price, allegiance +2, Clan discount only with another alignment), Imperial Favor at setup unless the opponent's Stronghold is also Imperial, Gold lock counting excess Gold spent, new Imperial clan emblem for the placard and battle placard built from the supplied mon. Art pack catalogue-art-issue771-20261008-r1 extends catalogue-art-issue742-20261008-r2 (4,626 images).",
+  "validation": "dotnet run --project tests/L5R.Core.Tests -- --filter wave-771 (8/8); bash tools/check.sh --skip-client; python -m unittest discover tools/content; emblem inspected beside Mantis and Spider at 94 and 42 px; client not built or playtested",
+  "remaining": "None; ready for review. Readings in docs/decisions/2026-10-08-journeys-end-keep-and-imperial-clan.md await Mendon, notably that the scan prints a different Gold sentence from the catalogue. Client not run, so the emblem has not been seen in the native placards.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/771",
+  "branch": "claude/771-journeys-end-keep",
+  "updated": "2026-10-09T00:26:31.557829+00:00"
+}

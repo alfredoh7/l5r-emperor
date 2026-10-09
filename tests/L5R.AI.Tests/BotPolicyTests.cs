@@ -18,6 +18,10 @@ internal static class BotPolicyTests
         ("Arena fixes: a harmful ability is never aimed at the bot's own card; Shinden always bows; a full hand does not spend Gold on a pure draw; the bot never gives the opponent Honor or loses its own by choice", ArenaFixes),
         ("Hoshoku-sha (issue #679): the bot never chooses to destroy himself or any Personality of its own with his Battle/Open action; an enemy target is played", HoshokuNeverSelf),
         ("Read the Essence (issue #699): the bot turns an enemy face-down province card, never its own for nothing, scouts with the optional second flip or declines it, and never stalls", ReadTheEssenceBot),
+        ("P25 decision infrastructure (issue #723): the bot answers a multi-pick Either/Or with the fewest picks and Done, a hook-registered pending type with an offered option, and a choice among shown cards, and never stalls", DecisionInfraBot),
+        ("P20 search extensions (issue #728): the bot answers a multi-card province search, an attach follow-up and the other player's choice among shown cards, whichever seat decides, and never stalls", SearchExtensionsBot),
+        ("Strength in Terror (playtest 2026-10): offered the destruction of an opponent's attachment the bot always destroys it, never declines", StrengthInTerrorBot),
+        ("Last stand (playtest 2026-10): when every Province it has left would fall, the bot defends; when the opponent wins on Honor next turn it attacks every Province it can beat, whatever the army in reply", LastStandAndHonorRace),
         ("Memory: copies seen in public zones count (three of a non-Unique card, one of a Unique), the roll is deterministic and fair", Memory),
     ];
 
@@ -202,6 +206,42 @@ internal static class BotPolicyTests
         Check(TrainingOpponent.Choose(view, [Answer("wl-essence-flip:0:1"), Answer(WlEssenceAbilities.Decline)]).Command!.Choice == WlEssenceAbilities.Decline, "with only its own card left it declines the second flip");
     }
 
+    private static void StrengthInTerrorBot()
+    {
+        var (view, pass, _) = Table();
+        var person = CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force > 0);
+        var attachment = Person("theirs-att", 1, person) with { Zone = Zone.Attached, AttachedTo = "theirs-1" };
+        var own = Person("own-att", 0, person) with { Zone = Zone.Attached, AttachedTo = "own-1" };
+        var v = view with { Players = [view.Players[0] with { Home = [own] }, view.Players[1] with { Home = [Person("theirs-1", 1, person), attachment] }] };
+        ActionOption Answer(string choice) => new("chooseEffect", choice, true, null, new("chooseEffect", 0, v.Version, Choice: choice));
+        Check(TrainingOpponent.Choose(v, [Answer("sit-decline"), Answer("sit-destroy:theirs-att")]).Command!.Choice == "sit-destroy:theirs-att", "an opponent's attachment is destroyed");
+        Check(TrainingOpponent.Choose(v, [Answer("sit-destroy:theirs-att"), Answer("sit-decline")]).Command!.Choice == "sit-destroy:theirs-att", "whatever the order offered");
+        Check(TrainingOpponent.Choose(v, [Answer("sit-destroy:own-att"), Answer("sit-decline")]).Command!.Choice == "sit-decline", "never its own attachment");
+    }
+
+    private static void LastStandAndHonorRace()
+    {
+        var (view, pass, _) = Table();
+        var person = CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force >= 4);
+        CardView Unit(string id, int owner, int? province) => Person(id, owner, person) with { Zone = province is null ? Zone.Home : Zone.Battlefield, ProvinceIndex = province, Force = 6 };
+        ProvinceView[] Provinces(int count) => Enumerable.Range(0, count).Select(i => new ProvinceView(i, 3, false, null, null)).ToArray();
+        // Two Provinces left, both attacked by 12 Force (3 + defense can not save them with 6 Force at home against 12 apiece): the bot defends anyway.
+        var attacked = view with
+        {
+            Players = [view.Players[0] with { Home = [Unit("own-1", 0, null)], Army = [], Provinces = Provinces(2) },
+            view.Players[1] with { Home = [], Army = [Unit("a-0", 1, 0), Unit("a-0b", 1, 0), Unit("a-1", 1, 1), Unit("a-1b", 1, 1)] }]
+        };
+        var defend = new ActionOption("assignDefense", "Defend", true, null, new("assignDefense", 0, attacked.Version, Assignments: []), TargetIds: ["own-1"], Provinces: [0, 1]);
+        Check(TrainingOpponent.Choose(attacked, [pass, defend]).Command?.Type == "assignDefense", "every Province would fall: the bot defends");
+        // Honor race: the opponent holds 40 Honor and a bigger home army. Without the race the bot stays home; with it, it attacks.
+        var wall = Enumerable.Range(0, 3).Select(i => Unit("wall-" + i, 1, null)).ToArray();
+        var race = view with { Players = [view.Players[0] with { Home = [Unit("own-1", 0, null), Unit("own-2", 0, null)] }, view.Players[1] with { Honor = 40, Home = wall, Provinces = Provinces(4) }] };
+        var calm = race with { Players = [race.Players[0], race.Players[1] with { Honor = 20 }] };
+        var declare = (MatchView v) => new ActionOption("declareAttack", "Declare", true, null, new("declareAttack", 0, v.Version));
+        Check(TrainingOpponent.Choose(calm, [pass, declare(calm)]).Command?.Type == "pass", "no Honor race and a larger army at home: no attack");
+        Check(TrainingOpponent.Choose(race, [pass, declare(race)]).Command?.Type == "declareAttack", "the opponent wins on Honor next turn: the bot attacks regardless of the army at home");
+    }
+
     private static CardView Person(string id, int owner, CardDefinition d) => new(id, d, owner, Zone.Home, true, false, null, null, d.Force);
 
     private static MatchView Races(MatchView view, int ownStart, int oppStart, int ownPeople, int oppPeople, int? favorHolder = null)
@@ -259,6 +299,53 @@ internal static class BotPolicyTests
         Check(Pick(WithAverage(At(4, 12, 10, 0), 2)) == "self-gain", "in between and ahead: gain");
         Check(Pick(WithAverage(At(4, 8, 10, 0), 2)) == "opponent-lose", "in between, behind and above the starting Honor: take it away");
         Check(Pick(WithAverage(At(4, 3, 10, 0), 2)) == "self-gain", "in between and below the starting Honor: gain");
+    }
+
+    private static void DecisionInfraBot()
+    {
+        foreach (var (kind, spec) in new[] { ("p25-multi", "multi-pick Either/Or"), ("p25-unknown", "hook-registered pending type"), ("p25-shown", "shown choice") })
+        {
+            var engine = MatchEngine.CreateDecisionShowcase(kind);
+            Check(engine.State.PendingChoice is not null && engine.State.PendingChoice.PlayerId == 0, $"{spec}: the showcase opens a decision for seat 0");
+            var steps = 0; var picks = new List<string>();
+            while (engine.State.PendingChoice is not null && steps++ < 8)
+            {
+                var actions = engine.QueryActions(0);
+                Check(actions.Any(a => a.Enabled && a.Command is not null && a.Type != "concede"), $"{spec}: the engine offers an answer");
+                var decision = TrainingOpponent.Choose(engine.GetView(0), actions);
+                Check(decision.Command is not null && decision.Command.Type != "concede", $"{spec}: the bot answers ({decision.Reason})");
+                picks.Add(decision.Command!.Choice ?? "");
+                var result = engine.Execute(decision.Command);
+                Check(result.Accepted, $"{spec}: the engine accepts the bot's answer: {result.Error}");
+            }
+            Check(engine.State.PendingChoice is null, $"{spec}: the decision is answered within {steps} steps (stalled)");
+            if (kind == "p25-multi") Check(picks.Count == 2 && picks[1] == "done", "multi-pick: the bot takes the one pick it must and then Done: " + string.Join(",", picks));
+        }
+    }
+
+    private static void SearchExtensionsBot()
+    {
+        foreach (var kind in new[] { "p20-provinces", "p20-other", "p20-attach" })
+        {
+            var engine = MatchEngine.CreateSearchShowcase(kind);
+            Check(engine.State.PendingChoice is not null, $"{kind}: the showcase opens a decision");
+            var steps = 0; var answers = new List<string>();
+            while (engine.State.PendingChoice is not null && steps++ < 8)
+            {
+                var seat = engine.State.PendingChoice.PlayerId;
+                var actions = engine.QueryActions(seat);
+                Check(actions.Any(a => a.Enabled && a.Command is not null && a.Type != "concede"), $"{kind}: the engine offers seat {seat} an answer at {engine.State.PendingChoice.Type}");
+                var decision = TrainingOpponent.Choose(engine.GetView(seat), actions);
+                Check(decision.Command is not null && decision.Command.Type != "concede", $"{kind}: the bot answers ({decision.Reason})");
+                answers.Add(decision.Command!.Type);
+                var result = engine.Execute(decision.Command);
+                Check(result.Accepted, $"{kind}: the engine accepts the bot's answer {decision.Command.Type}: {result.Error}");
+            }
+            Check(engine.State.PendingChoice is null && engine.State.PendingSearch is null, $"{kind}: the search is answered within {steps} steps (stalled): {string.Join(",", answers)}");
+            if (kind == "p20-provinces") Check(answers is ["selectSearchCards"], "a province search takes the engine's default selection: " + string.Join(",", answers));
+            if (kind == "p20-other") Check(answers is ["selectSearchCards", "chooseShown"], "the searcher takes two Items and the other seat chooses one: " + string.Join(",", answers));
+            if (kind == "p20-attach") Check(answers is ["chooseSearchAttachTarget"], "the bot picks an attach target: " + string.Join(",", answers));
+        }
     }
 
     private static void Memory()

@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Ninube Tsukau no longer offers itself as the target of its copy ability ('a card never copies its own stats'), which made the nightly catalogue's offered command fail. Regression asserts Tsukau is not among its own targets.",
+  "validation": "check.sh --skip-client passed; local nightly --mode catalogue PASS (2181 cards, 78103 probes, 0 failures); full seeded-soak nightly on main still to be verified after merge",
+  "remaining": "Close #784 only after a complete successful nightly on main.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/784",
+  "branch": "claude/784-tsukau-self-target",
+  "updated": "2026-10-09T15:47:46.610328+00:00"
+}

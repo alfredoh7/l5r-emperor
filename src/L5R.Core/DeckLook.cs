@@ -48,7 +48,11 @@ public sealed record LookRule(string Disposition, int Min, int Max, SearchCriter
 /// <paramref name="Remainder"/> is where a card no rule claims goes: "top" (the usual "put the rest back") or "bottom"
 /// ("put the other three on the bottom"). <paramref name="Reorder"/>: the cards going back into the deck may be put in any
 /// order; when false each group keeps its viewed order.</summary>
-public sealed record LookSpec(string Id, string Label, LookTarget[] Targets, int Count, LookRule[] Rules, string Remainder = LookDisposition.Top, bool Reorder = false);
+public sealed record LookSpec(string Id, string Label, LookTarget[] Targets, int Count, LookRule[] Rules, string Remainder = LookDisposition.Top, bool Reorder = false,
+    // P20 (issue #728): "reveal cards from the top of a deck until you reveal one that ...". RevealUntil replaces the fixed Count: the cards are the top of the deck up to and including the first that meets the
+    // criteria (all of the deck when none does), every one of them REVEALED (the public shown-cards record), and the matching card must take MatchDisposition (a rule with Min = Max = 1 added to Rules, unless
+    // Rules already names that disposition or it is the Remainder). Every other card takes the Remainder or a rule of Rules. Unbound Essence's overlay (P22) will be a further MatchDisposition.
+    SearchCriteria? RevealUntil = null, string MatchDisposition = LookDisposition.Hand);
 
 public static class LookCatalog
 {
@@ -144,6 +148,10 @@ public sealed partial class MatchEngine
 {
     private static bool IsLookChoice(string type) => type is "lookDeck" or "lookArrange";
 
+    // The rules a look applies: its own, and for a reveal-until look the one that forces the matching card to take MatchDisposition.
+    private static LookRule[] LookRules(LookSpec spec) =>
+        spec.RevealUntil is { } until && spec.MatchDisposition != spec.Remainder && spec.Rules.All(r => r.Disposition != spec.MatchDisposition) ? [.. spec.Rules, new(spec.MatchDisposition, 1, 1, until)] : spec.Rules;
+
     private LookSpec LookSpecOf(PendingLook look) => LookCatalog.All.TryGetValue(look.LookId, out var spec) ? spec : throw new RuleViolation("Unknown look.");
 
     private static string DispositionLabel(string disposition) => disposition switch
@@ -189,6 +197,7 @@ public sealed partial class MatchEngine
         var viewer = Player(look.PlayerId); var source = Card(look.SourceCardId);
         var ownerId = LookOwner(look, target);
         look.Deck = target.Deck; look.DeckOwnerId = ownerId; look.Stage = "Arrange";
+        if (LookSpecOf(look).RevealUntil is { } until) { OpenRevealUntil(look, until, target); return; } // P20: the cards are those up to the first match, all of them revealed
         var shown = Math.Min(look.Count, LookDeckList(ownerId, target.Deck).Count);
         var whose = ownerId == look.PlayerId ? "their" : $"{Player(ownerId).Name}'s";
         // Public: THAT a look happened and how many cards, never which. The deck owner learns nothing more (the deck size is public).
@@ -197,6 +206,23 @@ public sealed partial class MatchEngine
         if (shown == 0) { FinishLook(look); return; }
         _state.PendingChoice = new("lookArrange", look.PlayerId, source.Id,
             $"{Definition(source).Name}: look at the top {shown} card{(shown == 1 ? "" : "s")} of {(ownerId == look.PlayerId ? "your" : $"{Player(ownerId).Name}'s")} {target.Deck} deck, arrange them, then confirm.");
+    }
+
+    // P20: the look of a reveal-until spec. The viewed cards are the top of the deck up to and including the first card that meets the criteria (the whole deck when none does); each is revealed to
+    // both players (the shown-cards record) before the viewer arranges them. The deck cannot change while the look is open, so the count stays right until the arrangement.
+    private void OpenRevealUntil(PendingLook look, SearchCriteria until, LookTarget target)
+    {
+        var viewer = Player(look.PlayerId); var source = Card(look.SourceCardId); var ownerId = look.DeckOwnerId!.Value;
+        var deck = LookDeckList(ownerId, target.Deck);
+        var index = deck.FindIndex(id => SearchEligibility(until, Card(id)).Eligible);
+        look.Count = index < 0 ? deck.Count : index + 1;
+        var whose = ownerId == look.PlayerId ? "their" : $"{Player(ownerId).Name}'s";
+        Emit("topCardsLooked", look.Count == 0 ? $"{viewer.Name} reveals cards from {whose} {target.Deck} deck: no cards remain."
+            : $"{viewer.Name} reveals {look.Count} card{(look.Count == 1 ? "" : "s")} from the top of {whose} {target.Deck} deck{(index < 0 ? ", and none is " + Article(until.Noun) : "")}.", viewer.Id, source.Id);
+        if (look.Count == 0) { FinishLook(look); return; }
+        foreach (var id in deck.Take(look.Count).ToArray()) RecordShown(viewer.Id, Card(id), source, target.Deck, "reveal");
+        _state.PendingChoice = new("lookArrange", look.PlayerId, source.Id,
+            $"{Definition(source).Name}: {look.Count} card{(look.Count == 1 ? " was" : "s were")} revealed from the top of {(ownerId == look.PlayerId ? "your" : $"{Player(ownerId).Name}'s")} {target.Deck} deck. Arrange them, then confirm.");
     }
 
     private void ResolveLookCommand(GameCommand command)
@@ -236,7 +262,7 @@ public sealed partial class MatchEngine
         LookDeckList(look.DeckOwnerId!.Value, look.Deck!).Take(look.Count).Select(Card).ToList();
 
     private static string[] OfferedDispositions(LookSpec spec) =>
-        [spec.Remainder, .. spec.Rules.Select(r => r.Disposition).Where(d => d != spec.Remainder).Distinct()];
+        [spec.Remainder, .. LookRules(spec).Select(r => r.Disposition).Where(d => d != spec.Remainder).Distinct()];
 
     /// <summary>Whether one viewed card may take one disposition, and the short reason when it may not.</summary>
     private (bool Legal, string? Reason) LookLegal(PendingLook look, LookSpec spec, CardInstance card, string disposition)
@@ -249,7 +275,7 @@ public sealed partial class MatchEngine
             if (look.DeckOwnerId != look.PlayerId) return (false, "Only cards from your own deck may be put in your hand");
         }
         if (disposition == spec.Remainder) return (true, null);
-        var rule = spec.Rules.First(r => r.Disposition == disposition);
+        var rule = LookRules(spec).First(r => r.Disposition == disposition);
         if (rule.Criteria is not null) { var (eligible, reason) = SearchEligibility(rule.Criteria, card); if (!eligible) return (false, reason); }
         if (disposition == LookDisposition.PlayIt) return NitoshiPlayLegal(look, card); // issue #617
         if (disposition == LookDisposition.Play) return P5PlayDispositionLegal(look, card); // issue #503 (EmperorP5Hidden.cs)
@@ -285,7 +311,7 @@ public sealed partial class MatchEngine
             if (!legal) return $"{Definition(cards[position]).Name} cannot be given '{disposition}': {reason}";
             entries.Add((position, disposition));
         }
-        foreach (var rule in spec.Rules)
+        foreach (var rule in LookRules(spec))
         {
             var count = entries.Count(e => e.Disposition == rule.Disposition);
             var (min, max) = LookBounds(look, spec, cards, rule);
@@ -361,7 +387,7 @@ public sealed partial class MatchEngine
             LookDeckList(look.DeckOwnerId!.Value, look.Deck!).Count,
             cards.Select((c, i) => new LookCardView(i, c.DefinitionId, Copy(Definition(c)),
                 offered.Select(d => { var (legal, reason) = LookLegal(look, spec, c, d); return new LookDispositionView(d, DispositionLabel(d, spec), legal, reason); }).ToArray())).ToArray(),
-            spec.Rules.Select(r => { var (min, max) = LookBounds(look, spec, cards, r); return new LookRuleView(r.Disposition, DispositionLabel(r.Disposition, spec), min, max); }).ToArray(),
+            LookRules(spec).Select(r => { var (min, max) = LookBounds(look, spec, cards, r); return new LookRuleView(r.Disposition, DispositionLabel(r.Disposition, spec), min, max); }).ToArray(),
             spec.Remainder, spec.Reorder);
     }
 

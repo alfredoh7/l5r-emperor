@@ -1,0 +1,33 @@
+{
+  "Profile": "strategy-wave-143",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #736.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10376",
+      "Name": "Harbor of Kalani's Landing",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Negate Personalities' movement to or from this battlefield.\nBattle: If there is no Terrain in play at the current battlefield: Put this card into play there. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10376.jpg",
+      "Keywords": [
+        "Port",
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w736-harbor-play"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

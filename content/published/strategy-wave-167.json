@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-167",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #739.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10386",
+      "Name": "Now We Are Enemies",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target two Personalities in the same army that do not share a Clan alignment: Give each target -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10386.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "w739-now-enemies"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

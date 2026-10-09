@@ -63,7 +63,7 @@ public sealed partial class MatchEngine
                 Celestials: owned.Where(c => c.Zone == Zone.Celestial).Select(c => ViewCard(c)).ToArray(),
                 FocusCount: owned.Count(c => c.Zone == Zone.Focused),
                 Underneath: owned.Where(c => c.Zone == Zone.Underneath).Select(c => ViewUnder(c, playerId)).ToArray())
-            { HandLimit = HandLimitFor(player.Id), DynastyActionTaken = player.DynastyActionTaken }; // issue #503: The New Foundries
+            { HandLimit = HandLimitFor(player.Id), DynastyActionTaken = player.DynastyActionTaken, PlansWithinPlansArmed = player.Id == playerId && LimitedInsteadOfOpen(player.Id) }; // issue #503: The New Foundries
         }).ToArray();
         var duel = _state.PendingDuel;
         return new(ContentVersion, _scenario, _state.Version, _state.TurnNumber, playerId, _state.ActivePlayerId, _state.PriorityPlayerId,
@@ -224,7 +224,9 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player = Player(playerId);
-        if (_state.PendingChoice is { Type: "harshChoices" } harsh)
+        var registeredPending = RegisteredPendingActions(playerId); // P25 (DecisionInfra.cs): a hook-registered pending type lists its own actions
+        if (registeredPending is not null) result.AddRange(registeredPending);
+        else if (_state.PendingChoice is { Type: "harshChoices" } harsh)
         {
             Add("harshChoices", "Keep province", Command("harshChoices") with { Choice = "decline" }, cardId: harsh.CardId);
             var last = player.Provinces.Count(p => !p.Destroyed) == 1;
@@ -487,6 +489,11 @@ public sealed partial class MatchEngine
         {
             // Lakeside Retreat (issue #622, TfStrategiesB.cs): the bowed Personality or Follower to straighten.
             foreach (var option in LakesideRetreatOptions(playerId, lakesidePending.CardId)) result.Add(option);
+        }
+        else if (_state.PendingChoice is { Type: "beforeBattleOptional" } movingPending && _state.PendingBeforeBattleResolve is { } movingResolve && IsWave741MovingBattleChoice(movingResolve))
+        {
+            // A Moving Battle (issue #741, Wave741.cs): decline, or the Personality and the adjacent unresolved battlefield to move him to.
+            foreach (var option in Wave741MovingBattleOptions(playerId, movingPending.CardId)) result.Add(option);
         }
         else if (_state.PendingChoice is { Type: "beforeBattleOptional" } optionalPending)
         {

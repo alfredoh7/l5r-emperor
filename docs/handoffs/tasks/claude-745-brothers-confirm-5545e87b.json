@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Brothers in Battle (and any performing-slot action) could not be confirmed: the client sent the first performer as TargetId and Core refused it. TargetSlotOption.NotPrimary now marks performing/cost-only slots and the client skips them when choosing the target.",
+  "validation": "bash tools/check.sh --skip-client passed (exit 0) including new Brothers in Battle battle-offer regression; native tools/check-multi-targets-ui.sh passed at both sizes; new native 'brothers' scenario failed before the fix and passes after. No Windows human playtest.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/745",
+  "branch": "claude/745-brothers-confirm",
+  "updated": "2026-10-08T01:47:47.911063+00:00"
+}

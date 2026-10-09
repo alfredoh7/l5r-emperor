@@ -1,0 +1,28 @@
+{
+  "Profile": "event-wave-33",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #734.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10605",
+      "Name": "Riding to the Rescue",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Your Cavalry Personalities and Followers have +1F while attacking and opposed (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10605.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w734-riding"
+    }
+  ],
+  "Decks": []
+}

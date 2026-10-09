@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-10708",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10708",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10708-printing-1-image-1.webp",
+    "image_sha256": "15cf44571413df7a836d9d9d43cb5c2f684acc97e06ba469c65de81af3a06efb"
+  },
+  {
+    "card_id": "oracle-l5r-10700",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10700",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10700-printing-1-image-1.webp",
+    "image_sha256": "3e6d0a82286abc548b28683696a7c3ff8161d3110fad06209385f687dffcb998"
+  },
+  {
+    "card_id": "oracle-l5r-10540",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10540",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10540-printing-1-image-1.webp",
+    "image_sha256": "dae74bbc2e79a6b34e7f8ff665e8462f8ae66d3ac92f6df8215c74a2ba6147c4"
+  }
+]

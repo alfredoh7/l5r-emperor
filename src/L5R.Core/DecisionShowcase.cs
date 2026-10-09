@@ -7,6 +7,7 @@ public sealed partial class MatchEngine
     {
         if (kind is "preserving" or "rin" or "conqueror" or "straighten" or "discard") return CreateGenericDecisionShowcase(kind);
         if (kind == "kamina") return CreateKaminaShowcase();
+        if (kind.StartsWith("p25-", StringComparison.Ordinal)) return CreateDecisionInfraShowcase(kind); // P25 (DecisionInfraShowcase.cs)
         if (kind is not ("yumaru" or "fukui" or "fukui-bowed")) throw new ArgumentException("Unknown decision showcase.", nameof(kind));
         var state = CreatePublishedTestMatch(42).State;
         state.Phase = Phase.Battle; state.ActivePlayerId = 0; state.PriorityPlayerId = 0;

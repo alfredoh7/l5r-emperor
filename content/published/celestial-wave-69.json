@@ -1,0 +1,33 @@
+{
+  "Profile": "celestial-wave-69",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #735.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10817",
+      "Name": "The Inevitable Grasp of Conquest",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Personalities have Conqueror.\nBattle: Destroy one of your Provinces. Other players' cards will not destroy your Personalities this battle. Discard this Celestial.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10817.jpg",
+      "Keywords": [
+        "Unique",
+        "Maigo no Musha"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w735-grasp-destroy"
+      ],
+      "Effect": "w735-grasp"
+    }
+  ],
+  "Decks": []
+}

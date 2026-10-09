@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Gold payments use a coin fraction meter beside the hand (paid/cost; one coin for a chosen amount). Clicking a holding on the table bows it as a payment preview and adds its Gold; clicking again straightens it. Sidebar checkboxes and table clicks share one selection. Costed actions open with nothing pre-selected. Confirm appears only once the cost is covered (immediately for variable costs, with a 0-Gold Yes/No prompt); a variable cost pays the Gold bowed.",
+  "validation": "check-gold-payment (all modes) passes in the task worktree; gameplay-controls, either-or, opponent-payment, movement, multi-targets, province-target native checks pass; attack-targets printed ATTACK_TARGET_PASS but exited 1 on a Windows WASAPI audio error line. check-interactions fails identically on main (reflection call of Choose with one argument). check.sh --skip-client not completed. No Windows graphical playtest.",
+  "remaining": "Reaction/discount/Use Profits sources are not auto-dropped when a holding is straightened; opponent-payment (Virtuous Charity) keeps its amount stepper; human playtest of the meter placement and table clicks needed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/731",
+  "branch": "claude/731-gold-coin-payment",
+  "updated": "2026-10-08T01:13:59.568987+00:00"
+}
