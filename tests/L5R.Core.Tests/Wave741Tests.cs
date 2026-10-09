@@ -270,7 +270,7 @@ internal static class Wave741Tests
         var nonhuman = P(s, "w741-nonhuman-t", 1, Zone.Home, 7, 2, 1, ["Nonhuman", "Spirit"]);
         var e = MatchEngine.FromTestState(s);
         var targets = Batch336Support.Options(e, 0, Wave741Abilities.TsukauCopy, tsukau.Id).Where(a => a.Enabled).SelectMany(a => a.TargetIds ?? []).ToArray();
-        Check(targets.Contains(human.Id) && !targets.Contains(unique.Id) && !targets.Contains(nonhuman.Id), "only a non-Unique Human Personality is a target: " + string.Join(",", targets));
+        Check(targets.Contains(human.Id) && !targets.Contains(unique.Id) && !targets.Contains(nonhuman.Id) && !targets.Contains(tsukau.Id), "only another non-Unique Human Personality is a target (a card never copies itself): " + string.Join(",", targets));
         Accept(e, Batch336Support.Offer(e, 0, Wave741Abilities.TsukauCopy, tsukau.Id, human.Id));
         for (var guard = 0; guard < 4 && e.State.PendingCopy is not null; guard++)
         {
