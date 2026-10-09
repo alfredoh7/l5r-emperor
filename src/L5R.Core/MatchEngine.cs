@@ -941,6 +941,7 @@ public sealed partial class MatchEngine
         else if (gate.RefuseReason is { } gateRefusal) error = gateRefusal;
         else if (def.Type == CardType.Personality && !LoyaltyAllowsControl(card, player.Clan, player.Id)) error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if ((clanDiscount || clanAllegiance) && !inClan) error = "Clan discount and allegiance require your Clan's Personality.";
+        else if (clanDiscount && ImperialBarsClanDiscount(card, playerId)) error = "Journey's End Keep: Personalities whose only Clan alignment is Imperial cannot be bought with Clan discount."; // issue #771 (Wave771.cs)
         // Akodo Chiyo / Kitsu Ririko (issue #299): a Personality's own printed "Clan X players may ignore
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that

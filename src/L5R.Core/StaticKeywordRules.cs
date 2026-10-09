@@ -49,12 +49,13 @@ public sealed partial class MatchEngine
         if (!_staticKeywordQuestions.Add(key)) return [];
         try
         {
+            var imperial = ImperialClanAlignment(card); // Journey's End Keep (issue #771, Wave771.cs): Imperial is a Clan while one is a Stronghold in the match
             foreach (var source in StaticKeywordRuleSources(card.OwnerId))
                 if (Definition(source).Effect == NagiMagistrateClanEffect && NagiCovers(source, card)
-                    || Definition(source).Effect == AtosaGaijinClanEffect && AtosaCovers(card)) return ControllerClans(card.OwnerId);
+                    || Definition(source).Effect == AtosaGaijinClanEffect && AtosaCovers(card)) return [.. ControllerClans(card.OwnerId), .. imperial];
             // Atosa's own trait, out of play, still reaches the one card it is printed on (core rules, Traits): she has her owner's Clan alignment in a province too.
-            if (AtosaCoversHerself(card)) return ControllerClans(card.OwnerId);
-            return [];
+            if (AtosaCoversHerself(card)) return [.. ControllerClans(card.OwnerId), .. imperial];
+            return imperial;
         }
         finally { _staticKeywordQuestions.Remove(key); }
     }
