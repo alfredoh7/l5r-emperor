@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Stop-hook handoff reminder now scopes to the current session: it fires only when the session transcript shows an Edit/Write/MultiEdit/NotebookEdit on an engine file, so a session on a branch carrying another session's engine changes is no longer nagged. Falls back to the old branch-level check when the transcript is unreadable.",
+  "validation": "python -m unittest discover -s tools/hooks: all pass, incl. 3 new cases (inherited changes with no session edit, session edit still reminds, unreadable transcript falls back).",
+  "remaining": "Edits made only through Bash are invisible to the check. None otherwise; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/526",
+  "branch": "claude/hook-session-scope",
+  "updated": "2026-10-09T04:10:15.171447+00:00"
+}
