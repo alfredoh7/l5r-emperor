@@ -52,9 +52,19 @@ class HandoffReminderTests(unittest.TestCase):
         self.git("add", ".")
         self.git("-c", "gc.auto=0", "commit", "-m", message)
 
-    def run_hook(self):
+    def transcript(self, *edited_paths, tool="Edit"):
+        path = Path(self.tmp.name) / "transcript.jsonl"
+        lines = [json.dumps({"type": "assistant", "message": {"content": [
+            {"type": "text", "text": "working"},
+            {"type": "tool_use", "name": tool, "input": {"file_path": str(p)}}]}}) for p in edited_paths]
+        path.write_text(chr(10).join(["not json", *lines]) + chr(10), encoding="utf-8")
+        return path
+
+    def run_hook(self, transcript_path=None):
         payload = {"session_id": "test", "cwd": str(self.root), "hook_event_name": "Stop",
                    "stop_reason": "end_turn"}
+        if transcript_path is not None:
+            payload["transcript_path"] = str(transcript_path)
         result = subprocess.run(
             [sys.executable, str(SCRIPT)], input=json.dumps(payload),
             capture_output=True, text=True, timeout=10,
@@ -63,13 +73,13 @@ class HandoffReminderTests(unittest.TestCase):
         stdout_json = json.loads(result.stdout) if result.stdout.strip() else None
         return result.returncode, stdout_json, result.stderr
 
-    def assert_no_reminder(self):
-        code, stdout_json, stderr = self.run_hook()
+    def assert_no_reminder(self, transcript_path=None):
+        code, stdout_json, stderr = self.run_hook(transcript_path)
         self.assertEqual(code, 0, stderr)
         self.assertIsNone(stdout_json)
 
-    def assert_reminder(self):
-        code, stdout_json, stderr = self.run_hook()
+    def assert_reminder(self, transcript_path=None):
+        code, stdout_json, stderr = self.run_hook(transcript_path)
         self.assertEqual(code, 0, stderr)
         self.assertIsNotNone(stdout_json)
         decision = stdout_json["hookSpecificOutput"]
@@ -105,6 +115,23 @@ class HandoffReminderTests(unittest.TestCase):
         self.git("switch", "-c", "claude/12-content-wave")
         self.write("content/published/example-wave-1.json", "{}\n")
         self.assert_reminder()
+
+    def test_inherited_engine_changes_do_not_remind_a_session_that_edited_none(self):
+        self.git("switch", "-c", "claude/13-other-session")
+        self.write("src/L5R.Core/CardAbilities.cs", "someone else's rules change\n")
+        self.assert_no_reminder(self.transcript(self.root / "src/L5R.Client/CardTile.cs"))
+        self.assert_no_reminder(self.transcript())
+
+    def test_session_that_edited_an_engine_file_still_gets_a_reminder(self):
+        self.git("switch", "-c", "claude/13-other-session")
+        self.write("src/L5R.Core/CardAbilities.cs", "my rules change\n")
+        self.assert_reminder(self.transcript(self.root / "src/L5R.Core/CardAbilities.cs"))
+        self.assert_reminder(self.transcript(self.root / "src/L5R.Core/CardAbilities.cs", tool="Write"))
+
+    def test_unreadable_transcript_falls_back_to_the_branch_level_check(self):
+        self.git("switch", "-c", "claude/13-other-session")
+        self.write("src/L5R.Core/CardAbilities.cs", "rules change\n")
+        self.assert_reminder(Path(self.tmp.name) / "missing.jsonl")
 
     def test_on_main_branch_never_reminds(self):
         self.write("src/L5R.Core/CardAbilities.cs", "changed rules on main\n")
