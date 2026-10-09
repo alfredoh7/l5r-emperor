@@ -17,6 +17,13 @@ just explicit) plus additionalContext with the exact fix command from
 AGENTS.md; otherwise it prints nothing and exits 0. Any failure (not a git
 repo, no origin/main, detached HEAD, ...) is swallowed silently -- a reminder
 is not worth ever blocking or erroring a session over.
+
+Session scope: when the payload's transcript_path is readable, the reminder
+fires only if THIS session edited an engine file (Edit/Write/MultiEdit/
+NotebookEdit tool calls in the transcript). Otherwise a session that merely sits
+on a branch carrying someone else's engine changes is nagged for a handoff it
+cannot honestly write. Edits made through Bash are invisible to this check; when
+the transcript is missing or unreadable the branch-level check applies as before.
 """
 from __future__ import annotations
 
@@ -49,7 +56,43 @@ def import_collab():
     return collab
 
 
-def needs_reminder(root):
+EDIT_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit")
+
+
+def session_edited_paths(transcript_path):
+    """Files this session edited via edit tools, or None when it cannot be known."""
+    try:
+        text = Path(transcript_path).read_text(encoding="utf-8", errors="replace")
+    except (OSError, TypeError, ValueError):
+        return None
+    edited = set()
+    for line in text.splitlines():
+        try:
+            entry = json.loads(line)
+        except ValueError:
+            continue
+        content = (entry.get("message") or {}).get("content") if isinstance(entry, dict) else None
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "tool_use" and block.get("name") in EDIT_TOOLS:
+                args = block.get("input") or {}
+                path = args.get("file_path") or args.get("notebook_path")
+                if path:
+                    edited.add(str(path))
+    return edited
+
+
+def is_engine_path(path, root):
+    candidate = Path(path)
+    try:
+        candidate = candidate.resolve().relative_to(Path(root).resolve())
+    except (OSError, ValueError):
+        pass
+    return candidate.as_posix().startswith(ENGINE_PREFIXES)
+
+
+def needs_reminder(root, transcript_path=None):
     collab = import_collab()
     name = collab.branch(root)
     if name in ("main", "master", ""):
@@ -57,6 +100,10 @@ def needs_reminder(root):
     paths = collab.paths_changed(root, "origin/main", working=True)
     if not any(p.startswith(prefix) for p in paths for prefix in ENGINE_PREFIXES):
         return False
+    if transcript_path:
+        edited = session_edited_paths(transcript_path)
+        if edited is not None and not any(is_engine_path(p, root) for p in edited):
+            return False
     result = collab.audit(root, "origin/main", name=name, working=True)
     handoff_errors = ("Missing changed task handoff", "Handoff belongs to another branch")
     return any(any(marker in error for marker in handoff_errors) for error in result["errors"])
@@ -76,7 +123,7 @@ def main():
         return 0
     try:
         root = project_root(payload)
-        if needs_reminder(root):
+        if needs_reminder(root, payload.get("transcript_path")):
             allow(HANDOFF_HINT)
     except Exception:  # noqa: BLE001  a reminder is never worth blocking or erroring a session over
         pass
