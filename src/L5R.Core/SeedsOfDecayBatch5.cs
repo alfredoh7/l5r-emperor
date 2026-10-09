@@ -91,6 +91,7 @@ public sealed partial class MatchEngine
     // source card, so neither is touched (see the batch report's readings).
     private void NegateOtherPlayersEffects(CardInstance card)
     {
+        CleanseForceCaps(card, otherPlayersOnly: true); // issue #768 (ForceCaps.cs): a Force cap from another player's card is a current effect on it
         var removed = card.Modifiers.RemoveAll(m => EffectFromOtherPlayer(m.Source, card));
         foreach (var token in card.Tokens.Where(t => EffectFromOtherPlayer(t.Source, card)).ToArray()) { DestroyToken(card, token); removed++; }
         removed += card.GrantedKeywords.RemoveAll(g => EffectFromOtherPlayer(g.Source, card));

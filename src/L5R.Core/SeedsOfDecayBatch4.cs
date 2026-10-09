@@ -50,6 +50,7 @@ public sealed partial class MatchEngine
     // Every action lock on him is lifted, whatever its duration.
     private void CleanseForcePenaltiesAndLocks(CardInstance card)
     {
+        CleanseForceCaps(card); // issue #768 (ForceCaps.cs): a Force cap binding him now is a current Force penalty too
         var modifiers = card.Modifiers.RemoveAll(m => m.Stat == "Force" && m.Amount < 0);
         // Issue #503: a two-stat token (-1F/-1C Poison) loses its Force penalty and keeps its other stat.
         var twoStat = card.Tokens.Where(t => t.Stat == "Force" && t.Amount < 0 && t.Stat2 is not null).ToArray();

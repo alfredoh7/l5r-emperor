@@ -45,6 +45,7 @@ internal static partial class EngineHooks
         _ = StatTerms.Items;
         _ = CardRestrictions.Items;
         _ = CardTargetBars.Items;
+        _ = ForceCaps.Items; // issue #768: the Force cap channel
         _ = AfterActionTraits.Items;
         _ = EntryCostTerms.Items;
         _ = StandingImmunities.Items;

@@ -33,7 +33,11 @@ A token created as -1F is read by the existing `StatModifier`, so a Force read c
 5. **Tokens made before a Foothold is in play** do not exist: a Stronghold is in play from setup, so every Madness token is made after it.
 6. **"Join you."** The discount covers a Recruit and a Reserve recruit. An Experienced overlay and an Invest Reaction do not read the entry channel (P2's rule).
 7. **"Your Holdings enter play."** The Holdings the user recruits this turn, whichever of the two recruit routes. The mark is the turn it was made; it does not carry over, and the opponent's Holdings are not discounted.
-8. **Both Limited abilities bow the Stronghold**, so one is usable per turn.
+8. **Both Limited abilities bow the Stronghold.** Confirmed by Mendon (2026-10-09): if something straightens the Stronghold after one action is taken, the other may also be taken by bowing it again. Each ability is still once per turn. Tested: `foothold-of-the-mad/BothAbilitiesAfterStraightening`.
+
+## Rulings confirmed by Mendon (2026-10-09)
+
+Readings 1 to 7 are confirmed ("everything else is okay"); 8 is confirmed as stated above.
 
 ## Art pack
 

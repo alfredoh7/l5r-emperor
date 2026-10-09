@@ -2228,7 +2228,9 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
+    // A Force cap (issue #768, ForceCaps.cs) lowers the total below; it is applied here, once, so every reader of a Personality's Force sees it.
+    private int PersonalityForce(CardInstance card) => ApplyForceCaps(card, PersonalityForceUncapped(card));
+    private int PersonalityForceUncapped(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
