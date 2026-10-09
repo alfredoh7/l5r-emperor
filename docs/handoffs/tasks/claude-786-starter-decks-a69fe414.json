@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Eight playtest decks (Crab Control, Crane Dominance, Dragon Destruction, Phoenix Talons, Scorpion Lethargy, Scottish Lion Deck, Spider Conquer, Unicorn Maidens) are bundled in the client at Content/StarterDecks and copied once into the player's user://decks folder by StarterDecks.Seed (Core) via StarterDeckSeeder (client), used by the Deck Builder and Practice setup. A ledger (user://starter-decks.seen) means deleted or edited starters are never restored or overwritten, new starters in later builds still arrive, and player decks are never touched. User decks already live in %APPDATA%, outside the extracted game folder, so deleting and re-extracting the share package keeps them. export_presets include_filter now ships the .txt starters; the share READ ME explains both behaviours.",
+  "validation": "core/StarterDecks 8/8 pass; check-practice-setup.sh native probe PASS including new checks (starter decks present, every one loads against the catalogue, second launch adds nothing); tools/export.sh windows validated and all 8 decks stored in the pck; share ZIP rebuilt with new READ ME. Not verified: opening the exported Windows exe UI to see the seeded decks (exported binary cannot launch probe scenes); no Windows graphical playtest by a second person.",
+  "remaining": "None; ready for review. Friends upgrading from a pre-seeding build get the starters on first Deck Builder/Practice open.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/786",
+  "branch": "claude/786-starter-decks",
+  "updated": "2026-10-09T18:08:27.193260+00:00"
+}

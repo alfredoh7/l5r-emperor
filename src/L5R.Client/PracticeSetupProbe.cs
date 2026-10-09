@@ -13,6 +13,11 @@ public partial class PracticeSetupProbe : Node
         try
         {
             _out=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--out="))?[6..]??ProjectSettings.GlobalizePath("res://../../artifacts/practice-checks");Directory.CreateDirectory(_out);
+            var starterDir=Path.Combine(_out,"starter-"+Guid.NewGuid().ToString("N"));var starterNames=StarterDeckSeeder.SeedInto(starterDir,starterDir+".seen");
+            Check(starterNames.Length>=8&&starterNames.Contains("Phoenix Talons"),"bundled starter decks (including Phoenix Talons) are present in the game package");
+            foreach(var file in new DeckFileStore(starterDir).Files()){var workshop=CustomPractice.Workshop();try{workshop.Load(DeckFileStore.Read(file));}catch(FormatException e){throw new Exception("Starter deck "+Path.GetFileName(file)+" does not load: "+e.Message);}}
+            Check(true,"every bundled starter deck loads against the catalogue");
+            Check(StarterDeckSeeder.SeedInto(starterDir,starterDir+".seen").Length==0,"a second launch adds nothing");
             var storage=Path.Combine(_out,"fixtures-"+Guid.NewGuid().ToString("N"));var store=new DeckFileStore(storage);
             var crane=CustomPractice.Preset("Crane");var path=store.Save("Crane — Court and Steel",crane);
             store.Save("Lion — Honour and Steel",CustomPractice.Preset("Lion"));
