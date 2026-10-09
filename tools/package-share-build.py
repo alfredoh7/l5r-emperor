@@ -49,9 +49,8 @@ built-in opponent, or use Private Match to play online with a friend.
 
 STARTER DECKS AND YOUR OWN DECKS
 Nine ready-made decks (Crab Control, Crane Dominance, Dragon Destruction,
-Mantis Manipulation,
-Phoenix Talons, Scorpion Lethargy, Scottish Lion Deck, Spider Conquer and
-Unicorn Maidens) are added to your deck list the first time you open this
+Lion Legacy, Mantis Manipulation, Phoenix Talons, Scorpion Lethargy,
+Spider Conquer and Unicorn Maidens) are added to your deck list the first time you open this
 version. Choose them in Practice, or open them in the Deck Builder.
 Decks you build or edit are saved in your user profile, not in this folder:
   %APPDATA%\\Godot\\app_userdata\\L5R · Emperor\\decks
