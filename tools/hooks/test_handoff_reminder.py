@@ -133,6 +133,52 @@ class HandoffReminderTests(unittest.TestCase):
         self.write("src/L5R.Core/CardAbilities.cs", "rules change\n")
         self.assert_reminder(Path(self.tmp.name) / "missing.jsonl")
 
+    def sibling_worktree(self, branch, with_handoff):
+        """A task checkout beside the project root, on its own branch with an engine edit."""
+        sibling = Path(self.tmp.name) / ("sibling-" + branch.replace("/", "-"))
+        self.git("worktree", "add", "-b", branch, str(sibling), "origin/main")
+        (sibling / "src/L5R.Core").mkdir(parents=True, exist_ok=True)
+        (sibling / "src/L5R.Core/CardAbilities.cs").write_text("sibling rules change\n", encoding="utf-8")
+        if with_handoff:
+            path = sibling / c.handoff_path(branch, c.config(REPO))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps({
+                "branch": branch, "lane": "rules", "summary": "Fixture change for the Stop hook test.",
+                "validation": "Fixture verification completed successfully.", "remaining": "None; ready for review.",
+            }), encoding="utf-8")
+        return sibling
+
+    def test_edit_in_a_sibling_worktree_is_judged_on_that_worktrees_branch(self):
+        # The project root sits on someone else's branch with engine changes and no handoff; this session's
+        # edits are in a sibling checkout whose handoff exists, so nothing is owed (issue #781).
+        self.git("switch", "-c", "claude/13-other-session")
+        self.write("src/L5R.Core/CardAbilities.cs", "someone else's rules change\n")
+        sibling =self.sibling_worktree("claude/14-mine", with_handoff=True)
+        self.assert_no_reminder(self.transcript(sibling / "src/L5R.Core/CardAbilities.cs"))
+
+    def test_edit_in_a_sibling_worktree_without_a_handoff_reminds_even_with_a_clean_project_root(self):
+        sibling = self.sibling_worktree("claude/15-mine", with_handoff=False)
+        self.assert_reminder(self.transcript(sibling / "src/L5R.Core/CardAbilities.cs"))
+
+    def test_a_branch_already_merged_into_origin_main_never_reminds(self):
+        self.git("switch", "-c", "claude/16-merged")
+        self.write("src/L5R.Core/CardAbilities.cs", "merged rules change\n")
+        self.save("rules change")
+        self.git("update-ref", "refs/remotes/origin/main", "HEAD")
+        self.assert_no_reminder(self.transcript(self.root / "src/L5R.Core/CardAbilities.cs"))
+
+    def test_debug_trace_records_the_decision(self):
+        self.git("switch", "-c", "claude/17-trace")
+        self.write("src/L5R.Core/CardAbilities.cs", "rules change\n")
+        log =Path(self.tmp.name) / "hook.log"
+        payload = {"session_id": "t", "cwd": str(self.root), "hook_event_name": "Stop",
+                   "transcript_path": str(self.transcript(self.root / "src/L5R.Core/CardAbilities.cs"))}
+        result = subprocess.run([sys.executable, str(SCRIPT)], input=json.dumps(payload), capture_output=True, text=True, timeout=10,
+                                env={**os.environ, "CLAUDE_PROJECT_DIR": str(self.root), "L5R_HOOK_DEBUG": str(log)})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        entry = json.loads(log.read_text(encoding="utf-8").splitlines()[-1])
+        self.assertTrue(entry["has_transcript"] and entry["reminder"], entry)
+
     def test_on_main_branch_never_reminds(self):
         self.write("src/L5R.Core/CardAbilities.cs", "changed rules on main\n")
         self.assert_no_reminder()
