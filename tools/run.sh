@@ -12,7 +12,9 @@ l5r_python="${L5R_PYTHON:-}"
 if [ -z "$l5r_python" ]; then
   # Finder/Terminal may inherit Apple's Python 3.9 before Homebrew in PATH.
   # Use an installed project-compatible runtime, without installing anything.
-  for l5r_candidate in "$L5R_PROJECT_ROOT/.venv/bin/python3" /opt/homebrew/bin/python3 /usr/local/bin/python3 python3 python; do
+  # A shortcut started from Explorer can inherit a PATH from before Python was installed, so also look in the usual Windows install folders.
+  l5r_windows_pythons=(); for l5r_dir in "${LOCALAPPDATA:-}"/Python/pythoncore-*/python.exe "${LOCALAPPDATA:-}"/Programs/Python/Python3*/python.exe; do [ -f "$l5r_dir" ] && l5r_windows_pythons+=("$l5r_dir"); done
+  for l5r_candidate in "$L5R_PROJECT_ROOT/.venv/bin/python3" /opt/homebrew/bin/python3 /usr/local/bin/python3 python3 python ${l5r_windows_pythons[@]+"${l5r_windows_pythons[@]}"}; do
     if command -v "$l5r_candidate" >/dev/null && "$l5r_candidate" -c 'import sys; sys.exit(sys.version_info < (3, 12))' 2>/dev/null; then
       l5r_python="$l5r_candidate"; break
     fi

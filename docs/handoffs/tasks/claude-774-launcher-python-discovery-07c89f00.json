@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "tools/run.sh also looks in the usual Windows Python install folders, so the Windows launcher shortcut works when Explorer hands it a PATH without Python (it exited 1 with 'Python 3.12 or newer is required').",
+  "validation": "Simulated a PATH without Python: old run.sh discovery fails with the reported message, new discovery finds the 3.14 install and runs it. bash -n passes. Not yet confirmed by clicking the real shortcut.",
+  "remaining": "Mendon to click the shortcut after pulling; if it still fails, send artifacts/checks/latest-launch.log.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/774",
+  "branch": "claude/774-launcher-python-discovery",
+  "updated": "2026-10-09T04:14:10.907925+00:00"
+}
