@@ -226,8 +226,11 @@ internal static class BotPolicyTests
         CardView Unit(string id, int owner, int? province) => Person(id, owner, person) with { Zone = province is null ? Zone.Home : Zone.Battlefield, ProvinceIndex = province, Force = 6 };
         ProvinceView[] Provinces(int count) => Enumerable.Range(0, count).Select(i => new ProvinceView(i, 3, false, null, null)).ToArray();
         // Two Provinces left, both attacked by 12 Force (3 + defense can not save them with 6 Force at home against 12 apiece): the bot defends anyway.
-        var attacked = view with { Players = [view.Players[0] with { Home = [Unit("own-1", 0, null)], Army = [], Provinces = Provinces(2) },
-            view.Players[1] with { Home = [], Army = [Unit("a-0", 1, 0), Unit("a-0b", 1, 0), Unit("a-1", 1, 1), Unit("a-1b", 1, 1)] }] };
+        var attacked = view with
+        {
+            Players = [view.Players[0] with { Home = [Unit("own-1", 0, null)], Army = [], Provinces = Provinces(2) },
+            view.Players[1] with { Home = [], Army = [Unit("a-0", 1, 0), Unit("a-0b", 1, 0), Unit("a-1", 1, 1), Unit("a-1b", 1, 1)] }]
+        };
         var defend = new ActionOption("assignDefense", "Defend", true, null, new("assignDefense", 0, attacked.Version, Assignments: []), TargetIds: ["own-1"], Provinces: [0, 1]);
         Check(TrainingOpponent.Choose(attacked, [pass, defend]).Command?.Type == "assignDefense", "every Province would fall: the bot defends");
         // Honor race: the opponent holds 40 Honor and a bigger home army. Without the race the bot stays home; with it, it attacks.

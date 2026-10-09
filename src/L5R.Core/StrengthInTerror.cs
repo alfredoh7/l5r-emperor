@@ -19,8 +19,15 @@ public sealed partial class MatchEngine
         options.Add(new(StrengthInTerrorDecline, "Do not destroy an attachment", []));
         _state.PendingEffectChoice = new()
         {
-            Command = command, PlayerId = command.PlayerId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant, PlayedFromDiscard = playedFromDiscard,
-            OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList(), Options = options
+            Command = command,
+            PlayerId = command.PlayerId,
+            Negated = _state.NegatedEffects.ToList(),
+            ConsumedGrant = consumedGrant,
+            PlayedFromDiscard = playedFromDiscard,
+            OpponentHonorBefore = opponentHonorBefore,
+            BowedBefore = bowedBefore.ToList(),
+            PreExistingGrants = preExistingGrants.ToList(),
+            Options = options
         };
         _state.PendingChoice = new("effectChoice", command.PlayerId, source.Id, $"{Definition(source).Name}: you may destroy one of {Definition(target).Name}'s attachments.");
         _state.PriorityPlayerId = command.PlayerId; _state.ConsecutivePasses = 0;

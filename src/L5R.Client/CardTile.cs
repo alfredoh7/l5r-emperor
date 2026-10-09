@@ -42,7 +42,8 @@ public partial class CardTile : Button
     }
     private void LeaveHover()
     {
-        _exitDeferred = false; _hover = false; if (_hoveredTile == this) { _hoveredTile = null; _hoveredCardId = null; } QueueRedraw();
+        _exitDeferred = false; _hover = false; if (_hoveredTile == this) { _hoveredTile = null; _hoveredCardId = null; }
+        QueueRedraw();
     }
     /// <summary>Issue #635: set from outside (a hovered row in a target/performer list) to show this card exactly as if the pointer were over it; it fires no inspection.</summary>
     public bool ForcedHover { get => _forcedHover; set { if (_forcedHover == value) return; _forcedHover = value; QueueRedraw(); } }
