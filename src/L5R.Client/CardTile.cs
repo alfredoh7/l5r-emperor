@@ -28,7 +28,23 @@ public partial class CardTile : Button
     public string ContextHelp { get; set; } = "";
     private static Texture2D? _atlas;
     private static Texture2D? _dynastyBack;
-    private bool _hover;
+    private bool _hover, _enterPending, _exitDeferred;
+    private Action<CardView>? _inspected;
+    private static ulong _lastPointerMotion;
+    private static CardTile? _hoveredTile;
+    private static string? _hoveredCardId; // a rebuilt tile for the same card keeps the hover the pointer already had
+    private static bool RecentPointerMotion() => Time.GetTicksMsec() - _lastPointerMotion < 150;
+    private void EnterHover()
+    {
+        _enterPending = false; _exitDeferred = false;
+        if (_hoveredTile is { } previous && previous != this && IsInstanceValid(previous)) previous.LeaveHover();
+        _hoveredTile = this; _hoveredCardId = Card.Id; _hover = true; QueueRedraw(); _inspected?.Invoke(Card);
+    }
+    private void LeaveHover()
+    {
+        _exitDeferred = false; _hover = false; if (_hoveredTile == this) { _hoveredTile = null; _hoveredCardId = null; }
+        QueueRedraw();
+    }
     /// <summary>Issue #635: set from outside (a hovered row in a target/performer list) to show this card exactly as if the pointer were over it; it fires no inspection.</summary>
     public bool ForcedHover { get => _forcedHover; set { if (_forcedHover == value) return; _forcedHover = value; QueueRedraw(); } }
     private bool _forcedHover;
@@ -71,8 +87,12 @@ public partial class CardTile : Button
         TooltipText = card.Definition is null ? "Face-down card. Its identity is hidden." : $"{card.Definition.Name}\n{card.Definition.Type} · {card.Definition.GoldCost} Gold\n{card.Definition.Text}";
         if (CreatedCopyStatus.VisibleOn(card)) TooltipText += "\n" + CreatedCopyStatus.Description(card);
         Pressed += () => clicked(Card);
-        MouseEntered += () => { _hover = true; QueueRedraw(); inspected(Card); };
-        MouseExited += () => { _hover = false; QueueRedraw(); };
+        // A steady hover (playtest 2026-10): cards moving under a stationary pointer (flights, cleanup, refills) must not make the enlarged card pop up and down. Only real pointer
+        // motion starts or ends a hover; a card that slides in or out beneath a still pointer waits for the next movement.
+        _inspected = inspected;
+        MouseEntered += () => { if (RecentPointerMotion() || _hoveredCardId == Card.Id) EnterHover(); else _enterPending = true; };
+        MouseExited += () => { _enterPending = false; if (_hover && !RecentPointerMotion()) _exitDeferred = true; else LeaveHover(); };
+        GuiInput += e => { if (e is InputEventMouseMotion) { _lastPointerMotion = Time.GetTicksMsec(); if (_enterPending) EnterHover(); } };
         FocusEntered += () => { QueueRedraw(); inspected(Card); };
         FocusExited += QueueRedraw;
         Resized += QueueRedraw;
@@ -98,13 +118,14 @@ public partial class CardTile : Button
 
     public override void _Process(double delta)
     {
+        if (_exitDeferred && Input.GetLastMouseVelocity().LengthSquared() > 1) { _exitDeferred = false; if (!_HasPoint(GetLocalMousePosition())) LeaveHover(); }
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
         var inspecting = (Hovered || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
-        ZIndex = Hovered ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
+        ZIndex = Hovered ? 70 : HasFocus() ? 20 : IsSelected ? 10 : 0;
         if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
         _bowAngle = ReducedMotion ? _bowDestination : Mathf.MoveToward(_bowAngle, _bowDestination, (float)delta * Mathf.Pi * 3);
         // Reduced motion preserves visible feedback and makes its transition immediate.
