@@ -287,7 +287,7 @@ public sealed partial class MatchEngine
             Emit("controlRefused", $"{Definition(source).Name}: {name} is Loyal and will not be controlled by {player.Name}; he stays dead.", player.Id, target.Id);
             return false;
         }
-        if ((Keyword(target, "Unique") || Keyword(target, "Singular")) && ControlsCopyOf(player.Id, name))
+        if ((Keyword(target, "Unique") || Keyword(target, "Singular")) && ControlsCopyOf(player.Id, name, ExperienceLevel(target)))
         {
             Emit("controlRefused", $"{Definition(source).Name}: {player.Name} already controls a {name}; he stays dead.", player.Id, target.Id);
             return false;

@@ -372,3 +372,17 @@ Equip (Battle), and any other ordinary equip of a Spell, is not bound by matchin
 - **Cards/primitives:** Library of Rebirth (oracle-l5r-4724); `ReactivePaymentConditionMet` (`spell-in-combat`).
 - **Date:** 2026-10-09
 - **Source:** Mendon, during playtest (issue #794).
+
+### R-038 — A less experienced version in play does not stop a more experienced one being recruited
+An Experienced Personality may be bought for Gold (or brought in by any other recruit) while a lower-Experience version of the same title is in play; the two are independent cards. Overlaying is optional, never required. Only a copy of the same Experience Level is a duplicate for the Unique/Singular rule.
+
+- **Cards/primitives:** Tsuruchi Tomaru - experienced (oracle-l5r-8894) over Tsuruchi Tomaru (oracle-l5r-8893); `ControlsCopyOf(..., experienceLevel)`.
+- **Date:** 2026-10-09
+- **Source:** Mendon, during playtest (issue #803).
+
+### R-039 — Reaction windows both players can react in: announce, order, resolve
+When both players hold a Reaction in an alternating Reaction window (Engage, entry, duel result, after-resolution, after-action, after-Battle-action), the turn player and then the other player announce every Reaction they intend to play, then say they are done. If the announced Reactions are not all the turn player's and there is more than one, the turn player chooses the order they resolve in; otherwise they resolve in the order announced. Each is then played by its owner (targets and Gold chosen at that time; one no longer legal fizzles) and the window closes after the last. A window only one player can react in is unchanged: Reactions are played one after another in the order played. A player who took Pass all battles is treated as holding no Reaction.
+
+- **Cards/primitives:** `PendingReactionOrder` (ReactionOrdering.cs); the bot orders its own Reactions first, then the other player's in the order announced.
+- **Date:** 2026-10-09
+- **Source:** Mendon's gameplay QoL list, items 3 and 4 (issue #803).

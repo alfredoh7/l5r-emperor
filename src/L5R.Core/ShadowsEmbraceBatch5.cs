@@ -222,7 +222,7 @@ public sealed partial class MatchEngine
             // Celestial Sword of the Phoenix: "ignoring costs" waives the Gold, not the restrictions -- a Unique or Singular Personality of which the player already controls a copy
             // may not be brought into play.
             case "celestial-sword-phoenix-return" when command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var dead):
-                Require(!(Keyword(dead, "Unique") || Keyword(dead, "Singular")) || !ControlsCopyOf(player.Id, Definition(dead).Name),
+                Require(!(Keyword(dead, "Unique") || Keyword(dead, "Singular")) || !ControlsCopyOf(player.Id, Definition(dead).Name, ExperienceLevel(dead)),
                     $"You already control this {(Keyword(dead, "Unique") ? "Unique" : "Singular")} card.");
                 break;
         }

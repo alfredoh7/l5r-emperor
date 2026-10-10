@@ -192,7 +192,7 @@ public sealed partial class MatchEngine
             var nitoshi = Card(Nitoshi.SourceCardId);
             var wielders = _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && SameLocation(c, nitoshi)
                 && AttachmentAllowed(card, c) && AttachmentLegalTarget(def, c) && (def.Type != CardType.Spell || Keyword(c, "Shugenja"))
-                && !((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(playerId, def.Name))).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+                && !((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(playerId, def.Name, ExperienceLevel(card)))).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
             var quotes = wielders.ToDictionary(c => c.Id, c => QuoteEquipGold(playerId, card, c));
             var affordable = wielders.Where(c => quotes[c.Id].Payments.Length > 0).Select(c => c.Id).ToArray();
             var reason = wielders.Length == 0 ? "No Personality at Nitoshi's location can take it." : affordable.Length == 0 ? "Insufficient unbowed Gold production." : null;

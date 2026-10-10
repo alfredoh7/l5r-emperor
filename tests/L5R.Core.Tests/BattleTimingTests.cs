@@ -73,6 +73,41 @@ internal static class BattleTimingTests
         => new("useAbility", player, e.Version, CardId: card, AbilityId: ability, PerformerId: performer, TargetId: target);
     private static BattleStepView Step(MatchEngine e, int viewer = 0) => e.GetView(viewer).BattleStep!;
     // Both players pass in succession, closing the Engage window whoever holds priority.
+    // Issue #803: a window both players hold a Reaction for is announced, ordered and resolved (ReactionOrderingTests); a window one player holds Reactions for is played as played.
+    // Plays the Reactions in the order given either way, and leaves the window as that leaves it (closed, after the last one, when both players were asked to announce).
+    private static void EnginePlays(MatchEngine e, params (int Player, string Ability, string Card, string? Performer)[] plays)
+    {
+        EngineAnnounces(e, plays);
+        EngineResolves(e, plays);
+    }
+    // Announcing and ordering only (nothing is played yet), when the window asks for it.
+    private static void EngineAnnounces(MatchEngine e, params (int Player, string Ability, string Card, string? Performer)[] plays)
+    {
+        if (e.State.PendingReactionOrder is { Stage: "Announce" })
+        {
+            foreach (var player in new[] { e.State.PendingReactionOrder.Turn, 1 - e.State.PendingReactionOrder.Turn })
+            {
+                foreach (var play in plays.Where(p => p.Player == player))
+                    Accept(e, e.QueryActions(player).First(o => o.Type == "reactionAnnounce" && o.Command!.AbilityId == play.Ability && o.Command.CardId == (play.Card.Length == 0 ? null : play.Card) && (play.Performer is null || o.Command.PerformerId == play.Performer)).Command!);
+                Accept(e, e.QueryActions(player).First(o => o.Type == "reactionAnnounceDone").Command!);
+            }
+            for (var placed = 0; e.State.PendingReactionOrder is { Stage: "Order" } order; placed++)
+            {
+                var next = plays[placed];
+                Accept(e, e.QueryActions(order.Turn).First(o => o.Type == "reactionOrder" && order.Announced.First(a => a.Id == o.Command!.TargetId) is var item && item.AbilityId == next.Ability && item.CardId == (next.Card.Length == 0 ? null : next.Card)).Command!);
+            }
+        }
+    }
+    // Playing the given Reactions, in order, as far as the window lasts.
+    private static void EngineResolves(MatchEngine e, params (int Player, string Ability, string Card, string? Performer)[] plays)
+    {
+        foreach (var play in plays)
+        {
+            if (e.State.PendingReactionOrder is null && e.State.PendingChoice?.Type != "engageReaction") return;
+            if (e.State.PendingReactionOrder is null && e.State.PriorityPlayerId != play.Player) Accept(e, Decline(e));
+            Accept(e, Use(e, play.Player, play.Ability, play.Card.Length == 0 ? null : play.Card, play.Performer));
+        }
+    }
     private static void CloseWindow(MatchEngine e) { while (e.State.PendingChoice?.Type == "engageReaction") Accept(e, Decline(e)); }
     // The battle's Combat Segment ends: both players pass in succession (Pass), resolving it.
     private static void ResolveByPassing(MatchEngine e) { Accept(e, PassC(e)); Accept(e, PassC(e)); }
@@ -156,7 +191,7 @@ internal static class BattleTimingTests
     private static void EngageWindowMechanics()
     {
         var s = Table(); var (a, d) = Units(s);
-        var mine = Add(s, Honor, 0, Zone.Hand); var theirs = Add(s, Honor, 1, Zone.Hand);
+        var mine = Add(s, Honor, 0, Zone.Hand); var mine2 = Add(s, Honor, 0, Zone.Hand); // one player holds Reactions: played as played (a window both players hold one for announces first, issue #803)
         var harmless = Add(s, "training-harmless-battle-action", 0, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(s);
         var honor0 = e.State.Players[0].Honor; var honor1 = e.State.Players[1].Honor;
@@ -168,24 +203,24 @@ internal static class BattleTimingTests
         // Only Engage actions and "After engaging" Reactions: a Battle action, a foreign command and the wrong player are all refused, atomically.
         Reject(e, Use(e, 0, "kouki-force", harmless.Id, target: d.Id)); // a Battle action
         Reject(e, Select(e));
-        Reject(e, Use(e, 1, "training-engage-gain-honor", theirs.Id)); // not your opportunity
+        Reject(e, Use(e, 1, "training-engage-gain-honor", mine.Id)); // not your opportunity
         Reject(e, new GameCommand("playStrategy", 0, e.Version, CardId: mine.Id));
         // A reaction resolves the moment it is played (no queue), and hands the opportunity to the other player.
         Accept(e, Use(e, 0, "training-engage-gain-honor", mine.Id));
         Eq(e.State.Players[0].Honor, honor0 + 1, "Resolved immediately");
         Eq(e.State.Cards[mine.Id].Zone, Zone.FateDiscard); Eq(e.State.PriorityPlayerId, 1); Eq(e.State.PendingChoice?.Type, "engageReaction");
-        Accept(e, Use(e, 1, "training-engage-gain-honor", theirs.Id));
-        Eq(e.State.Players[1].Honor, honor1 + 1, "The Defender may react too, after the Attacker");
-        Eq(e.State.PriorityPlayerId, 0);
+        Accept(e, Decline(e));
+        Eq(e.State.PriorityPlayerId, 0, "the other player held nothing and passed");
         // Passing does not close it (one pass), playing resets the count, and it closes only on two passes in succession.
-        Accept(e, Decline(e)); Eq(e.State.PendingChoice?.Type, "engageReaction"); Eq(Step(e).ConsecutivePasses, 1); Eq(e.State.PriorityPlayerId, 1);
+        Accept(e, Use(e, 0, "training-engage-gain-honor", mine2.Id)); Eq(Step(e).ConsecutivePasses, 0);
+        Accept(e, Decline(e)); Eq(e.State.PendingChoice?.Type, "engageReaction"); Eq(Step(e).ConsecutivePasses, 1); Eq(e.State.PriorityPlayerId, 0);
         Accept(e, Decline(e));
         Check(e.State.PendingChoice is null && e.State.PendingEngage is null, "Two consecutive passes closed the window");
         Eq(e.State.PriorityPlayerId, 1, "No claim: the Defender acts first");
         Eq(ReasonOf(e), BattleSteps.ReasonDefault);
         // The window is over: an Engage reaction can no longer be played, and Battle actions now can.
         Check(e.State.Cards.Values.All(c => c.DefinitionId != Honor || c.Zone == Zone.FateDiscard));
-        Reject(e, Use(e, 1, "training-engage-gain-honor", theirs.Id)); // spent, and the window is over
+        Reject(e, Use(e, 1, "training-engage-gain-honor", mine.Id)); // spent, and the window is over
         Accept(e, PassC(e)); // the Defender's first opportunity: pass
         Accept(e, Use(e, 0, "kouki-force", harmless.Id, target: d.Id)); // a Battle action is legal now
     }
@@ -193,7 +228,7 @@ internal static class BattleTimingTests
     private static void EngageQueryActions()
     {
         var s = Table(); Units(s);
-        var mine = Add(s, Honor, 0, Zone.Hand); Add(s, Honor, 1, Zone.Hand);
+        var mine = Add(s, Honor, 0, Zone.Hand); // the Defender holds nothing: a window both hold a Reaction for announces first (ReactionOrderingTests)
         var e = MatchEngine.FromTestState(s);
         Accept(e, Select(e));
         var offered = e.QueryActions(0);
@@ -205,7 +240,7 @@ internal static class BattleTimingTests
         Check(waiting.Any(o => o.Type == "wait") && !waiting.Any(o => o.Type == "useAbility"), "The other player waits for their opportunity");
         Accept(e, Decline(e));
         var defender = e.QueryActions(1);
-        Check(defender.Any(o => o.Type == "useAbility" && o.Enabled && o.Command!.AbilityId == "training-engage-gain-honor"), "then the Defender's own");
+        Check(defender.Any(o => o.Type == "declineReaction" && o.Enabled) && !defender.Any(o => o.Type == "useAbility" && o.Enabled), "then the Defender's turn to pass: " + string.Join(",", defender.Select(o => o.Type + ":" + o.Enabled)));
         foreach (var option in defender.Where(o => o.Enabled && o.Command is not null)) Accept(MatchEngine.FromTestState(e.State), option.Command!);
     }
 
@@ -235,8 +270,8 @@ internal static class BattleTimingTests
         var s2 = Table(); Units(s2);
         var theirs = Add(s2, Claim, 1, Zone.Hand); Add(s2, Honor, 0, Zone.Hand);
         var e2 = MatchEngine.FromTestState(s2);
-        Accept(e2, Select(e2)); Accept(e2, Decline(e2));
-        Accept(e2, Use(e2, 1, "training-engage-attacker-first", theirs.Id));
+        Accept(e2, Select(e2));
+        EnginePlays(e2, (1, "training-engage-attacker-first", theirs.Id, null)); // both hold a Reaction: announced by the Defender alone, then played (issue #803)
         CloseWindow(e2);
         Eq(e2.State.PriorityPlayerId, 0, "The card names the Attacker as the beneficiary, whoever played it");
     }
@@ -272,10 +307,9 @@ internal static class BattleTimingTests
             var c1 = Add(s, Claim, 0, Zone.Hand); var c2 = Add(s, Claim, 0, Zone.Hand);
             var e = MatchEngine.FromTestState(s);
             Accept(e, Select(e));
-            Accept(e, Use(e, 0, "training-engage-attacker-first", c1.Id));
-            Accept(e, Use(e, 1, "yuki-engage-recon", yuki.Id));
-            Accept(e, Use(e, 0, "training-engage-attacker-first", c2.Id)); // a claim AFTER the override changes nothing
-            Accept(e, Decline(e)); Accept(e, Decline(e));
+            EnginePlays(e, (0, "training-engage-attacker-first", c1.Id, null), (1, "yuki-engage-recon", yuki.Id, null),
+                (0, "training-engage-attacker-first", c2.Id, null)); // a claim AFTER the override changes nothing
+            CloseWindow(e);
             Eq(e.State.PriorityPlayerId, 1, "The Defender acts first"); Eq(ReasonOf(e), BattleSteps.ReasonDefenderOverride);
             Eq(Step(e).FirstActionPlayerId, (int?)1);
             Check(e.State.FirstActionRestriction is null);
@@ -287,10 +321,7 @@ internal static class BattleTimingTests
             var c1 = Add(s, Claim, 0, Zone.Hand); var c2 = Add(s, Claim, 0, Zone.Hand);
             var e = MatchEngine.FromTestState(s);
             Accept(e, Select(e));
-            Accept(e, Decline(e));
-            Accept(e, Use(e, 1, "yuki-engage-recon", yuki.Id));
-            Accept(e, Use(e, 0, "training-engage-attacker-first", c1.Id)); Accept(e, Decline(e));
-            Accept(e, Use(e, 0, "training-engage-attacker-first", c2.Id));
+            EnginePlays(e, (1, "yuki-engage-recon", yuki.Id, null), (0, "training-engage-attacker-first", c1.Id, null), (0, "training-engage-attacker-first", c2.Id, null));
             CloseWindow(e);
             Eq(e.State.PriorityPlayerId, 1, "Same result whatever order the claims were made in"); Eq(ReasonOf(e), BattleSteps.ReasonDefenderOverride);
         }
@@ -347,7 +378,7 @@ internal static class BattleTimingTests
         var yA = Add(s3, Yuki, 0, Zone.Battlefield, province: 0); var yD = Add(s3, Yuki, 1, Zone.Battlefield, province: 0);
         var e3 = MatchEngine.FromTestState(s3);
         Accept(e3, Select(e3));
-        Accept(e3, Use(e3, 0, "yuki-engage-recon", yA.Id)); Accept(e3, Use(e3, 1, "yuki-engage-recon", yD.Id));
+        EnginePlays(e3, (0, "yuki-engage-recon", yA.Id, null), (1, "yuki-engage-recon", yD.Id, null));
         Check(e3.State.Players[1].Provinces[0].Reconnaissance[0] && e3.State.Players[1].Provinces[0].Reconnaissance[1], "Each controller holds their own");
         CloseWindow(e3);
         Eq(e3.State.PriorityPlayerId, 1); Eq(ReasonOf(e3), BattleSteps.ReasonDefenderOverride);
@@ -563,7 +594,8 @@ internal static class BattleTimingTests
         var yuki = Add(s, Yuki, 1, Zone.Battlefield, province: 0); var c1 = Add(s, Claim, 0, Zone.Hand);
         var first = MatchEngine.FromTestState(s);
         Accept(first, Select(first));
-        Accept(first, Use(first, 0, "training-engage-attacker-first", c1.Id));
+        var plays = new[] { (0, "training-engage-attacker-first", c1.Id, (string?)null), (1, "yuki-engage-recon", yuki.Id, (string?)null) };
+        EngineAnnounces(first, plays); EngineResolves(first, plays[0]); // both hold a Reaction (issue #803): announced and ordered, the Attacker's played, the Defender's Yuki still to come
         var snapshot = first.State; // taken mid-window, with a claim already recorded
         Check(snapshot.PendingEngage is not null && snapshot.PendingEngage.Claims.Count == 1);
         string Continue(MatchState from)
@@ -631,9 +663,8 @@ internal static class BattleTimingTests
         s3.Cards.Remove(s3.Cards.Values.First(c => c.OwnerId == 1 && c.Zone == Zone.Battlefield && c.DefinitionId == "training-lion-samurai").Id);
         var e3 = MatchEngine.FromTestState(s3);
         Accept(e3, Select(e3));
-        Accept(e3, Use(e3, 0, "naval-invasion", null, e3.State.Cards.Values.First(c => c.DefinitionId == Isas).Id));
-        Accept(e3, Use(e3, 1, "yuki-engage-recon", yuki.Id));
-        Accept(e3, Decline(e3)); Accept(e3, Decline(e3));
+        EnginePlays(e3, (0, "naval-invasion", "", e3.State.Cards.Values.First(c => c.DefinitionId == Isas).Id), (1, "yuki-engage-recon", yuki.Id, null));
+        CloseWindow(e3);
         Eq(e3.State.PriorityPlayerId, 1); Eq(ReasonOf(e3), BattleSteps.ReasonDefenderOverride); Check(e3.State.FirstActionRestriction is null);
         // Naval together with another engage grant is still one opportunity; the printed "which he must perform" is kept (documented reading).
         var (s4, _, _) = NavalTable(0, 0); var grant = Add(s4, Claim, 0, Zone.Hand);
@@ -956,12 +987,13 @@ internal static class BattleTimingTests
         var yuki = Add(s, Yuki, 1, Zone.Battlefield, province: 0); var claim = Add(s, Claim, 0, Zone.Hand);
         var e = MatchEngine.FromTestState(s);
         Accept(e, Select(e));
-        Accept(e, Use(e, 0, "training-engage-attacker-first", claim.Id));
+        var plays = new[] { (0, "training-engage-attacker-first", claim.Id, (string?)null), (1, "yuki-engage-recon", yuki.Id, (string?)null) };
+        EngineAnnounces(e, plays); EngineResolves(e, plays[0]); // both hold a Reaction (issue #803): announced and ordered, the Attacker's played first
         var v = Step(e);
         Eq(v.EngageClaims.Length, 1); Eq(v.EngageClaims[0].Kind, "Engage"); Eq(v.EngageClaims[0].SourceId, claim.Id);
         Eq(v.FirstActionPlayerId, (int?)0); Eq(v.FirstActionReason, BattleSteps.ReasonEngageGrant); Check(!v.FirstActionResolved, "provisional until the window closes");
-        Accept(e, Use(e, 1, "yuki-engage-recon", yuki.Id));
-        Eq(Step(e).FirstActionPlayerId, (int?)1); Eq(Step(e).FirstActionReason, BattleSteps.ReasonDefenderOverride); Eq(Step(e).EngageClaims.Length, 2);
+        EngineResolves(e, plays[1]);
+        Eq(Step(e).FirstActionPlayerId, (int?)1); Eq(Step(e).FirstActionReason, BattleSteps.ReasonDefenderOverride); // (the window closes with the last announced Reaction, issue #803)
         CloseWindow(e);
         var closed = Step(e);
         Eq(closed.FirstActionPlayerId, (int?)1); Check(closed.FirstActionResolved); Eq(closed.EngageClaims.Length, 0);

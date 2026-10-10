@@ -566,12 +566,13 @@ internal static class IvoryMovementTests
         Kw(yuki, "Scout");
         var g = MatchEngine.FromTestState(w);
         Accept(g, new GameCommand("selectBattle", 0, g.Version, Province: 0));
-        if (CanUse(g, 0, "sneak-attack-claim", c5.Id)) Accept(g, Cmd(g, 0, "sneak-attack-claim", c5));
+        // Both players hold a Reaction (issue #803): each announces what they hold, the turn player orders, and the announced Reactions are played.
         while (g.State.PendingChoice?.Type == "engageReaction")
         {
-            var actor = g.State.PriorityPlayerId;
-            var yukiOption = actor == 1 ? Options(g, 1, "yuki-engage-recon", yuki.Id).FirstOrDefault(o => o.Enabled) : null;
-            Accept(g, yukiOption is not null ? yukiOption.Command! : new GameCommand("declineReaction", actor, g.Version));
+            var actor = g.State.PriorityPlayerId; var offered = g.QueryActions(actor);
+            var pick = offered.FirstOrDefault(o => o.Enabled && o.Command is not null && o.Type is "reactionAnnounce" or "reactionOrder" or "useAbility")
+                ?? offered.First(o => o.Enabled && o.Type is "reactionAnnounceDone" or "declineReaction");
+            Accept(g, pick.Command!);
         }
         Eq(g.State.FirstActionPlayerId, 1, "the Defender's claim overrides the Attacker's Sneak Attack");
     }
