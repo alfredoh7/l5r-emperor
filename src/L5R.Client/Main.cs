@@ -599,6 +599,7 @@ public partial class Main : Node
         if (_session.Busy || PresentationBusy || _playHeld) return;
         if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
+        if (SelectDiscardCard(card)) return;
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
         if (MovementActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } destination)
@@ -659,6 +660,8 @@ public partial class Main : Node
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
             tile.Highlighted |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.Highlighted |= _chosen?.Command?.PerformerId == tile.Card.Id; // issue #789: the performer of the prepared action is marked on the table
+            tile.DecisionSelected |= DiscardActive && _discardSelected.Contains(tile.Card.Id); // issue #791: the cards chosen to discard
+            tile.LegalTarget |= DiscardActive && tile.Card.Zone == Zone.Hand && tile.Card.OwnerId == View.ViewerId && !_discardSelected.Contains(tile.Card.Id);
             tile.Highlighted |= _hoveredPaymentCardId == tile.Card.Id; // issue #667: the payment method under the pointer names its card
             tile.LegalTarget |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;

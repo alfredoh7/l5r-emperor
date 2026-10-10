@@ -7,6 +7,7 @@ public partial class Main
 {
     private void RenderInspector()
     {
+        BeginDiscardIfPending(); // issue #791: a required discard is announced and starts as a click-to-choose selection in the hand
         if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
         Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null; _goldMeter.Dismiss();
@@ -456,35 +457,6 @@ public partial class Main
         confirm.Disabled = _refreshSelected.Count == 0;
         _decisionActions.AddChild(confirm);
         _decisionActions.AddChild(SidebarSkin.Button("Cancel", CancelChoice));
-    }
-
-    private void RenderHandDiscard()
-    {
-        // The offered command already contains the engine's required number of cards.
-        // Keep its seat/version and replace only the player's explicit selection.
-        var offered = _chosen?.Command;
-        if (offered is not { Type: "discardHand", CardIds.Length: > 0 }
-            || offered.PlayerId != View.ViewerId || offered.ExpectedVersion != View.Version)
-        {
-            _inspector.AddChild(Palette.Wrapped("Waiting for the current discard choice…", 17));
-            return;
-        }
-        var count = offered.CardIds.Length;
-        var selected = new HashSet<string>();
-        var instruction = Self.HandLimit is { } limit
-            ? $"Choose {count} card(s) to discard. Hand limit: {limit.Maximum}."
-            : $"Choose {count} card(s) to discard.";
-        _inspector.AddChild(Palette.Wrapped(instruction, 17));
-        var confirm = SidebarSkin.Button("Confirm discard", () => _ = Submit(offered with { CardIds = selected.ToArray() }), true);
-        confirm.Disabled = true;
-        foreach (var c in Self.Hand)
-        {
-            var check = new CheckBox { Text = ShortName(c) };
-            check.Toggled += yes => { if (yes) selected.Add(c.Id); else selected.Remove(c.Id); confirm.Disabled = selected.Count != count; };
-            _inspector.AddChild(check);
-        }
-        _decisionActions.AddChild(confirm);
-        _decisionActions.AddChild(SidebarSkin.Button("Cancel selection", CancelChoice));
     }
 
     private void CancelChoice() { _playPrompt = null; ResetDecisionSelection(); SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
