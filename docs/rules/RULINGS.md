@@ -358,3 +358,17 @@ A card that names a performing Personality without the word "unbowed" may be per
 - **Cards/primitives:** Strength in Terror (oracle-l5r-7538); Performer categories without "unbowed".
 - **Date:** 2026-10-08
 - **Source:** Mendon, during playtest (QoL batch).
+
+### R-036 — A Spell may be equipped by a Shugenja that does not share its element; a Focus Effect's wielder limit applies to that Focus Effect only
+Equip (Battle), and any other ordinary equip of a Spell, is not bound by matching element keywords: a Fire Shugenja may equip a Water Spell. A restriction printed inside a Focus Effect (The Swell of Strength: "As a Focus Effect: ...attach this card to one of your Water Shugenja, ignoring Gold cost") limits that Focus Effect's free attach only and does not affect the card's ordinary equip in any other phase or segment. Library of Rebirth's Reaction is likewise not element-bound.
+
+- **Cards/primitives:** The Swell of Strength (oracle-l5r-8366), which no longer carries a whole-card `AttachRequiresKeyword`; `FocusEffectChoice.AttachWielderCandidates`; Library of Rebirth (oracle-l5r-4724).
+- **Date:** 2026-10-09
+- **Source:** Mendon, during playtest (issue #794).
+
+### R-037 — Library of Rebirth pays only in the Combat Segment (as printed), not in the Action phase
+"When paying for a Spell during the Combat Segment" means the combat part of a battle. Equipping a Spell in the Action phase is not helped by the Library's 4 Gold, bowed or not.
+
+- **Cards/primitives:** Library of Rebirth (oracle-l5r-4724); `ReactivePaymentConditionMet` (`spell-in-combat`).
+- **Date:** 2026-10-09
+- **Source:** Mendon, during playtest (issue #794).

@@ -2256,8 +2256,7 @@ public sealed partial class MatchEngine
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
         + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell).Sum(c => Definition(c).Effect == "scouring-flood-force" || Definition(c).Effect == "wave-persists-force" && Keyword(card, "Water") ? 2 : 0)
-        // The Swell of Strength (oracle-l5r-8366, issue #460 batch 5): "This Shugenja has +2F" -- Scouring Flood's own Spell-Effect-keyed static bonus shape; always applies (the
-        // Spell only ever attaches to a Water Shugenja, via AttachRequiresKeyword, so no extra wielder-keyword check is needed here).
+        // The Swell of Strength (oracle-l5r-8366, issue #460 batch 5): "This Shugenja has +2F" -- Scouring Flood's own Spell-Effect-keyed static bonus shape; always applies to whoever wields it (any Shugenja may equip it; only its Focus Effect is limited to Water Shugenja).
         + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "swell-of-strength-force") * 2
         // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
         + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "tsunami-force" && Keyword(card, "Shugenja")).Sum(_ => 6)

@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "The Swell of Strength no longer carries a whole-card Water attach requirement: only its Focus Effect (free attach after a duel) is limited to Water Shugenja, so Equip (Battle) and ordinary Equip work for any Shugenja. Records R-036 (Spell equips not element-bound; Library of Rebirth Reaction not element-bound) and R-037 (Library of Rebirth pays only in the Combat Segment as printed, not the Action phase). Playtest report from Mendon.",
+  "validation": "bash tools/check.sh --skip-client passed (0 failures). New regression: a Fire Shugenja equips The Swell of Strength in battle with the bowed Library of Rebirth and a Small Farm paying; the Focus Effect's candidates exclude non-Water Shugenja. EquipLimitedSpellRefusals keeps its keyword-requirement coverage on a fixture Spell and adds the open Swell equip. No client or native check needed (Core and content only).",
+  "remaining": "None; ready for review. Library of Rebirth still pays only in the Combat Segment, confirmed by Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/794",
+  "branch": "claude/794-library-of-rebirth-gold",
+  "updated": "2026-10-09T23:25:43.045131+00:00"
+}

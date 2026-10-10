@@ -102,8 +102,7 @@
         "swell-of-strength-focus",
         "swell-of-strength-attack"
       ],
-      "Effect": "swell-of-strength-force",
-      "AttachRequiresKeyword": "Water"
+      "Effect": "swell-of-strength-force"
     }
   ],
   "Decks": []
