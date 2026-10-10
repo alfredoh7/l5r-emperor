@@ -12,24 +12,25 @@ public static partial class TrainingOpponent
     /// <summary>The battle rules applied on top of an action's ordinary score. Only the actions a player takes in a battle (an ability, a Strategy, an attachment) are affected.</summary>
     private static double Adjust(Ctx x, ActionOption action, GameCommand command, double score)
     {
-        if (!x.Memory.UseBattlePolicy || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
+        if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (intent.Negates) return score; // a negating Reaction is always played (Mendon's earlier spec)
         // Equip (Battle) item 1: the additional action an attached spell grants is always used.
-        if (action.Type == "useAbility" && UsesGrantedAttachmentAction(x, command)) return Math.Max(score, GrantedActionScore);
+        if (x.Memory.UseEquipPolicy && action.Type == "useAbility" && UsesGrantedAttachmentAction(x, command)) return Math.Max(score, GrantedActionScore);
         var odds = x.Odds;
         var source = x.Card(command.CardId);
         var inPlay = source is not null && source.OwnerId == x.Self.Id && !x.Self.Hand.Any(h => h.Id == source.Id);
 
         // Rule 5: the first action of a combat taken through a Reaction (Naval, Sneak Attack, ...) is only worth claiming when the bot will have something to do with it,
         // that is when the battle is not already won. Then it prefers to destroy, bow, move, penalize, and last help, and above all a buff that lifts a unit past an Attack.
-        if (x.View.PendingChoice?.Type == "engageReaction" && (intent.IsReaction || action.Type == "playStrategy"))
+        if (x.Memory.UseBattlePolicy && x.View.PendingChoice?.Type == "engageReaction" && (intent.IsReaction || action.Type == "playStrategy"))
         {
             if (odds is { Satisfied: true }) return Math.Min(score, BarredScore);
             return 150 + EngageBonus(x, command, intent);
         }
         if (odds is null) return score;
-        if (IsEquip(action, command)) return EquipScore(x, action, command, score, odds);
+        if (IsEquip(action, command)) return x.Memory.UseEquipPolicy ? EquipScore(x, action, command, score, odds) : score;
+        if (!x.Memory.UseBattlePolicy) return score;
 
         var target = x.Card(command.TargetId);
         // Rule 4: a defender that is losing and cannot win may send its own units home, but only without handing the attacker the Province.
@@ -98,7 +99,7 @@ public static partial class TrainingOpponent
         var attachment = Attachment(x, action, command);
         var value = AttachmentValue(attachment) is { } v ? Math.Max(v, action.Type == "equip" ? PassScore : 0) : score;
         if (odds.Satisfied)
-            return x.Self.HandCount >= x.MaxHand ? 100 + Math.Min(value, 99) / 100.0 : Math.Min(score, BarredScore);
+            return x.Self.HandCount >= x.MaxHand ? 100 + Math.Min(value, 99) / 100.0 : x.Memory.UseBattlePolicy ? Math.Min(score, BarredScore) : value;
         if (attachment is not null && ChangesOutcome(x, odds).Contains(attachment.Id)) return Math.Max(value, 140);
         return value;
     }

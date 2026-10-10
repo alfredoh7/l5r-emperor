@@ -19,5 +19,8 @@ These are bot-behaviour choices, not rules rulings. The bot still only sees its 
    - Not decided: if equipping at most three of the offered attachments, within the Gold it can produce, would move the outcome up the ladder, those attachments score 140 (above ordinary plays). The Force gain of an attachment is its printed Force plus the largest "+N F" its Battle abilities give. If no three cards change the outcome the equip is scored as an ordinary attachment (item 7); the hand-limit rule does not apply to a battle that is not decided.
    - *Interpretation:* "using" the cards is counted only as Force the bot gains. Reducing the enemy's Force (bowing or destroying a defender) is not yet counted toward changing the outcome. A defender's tie is not treated as a win here, although rules 1 to 6 still pass on a defending tie (their existing reading); the two are left as they were.
 
+## Activation (decided 2026-10-10)
+Owner decision: ship the equip changes (7 and 8), keep rules 1 to 6 and trade attacks parked. `BotContext.UseEquipPolicy` is on by default; `UseBattlePolicy` (rules 1 to 6) and `UseTradeAttacks` are off by default, so the shipped bot plays as it did before them apart from the equip rules. The arena can switch rules 1 to 6 on with `UseBattlePolicy = true` (`BotArena.Memory` already does). With the six rules off, rule 8's "nothing else to do" is not enforced: a won battle's ordinary plays are not barred, and the hand-limit equip simply outranks them.
+
 ## Not changed
 No Core, client or message change. The UI reads the same actions and the same explanation strings.

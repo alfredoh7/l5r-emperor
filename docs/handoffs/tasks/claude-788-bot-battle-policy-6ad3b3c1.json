@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Bot (rules lane, AI code and tests only; shared lane because path routing sees both): attachments valued like Strategies, the granted additional action always used, equip down to the hand limit once a battle is won, equip up to 3 cards when that lifts the outcome. Built on the parked #788 battle policy; no Core, client or message change",
-  "validation": "tests/L5R.AI.Tests: 134/134 cases pass locally (5 new battle-policy cases); dotnet format whitespace clean; no arena run",
-  "remaining": "No PR opened: the branch also carries the parked six battle rules and default-off trade attacks, whose arena results were inconclusive. Enemy-Force reduction is not counted toward changing a battle outcome. No arena measurement of the new rules.",
+  "summary": "Bot (AI code and tests only; shared lane because path routing sees both): attachments valued like Strategies, the granted additional action always used, equip down to the hand limit once a battle is won, equip up to 3 cards when that lifts the outcome. The parked six battle rules and trade attacks ship but stay OFF by default (BotContext.UseBattlePolicy/UseTradeAttacks); the equip rules are ON (UseEquipPolicy). No Core, client or message change",
+  "validation": "tests/L5R.AI.Tests: 135/135 cases pass locally (6 new battle-policy cases incl. defaults); dotnet format whitespace clean; no arena run",
+  "remaining": "Enemy-Force reduction is not counted toward changing a battle outcome. No arena measurement of the equip rules. Parked rules still need an arena decision (docs/parked).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/788",
   "branch": "claude/788-bot-battle-policy",
-  "updated": "2026-10-10T05:29:47.049501+00:00"
+  "updated": "2026-10-10T05:50:22.399822+00:00"
 }

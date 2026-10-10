@@ -21,8 +21,11 @@ public sealed class BotContext
     private int _favorTakenTurn = -1;
     private int _borderRefreshTurn = -1;
 
-    /// <summary>Issue #788: false plays the bot as it was before the six battle changes (no pass-when-won, target priorities, send-home rule, reaction rule or Border Keep refresh). The arena uses it to measure the change.</summary>
-    public bool UseBattlePolicy { get; init; } = true;
+    /// <summary>Issue #788: false (the default while the arena results are inconclusive; see docs/parked) plays the bot as it was before the six battle changes (no pass-when-won, target priorities, send-home rule, reaction rule or Border Keep refresh). The arena uses it to measure the change.</summary>
+    public bool UseBattlePolicy { get; init; } = false;
+
+    /// <summary>Issue #788 (Mendon's equip changes): attachments valued by their Battle abilities, the additional action an attached Spell grants always used, equipping down to the hand limit once a battle is won, and equipping up to three cards to change a battle's outcome. ON by default, independent of <see cref="UseBattlePolicy"/>.</summary>
+    public bool UseEquipPolicy { get; init; } = true;
 
     /// <summary>Issue #788 (Mendon): true lets the bot attack when it cannot raze a Province but can destroy the defending army (or trade favourably in a tie). OFF by default: the arena found it lost more than it won (docs/parked/2026-10-09-what-makes-a-good-l5r-bot.md).</summary>
     public bool UseTradeAttacks { get; init; } = false;

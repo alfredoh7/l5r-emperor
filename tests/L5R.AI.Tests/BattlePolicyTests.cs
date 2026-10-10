@@ -19,6 +19,7 @@ internal static class BattlePolicyTests
         ("Outcome ladder: defender lose-and-lose-Province < lose < tie < win; attacker lose < tie < win < win-and-destroy", OutcomeLadder),
         ("Equip plan: at most three attachments, biggest Force gain first, within the Gold available", EquipPlanLimits),
         ("Equip (item 2): a bot that has already won equips while its hand is at the limit and passes once it is under it", EquipAtHandLimit),
+        ("Parked rules: the six battle rules and trade attacks are off unless switched on; the equip rules are on", ParkedRulesAreOffByDefault),
         ("Equip (item 2): equipping is chosen when 3 or fewer cards change the outcome, and not when they cannot", EquipChangesOutcome),
         ("Equip (item 1): an attachment is valued by its best Battle ability in strategy order, and the granted additional action is always used", EquipAttachmentPriority),
         ("Trade attacks: a battle won outright is worth making without razing, a tie only when the defenders are worth clearly more, attachments and Personalities count", TradeAttacks),
@@ -60,7 +61,7 @@ internal static class BattlePolicyTests
     private static MatchView WithHand(MatchView v, int handCount, params CardView[] hand) =>
         v with { Players = [v.Players[0] with { Hand = hand, HandCount = handCount, HandLimit = new HandLimitView(8, 8, []) }, v.Players[1]] };
 
-    private static string ChoseType(MatchView v, params ActionOption[] options) => TrainingOpponent.Choose(v, options).Command?.Type ?? "none";
+    private static string ChoseType(MatchView v, params ActionOption[] options) => TrainingOpponent.Choose(v, options, SixRules).Command?.Type ?? "none";
 
     private static void EquipAtHandLimit()
     {
@@ -74,8 +75,19 @@ internal static class BattlePolicyTests
         Check(ChoseType(over, Pass(over), equip) == "equip", "a hand over the limit equips too");
         var defender = WithHand(Battle(6, 4, 7, botAttacks: false), 8, card);
         Check(ChoseType(defender, Pass(defender), equip) == "equip", "a defender that is already winning equips with a full hand");
-        var ruleOff = TrainingOpponent.Choose(under, [Pass(under), equip], new BotContext { UseBattlePolicy = false }).Command?.Type;
-        Check(ruleOff == "equip", "with the battle rules off the ordinary equip score is untouched (it equips rather than passes)");
+        var ruleOff = TrainingOpponent.Choose(under, [Pass(under), equip], new BotContext { UseEquipPolicy = false }).Command?.Type;
+        Check(ruleOff == "equip", "with the equip rules off the ordinary equip score is untouched (it equips rather than passes)");
+    }
+
+    private static void ParkedRulesAreOffByDefault()
+    {
+        Check(!new BotContext().UseBattlePolicy && !new BotContext().UseTradeAttacks && new BotContext().UseEquipPolicy, "the six battle rules and trade attacks are off by default; the equip rules are on");
+        var plain = FindAbility((id, a, i) => a.Timing == "Battle" && a.Target == "none" && !i.IsReaction && i.Rank == EffectRank.Help && !i.HonorGain && !i.HonorLoss && !i.Draws);
+        var winning = Battle(16, 4, 7);
+        Check(TrainingOpponent.Choose(winning, [Pass(winning), Use(winning, plain)]).Command?.AbilityId == plain, "by default a won battle still plays its ordinary abilities (the pass-when-won rule is parked)");
+        var (card, equip) = EquipOffer(winning, "item-1", 0);
+        var full = WithHand(winning, 8, card);
+        Check(TrainingOpponent.Choose(full, [Pass(full), Use(full, plain), equip]).Command?.Type == "equip", "by default the equip rule still applies in a won battle with a full hand");
     }
 
     private static void EquipChangesOutcome()
@@ -104,7 +116,7 @@ internal static class BattlePolicyTests
         CardView Spell(string id, CardDefinition def) => new(id, def, 0, Zone.Hand, true, false, null, null, 0);
         ActionOption EquipBattle(string id) => new("useAbility", "Equip (Battle)", true, null, new("useAbility", 0, view.Version, "own-main", AbilityId: "equip-battle", TargetId: id), "own-main", [id]);
         var held = WithHand(view, 2, Spell("spell-help", helper), Spell("spell-destroy", destroyer));
-        var pick = TrainingOpponent.Choose(held, [Pass(held), EquipBattle("spell-help"), EquipBattle("spell-destroy")]).Command;
+        var pick = TrainingOpponent.Choose(held, [Pass(held), EquipBattle("spell-help"), EquipBattle("spell-destroy")], SixRules).Command;
         Check(pick?.AbilityId == "equip-battle" && pick.TargetId == "spell-destroy", $"the spell that destroys is attached before the one that only helps: {pick?.TargetId}");
         // The additional action an attached spell grants: a battle already won still uses it, never declining.
         var won = Battle(16, 4, 7);
@@ -159,12 +171,12 @@ internal static class BattlePolicyTests
     {
         ActionOption Declare(MatchView v) => new("declareAttack", "Declare", true, null, new("declareAttack", 0, v.Version));
         ActionOption Attack(MatchView v) => new("attack", "Attack", true, null, new("attack", 0, v.Version, Assignments: []));
-        var on = new BotContext { UseTradeAttacks = true };
+        var on = new BotContext { UseBattlePolicy = true, UseTradeAttacks = true };
         var strong = AttackView(6, 4, 5, 9); // beats the defender, cannot raze a Strength 9 Province
         Check(TrainingOpponent.Choose(strong, [Pass(strong), Declare(strong)], on).Command?.Type == "declareAttack", "a battle it can win outright is declared even though the Province would hold");
         var assigned = TrainingOpponent.Choose(strong, [Pass(strong), Attack(strong)], on).Command;
         Check(assigned is { Type: "attack", Assignments: { Count: 1 } } && assigned.Assignments.ContainsKey("a"), "the winning unit is assigned to the attack");
-        var off = TrainingOpponent.Choose(strong, [Pass(strong), Declare(strong)]).Command;
+        var off = TrainingOpponent.Choose(strong, [Pass(strong), Declare(strong)], SixRules).Command;
         Check(off?.Type == "pass", "the rule is off by default: the old caution holds, no declaration");
         var weak = AttackView(3, 4, 5, 9);
         Check(TrainingOpponent.Choose(weak, [Pass(weak), Declare(weak)], on).Command?.Type == "pass", "a defence that would win is not attacked");
@@ -202,7 +214,9 @@ internal static class BattlePolicyTests
     private static ActionOption Pass(MatchView v) => new("pass", "Pass", true, null, new("pass", 0, v.Version));
     private static ActionOption Use(MatchView v, string id, string? card = "own-main", string? target = null, string[]? targets = null) =>
         new("useAbility", id, true, null, new("useAbility", 0, v.Version, CardId: card, AbilityId: id, TargetId: target), card, targets);
-    private static string Chose(MatchView v, params ActionOption[] options) => TrainingOpponent.Choose(v, options).Command is { } c ? c.AbilityId ?? c.Type : "none";
+    /// <summary>The six parked battle rules are off by default; their tests switch them on.</summary>
+    private static BotContext SixRules => new() { UseBattlePolicy = true };
+    private static string Chose(MatchView v, params ActionOption[] options) => TrainingOpponent.Choose(v, options, SixRules).Command is { } c ? c.AbilityId ?? c.Type : "none";
 
     private static void Odds()
     {
@@ -257,7 +271,7 @@ internal static class BattlePolicyTests
         var inPlay = new ActionOption("useAbility", plain, true, null, new("useAbility", 0, calm.Version, CardId: "own-main", AbilityId: plain), "own-main");
         var fromHand = new ActionOption("useAbility", plain, true, null, new("useAbility", 0, calm.Version, CardId: "hand-1", AbilityId: plain), "hand-1");
         var withHand = calm with { Players = [calm.Players[0] with { Hand = [new CardView("hand-1", Person(2), 0, Zone.Hand, true, false, null, null, 0)] }, calm.Players[1]] };
-        var decision = TrainingOpponent.Choose(withHand, [Pass(withHand), fromHand, inPlay]).Command;
+        var decision = TrainingOpponent.Choose(withHand, [Pass(withHand), fromHand, inPlay], SixRules).Command;
         Check(decision?.CardId == "own-main", "against an enemy with nothing in hand the ability already in play comes before the one from the hand: " + decision?.CardId);
     }
 
@@ -334,10 +348,10 @@ internal static class BattlePolicyTests
         }
         ActionOption Border(MatchView v) => new("useAbility", "border-game", true, null, new("useAbility", 0, v.Version, CardId: "keep", AbilityId: "border-game", CardIds: []), "keep", ["prov-0", "prov-1", "prov-2"]);
         var rich = WithGold(22);
-        var decision = TrainingOpponent.Choose(rich, [Pass(rich), Border(rich)]).Command;
+        var decision = TrainingOpponent.Choose(rich, [Pass(rich), Border(rich)], SixRules).Command;
         Check(decision?.AbilityId == "border-game" && decision.CardIds is { Length: 3 }, "22 Gold and three stocked provinces: the Border Keep refreshes all three");
         var poor = WithGold(21);
-        var held = TrainingOpponent.Choose(poor, [Pass(poor), Border(poor)]).Command;
+        var held = TrainingOpponent.Choose(poor, [Pass(poor), Border(poor)], SixRules).Command;
         Check(held?.AbilityId != "border-game" || held.CardIds is not { Length: 3 }, "21 Gold: the refresh is not taken under the new rule");
     }
 }
