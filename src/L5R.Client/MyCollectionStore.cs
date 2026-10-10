@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using L5R.Core;
 
 namespace L5R.Client;
 
@@ -21,6 +22,8 @@ public sealed class CollectionImportRow
     public bool Printing { get; init; }
     public string Edition { get; init; } = "";
     public string Rarity { get; init; } = "";
+    /// <summary>Set when the name matched no card exactly but one card is clearly the one meant (a typo, a missing letter); says which and how sure. The row is applied to that card.</summary>
+    public string Guess { get; set; } = "";
     /// <summary>The ownership bucket this row sets: the card's ID alone for the older file, or ID with the printing suffix.</summary>
     public string? Bucket => Id is null ? null : Printing ? Id + CollectionPrintings.Suffix(Edition, Rarity) : Id;
     public string PrintingLabel => Edition.Length == 0 ? "" : Rarity.Length == 0 ? Edition : Edition + " · " + Rarity;
@@ -36,6 +39,9 @@ public sealed class CollectionImportPlan
             Rows.Where(r => !r.Excluded && r.Id is not null).GroupBy(r => r.Bucket)
                 .Where(g => g.Count() > 1).Select(g => $"Repeated card {g.First().Name}{(g.First().Printing && g.First().PrintingLabel.Length > 0 ? " (" + g.First().PrintingLabel + ")" : "")}; exclude a duplicate or correct the CSV.")).ToArray();
     public bool CanApply => Rows.Any(r => !r.Excluded) && Problems.Length == 0;
+    /// <summary>Leaves out every row still waiting for a decision (an unknown name, a version not chosen), so the rest can be applied.</summary>
+    public void ExcludeUnresolved() { foreach (var row in Rows.Where(r => r.Error.Length > 0 || r.Id is null)) row.Excluded = true; }
+    public bool HasUnresolved => Rows.Any(r => !r.Excluded && (r.Error.Length > 0 || r.Id is null));
 }
 public sealed class MyCollectionStore
 {
@@ -195,6 +201,12 @@ public sealed class MyCollectionStore
         var byKey = cards.ToLookup(c => CollectionPrintings.Key(c.VersionName));
         var byBase = cards.ToLookup(c => CollectionPrintings.Key(c.Name));
         var rows = new List<CollectionImportRow>(); var skipped = 0;
+        // The names no card has: ranked once each, side by side, before the rows are read (a file lists a name once per printing).
+        var unknown = records.Skip(1).Where(r => r.Length > Math.Max(nameIndex, countIndex) && r[countIndex].Trim() is not ("" or "-" or "0")).Select(r => r[nameIndex])
+            .Where(name => name.Trim().Length > 0 && !byKey[CollectionPrintings.Key(name)].Any() && !byBase[CollectionPrintings.Key(name)].Any()).Select(CollectionPrintings.NormalizeName).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        var closest = new System.Collections.Concurrent.ConcurrentDictionary<string, (CollectionIdentity Item, double Score)[]>(StringComparer.OrdinalIgnoreCase);
+        var levels = cards.ToDictionary(c => c, c => DeckTroubleshooter.SplitExperience(c.VersionName).Level);
+        Parallel.ForEach(unknown, name => closest[name] = DeckTroubleshooter.Rank(name, cards, c => c.Name, c => c.VersionName, c => levels[c]));
         for (var i = 1; i < records.Count; i++)
         {
             var fields = records[i]; if (fields.All(string.IsNullOrWhiteSpace)) continue;
@@ -208,8 +220,18 @@ public sealed class MyCollectionStore
             if (error.Length == 0 && edition.Length > 0 && editions is not null)
             { if (editions.TryGetValue(edition, out var known)) edition = known; else error = $"Unknown edition code {edition}."; }
             var key = CollectionPrintings.Key(name);
-            var candidates = byKey[key].ToArray(); var exact = candidates.Length == 1;
+            var candidates = byKey[key].ToArray(); var exact = candidates.Length == 1; var guess = "";
             if (candidates.Length == 0) candidates = byBase[key].ToArray();
+            if (candidates.Length == 0 && error.Length == 0 && !(rawCount == "0"))
+            {
+                // No card of that name: the closest by the deck troubleshooter's scoring (typos, a missing letter). One clear winner of the Experience level the row names is used and shown for
+                // checking; anything less sure is offered as the closest cards to choose from.
+                var wanted = DeckTroubleshooter.SplitExperience(CollectionPrintings.NormalizeName(name)).Level;
+                var ranked = closest.GetValueOrDefault(CollectionPrintings.NormalizeName(name)) ?? [];
+                candidates = ranked.Select(r => r.Item).ToArray();
+                if (ranked.Length > 0 && ranked[0].Score >= .9 && (ranked.Length == 1 || ranked[0].Score - ranked[1].Score >= .06) && DeckTroubleshooter.SplitExperience(ranked[0].Item.VersionName).Level == wanted)
+                { exact = true; guess = $"Matched \"{ranked[0].Item.VersionName}\" by closest name"; }
+            }
             // A printing the catalogue cannot name or pick a version for, listed as 0 owned (every unowned row of the template), has nothing to record and nothing to review.
             if (error.Length == 0 && rawCount == "0" && !exact) { skipped++; continue; }
             if (candidates.Length == 0 && error.Length == 0) error = "Unknown card name.";
@@ -219,6 +241,7 @@ public sealed class MyCollectionStore
                 Name = name,
                 Count = count,
                 Id = error.Length == 0 && exact ? candidates[0].Id : null, // a title that matches only other versions is never guessed
+                Guess = guess,
                 Error = error,
                 Candidates = candidates,
                 Printing = true,
@@ -227,6 +250,9 @@ public sealed class MyCollectionStore
             });
         }
         if (rows.Count == 0) throw new FormatException("The CSV contains no collectible card rows.");
+        // A misspelled row whose card and printing the file also lists under the right spelling is that same row twice: the guess is left out.
+        var spelledRight = rows.Where(r => r.Guess.Length == 0 && r.Id is not null).Select(r => r.Bucket).ToHashSet();
+        foreach (var row in rows.Where(r => r.Guess.Length > 0 && spelledRight.Contains(r.Bucket))) { row.Excluded = true; row.Guess += "; the file lists this printing again under the right name, so this row is left out"; }
         return new CollectionImportPlan { Revision = Revision, Rows = rows.ToArray(), Skipped = skipped };
     }
     /// <summary>The collection as the per-printing file: every printing of the list in its own order with the copies owned (0 when none, - when it cannot be collected), then a row for any

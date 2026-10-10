@@ -84,6 +84,19 @@ try
     var unresolved = resolved.Rows.Count(r => r.Id is null);
     Console.WriteLine($"  template against the catalogue: {resolved.Rows.Length - unresolved} of {resolved.Rows.Length} rows resolve without review");
     Check(resolved.Rows.Length == 1973 && unresolved < 80, "all but a few of the template's rows resolve to a catalogue card without review");
+    // ---- the closest-name guess (issue #807): the deck troubleshooter's scoring, for names the catalogue spells differently ----
+    CollectionIdentity[] spelled = [new("w", "Advance Warning", "Advance Warning"), new("m", "Modifications", "Modifications"), new("i", "Itoku", "Itoku"), new("a", "Kaiu Esumi", "Kaiu Esumi"), new("b", "Kaiu Esumi", "Kaiu Esumi - exp")];
+    var guessed = new MyCollectionStore(Path.Combine(dir, "guess.json")).Preview("Set,Card Name,Card Type,Rarity,Edition Code,Count\nx,Advanced Warning,Strategy,Common,BtD,2\nx,Modifcations,Strategy,Common,BtD,1\nx,Itoku (Exp),Personality,Rare,EoW,1\nx,Kaiu Esumi (Exp.),Personality,Rare,EoW,1\nx,Zzzz Qqqq,Strategy,Common,BtD,1\nx,Zzzz Qqqq,Strategy,Common,BtD,0\n", spelled, list);
+    Check(guessed.Rows[0].Id == "w" && guessed.Rows[0].Guess.Contains("Advance Warning") && guessed.Rows[1].Id == "m", "a name one letter off the catalogue's is matched to it and shown for checking");
+    Check(guessed.Rows[2].Id is null && guessed.Rows[2].Candidates.Any(c => c.Id == "i") && guessed.Rows[2].Error.Length == 0, "an Experienced row whose version is not in the catalogue is offered the base card, never silently assigned it");
+    Check(guessed.Rows[3].Id is null && guessed.Rows[3].Candidates.Length >= 2 || guessed.Rows[3].Id == "b", "an (Exp.) row for a title with both versions never lands on the wrong one");
+    Check(guessed.Rows[4].Error == "Unknown card name." && guessed.Rows.Length == 5, "a name nothing resembles is an error, and its zero-count twin is skipped");
+    Check(!guessed.CanApply && guessed.HasUnresolved, "unresolved rows block apply until decided");
+    guessed.ExcludeUnresolved(); Check(guessed.CanApply && !guessed.HasUnresolved && guessed.Rows.Count(r => !r.Excluded) >= 2, "Exclude unresolved leaves the matched rows ready to apply");
+    var wholeFile = new MyCollectionStore(Path.Combine(dir, "whole.json")).Preview(MyCollectionStore.Template(printings).Replace("\"0\"", "\"1\""), real, printings);
+    Console.WriteLine($"  template against the catalogue: {wholeFile.Rows.Count(r => r.Id is not null)} ready ({wholeFile.Rows.Count(r => r.Guess.Length > 0)} by closest name), {wholeFile.Rows.Count(r => r.Id is null)} to choose or exclude");
+    foreach (var g in wholeFile.Rows.Where(r => r.Guess.Length > 0).GroupBy(r => r.Name)) Console.WriteLine("  guess: " + g.Key + " -> " + g.First().Guess);
+    wholeFile.ExcludeUnresolved(); Check(wholeFile.CanApply, "the whole template can be applied once its unresolved rows are excluded: " + string.Join(" | ", wholeFile.Problems.Take(8)));
     string[] Printed(string text) => CatalogueActions.Printings(text);
     Check(Printed("Battle/Open: Target your bowed Personality: Straighten him.").SequenceEqual(["Battle/Open"]), "Battle/Open is its own printed action");
     Check(Printed("Battle/Open: Straighten.\nLimited, :g1:: Draw a card.").SequenceEqual(["Battle/Open", "Limited"]), "a card may print several actions");

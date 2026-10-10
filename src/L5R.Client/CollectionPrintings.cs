@@ -24,7 +24,7 @@ public static class CollectionPrintings
         var text = Regex.Replace(name.Replace('\u2019', '\'').Replace('\u2018', '\'').Replace('\u201C', '"').Replace('\u201D', '"').Replace('\u00A0', ' ').Trim(), @"\s+", " ");
         const string trailingType = @"(?:\s+(?:Personality|Item|Follower|Spell|Strategy|Holding|Event|Region|Ring|Stronghold|Celestial))?";
         var match = Regex.Match(text, @"^(.*?)\s*\((inexp|inexperienced|exp(?:erienced)?\.?\s*(\d*))\.?\)" + trailingType + "$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        if (!match.Success) match = Regex.Match(text, @"^(.*?)\s+(inexperienced|experienced(?:\s+(\d+|CoM))?)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        if (!match.Success) match = Regex.Match(text, @"^(.*?[^-\s])\s+(inexperienced|experienced(?:\s+(\d+|CoM))?)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         if (!match.Success) return text;
         var title = match.Groups[1].Value.TrimEnd();
         if (match.Groups[2].Value.StartsWith("inexp", StringComparison.OrdinalIgnoreCase)) return title + " - inexperienced";

@@ -223,7 +223,7 @@ public partial class MyCollectionEditor : Control
         // A real collection file has thousands of rows and almost all of them are ready: only rows that need a decision are drawn in full (a node tree per row is what made big files slow),
         // then a short sample of the changes; the rest are counted. Everything is still applied.
         var repeated = plan.Rows.Where(r => !r.Excluded && r.Id is not null).GroupBy(r => r.Bucket).Where(g => g.Count() > 1).SelectMany(g => g).ToHashSet();
-        var attention = plan.Rows.Where(r => r.Error.Length > 0 || r.Id is null || repeated.Contains(r)).Take(150).ToArray();
+        var attention = plan.Rows.Where(r => r.Error.Length > 0 || r.Id is null || repeated.Contains(r) || r.Guess.Length > 0).Take(150).ToArray();
         var sample = plan.Rows.Where(r => !attention.Contains(r)).Take(25).ToArray();
         var shown = attention.Concat(sample).ToArray();
         var hidden = plan.Rows.Length - shown.Length;
@@ -247,7 +247,7 @@ public partial class MyCollectionEditor : Control
                 line.AddChild(cell);
             }
             var excluded = new HBoxContainer(); box.AddChild(excluded);
-            var hint = Cell(row.Error.Length > 0 ? row.Error : row.Excluded ? "Excluded from this import" : row.Id is null ? "Choose the exact version" : $"CSV row {row.Line}" + (row.Printing && row.PrintingLabel.Length > 0 ? " · " + row.PrintingLabel : ""), 600, 15); hint.AddThemeColorOverride("font_color", CatalogueArt.Muted); excluded.AddChild(hint);
+            var hint = Cell(row.Error.Length > 0 ? row.Error : row.Excluded ? "Excluded from this import" : row.Id is null ? "Choose the closest card" : row.Guess.Length > 0 ? $"CSV row {row.Line} · {row.Guess}" : $"CSV row {row.Line}" + (row.Printing && row.PrintingLabel.Length > 0 ? " · " + row.PrintingLabel : ""), 600, 15); hint.AddThemeColorOverride("font_color", CatalogueArt.Muted); excluded.AddChild(hint);
             var exclude = new CheckBox { Text = "Exclude", ButtonPressed = row.Excluded }; excluded.AddChild(exclude); exclude.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
             exclude.AddThemeIconOverride("checked", DeckSkin.Icon("checked")); exclude.AddThemeIconOverride("unchecked", DeckSkin.Icon("unchecked"));
             exclude.Toggled += yes => { row.Excluded = yes; BuildImport(); };
@@ -269,6 +269,8 @@ public partial class MyCollectionEditor : Control
         Put(_panel, Palette.Wrapped(plan.Problems.FirstOrDefault() ?? $"{plan.Rows.Count(r => !r.Excluded)} listed totals ready" + (plan.Skipped > 0 ? $"; {plan.Skipped} rows with no count skipped" : "") + ". Repeated imports replace totals.", 17, CatalogueArt.Gold), 30, 724, 760, 43);
         Put(_panel, CatalogueArt.Button("Back", BuildEditor), 30, 782, 112, 40); Put(_panel, CatalogueArt.Button("Cancel", BuildEditor), 154, 782, 112, 40);
         Put(_panel, CatalogueArt.Button("CSV template", () => SaveCsv(MyCollectionStore.Template(MyCollection.Printings), "Collection Template.csv")), 282, 782, 176, 40);
+        var leaveOut = CatalogueArt.Button("Exclude unresolved", () => { plan.ExcludeUnresolved(); BuildImport(); }); leaveOut.Name = "ExcludeUnresolved"; leaveOut.Disabled = !plan.HasUnresolved;
+        leaveOut.TooltipText = "Leave out every row that has no card yet, so the rest can be applied."; Put(_panel, leaveOut, 370, 782, 188, 40);
         var apply = CatalogueArt.Button("Apply changes", ApplyImport); apply.Disabled = !plan.CanApply; apply.Name = "ApplyCollectionImport"; Put(_panel, apply, 568, 782, 222, 40); if (plan.CanApply) DeckSkin.Primary(apply);
         Fit();
     }
