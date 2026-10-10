@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "A required hand-limit discard is announced with the 'Your Turn' ink banner reading 'DISCARD TO X', and starts directly as a click-to-choose selection in the hand (select/deselect by clicking; selected cards show a check). Confirm discard appears only when the required number are selected. Removes the checkbox list and the extra step to begin discarding. Core's discard rules are unchanged.",
-  "validation": "Client builds with zero warnings. Updated native interaction probe (discard-only) passes for hand limits 7, 8, 10 and both seats: banner text, no Confirm before enough cards, exact hand selection, third card refused, deselect/reselect, engine result. Native direct-play, stabilization, either-or, multi-targets, gold-payment, reaction-flow, interactions, decision-chooser, event-decisions, action-lock pass. card-deselection's assignment mode is flaky on a randomly dealt hand (also seen without these changes). No human playtest yet.",
+  "lane": "shared",
+  "summary": "Presentation only (Core untouched): a required hand-limit discard is announced with the 'Your Turn' ink banner reading 'DISCARD TO X' and starts directly as a click-to-choose selection in the hand (click selects, click on a selected card deselects, selected cards show a check). Confirm discard appears only when the required number are selected. Removes the checkbox list and the extra step to begin discarding. Shared because it also updates the native interaction probe's discard check to the new flow.",
+  "validation": "Client builds with zero warnings. Updated native interaction probe (discard-only) passes for hand limits 7, 8, 10 and both seats: banner text, no Confirm before enough cards, exact hand selection, third card refused, deselect/reselect, engine result. Native direct-play, stabilization, either-or, multi-targets, gold-payment, reaction-flow, interactions, decision-chooser, event-decisions, action-lock pass. card-deselection's assignment mode is flaky on a randomly dealt hand (passes 3/3 in isolation; also seen failing without these changes' effect). No human playtest yet.",
   "remaining": "None; ready for review. Needs a human look at the banner wording and the sidebar text.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/791",
   "branch": "claude/791-discard-in-hand",
-  "updated": "2026-10-10T00:20:27.658117+00:00"
+  "updated": "2026-10-10T00:20:45.954596+00:00"
 }
