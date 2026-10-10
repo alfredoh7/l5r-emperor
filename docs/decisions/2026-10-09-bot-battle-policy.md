@@ -1,4 +1,4 @@
-# Practice bot battle policy (six changes)
+# Practice bot battle policy (six changes, plus two equip changes)
 
 Status: accepted as the owner's (Mendon, `mdornbrook`) specification for the practice bot; the readings marked *interpretation* are the implementer's and are open to correction. Issue #788. Lane: rules (bot), no UI or Core contract change.
 
@@ -12,6 +12,12 @@ These are bot-behaviour choices, not rules rulings. The bot still only sees its 
 4. **Losing defender.** A bowed or Force-less unit may be sent home to save it, unless the bot can straighten it. A unit that is fighting may be sent home only when the Province still holds without its Force, and only when no enemy unit can be sent home instead. Otherwise it stays to save the Province. ("Cannot win" is approximated: the send-home option is always weighed below any enemy-affecting action.)
 5. **First-action reactions** (Naval, Sneak Attack, other Engage reactions) are claimed only when the battle is not already decided (otherwise the bot would just pass). Preference: destroy, bow, move, penalize, everything else; a buff for its own army ranks higher still when it lifts a unit past an enemy Ranged/Melee Attack.
 6. **Border Keep.** With 22+ producible Gold and three or more provinces (all of them when two or fewer remain) holding Holdings or face-down cards during its own Action phase, the bot uses the once-per-game refresh on exactly those provinces and then favours recruiting Personalities.
+
+7. **Attachments are valued like Strategies; the granted action is always used** (second set of changes, same issue). An Equip (Battle) of a Spell (or an Equip of an Item in a battle) is scored by the best Battle ability the attachment prints, in the Strategy order destroy, bow, penalize, help (the generic ability score: 30 plus the rank bonus), instead of a flat score. An attachment with no Battle ability keeps its ordinary equip score. When Equip (Battle) grants the additional action to use the Spell's Battle ability, the bot always takes it, even in a battle it has already won (the engine offers `declineAdditionalAction` exactly while an optional grant is held, and the Spell is the bot's own attached Spell), and its target is picked by the same attack, bow and ability priorities as any other Battle action.
+8. **Equip when the battle is decided and the hand is full; equip to change the outcome.** The outcome ladder is, for a defender: loses the battle and the Province, loses, ties, wins; for an attacker: loses, ties, wins, wins and destroys the Province. A tie is its own rung (it destroys both armies).
+   - Already decided (rule 1's condition) and the bot would otherwise do nothing: it equips whenever its hand is at or above its maximum, one card at a time, so it stops when the hand is under the limit. Below the limit it passes as before.
+   - Not decided: if equipping at most three of the offered attachments, within the Gold it can produce, would move the outcome up the ladder, those attachments score 140 (above ordinary plays). The Force gain of an attachment is its printed Force plus the largest "+N F" its Battle abilities give. If no three cards change the outcome the equip is scored as an ordinary attachment (item 7); the hand-limit rule does not apply to a battle that is not decided.
+   - *Interpretation:* "using" the cards is counted only as Force the bot gains. Reducing the enemy's Force (bowing or destroying a defender) is not yet counted toward changing the outcome. A defender's tie is not treated as a win here, although rules 1 to 6 still pass on a defending tie (their existing reading); the two are left as they were.
 
 ## Not changed
 No Core, client or message change. The UI reads the same actions and the same explanation strings.

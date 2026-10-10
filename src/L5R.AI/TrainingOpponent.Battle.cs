@@ -15,6 +15,8 @@ public static partial class TrainingOpponent
         if (!x.Memory.UseBattlePolicy || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (intent.Negates) return score; // a negating Reaction is always played (Mendon's earlier spec)
+        // Equip (Battle) item 1: the additional action an attached spell grants is always used.
+        if (action.Type == "useAbility" && UsesGrantedAttachmentAction(x, command)) return Math.Max(score, GrantedActionScore);
         var odds = x.Odds;
         var source = x.Card(command.CardId);
         var inPlay = source is not null && source.OwnerId == x.Self.Id && !x.Self.Hand.Any(h => h.Id == source.Id);
@@ -27,6 +29,7 @@ public static partial class TrainingOpponent
             return 150 + EngageBonus(x, command, intent);
         }
         if (odds is null) return score;
+        if (IsEquip(action, command)) return EquipScore(x, action, command, score, odds);
 
         var target = x.Card(command.TargetId);
         // Rule 4: a defender that is losing and cannot win may send its own units home, but only without handing the attacker the Province.
@@ -50,6 +53,70 @@ public static partial class TrainingOpponent
         // spending cards from its hand.
         if (!BattlePolicy.Unthreatened(EnemyArmyAt(x), x.Opponent.HandCount)) return score;
         return inPlay ? score + 25 : Math.Max(PassScore, score - 25);
+    }
+
+    /// <summary>Above every ordinary score: Mendon's "always use the additional action" for an attachment the bot has just equipped.</summary>
+    private const double GrantedActionScore = 300;
+
+    /// <summary>
+    /// Mendon's item 1: electing to attach a spell can grant an additional action to use its Battle ability; the bot always takes it. The engine offers declineAdditionalAction exactly
+    /// while an optional grant is held, so an ability of a spell the bot has attached, offered beside that decline, is the granted action. Its target comes from the same battle-action priorities as any other.
+    /// </summary>
+    private static bool UsesGrantedAttachmentAction(Ctx x, GameCommand command) =>
+        x.Actions.Any(a => a.Enabled && a.Type == "declineAdditionalAction")
+        && x.Card(command.CardId) is { AttachedTo: not null, Definition.Type: CardType.Spell } spell && spell.OwnerId == x.Self.Id;
+
+    private static bool IsEquip(ActionOption action, GameCommand command) => action.Type == "equip" || command.AbilityId == "equip-battle";
+
+    /// <summary>The card an equip action attaches: Equip names it as the card, Equip (Battle) as its target.</summary>
+    private static CardView? Attachment(Ctx x, ActionOption action, GameCommand command) => x.Card(action.Type == "equip" ? command.CardId : command.TargetId);
+
+    /// <summary>
+    /// Mendon's item 1: an attachment is valued like a Strategy, by the best thing its Battle abilities do (destroy, then bow, then penalize, then help), with the same base the generic
+    /// ability score uses. Null when it prints no Battle ability worth using, in which case its ordinary score stands.
+    /// </summary>
+    private static double? AttachmentValue(CardView? attachment)
+    {
+        if (attachment is null) return null;
+        var best = BattlePolicy.Printed(attachment).Where(p => p.Ability.Timing is "Battle" or "BattleOrOpen" && !p.Intent.IsReaction && !(p.Intent.Rank >= EffectRank.Penalize && p.Intent.Side == TargetSide.Own))
+            .Select(p => p.Intent.Rank).DefaultIfEmpty(EffectRank.Neutral).Max();
+        return best == EffectRank.Neutral && !BattlePolicy.Printed(attachment).Any(p => p.Ability.Timing is "Battle" or "BattleOrOpen") ? null : 30 + RankBonus(best);
+    }
+
+    /// <summary>The Force an attachment adds to its wielder's army this battle: its own printed Force plus the largest "+N F" its Battle abilities give.</summary>
+    private static int EquipForce(CardView? attachment) =>
+        attachment?.Definition is not { } d ? 0 : Math.Max(0, d.Force) + BattlePolicy.Printed(attachment).Where(p => p.Ability.Timing is "Battle" or "BattleOrOpen" && p.Intent.Side != TargetSide.Enemy)
+            .Select(p => ForceBonus(p.Ability)).DefaultIfEmpty(0).Max();
+
+    /// <summary>
+    /// Mendon's item 2. When the battle is already won (the defender holds, or the attacker razes the Province) and the bot would otherwise do nothing, it equips while its hand is at or above
+    /// the hand limit, until it is below it. Otherwise, when equipping at most three cards would lift the outcome up the ladder (see <see cref="BattlePolicy.Odds.Tier"/>), the cards that do it are equipped.
+    /// An equip that does neither keeps the score the attachment's own abilities earn it.
+    /// </summary>
+    private static double EquipScore(Ctx x, ActionOption action, GameCommand command, double score, BattlePolicy.Odds odds)
+    {
+        var attachment = Attachment(x, action, command);
+        var value = AttachmentValue(attachment) is { } v ? Math.Max(v, action.Type == "equip" ? PassScore : 0) : score;
+        if (odds.Satisfied)
+            return x.Self.HandCount >= x.MaxHand ? 100 + Math.Min(value, 99) / 100.0 : Math.Min(score, BarredScore);
+        if (attachment is not null && ChangesOutcome(x, odds).Contains(attachment.Id)) return Math.Max(value, 140);
+        return value;
+    }
+
+    /// <summary>The attachments (at most three, within the Gold available) that together lift the battle's outcome; empty when equipping cannot change it.</summary>
+    private static string[] ChangesOutcome(Ctx x, BattlePolicy.Odds odds)
+    {
+        var gold = Production(x.Self.Stronghold, x.Self.Clan) + x.Self.Home.Sum(c => Production(c, x.Self.Clan));
+        var options = new List<(string Id, int Gain, int Cost)>();
+        foreach (var offered in x.Actions.Where(a => a.Enabled && (a.Type == "equip" || a.Command?.AbilityId == "equip-battle")))
+        {
+            IEnumerable<string?> ids = offered.Type == "equip" ? new string?[] { offered.CardId } : offered.TargetIds ?? new string?[] { offered.Command?.TargetId };
+            foreach (var id in ids.OfType<string>().Distinct())
+                if (x.Card(id) is { Definition: { } d } card) options.Add((id, EquipForce(card), offered.Gold?.Cost ?? d.GoldCost));
+        }
+        var plan = BattlePolicy.EquipPlan(options, gold);
+        var gain = options.Where(o => plan.Contains(o.Id)).Sum(o => o.Gain);
+        return odds.Tier(gain) > odds.Tier() ? plan : [];
     }
 
     private static AbilityIntent StrategyIntent(CardView? card) => card?.Definition?.Effect switch

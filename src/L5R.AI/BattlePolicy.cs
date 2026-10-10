@@ -20,6 +20,35 @@ public static class BattlePolicy
         public int Margin => IsAttacker ? (Strength is int s ? Own - Enemy - s - 1 : Own - Enemy - 1) : Own - Enemy;
         /// <summary>For a defender: whether the Province would fall if the bot's Force dropped by <paramref name="lost"/> (the attacker beats defenders plus Strength).</summary>
         public bool WouldFallAfterLosing(int lost) => !IsAttacker && Strength is int s && Enemy > Own - lost + s;
+
+        /// <summary>
+        /// Mendon's outcome ladder, worst to best, with <paramref name="gain"/> more Force on the bot's side. Defender: 0 loses and loses the Province, 1 loses, 2 ties, 3 wins.
+        /// Attacker: 0 loses, 1 ties, 2 wins, 3 wins and destroys the Province (a battlefield with no Province tops out at winning). A tie is its own rung here, as it destroys both armies.
+        /// </summary>
+        public int Tier(int gain = 0)
+        {
+            var own = Own + gain;
+            if (IsAttacker) return own < Enemy ? 0 : own == Enemy ? 1 : Strength is int s && own <= Enemy + s ? 2 : 3;
+            return own > Enemy ? 3 : own == Enemy ? 2 : Strength is int p && Enemy > own + p ? 0 : 1;
+        }
+    }
+
+    /// <summary>How many cards the bot will equip and use to change a battle's outcome (Mendon: "3 or fewer").</summary>
+    public const int MaxEquipsToChangeOutcome = 3;
+
+    /// <summary>
+    /// The largest set of at most <see cref="MaxEquipsToChangeOutcome"/> attachments whose combined cost fits <paramref name="gold"/>, taking the biggest Force gains first.
+    /// Returns the chosen ids; empty when none adds Force.
+    /// </summary>
+    public static string[] EquipPlan(IEnumerable<(string Id, int Gain, int Cost)> options, int gold)
+    {
+        var chosen = new List<string>();
+        foreach (var o in options.Where(o => o.Gain > 0).OrderByDescending(o => o.Gain).ThenBy(o => o.Cost).ThenBy(o => o.Id, StringComparer.Ordinal))
+        {
+            if (chosen.Count == MaxEquipsToChangeOutcome || o.Cost > gold) continue;
+            gold -= o.Cost; chosen.Add(o.Id);
+        }
+        return chosen.ToArray();
     }
 
     /// <summary>The battle the viewer is in, or null when there is none.</summary>

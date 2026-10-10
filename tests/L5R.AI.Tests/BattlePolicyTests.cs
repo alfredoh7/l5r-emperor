@@ -16,6 +16,11 @@ internal static class BattlePolicyTests
         ("Losing defender (rule 4): sends a non-contributing unit home to save it, a fighting unit only when the Province still holds", LosingDefender),
         ("First-action reactions (rule 5): claimed only when the battle is not already won", EngageReactions),
         ("Border Keep (rule 6): refreshes once with 22 Gold and three stocked provinces, never with 21", BorderKeep),
+        ("Outcome ladder: defender lose-and-lose-Province < lose < tie < win; attacker lose < tie < win < win-and-destroy", OutcomeLadder),
+        ("Equip plan: at most three attachments, biggest Force gain first, within the Gold available", EquipPlanLimits),
+        ("Equip (item 2): a bot that has already won equips while its hand is at the limit and passes once it is under it", EquipAtHandLimit),
+        ("Equip (item 2): equipping is chosen when 3 or fewer cards change the outcome, and not when they cannot", EquipChangesOutcome),
+        ("Equip (item 1): an attachment is valued by its best Battle ability in strategy order, and the granted additional action is always used", EquipAttachmentPriority),
         ("Trade attacks: a battle won outright is worth making without razing, a tie only when the defenders are worth clearly more, attachments and Personalities count", TradeAttacks),
         ("Trade attacks: the bot declares and assigns such an attack, and not when the rule is off or the defence is too strong", TradeAttackChoice),
     ];
@@ -24,6 +29,91 @@ internal static class BattlePolicyTests
     {
         var def = type is null ? Person() with { GoldCost = gold } : CardCatalog.Cards.Values.First(d => d.Type == type) with { GoldCost = gold };
         return new CardView(id, def, owner, Zone.Home, true, false, null, attachedTo, force);
+    }
+
+    private static void OutcomeLadder()
+    {
+        // Defender, Strength 7: 5 v 13 loses the Province, 5 v 12 loses the battle but the Province holds, 5 v 5 ties, 6 v 5 wins.
+        int Def(int own, int enemy, int gain = 0) => new BattlePolicy.Odds(false, own, enemy, 7).Tier(gain);
+        Check(Def(5, 13) == 0 && Def(5, 12) == 1 && Def(5, 5) == 2 && Def(6, 5) == 3, $"defender ladder {Def(5, 13)}{Def(5, 12)}{Def(5, 5)}{Def(6, 5)}");
+        Check(Def(5, 13, 1) == 1 && Def(4, 5, 1) == 2 && Def(4, 5, 2) == 3, "gains climb the defender's ladder");
+        int Att(int own, int enemy, int gain = 0) => new BattlePolicy.Odds(true, own, enemy, 7).Tier(gain);
+        Check(Att(3, 5) == 0 && Att(5, 5) == 1 && Att(6, 5) == 2 && Att(12, 5) == 2 && Att(13, 5) == 3, $"attacker ladder {Att(3, 5)}{Att(5, 5)}{Att(6, 5)}{Att(12, 5)}{Att(13, 5)}");
+        Check(new BattlePolicy.Odds(true, 6, 5, null).Tier() == 3, "an attacker that wins at a battlefield with no Province has nothing more to destroy");
+    }
+
+    private static void EquipPlanLimits()
+    {
+        var plan = BattlePolicy.EquipPlan([("a", 1, 2), ("b", 4, 3), ("c", 3, 2), ("d", 2, 1), ("e", 0, 1)], 20);
+        Check(plan.SequenceEqual(["b", "c", "d"]), "three best gains, none with no gain: " + string.Join(",", plan));
+        Check(BattlePolicy.EquipPlan([("a", 5, 6), ("b", 2, 1), ("c", 1, 1)], 5).SequenceEqual(["b", "c"]), "a card the Gold cannot pay for is skipped");
+    }
+
+    /// <summary>An Equip option for an item in the bot's hand at <paramref name="cost"/> Gold, with no Battle ability of its own.</summary>
+    private static (CardView Card, ActionOption Option) EquipOffer(MatchView v, string id, int force, int cost = 2)
+    {
+        var def = CardCatalog.Cards.Values.First(d => d.Type == CardType.Item && (d.Abilities ?? []).All(a => !AbilityCatalog.All.TryGetValue(a, out var ab) || ab.Timing is not ("Battle" or "BattleOrOpen"))) with { Force = force, GoldCost = cost };
+        var card = new CardView(id, def, 0, Zone.Hand, true, false, null, null, force);
+        return (card, new ActionOption("equip", "Equip", true, null, new("equip", 0, v.Version, id, TargetId: "own-main"), id, ["own-main"], Gold: new GoldQuote(cost, "Printed", "", null, [])));
+    }
+
+    private static MatchView WithHand(MatchView v, int handCount, params CardView[] hand) =>
+        v with { Players = [v.Players[0] with { Hand = hand, HandCount = handCount, HandLimit = new HandLimitView(8, 8, []) }, v.Players[1]] };
+
+    private static string ChoseType(MatchView v, params ActionOption[] options) => TrainingOpponent.Choose(v, options).Command?.Type ?? "none";
+
+    private static void EquipAtHandLimit()
+    {
+        var won = Battle(16, 4, 7);
+        var (card, equip) = EquipOffer(won, "item-1", 0);
+        var full = WithHand(won, 8, card);
+        Check(ChoseType(full, Pass(full), equip) == "equip", "already won with a full hand: equips instead of passing");
+        var under = WithHand(won, 7, card);
+        Check(ChoseType(under, Pass(under), equip) == "pass", "already won with room in the hand: passes");
+        var over = WithHand(won, 9, card);
+        Check(ChoseType(over, Pass(over), equip) == "equip", "a hand over the limit equips too");
+        var defender = WithHand(Battle(6, 4, 7, botAttacks: false), 8, card);
+        Check(ChoseType(defender, Pass(defender), equip) == "equip", "a defender that is already winning equips with a full hand");
+        var ruleOff = TrainingOpponent.Choose(under, [Pass(under), equip], new BotContext { UseBattlePolicy = false }).Command?.Type;
+        Check(ruleOff == "equip", "with the battle rules off the ordinary equip score is untouched (it equips rather than passes)");
+    }
+
+    private static void EquipChangesOutcome()
+    {
+        // Attacker, Strength 7: 12 v 5 only wins the battle; one Force 1 item makes it 13, which razes the Province.
+        var short_ = Battle(12, 5, 7);
+        var (card, equip) = EquipOffer(short_, "item-1", 1);
+        var view = WithHand(short_, 4, card);
+        Check(ChoseType(view, Pass(view), equip) == "equip", "one card lifts a win to a win that razes the Province");
+        // 5 v 5 is a tie; one Force turns it into a win.
+        var tie = WithHand(Battle(5, 5, 7), 4, card);
+        Check(ChoseType(tie, Pass(tie), equip) == "equip", "a tie changed to a win");
+        // Three cards is the most the bot counts on: 6 v 10 needs four Force 1 cards to tie, so it does not spend on them (a defender at 6 v 10 stays on the same rung with three).
+        var odds = new BattlePolicy.Odds(false, 6, 10, 7);
+        var four = BattlePolicy.EquipPlan([("i1", 1, 1), ("i2", 1, 1), ("i3", 1, 1), ("i4", 1, 1)], 10);
+        Check(four.Length == 3 && odds.Tier(four.Length) == odds.Tier() && odds.Tier(4) > odds.Tier(), "6 v 10 needs four Force 1 cards to climb a rung and the plan stops at three, so no equip is justified by the outcome");
+    }
+
+    private static void EquipAttachmentPriority()
+    {
+        var spells = CardCatalog.Cards.Values.Where(d => d.Type == CardType.Spell).Select(d => (Def: d, Best: (d.Abilities ?? []).Where(a => AbilityCatalog.All.TryGetValue(a, out var ab) && ab.Timing == "Battle")
+            .Select(AbilityIntent.Of).Where(i => !i.IsReaction && i.Side != TargetSide.Own).Select(i => i.Rank).DefaultIfEmpty(EffectRank.Neutral).Max())).ToArray();
+        var destroyer = spells.First(s => s.Best == EffectRank.Destroy).Def;
+        var helper = spells.First(s => s.Best == EffectRank.Help).Def;
+        var view = Battle(6, 7, 7);
+        CardView Spell(string id, CardDefinition def) => new(id, def, 0, Zone.Hand, true, false, null, null, 0);
+        ActionOption EquipBattle(string id) => new("useAbility", "Equip (Battle)", true, null, new("useAbility", 0, view.Version, "own-main", AbilityId: "equip-battle", TargetId: id), "own-main", [id]);
+        var held = WithHand(view, 2, Spell("spell-help", helper), Spell("spell-destroy", destroyer));
+        var pick = TrainingOpponent.Choose(held, [Pass(held), EquipBattle("spell-help"), EquipBattle("spell-destroy")]).Command;
+        Check(pick?.AbilityId == "equip-battle" && pick.TargetId == "spell-destroy", $"the spell that destroys is attached before the one that only helps: {pick?.TargetId}");
+        // The additional action an attached spell grants: a battle already won still uses it, never declining.
+        var won = Battle(16, 4, 7);
+        var abilityId = destroyer.Abilities!.First(a => AbilityCatalog.All.TryGetValue(a, out var ab) && ab.Timing == "Battle");
+        var attached = new CardView("spell-destroy", destroyer, 0, Zone.Attached, true, false, 0, "own-main", 0);
+        var grantView = won with { Players = [won.Players[0] with { Army = [.. won.Players[0].Army, attached] }, won.Players[1]] };
+        var decline = new ActionOption("declineAdditionalAction", "Decline", true, null, new("declineAdditionalAction", 0, grantView.Version));
+        var use = new ActionOption("useAbility", abilityId, true, null, new("useAbility", 0, grantView.Version, "spell-destroy", AbilityId: abilityId, TargetId: "enemy-main"), "spell-destroy", ["enemy-main"]);
+        Check(Chose(grantView, Pass(grantView), decline, use) == abilityId, "the granted additional action is used, not declined, even when the battle is won");
     }
 
     private static void TradeAttacks()
@@ -57,7 +147,9 @@ internal static class BattlePolicyTests
         ProvinceView[] Provinces(int owner) => view.Players[owner].Provinces.Select(p => p with { Strength = strength, Destroyed = false }).ToArray();
         return view with
         {
-            Phase = Phase.AttackDeclaration, ActivePlayerId = 0, PriorityPlayerId = 0,
+            Phase = Phase.AttackDeclaration,
+            ActivePlayerId = 0,
+            PriorityPlayerId = 0,
             Players = [view.Players[0] with { Home = [Home("a", 0, ownForce, 3)], Army = [], Provinces = Provinces(0) },
                 view.Players[1] with { Home = [Home("d", 1, enemyForce, enemyGold)], Army = [], Provinces = Provinces(1) }]
         };
@@ -98,7 +190,10 @@ internal static class BattlePolicyTests
         var theirs = new List<CardView> { Unit("enemy-main", 1, enemy) }; theirs.AddRange(enemyExtra ?? []);
         return view with
         {
-            Phase = Phase.Battle, CurrentBattleProvince = 0, ActivePlayerId = botAttacks ? 0 : 1, PriorityPlayerId = 0,
+            Phase = Phase.Battle,
+            CurrentBattleProvince = 0,
+            ActivePlayerId = botAttacks ? 0 : 1,
+            PriorityPlayerId = 0,
             Players = [view.Players[0] with { Army = mine.ToArray(), Home = [], Provinces = Provinces(0) },
                 view.Players[1] with { Army = theirs.ToArray(), Home = [], HandCount = enemyHand, Provinces = Provinces(1) }]
         };
