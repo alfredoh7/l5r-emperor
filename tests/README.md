@@ -42,7 +42,7 @@ several seconds; a stale or missing entry only affects balance, never coverage. 
 together, and the same text appended to the Actions job summary when `GITHUB_STEP_SUMMARY` is set.
 
 `tools/check.sh` exposes the slices CI uses; no argument, `--skip-client` and `--client-only`
-behave as before (the Mac job still runs everything):
+still run the same checks (the Mac job still runs everything):
 
 ```sh
 bash tools/check.sh --part quick                  # tools' Python tests, comment lint, Server/Transport/Collection
@@ -55,6 +55,12 @@ bash tools/check.sh --part ai --shard 2/2         # half of L5R.AI.Tests
 skipped inside `py`/`quick` (they set `L5R_SKIP_REGISTRATION_BUILD`) and run only in
 `registration`, or in the unpartitioned runs. Changing the matrix in `.github/workflows/check.yml`
 must keep every part and shard present: dropping one silently drops those tests from PR validation.
+
+A full run (no argument or `--skip-client`) builds everything once and then runs its stages side by
+side (issue #805): the Python tests, the small projects, Core and AI as three `--shard` slices each,
+and the Godot import and smoke run. Each stage writes `artifacts/checks/stage-NAME.log`; the logs are
+printed whole, in start order, as the stages end, and any failing stage fails the run and is named
+on the last line. `L5R_CHECK_SHARDS=N` changes the slice count (use `1` on a machine with few cores).
 
 For repeated runs after building, invoke the corresponding
 `tests/<project>/bin/Debug/net10.0/<project>.dll` with `dotnet` and the same flags.
