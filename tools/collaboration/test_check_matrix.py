@@ -42,6 +42,22 @@ class CheckMatrixTests(unittest.TestCase):
         # A quoted "$CHECK_ARGS" would hand '--part core --shard 1/2' over as ONE argument and every split job would exit 2.
         self.assertRegex(WORKFLOW, r"bash tools/check\.sh \$CHECK_ARGS(\s|$)")
 
+    def test_only_the_client_job_needs_the_godot_files(self):
+        # The rules jobs skip what only Godot reads; the client job and the Mac (no sparse checkout) must keep every file.
+        matrix = WORKFLOW[WORKFLOW.index("include:"):WORKFLOW.index("    runs-on:")]
+        entries = {}
+        for chunk in matrix.split("- os: ")[1:]:
+            entries[chunk.split()[0]] = chunk
+        client_only = ("!/assets/ui/", "!/src/L5R.Client/Art/", "!*.import", "!*.uid")
+        self.assertIn("windows-2022-client", entries)
+        for name, text in entries.items():
+            rules_job = name.startswith("windows-2022-") and name != "windows-2022-client"
+            for pattern in client_only:
+                if rules_job:
+                    self.assertIn(pattern, text, f"{name} should skip {pattern}")
+                else:
+                    self.assertNotIn(pattern, text, f"{name} needs {pattern}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -33,9 +33,12 @@ bash tools/check.sh  # also builds/imports/smoke-tests the native client
 ## Sharding and timings (issue #798)
 
 PR validation runs the rules checks as parallel CI jobs. The console runners accept
-`--shard I/N` (1-based): after any `--filter`, cases are dealt round-robin in registration
-order, so the N shards of one build partition the cases exactly (`--list --shard 1/4` shows
-what a shard runs). Every run ends with a summary of the slowest cases, every failing label
+`--shard I/N` (1-based): after any `--filter`, cases are dealt in registration order, so the N
+shards of one build partition the cases exactly (`--list --shard 1/4` shows what a shard runs).
+Cases named in `tests/slow-cases.txt` (a case-insensitive label substring per line, copied beside
+each test assembly) are dealt among themselves in a snake order first, so the heavy full-match
+cases spread across shards; everything else is round-robin. Add a line there when a case takes
+several seconds; a stale or missing entry only affects balance, never coverage. Every run ends with a summary of the slowest cases, every failing label
 together, and the same text appended to the Actions job summary when `GITHUB_STEP_SUMMARY` is set.
 
 `tools/check.sh` exposes the slices CI uses; no argument, `--skip-client` and `--client-only`

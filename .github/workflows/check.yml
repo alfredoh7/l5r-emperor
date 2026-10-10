@@ -26,6 +26,8 @@ jobs:
         # Godot client build, import and smoke run (windows-2022-client; its Godot import of ~1500 scans restores the previous import
         # cache). Every Windows job pays its own checkout and tool bootstrap, so do not split further without measuring. Shards come
         # from the test runner's --shard I/N and are exact partitions of one build's cases.
+        # The rules jobs skip what only the Godot client reads (1 GB of client art, assets/ui, the .import/.uid sidecars): about a quarter
+        # fewer files and ~1.3 GB less to fetch, verified by running every part in such a checkout (issue #798). The client job needs all of it.
         # The Mac runner keeps one job with every check (its workspace persists, so it is already fast); macOS coverage is deliberate.
         include:
           - os: macos-local
@@ -42,6 +44,10 @@ jobs:
               !/docs/screenshots/
               !/docs/videos/
               !/assets/table/
+              !/assets/ui/
+              !/src/L5R.Client/Art/
+              !*.import
+              !*.uid
           - os: windows-2022-registration
             runner: [windows-2022]
             args: --part registration
@@ -51,6 +57,10 @@ jobs:
               !/docs/screenshots/
               !/docs/videos/
               !/assets/table/
+              !/assets/ui/
+              !/src/L5R.Client/Art/
+              !*.import
+              !*.uid
           - os: windows-2022-core-1
             runner: [windows-2022]
             args: --part core --shard 1/2
@@ -60,6 +70,10 @@ jobs:
               !/docs/screenshots/
               !/docs/videos/
               !/assets/table/
+              !/assets/ui/
+              !/src/L5R.Client/Art/
+              !*.import
+              !*.uid
           - os: windows-2022-core-2
             runner: [windows-2022]
             args: --part core --shard 2/2
@@ -69,6 +83,10 @@ jobs:
               !/docs/screenshots/
               !/docs/videos/
               !/assets/table/
+              !/assets/ui/
+              !/src/L5R.Client/Art/
+              !*.import
+              !*.uid
           - os: windows-2022-ai-1
             runner: [windows-2022]
             args: --part ai --shard 1/2
@@ -78,6 +96,10 @@ jobs:
               !/docs/screenshots/
               !/docs/videos/
               !/assets/table/
+              !/assets/ui/
+              !/src/L5R.Client/Art/
+              !*.import
+              !*.uid
           - os: windows-2022-ai-2
             runner: [windows-2022]
             args: --part ai --shard 2/2
@@ -87,6 +109,10 @@ jobs:
               !/docs/screenshots/
               !/docs/videos/
               !/assets/table/
+              !/assets/ui/
+              !/src/L5R.Client/Art/
+              !*.import
+              !*.uid
           - os: windows-2022-client
             runner: [windows-2022]
             args: --client-only
