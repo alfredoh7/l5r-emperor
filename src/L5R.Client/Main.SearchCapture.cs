@@ -109,6 +109,7 @@ public partial class Main
     {
         var action = Actions.First(a => a.Enabled && a.Type is "chooseSearchProvince" or "chooseSearchDiscard");
         await SupportClick(StabilizationButtons(_inspector).Single(b => b.Text == action.Label));
+        if (_sources.Count == 0 && _chosen is not null && QuoteFor(_chosen) is { Payments.Length: > 0 } quote) { GoldClickHoldings(quote.Payments[0].SourceIds); await EventFrames(4); } // the player bows holdings (#731)
         await SupportCapture("-followup-" + View.PendingSearch!.Stage + (QuoteFor(action) is null ? "" : "-payment"));
         await SupportClick(StabilizationButtons(_decisionActions).First(b => b.Text.StartsWith("Confirm", StringComparison.Ordinal))); await WaitDecisionPresentation(); await EventFrames(12);
     }
@@ -177,7 +178,7 @@ public partial class Main
             await PrepareSearchReview(); await PickSearchDeck("Fate");
             await PickSearchEntry(); SupportRequire(View.PendingSearch?.Stage == SearchStage.ChooseDiscard, "Terrain discard follow-up missing");
             var found = Self.Hand.Single(c => c.Definition?.Id == View.PendingSearch!.Selected!.Id);
-            SupportRequire(!Actions.Any(a => a.Type == "chooseSearchDiscard" && a.Command?.TargetId == found.Id), "Found Terrain incorrectly offered for discard");
+            SupportRequire(Actions.Any(a => a.Enabled && a.Type == "chooseSearchDiscard" && a.Command?.TargetId == found.Id), "Found Terrain must be offered for discard (R-033)");
             await FinishSearchFollowup(); SupportRequire(View.PendingSearch is null, "Terrain search failed to finish");
             await PrepareSearchReview("none"); await PickSearchDeck("Dynasty");
             SupportRequire(View.PendingSearch!.CanPass && _searchPanel!.Cards.All(c => !c.Entry.Eligible), "No-match fixture did not expose Pass");
@@ -187,7 +188,7 @@ public partial class Main
             await PrepareSearchReview("gift"); SupportRequire(View.PendingSearch?.SourceName == "Imperial Gift" && View.PendingSearch.Stage == SearchStage.Select, "Gift should open its list directly");
             await SupportCapture("-gift"); await PickSearchEntry(); SupportRequire(View.PendingSearch is null && View.ShownCards!.Length == 1, "Gift did not complete and show its Item");
             await PrepareSearchReview("cost"); await PickSearchDeck("Dynasty"); await SearchFilter("costed");
-            await PickSearchEntry("training-costed-region"); await FinishSearchFollowup(); SupportRequire(View.PendingSearch is null && View.Events.Any(e => e.Type == "payment"), "Quoted Region payment did not finish");
+            await PickSearchEntry("training-costed-region"); await FinishSearchFollowup(); SupportRequire(View.PendingSearch is null && View.Events.Any(e => e.Type == "payment"), "Quoted Region payment did not finish: stage=" + View.PendingSearch?.Stage + " chosen=" + _chosen?.Type + " confirm=" + (_paymentConfirm is null ? "none" : _paymentConfirm.Disabled + "/" + _paymentConfirm.Visible) + " buttons=" + string.Join(" | ", StabilizationButtons(_inspector).Concat(StabilizationButtons(_decisionActions)).Select(x => x.Text)));
             await PrepareSearchReview("empty"); await PickSearchDeck("Dynasty");
             SupportRequire(_searchPanel!.Cards.Count == 0 && View.PendingSearch!.CanPass, "Empty deck did not offer Pass"); await SupportCapture("-empty");
             await SupportClick(StabilizationButtons(_searchPanel).Single(b => b.Text.StartsWith("Pass", StringComparison.Ordinal))); await SupportClick(_searchPanel!.ConfirmButton); await WaitDecisionPresentation();
