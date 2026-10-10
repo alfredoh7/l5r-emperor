@@ -93,7 +93,7 @@ public partial class InteractionReview : Node
         typeof(MatchSession).GetMethod("RefreshLocal", Private)!.Invoke(_session, null);
         if (pending) await _session.Submit(new GameCommand("endDynasty", seat, engine.Version));
         await Wait(.35); Call("Render"); Call("ResetTableCamera"); Field<TurnBloom>("_turnBloom").Cancel();
-        if (pending && engine.State.PendingChoice?.Type == "discardHand") Call("Choose", _session.Snapshot!.Actions.Single(a => a.Type == "discardHand"));
+        if (pending && engine.State.PendingChoice?.Type == "discardHand") Call("RenderInspector"); // issue #791: the discard begins by itself, announced by the ink banner
         await Wait(.25);
     }
     private async Task LoadExample()
@@ -184,21 +184,40 @@ public partial class InteractionReview : Node
             GD.Print("HANDOFF_PASS: seat " + seat + " Escape, close, cleanup, explicit readiness, session replacement");
         }
     }
+    // Hand cards fan over one another, so a player clicks a card's visible left edge, not its centre.
+    private async Task ClickCardEdge(CardTile tile)
+    {
+        Check(tile.IsVisibleInTree(), "Card is hidden");
+        var corners = tile.FaceCornersOnViewport(); var centre = (Vector2)Call("ScreenCenter", tile)!;
+        var left = corners.OrderBy(c => c.X).Take(2).Aggregate(Vector2.Zero, (sum, c) => sum + c) / 2;
+        var point = centre.Lerp(left, .7f);
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = point, GlobalPosition = point }); await Wait(.04);
+        Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true });
+        Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); await Wait();
+    }
     private async Task CheckDiscard()
     {
+        bool ConfirmShown() => Descendants<Button>(_main).Any(b => b.IsVisibleInTree() && b.Text == "Confirm discard");
         foreach (var limit in new[] { 7, 8, 10 }) foreach (var seat in new[] { 0, 1 })
         {
             await Load(limit, limit + 2, seat); var before = Engine.State.Players[seat].Hand.ToArray(); var version = Engine.Version;
-            var confirm = Button("Confirm discard"); var boxes = Descendants<CheckBox>(Field<VBoxContainer>("_inspector")).ToArray();
-            Check(confirm.Disabled && boxes.Length == limit + 2, "Discard controls do not match the current hand");
-            await Click(boxes[^1]); Check(boxes[^1].ButtonPressed, "Native click missed the last card"); Check(confirm.Disabled, "One selection wrongly satisfies a two-card discard");
-            await Click(boxes[^2]); Check(boxes[^2].ButtonPressed, "Native click missed the second-last card"); Check(!confirm.Disabled, "Two selections should satisfy the authoritative discard requirement");
-            await Click(boxes[^3]); Check(confirm.Disabled, "Too many selected cards can be confirmed"); await Click(boxes[^3]);
+            var bloom = Field<TurnBloom>("_turnBloom");
+            // The probe swaps in a brand-new engine, so the turn-change observer plays "YOUR TURN" after the announcement; start the discard again as a live game would.
+            Set("_discardAnnouncedKey", null); Set("_chosen", null); Call("RenderInspector"); await Wait(.25);
+            Check(bloom.Text == "DISCARD TO " + limit && bloom.IsAnnouncement, "The discard was not announced with the ink banner: " + bloom.Text);
+            Check(!ConfirmShown(), "Confirm discard is offered before any card is selected");
+            var tiles = before.Select(id => Field<List<CardTile>>("_tiles").Single(t => t.Card.Id == id)).ToArray();
+            Check(Descendants<CheckBox>(Field<VBoxContainer>("_inspector")).Count() == 0, "The old checkbox list is still shown");
+            await ClickCardEdge(tiles[^1]); Check(tiles[^1].DecisionSelected, "Native click did not select the last card"); Check(!ConfirmShown(), "One selection wrongly satisfies a two-card discard");
+            await ClickCardEdge(tiles[^2]); Check(tiles[^2].DecisionSelected, "Native click did not select the second-last card"); Check(ConfirmShown(), "Two selections should satisfy the authoritative discard requirement");
+            await ClickCardEdge(tiles[^3]); Check(!tiles[^3].DecisionSelected && ConfirmShown(), "A third card was selected beyond the required count");
+            await ClickCardEdge(tiles[^2]); Check(!tiles[^2].DecisionSelected && !ConfirmShown(), "Clicking a selected card did not deselect it");
+            await ClickCardEdge(tiles[^2]); Check(tiles[^2].DecisionSelected && ConfirmShown(), "Reselecting the card did not restore Confirm");
             Check(Engine.Version == version, "Selecting cards submitted a command before confirmation"); await Capture("discard-" + limit + "-seat-" + seat);
-            await Click(confirm); await Wait(.3);
+            await Click(Button("Confirm discard")); await Wait(.3);
             Check(Engine.State.Players[seat].Hand.SequenceEqual(before.Take(before.Length - 2)), "UI discarded the wrong cards or wrong count");
             Check(Engine.State.ActivePlayerId == 1 - seat, "Valid discard failed to finish the turn");
-            GD.Print("DISCARD_PASS: limit " + limit + ", seat " + seat + ", exact native selection and engine result");
+            GD.Print("DISCARD_PASS: limit " + limit + ", seat " + seat + ", banner, exact native hand selection and engine result");
         }
         await Load(10, 10, 0); Check(!Descendants<Button>(_main).Any(b => b.IsVisibleInTree() && b.Text == "Confirm discard"), "At-limit hand incorrectly requires a discard");
     }
