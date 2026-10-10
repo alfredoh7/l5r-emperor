@@ -98,11 +98,21 @@ public static class SidebarSkin
         t.SetStylebox("panel", "TooltipPanel", Inset());
         return t;
     }
-    public static Button Button(string text, Action action, bool primary = false)
+    // Issue #793: the declare-attack button is a blood-red lacquer, not the black one: the gold button face, tinted deep red.
+    private static readonly Color BloodRed = new(.68f, .09f, .08f);
+    public static Button Button(string text, Action action, bool primary = false, bool danger = false)
     {
         var b = Palette.Button(text, action); b.CustomMinimumSize = new Vector2(0, 60);
         b.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-        if (primary)
+        if (danger)
+        {
+            b.AddThemeStyleboxOverride("normal", Surface(true, true, BloodRed));
+            b.AddThemeStyleboxOverride("hover", Surface(true, true, new Color(.84f, .14f, .12f)));
+            b.AddThemeStyleboxOverride("pressed", Surface(true, true, new Color(.5f, .07f, .06f)));
+            b.AddThemeStyleboxOverride("focus", ButtonFocus(true));
+            foreach (var state in new[] { "font_color", "font_hover_color", "font_pressed_color" }) b.AddThemeColorOverride(state, new Color("fbefd6"));
+        }
+        else if (primary)
         {
             b.AddThemeStyleboxOverride("normal", Surface(true, true));
             b.AddThemeStyleboxOverride("hover", Surface(true, true, new Color(1.1f, 1.08f, 1)));

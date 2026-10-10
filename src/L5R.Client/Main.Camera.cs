@@ -207,6 +207,7 @@ public partial class Main
 
     public override void _Input(InputEvent @event)
     {
+        if (GuardRepeatedSubmissionInput(@event)) return;
         // Native camera probes share a desktop with the reviewer. Only their
         // tagged pointer events belong to the scripted acceptance sequence.
         if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))

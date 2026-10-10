@@ -35,16 +35,16 @@ public partial class DeckBuilderProbe : Node
             // Deck views, Focus/Action filters and full-size hover (#580)
             var browser = _screen.Browser;
             Check(browser.Actions.Trigger.Visible && !browser.Focus.Trigger.Visible, "Dynasty builder offers Action Type but not Focus Value");
-            Check(Button("All Cards (" + _screen.Collection.Cards.Length.ToString("N0") + " shown)").ToggleMode && Button("Dynasty Deck (" + source.Dynasty.Length + " cards)").ToggleMode && Button("Fate Cards (" + source.Fate.Length + " cards)").ToggleMode, "All Cards, Dynasty Deck and Fate Cards toggles show live counts");
+            Check(Button("All Dynasty Cards (" + _screen.Collection.Cards.Length.ToString("N0") + " shown)").ToggleMode && Button("Dynasty Deck (" + source.Dynasty.Length + " cards)").ToggleMode && Button("All Fate Cards").ToggleMode && Button("Fate Deck (" + source.Fate.Length + " cards)").ToggleMode, "All Dynasty Cards, Dynasty Deck, All Fate Cards and Fate Deck toggles show live counts, in that order (#792)");
             Check(_screen.Collection.GetGlobalRect().End.Y <= GetViewport().GetVisibleRect().Size.Y, "collection pane stays inside the window with the extra controls");
             var allCount = _screen.Collection.Cards.Length;
             Click(Button("Dynasty Deck (" + source.Dynasty.Length + " cards)")); await Wait(.6);
             var dynastyIds = _screen.Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains("Dynasty")).Select(c => c.Id).ToHashSet();
             Check(_screen.DeckViewOnly && _screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(dynastyIds), "Dynasty Deck shows only the Dynasty cards in the deck");
             await Capture("view-dynasty-deck");
-            Click(Button("Fate Cards (" + source.Fate.Length + " cards)")); await Wait(.6);
+            Click(Button("Fate Deck (" + source.Fate.Length + " cards)")); await Wait(.6);
             var fateIds = _screen.Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains("Fate")).Select(c => c.Id).ToHashSet();
-            Check(_screen.Family == "Fate" && _screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(fateIds), "Fate Cards shows only the Fate cards in the deck");
+            Check(_screen.Family == "Fate" && _screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(fateIds), "Fate Deck shows only the Fate cards in the deck");
             Check(browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible && _screen.Collection.GetGlobalRect().End.Y <= GetViewport().GetVisibleRect().Size.Y, "Fate builder offers Focus Value and Action Type within the window");
             var focusValue = _screen.Collection.Cards.First(c => c.Focus is not null).Focus!.Value.ToString();
             Click(browser.Focus.Trigger); await Wait(.3); Activate(PopupButton("Focus Value", "Deselect all")); await Wait(.2); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == focusValue)); await Wait(.4); browser.CloseMenus(); await Wait(.2);
@@ -55,8 +55,23 @@ public partial class DeckBuilderProbe : Node
             _screen.Adjust(firstDeckCard, -_screen.Draft.Count(firstDeckCard.Id)); await Wait(.3);
             Check(_screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(viewBefore), "a card removed in a deck view stays until the view is refreshed");
             _screen.Adjust(firstDeckCard, 3); await Wait(.2);
-            Click(Button("All Cards (" + _screen.Browser.Results.Length.ToString("N0") + " shown)")); await Wait(.6);
-            Check(!_screen.DeckViewOnly && _screen.Collection.Cards.Length > fateIds.Count, "All Cards restores the full filtered collection");
+            Click(Button("All Fate Cards")); await Wait(.6);
+            Check(!_screen.DeckViewOnly && _screen.Family == "Fate" && _screen.Collection.Cards.Length > fateIds.Count, "All Fate Cards reveals every Fate card, not only the deck's");
+            // Issue #792: All Dynasty Cards filters on Dynasty cards, and the Dynasty-only filters appear there.
+            Check(!browser.PersonalHonor.Trigger.Visible && !browser.GoldProduction.Trigger.Visible, "Personal Honor and Gold Production are not offered for Fate cards");
+            Click(Button("All Dynasty Cards")); await Wait(.6);
+            Check(!_screen.DeckViewOnly && _screen.Family == "Dynasty" && _screen.Collection.Cards.All(c => c.DeckTypes.Contains("Dynasty")) && browser.PersonalHonor.Trigger.Visible && browser.GoldProduction.Trigger.Visible, "All Dynasty Cards shows Dynasty cards only and offers Personal Honor and Gold Production");
+            browser.Reset(); await Wait(.3);
+            browser.PersonalHonor.SetExcluded(["0", "1", "2", "3", "5+", "None"]); browser.Refresh(); await Wait(.3);
+            Check(browser.Results.Length > 0 && browser.Results.All(c => c.Types.Contains("Personality") && c.Stats["ph"][0] == "4"), "the Personal Honor filter keeps only Personalities of that Personal Honor");
+            browser.Reset(); await Wait(.3);
+            foreach (var amount in new[] { "2", "3" })
+            {
+                browser.GoldProduction.SetExcluded(new[] { "0", "1", "2", "3", "4", "5+", "None" }.Where(o => o != amount)); browser.Refresh(); await Wait(.3);
+                Check(browser.Results.Length > 0 && browser.Results.All(c => c.Types.Contains("Holding")), "the Gold Production filter keeps only Holdings");
+                Check(browser.Results.Any(c => c.Name == "Ageless Shrine"), "a Holding that produces 2 or 3 Gold appears under " + amount);
+            }
+            browser.Reset(); await Wait(.3);
             var hoverFace = Walk(_screen.Collection).OfType<DeckFace>().First(f => f.IsVisibleInTree()); var faceWidth = hoverFace.GetGlobalRect().Size.X;
             HoverOver(hoverFace); await Wait(1.2); var hover = Walk(_screen).OfType<CardScanHover>().Single();
             Check(hover.Visible && hover.Card?.Id == hoverFace.Card.Id && hover.Face.Size.X >= faceWidth * 1.5f - 1, "builder hover shows a scan at least 50% larger than the collection face");

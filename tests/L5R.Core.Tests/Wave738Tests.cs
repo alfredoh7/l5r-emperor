@@ -292,7 +292,7 @@ internal static class Wave738Tests
         // Without the Item, the Attacker keeps his action.
         var plain = Window(oil: false);
         Accept(plain, new GameCommand("selectBattle", 0, plain.Version, Province: 0));
-        Check(!plain.EngageActionBarred(0) && Batch336Support.Options(plain, 0, EngageAbility).Any(o => o.Enabled), "with no Lantern Oil the Attacker's action is on offer");
+        Check(!plain.EngageActionBarred(0) && plain.QueryActions(0).Any(o => o.Enabled && o.Type is "reactionAnnounce" or "useAbility" && o.Command?.AbilityId == EngageAbility), "with no Lantern Oil the Attacker's action is on offer (to announce when both players hold one, issue #803)");
         // An Item whose host is at another battlefield bars nothing here.
         var s = Selection(); s.UnresolvedBattlefields = [0, 1];
         Add(s, LionSamurai, 0, Zone.Battlefield, province: 0);

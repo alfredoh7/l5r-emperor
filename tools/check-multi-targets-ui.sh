@@ -4,7 +4,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 mkdir -p artifacts/checks/multi-targets
-dotnet build src/L5R.Client/L5R.Client.csproj --nologo > artifacts/checks/multi-targets/build.log
+dotnet build src/L5R.Client/L5R.Client.csproj --nologo --disable-build-servers -p:UseSharedCompilation=false -m:1 > artifacts/checks/multi-targets/build.log
 "$GODOT" --headless --editor --path src/L5R.Client --import > artifacts/checks/multi-targets/import.log 2>&1
 specs=('1920x1080 normal' '1280x800 reduced')
 if [ "$#" -gt 0 ]; then specs=("$@"); fi

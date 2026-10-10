@@ -39,6 +39,7 @@ internal static class EmbersOfWarBatch2Tests
         ("Soshi Yoshihara - experienced: locks a target Holding or Personality's own abilities for the turn; bows herself to dishonor a target Personality, losing his controller 1 Honor only when she is a Scorpion or Crab Clan player", YoshiharaLockAndDishonor),
         ("Sugihara: gives a target enemy Personality -4F, and grants an additional Battle action Sugihara alone may perform only once that brings the target to 0 Force", SugiharaPenalty),
         ("Tsuruchi Tomaru - experienced: Ranged 4 Attack, twice per turn", TomaruAttack),
+        ("Tsuruchi Tomaru - experienced: recruited from a province for Gold, alone or over the base Tomaru (issue #803)", TomaruRecruit),
         ("Yasuki Makoto: his controller's Holdings enter play for 1 less Gold; bows to make a target's controller choose paying 4 Gold and 1 Honor, or the target is dishonored and moved home", MakotoLockAndHoldingDiscount),
         ("Yoritomo Kanaye: bows a target enemy card without attachments, destroying it too only if Gold equal to its own Gold Cost was paid", KanayeBow),
     ]);
@@ -262,6 +263,22 @@ internal static class EmbersOfWarBatch2Tests
         Accept(e, Offer(e, 0, "tomaru-attack", tomaru.Id, enemy2.Id));
         Accept(e, new("pass", 1, e.Version));
         Check(!CanUse(e, 0, "tomaru-attack", tomaru.Id), "spent after two uses this turn");
+    }
+
+    // Issue #803 (Mendon): a less experienced version in play never stops a more experienced one being recruited -- they are independent cards; only a copy of the same experience level does.
+    private static void TomaruRecruit()
+    {
+        var s = Table(Phase.Dynasty, 0);
+        var baseTomaru = Add(s, "oracle-l5r-8893", 0, Zone.Home, bowed: true);
+        var exp = Add(s, Tomaru, 0, Zone.Province, province: 0); exp.FaceUp = true; s.Players[0].Provinces[0].CardId = exp.Id;
+        var e = MatchEngine.FromTestState(s);
+        Eq(e.QuotePurchase(0, exp.Id).Error, (string?)null, "bought for Gold alongside the base Tomaru");
+        Check(e.QueryActions(0).Any(a => a.Type == "purchase" && a.Enabled && a.CardId == exp.Id), "the Buy option is enabled");
+        Eq(e.QuoteOverlay(0, exp.Id, baseTomaru.Id).Error, (string?)null, "and may still overlay the base Tomaru");
+        var s2 = Table(Phase.Dynasty, 0);
+        Add(s2, Tomaru, 0, Zone.Home);
+        var second = Add(s2, Tomaru, 0, Zone.Province, province: 0); second.FaceUp = true; s2.Players[0].Provinces[0].CardId = second.Id;
+        Check(MatchEngine.FromTestState(s2).QuotePurchase(0, second.Id).Error is not null, "a second copy of the same experience level is still refused");
     }
 
     private static void MakotoLockAndHoldingDiscount()

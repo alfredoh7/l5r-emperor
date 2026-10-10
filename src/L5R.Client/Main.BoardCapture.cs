@@ -115,7 +115,7 @@ public partial class Main
             if (_chosen?.Command?.TargetId != targetId || _chosen.Command.AbilityId != action.Command!.AbilityId || View.Version != version) throw new InvalidOperationException("Direct targeting lost the ability or submitted early.");
             if (_captureMode.EndsWith("confirm", StringComparison.Ordinal))
             {
-                _decisionActions.GetChildren().OfType<Button>().Single(b => b.Text.StartsWith("Confirm action", StringComparison.Ordinal)).EmitSignal(Button.SignalName.Pressed);
+                ReviewedCommitButton().EmitSignal(Button.SignalName.Pressed);
                 _uiQueue.Clear(); Render();
                 // A destruction announcement intentionally holds the old presented View.
                 // Confirm against the authoritative session, not its animation snapshot.

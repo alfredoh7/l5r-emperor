@@ -218,7 +218,7 @@ internal static class RuleFlagsTests
         // Another battlefield: the flag is for battlefield 1, the battle is at 0.
         var elsewhere = Window(1, true, true);
         Accept(elsewhere, new GameCommand("selectBattle", 0, elsewhere.Version, Province: 0));
-        Check(Batch336Support.Options(elsewhere, 0, EngageAbility).Any(o => o.Enabled), "a flag at another battlefield bars nothing here");
+        Check(elsewhere.QueryActions(0).Any(o => o.Enabled && o.Type is "reactionAnnounce" or "useAbility" && o.Command?.AbilityId == EngageAbility), "a flag at another battlefield bars nothing here (both players hold a Reaction, so it is on offer to announce, issue #803)");
         // A flag without a battlefield bars the Attacker everywhere (player scope, with an Until).
         var everywhere = Window(0, true, true, flagged: false);
         everywhere.SetRuleFlag(RuleFlagKinds.NoEngageForAttacker, RuleFlagScope.Player, 1, "Test", until: everywhere.UntilOwnersNextTurnBegins(1));

@@ -36,6 +36,8 @@ internal static class EmperorStrongholdBatch1Tests
         ("Koshin Keep: Reconnaissance after engaging; then, this battle, a Ranged Attack that does not destroy its target reduces its Force by the strength and allows one more Ranged Attack on the same card only", KoshinKeepRanged),
         ("Kyuden Otomo - exp: taking the Imperial Favor lets its controller discard it for a Favor token; a Courtier bows to add one; a token may be discarded in place of the Favor as a cost", KyudenOtomoTokens),
         ("Library of Rebirth: produces 4 Gold for a Spell during the Combat Segment even while bowed and without bowing; its Battle action straightens a performing Shugenja and grants an additional Battle action", LibraryGold),
+        ("Library of Rebirth and Small Farm pay for The Swell of Strength in a battle: Equip (Battle) is offered for an unbowed opposed Water Shugenja, with the Library bowed or not", LibrarySwellOfStrength),
+        ("The Swell of Strength: a Shugenja of another element may equip it in a battle, the bowed Library of Rebirth and a Small Farm pay for it, and only its Focus Effect is limited to Water Shugenja", SwellEquipByNonWaterShugenja),
         ("Midday Shadow Court: Lobby treats its controller's Honor as 20 higher; its Political Open (even bowed) dishonors an enemy Personality and costs his controller 1 Honor when he is next assigned or an action he performed ends", MiddayWatch),
         ("Hidden Falls Dojo: Reconnaissance at one or two provinces' battlefields and, after the Cavalry Maneuvers Segment, an additional Infantry Maneuvers Segment for its controller's Scouts, to those provinces only", HiddenFallsSegment),
     ]);
@@ -421,6 +423,54 @@ internal static class EmperorStrongholdBatch1Tests
         var sx = Table(Phase.Action, 0); sx.PriorityPlayerId = 0; StrongholdOf(sx, 1, KyudenOtomo).Tokens.Add(new CardToken("tok-2", "Favor", "test-fixture", null, 0)); Add(sx, Shunya, 0, Zone.Home);
         var ex = MatchEngine.FromTestState(sx);
         Check(Options(ex, 0, "shunya-honor").All(o => !o.Enabled), "an opponent's Favor token is not yours to discard");
+    }
+
+    // ---- Library of Rebirth with the real Swell of Strength (playtest report, issue #794) --------------------------------------------------------------------
+    // A Shugenja may equip a Spell that does not share an element keyword with it, and the Library's Reaction is not element-bound. The Swell's "Water" belongs to its Focus Effect only.
+    private static void SwellEquipByNonWaterShugenja()
+    {
+        const string Swell = "oracle-l5r-8366", FireShugenja = "oracle-l5r-592", WaterShugenja = "oracle-l5r-3850", SmallFarm = "oracle-l5r-7303";
+        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+        var library = StrongholdOf(s, 0, LibraryOfRebirth); library.Bowed = true;
+        var libraryId = library.Id;
+        foreach (var card in s.Cards.Values.Where(c => c.OwnerId == 0 && c.Id != libraryId && CardCatalog.Get(c.DefinitionId).GoldProduction > 0)) card.Bowed = true;
+        Add(s, SmallFarm, 0, Zone.Home);
+        var fire = Add(s, FireShugenja, 0, Zone.Battlefield, province: 0);
+        var water = Add(s, WaterShugenja, 0, Zone.Battlefield, province: 0);
+        Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var swell = Add(s, Swell, 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        foreach (var shugenja in new[] { fire, water })
+            Check(e.QueryActions(0).Any(a => a.Enabled && a.Command?.AbilityId == "equip-battle" && a.Command.PerformerId == shugenja.Id),
+                "Equip (Battle) offers The Swell of Strength to " + CardCatalog.Get(shugenja.DefinitionId).Name);
+        Accept(e, Enabled(e, 0, "equip-battle", performerId: fire.Id).Command! with { TargetId = swell.Id });
+        Eq(e.State.Cards[swell.Id].AttachedTo, fire.Id, "a Fire Shugenja equipped the Water Spell, paid with the Library's Reaction and the Small Farm");
+        Check(e.State.Cards[library.Id].Bowed, "the Library stays bowed");
+        // Only the Focus Effect is limited to "one of your Water Shugenja".
+        var focusCandidates = (List<string>)typeof(MatchEngine).GetMethod("AttachWielderCandidates", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.Invoke(e, [0, swell.Id])!;
+        Check(focusCandidates.Contains(water.Id) && !focusCandidates.Contains(fire.Id), "the Swell's Focus Effect may attach only to a Water Shugenja: " + string.Join(",", focusCandidates));
+    }
+
+    private static void LibrarySwellOfStrength()
+    {
+        const string Swell = "oracle-l5r-8366", Kojiro = "oracle-l5r-3850", SmallFarm = "oracle-l5r-7303";
+        foreach (var libraryBowed in new[] { true, false })
+        {
+            var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+            var library = StrongholdOf(s, 0, LibraryOfRebirth); library.Bowed = libraryBowed;
+            var libraryId = library.Id;
+            foreach (var card in s.Cards.Values.Where(c => c.OwnerId == 0 && c.Id != libraryId && CardCatalog.Get(c.DefinitionId).GoldProduction > 0)) card.Bowed = true;
+            Add(s, SmallFarm, 0, Zone.Home);
+            var kojiro = Add(s, Kojiro, 0, Zone.Battlefield, province: 0);
+            Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var swell = Add(s, Swell, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            var offered = e.QueryActions(0).Where(a => a.Command?.AbilityId == "equip-battle" && a.CardId != null).ToArray();
+            var report = string.Join(" || ", e.QueryActions(0).Where(a => a.Command?.AbilityId == "equip-battle" || a.Type == "equip").Select(a => $"{a.Type}/{a.Command?.AbilityId} card={a.CardId} enabled={a.Enabled} reason={a.Reason} perf={a.Command?.PerformerId}"));
+            Check(e.QueryActions(0).Any(a => a.Enabled && a.Command?.AbilityId == "equip-battle" && a.Command.PerformerId == kojiro.Id),
+                $"Equip (Battle) is offered for a Water Shugenja with Library bowed={libraryBowed}: {report}");
+            Check(e.PaymentOptions(0, CardCatalog.Get(Swell).GoldCost, new PaymentSubject(swell, PaymentKind.Equip)).Length > 0, $"The Swell of Strength is payable with Library bowed={libraryBowed}");
+        }
     }
 
     // ---- Library of Rebirth -----------------------------------------------------------------------------------------------------------------------------

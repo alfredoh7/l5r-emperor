@@ -30,7 +30,9 @@ public partial class PhaseTrack : Control
         var pass = actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
         var actor = view.Players.Single(p => p.Id == view.PriorityPlayerId);
         var own = view.PriorityPlayerId == view.ViewerId;
-        PriorityLabel.Text = view.WinnerId is not null ? "Match complete" : own ? (pass is null ? "Your decision" : "You may act or pass") : $"{actor.Name} · Opponent may act";
+        PriorityLabel.Text = view.WinnerId is not null ? "Match complete" : view.ReactionPresentation is { } response
+            ? own ? response.DeclineLabel.Length == 0 ? "Your choice" : "Your response" : $"{actor.Name} · Responding"
+            : own ? (pass is null ? "Your decision" : "You may act or pass") : $"{actor.Name} · Opponent may act";
         PriorityLabel.TooltipText = view.PendingChoice?.Prompt ?? PriorityLabel.Text;
         _priorityColor = own ? new Color("9ceafa") : new Color("efb967");
         PriorityLabel.Modulate = _priorityColor;

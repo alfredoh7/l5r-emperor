@@ -131,7 +131,7 @@ public partial class Main
         var context = new HBoxContainer(); context.AddThemeConstantOverride("separation", 12); _inspector.AddChild(context);
         if (source is { Definition: not null })
         {
-            var face = new DecisionSourceFace(source, 140); context.AddChild(face); face.Pressed += () => InspectMultiCard(source);
+            var face = new DecisionSourceFace(source, 140); context.AddChild(face); LinkToTable(face, source.Id); face.Pressed += () => InspectMultiCard(source);
         }
         var explanation = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; explanation.AddThemeConstantOverride("separation", 8); context.AddChild(explanation);
         var label = action.Command!.PerformerId is { } performer ? action.Label.Replace($" ({performer})", "", StringComparison.Ordinal) : action.Label;
@@ -206,11 +206,12 @@ public partial class Main
         else
         {
             var (required, ready) = RenderGoldPanel(action);
-            _paymentConfirm = SidebarSkin.Button((total == 0 ? MultiReady ? "Confirm without targets" : "Choose required targets" : $"Confirm {total} target{(total == 1 ? "" : "s")}") + (required > 0 ? $" · {required} Gold" : ""), () =>
+            _paymentConfirm = SidebarSkin.Button(CommitButtonLabel(action) + (total > 0 ? $" · {total} target{(total == 1 ? "" : "s")}" : "") + (required > 0 ? $" · {required} Gold" : ""), () =>
             {
                 if (!DecisionCanSubmit || !MultiTargetActive || key != _multiDraftKey || !MultiReady || !ready) return;
                 _ = Submit(MultiCommand() with { SourceIds = required > 0 ? _sources.ToArray() : [] });
             }, true);
+            _paymentConfirm.Name = "CommitAction";
             _paymentConfirm.Disabled = !DecisionCanSubmit || !MultiReady || !ready; _decisionActions.AddChild(_paymentConfirm);
         }
         _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice)); return true;
@@ -239,7 +240,7 @@ public partial class Main
     {
         if (View.PendingChoice?.Type != "beforeActionReaction" || FindCard(View.PendingChoice.CardId ?? "") is not { Definition: not null } target) return;
         _inspector.AddChild(Palette.Wrapped("Reaction for " + ShortName(target), 20, Palette.Gold));
-        var face = new DecisionSourceFace(target, 190); face.Pressed += () => InspectAttackCard(target); _inspector.AddChild(face);
+        var face = new DecisionSourceFace(target, 190); face.Pressed += () => InspectAttackCard(target); LinkToTable(face, target.Id); _inspector.AddChild(face);
     }
     private bool MultiSelectionsAllowed(ActionOption option) => option.Slots is not null && option.Slots.Where(s => s.Timing == TargetSlotTimings.UpFront).All(s =>
         s.Kind == TargetSlotKinds.Card ? _multiCards.TryGetValue(s.Slot, out var selected) && selected.Count >= s.Min && selected.Count <= s.Max && selected.All(s.CardIds.Contains) :

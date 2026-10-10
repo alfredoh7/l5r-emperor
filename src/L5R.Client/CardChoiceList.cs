@@ -10,7 +10,6 @@ namespace L5R.Client;
 /// </summary>
 public sealed partial class CardChoiceList : VBoxContainer
 {
-    private static readonly Color Lit = new(1.3f, 1.2f, .85f);
     private readonly Func<string, IReadOnlyList<CardTile>> _tilesFor;
     private readonly List<(Button Row, string? CardId)> _rows = [];
     private int _selected = -1;
@@ -34,36 +33,12 @@ public sealed partial class CardChoiceList : VBoxContainer
         row.SetMeta("choice_card", cardId ?? "");
         _rows.Add((row, cardId));
         AddChild(row);
-        if (cardId is null) return;
-        row.MouseEntered += () => SetTilesHover(cardId, true);
-        row.MouseExited += () => SetTilesHover(cardId, false);
-        row.FocusEntered += () => SetTilesHover(cardId, true);
-        row.FocusExited += () => SetTilesHover(cardId, false);
-        row.TreeExiting += () => SetTilesHover(cardId, false);
-        // The other direction: the Personality on the table lights this row. Handlers are removed with the row so a rebuilt list never leaves any behind.
-        foreach (var tile in _tilesFor(cardId))
-        {
-            var captured = tile;
-            Action enter = () => Light(index, true), exit = () => Light(index, false);
-            captured.MouseEntered += enter; captured.MouseExited += exit;
-            row.TreeExiting += () => { if (GodotObject.IsInstanceValid(captured)) { captured.MouseEntered -= enter; captured.MouseExited -= exit; } };
-        }
+        if (cardId is not null) TableLink.Attach(row, _tilesFor, [cardId]);
         Restyle();
     }
 
     /// <summary>Selects a row and raises ItemSelected, as a click on it does (used by the capture probes).</summary>
     public void Choose(int index) { Selected = index; ItemSelected?.Invoke(index); }
-
-    private void SetTilesHover(string cardId, bool on)
-    {
-        foreach (var tile in _tilesFor(cardId)) if (GodotObject.IsInstanceValid(tile)) tile.ForcedHover = on;
-    }
-
-    private void Light(int index, bool on)
-    {
-        if (index < 0 || index >= _rows.Count || !GodotObject.IsInstanceValid(_rows[index].Row)) return;
-        _rows[index].Row.Modulate = on ? Lit : Colors.White;
-    }
 
     private void Restyle()
     {

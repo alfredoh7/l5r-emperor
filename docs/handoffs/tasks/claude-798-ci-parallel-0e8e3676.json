@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Parallel PR validation: check.sh --part quick|registration|core|ai with TestRunner --shard/timings; heavy cases dealt in snake order via tests/slow-cases.txt for balanced shards; rules jobs use a trimmed sparse checkout (no client art, assets/ui, .import/.uid); guard tests pin the matrix and the client job's full checkout. Mac job unchanged.",
+  "validation": "Local Windows: Core/AI shards partition 3442/117 cases exactly with heavy cases spread 5/4 and 11/12; fresh sparse clone with the new exclusions (9329 files, 841 MB vs ~12.4k files / ~2.5 GB) passes quick, registration, core 1/2+2/2 (1721 each) and ai 1/2+2/2 (59+58); python skip counts identical to the full checkout; test_check_matrix passes. First CI run of the earlier version: all jobs green, 12m35s total. NOT yet measured on GitHub runners: the trimmed checkout and rebalanced shards.",
+  "remaining": "Confirm checkout time and shard balance on this PR's CI run; Mac job is the remaining critical path (owner handling from own Mac); reduced PR soak/seeds not done.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/798",
+  "branch": "claude/798-ci-parallel",
+  "updated": "2026-10-10T02:08:34.882527+00:00"
+}

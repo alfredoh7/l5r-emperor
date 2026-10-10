@@ -3019,8 +3019,8 @@ public static class AbilityCatalog
             Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Spirit"], Costs: ActionCost.BowWielder, Absent: true, Move: new(MoveSpec.Target, MoveSpec.Home), MovesToBattle: false),
         // The Swell of Strength (oracle-l5r-8366): "As a Focus Effect: After this duel ends, you may attach this card to one of your Water
         // Shugenja, ignoring Gold cost" is Hiromi's Vassals/Shamsir's own attach-self Focus Effect shape (FocusEffectChoice.cs), narrowed to
-        // Water wielders via the plain AttachRequiresKeyword field (no new candidate filter needed -- AttachWielderCandidates already calls
-        // AttachmentLegalTarget, which already reads it). "This Shugenja has +2F" is Scouring Flood's own Spell-Effect-keyed static Force bonus
+        // Water wielders by AttachWielderCandidates (FocusEffectChoice.cs) for the Focus Effect ONLY: the Spell's ordinary Equip may go to any Shugenja, so
+        // the card carries no AttachRequiresKeyword. "This Shugenja has +2F" is Scouring Flood's own Spell-Effect-keyed static Force bonus
         // shape (MatchEngine.PersonalityForce). "Battle: Bow this card and target an enemy Personality or Follower: Reduce its Force to 0" is
         // Kaido's own delta-to-value Force override ("kaido-force-zero").
         ["swell-of-strength-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, you may attach this card to one of your Water Shugenja, ignoring Gold cost", "none"),
@@ -4636,7 +4636,8 @@ public sealed partial class MatchEngine
     // controller. Unique additionally restricts deck construction (DeckFormat.cs, unaffected here);
     // Singular does not. Checked at every entry-into-play path (Purchase, Equip) that names a card by
     // Name, not DefinitionId, matching the existing Unique convention this generalizes.
-    private bool ControlsCopyOf(int owner, string name) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Definition(c).Name == name);
+    // experienceLevel (Mendon, issue #803): a less experienced version of a Personality in play does not stop a more experienced one being recruited; they are independent cards.
+    private bool ControlsCopyOf(int owner, string name, int? experienceLevel = null) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Definition(c).Name == name && (experienceLevel is null || ExperienceLevel(c) == experienceLevel));
     // Reconnaissance (core rules Glossary): a per-player boolean at a specific province, defaulted to
     // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
     // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
@@ -6341,7 +6342,7 @@ public sealed partial class MatchEngine
                     // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
                     // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
                     // needed this check.
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
+                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Low Market's own Target category: broader than "spell-or-reserve-in-hand" above (any
@@ -6355,7 +6356,7 @@ public sealed partial class MatchEngine
                         "Choose an Item, Follower, or Spell from your hand.");
                     Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Personality.");
                     Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
+                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Moto Jun-Ni / Foothills Keep (issue #337): a card in a discard pile the ability's AttachSpec names (whose pile, which kinds).
@@ -6489,7 +6490,7 @@ public sealed partial class MatchEngine
                         "Choose a Spell with the required keyword from your hand.");
                     Require(AttachmentLegalTarget(Definition(target), source!), "This Spell will not attach to that Shugenja.");
                     Require(AttachmentAllowed(target, source!), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
+                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Seeds of Decay pass (issue #453), batch 1. Requesting Reinforcements: "a face-up Scout Personality in your province" -- Your Clan Needs You!'s own

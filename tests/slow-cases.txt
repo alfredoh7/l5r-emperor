@@ -1,0 +1,16 @@
+# Cases that take several seconds or more each (measured in CI, issue #798). TestRunner --shard deals these among the shards on
+# their own, in a snake order, before it round-robins everything else, so the heavy cases cannot all land in one shard.
+# One case-insensitive substring of the case label per line; blank lines and # comments are ignored. Out-of-date entries are
+# harmless (they just match nothing); a missing entry only costs shard balance, never coverage.
+core/BatchDPrimitives
+published/Replay
+attack-assignment-audit/EveryPersonality
+core/CompleteMatch
+deck-look/ViewerAlwaysHasALegalAnswer
+emperor-three-S/KurohitoFavor
+bot-soak/
+deck-search fixture
+resolves a look at the top cards
+published abilities, complete match
+legal complete training match
+custom Practice

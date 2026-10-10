@@ -264,21 +264,30 @@ internal static class KeywordRules695Tests
         var s = Table();
         var card = Add(s, Samurai, 0, Zone.Home);
         var e = Engine(s);
-        for (var n = 0; n < 200; n++) e.ConsultKeywordRulesAnswersForTest(card.Id, "Courtier");
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var n = 0; n < 5000; n++) e.ConsultKeywordRulesAnswersForTest(card.Id, "Courtier");
-        var after = GC.GetAllocatedBytesForCurrentThread();
-        Check(after - before < 1024, $"the consult for a keyword no rule names allocated {after - before} bytes over 5000 calls (only the test seam's own lookup is allowed)");
+        var bytes = LeastAllocatedOver5000Consults(e, card.Id);
+        Check(bytes < 1024, $"the consult for a keyword no rule names allocated {bytes} bytes over 5000 calls (only the test seam's own lookup is allowed)");
         // With a gain block stored on ANOTHER card the consult is still free of allocation for this one.
         s = Table(); card = Add(s, Samurai, 0, Zone.Home); var other = Add(s, Samurai, 0, Zone.Home);
         e = Engine(s);
         var id = other.Id;
         e = Edit(e, st => st.KeywordRules.Blocks.Add(new("b", null, id, null, ["Fallen"], [])));
-        for (var n = 0; n < 200; n++) e.ConsultKeywordRulesAnswersForTest(card.Id, "Courtier");
-        before = GC.GetAllocatedBytesForCurrentThread();
-        for (var n = 0; n < 5000; n++) e.ConsultKeywordRulesAnswersForTest(card.Id, "Courtier");
-        after = GC.GetAllocatedBytesForCurrentThread();
-        Check(after - before < 1024, $"a stored block on another card costs no allocation either ({after - before} bytes)");
+        bytes = LeastAllocatedOver5000Consults(e, card.Id);
+        Check(bytes < 1024, $"a stored block on another card costs no allocation either ({bytes} bytes)");
+    }
+
+    // The least over three rounds: a real per-call allocation shows in every round (5000 calls x any size), but the runtime's own
+    // tiered-JIT promotion can land inside one measured window on a busy CI runner and charge it a few KB (6600 bytes seen once).
+    private static long LeastAllocatedOver5000Consults(MatchEngine e, string cardId)
+    {
+        for (var n = 0; n < 200; n++) e.ConsultKeywordRulesAnswersForTest(cardId, "Courtier");
+        var least = long.MaxValue;
+        for (var round = 0; round < 3; round++)
+        {
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            for (var n = 0; n < 5000; n++) e.ConsultKeywordRulesAnswersForTest(cardId, "Courtier");
+            least = Math.Min(least, GC.GetAllocatedBytesForCurrentThread() - before);
+        }
+        return least;
     }
 
     private static void GainBlocksGrantKeyword()
