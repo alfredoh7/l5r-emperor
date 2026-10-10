@@ -184,7 +184,16 @@ public static partial class TrainingOpponent
                 // Never give the opponent Honor (Mendon's rule, issue #642): bowing is always the answer; allowing the Honor gain is only chosen if bowing were not offered.
                 return command.Choice == "honor" ? -100 : 100;
             case "useAbility":
-                return AbilityScore(x, action, command);
+                // A Reaction it announced and ordered is played: skipping it is never better than the announcement it made (issue #803).
+                return AbilityScore(x, action, command) + (view.ReactionOrder is { Stage: "Resolve" } ? 1000 : 0);
+            // Announce-and-order of a Reaction window (issue #803): announce what it would play anyway, then say it is done; order its own Reactions first and the other player's as announced.
+            case "reactionAnnounce": return AbilityScore(x, action with { Type = "useAbility" }, command with { Type = "useAbility" });
+            case "reactionAnnounceDone": return 100.001; // just above declineReaction: announced only what it would play instead of declining
+            case "reactionUnannounce": return -1000;
+            case "reactionOrder":
+                var placed = view.ReactionOrder?.Announced.FirstOrDefault(i => i.Id == command.TargetId);
+                var rank = int.TryParse(command.TargetId?.TrimStart('r'), out var number) ? number : 0;
+                return (placed?.PlayerId == self.Id ? 1000 : 500) - rank;
             case "proclaim": return ProclaimActionScore(x);
             case "declineReaction": return 100;
             case "discardHand": return 100;

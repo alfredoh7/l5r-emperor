@@ -6,7 +6,9 @@ namespace L5R.Core;
 //   * Taking it is a pass (the ordinary Pass, with its forced-pass, first-action and Killing Grounds handling) and sets a per-player flag.
 //   * While a flagged player holds the priority and nothing is waiting for an answer, the engine passes for them (RunPassAllBattles, after each command).
 //     As Attacker the same applies to choosing the next battle: the lowest remaining battlefield is selected, then the next lowest.
-//   * A decision or window that needs the flagged player (a reaction, an Either/Or, a duel ...) is never answered for them; the engine waits, and
+//   * The Engage window and the "before this battle resolves" Reaction prompt are the exceptions (issue #803): a flagged player has chosen to take no
+//     action in the battles, so the engine declines those Reactions for them. A window the other player can still use stays open for the other player.
+//   * Any other decision or window that needs the flagged player (a reaction, an Either/Or, a duel ...) is never answered for them; the engine waits, and
 //     carries on once it is answered.
 //   * An action (an ability, a Strategy, a Reserve recruit, an equip) taken by the OTHER player in a battle ends the pass: the flag is cleared and the
 //     player must choose Pass all battles again.
@@ -61,13 +63,27 @@ public sealed partial class MatchEngine
     /// <summary>What the engine does next for the player holding the priority, or null when nothing is owed (no flag, a decision open, or no battle to choose).</summary>
     private GameCommand? NextPassAllBattlesCommand()
     {
-        if (_state.WinnerId is not null || HasOpenDecisionState() || !InBattles()) return null;
+        if (_state.WinnerId is not null || !InBattles()) return null;
         var player = _state.PriorityPlayerId;
+        if (HasOpenDecisionState()) return NextPassAllReactionDecline();
         if (player is not (0 or 1) || !PassAllBattlesOn(player)) return null;
         if (_state.Phase == Phase.Battle) return new("pass", player, _state.Version);
         return player == _state.ActivePlayerId && _state.UnresolvedBattlefields.Count > 0
             ? new("selectBattle", player, _state.Version, Province: _state.UnresolvedBattlefields.Min())
             : null;
+    }
+
+    /// <summary>The Reaction the engine declines for a player who has taken Pass all battles: the Engage window, or one
+    /// "before this battle resolves" Reaction, and nothing else open. Null when the window is something else, or the player holding it is not flagged.</summary>
+    private GameCommand? NextPassAllReactionDecline()
+    {
+        if (_state.PendingChoice is not { Type: "engageReaction" or "beforeBattleReaction" } pending) return null;
+        foreach (var decision in DecisionStates)
+            if (decision.Name is not (nameof(MatchState.PendingChoice) or nameof(MatchState.PendingEngage) or nameof(MatchState.PendingBeforeBattleResolve)) && decision.Open(_state)) return null;
+        foreach (var decision in EngineHooks.DecisionState.Items) if (decision(_state)) return null;
+        var holder = pending.Type == "engageReaction" ? _state.PriorityPlayerId : pending.PlayerId;
+        if (holder is not (0 or 1) || !PassAllBattlesOn(holder)) return null;
+        return new("declineReaction", holder, _state.Version);
     }
 
     /// <summary>Execute's tail: carries out the passes and battle selections the raised flags owe, each as an ordinary command of its own.</summary>

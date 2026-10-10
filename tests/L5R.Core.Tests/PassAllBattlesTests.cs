@@ -14,6 +14,7 @@ internal static class PassAllBattlesTests
         ("Both players taking it resolves every remaining battle and ends the Attack Phase", BothResolveEverything),
         ("The passes the engine makes are not commands of their own: the replay holds only what the players chose", ReplayHoldsOnlyChosenCommands),
         ("The flags end with the Attack Phase", FlagsEndWithTheAttackPhase),
+        ("The Engage window is declined for a player who has taken it, and still waits for the opponent who has not (issue #803)", EngageWindowDeclined),
     ]);
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -155,6 +156,28 @@ internal static class PassAllBattlesTests
         Accept(e, Cmd(e, "pass")); // the Defender passes; the one battle resolves
         Check(e.State.Phase is not (Phase.Battle or Phase.BattleSelection));
         Check(!e.State.PassAllBattles[0] && !e.State.PassAllBattles[1]);
+    }
+
+    private static void EngageWindowDeclined()
+    {
+        var s = Table(0);
+        var mine = Add(s, "training-engage-honor-strategy", 0, Zone.Hand); var theirs = Add(s, "training-engage-honor-strategy", 1, Zone.Hand);
+        Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Cmd(e, "passAllBattles"));
+        Eq(e.State.PendingChoice?.Type, "engageReaction", "the window opened, because the Defender can react");
+        Eq(e.State.PriorityPlayerId, 1, "the Attacker's Reaction was declined for them, so the opportunity is the Defender's");
+        Eq(e.State.Cards[mine.Id].Zone, Zone.Hand, "and their Reaction was not played");
+        Accept(e, Cmd(e, "declineReaction"));
+        Check(e.State.PendingChoice is null, "the Defender passing closes it");
+        // Both flagged: nobody is asked anything, every battle is fought.
+        var s2 = Table(0);
+        Add(s2, "training-engage-honor-strategy", 0, Zone.Hand); Add(s2, "training-engage-honor-strategy", 1, Zone.Hand);
+        Add(s2, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(s2, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var both = MatchEngine.FromTestState(s2);
+        s2 = both.State; s2.PassAllBattles[1] = true; both = MatchEngine.FromTestState(s2);
+        Accept(both, Cmd(both, "passAllBattles"));
+        Check(both.State.Phase is not (Phase.Battle or Phase.BattleSelection) && both.State.PendingChoice is null, "no window is left open for either player");
     }
 
     private static void Settle(MatchEngine e)

@@ -89,7 +89,7 @@ public sealed partial class MatchEngine
                 return (false, "No Personality you control can have it attached");
             case SearchEffect.RecruitFromProvinceIgnoringCosts:
                 if (def.Type is not (CardType.Personality or CardType.Holding)) return (false, "Only a Personality or a Holding can be recruited");
-                if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(search.PlayerId, def.Name)) return (false, "You already control this Unique card");
+                if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(search.PlayerId, def.Name, ExperienceLevel(card))) return (false, "You already control this Unique card");
                 if (ProvinceEntryLockError(card) is { } locked) return (false, locked);
                 break;
         }

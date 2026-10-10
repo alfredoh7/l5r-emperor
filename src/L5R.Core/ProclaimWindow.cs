@@ -32,7 +32,7 @@ public sealed partial class MatchEngine
     /// The timing of the window closing tells the opponent that the other side held (or did not hold) a Reaction; this is the small information leak #639/#644 accept.</summary>
     private void SettleReactionWindow()
     {
-        if (_state.PendingChoice is not { } pending || !SettledReactionWindows.Contains(pending.Type) || _state.PendingNegatableAbility is not null) return;
+        if (_state.PendingChoice is not { } pending || !SettledReactionWindows.Contains(pending.Type) || _state.PendingNegatableAbility is not null || ReactionOrderHolds()) return;
         var priority = _state.PriorityPlayerId;
         if (ReactionWindowOffers(priority)) return;
         if (ReactionWindowOffers(1 - priority)) { _state.PriorityPlayerId = 1 - priority; return; }
