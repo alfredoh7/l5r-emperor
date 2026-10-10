@@ -220,7 +220,16 @@ public partial class MyCollectionEditor : Control
         foreach (var text in new[] { "Current", "Imported", "Change" }) header.AddChild(Cell(text, 105, 17));
         var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; Put(_panel, scroll, 30, 310, 760, 400);
         var rows = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill }; rows.AddThemeConstantOverride("separation", 12); scroll.AddChild(rows);
-        foreach (var row in plan.Rows)
+        // A real collection file has thousands of rows and almost all of them are ready: only rows that need a decision are drawn in full (a node tree per row is what made big files slow),
+        // then a short sample of the changes; the rest are counted. Everything is still applied.
+        var repeated = plan.Rows.Where(r => !r.Excluded && r.Id is not null).GroupBy(r => r.Bucket).Where(g => g.Count() > 1).SelectMany(g => g).ToHashSet();
+        var attention = plan.Rows.Where(r => r.Error.Length > 0 || r.Id is null || repeated.Contains(r)).Take(150).ToArray();
+        var sample = plan.Rows.Where(r => !attention.Contains(r)).Take(25).ToArray();
+        var shown = attention.Concat(sample).ToArray();
+        var hidden = plan.Rows.Length - shown.Length;
+        if (hidden > 0)
+            rows.AddChild(Palette.Wrapped($"Showing {attention.Length} rows that need a decision and {sample.Length} others. {hidden} more rows are ready and will be applied as listed.", 16, CatalogueArt.Muted));
+        foreach (var row in shown)
         {
             var box = new VBoxContainer(); box.AddThemeConstantOverride("separation", 8); rows.AddChild(box);
             var line = Line(); box.AddChild(line); var nameCell = new HBoxContainer { CustomMinimumSize = new Vector2(350, 58) }; nameCell.AddThemeConstantOverride("separation", 12); line.AddChild(nameCell);

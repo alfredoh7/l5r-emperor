@@ -89,6 +89,9 @@ public partial class MyCollectionProbe : Node
             editor.PreviewCsv($"card_id,card_name,owned_count\n{card.Id},\"{card.Name}\",1\n"); await Wait(.2); await Capture("csv-ready");
             Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Cancel")); await Wait(.2);
             Check(MyCollection.Store.Count(card.Id) == 5, "cancel CSV review preserves inventory");
+            var timer = System.Diagnostics.Stopwatch.StartNew(); editor.PreviewCsv(MyCollectionStore.Template(MyCollection.Printings).Replace("\"0\"", "\"1\"")); timer.Stop();
+            Check(timer.ElapsedMilliseconds < 4000, $"a {MyCollection.Printings.Length}-row file opens its review in {timer.ElapsedMilliseconds} ms"); await Wait(.2);
+            Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Cancel")); await Wait(.2);
             Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Done")); await Wait(.2);
             library.QueueFree(); await Wait(.3);
             var builder = new DeckBuilderScreen { StorageDirectory = Path.Combine(_out, "decks") }; AddChild(builder); builder.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
