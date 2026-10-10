@@ -21,6 +21,12 @@ public sealed class BotContext
     private int _favorTakenTurn = -1;
     private int _borderRefreshTurn = -1;
 
+    /// <summary>Issue #788: false plays the bot as it was before the six battle changes (no pass-when-won, target priorities, send-home rule, reaction rule or Border Keep refresh). The arena uses it to measure the change.</summary>
+    public bool UseBattlePolicy { get; init; } = true;
+
+    /// <summary>Issue #788 (Mendon): true lets the bot attack when it cannot raze a Province but can destroy the defending army (or trade favourably in a tie). OFF by default: the arena found it lost more than it won (docs/parked/2026-10-09-what-makes-a-good-l5r-bot.md).</summary>
+    public bool UseTradeAttacks { get; init; } = false;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 

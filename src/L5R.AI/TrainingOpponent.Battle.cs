@@ -12,7 +12,7 @@ public static partial class TrainingOpponent
     /// <summary>The battle rules applied on top of an action's ordinary score. Only the actions a player takes in a battle (an ability, a Strategy, an attachment) are affected.</summary>
     private static double Adjust(Ctx x, ActionOption action, GameCommand command, double score)
     {
-        if (action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
+        if (!x.Memory.UseBattlePolicy || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (intent.Negates) return score; // a negating Reaction is always played (Mendon's earlier spec)
         var odds = x.Odds;
@@ -66,6 +66,22 @@ public static partial class TrainingOpponent
     }
 
     /// <summary>The ordering of Mendon's rule 5: destroy, bow, move, penalize, everything else, with a buff for the bot's own army on top when it lifts a unit past an enemy Attack.</summary>
+    /// <summary>Issue #788 (Mendon): the attack that cannot raze a Province but destroys the defending army, or trades well in a tie. Null when the rule is off or no such attack exists.</summary>
+    private static BattlePolicy.Trade? TradeFor(Ctx x, CardView[] units) =>
+        x.Memory.UseBattlePolicy && x.Memory.UseTradeAttacks && !HonorRace(x) ? BattlePolicy.PlanTrade(units, x.Self.Home, x.Opponent.Home) : null;
+
+    /// <summary>The trade the already-chosen assignment makes, so a plan the engine or the planner supplied is scored by the same rule.</summary>
+    private static BattlePolicy.Trade? TradeOf(Ctx x, IEnumerable<string> sentIds)
+    {
+        if (!x.Memory.UseBattlePolicy || !x.Memory.UseTradeAttacks || HonorRace(x)) return null;
+        var sent = x.Self.Home.Where(c => sentIds.Contains(c.Id)).ToArray();
+        var defenders = x.Opponent.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).ToArray();
+        return BattlePolicy.Evaluate(sent, x.Self.Home, BattlePolicy.Force(x.Opponent.Home), defenders.Sum(d => BattlePolicy.UnitValue(d, x.Opponent.Home)));
+    }
+
+    /// <summary>Between a pass (10) and a razing attack (90 and up): a worthwhile trade, better the more Gold it nets.</summary>
+    private static double TradeScore(BattlePolicy.Trade trade) => 70 + Math.Min(trade.Net, 15);
+
     private static double EngageBonus(Ctx x, GameCommand command, AbilityIntent intent)
     {
         var moves = BattlePolicy.Moves(command.AbilityId) || BattlePolicy.SendsHome(command.AbilityId);
@@ -178,7 +194,7 @@ public static partial class TrainingOpponent
     private static double AttackTargetChoiceScore(Ctx x, GameCommand command)
     {
         if (command.TargetId is null) return 50;
-        if (x.Card(command.TargetId) is not { } target) return 100;
+        if (!x.Memory.UseBattlePolicy || x.Card(command.TargetId) is not { } target) return 100;
         var strength = AttackStrengthFor(x, x.Card(command.CardId));
         return 100 + BattlePolicy.AttackTargetScore(target, strength, x.Cards.Values) / 100.0;
     }
@@ -195,7 +211,7 @@ public static partial class TrainingOpponent
     /// <summary>Rule 6: the Border Keep's once-per-game refresh is worth using when the bot has 22 or more Gold to spend and the provinces it would cycle are mostly holdings or unknown cards.</summary>
     private static bool BorderRefreshWanted(Ctx x)
     {
-        if (x.View.Phase != Phase.Action || x.View.ActivePlayerId != x.Self.Id) return false;
+        if (!x.Memory.UseBattlePolicy || x.View.Phase != Phase.Action || x.View.ActivePlayerId != x.Self.Id) return false;
         var gold = Production(x.Self.Stronghold, x.Self.Clan) + x.Self.Home.Sum(c => Production(c, x.Self.Clan));
         if (gold < 22) return false;
         var live = x.Self.Provinces.Where(p => !p.Destroyed).ToArray();

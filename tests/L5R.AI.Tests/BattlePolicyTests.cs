@@ -16,7 +16,69 @@ internal static class BattlePolicyTests
         ("Losing defender (rule 4): sends a non-contributing unit home to save it, a fighting unit only when the Province still holds", LosingDefender),
         ("First-action reactions (rule 5): claimed only when the battle is not already won", EngageReactions),
         ("Border Keep (rule 6): refreshes once with 22 Gold and three stocked provinces, never with 21", BorderKeep),
+        ("Trade attacks: a battle won outright is worth making without razing, a tie only when the defenders are worth clearly more, attachments and Personalities count", TradeAttacks),
+        ("Trade attacks: the bot declares and assigns such an attack, and not when the rule is off or the defence is too strong", TradeAttackChoice),
     ];
+
+    private static CardView Home(string id, int owner, int force, int gold, string? attachedTo = null, CardType? type = null)
+    {
+        var def = type is null ? Person() with { GoldCost = gold } : CardCatalog.Cards.Values.First(d => d.Type == type) with { GoldCost = gold };
+        return new CardView(id, def, owner, Zone.Home, true, false, null, attachedTo, force);
+    }
+
+    private static void TradeAttacks()
+    {
+        CardView[] none = [];
+        // Won outright without razing: one Force 6 unit against a Force 4 defender worth 5 Gold plus the Personality bonus.
+        var mine = new[] { Home("a", 0, 6, 3) };
+        var enemy = new[] { Home("d", 1, 4, 5) };
+        var win = BattlePolicy.PlanTrade(mine, mine, enemy);
+        Check(win is { Tie: false, Losses: 0, Kills: 7, Net: 7 }, $"a won battle nets the defenders' worth (7): {win}");
+        Check(BattlePolicy.PlanTrade([Home("w", 0, 3, 3)], [Home("w", 0, 3, 3)], enemy) is null, "Force 3 against a Force 4 defence loses the army for nothing: no trade");
+        Check(BattlePolicy.PlanTrade(mine, mine, none) is null, "nothing to destroy, nothing to trade");
+        // A tie destroys both armies: worthwhile only when the defenders are worth clearly more than the attackers.
+        var even = new[] { Home("a", 0, 4, 2) };
+        var rich = BattlePolicy.PlanTrade(even, even, [Home("d", 1, 4, 9)]);
+        Check(rich is { Tie: true, Net: 3 }, $"a tie against a 9 Gold defender (11 with the bonus) for a 2 Gold attacker (4): net 3, {rich}");
+        Check(BattlePolicy.PlanTrade(even, even, [Home("d", 1, 4, 3)]) is null, "a tie against a cheaper defender is a bad trade");
+        // Attachments are part of the defending unit's worth.
+        var armed = new[] { Home("d", 1, 4, 3), Home("blade", 1, 0, 6, "d", CardType.Item) };
+        var withItem = BattlePolicy.PlanTrade(even, even, armed);
+        Check(withItem is { Tie: true } && withItem.Kills == 11, $"the attachment's 6 Gold is destroyed with its Personality: kills {withItem?.Kills}");
+        // Sends the smallest sufficient subset with a spare point of Force, keeping the rest home.
+        var big = Home("big", 0, 9, 4); var small = Home("small", 0, 2, 1);
+        var subset = BattlePolicy.PlanTrade([big, small], [big, small], enemy);
+        Check(subset is { UnitIds: ["big"] }, $"the Force 9 unit alone beats a Force 4 defence with room to spare: [{string.Join(",", subset?.UnitIds ?? [])}]");
+    }
+
+    private static MatchView AttackView(int ownForce, int enemyForce, int enemyGold, int strength)
+    {
+        var view = MatchEngine.CreateStarterMatch().GetView(0);
+        ProvinceView[] Provinces(int owner) => view.Players[owner].Provinces.Select(p => p with { Strength = strength, Destroyed = false }).ToArray();
+        return view with
+        {
+            Phase = Phase.AttackDeclaration, ActivePlayerId = 0, PriorityPlayerId = 0,
+            Players = [view.Players[0] with { Home = [Home("a", 0, ownForce, 3)], Army = [], Provinces = Provinces(0) },
+                view.Players[1] with { Home = [Home("d", 1, enemyForce, enemyGold)], Army = [], Provinces = Provinces(1) }]
+        };
+    }
+
+    private static void TradeAttackChoice()
+    {
+        ActionOption Declare(MatchView v) => new("declareAttack", "Declare", true, null, new("declareAttack", 0, v.Version));
+        ActionOption Attack(MatchView v) => new("attack", "Attack", true, null, new("attack", 0, v.Version, Assignments: []));
+        var on = new BotContext { UseTradeAttacks = true };
+        var strong = AttackView(6, 4, 5, 9); // beats the defender, cannot raze a Strength 9 Province
+        Check(TrainingOpponent.Choose(strong, [Pass(strong), Declare(strong)], on).Command?.Type == "declareAttack", "a battle it can win outright is declared even though the Province would hold");
+        var assigned = TrainingOpponent.Choose(strong, [Pass(strong), Attack(strong)], on).Command;
+        Check(assigned is { Type: "attack", Assignments: { Count: 1 } } && assigned.Assignments.ContainsKey("a"), "the winning unit is assigned to the attack");
+        var off = TrainingOpponent.Choose(strong, [Pass(strong), Declare(strong)]).Command;
+        Check(off?.Type == "pass", "the rule is off by default: the old caution holds, no declaration");
+        var weak = AttackView(3, 4, 5, 9);
+        Check(TrainingOpponent.Choose(weak, [Pass(weak), Declare(weak)], on).Command?.Type == "pass", "a defence that would win is not attacked");
+        var razing = AttackView(12, 4, 5, 3); // 12 > 4 + 3: the ordinary planner razes the Province
+        Check(TrainingOpponent.Choose(razing, [Pass(razing), Declare(razing)], on).Command?.Type == "declareAttack", "an attack that razes the Province is unchanged");
+    }
 
     private static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
     private static CardDefinition Person(int force = 4) => CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force == force);

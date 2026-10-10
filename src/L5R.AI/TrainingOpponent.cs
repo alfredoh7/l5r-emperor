@@ -101,6 +101,11 @@ public static partial class TrainingOpponent
                 // Mendon's spec (issue #642): as many sub-armies as can each beat their province plus every unit that could defend it.
                 var plan = PlanAttack(x, units, provinces);
                 if (plan is not null) return command with { Assignments = plan };
+                if (TradeFor(x, units) is { } trade)
+                {
+                    var weakest = opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index;
+                    return command with { Assignments = trade.UnitIds.ToDictionary(id => id, _ => weakest, StringComparer.Ordinal) };
+                }
                 if (command.Assignments is { Count: > 0 }) return command; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
             // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
@@ -149,7 +154,7 @@ public static partial class TrainingOpponent
                 var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view)))
                     .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
                 // Issue #788: an Attack takes the highest-Force target it can destroy, and a bow takes the unit with the most attachments (or the most dangerous printed ability).
-                var ruled = intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
+                var ruled = !x.Memory.UseBattlePolicy ? null : intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
                     : intent.Rank == EffectRank.Bow && intent.Side == TargetSide.Enemy ? PickBowTarget(x, legal, command.AbilityId) : null;
                 var target = ruled ?? known.Card ?? PickCard(x, legal, intent, action.Label);
                 if (target is not null) command = WithTarget(command, action, target.Id);
@@ -163,7 +168,7 @@ public static partial class TrainingOpponent
             var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id) && !refusedTargets.Contains(c.Id)).ToArray();
             if (targetCards.Length == 0) return refusedTargets.Count > 0 ? null : Complete(x, action, command);
             var ordered = targetCards.OrderBy(c => c.Bowed).ThenByDescending(c => c.Force);
-            var bowStrategy = action.Type == "playStrategy" && x.Card(command.CardId)?.Definition?.Effect == "bow-small" ? PickBowTarget(x, targetCards.Select(c => c.Id).ToArray(), null) : null;
+            var bowStrategy = x.Memory.UseBattlePolicy && action.Type == "playStrategy" && x.Card(command.CardId)?.Definition?.Effect == "bow-small" ? PickBowTarget(x, targetCards.Select(c => c.Id).ToArray(), null) : null;
             var withTarget = WithTarget(command, action, bowStrategy?.Id ?? ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
             return withTarget is null ? null : Complete(x, action, withTarget);
         }
@@ -246,7 +251,9 @@ public static partial class TrainingOpponent
                 var armies = command.Assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
                 if (HonorRace(x) && armies.Length > 0) return 150 + armies.Length; // the opponent wins on Honor at the start of its turn: destroy every Province the army can
                 var weakestArmyMargin = armies.Length == 0 ? int.MinValue : armies.Min(a => a.Force - (opponent.Provinces.FirstOrDefault(p => p.Index == a.Province)?.Strength ?? int.MaxValue / 2) - homeDefense);
-                return weakestArmyMargin > 0 ? 90 + force - homeDefense : armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0 ? 80 : 0;
+                if (weakestArmyMargin > 0) return 90 + force - homeDefense;
+                if (armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0) return 80;
+                return armies.Length == 1 && TradeOf(x, command.Assignments.Keys) is { } traded ? TradeScore(traded) : 0;
             case "assignDefense":
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);

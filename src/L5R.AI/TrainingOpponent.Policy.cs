@@ -147,7 +147,7 @@ public static partial class TrainingOpponent
         var units = x.Self.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).ToArray();
         var provinces = x.Opponent.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray();
         var plan = PlanAttack(x, units, provinces);
-        if (plan is null) return units.Length == 0 ? -100 : 0;
+        if (plan is null) return units.Length == 0 ? -100 : TradeFor(x, units) is { } trade ? TradeScore(trade) : 0;
         if (HonorRace(x)) return 200; // the opponent wins on Honor next turn: always attack
         var force = ArmyForce(x.Self.Home.Where(c => plan.ContainsKey(c.Id) || c.AttachedTo is not null && plan.ContainsKey(c.AttachedTo)));
         return 90 + force - ArmyForce(x.Opponent.Home);

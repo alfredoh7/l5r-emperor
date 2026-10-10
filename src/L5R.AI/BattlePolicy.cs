@@ -114,6 +114,66 @@ public static class BattlePolicy
         return target.Force <= strength ? 1000 + target.Force * 100 + gold : 500 - target.Force;
     }
 
+    // ---- trade attacks ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /// <summary>Extra value (in Gold) of destroying or losing a Personality over a bare attachment: Personalities are the cards that carry a deck.</summary>
+    public const int PersonalityBonus = 2;
+    private const int MaxTradeUnits = 12;
+
+    /// <summary>The worth of a unit in Gold: its own printed cost plus everything attached to it, and <see cref="PersonalityBonus"/> when it is a Personality.</summary>
+    public static int UnitValue(CardView unit, IEnumerable<CardView> home) => UnitGold(unit, home) + (unit.Definition?.Type == CardType.Personality ? PersonalityBonus : 0);
+
+    /// <summary>
+    /// An attack that does not raze the Province but is still worth making. <paramref name="Net"/> is the Gold-worth of the defenders it destroys minus what it risks.
+    /// A battle won outright (more Force than every possible defender) destroys the whole defending army and costs the attacker nothing; a tie destroys both armies,
+    /// so it is worth making only when the defenders are worth clearly more than the attackers.
+    /// </summary>
+    public sealed record Trade(string[] UnitIds, int Sent, int Defence, int Kills, int Losses, bool Tie, int Net);
+
+    /// <summary>
+    /// Issue #788 (Mendon): "count a failed attack as useful if it destroys defenders' cards (Personalities most valuable, attachments also valuable), especially if the Gold
+    /// traded is in the attacker's favour". The engine destroys the losing army and leaves the winner's untouched; a tie destroys both. <paramref name="enemyHome"/> is every
+    /// card the opponent has at home; every unbowed Personality there could defend, so the whole of it is counted as the defence (the safe reading, as the attack planner does).
+    /// Returns the best subset of <paramref name="ownUnits"/> to send, or null when no subset beats the defence or trades well. Pure and deterministic.
+    /// </summary>
+    public static Trade? PlanTrade(IReadOnlyList<CardView> ownUnits, IReadOnlyCollection<CardView> ownHome, IReadOnlyCollection<CardView> enemyHome)
+    {
+        var defenders = enemyHome.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).ToArray();
+        var defence = Force(enemyHome);
+        var kills = defenders.Sum(d => UnitValue(d, enemyHome));
+        if (defence <= 0 || kills <= 0) return null;
+        var candidates = ownUnits.Where(u => ForceOf(u, ownHome) > 0).OrderByDescending(u => ForceOf(u, ownHome)).ThenBy(u => u.Id, StringComparer.Ordinal).Take(MaxTradeUnits).ToArray();
+        Trade? best = null;
+        for (var mask = 1; mask < 1 << candidates.Length; mask++)
+        {
+            var subset = candidates.Where((_, i) => (mask >> i & 1) == 1).ToArray();
+            if (Evaluate(subset, ownHome, defence, kills) is { } t && (best is null || Better(t, best))) best = t;
+        }
+        return best;
+
+        static bool Better(Trade a, Trade b) =>
+            a.Net != b.Net ? a.Net > b.Net : a.Losses != b.Losses ? a.Losses < b.Losses : a.Sent != b.Sent ? a.Sent < b.Sent
+            : string.CompareOrdinal(string.Join(",", a.UnitIds), string.Join(",", b.UnitIds)) < 0;
+    }
+
+    /// <summary>The trade a particular set of attackers makes against a defence of <paramref name="defence"/> Force worth <paramref name="kills"/> Gold, or null when it is not worth making.</summary>
+    public static Trade? Evaluate(IReadOnlyCollection<CardView> sentUnits, IReadOnlyCollection<CardView> ownHome, int defence, int kills)
+    {
+        var sent = sentUnits.Sum(u => ForceOf(u, ownHome));
+        if (sent < defence || defence <= 0) return null;
+        var losses = sentUnits.Sum(u => UnitValue(u, ownHome));
+        var ids = sentUnits.Select(u => u.Id).OrderBy(i => i, StringComparer.Ordinal).ToArray();
+        if (sent == defence)
+        {
+            var tieNet = kills - losses - 4; // a tie is fragile: one enemy Force boost turns it into a loss of the whole army
+            return tieNet >= 3 ? new(ids, sent, defence, kills, losses, true, tieNet) : null;
+        }
+        // Won outright. One spare point of Force over the defence is a thin margin, so a subset with two or more is preferred by a small amount.
+        return new(ids, sent, defence, kills, 0, false, kills - (sent < defence + 2 ? 2 : 0));
+    }
+
+    private static int ForceOf(CardView unit, IEnumerable<CardView> home) => Force(home.Where(h => h.Id == unit.Id || h.AttachedTo == unit.Id));
+
     // ---- bowing -------------------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>

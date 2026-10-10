@@ -208,6 +208,12 @@ internal static class BotSoak
             var folder = Env("L5R_ARENA_DECKS");
             if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the arena"); return; }
             BotArena.Run(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, Env("L5R_ARENA_REPORT"));
+        }),
+        ("bot-arena: battle policy (issue #788), decks in L5R_ARENA_DECKS, the bot with the six battle changes versus the same bot without them (opt-in, see BotArena.RunPolicy)", () =>
+        {
+            var folder = Env("L5R_ARENA_DECKS");
+            if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the battle-policy arena"); return; }
+            BotArena.RunPolicy(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, int.TryParse(Env("L5R_ARENA_SEEDS"), out var seeds) ? seeds : 1, Env("L5R_ARENA_REPORT"));
         })
     ];
 }

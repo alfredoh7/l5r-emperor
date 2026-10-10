@@ -28,7 +28,7 @@ public static partial class TrainingOpponent
         if (a.AlternativeCost is { } alternative && command.CostOption is null) command = command with { CostOption = alternative.Id };
         if (a.Type == "useAbility" && a.Provinces is { Length: > 0 } provinces && command.Province is null)
             // Issue #788: units are only moved into a battlefield the enemy holds (the weakest opposition first); any other destination is a last resort.
-            command = command with { Province = a.Movement is null ? provinces[0] : provinces.OrderBy(p => EnemyForceAt(x, p) == 0).ThenBy(p => EnemyForceAt(x, p)).ThenBy(p => p).First() };
+            command = command with { Province = a.Movement is null || !x.Memory.UseBattlePolicy ? provinces[0] : provinces.OrderBy(p => EnemyForceAt(x, p) == 0).ThenBy(p => EnemyForceAt(x, p)).ThenBy(p => p).First() };
         return command;
     }
 
