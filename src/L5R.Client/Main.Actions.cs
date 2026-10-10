@@ -63,7 +63,8 @@ public partial class Main
             _inspector.AddChild(Palette.Text("MATCH COMPLETE", 12, Palette.Gold));
             _inspector.AddChild(Palette.Text(View.Players[winner].Clan + " prevails", 28, title: true));
             _inspector.AddChild(Palette.Wrapped(View.VictoryReason ?? "Victory"));
-            _inspector.AddChild(SidebarSkin.Button("Start another practice", ShowPractice, true)); return;
+            _inspector.AddChild(SidebarSkin.Button("Start another practice", ShowPractice, true));
+            _inspector.AddChild(SidebarSkin.Button("Return to main menu", ShowMainMenu)); return; // issue #793
         }
         if (BattleTracker.InBattle(View.Phase) || _resolutionMessage is not null)
         {
@@ -400,6 +401,7 @@ public partial class Main
         else if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table or below. Review the arrow, then use the action button.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
+        if (!ReactionFlowOwnsControls && PerformerClicks().Count > 0) _inspector.AddChild(Palette.Wrapped("Choose the performing Personality: click a highlighted Personality on the table.", 15, Palette.Gold)); // issue #793
         if (IsProvinceTarget(action)) RenderProvincePicker(action);
         if (targets.Length > 0)
         {
@@ -494,7 +496,7 @@ public partial class Main
             else if (option.Type == "endDynasty" && option.Command is { } endCommand && NeedsEndDynastyConfirmation())
                 Confirm("End your Dynasty phase?", "You have not bought or discarded anything from your provinces this turn. End your Dynasty phase anyway?", () => _ = Submit(endCommand));
             else if (option.Command is { } command) _ = Submit(command);
-        }, option.Type is "pass" or "endDynasty" or "declineReaction");
+        }, option.Type is "pass" or "endDynasty" or "declineReaction", danger: option.Type == "declareAttack");
         button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;
         IdentifyReactionOption(button, option); LinkToTable(button, ActionCards(option));
         button.TooltipText = RulesHelp.Tooltip((option.Reason is { } reasonText ? "Unavailable: " + reasonText + "\n\n" : option.Label + "\n\n") + RulesHelp.ActionGuide(option.Type));
