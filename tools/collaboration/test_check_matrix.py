@@ -38,6 +38,15 @@ class CheckMatrixTests(unittest.TestCase):
             if m:
                 self.assertRegex(CHECK_SH, rf"\b{m.group(1)}\b.*\)", f"check.sh does not know part {m.group(1)}")
 
+    def test_full_run_starts_every_stage(self):
+        # The Mac job's full run starts its stages in the background (issue #805); one left out would silently stop running.
+        full_run = CHECK_SH[CHECK_SH.index("rm -f artifacts/checks/stage-*.log"):]
+        for stage in ("python run_python_tests", "small test_small_projects", "client test_client"):
+            self.assertIn(f"start_stage {stage}", full_run)
+        for project, name in (("L5R.Core.Tests", "core"), ("L5R.AI.Tests", "ai")):
+            self.assertIn(f'start_stage "{name}-$i" test_dotnet_project {project} --shard "$i/$shards"', full_run)
+        self.assertIn("for ((i = 1; i <= shards; i++)); do", full_run)
+
     def test_unquoted_matrix_args_reach_check_sh_as_words(self):
         # A quoted "$CHECK_ARGS" would hand '--part core --shard 1/2' over as ONE argument and every split job would exit 2.
         self.assertRegex(WORKFLOW, r"bash tools/check\.sh \$CHECK_ARGS(\s|$)")

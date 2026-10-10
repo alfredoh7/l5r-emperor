@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Full tools/check.sh runs (no argument, --skip-client) now build once and run their stages concurrently: Python tests, small projects, Core and AI as L5R_CHECK_SHARDS slices each (default 3), and the Godot import/smoke. Each stage logs to artifacts/checks/stage-NAME.log; logs print in start order and any failed stage fails the run. --part and --client-only are unchanged. Aim: the Mac CI job (one self-hosted runner, ~12.4 min serial) stops setting PR time.",
+  "validation": "On an M5 Mac (10 cores): bash tools/check.sh passed in 2 min 32 s; its 3,650 PASS labels are identical to the earlier serial full run (diff empty). A copy with the small stage replaced by false exited 1 and named the stage; L5R_CHECK_SHARDS=x exits 2. tools/collaboration test_check_matrix.py passes (5 tests). Not yet measured on the Mac CI runner; Windows jobs do not use the changed path.",
+  "remaining": "Confirm Mac CI job time and stability over several runs (AI cases with time budgets run slower under load). Not done: keeping .tools/.cache/.godot across runs on the Mac runner; a third Windows AI shard.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/805",
+  "branch": "claude/805-check-parallel",
+  "updated": "2026-10-10T05:01:03.253908+00:00"
+}
