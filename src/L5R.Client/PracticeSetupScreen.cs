@@ -25,7 +25,7 @@ public partial class PracticeSetupScreen : Control
     public override void _Ready()
     {
         Theme=SidebarSkin.Theme();MouseFilter=MouseFilterEnum.Stop;
-        _store=new DeckFileStore(StorageDirectory??ProjectSettings.GlobalizePath("user://decks"));
+        _store=new DeckFileStore(StorageDirectory??ProjectSettings.GlobalizePath("user://decks"));if(StorageDirectory is null)PreloadedDecks.Seed(_store);
         Choices=[Preset("Crane"),Preset("Lion")];
         var black=new ColorRect{Color=new Color("05090d"),MouseFilter=MouseFilterEnum.Ignore};AddChild(black);black.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(Canvas);Canvas.AddChild(new TextureRect{Texture=PracticeArt.Background,Size=Canvas.Size,ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,MouseFilter=MouseFilterEnum.Ignore});Canvas.AddChild(_page);_page.Size=Canvas.Size;

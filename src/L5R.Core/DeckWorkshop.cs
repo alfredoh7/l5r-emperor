@@ -148,6 +148,23 @@ public sealed class DeckFileStore(string directory)
             throw new ArgumentException("Choose another deck name; this one is reserved by Windows.");
         return Path.Combine(DirectoryPath, clean + ".txt");
     }
+    /// <summary>Puts the decks that ship with the game into this folder the first time it is asked (the marker file records that it has been): a deck of the same name is never replaced, and a deck
+    /// the player later deletes does not come back. Returns how many were written.</summary>
+    public int Preload(IEnumerable<(string Name, string Text)> decks, string markerPath)
+    {
+        if (File.Exists(markerPath)) return 0;
+        Directory.CreateDirectory(DirectoryPath);
+        var written = 0;
+        foreach (var (name, text) in decks)
+        {
+            var target = PathFor(name);
+            if (File.Exists(target)) continue;
+            File.WriteAllText(target, text); written++;
+        }
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(markerPath))!);
+        File.WriteAllText(markerPath, $"{written} preloaded decks written");
+        return written;
+    }
     public static string Read(string path)
     {
         if (new FileInfo(path).Length > 1_000_000) throw new FormatException("Deck file exceeds the 1 MB limit.");

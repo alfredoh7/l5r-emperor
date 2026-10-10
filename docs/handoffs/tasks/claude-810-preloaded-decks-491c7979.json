@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "The nine My Decks ship preloaded: Content/preloaded-decks.json is written into the deck folder once on first open (DeckFileStore.Preload: never over an existing deck, not again after a delete), from the deck builder and practice setup.",
+  "validation": "deck-workshop tests 16/16 incl. Preload semantics and all nine decks reading cleanly against the catalogue; client builds with no warnings. Packaged build checked separately.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/810",
+  "branch": "claude/810-preloaded-decks",
+  "updated": "2026-10-10T06:06:38.465712+00:00"
+}
