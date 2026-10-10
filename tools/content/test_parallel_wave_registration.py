@@ -11,6 +11,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class ParallelWaveRegistrationTests(unittest.TestCase):
+    # The two registration tests each build Core twice in a scratch repo (~100 s apiece); CI's "py" part sets this and its
+    # "registration" part runs them side by side (issue #798). The full local/Mac run leaves it unset and still runs them.
+    @unittest.skipIf(os.environ.get("L5R_SKIP_REGISTRATION_BUILD"), "runs in the registration CI part")
     def test_two_branches_add_waves_without_shared_registration_edits(self):
         with tempfile.TemporaryDirectory(prefix="l5r-waves-") as directory:
             root = Path(directory)

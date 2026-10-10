@@ -30,6 +30,32 @@ bash tools/check.sh --skip-client
 bash tools/check.sh  # also builds/imports/smoke-tests the native client
 ```
 
+## Sharding and timings (issue #798)
+
+PR validation runs the rules checks as parallel CI jobs. The console runners accept
+`--shard I/N` (1-based): after any `--filter`, cases are dealt in registration order, so the N
+shards of one build partition the cases exactly (`--list --shard 1/4` shows what a shard runs).
+Cases named in `tests/slow-cases.txt` (a case-insensitive label substring per line, copied beside
+each test assembly) are dealt among themselves in a snake order first, so the heavy full-match
+cases spread across shards; everything else is round-robin. Add a line there when a case takes
+several seconds; a stale or missing entry only affects balance, never coverage. Every run ends with a summary of the slowest cases, every failing label
+together, and the same text appended to the Actions job summary when `GITHUB_STEP_SUMMARY` is set.
+
+`tools/check.sh` exposes the slices CI uses; no argument, `--skip-client` and `--client-only`
+behave as before (the Mac job still runs everything):
+
+```sh
+bash tools/check.sh --part quick                  # tools' Python tests, comment lint, Server/Transport/Collection
+bash tools/check.sh --part registration           # the two scratch-repo registration builds, run side by side
+bash tools/check.sh --part core --shard 1/2       # half of L5R.Core.Tests
+bash tools/check.sh --part ai --shard 2/2         # half of L5R.AI.Tests
+```
+
+`--part py` and `--part small` are the two halves of `quick`. The two registration tests are
+skipped inside `py`/`quick` (they set `L5R_SKIP_REGISTRATION_BUILD`) and run only in
+`registration`, or in the unpartitioned runs. Changing the matrix in `.github/workflows/check.yml`
+must keep every part and shard present: dropping one silently drops those tests from PR validation.
+
 For repeated runs after building, invoke the corresponding
 `tests/<project>/bin/Debug/net10.0/<project>.dll` with `dotnet` and the same flags.
 The test count can increase when a loop becomes independently reported cases;

@@ -8,6 +8,6 @@
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="../../src/L5R.Core/L5R.Core.csproj" />  <Compile Include="../../src/L5R.Client/BattleJournal.cs" Link="BattleJournal.cs" />
   </ItemGroup>
-  <ItemGroup><Compile Include="../TestRunner.cs" Link="TestRunner.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../TestRunner.cs" Link="TestRunner.cs" /><None Include="../slow-cases.txt" Link="slow-cases.txt" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
   <ItemGroup><Compile Include="../../src/L5R.Client/ProvincePresentation.cs" Link="ProvincePresentation.cs" /></ItemGroup>
 </Project>
