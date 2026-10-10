@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Split PR validation's Windows rules job into parallel jobs: check.sh --part quick|registration|core|ai (+ --shard I/N via new TestRunner --shard, per-case timings and failure summary). Registration tests run side by side in their own part. NoAllocation made robust to JIT noise. Guard test pins the CI matrix. Mac job unchanged (full coverage kept).",
+  "validation": "Local Windows: core and ai --list shards partition 3442 cases exactly; core shards 1/2 and 2/2 exit 0; ai shards 59+58=117 cases pass; --part registration 110s (was 212s serial); --part py ~90s (was ~300s); --part small passes; check.yml parses; test_check_matrix (incl. mutation check) passes. NOT yet validated: the new workflow on GitHub-hosted runners and its real wall-clock time.",
+  "remaining": "Open PR and compare real CI wall-clock and failure coverage against the baseline (median ~21 min); tune shard counts if checkout overhead dominates; consider reduced PR seeds/soak with nightly as backstop (not done).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/798",
+  "branch": "claude/798-ci-parallel",
+  "updated": "2026-10-10T01:14:45.174687+00:00"
+}

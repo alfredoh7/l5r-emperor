@@ -21,20 +21,67 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The Windows work is split in two parallel jobs: the rules/AI/server/content checks (windows-2022) and the native Godot client
-        # build, import and smoke run (windows-2022-client). The Godot import of ~1500 scans and the art dominated the single job (about
-        # 9 of its 17 minutes) and pushed slow runs past the timeout; the client job now also restores the previous import cache.
-        # The Mac runner keeps one job with every check (its workspace persists, so it is already fast).
+        # The Windows work runs as parallel jobs (issue #798; the single rules job took ~23 min and set the PR time): tools tests and the
+        # small .NET projects ("quick"), the two scratch-repo registration builds, Core in two shards, AI in two shards, and the native
+        # Godot client build, import and smoke run (windows-2022-client; its Godot import of ~1500 scans restores the previous import
+        # cache). Every Windows job pays its own checkout and tool bootstrap, so do not split further without measuring. Shards come
+        # from the test runner's --shard I/N and are exact partitions of one build's cases.
+        # The Mac runner keeps one job with every check (its workspace persists, so it is already fast); macOS coverage is deliberate.
         include:
           - os: macos-local
             runner: [self-hosted, macOS, ARM64, l5r-mac-studio]
             args: ''
             timeout: 25
             sparse: ''
-          - os: windows-2022
+          - os: windows-2022-quick
             runner: [windows-2022]
-            args: --skip-client
-            timeout: 25
+            args: --part quick
+            timeout: 15
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
+          - os: windows-2022-registration
+            runner: [windows-2022]
+            args: --part registration
+            timeout: 15
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
+          - os: windows-2022-core-1
+            runner: [windows-2022]
+            args: --part core --shard 1/2
+            timeout: 20
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
+          - os: windows-2022-core-2
+            runner: [windows-2022]
+            args: --part core --shard 2/2
+            timeout: 20
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
+          - os: windows-2022-ai-1
+            runner: [windows-2022]
+            args: --part ai --shard 1/2
+            timeout: 20
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
+          - os: windows-2022-ai-2
+            runner: [windows-2022]
+            args: --part ai --shard 2/2
+            timeout: 20
             sparse: |
               /*
               !/docs/screenshots/
@@ -95,12 +142,12 @@ jobs:
           key: godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-${{ github.sha }}
           restore-keys: |
             godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-
-      - name: ${{ matrix.args == '--client-only' && 'Native client build, Godot import and smoke run' || 'Rules, AI, server, client transport and content (plus the native client on the Mac)' }}
+      - name: ${{ matrix.args == '--client-only' && 'Native client build, Godot import and smoke run' || (matrix.args == '' && 'Every check, including the native client (Mac)' || format('Checks {0}', matrix.args)) }}
         env:
           CHECK_ARGS: ${{ matrix.args }}
-        run: bash tools/check.sh "$CHECK_ARGS"
+        run: bash tools/check.sh $CHECK_ARGS  # unquoted on purpose: a matrix value like '--part core --shard 1/2' is several arguments
       - name: Keep the Godot logs of a failed run
-        if: failure() && matrix.args != '--skip-client'
+        if: failure() && (matrix.args == '' || matrix.args == '--client-only')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: godot-logs-${{ matrix.os }}
