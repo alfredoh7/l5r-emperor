@@ -13,7 +13,7 @@ using L5R.Core;
 //   new/new and old/old are mirror controls, which show how strong the deck is against a preset when both sides use the same bot.
 internal static class BotArena
 {
-    private enum Kind { New, Old }
+    private enum Kind { New, Old, Prior }
     private sealed record Game(string Deck, string Opponent, Kind DeckBot, Kind OpponentBot, int? Winner, string Result, int Turn, double Seconds, int Refused, string? Error)
     {
         /// <summary>Per seat: how many times each kind of action was taken, and the final Honor / provinces left / personalities in play.</summary>
@@ -36,7 +36,7 @@ internal static class BotArena
         MatchEngine game;
         try { game = MatchEngine.CreateCustomMatch(seed, deck, opponent); }
         catch (Exception e) { return End(null, "not playable", 0, e.Message.Split('\n')[0]); }
-        var bots = new[] { deckBot, opponentBot }; var memory = new[] { new BotContext(), new BotContext() };
+        var bots = new[] { deckBot, opponentBot }; var memory = new[] { Memory(deckBot), Memory(opponentBot) };
         var sameAnswer = 0; GameCommand? lastRefused = null;
         for (var n = 0; n < 6000; n++)
         {
@@ -54,7 +54,7 @@ internal static class BotArena
                     if (alt.Any(x => x.Enabled && x.Type != "concede")) { seat = other; actions = alt; }
                 }
                 var view = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(game.GetView(seat)))!;
-                var decision = bots[seat] == Kind.New ? TrainingOpponent.Choose(view, actions, memory[seat]) : LegacyTrainingOpponent.Choose(view, actions);
+                var decision = bots[seat] != Kind.Old ? TrainingOpponent.Choose(view, actions, memory[seat]) : LegacyTrainingOpponent.Choose(view, actions);
                 if (decision.Command is null) return End(null, "stuck", v0.TurnNumber, $"seat {seat} had no command: {decision.Reason}");
                 var outcome = game.Execute(decision.Command);
                 if (outcome.Accepted)
@@ -79,6 +79,74 @@ internal static class BotArena
             catch (Exception e) { return End(null, "exception", 0, $"{e.GetType().Name}: {e.Message}"); }
         }
         return End(null, "decision cap", 0);
+    }
+
+    /// <summary>L5R_ARENA_TRADE=only compares the trade-attack rule alone (New: the six battle changes plus trade attacks; Prior: the six changes without them); otherwise New is the six changes and Prior is the bot before them.</summary>
+    private static readonly bool TradeOnly = Environment.GetEnvironmentVariable("L5R_ARENA_TRADE") == "only";
+    private static BotContext Memory(Kind kind) => new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New };
+
+    /// <summary>
+    /// Issue #788: the bot with the six battle changes (New) against the same bot without them (Prior, the bot on main before the change). Every ordered pair of decks in the folder, plus the
+    /// Lion and Crane presets, is played twice from the same seed with the bots swapped between the seats, so the deck, the seat and the shuffle cancel out and only the bot differs.
+    /// </summary>
+    public static void RunPolicy(string folder, ulong seed, int seeds, string? reportPath)
+    {
+        var decks = new List<(string Name, Deck Deck)> { ("Lion preset", CustomPractice.Preset("Lion")), ("Crane preset", CustomPractice.Preset("Crane")) };
+        var unplayable = new List<string>();
+        foreach (var file in Directory.GetFiles(folder, "*.txt").OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            try { var d = DeckFormat.Parse(File.ReadAllText(file)); if (CustomPractice.Review(d).Ready) decks.Add((name, d)); else unplayable.Add(name); }
+            catch (Exception e) { unplayable.Add($"{name}: {e.Message}"); }
+        }
+        var jobs = new List<(string A, Deck DA, string B, Deck DB, Kind SeatZero, Kind SeatOne, ulong Seed)>(); var n = 0UL;
+        for (var s = 0; s < seeds; s++)
+            foreach (var a in decks)
+                foreach (var b in decks)
+                {
+                    if (a.Name == b.Name) continue;
+                    n++;
+                    jobs.Add((a.Name, a.Deck, b.Name, b.Deck, Kind.New, Kind.Prior, seed + n));
+                    jobs.Add((a.Name, a.Deck, b.Name, b.Deck, Kind.Prior, Kind.New, seed + n));
+                }
+        var results = new Game[jobs.Count];
+        Parallel.For(0, jobs.Count, new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) },
+            i => { var j = jobs[i]; results[i] = Play(j.A, j.DA, j.B, j.DB, j.SeatZero, j.SeatOne, j.Seed, TimeSpan.FromMinutes(12)); });
+        static bool NewWon(Game g) => g.Winner is int w && (w == 0) == (g.DeckBot == Kind.New);
+        static bool PriorWon(Game g) => g.Winner is not null && !NewWon(g);
+        var decided = results.Where(g => g.Winner is not null).ToArray();
+        int won = decided.Count(NewWon), lost = decided.Count(PriorWon), total = won + lost;
+        // Two-sided exact binomial (sign) test against an even split.
+        double Choose(int m, int k) { double c = 1; for (var i = 1; i <= k; i++) c = c * (m - k + i) / i; return c; }
+        var tail = total == 0 ? 1 : Math.Min(1, 2 * Enumerable.Range(Math.Max(won, lost), total - Math.Max(won, lost) + 1).Sum(k => Choose(total, k) * Math.Pow(.5, total)));
+        var text = new System.Text.StringBuilder();
+        text.AppendLine($"# Bot arena: {(TradeOnly ? "trade attacks (#788)" : "battle policy (#788)")}, new bot versus the {(TradeOnly ? "same bot without trade attacks" : "bot before the change")} (seed {seed}, {seeds} seed(s), turn limit {BotSoak.TurnLimit})").AppendLine();
+        foreach (var u in unplayable) text.AppendLine($"- NOT PLAYED: {u}");
+        text.AppendLine($"Decks: {string.Join(", ", decks.Select(d => d.Name))}.");
+        text.AppendLine($"Games: {results.Length}; decided {decided.Length}; no winner {results.Length - decided.Length} (turn limit, stuck or error).");
+        text.AppendLine($"**New bot won {won}, prior bot won {lost}** ({(total == 0 ? 0 : 100.0 * won / total):F1}% of decided games; two-sided sign-test p = {tail:F4}).");
+        foreach (var seat in new[] { Kind.New, Kind.Prior })
+        {
+            var set = decided.Where(g => g.DeckBot == seat).ToArray();
+            text.AppendLine($"- New bot in seat {(seat == Kind.New ? 0 : 1)}: won {set.Count(NewWon)} of {set.Length}");
+        }
+        // Per deck: how often the deck won when the new bot piloted it, and when the prior bot did.
+        foreach (var d in decks)
+        {
+            var asFirst = decided.Where(g => g.Deck == d.Name).ToArray(); var asSecond = decided.Where(g => g.Opponent == d.Name).ToArray();
+            bool[] Wins(Kind bot) => asFirst.Where(g => g.DeckBot == bot).Select(g => g.Winner == 0).Concat(asSecond.Where(g => g.OpponentBot == bot).Select(g => g.Winner == 1)).ToArray();
+            var withNew = Wins(Kind.New); var withPrior = Wins(Kind.Prior);
+            text.AppendLine($"- {d.Name}: won {withNew.Count(w => w)}/{withNew.Length} with the new bot, {withPrior.Count(w => w)}/{withPrior.Length} with the prior bot");
+        }
+        text.AppendLine($"- Average length of the games the new bot won: turn {decided.Where(NewWon).Select(g => g.Turn).DefaultIfEmpty(0).Average():F1}; the games the prior bot won: turn {decided.Where(PriorWon).Select(g => g.Turn).DefaultIfEmpty(0).Average():F1}.");
+        var unfinished = results.Where(g => g.Error is not null || g.Winner is null).ToArray();
+        if (unfinished.Length > 0)
+        {
+            text.AppendLine().AppendLine("## Games without a winner");
+            foreach (var g in unfinished.Take(40)) text.AppendLine($"- {g.Deck} vs {g.Opponent}, {g.DeckBot}/{g.OpponentBot}: {g.Result}, turn {g.Turn}{(g.Error is null ? "" : " - " + g.Error)}");
+        }
+        Console.WriteLine(text.ToString());
+        if (reportPath is not null) File.WriteAllText(reportPath, text.ToString());
     }
 
     public static void Run(string folder, ulong seed, string? reportPath)

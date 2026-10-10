@@ -253,6 +253,7 @@ foreach (var scenario in DuelDemoScenarios.All)
         });
 runner.Run("ai", tests);
 runner.Run("bot-policy", BotPolicyTests.Tests); // issue #642: the policies Mendon specified
+runner.Run("battle-policy", BattlePolicyTests.Tests); // issue #788: the six battle changes to the practice bot
 runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
 return runner.Finish();
 
