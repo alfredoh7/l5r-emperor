@@ -16,6 +16,14 @@ public static class MyCollection
             return store;
         }
     }
+    private static CollectionPrinting[]? _printings;
+    /// <summary>The printings the collection file lists (Content/collection-printings.txt): set, edition code and rarity of each card, which the catalogue itself does not record.</summary>
+    public static CollectionPrinting[] Printings => _printings ??= Load();
+    private static CollectionPrinting[] Load()
+    {
+        using var file = Godot.FileAccess.Open("res://Content/collection-printings.txt", Godot.FileAccess.ModeFlags.Read);
+        return file is null ? [] : CollectionPrintings.Parse(CollectionPrintings.Decode(file.GetBuffer((long)file.GetLength())));
+    }
     public static CollectionIdentity[] Identities(CatalogueData data) => data.Cards.Select(c =>
         new CollectionIdentity(c.Id, Experienced.BaseTitle(c.Name), Experienced.DeckName(c.Name, c.Definition?.Keywords ?? c.Keywords))).ToArray();
     public static MyCollectionEditor Show(Control parent, CatalogueData data, CatalogueScans scans, CatalogueBrowserBar browser)
@@ -79,7 +87,7 @@ public partial class MyCollectionEditor : Control
         var saved = CatalogueArt.Label("Changes save automatically on this device", 17); saved.HorizontalAlignment = HorizontalAlignment.Center;
         Put(_panel, saved, 30, 58, 1140, 28);
         Put(_panel, CatalogueArt.Button("Import CSV", ImportFile), 832, 25, 110, 42);
-        Put(_panel, CatalogueArt.Button("Export CSV", () => SaveCsv(_store.Export(MyCollection.Identities(_data)), "my-collection.csv")), 954, 25, 110, 42);
+        Put(_panel, CatalogueArt.Button("Export CSV", () => SaveCsv(_store.Export(MyCollection.Identities(_data), MyCollection.Printings), "Collection.csv")), 954, 25, 110, 42);
         var done = CatalogueArt.Button("Done", Close); DeckSkin.Primary(done); Put(_panel, done, 1076, 25, 100, 42);
         _search = new LineEdit { PlaceholderText = "Search your current card selection…", ClearButtonEnabled = true };
         _search.Text = _browser.Search.Text; Put(_panel, _search, 30, 108, 800, 44);
@@ -175,11 +183,11 @@ public partial class MyCollectionEditor : Control
     private void ImportFile()
     {
         var file = new FileDialog { Title = "Import my collection", FileMode = FileDialog.FileModeEnum.OpenFile, Access = FileDialog.AccessEnum.Filesystem, Filters = ["*.csv ; Collection CSV"], Theme = Theme };
-        AddChild(file); file.FileSelected += path => { file.QueueFree(); Try(() => { if (new FileInfo(path).Length > 1_000_000) throw new FormatException("CSV exceeds 1 MB."); PreviewCsv(File.ReadAllText(path), Path.GetFileName(path)); }); };
+        AddChild(file); file.FileSelected += path => { file.QueueFree(); Try(() => { if (new FileInfo(path).Length > 1_000_000) throw new FormatException("CSV exceeds 1 MB."); PreviewCsv(CollectionPrintings.Decode(File.ReadAllBytes(path)), Path.GetFileName(path)); }); };
         file.Canceled += file.QueueFree; file.PopupCentered(new Vector2I(960, 640));
     }
     public void PreviewCsv(string csv, string filename = "my-cards.csv")
-    { _plan = _store.Preview(csv, MyCollection.Identities(_data)); _filename = filename; _mode = CollectionImportMode.UpdateListed; BuildImport(); }
+    { _plan = _store.Preview(csv, MyCollection.Identities(_data), MyCollection.Printings); _filename = filename; _mode = CollectionImportMode.UpdateListed; BuildImport(); }
     private void BuildImport()
     {
         var plan = _plan!; StartPanel("Review collection import");
@@ -199,7 +207,8 @@ public partial class MyCollectionEditor : Control
             option.Name = i == 0 ? "UpdateListedMode" : "ReplaceCollectionMode"; option.Icon = DeckSkin.Icon(_mode == mode ? "selected" : "radio"); option.AddThemeConstantOverride("h_separation", 10);
             Put(_panel, option, 30 + i * 385, 166, 375, 42); CatalogueArt.Selected(option, _mode == mode); modes.Add(option);
         }
-        var omitted = _store.Counts.Keys.Except(plan.Rows.Where(r => !r.Excluded && r.Id is not null).Select(r => r.Id!)).Count();
+        var listed = plan.Rows.Where(r => !r.Excluded && r.Id is not null).ToArray();
+        var omitted = _store.Buckets.Keys.Count(b => !listed.Any(r => r.Bucket == b || !r.Printing && r.Id == MyCollectionStore.CardOf(b)));
         var explanation = _mode == CollectionImportMode.UpdateListed ? "Listed counts replace current totals. Unlisted cards stay unchanged." :
             $"Replace ALL totals. {omitted} currently owned entries not listed become zero. A backup is kept.";
         Put(_panel, Palette.Wrapped(explanation, 17, CatalogueArt.Gold), 30, 214, 760, 48);
@@ -221,7 +230,7 @@ public partial class MyCollectionEditor : Control
                 var thumbnail = new DeckFace(matched, _scans) { CustomMinimumSize = new Vector2(40, 58) }; nameCell.AddChild(thumbnail); thumbnail.Pressed += () => Inspect(matched);
             }
             var name = Cell(matched?.Name ?? row.Name, matched is null ? 350 : 298); name.TooltipText = $"CSV row {row.Line} · " + row.Name; nameCell.AddChild(name);
-            var current = row.Id is null ? 0 : _store.Count(row.Id);
+            var current = row.Id is null ? 0 : row.Printing ? _store.CountOf(row.Bucket!) : _store.Count(row.Id);
             foreach (var value in new[] { row.Id is null ? "—" : current.ToString(), row.Count.ToString(), row.Id is null ? "—" : (row.Count - current).ToString("+0;-0;0") })
             {
                 var cell = Cell(value, 105, 20);
@@ -229,7 +238,7 @@ public partial class MyCollectionEditor : Control
                 line.AddChild(cell);
             }
             var excluded = new HBoxContainer(); box.AddChild(excluded);
-            var hint = Cell(row.Error.Length > 0 ? row.Error : row.Excluded ? "Excluded from this import" : row.Id is null ? "Choose the exact version" : $"CSV row {row.Line}", 600, 15); hint.AddThemeColorOverride("font_color", CatalogueArt.Muted); excluded.AddChild(hint);
+            var hint = Cell(row.Error.Length > 0 ? row.Error : row.Excluded ? "Excluded from this import" : row.Id is null ? "Choose the exact version" : $"CSV row {row.Line}" + (row.Printing && row.PrintingLabel.Length > 0 ? " · " + row.PrintingLabel : ""), 600, 15); hint.AddThemeColorOverride("font_color", CatalogueArt.Muted); excluded.AddChild(hint);
             var exclude = new CheckBox { Text = "Exclude", ButtonPressed = row.Excluded }; excluded.AddChild(exclude); exclude.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
             exclude.AddThemeIconOverride("checked", DeckSkin.Icon("checked")); exclude.AddThemeIconOverride("unchecked", DeckSkin.Icon("unchecked"));
             exclude.Toggled += yes => { row.Excluded = yes; BuildImport(); };
@@ -248,9 +257,9 @@ public partial class MyCollectionEditor : Control
             }
             box.AddChild(new HSeparator());
         }
-        Put(_panel, Palette.Wrapped(plan.Problems.FirstOrDefault() ?? $"{plan.Rows.Count(r => !r.Excluded)} listed totals ready. Repeated imports replace totals.", 17, CatalogueArt.Gold), 30, 724, 760, 43);
+        Put(_panel, Palette.Wrapped(plan.Problems.FirstOrDefault() ?? $"{plan.Rows.Count(r => !r.Excluded)} listed totals ready" + (plan.Skipped > 0 ? $"; {plan.Skipped} rows with no count skipped" : "") + ". Repeated imports replace totals.", 17, CatalogueArt.Gold), 30, 724, 760, 43);
         Put(_panel, CatalogueArt.Button("Back", BuildEditor), 30, 782, 112, 40); Put(_panel, CatalogueArt.Button("Cancel", BuildEditor), 154, 782, 112, 40);
-        Put(_panel, CatalogueArt.Button("CSV template", () => SaveCsv(CollectionCsv.Write([]), "collection-template.csv")), 282, 782, 176, 40);
+        Put(_panel, CatalogueArt.Button("CSV template", () => SaveCsv(MyCollectionStore.Template(MyCollection.Printings), "Collection Template.csv")), 282, 782, 176, 40);
         var apply = CatalogueArt.Button("Apply changes", ApplyImport); apply.Disabled = !plan.CanApply; apply.Name = "ApplyCollectionImport"; Put(_panel, apply, 568, 782, 222, 40); if (plan.CanApply) DeckSkin.Primary(apply);
         Fit();
     }

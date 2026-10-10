@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "My Collection reads and writes Mendon's per-printing file (Set, Card Name, Card Type, Rarity, Edition Code, Count): per-printing ownership buckets (totals unchanged for filters/shortages), name normalisation for (Exp)/(Exp2)/(Inexp)/curly quotes, Windows-1252 import, full-template export that round-trips, template download; shipped printing list; decision doc.",
+  "validation": "Collection tests 79 assertions (incl. real template vs catalogue: 1901/1973 rows resolve without review); MyCollectionProbe native run exit 0, 36 checks; client builds with no warnings.",
+  "remaining": "Not seen in a manual playtest of the review screen; rows the catalogue spells differently (about 70) are reviewed or excluded.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/807",
+  "branch": "claude/807-collection-printings",
+  "updated": "2026-10-10T05:20:40.235290+00:00"
+}

@@ -17,15 +17,24 @@ public sealed class CollectionImportRow
     public string Error { get; init; } = "";
     public CollectionIdentity[] Candidates { get; init; } = [];
     public bool Excluded { get; set; }
+    /// <summary>True for a row of the per-printing file (issue #807); Edition and Rarity then say which printing it counts.</summary>
+    public bool Printing { get; init; }
+    public string Edition { get; init; } = "";
+    public string Rarity { get; init; } = "";
+    /// <summary>The ownership bucket this row sets: the card's ID alone for the older file, or ID with the printing suffix.</summary>
+    public string? Bucket => Id is null ? null : Printing ? Id + CollectionPrintings.Suffix(Edition, Rarity) : Id;
+    public string PrintingLabel => Edition.Length == 0 ? "" : Rarity.Length == 0 ? Edition : Edition + " · " + Rarity;
 }
 public sealed class CollectionImportPlan
 {
     public long Revision { get; init; }
     public CollectionImportRow[] Rows { get; init; } = [];
+    /// <summary>Rows not read because their Count is "-" (not collectible) or blank.</summary>
+    public int Skipped { get; init; }
     public string[] Problems => Rows.Where(r => !r.Excluded && (r.Error.Length > 0 || r.Id is null))
         .Select(r => $"Row {r.Line}: {(r.Error.Length > 0 ? r.Error : "choose a card version")}").Concat(
-            Rows.Where(r => !r.Excluded && r.Id is not null).GroupBy(r => r.Id)
-                .Where(g => g.Count() > 1).Select(g => $"Repeated card {g.First().Name}; exclude a duplicate or correct the CSV.")).ToArray();
+            Rows.Where(r => !r.Excluded && r.Id is not null).GroupBy(r => r.Bucket)
+                .Where(g => g.Count() > 1).Select(g => $"Repeated card {g.First().Name}{(g.First().Printing && g.First().PrintingLabel.Length > 0 ? " (" + g.First().PrintingLabel + ")" : "")}; exclude a duplicate or correct the CSV.")).ToArray();
     public bool CanApply => Rows.Any(r => !r.Excluded) && Problems.Length == 0;
 }
 public sealed class MyCollectionStore
@@ -33,8 +42,12 @@ public sealed class MyCollectionStore
     public const int MaximumCount = 99999;
     private sealed record FileData(int SchemaVersion, Dictionary<string, int> Counts);
     private readonly string _path, _undoPath;
+    // Ownership buckets (issue #807): a card's ID alone is copies of no recorded printing; "ID@EDITION" or "ID@EDITION@Rarity" are copies of that printing. The card's total is the sum.
     private Dictionary<string, int> _counts = [];
-    public IReadOnlyDictionary<string, int> Counts => _counts.AsReadOnly();
+    private Dictionary<string, int> _totals = [];
+    public IReadOnlyDictionary<string, int> Counts => _totals.AsReadOnly();
+    /// <summary>Every bucket, printing by printing.</summary>
+    public IReadOnlyDictionary<string, int> Buckets => _counts.AsReadOnly();
     public long Revision { get; private set; }
     public string LoadError { get; private set; } = "";
     public bool CanUndo => LoadError.Length == 0 && File.Exists(_undoPath);
@@ -42,24 +55,47 @@ public sealed class MyCollectionStore
     public MyCollectionStore(string path)
     {
         _path = path; _undoPath = path + ".previous";
-        try { if (File.Exists(path)) _counts = Read(path); }
+        try { if (File.Exists(path)) { _counts = Read(path); _totals = Totals(_counts); } }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or FormatException)
         { LoadError = "Collection could not be loaded. The original file is preserved: " + e.Message; }
     }
-    public int Count(string id) => _counts.GetValueOrDefault(id);
+    public int Count(string id) => _totals.GetValueOrDefault(id);
+    /// <summary>Copies recorded against one bucket (a card ID with or without its printing suffix).</summary>
+    public int CountOf(string bucket) => _counts.GetValueOrDefault(bucket);
+    public static string CardOf(string bucket) { var at = bucket.IndexOf('@'); return at < 0 ? bucket : bucket[..at]; }
+    private static Dictionary<string, int> Totals(Dictionary<string, int> buckets)
+    {
+        var totals = new Dictionary<string, int>();
+        foreach (var (bucket, count) in buckets) { var id = CardOf(bucket); totals[id] = totals.GetValueOrDefault(id) + count; }
+        return totals;
+    }
     public bool Includes(string id, OwnershipFilter filter) => filter == OwnershipFilter.All || (filter == OwnershipFilter.Owned ? Count(id) > 0 : Count(id) == 0);
     public void Set(string id, int count)
     {
         if (count is < 0 or > MaximumCount) throw new FormatException($"Owned count must be 0–{MaximumCount}.");
         if (string.IsNullOrWhiteSpace(id)) throw new FormatException("A catalogue card ID is required.");
-        if (Count(id) == count) return;
-        var next = new Dictionary<string, int>(_counts); if (count == 0) next.Remove(id); else next[id] = count; Commit(next);
+        var current = Count(id);
+        if (current == count) return;
+        // The total is what is edited. Extra copies are recorded against no printing; fewer copies come off the unassigned ones first, then printing by printing from the last.
+        var next = new Dictionary<string, int>(_counts);
+        if (count > current) next[id] = next.GetValueOrDefault(id) + count - current;
+        else
+        {
+            var remove = current - count;
+            foreach (var bucket in next.Keys.Where(b => CardOf(b) == id).OrderByDescending(b => b == id).ThenByDescending(b => b, StringComparer.Ordinal).ToArray())
+            {
+                if (remove == 0) break;
+                var take = Math.Min(remove, next[bucket]); remove -= take;
+                if (take == next[bucket]) next.Remove(bucket); else next[bucket] -= take;
+            }
+        }
+        Commit(next);
     }
     public void Undo()
     {
         EnsureWritable();
         if (!CanUndo) return;
-        var previous = Read(_undoPath); Write(_path, previous); _counts = previous;
+        var previous = Read(_undoPath); Write(_path, previous); _counts = previous; _totals = Totals(previous);
         File.Delete(_undoPath); Revision++; Changed?.Invoke();
     }
     public void Apply(CollectionImportPlan plan, CollectionImportMode mode)
@@ -69,8 +105,20 @@ public sealed class MyCollectionStore
         if (plan.Rows.Any(r => !r.Excluded && (r.Count is < 0 or > MaximumCount || !r.Candidates.Any(c => c.Id == r.Id)))) throw new FormatException("Invalid resolved card or quantity.");
         if (!plan.CanApply) throw new FormatException("Resolve or explicitly exclude every invalid/ambiguous row before applying.");
         var next = mode == CollectionImportMode.Replace ? new Dictionary<string, int>() : new Dictionary<string, int>(_counts);
+        var rewritten = new HashSet<string>(StringComparer.Ordinal);
         foreach (var row in plan.Rows.Where(r => !r.Excluded))
-        { if (row.Count == 0) next.Remove(row.Id!); else next[row.Id!] = row.Count; }
+        {
+            if (!row.Printing)
+            {
+                // The older file states a card's total: every printing it was recorded against is replaced by that one figure.
+                foreach (var bucket in next.Keys.Where(b => CardOf(b) == row.Id).ToArray()) next.Remove(bucket);
+                if (row.Count > 0) next[row.Id!] = row.Count;
+                continue;
+            }
+            // A card listed by printing is described by the file: copies recorded against no printing are replaced by the printings it lists.
+            if (rewritten.Add(row.Id!)) next.Remove(row.Id!);
+            if (row.Count == 0) next.Remove(row.Bucket!); else next[row.Bucket!] = row.Count;
+        }
         Commit(next);
     }
     private void EnsureWritable() { if (LoadError.Length > 0) throw new IOException(LoadError); }
@@ -78,13 +126,13 @@ public sealed class MyCollectionStore
     {
         EnsureWritable();
         if (_counts.Count == next.Count && _counts.All(kv => next.GetValueOrDefault(kv.Key) == kv.Value)) return;
-        Write(_undoPath, _counts); Write(_path, next); _counts = next; Revision++; Changed?.Invoke();
+        Write(_undoPath, _counts); Write(_path, next); _counts = next; _totals = Totals(next); Revision++; Changed?.Invoke();
     }
     private static Dictionary<string, int> Read(string path)
     {
         if (new FileInfo(path).Length > 4_000_000) throw new FormatException("Collection file exceeds 4 MB.");
         var data = JsonSerializer.Deserialize<FileData>(File.ReadAllText(path)) ?? throw new FormatException("Empty collection file.");
-        if (data.SchemaVersion != 1 || data.Counts is null || data.Counts.Any(p => string.IsNullOrWhiteSpace(p.Key) || p.Value is < 0 or > MaximumCount))
+        if (data.SchemaVersion is not (1 or 2) || data.Counts is null || data.Counts.Any(p => string.IsNullOrWhiteSpace(p.Key) || p.Value is < 0 or > MaximumCount))
             throw new FormatException("Invalid collection schema or quantities.");
         return data.Counts.Where(kv => kv.Value > 0).ToDictionary();
     }
@@ -95,17 +143,18 @@ public sealed class MyCollectionStore
         try
         {
             using (var file = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-            { JsonSerializer.Serialize(file, new FileData(1, counts)); file.Flush(true); }
+            { JsonSerializer.Serialize(file, new FileData(2, counts)); file.Flush(true); }
             File.Move(temp, path, true);
         }
         finally { if (File.Exists(temp)) File.Delete(temp); }
     }
-    public CollectionImportPlan Preview(string csv, CollectionIdentity[] cards)
+    public CollectionImportPlan Preview(string csv, CollectionIdentity[] cards, CollectionPrinting[]? printings = null)
     {
         var records = CollectionCsv.Parse(csv);
         if (records.Count < 2) throw new FormatException("CSV needs a header and at least one card row.");
         var header = records[0].Select(s => s.Trim().TrimStart('\uFEFF').ToLowerInvariant()).ToArray();
         if (header.Distinct().Count() != header.Length) throw new FormatException("CSV has repeated header columns.");
+        if (CollectionPrintings.IsPrintingFile(header)) return PreviewPrintings(records, header, cards, printings);
         var idIndex = Array.IndexOf(header, "card_id"); var nameIndex = Array.IndexOf(header, "card_name");
         var countIndex = Array.IndexOf(header, "owned_count");
         if ((idIndex < 0 && nameIndex < 0) || countIndex < 0) throw new FormatException("Use card_id and/or card_name, plus owned_count. Download the template.");
@@ -137,6 +186,74 @@ public sealed class MyCollectionStore
         if (rows.Count == 0) throw new FormatException("The CSV contains no card rows.");
         return new CollectionImportPlan { Revision = Revision, Rows = rows.ToArray() };
     }
+    // The per-printing file (issue #807): Set, Card Name, Card Type, Rarity, Edition Code, Count. A Count of "-" or nothing is not a collectible row and is not read; 0 clears that printing.
+    private CollectionImportPlan PreviewPrintings(List<string[]> records, string[] header, CollectionIdentity[] cards, CollectionPrinting[]? printings)
+    {
+        int Col(string name) => Array.IndexOf(header, name);
+        int nameIndex = Col("card name"), editionIndex = Col("edition code"), rarityIndex = Col("rarity"), countIndex = Col("count");
+        var editions = printings?.Select(p => p.Edition).Distinct(StringComparer.OrdinalIgnoreCase).ToDictionary(e => e, e => e, StringComparer.OrdinalIgnoreCase);
+        var byKey = cards.ToLookup(c => CollectionPrintings.Key(c.VersionName));
+        var byBase = cards.ToLookup(c => CollectionPrintings.Key(c.Name));
+        var rows = new List<CollectionImportRow>(); var skipped = 0;
+        for (var i = 1; i < records.Count; i++)
+        {
+            var fields = records[i]; if (fields.All(string.IsNullOrWhiteSpace)) continue;
+            string Field(int index) => index < 0 || index >= fields.Length ? "" : fields[index].Trim();
+            var rawCount = Field(countIndex);
+            if (rawCount is "" or "-") { skipped++; continue; }
+            var name = Field(nameIndex); var edition = Field(editionIndex); var error = "";
+            if (fields.Length != header.Length) error = "Column count does not match the header.";
+            if (!int.TryParse(rawCount, NumberStyles.None, CultureInfo.InvariantCulture, out var count) || count is < 0 or > MaximumCount)
+                error = $"Count must be a whole number from 0 to {MaximumCount}, or - for a card that cannot be collected.";
+            if (error.Length == 0 && edition.Length > 0 && editions is not null)
+            { if (editions.TryGetValue(edition, out var known)) edition = known; else error = $"Unknown edition code {edition}."; }
+            var key = CollectionPrintings.Key(name);
+            var candidates = byKey[key].ToArray(); var exact = candidates.Length == 1;
+            if (candidates.Length == 0) candidates = byBase[key].ToArray();
+            // A printing the catalogue cannot name or pick a version for, listed as 0 owned (every unowned row of the template), has nothing to record and nothing to review.
+            if (error.Length == 0 && rawCount == "0" && !exact) { skipped++; continue; }
+            if (candidates.Length == 0 && error.Length == 0) error = "Unknown card name.";
+            rows.Add(new CollectionImportRow
+            {
+                Line = i + 1,
+                Name = name,
+                Count = count,
+                Id = error.Length == 0 && exact ? candidates[0].Id : null, // a title that matches only other versions is never guessed
+                Error = error,
+                Candidates = candidates,
+                Printing = true,
+                Edition = edition,
+                Rarity = Field(rarityIndex)
+            });
+        }
+        if (rows.Count == 0) throw new FormatException("The CSV contains no collectible card rows.");
+        return new CollectionImportPlan { Revision = Revision, Rows = rows.ToArray(), Skipped = skipped };
+    }
+    /// <summary>The collection as the per-printing file: every printing of the list in its own order with the copies owned (0 when none, - when it cannot be collected), then a row for any
+    /// copies the list has no printing for (recorded against no printing, or a card the list does not name).</summary>
+    public string Export(CollectionIdentity[] cards, CollectionPrinting[] printings)
+    {
+        var byKey = cards.ToLookup(c => CollectionPrintings.Key(c.VersionName));
+        var rows = new List<string[]>(); var written = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var printing in printings)
+        {
+            var matches = byKey[CollectionPrintings.Key(printing.Name)].ToArray();
+            var bucket = matches.Length == 1 ? matches[0].Id + printing.Suffix : null;
+            var count = printing.NotCollectible ? "-" : bucket is not null && written.Add(bucket) ? CountOf(bucket).ToString(CultureInfo.InvariantCulture) : "0";
+            rows.Add([printing.Set, printing.Name, printing.Type, printing.Rarity, printing.Edition, count]);
+        }
+        foreach (var (bucket, owned) in _counts.OrderBy(p => p.Key, StringComparer.Ordinal))
+        {
+            if (written.Contains(bucket)) continue;
+            var id = CardOf(bucket); var parts = bucket.Split('@');
+            var name = cards.FirstOrDefault(c => c.Id == id)?.VersionName ?? id;
+            rows.Add(["", name, "", parts.Length > 2 ? parts[2] : "", parts.Length > 1 ? parts[1] : "", owned.ToString(CultureInfo.InvariantCulture)]);
+        }
+        return CollectionPrintings.Header + "\r\n" + string.Concat(rows.Select(row => string.Join(",", row.Select(f => "\"" + f.Replace("\"", "\"\"") + "\"")) + "\r\n"));
+    }
+    /// <summary>The empty collection file: every printing of the list with 0 owned (- where it cannot be collected).</summary>
+    public static string Template(CollectionPrinting[] printings) => CollectionPrintings.Header + "\r\n" + string.Concat(printings.Select(p =>
+        string.Join(",", new[] { p.Set, p.Name, p.Type, p.Rarity, p.Edition, p.NotCollectible ? "-" : "0" }.Select(f => "\"" + f.Replace("\"", "\"\"") + "\"")) + "\r\n"));
     public string Export(CollectionIdentity[] cards) => CollectionCsv.Write(
         _counts.OrderBy(p => p.Key).Select(p => new[] { p.Key, cards.FirstOrDefault(c => c.Id == p.Key)?.VersionName ?? "", p.Value.ToString(CultureInfo.InvariantCulture) }));
 }

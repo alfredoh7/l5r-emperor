@@ -67,13 +67,13 @@ public partial class MyCollectionProbe : Node
             Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Export CSV")); await Wait(.2);
             var saveDialog = editor.GetChildren().OfType<FileDialog>().Single(); saveDialog.CurrentPath = exported;
             saveDialog.GetOkButton().GrabFocus(); KeyPress(Key.Enter); await Wait(.2);
-            Check(File.Exists(exported) && File.ReadAllText(exported).Contains(card.Id), "native export file chooser writes current inventory");
+            Check(File.Exists(exported) && File.ReadAllText(exported).Contains("Set,Card Name,Card Type,Rarity,Edition Code,Count") && File.ReadAllText(exported).Contains(MyCollection.Identities(library.Data).Single(i => i.Id == card.Id).VersionName), "native export file chooser writes the per-printing file with current inventory");
             Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Import CSV")); await Wait(.2);
             var openDialog = editor.GetChildren().OfType<FileDialog>().Single(); openDialog.CurrentDir = Path.GetDirectoryName(exported)!;
             var filenameInput = openDialog.GetLineEdit(); filenameInput.GrabFocus(); filenameInput.SelectAll(); KeyPress(Key.Backspace);
             foreach (var character in Path.GetFileName(exported)) Input.ParseInputEvent(new InputEventKey { Unicode = character, Pressed = true });
             KeyPress(Key.Enter); await Wait(.5);
-            Check(editor.ImportPlan?.CanApply == true && MyCollection.Store.Count(card.Id) == 5, "native import file chooser opens review without changing inventory");
+            Check(editor.ImportPlan?.CanApply == true && MyCollection.Store.Count(card.Id) == 5, "native import file chooser opens review without changing inventory: " + string.Join(" | ", editor.ImportPlan?.Problems ?? []));
             Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Cancel")); await Wait(.2);
             MyCollection.Store.Set(twins[0].Id, 3);
             editor.PreviewCsv($"card_id,owned_count\n{card.Id},1\n"); await Wait(.2);
