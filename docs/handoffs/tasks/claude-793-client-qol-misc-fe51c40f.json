@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Three client QoL items, presentation only (Core untouched): the Declare an attack button is a blood-red lacquer (gold button face tinted deep red) instead of black; a finished match offers 'Return to main menu' beside 'Start another practice'; a hand Strategy offered once per performing Personality (the Spirit of X strategies) is performed by clicking a highlighted Personality on the table, with an on-screen instruction. Shared because it extends the native direct-play check with three scenarios.",
+  "validation": "Client builds with zero warnings. Native direct-play check passes with three new scenarios: Spirit of the Berserker's performer is chosen by clicking the other highlighted Personality; the Declare an attack button's style is red-dominant (screenshot inspected); a finished match lists Return to main menu and Start another practice. Native reaction-flow, stabilization, multi-targets, gold-payment, either-or, province-target, attack-targets, decision-chooser, event-decisions, action-lock, movement, opponent-payment pass. interactions fails with the pre-existing Choose reflection ambiguity that the discard-flow PR (#796) removes. No human playtest yet.",
+  "remaining": "None; ready for review. Needs a human look at the red's shade.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/793",
+  "branch": "claude/793-client-qol-misc",
+  "updated": "2026-10-10T01:23:37.250996+00:00"
+}
