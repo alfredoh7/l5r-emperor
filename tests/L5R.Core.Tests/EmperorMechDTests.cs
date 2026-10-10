@@ -599,20 +599,27 @@ internal static class EmperorMechDTests
         var shugenja = Add(s, "training-shugenja", 1, Zone.Home);
         var water = Add(s, "training-water-shugenja", 1, Zone.Home);
         var spell = Add(s, "training-spell", 1, Zone.Hand);
-        var swell = Add(s, "oracle-l5r-8366", 1, Zone.Hand); // The Swell of Strength: "will only attach to a Water Shugenja"
+        var keyed = Add(s, "training-spell", 1, Zone.Hand); // a Spell that prints "will only attach to a Water Shugenja"
+        keyed.Printed = CardCatalog.Get("training-spell") with { AttachRequiresKeyword = "Water" };
         var named = Add(s, "training-spell", 1, Zone.Hand);
         named.Printed = CardCatalog.Get("training-spell") with { AttachRequiresName = "Nobody In Play" };
         var unique = Add(s, "training-unique-spell", 1, Zone.Hand);
         var uniqueInPlay = Add(s, "training-unique-spell", 1, Zone.Attached, parent: water.Id);
         var e = MatchEngine.FromTestState(s);
         Check(!e.Execute(EquipCommand(e, 1, spell, samurai)).Accepted, "a non-Shugenja host is refused");
-        Check(!e.Execute(EquipCommand(e, 1, swell, shugenja)).Accepted, "a Spell's keyword requirement: a non-Water Shugenja is refused");
-        Check(e.QueryActions(1).First(a => a.Type == "equip" && a.CardId == swell.Id).TargetIds!.SequenceEqual([water.Id]), "only the Water Shugenja is offered for it");
+        Check(!e.Execute(EquipCommand(e, 1, keyed, shugenja)).Accepted, "a Spell's keyword requirement: a non-Water Shugenja is refused");
+        Check(e.QueryActions(1).First(a => a.Type == "equip" && a.CardId == keyed.Id).TargetIds!.SequenceEqual([water.Id]), "only the Water Shugenja is offered for it");
         Check(!e.Execute(EquipCommand(e, 1, named, shugenja)).Accepted, "a Spell's name requirement refuses every other Personality");
         Check(e.QueryActions(1).First(a => a.Type == "equip" && a.CardId == named.Id) is { Enabled: false }, "and it is offered disabled");
         Check(!e.Execute(EquipCommand(e, 1, unique, shugenja)).Accepted, "a second copy of a Unique Spell is refused");
-        Accept(e, EquipCommand(e, 1, swell, water));
-        Eq(e.State.Cards[swell.Id].AttachedTo, water.Id, "the Water Shugenja takes The Swell of Strength");
+        Accept(e, EquipCommand(e, 1, keyed, water));
+        Eq(e.State.Cards[keyed.Id].AttachedTo, water.Id, "the Water Shugenja takes the Water-only Spell");
+        // R-036: The Swell of Strength has no whole-card "will only attach to" (Equip is Limited, so this is a fresh turn).
+        var s2 = Table(Phase.Action, 1); RealStronghold(s2, 1);
+        var notWater = Add(s2, "training-shugenja", 1, Zone.Home); var swell2 = Add(s2, "oracle-l5r-8366", 1, Zone.Hand);
+        var e2 = MatchEngine.FromTestState(s2);
+        Accept(e2, EquipCommand(e2, 1, swell2, notWater));
+        Eq(e2.State.Cards[swell2.Id].AttachedTo, notWater.Id, "a non-Water Shugenja takes The Swell of Strength by an ordinary equip (R-036)");
         // In a battle the Equip command does not attach a Spell: Equip (Battle) does, unchanged.
         var b = Table(Phase.Battle, 1); b.PriorityPlayerId = 0; RealStronghold(b, 0);
         var bShugenja = Add(b, "training-shugenja", 0, Zone.Battlefield, province: 0);

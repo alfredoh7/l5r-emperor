@@ -26,7 +26,7 @@ ABILITIES: dict[int, list[str]] = {
 }
 OVERRIDE: dict[int, dict] = {
     3732: {"Effect": "incite-the-phantoms-force"},
-    8366: {"Effect": "swell-of-strength-force", "AttachRequiresKeyword": "Water"},
+    8366: {"Effect": "swell-of-strength-force"},  # Water is a limit of its Focus Effect only (FocusEffectChoice.AttachWielderCandidates); an ordinary Equip may go to any Shugenja
 }
 
 

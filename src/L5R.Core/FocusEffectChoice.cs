@@ -37,7 +37,7 @@ public sealed partial class MatchEngine
         or "ceaseless-vigil-focus"
         or "sandalwood-incense-focus" // issue #453, batch 5
         or "cycle-of-vengeance-focus" // issue #460, batch 4
-        or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
+        or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachWielderCandidates (the Focus Effect only; the Spell's ordinary Equip is not element-bound).
         or "crippled-sensei-focus"
         || abilityId == "fair-warning-focus" // issue #453, batch 2
         || abilityId == "superior-opponent-focus" // Emperor Edition remaining-cards pass, group C (issue #492)
@@ -92,6 +92,7 @@ public sealed partial class MatchEngine
         var attachment = Card(focusCardId); var def = Definition(attachment);
         return _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality
                 && AttachmentLegalTarget(def, c) && AttachmentAllowed(attachment, c)
+                && (def.Effect != "swell-of-strength-force" || Keyword(c, "Water") && Keyword(c, "Shugenja")) // The Swell of Strength: only its Focus Effect is limited to "one of your Water Shugenja"; its Equip is not
                 && (!(Keyword(attachment, "Unique") || Keyword(attachment, "Singular")) || !ControlsCopyOf(playerId, def.Name)))
             .Select(c => c.Id).Order(StringComparer.Ordinal).ToList();
     }
