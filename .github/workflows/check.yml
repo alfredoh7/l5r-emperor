@@ -28,7 +28,9 @@ jobs:
         # from the test runner's --shard I/N and are exact partitions of one build's cases.
         # The rules jobs skip what only the Godot client reads (1 GB of client art, assets/ui, the .import/.uid sidecars): about a quarter
         # fewer files and ~1.3 GB less to fetch, verified by running every part in such a checkout (issue #798). The client job needs all of it.
-        # The Mac runner keeps one job with every check (its workspace persists, so it is already fast); macOS coverage is deliberate.
+        # The Mac runner keeps one job with every check, and macOS coverage is deliberate. It takes one job at a time, so that job
+        # runs its stages side by side inside tools/check.sh instead of as more matrix jobs (issue #805). Its checkout cleans the
+        # workspace (git clean -ffdx), so every run still bootstraps the tools, builds and does the whole Godot import.
         include:
           - os: macos-local
             runner: [self-hosted, macOS, ARM64, l5r-mac-studio]
