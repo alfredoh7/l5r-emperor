@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "deck-search-ui native check now expects the found Terrain to be offered for discard (R-033) and bows holdings for the quoted Region payment (#731).",
+  "validation": "bash tools/check-deck-search-ui.sh: normal and reduced passed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/801",
+  "branch": "claude/801-deck-search-r033",
+  "updated": "2026-10-10T03:08:03.719054+00:00"
+}
