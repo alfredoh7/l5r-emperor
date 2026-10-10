@@ -1,4 +1,5 @@
 using Godot;
+using System.Text.RegularExpressions;
 namespace L5R.Client;
 
 /// <summary>One catalogue filter/interaction model for Library and Deck Builder; no game legality lives here.</summary>
@@ -20,6 +21,10 @@ public partial class CatalogueBrowserBar : Control
     public FilterChecklist Collection { get; }
     /// <summary>Focus Value, offered for Fate cards only.</summary>
     public FilterChecklist Focus { get; }
+    /// <summary>Printed Personal Honor of a Personality, 0 to 5+, or None for a card without one; offered for Dynasty cards only (issue #792).</summary>
+    public FilterChecklist PersonalHonor { get; }
+    /// <summary>Gold a Holding produces, 0 to 5+, or None; a Holding that produces different amounts is listed under each. Offered for Dynasty cards only (issue #792).</summary>
+    public FilterChecklist GoldProduction { get; }
     /// <summary>Printed action type, offered for Dynasty and Fate cards.</summary>
     public FilterChecklist Actions { get; }
     public bool ExtraRow => Family is "Dynasty" or "Fate";
@@ -34,7 +39,7 @@ public partial class CatalogueBrowserBar : Control
     public event Action? EditCollection;
     public string ScopeNotice => _notice.Text;
     public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { foreach (var menu in Menus) menu.PopupBounds = value; } }
-    private FilterChecklist[] Menus => [Types, Keywords, Sets, Gold, Support, Collection, Focus, Actions];
+    private FilterChecklist[] Menus => [Types, Keywords, Sets, Gold, Support, Collection, Focus, PersonalHonor, GoldProduction, Actions];
     public float BarHeight => _families.Count == 2 ? 206 : 254;
     private const string Owned = "Owned", Unowned = "Unowned", Playable = "Playable now", NotPlayable = "Not yet playable", OtherSet = "Other", NoneChoice = "None", NoKeywords = "No keywords";
     private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Imperial", "Unaligned"];
@@ -80,6 +85,10 @@ public partial class CatalogueBrowserBar : Control
         Keywords = new FilterChecklist(this, Theme, "Keywords", extraHeader: order); AddChild(Keywords.Trigger); Keywords.Changed += () => Refresh();
         Focus = new FilterChecklist(this, Theme, "Focus Value", new Vector2I(300, 440)); AddChild(Focus.Trigger); Focus.Changed += () => Refresh();
         Focus.SetOptions(["0", "1", "2", "3", "4", "5", NoneChoice]);
+        PersonalHonor = new FilterChecklist(this, Theme, "Personal Honor", new Vector2I(300, 400)); AddChild(PersonalHonor.Trigger); PersonalHonor.Changed += () => Refresh();
+        PersonalHonor.SetOptions(["0", "1", "2", "3", "4", "5+", NoneChoice]);
+        GoldProduction = new FilterChecklist(this, Theme, "Gold Production", new Vector2I(300, 400)); AddChild(GoldProduction.Trigger); GoldProduction.Changed += () => Refresh();
+        GoldProduction.SetOptions(["0", "1", "2", "3", "4", "5+", NoneChoice]);
         Actions = new FilterChecklist(this, Theme, "Action Type", new Vector2I(320, 440)); AddChild(Actions.Trigger); Actions.Changed += () => Refresh();
         Actions.SetOptions(CatalogueActions.Choices);
         Actions.Trigger.TooltipText = "Bold actions printed on the card. Battle and Open include Battle/Open cards; Battle/Open matches only cards printing it; None has no printed action.";
@@ -174,6 +183,8 @@ public partial class CatalogueBrowserBar : Control
             var familyCards = _data.Filter(family: Family).Where(_eligible);
             var removed = new List<string>();
             if (Family != "Fate" && Focus.Active) { removed.Add("Focus Value"); Focus.Clear(); }
+            if (Family != "Dynasty" && PersonalHonor.Active) { removed.Add("Personal Honor"); PersonalHonor.Clear(); }
+            if (Family != "Dynasty" && GoldProduction.Active) { removed.Add("Gold Production"); GoldProduction.Clear(); }
             if (!ExtraRow && Actions.Active) { removed.Add("Action Type"); Actions.Clear(); }
             Types.SetOptions(familyCards.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray());
             CardsWithoutOwnership = FilterWithoutKeywords(false, true).Where(KeywordPasses).ToArray();
@@ -196,7 +207,7 @@ public partial class CatalogueBrowserBar : Control
             }
             foreach (var (family, button) in _families) SelectedStyle(button, Family == family);
             SelectedStyle(_alphabetical, !_mostCommon); SelectedStyle(_common, _mostCommon);
-            Focus.Trigger.Visible = Family == "Fate"; Actions.Trigger.Visible = ExtraRow;
+            Focus.Trigger.Visible = Family == "Fate"; Actions.Trigger.Visible = ExtraRow; PersonalHonor.Trigger.Visible = GoldProduction.Trigger.Visible = Family == "Dynasty";
             BuildTags(); Fit();
         }
         finally { _refreshing = false; }
@@ -221,6 +232,19 @@ public partial class CatalogueBrowserBar : Control
         return [.. boxes];
     }
     private static string[] GoldFeature(CatalogueData.Card c) => [c.Numeric("cost") is var cost && cost != double.MaxValue ? (cost >= 10 ? "10+" : ((int)cost).ToString()) : NoneChoice];
+    private static string[] PersonalHonorFeature(CatalogueData.Card c) =>
+        c.Types.Contains("Personality") && c.Stats.TryGetValue("ph", out var values) && int.TryParse(values.FirstOrDefault(), out var honor) ? [honor >= 5 ? "5+" : Math.Max(0, honor).ToString()] : [NoneChoice];
+    private static readonly Regex ProduceClause = new(@"\bproduce[sd]?\b([^.;\n]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex GoldAmount = new(@"\b(\d+)\s+Gold\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    /// <summary>Every Gold amount a Holding's "Produce N Gold, or M Gold when..." clauses name, so a Holding with two amounts is found under either. Other cards, and Holdings with no production, are None.</summary>
+    internal static string[] GoldProductionFeatures(CatalogueData.Card c)
+    {
+        if (!c.Types.Contains("Holding")) return [NoneChoice];
+        var amounts = new SortedSet<int>();
+        foreach (Match clause in ProduceClause.Matches(c.CurrentOracleText)) foreach (Match amount in GoldAmount.Matches(clause.Groups[1].Value)) amounts.Add(int.Parse(amount.Groups[1].Value));
+        if (amounts.Count == 0 && c.Definition is { GoldProduction: > 0 } definition) amounts.Add(definition.GoldProduction);
+        return amounts.Count == 0 ? [NoneChoice] : amounts.Select(a => a >= 5 ? "5+" : a.ToString()).Distinct().ToArray();
+    }
     private static string[] SetFeatures(CatalogueData.Card c)
     {
         var sets = c.Printings.Where(p => p.Set != "Game printing").Select(p => CatalogueData.SetOrder.Contains(p.Set) ? p.Set : OtherSet).Distinct().ToArray();
@@ -232,6 +256,8 @@ public partial class CatalogueBrowserBar : Control
             .Where(c => FilterChecklist.Passes(ExcludedClans, ClanFeatures(c))
                 && Types.Passes(c.Types) && Sets.Passes(SetFeatures(c)) && Gold.Passes(GoldFeature(c)) && Support.Passes(c.Playable ? Playable : NotPlayable));
         if (Family == "Fate" && Focus.Active) cards = cards.Where(c => Focus.Passes(c.Focus is { } focus ? focus.ToString() : NoneChoice));
+        if (Family == "Dynasty" && PersonalHonor.Active) cards = cards.Where(c => PersonalHonor.Passes(PersonalHonorFeature(c)));
+        if (Family == "Dynasty" && GoldProduction.Active) cards = cards.Where(c => GoldProduction.Passes(GoldProductionFeatures(c)));
         if (ExtraRow && Actions.Active) cards = cards.Where(c => CatalogueActions.Choices.Any(choice => Actions.Checked(choice) && CatalogueActions.Matches(c.Actions, choice)));
         return ownership && Collection.Active ? cards.Where(c => Collection.Passes(MyCollection.Store.Count(c.Id) > 0 ? Owned : Unowned)) : cards;
     }
@@ -263,7 +289,7 @@ public partial class CatalogueBrowserBar : Control
         Place(_selectAll, w - 215, 14, 100, 38); Place(_deselectAll, w - 109, 14, 109, 38);
         var compact = _families.Count == 2; var searchY = compact ? 80 : 84; var filterY = compact ? 122 : 150; var tagsY = compact ? 166 : 204;
         // Focus Value and Action Type lead the tag row, so offering them never changes the bar's height.
-        var tagX = 0; if (ExtraRow) { tagX = 190 + 10; if (Focus.Trigger.Visible) tagX += 176 + 10; }
+        var tagX = 0; if (ExtraRow) { tagX = 190 + 10; if (Focus.Trigger.Visible) tagX += 176 + 10; if (GoldProduction.Trigger.Visible) tagX += 176 + 10 + 190 + 10; }
         var familyWidth = _families.Count == 4 ? 400 : 230;
         Place(Search, 0, searchY, w - familyWidth - 435, compact ? 40 : 52);
         Place(Collection.Trigger, w - familyWidth - 425, searchY, 220, compact ? 40 : 52); Place(EditCollectionButton, w - familyWidth - 195, searchY, 183, compact ? 40 : 52);
@@ -276,6 +302,8 @@ public partial class CatalogueBrowserBar : Control
         Place(_sort, w - 506, tagsY, 170, compact ? 38 : 44); Place(_sizeLabel, w - 320, compact ? tagsY + 5 : filterY + 12, 78, 25); Place(CardSize, w - 238, compact ? tagsY + 6 : filterY + 13, 230, 24);
         if (ExtraRow) Place(Actions.Trigger, 0, tagsY, 190, compact ? 38 : 44);
         if (Focus.Trigger.Visible) Place(Focus.Trigger, 200, tagsY, 176, compact ? 38 : 44);
+        if (PersonalHonor.Trigger.Visible) Place(PersonalHonor.Trigger, 200, tagsY, 176, compact ? 38 : 44);
+        if (GoldProduction.Trigger.Visible) Place(GoldProduction.Trigger, 386, tagsY, 190, compact ? 38 : 44);
         Place(_notice, 0, compact ? 204 : 248, w, compact ? 18 : 20);
         QueueRedraw();
     }

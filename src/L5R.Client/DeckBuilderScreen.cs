@@ -54,7 +54,7 @@ public partial class DeckBuilderScreen : Control
     private const float SidebarWidth = 620, MatLeft = 656;
     private bool _building, _list = true;
     private CardScanHover _scanHover = null!;
-    private Button _viewAll = null!, _viewDynasty = null!, _viewFate = null!;
+    private Button _viewAll = null!, _viewDynasty = null!, _viewAllFate = null!, _viewFate = null!;
     private bool _deckOnly;
     /// <summary>True while the collection pane lists only cards already in the current deck's active family.</summary>
     public bool DeckViewOnly => _deckOnly;
@@ -217,20 +217,25 @@ public partial class DeckBuilderScreen : Control
     private void BuildViewStrip()
     {
         _viewStrip.Name = "CollectionViewStrip"; _viewStrip.Theme = CatalogueArt.Theme();
-        _viewAll = CatalogueArt.Button("", () => { _deckOnly = false; ApplyFilters(); UpdateStatus(); }); _viewAll.Name = "ViewAllCards";
+        // All Dynasty Cards | Dynasty Deck | All Fate Cards | Fate Deck (issue #792): "All" browses every card of that family, "Deck" only the cards in this deck.
+        _viewAll = CatalogueArt.Button("", () => { _deckOnly = false; SetFamily("Dynasty"); }); _viewAll.Name = "ViewAllDynastyCards";
         _viewDynasty = CatalogueArt.Button("", () => { _deckOnly = true; SetFamily("Dynasty"); }); _viewDynasty.Name = "ViewDynastyDeck";
-        _viewFate = CatalogueArt.Button("", () => { _deckOnly = true; SetFamily("Fate"); }); _viewFate.Name = "ViewFateCards";
-        foreach (var b in new[] { _viewAll, _viewDynasty, _viewFate }) { b.ToggleMode = true; b.ClipText = true; b.AddThemeFontSizeOverride("font_size", 19); b.FocusMode = FocusModeEnum.All; _viewStrip.AddChild(b); }
-        _viewAll.TooltipText = "Browse every card that matches the filters."; _viewDynasty.TooltipText = "Show only the Dynasty cards in this deck."; _viewFate.TooltipText = "Show only the Fate cards in this deck.";
-        _viewStrip.Resized += () => { var w = _viewStrip.Size.X; var each = Math.Min(300f, (w - 16) / 3); Place(_viewAll, 0, 0, each, 36); Place(_viewDynasty, each + 8, 0, each, 36); Place(_viewFate, 2 * (each + 8), 0, each, 36); };
+        _viewAllFate = CatalogueArt.Button("", () => { _deckOnly = false; SetFamily("Fate"); }); _viewAllFate.Name = "ViewAllFateCards";
+        _viewFate = CatalogueArt.Button("", () => { _deckOnly = true; SetFamily("Fate"); }); _viewFate.Name = "ViewFateDeck";
+        foreach (var b in new[] { _viewAll, _viewDynasty, _viewAllFate, _viewFate }) { b.ToggleMode = true; b.ClipText = true; b.AddThemeFontSizeOverride("font_size", 17); b.FocusMode = FocusModeEnum.All; _viewStrip.AddChild(b); }
+        _viewAll.TooltipText = "Browse every Dynasty card that matches the filters."; _viewDynasty.TooltipText = "Show only the Dynasty cards in this deck.";
+        _viewAllFate.TooltipText = "Browse every Fate card that matches the filters."; _viewFate.TooltipText = "Show only the Fate cards in this deck.";
+        _viewStrip.Resized += () => { var w = _viewStrip.Size.X; var each = Math.Min(300f, (w - 24) / 4); var x = 0f; foreach (var b in new[] { _viewAll, _viewDynasty, _viewAllFate, _viewFate }) { Place(b, x, 0, each, 36); x += each + 8; } };
     }
     private void UpdateViewStrip(DeckReview r)
     {
         if (_viewAll is null) return;
         var all = Browser.Results.Length;
-        _viewAll.Text = $"All Cards ({all:N0} shown)"; _viewDynasty.Text = $"Dynasty Deck ({r.Dynasty} cards)"; _viewFate.Text = $"Fate Cards ({r.Fate} cards)";
-        _viewAll.SetPressedNoSignal(!_deckOnly); _viewDynasty.SetPressedNoSignal(_deckOnly && Family == "Dynasty"); _viewFate.SetPressedNoSignal(_deckOnly && Family == "Fate");
-        CatalogueArt.Selected(_viewAll, !_deckOnly); CatalogueArt.Selected(_viewDynasty, _deckOnly && Family == "Dynasty"); CatalogueArt.Selected(_viewFate, _deckOnly && Family == "Fate");
+        bool allDynasty = !_deckOnly && Family == "Dynasty", dynastyDeck = _deckOnly && Family == "Dynasty", allFate = !_deckOnly && Family == "Fate", fateDeck = _deckOnly && Family == "Fate";
+        _viewAll.Text = allDynasty ? $"All Dynasty Cards ({all:N0} shown)" : "All Dynasty Cards"; _viewDynasty.Text = $"Dynasty Deck ({r.Dynasty} cards)";
+        _viewAllFate.Text = allFate ? $"All Fate Cards ({all:N0} shown)" : "All Fate Cards"; _viewFate.Text = $"Fate Deck ({r.Fate} cards)";
+        _viewAll.SetPressedNoSignal(allDynasty); _viewDynasty.SetPressedNoSignal(dynastyDeck); _viewAllFate.SetPressedNoSignal(allFate); _viewFate.SetPressedNoSignal(fateDeck);
+        CatalogueArt.Selected(_viewAll, allDynasty); CatalogueArt.Selected(_viewDynasty, dynastyDeck); CatalogueArt.Selected(_viewAllFate, allFate); CatalogueArt.Selected(_viewFate, fateDeck);
     }
     public void SetFamily(string family) { Family = family; Browser.SetFamily(family); SetSetup(""); ApplyFilters(); RefreshMat(true); }
     public void SetSetup(string slot)
