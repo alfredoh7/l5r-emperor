@@ -74,7 +74,31 @@ public partial class Main
             SelectCard(moving); await EventFrames(4);
             SupportRequire(legal.Length == 1 && _playPrompt is not null && ActionTextBlocks().Count() == 0, $"With one legal action ({legal.Length}) it should be assumed");
             SupportRequire(PromptedChoice()!.Option.Command!.AbilityId == "moving-unmoving-approach", "The legal first action should be the one assumed");
-            GD.Print("DIRECT_PLAY_PASS: confirm-first for an automatic action, two-action text selection with cancel, assumed single legal action.");
+            // 4. Issue #793: a Strategy that any of several Personalities may perform (Spirit of the Berserker) is performed by clicking a highlighted Personality on the table.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 3636, 0, Zone.Home); SupportFixtureCard(s, 7420, 0, Zone.Hand); });
+            var spirit = View.Players[0].Hand.Single();
+            SelectCard(spirit); await EventFrames(4);
+            await SupportClick(StabilizationButtons(_decisionActions).Single(b => b.Text == "Confirm play")); await EventFrames(4);
+            SupportRequire(_chosen is not null && StabilizationText(_inspector).Contains("click a highlighted Personality on the table"), "The performer choice is not explained");
+            var performerClicks = PerformerClicks();
+            SupportRequire(performerClicks.Count == 2, $"Both Personalities should be clickable performers, found {performerClicks.Count}");
+            var otherPerformer = performerClicks.Keys.Single(id => id != _chosen!.Command!.PerformerId);
+            var performerTile = _tiles.Single(t => t.Card.Id == otherPerformer);
+            SupportRequire(performerTile.LegalTarget, "The other performing Personality is not highlighted on the table");
+            await SupportClick(performerTile); await EventFrames(6);
+            SupportRequire(_chosen?.Command?.PerformerId == otherPerformer, "Clicking the Personality did not choose it as the performer");
+
+            // 5. Issue #793: the Declare Attack button is a blood-red lacquer, not black.
+            await LoadDirectPlay(s => { s.Phase = Phase.AttackDeclaration; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 3636, 1, Zone.Home); });
+            var declare = StabilizationButtons(_phaseActions).FirstOrDefault(b => b.Text.Contains("Declare an attack", StringComparison.Ordinal));
+            SupportRequire(declare is not null, "No Declare an attack button is offered: " + string.Join(" | ", Actions.Select(x => x.Type)));
+            SupportRequire(declare!.GetThemeStylebox("normal") is StyleBoxTexture { ModulateColor: var red } && red.R > red.G * 3 && red.R > red.B * 3, "Declare an attack is not blood red"); await EventFrames(4); GetViewport().GetTexture().GetImage().SavePng(Path.ChangeExtension(_capturePath!, null) + "-declare.png");
+
+            // 6. Issue #793: a finished match offers a return to the main menu as well as another practice.
+            await LoadDirectPlay(s => { s.WinnerId = 0; s.VictoryReason = "Test victory"; SupportFixtureCard(s, 229, 0, Zone.Home); });
+            var labels = StabilizationButtons(_inspector).Select(b => b.Text).ToArray();
+            SupportRequire(labels.Contains("Return to main menu") && labels.Contains("Start another practice"), "The end of a match does not offer the main menu: " + string.Join(" | ", labels));
+            GD.Print("DIRECT_PLAY_PASS: confirm-first for an automatic action, two-action text selection with cancel, assumed single legal action, click-to-choose performer, blood-red Declare Attack, end-of-match main menu.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }

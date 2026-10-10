@@ -30,6 +30,9 @@ public partial class TurnBloom : Control
     public bool Playing => Elapsed < (ReducedMotion ? 2.6f : 3.5f);
     public bool ManualTime { get; set; }
     public int PlayCount { get; private set; }
+    /// <summary>The words drawn over the ink: "YOUR TURN" for a new turn, or an announcement such as "DISCARD TO 8" (issue #791).</summary>
+    public string Text { get; private set; } = "YOUR TURN";
+    public bool IsAnnouncement => Text != "YOUR TURN";
     private TextureRect _ink = null!;
     private ShaderMaterial _material = null!;
     private Font _font = null!;
@@ -50,7 +53,7 @@ public partial class TurnBloom : Control
         _font = new FontVariation { BaseFont = GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf"), SpacingGlyph = -1 };
         SetTime(4);
     }
-    public void Play() { PlayCount++; SetTime(0); }
+    public void Play(string text = "YOUR TURN") { Text = text; PlayCount++; SetTime(0); }
     public void Cancel() { if (Elapsed != 4) SetTime(4); }
     public void SetTime(float time)
     {
@@ -73,10 +76,10 @@ public partial class TurnBloom : Control
         var opacity = ReducedMotion ? Ease(.08f, .22f, Elapsed) * (1 - Ease(2.4f, 2.6f, Elapsed))
             : Ease(.52f, .92f, Elapsed) * (1 - Ease(2.5f, 3.15f, Elapsed));
         int size = Math.Max(18, (int)Math.Round(Size.X * 56 / 940));
-        var width = _font.GetStringSize("YOUR TURN", fontSize: size).X;
+        var width = _font.GetStringSize(Text, fontSize: size).X;
         // Actual glyph bounds, not the font's unusually large line-box padding.
         var textAt = new Vector2((Size.X - width) / 2, Size.Y / 2 + size * .37f - Size.X * 6 / 940);
-        DrawStringOutline(_font, textAt, "YOUR TURN", fontSize: size, size: Math.Max(1, size / 10), modulate: new Color(1, .74f, .34f, opacity * .07f));
-        DrawString(_font, textAt, "YOUR TURN", fontSize: size, modulate: new Color("efdfbd") { A = opacity });
+        DrawStringOutline(_font, textAt, Text, fontSize: size, size: Math.Max(1, size / 10), modulate: new Color(1, .74f, .34f, opacity * .07f));
+        DrawString(_font, textAt, Text, fontSize: size, modulate: new Color("efdfbd") { A = opacity });
     }
 }

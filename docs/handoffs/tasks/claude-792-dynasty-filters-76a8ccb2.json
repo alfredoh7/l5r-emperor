@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Presentation/browse only (Core untouched): the shared catalogue filter bar (deck builder and card library) gains Personal Honor (Personalities, 0 to 5+) and Gold Production (Holdings parsed from their Produce clauses; a Holding that produces different amounts appears under each) for Dynasty cards. The deck builder view strip is now All Dynasty Cards | Dynasty Deck | All Fate Cards | Fate Deck: All Dynasty Cards filters on Dynasty cards and All Fate Cards reveals every Fate card. Shared because it extends the native deck-builder probe.",
+  "validation": "Client builds with zero warnings. Native deck-builder probe passes with new assertions: strip order and labels, Personal Honor keeps only Personalities of that value, Gold Production keeps only Holdings and lists Ageless Shrine (2 or 3 Gold) under both 2 and 3, All Fate Cards reveals the full Fate set, filters hidden for Fate. Native catalogue, main-menu, practice-setup pass; Collection unit tests pass. check-deck-search-ui fails on a stale in-match search assertion that R-033 reversed (found Terrain may be discarded); it fails without these changes. No human playtest yet.",
+  "remaining": "None for this change. The library's own family buttons (All, Dynasty, Fate, Strongholds) are unchanged; only the deck builder has the Deck vs All strip. check-deck-search-ui needs updating for R-033 separately.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/792",
+  "branch": "claude/792-dynasty-filters",
+  "updated": "2026-10-10T00:39:21.412497+00:00"
+}
