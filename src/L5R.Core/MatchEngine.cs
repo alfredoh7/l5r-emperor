@@ -357,6 +357,7 @@ public sealed partial class MatchEngine
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
         NormalizeOwnerAnsweredPriority(); // Issue #642 (PendingPriority.cs): a choice answered by its owner gives its owner priority.
         SkipIdleCavalrySegments(); // Issue #627 (CavalrySkip.cs): a Cavalry Maneuvers segment where the acting player has nothing to do but pass.
+        ReactionOrderTail(); // Issue #803 (ReactionOrdering.cs): announce, order and resolve the Reactions of a window both players hold one for.
     }
     private void ApplyCore(GameCommand command)
     {
@@ -367,6 +368,7 @@ public sealed partial class MatchEngine
         Require(_state.PendingHonorLossDecision is null, "Answer the Honor loss decision first (Ten Thousand Temples)."); // issue #492, group F: only "honorLossChoice" (handled by Execute) answers it.
         Require(_state.PendingEntryCostDecision is null, "Choose how to pay the additional cost of entering play first."); // issue #501: only "entryCostChoice" (handled by Execute) answers it.
         Require(command.PlayerId == _state.PriorityPlayerId, "Wait for your action opportunity.");
+        if (_state.PendingReactionOrder is { } reactionOrder && Equals(_state.PendingChoice, reactionOrder.Window) && HandleReactionOrderCommand(reactionOrder, command)) return; // issue #803 (ReactionOrdering.cs)
         if (_state.PendingChoice is not null)
         {
             foreach (var handler in EngineHooks.PendingChoice.Items)
@@ -707,7 +709,7 @@ public sealed partial class MatchEngine
         else if (!LoyaltyAllowsControl(card, Player(playerId).Clan, playerId, RecruitGateKind.Overlay))
             error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && _state.Cards.Values.Any(c => c.Id != target.Id && c.OwnerId == playerId && InPlay(c)
-            && string.Equals(Experienced.BaseTitle(Definition(c).Name), Experienced.BaseTitle(Definition(card).Name), StringComparison.OrdinalIgnoreCase)))
+            && string.Equals(Experienced.BaseTitle(Definition(c).Name), Experienced.BaseTitle(Definition(card).Name), StringComparison.OrdinalIgnoreCase) && ExperienceLevel(c) == higherLevel))
             error = $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.";
         return new(cardId, targetId, higherLevel, lowerLevel, error);
     }
@@ -987,7 +989,7 @@ public sealed partial class MatchEngine
             + (roninDiscount > 0 ? $" − {roninDiscount} (Palace of the Breaking Dawn)" : "")
             + (nagaDiscount > 0 ? $" − {nagaDiscount} ({nagaTerm})" : "")
             + (clanAllegiance ? " + 2 (Clan allegiance)" : "") + (clanDiscount ? " − 2 (Clan discount)" : "") + entryTerms.Basis + (!entryTerms.Ignore && rawCost + entryTerms.Adjustment < 0 ? " (min 0)" : "");
-        if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(playerId, def.Name)) error = $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.";
+        if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && ControlsCopyOf(playerId, def.Name, ExperienceLevel(card))) error = $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.";
         error ??= AdditionalEntryCostUnpayable(card, playerId); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play he cannot pay bars the recruit.
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
         var eligible = error is null && (inClan || def.Type == CardType.Personality && ProclaimGateEligible(card, player)) && !clanDiscount && !fromDeadPile && !fromDynastyDeck && playerId == _state.ActivePlayerId && ProclaimAllowed(player, def, card);
@@ -1138,6 +1140,7 @@ public sealed partial class MatchEngine
         {
             _state.PendingChoice = null;
             _state.ConsecutivePasses = 0;
+            _state.ReactionOrderSkipped = null;
             if (pending.Type == "proclaim") ApplyPendingEntryEffects();
             Emit("reactionClosed", reason);
             // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
@@ -2033,7 +2036,7 @@ public sealed partial class MatchEngine
         // Unique/Singular (issue #202): Equip had no in-play-duplicate check at all before this -- only
         // QuotePurchase (Personality/Holding) did. Generalizes that same check to cover Follower/Item/
         // Spell entry too, for both keywords.
-        Require(!(Keyword(card, "Unique") || Keyword(card, "Singular")) || !ControlsCopyOf(command.PlayerId, def.Name),
+        Require(!(Keyword(card, "Unique") || Keyword(card, "Singular")) || !ControlsCopyOf(command.PlayerId, def.Name, ExperienceLevel(card)),
             $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.");
         // The cost (Katagi's, Satoshi's Dual Warfans', Legion of the Bat's and Champion of Thunder's
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this

@@ -41,6 +41,7 @@ public partial class Main
             context.Name = "ReactionContext"; _sidebarHeader.AddChild(context);
             var status = ReactionContextText(reaction.Status, 15, Palette.PaperDim);
             status.Name = "ReactionStatus"; _sidebarHeader.AddChild(status);
+            if (View.ReactionOrder is { } order) RenderReactionOrder(order);
             if (reaction.ParentContext is { Length: > 0 } parent)
                 _sidebarHeader.AddChild(ReactionContextText(BattleActionText.WithoutIds(parent), 15, Palette.PaperDim));
             _sidebarHeader.AddChild(new HSeparator());
@@ -49,6 +50,31 @@ public partial class Main
         {
             var label = ReactionContextText(receipt, 17, Palette.Gold);
             label.Name = "ReactionReceipt"; _sidebarHeader.AddChild(label);
+        }
+    }
+
+    // Issue #803: the announce / order / resolve procedure of a window both players hold a Reaction for. Core owns every decision; this only says where the window is and lists the Reactions.
+    private void RenderReactionOrder(ReactionOrderView order)
+    {
+        var turnClan = View.Players.Single(p => p.Id == order.TurnPlayerId).Clan;
+        var mine = order.TurnPlayerId == View.ViewerId;
+        var instruction = order.Stage switch
+        {
+            "Announce" => mine ? "Announce every Reaction you will play in this window, then choose Done." : $"Waiting for {turnClan} to announce their Reactions.",
+            "Order" => mine ? "Choose which announced Reaction resolves next." : $"Waiting for {turnClan} to choose the order the Reactions resolve in.",
+            _ => "The announced Reactions resolve in this order.",
+        };
+        var heading = ReactionContextText(instruction, 17, Palette.Gold); heading.Name = "ReactionOrderInstruction"; _sidebarHeader.AddChild(heading);
+        string Describe(ReactionOrderItemView item) => $"{item.CardName} · {BattleActionText.WithoutIds(item.Label)} ({View.Players.Single(p => p.Id == item.PlayerId).Clan})";
+        for (var i = 0; i < order.Ordered.Length; i++)
+        {
+            var line = ReactionContextText($"{i + 1}. {Describe(order.Ordered[i])}", 15, i == 0 && order.Stage == "Resolve" ? Palette.Paper : Palette.PaperDim);
+            line.Name = "ReactionOrderQueued"; _sidebarHeader.AddChild(line);
+        }
+        foreach (var item in order.Announced)
+        {
+            var line = ReactionContextText("Announced: " + Describe(item), 15, Palette.PaperDim);
+            line.Name = "ReactionOrderAnnounced"; _sidebarHeader.AddChild(line);
         }
     }
 

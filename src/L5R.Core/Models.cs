@@ -1558,6 +1558,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
 {
     // #722: Core-owned response context. Older snapshots omit this member; no response is inferred by the client.
     public ReactionPresentationView? ReactionPresentation { get; init; }
+    // Issue #803 (ReactionOrdering.cs): the announce / order / resolve procedure of a Reaction window both players hold a Reaction for; PUBLIC, null otherwise.
+    public ReactionOrderView? ReactionOrder { get; init; }
     public ProvinceOrderView? PendingProvinceOrder { get; init; }
     // Harsh Choices (issue #581): what destroying the province would do, computed by the engine and PUBLIC -- both players see the same consequence. Null when no Harsh Choices decision is open.
     public HarshChoicesView? PendingHarshChoices { get; init; }

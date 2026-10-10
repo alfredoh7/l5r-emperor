@@ -4636,7 +4636,8 @@ public sealed partial class MatchEngine
     // controller. Unique additionally restricts deck construction (DeckFormat.cs, unaffected here);
     // Singular does not. Checked at every entry-into-play path (Purchase, Equip) that names a card by
     // Name, not DefinitionId, matching the existing Unique convention this generalizes.
-    private bool ControlsCopyOf(int owner, string name) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Definition(c).Name == name);
+    // experienceLevel (Mendon, issue #803): a less experienced version of a Personality in play does not stop a more experienced one being recruited; they are independent cards.
+    private bool ControlsCopyOf(int owner, string name, int? experienceLevel = null) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Definition(c).Name == name && (experienceLevel is null || ExperienceLevel(c) == experienceLevel));
     // Reconnaissance (core rules Glossary): a per-player boolean at a specific province, defaulted to
     // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
     // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
@@ -6341,7 +6342,7 @@ public sealed partial class MatchEngine
                     // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
                     // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
                     // needed this check.
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
+                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Low Market's own Target category: broader than "spell-or-reserve-in-hand" above (any
@@ -6355,7 +6356,7 @@ public sealed partial class MatchEngine
                         "Choose an Item, Follower, or Spell from your hand.");
                     Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Personality.");
                     Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
+                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Moto Jun-Ni / Foothills Keep (issue #337): a card in a discard pile the ability's AttachSpec names (whose pile, which kinds).
@@ -6489,7 +6490,7 @@ public sealed partial class MatchEngine
                         "Choose a Spell with the required keyword from your hand.");
                     Require(AttachmentLegalTarget(Definition(target), source!), "This Spell will not attach to that Shugenja.");
                     Require(AttachmentAllowed(target, source!), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
+                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Seeds of Decay pass (issue #453), batch 1. Requesting Reinforcements: "a face-up Scout Personality in your province" -- Your Clan Needs You!'s own

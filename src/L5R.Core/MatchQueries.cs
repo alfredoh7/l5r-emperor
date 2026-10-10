@@ -74,7 +74,7 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId), BuildShownCards(), BuildLookView(playerId), BuildCopyView(playerId), BuildEitherOrView(playerId), BuildOpponentPaymentView(playerId),
             _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildPendingAttackCue(), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
-        { ReactionPresentation = BuildReactionPresentation(), PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
+        { ReactionPresentation = BuildReactionPresentation(), ReactionOrder = BuildReactionOrderView(), PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
     }
 
     // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
@@ -123,6 +123,7 @@ public sealed partial class MatchEngine
     {
         if (playerId is < 0 or > 1) return [];
         if (_state.WinnerId is not null) return [];
+        if (_state.PendingReactionOrder is { } reactionOrder && Equals(_state.PendingChoice, reactionOrder.Window)) return ReactionOrderActions(playerId, reactionOrder); // issue #803 (ReactionOrdering.cs)
         // Duel stages and duel reaction windows list their own actions; any other decision opened mid-duel
         // (a paused Focus Effect's choice, a search it starts) falls through to its ordinary handler below.
         if (_state.PendingChoice?.Type is "duelReaction" or "duelWonReaction" or "overconfidentDraw"

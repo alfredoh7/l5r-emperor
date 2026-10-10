@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Gameplay QoL (issue #803): Tsuruchi Tomaru - exp (and any Experienced Personality) may be recruited while a lower-Experience version is in play (R-038); Pass all battles also declines the Engage window and a before-resolution Reaction; Reaction windows both players can react in now announce, order and resolve (R-039, ReactionOrdering.cs), with client panel and bot support.",
+  "validation": "bash tools/check.sh --skip-client: all passed (Core, AI incl. bot-soak, Server, Transport, Collection); new reaction-ordering and pass-all-battles tests; check-reaction-flow-ui.sh passed 4/4; client builds with no warnings. Announce/order sidebar not yet seen in a native playtest.",
+  "remaining": "Playtest the announce/order UI; extend to proclaim and before-action windows only if wanted.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/803",
+  "branch": "claude/803-reaction-window-qol",
+  "updated": "2026-10-10T04:34:45.697009+00:00"
+}

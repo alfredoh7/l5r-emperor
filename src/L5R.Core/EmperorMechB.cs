@@ -259,7 +259,7 @@ public sealed partial class MatchEngine
             Emit("controlRefused", $"{via}: {(gateReason is null or LoyalRecruitRefusal ? $"{name} is Loyal and cannot be controlled by {Player(controllerId).Name}." : gateReason)}", controllerId, personality.Id);
             return false;
         }
-        if ((Keyword(personality, "Unique") || Keyword(personality, "Singular")) && ControlsCopyOf(controllerId, name))
+        if ((Keyword(personality, "Unique") || Keyword(personality, "Singular")) && ControlsCopyOf(controllerId, name, ExperienceLevel(personality)))
         {
             Emit("controlRefused", $"{via}: {Player(controllerId).Name} already controls a {name}.", controllerId, personality.Id);
             return false;
