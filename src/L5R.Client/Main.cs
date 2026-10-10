@@ -62,6 +62,7 @@ public partial class Main : Node
     public override void _Ready()
     {
         GetWindow().MinSize = new Vector2I(1120, 700);
+        PreloadedDecks.Seed(new DeckFileStore(ProjectSettings.GlobalizePath("user://decks"))); // the shipped decks are in My Decks from the first launch (issue #810)
         _session.Changed += () =>
         {
             // Capture every permitted snapshot, even when several packets arrive within one rendered frame.
