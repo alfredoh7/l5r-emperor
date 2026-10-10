@@ -231,30 +231,30 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case EmperorMechDAbilities.NarizaneBow:
-            {
-                var limit = MechD.NarizaneLimits.TryGetValue(source!.Id, out var captured) ? captured : MechD.ReconActionsThisTurn[player.Id];
-                if (limit == 0 || NarizaneCandidates(target!).Count == 0)
                 {
-                    Emit("narizaneNothing", limit == 0 ? $"{Definition(source).Name}: {player.Name} has taken no Recon actions this turn, so nothing is bowed."
-                        : $"{Definition(source).Name}: no card in {Definition(target!).Name}'s unit is unbowed.", player.Id, source.Id);
-                    return false;
+                    var limit = MechD.NarizaneLimits.TryGetValue(source!.Id, out var captured) ? captured : MechD.ReconActionsThisTurn[player.Id];
+                    if (limit == 0 || NarizaneCandidates(target!).Count == 0)
+                    {
+                        Emit("narizaneNothing", limit == 0 ? $"{Definition(source).Name}: {player.Name} has taken no Recon actions this turn, so nothing is bowed."
+                            : $"{Definition(source).Name}: no card in {Definition(target!).Name}'s unit is unbowed.", player.Id, source.Id);
+                        return false;
+                    }
+                    return BeginDeciderChoice(EmperorMechDSpecs.NarizaneBow, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
                 }
-                return BeginDeciderChoice(EmperorMechDSpecs.NarizaneBow, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
             case EmperorMechDAbilities.BrokenCipherDraw:
                 Draw(player); Draw(player);
                 return false;
             case EmperorMechDAbilities.IndecisionDiscard:
                 return BeginDeciderChoice(EmperorMechDSpecs.IndecisionDiscard, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
             case EmperorMechDAbilities.IndecisionMove:
-            {
-                // The move is the shared "to the current battlefield" rule (MoveDestinations.cs: a negated or blocked move leaves him where he was); he straightens only if he moved.
-                var mover = Card(command.PerformerId!);
-                var wasThere = AtBattle(mover);
-                ExecuteMove(command, ability, source, target);
-                if (!wasThere && AtBattle(mover)) Straighten(mover);
-                return false;
-            }
+                {
+                    // The move is the shared "to the current battlefield" rule (MoveDestinations.cs: a negated or blocked move leaves him where he was); he straightens only if he moved.
+                    var mover = Card(command.PerformerId!);
+                    var wasThere = AtBattle(mover);
+                    ExecuteMove(command, ability, source, target);
+                    if (!wasThere && AtBattle(mover)) Straighten(mover);
+                    return false;
+                }
             case EmperorMechDAbilities.YajindenRaise:
                 return RaiseWithYajinden(player, source!, target!);
             case EmperorMechDAbilities.AmazingFeatCreate:
