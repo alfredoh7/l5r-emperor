@@ -254,7 +254,7 @@ public sealed partial class MatchEngine
         player.ProclaimUsedTurn = _state.TurnNumber; player.ProclaimedCardId = card.Id;
         RecordFact(FactKinds.Proclaimed, player.Id, card.Id, null, null, negated ? "negated" : null); // P6 (AfterFacts.cs): "after you Proclaim"
         // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
-        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
+        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card) + Wave829PersonalHonor(card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;
@@ -312,7 +312,7 @@ public sealed partial class MatchEngine
 
     // "+1PH if any other player is Dragon Clan".
     private int StaticPersonalHonorBonus(CardInstance card) =>
-        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card) + IvoryPoliticalPersonalHonorBonus(card) + PromoItemsPersonalHonorBonus(card); // + Utaku Lishan (issue #503); Oriole Imperial Vanguard (issue #622); Kimono of the Turquoise Champion, The Emerald Armor (PromoEmperorItems.cs)
+        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card) + IvoryPoliticalPersonalHonorBonus(card) + PromoItemsPersonalHonorBonus(card) + Wave829PersonalHonor(card); // + Utaku Lishan (issue #503); Oriole Imperial Vanguard (issue #622); Kimono of the Turquoise Champion, The Emerald Armor (PromoEmperorItems.cs)
 
     // "The amount of Honor you need in order to win an Honor Victory is reduced by Hotaka's Personal Honor minus one" -- each copy in play.
     private int HonorVictoryThreshold(int playerId) =>

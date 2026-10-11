@@ -183,6 +183,7 @@ public sealed partial class MatchEngine
             .OrderBy(c => c.Id, StringComparer.Ordinal),
         // The Loyalty of the Scorpion (ruling pass R2, issue #492): "your performing Scorpion Clan Personality" -- every Personality of the category the player controls.
         { } category when category.StartsWith("rr2-", StringComparison.Ordinal) => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && RulingR2PerformerAllows(reaction, c, false)).OrderBy(c => c.Id, StringComparer.Ordinal),
+        Wave829Abilities.BentenPerformer => Wave829RedirectPerformers(playerId, reaction),
         _ => throw new InvalidOperationException($"A targeted-by-action Reaction with the performer '{reaction.Performer}' is not listed.")
     };
 
@@ -348,11 +349,11 @@ public sealed partial class MatchEngine
                 return false;
             // A Paragon's Strength: the Honor loss, then the Attack; the move, then the Honor gain (the performer's, so a dishonorable Paragon is rehonored instead).
             case "paragon-strength-attack":
-            {
-                var paragon = Card(command.PerformerId!);
-                GainHonor(player.Id, -4, name, source);
-                return ResolveOrDeferAttack(id, player, target?.Id, paragon.Id, consumedGrant);
-            }
+                {
+                    var paragon = Card(command.PerformerId!);
+                    GainHonor(player.Id, -4, name, source);
+                    return ResolveOrDeferAttack(id, player, target?.Id, paragon.Id, consumedGrant);
+                }
             case "paragon-strength-move":
                 MoveHome(target!, false);
                 GainHonorFromPerformer(Card(command.PerformerId!), 2, name);
@@ -385,30 +386,30 @@ public sealed partial class MatchEngine
                 return false;
             // Bend like a Reed.
             case "bend-reed-boost":
-            {
-                var duel = _state.PendingDuel!;
-                duel.BendUsed = true;
-                var duelist = Card(duel.ChallengerPlayerId == player.Id ? duel.ChallengerId : duel.ChallengedId);
-                duel.StatBonuses[duelist.Id] = duel.StatBonuses.GetValueOrDefault(duelist.Id) + 2;
-                Emit("duelStatRaised", $"{name}: {Definition(duelist).Name} has +2 to his duel stat until the duel ends.", player.Id, duelist.Id);
-                return false;
-            }
+                {
+                    var duel = _state.PendingDuel!;
+                    duel.BendUsed = true;
+                    var duelist = Card(duel.ChallengerPlayerId == player.Id ? duel.ChallengerId : duel.ChallengedId);
+                    duel.StatBonuses[duelist.Id] = duel.StatBonuses.GetValueOrDefault(duelist.Id) + 2;
+                    Emit("duelStatRaised", $"{name}: {Definition(duelist).Name} has +2 to his duel stat until the duel ends.", player.Id, duelist.Id);
+                    return false;
+                }
             // Besieged: every province of every player, by the sacrificed Personality's base Chi.
             case "besieged-raise":
             case "besieged-lower":
-            {
-                var amount = Definition(Card(command.PerformerId!)).Chi * (id == "besieged-raise" ? 1 : -1);
-                foreach (var owner in _state.Players) foreach (var province in owner.Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(owner.Id, province.Index, amount, name); // until end of turn (issue #492 ruling R3)
-                return false;
-            }
+                {
+                    var amount = Definition(Card(command.PerformerId!)).Chi * (id == "besieged-raise" ? 1 : -1);
+                    foreach (var owner in _state.Players) foreach (var province in owner.Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(owner.Id, province.Index, amount, name); // until end of turn (issue #492 ruling R3)
+                    return false;
+                }
             // Breath of the Heavens: the Ranged 3 Attack (+1 for each Fire token now on the Personality), then the new +1F Fire token.
             case "breath-heavens-attack":
-            {
-                var performer = Card(command.PerformerId!);
-                var opened = ResolveOrDeferAttack(id, player, target?.Id, performer.Id, consumedGrant);
-                if (InPlay(performer)) CreateToken(performer, "Fire", id, "Force", 1);
-                return opened;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    var opened = ResolveOrDeferAttack(id, player, target?.Id, performer.Id, consumedGrant);
+                    if (InPlay(performer)) CreateToken(performer, "Fire", id, "Force", 1);
+                    return opened;
+                }
             // Burn the Towers.
             case "burn-towers-recon":
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
@@ -416,21 +417,21 @@ public sealed partial class MatchEngine
                 return false;
             // Caught in the Act: the bowing of every Personality of the reactor's the held action targets is negated.
             case "caught-act-negate-bow":
-            {
-                var held = HeldAction();
-                var targeted = ReactionWindowTargets(held.Command).OfType<string>().Append(held.TargetId).OfType<string>().Distinct(StringComparer.Ordinal)
-                    .Select(Card).Where(c => c.OwnerId == player.Id && Definition(c).Type == CardType.Personality).ToArray();
-                foreach (var personality in targeted) NegateEffects(personality, "bow");
-                return false;
-            }
+                {
+                    var held = HeldAction();
+                    var targeted = ReactionWindowTargets(held.Command).OfType<string>().Append(held.TargetId).OfType<string>().Distinct(StringComparer.Ordinal)
+                        .Select(Card).Where(c => c.OwnerId == player.Id && Definition(c).Type == CardType.Personality).ToArray();
+                    foreach (var personality in targeted) NegateEffects(personality, "bow");
+                    return false;
+                }
             // Control the Field: destroy the Terrain; an additional Battle action may play a Terrain (scoped to the Terrains in the hand).
             case "control-field-destroy":
-            {
-                DiscardTerrain(target!); player.TerrainDestroyedThisBattle = true;
-                var terrains = player.Hand.Select(Card).Where(c => Definition(c).Type == CardType.Strategy && Keyword(c, "Terrain")).Select(c => c.Id).ToArray();
-                if (terrains.Length > 0) GrantAdditionalAction(player.Id, terrains);
-                return false;
-            }
+                {
+                    DiscardTerrain(target!); player.TerrainDestroyedThisBattle = true;
+                    var terrains = player.Hand.Select(Card).Where(c => Definition(c).Type == CardType.Strategy && Keyword(c, "Terrain")).Select(c => c.Id).ToArray();
+                    if (terrains.Length > 0) GrantAdditionalAction(player.Id, terrains);
+                    return false;
+                }
             // Dangerous Indulgence.
             case "dangerous-indulgence-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -453,11 +454,11 @@ public sealed partial class MatchEngine
                 return false;
             // Duel of Serpents: the performer was bowed as the cost of the Open half.
             case "duel-serpents-honor":
-            {
-                var serpent = Card(command.PerformerId!);
-                if (Definition(serpent).Type == CardType.Personality) GainHonorFromPerformer(serpent, 3, name); else GainHonor(player.Id, 3, name, source);
-                return false;
-            }
+                {
+                    var serpent = Card(command.PerformerId!);
+                    if (Definition(serpent).Type == CardType.Personality) GainHonorFromPerformer(serpent, 3, name); else GainHonor(player.Id, 3, name, source);
+                    return false;
+                }
             case "duel-serpents-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;

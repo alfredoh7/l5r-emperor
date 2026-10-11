@@ -484,3 +484,66 @@ A Shugenja may normally have any number of Spells attached; Koan's Jingasa limit
 - **Cards/primitives:** Koan's Jingasa (oracle-l5r-10524), Koan's Robes (oracle-l5r-10525); `WatchScope.Unit`, `Wave827KoanExcess`, the P24 `SpellFocusParityWaives` cost waiver.
 - **Date:** 2026-10-11
 - **Source:** Mendon, card wiring list (issue #827). Ningen's 'Treatise on the Nezumi' is not wired: allies are out of scope.
+
+### R-054 — Cross-Clan Wedding is two separate resolvable effects
+The Event's first effect: the Event's owner targets a Personality he controls and gives it to the opponent. Its second effect: if the opponent now controls that Personality, the opponent targets a Personality he controls that is not the one he just received and gives control of it to the Event's owner.
+
+- **Cards/primitives:** Cross-Clan Wedding (oracle-l5r-1576); a P5 province-reveal Event, `w829WeddingGive` (Wave829.cs).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-055 — Caught Unawares: five primitives
+Open: a "you control no Personalities" condition; one or two target Personalities; a straightening negation that lasts THIS TURN (not the "next straightening" of Bow Before My Will and Quagmire); a draw when it is not your turn. Battle: a target filter "an enemy card with no unbowed attachments" (the existing filter is "no attachments at all").
+
+- **Cards/primitives:** Caught Unawares (oracle-l5r-1239); `LockStraightening` (the per-turn lock), a 1-to-2 slot, `Wave829TargetAllows`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-056 — Stone of Remembrance counts as zero cards, reacts to any action that destroys one of its controller's cards, and is torn in half
+It counts as zero cards when counted toward the minimum deck size. It may react to any action that would destroy a card of its controller. When it is played, an animation shows it torn in half before it is removed from the game.
+
+- **Cards/primitives:** Stone of Remembrance (oracle-l5r-7501); `DeckWorkshop.CountsTowardMinimumOf`, the `cardTorn` event, the client's `CardTear`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-057 — Shrine to the Heavens: each Shrine protects one Celestial per Celestial revealed, and the check is made only at the reveal
+When a Celestial is revealed in a player's Province, the trait lets the player select a Celestial in play and stop it from being discarded. It is a trait, so it repeats: each Shrine a player has in play protects one Celestial for each Celestial revealed in a Province (three Shrines protect up to three). Celestials not so protected are discarded when another Celestial enters play. The check is made only when a Celestial is revealed, so a Shrine that is destroyed does not cause a Celestial to be discarded.
+
+- **Cards/primitives:** Shrine to the Heavens (oracle-l5r-7229); the P6 `CelestialEntryRegistry` hooks `Wave829Shrine1..3`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-058 — Minor Blackmail: an untimed watch on performing and on assignment
+The watch is not timed. It triggers when the chosen Personality is the performer of an action (an ability on his own card, a Spell, an Item, or named as the performer by another card); it does not trigger when he is a target. It also triggers when he is assigned to a battlefield, on either side.
+
+- **Cards/primitives:** Minor Blackmail (oracle-l5r-5061); `BlackmailWatch`, fired from the after-action traits and the two assignment sites.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-059 — The Onyx Championship: the granted ability is a usual recruit action, from the discard pile
+The ability the Event grants lets its controller perform a recruit action on an Oni from the discard pile, dead Oni included. It is an ordinary recruit action; the only difference is that the Personality comes from the discard pile.
+
+- **Cards/primitives:** The Onyx Championship (oracle-l5r-8242); `w829-onyx-maho` (recruit cost through `GoldCostRule.TargetRecruit`, an Oni in any of the player's discard piles).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-060 — Benten's Blessing: a multi-pick over Personalities in or out of play, and the +1 PH persists and counts in a Proclaim
+Create a multi-pick choice. "Out of play" Personalities include those in the discard pile (the dead included) and those revealed in Provinces, but not those in a deck or face down in a Province. As usual, cards are selected by clicking them or from a pick list, with highlighting both ways. The +1 PH persists as long as Benten's Blessing is in play; if the Personality is proclaimed, the player gains the +1 PH as well.
+
+- **Cards/primitives:** Benten's Blessing (oracle-l5r-959); `w829BentenChoice` (Sleep's multi-select actions), `Wave829PersonalHonor`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-061 — Jizo's Mercy: the second Battle is the attacker's, and 4 Honor replace the Province's destruction
+After the second Battle action is used, only an attacking player may play it. Instead of destroying the Province in the resolution, the player gains 4 Honor. Every other effect of the resolution still happens as normal (losers destroyed, Honor gained or lost, resolution effects, the attacker's bow); only the Province is not destroyed.
+
+- **Cards/primitives:** Jizo's Mercy (oracle-l5r-10563); `JizoMark`, `Wave829JizoReplacesDestruction` (called from `ContinueResolveBattle`).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-062 — The Duty of the Crab: recruit at a battlefield from a province or the discard pile
+The Battle half is a recruit at a battlefield: its source is a province or the discard pile. Whether one action can offer both sources was to be checked; it can, with the Crab Clan Personality as the action's target. Nothing remains unwired.
+
+- **Cards/primitives:** The Duty of the Crab (oracle-l5r-8036); `w829-duty-battle` (`BringProvincePersonalityIntoPlay` / `BringDeadPersonalityIntoPlay`), `w829-duty-focus` (a delay Focus Effect).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829). Well-Tended Farm and One Koku needed no ruling.

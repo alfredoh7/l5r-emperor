@@ -332,6 +332,7 @@ public static partial class TrainingOpponent
                 return command.Choice == "use" ? 60 + (optionalTarget?.Force ?? 0) : 20;
             // Sleep's budgeted multi-select (issue #667): the bot bows enemy unbowed Personalities the budget allows (strongest first), never its own or an already bowed one, never clears, then confirms.
             case "budgetSelectAdd":
+                if (x.View.PendingChoice?.Type == Wave829Abilities.BentenType) return Wave829BentenScore(x, action); // Benten's Blessing (issue #829) shares the three actions
                 var sleepTarget = opponent.Army.Concat(opponent.Home).FirstOrDefault(c => c.Id == command.TargetId);
                 return sleepTarget is { Bowed: false } ? 120 + sleepTarget.Force : -50;
             case "budgetSelectConfirm": return 100;
@@ -340,6 +341,9 @@ public static partial class TrainingOpponent
             case "w827KokujinChoose": return Wave827KokujinScore(x, command);
             case "w827PanKuStraightenChoose": return command.Choice == "remain" ? 105 : 100;
             case "w827KoanDiscardChoose": return 100;
+            // Cross-Clan Wedding (issue #829): the Personality it gives away is the least valuable it has, whether it is the first gift or the one given back; Minor Blackmail names the other player's strongest.
+            case "w829WeddingGiveChoose": return 100 - Wave829Worth(x.Card(command.TargetId));
+            case "eventChoice": return Wave829EventChoiceScore(x, action, command);
             // Fusako's pre-accept bow (issue #667): the bot never bows its own Personality to refuse; it accepts the duel.
             case "bowToRefuseDuel": return -100;
             // Any other decision the engine offers is answered rather than ignored (issue #642): a modest bot takes the first complete option, just above passing,

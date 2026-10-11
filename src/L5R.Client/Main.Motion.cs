@@ -7,6 +7,7 @@ public partial class Main
 {
     private MatchView? _motionView;
     private readonly List<CardFlight> _flights = [];
+    private readonly List<CardTear> _tears = []; // Stone of Remembrance (issue #829): a card torn in half before it leaves the game
     private record MotionFrame(MatchView View, Dictionary<string, Vector2[]> Cards,
         Dictionary<string, Vector2> TableOrigins,
         Dictionary<(int, Zone), (Vector2[] Corners, float Count, Vector2 Origin)> Piles);
@@ -18,7 +19,7 @@ public partial class Main
             .Select(p => _tableSurface.ProjectCanvas(pile.GetGlobalTransform() * p) / _root.Scale.X).ToArray();
     }
     private bool TableMotionsSettled() =>
-        _flights.All(f => !IsInstanceValid(f) || f.IsQueuedForDeletion()) &&
+        _flights.All(f => !IsInstanceValid(f) || f.IsQueuedForDeletion()) && _tears.All(t => !IsInstanceValid(t) || t.IsQueuedForDeletion()) &&
         _tiles.Where(IsInstanceValid).All(t => Mathf.IsEqualApprox(t.VisualBowAngle, t.Card.Bowed ? Mathf.Pi / 2 : 0)) &&
         TablePiles.All(p => Math.Abs(p.ShownCount - p.Count) < .01f) &&
         _tiles.Where(IsInstanceValid).Cast<Control>().Concat(TablePiles)
@@ -28,6 +29,8 @@ public partial class Main
     {
         foreach (var flight in _flights) if (IsInstanceValid(flight)) flight.Finish();
         _flights.Clear();
+        foreach (var tear in _tears) if (IsInstanceValid(tear)) tear.QueueFree();
+        _tears.Clear();
         if (_motionView is null || _motionView.ViewerId != View.ViewerId || _motionView.Scenario != View.Scenario ||
            View.Version <= _motionView.Version || _reducedMotion) return null;
         return new(_motionView, _tiles.Where(IsInstanceValid).GroupBy(t => t.Card.Id)
@@ -49,6 +52,15 @@ public partial class Main
                 _fallTimes[(player.Id, province.Index)] = _battlePresentationStage == 2 ? -1 : _battleVisualTime;
         var old = VisibleCards(before.View).GroupBy(c => c.Id).ToDictionary(g => g.Key, g => g.First());
         var next = VisibleCards(View).GroupBy(c => c.Id).ToDictionary(g => g.Key, g => g.First());
+        // Stone of Remembrance (issue #829): "remove this card from the game and then tear it in half". The engine says it with a "cardTorn" event; the card has already left the table, so the tear is drawn
+        // where it stood in the previous frame, from the face the previous view showed.
+        var lastSeen = before.View.Events.LastOrDefault()?.Sequence ?? -1;
+        foreach (var torn in View.Events.Where(e => e.Type == "cardTorn" && e.Sequence > lastSeen && e.CardId is not null))
+            if (before.Cards.TryGetValue(torn.CardId!, out var tornFrom) && old.GetValueOrDefault(torn.CardId!)?.Definition is { } tornDefinition && CardTile.Artwork(tornDefinition) is { } tornFace)
+            {
+                var tear = new CardTear { From = tornFrom, Face = tornFace };
+                _root.AddChild(tear); _tears.Add(tear);
+            }
         foreach (var pile in TablePiles)
             if (before.Piles.TryGetValue((pile.OwnerId, pile.PileZone), out var prior))
             {

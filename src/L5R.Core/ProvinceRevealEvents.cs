@@ -67,6 +67,7 @@ public sealed partial class MatchEngine
     private bool RunAfterProvincesRevealed(PlayerState player)
     {
         if (!ProvinceRevealEvents.AnyFlagged) return false;
+        if (Wave829WeddingOpen()) return true; // Cross-Clan Wedding's second effect waits for the other player; the Events Phase resumes when it is answered
         var owed = player.Provinces
             .Where(p => !p.Destroyed && p.CardId is not null)
             .Select(p => (Province: p, Card: Card(p.CardId!)))

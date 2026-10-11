@@ -158,14 +158,14 @@ public sealed partial class MatchEngine
                 return false;
             // The Honor of the Lion: a bonus raising his Personal Honor to 4 (none if it is 4 or more already) and the ability, both permanently.
             case "honor-lion-boost":
-            {
-                var lion = Card(command.PerformerId!);
-                var raise = Math.Max(0, 4 - CardPersonalHonor(lion));
-                if (raise > 0) AddPermanentModifier(lion, source!.Id, id, "PersonalHonor", raise);
-                GrantAbility(lion, "honor-lion-bow", source!.Id, GrantDuration.Permanent);
-                Emit("abilityGranted", $"{Definition(lion).Name} permanently gains a Personal Honor bonus (up to 4) and Battle: {AbilityCatalog.All["honor-lion-bow"].Label}.", player.Id, lion.Id);
-                return false;
-            }
+                {
+                    var lion = Card(command.PerformerId!);
+                    var raise = Math.Max(0, 4 - CardPersonalHonor(lion));
+                    if (raise > 0) AddPermanentModifier(lion, source!.Id, id, "PersonalHonor", raise);
+                    GrantAbility(lion, "honor-lion-bow", source!.Id, GrantDuration.Permanent);
+                    Emit("abilityGranted", $"{Definition(lion).Name} permanently gains a Personal Honor bonus (up to 4) and Battle: {AbilityCatalog.All["honor-lion-bow"].Label}.", player.Id, lion.Id);
+                    return false;
+                }
             case "honor-lion-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 GainHonor(player.Id, 2, name, source);
@@ -192,12 +192,12 @@ public sealed partial class MatchEngine
                 return false;
             // The Honesty of the Phoenix: the acting player names a card (a choice among the titles of the Strategies and Rings that can be played); the watch is set once he has.
             case "honesty-phoenix-name":
-            {
-                var titles = HonestyTitles();
-                return BeginListedEffectChoice(command, titles.Select(t => new EffectOption($"name:{t}", $"Name {t}", [$"{HonestyNameEffect}{t}"])).ToArray(),
-                    $"{name}: name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, you draw a card and choose a player who discards a card.",
-                    consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
+                {
+                    var titles = HonestyTitles();
+                    return BeginListedEffectChoice(command, titles.Select(t => new EffectOption($"name:{t}", $"Name {t}", [$"{HonestyNameEffect}{t}"])).ToArray(),
+                        $"{name}: name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, you draw a card and choose a player who discards a card.",
+                        consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+                }
             default:
                 return null;
         }
@@ -226,7 +226,7 @@ public sealed partial class MatchEngine
 
     // ---- the duel's delay ----
 
-    private static bool IsDelayFocusEffect(string abilityId) => EmperorRulingR2Abilities.DelayFocusEffects.Contains(abilityId);
+    private static bool IsDelayFocusEffect(string abilityId) => EmperorRulingR2Abilities.DelayFocusEffects.Contains(abilityId) || abilityId == Wave829Abilities.DutyFocus;
 
     private string? FocusEffectAbilityOf(string focusCardId) =>
         (Definition(Card(focusCardId)).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");

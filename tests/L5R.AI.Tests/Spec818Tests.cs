@@ -17,6 +17,7 @@ internal static class Spec818Tests
         ("Item 10: Shinden bows a small unit or against an opponent over 25 Honor, otherwise only when that cannot change the attack decision", ShindenBow),
         ("Issue #825: the bot never negates its own held action, but still negates the opponent's", NeverNegatesOwnAction),
         ("Item 11: a Reaction that destroys or bows an opponent's card is always played", AlwaysDestroyOrBow),
+        ("Issue #829: the bot gives away its weakest Personality for the Wedding, ticks only its own Personalities for Benten's Blessing and confirms, and names the strongest enemy for Minor Blackmail", Wave829Decisions),
         ("Issue #827: Kokujin's question sacrifices the weakest Personality for a clearly stronger loser, declines otherwise; P'an Ku stays bowed; a Koan discard is answered", Wave827Decisions),
     ];
 
@@ -293,5 +294,36 @@ internal static class Spec818Tests
             new ActionOption("w827PanKuStraightenChoose", "Remain", true, null, new GameCommand("w827PanKuStraightenChoose", 0, panKuView.Version, Choice: "remain"))};
         var kept = TrainingOpponent.Choose(panKuView, straighten, new BotContext());
         Check(kept.Command?.Choice == "remain", "P'an Ku stays bowed to keep what he took: " + kept.Command?.Choice + " / " + kept.Reason);
+    }
+
+    private static void Wave829Decisions()
+    {
+        // Cross-Clan Wedding's second effect: the weakest of the bot's own Personalities is given back.
+        var view = MatchEngine.CreateStarterMatch().GetView(0);
+        var weak = Soldier("weak", 0, 2); var strong = Soldier("strong", 0, 6);
+        view = view with { PendingChoice = new PendingChoice(Wave829Abilities.WeddingType, 0, "wedding", "give"), PriorityPlayerId = 0, Players = [view.Players[0] with { Home = [weak, strong] }, view.Players[1]] };
+        ActionOption Give(string id) => new(Wave829Abilities.WeddingCommand, "Give " + id, true, null, new GameCommand(Wave829Abilities.WeddingCommand, 0, view.Version, TargetId: id), id, DecisionCandidateIds: [id]);
+        var give = TrainingOpponent.Choose(view, [Give("strong"), Give("weak")], new BotContext()).Command!;
+        Check(give.TargetId == "weak", "the weakest Personality is given away: " + give.TargetId);
+
+        // Benten's Blessing: its own Personalities are ticked (never the enemy's, never removed), then it confirms.
+        var mine = Soldier("mine", 0, 3); var theirs = Soldier("theirs", 1, 5);
+        var benten = MatchEngine.CreateStarterMatch().GetView(0);
+        benten = benten with { PendingChoice = new PendingChoice(Wave829Abilities.BentenType, 0, "benten", "choose"), PriorityPlayerId = 0, Players = [benten.Players[0] with { Home = [mine] }, benten.Players[1] with { Home = [theirs] }] };
+        ActionOption Add(string id, string label) => new("budgetSelectAdd", label + " " + id, true, null, new GameCommand("budgetSelectAdd", 0, benten.Version, TargetId: id), id, DecisionCandidateIds: [id]);
+        var confirm = new ActionOption("budgetSelectConfirm", "Confirm selection (0 of 2)", true, null, new GameCommand("budgetSelectConfirm", 0, benten.Version));
+        var clear = new ActionOption("budgetSelectClear", "Clear selection", false, "Nothing is chosen.", null);
+        var first = TrainingOpponent.Choose(benten, [Add("theirs", "Add"), Add("mine", "Add"), confirm, clear], new BotContext()).Command!;
+        Check(first.Type == "budgetSelectAdd" && first.TargetId == "mine", "it ticks its own Personality first: " + first.Type + "/" + first.TargetId);
+        var second = TrainingOpponent.Choose(benten, [Add("theirs", "Add"), Add("mine", "Remove"), confirm, clear], new BotContext()).Command!;
+        Check(second.Type == "budgetSelectConfirm", "with its own Personality ticked it confirms, never removing it or ticking an enemy's: " + second.Type + "/" + second.TargetId);
+
+        // The Events that stay face up ask their owner a card: Minor Blackmail names the strongest enemy.
+        var events = MatchEngine.CreateStarterMatch().GetView(0);
+        var blackmailCard = new CardView("blackmail", CardCatalog.Get(Wave829Abilities.Blackmail), 0, Zone.Province, true, false, null, null, 0);
+        events = events with { PendingChoice = new PendingChoice("eventChoice", 0, "blackmail", "choose"), PriorityPlayerId = 0, Players = [events.Players[0] with { Provinces = [new ProvinceView(0, 5, false, blackmailCard, null)] }, events.Players[1] with { Home = [Soldier("lesser", 1, 2), Soldier("greater", 1, 7)] }] };
+        ActionOption Name(string id) => new("eventChoice", "Blackmail " + id, true, null, new GameCommand("eventChoice", 0, events.Version, CardId: "blackmail", TargetId: id), "blackmail", DecisionCandidateIds: [id]);
+        var named = TrainingOpponent.Choose(events, [Name("lesser"), Name("greater")], new BotContext()).Command!;
+        Check(named.TargetId == "greater", "the strongest enemy Personality is named: " + named.TargetId);
     }
 }
