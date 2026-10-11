@@ -120,9 +120,16 @@ def checked_out_since(collab, root):
         log = collab.git(root, "log", "-g", "--date=iso", "--format=%gd|%gs", "HEAD")
     except Exception:  # noqa: BLE001
         return None
-    for entry in log.splitlines():
+    target = name
+    for entry in log.splitlines():  # newest first
         ref, _, subject = entry.partition("|")
-        if subject.startswith("checkout: moving from ") and subject.endswith(" to " + name):
+        # A renamed branch (`git branch -m`) was checked out under its old name: follow the rename back.
+        if subject.startswith("Branch: renamed refs/heads/") and " to refs/heads/" in subject:
+            old, _, new = subject[len("Branch: renamed refs/heads/"):].partition(" to refs/heads/")
+            if new == target and old != new:
+                target = old
+            continue
+        if subject.startswith("checkout: moving from ") and subject.endswith(" to " + target):
             try:
                 return datetime.strptime(ref[ref.index("{") + 1:ref.rindex("}")], "%Y-%m-%d %H:%M:%S %z")
             except ValueError:

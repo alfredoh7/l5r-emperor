@@ -138,6 +138,15 @@ class HandoffReminderTests(unittest.TestCase):
         self.assert_reminder(self.transcript(edited, timestamp="2999-01-01T00:00:00.000Z"))
         self.assert_reminder(self.transcript(edited))  # no timestamp: cannot be excluded
 
+    def test_a_renamed_branch_is_followed_back_to_its_checkout(self):
+        # Another session renamed its branch after checking it out (issue #823): the reflog's checkout entry names the old branch.
+        self.git("switch", "-c", "claude/13-old-name")
+        self.git("branch", "-m", "claude/13-new-name")
+        self.write("src/L5R.Core/CardAbilities.cs", "someone else's rules change" + chr(10))
+        edited = self.root / "src/L5R.Core/CardAbilities.cs"
+        self.assert_no_reminder(self.transcript(edited, timestamp="2000-01-01T00:00:00.000Z"))
+        self.assert_reminder(self.transcript(edited, timestamp="2999-01-01T00:00:00.000Z"))
+
     def test_unreadable_transcript_falls_back_to_the_branch_level_check(self):
         self.git("switch", "-c", "claude/13-other-session")
         self.write("src/L5R.Core/CardAbilities.cs", "rules change\n")
