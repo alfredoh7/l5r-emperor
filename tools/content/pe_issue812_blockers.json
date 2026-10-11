@@ -1,0 +1,30 @@
+{
+  "oracle-l5r-5709": {
+    "note": "One Koku (Strategy, issue #812): \"Reaction: When paying a Gold cost: Produce one Gold.\" No engine gap found. Near Miss (PromoPaymentSources.cs, issue #667) is the precedent for a Strategy IN HAND offered as a payment token and discarded when chosen, and Seaside Bazaar's \"When paying a Gold Cost: Produce 1 Gold\" (EmperorMechE.cs, AnyGoldCostWhen) is the unrestricted trigger. The designer note (\"worth one koku\") has no rules effect. Imported from the Emperor Edition printing (#326); Oracle lists it as banned from Emperor Edition tournaments (12/24/12) and Mendon has not ruled on playing banned cards.",
+    "category": "WIRE"
+  },
+  "oracle-l5r-9292": {
+    "note": "Well-Tended Farm (Holding, issue #812): \":bow:: Produce 1 Gold. Limited, :bow:: Gain 1 Honor.\" No engine gap found. A Holding with a printed bow-for-Gold production and a Limited bow ability that gains Honor is the shape the Holding waves already use (package_holding_wave_2.py, _50.py, _51.py). Wire it as a Holding wave entry from Emperor Edition #56. Oracle lists it as banned from Emperor Edition tournaments (12/24/12); Mendon has not ruled on playing banned cards.",
+    "category": "WIRE"
+  },
+  "oracle-l5r-1239": {
+    "note": "Caught Unawares (Strategy, issue #812). Open: \"If you control no Personalities, target one or two Personalities: Bow them. Negate their straightening (this turn). If it is not your turn, draw a card.\" Battle: \"Target an enemy card with no unbowed attachments: Bow it.\" Bow and negate-straighten effects exist (Bow Before My Will, Quagmire), but this needs a \"you control no Personalities\" condition, a one-or-two target count, a straighten negation lasting THIS TURN (the existing ones are \"next straightening\"), a draw conditional on whose turn it is, and a target filter for \"no unbowed attachments\" (the existing filter is no attachments at all). Read against the engine, not built. Oracle lists it as banned (September 21st, 2013).",
+    "category": "SMALL"
+  },
+  "oracle-l5r-8036": {
+    "note": "The Duty of the Crab (Strategy, issue #812). Its Focus Effect (\"delay the effects of losing this duel until after the next Dynasty Phase begins\") is an existing shape: add its Focus Effect to DelayFocusEffects (EmperorRulingR2Cards.cs, which The Honor of the Lion and five more Strategies use). The Battle half (\"If you control any units at the current battlefield, choose your performing Crab Clan Personality who is face-up in your provinces or discarded (not dead): Bring him into play there, paying all costs\") is a recruit at a battlefield from a province or the discard pile; the Reserve recruit and the dead-pile gap (ZONE) are the nearest primitives, and whether one action can offer both a province and the discard pile as sources has NOT been checked. Oracle lists it as banned (September 21st, 2013).",
+    "category": "SMALL"
+  },
+  "oracle-l5r-1576": {
+    "note": "Cross-Clan Wedding (Event, issue #812). Province-reveal Events exist (ProvinceRevealEvents.cs, primitive P5) and taking control of a Personality exists (TakeControlOfPersonality, EmperorRemainingC.cs), so the engine has the trigger and the transfer. Missing: the other player's OWN choice of which of their Personalities to give back (the \"other player chooses\" primitive exists only for deck searches, SearchExtensions.cs), the \"If he now controls the Personality\" condition, and a check of the Unique/Singular rules for both transfers (docs/decisions/2026-09-12-unique-singular-control-transfer.md). The Emperor-era Event scans may print only the effect without the \"After you reveal cards in your Provinces\" lead-in (EmperorRemainingFEvents.cs), so compare the Emperor Edition #15 scan before wiring. Oracle lists it as banned (12/24/12).",
+    "category": "SMALL"
+  },
+  "oracle-l5r-4252": {
+    "note": "Kalani's Landing (Mantis Stronghold, Emperor Edition #408, issue #812): production 4, strength 7, starting Honor 2. \"This card will not produce Gold when paying for an attachment\" and \"After each phase begins: Straighten this card\" look expressible (payment kinds distinguish attachments, PaymentKind.Equip; Stronghold phase-start straightening has precedent, though neither was checked closely). The blocker is the Reaction: \"After an action is announced, target a card (in play): Give it -2 Gold Cost.\" It needs an after-announcement Reaction for any action (TRIG-ANN), a persistent Gold Cost modifier on a card in play (no such modifier exists for cards in play), and the text states no duration or what a Gold Cost on a card in play affects, which needs a ruling from Mendon. Oracle lists it as banned (September 21st, 2013).",
+    "category": "RULES"
+  },
+  "oracle-l5r-8106": {
+    "note": "The Governor's Estate (Stronghold, Emperor Edition, unnumbered, issue #812): production 4, strength 7, starting Honor 8. \"Your face-down Dynasty cards in play are Holdings with the trait, ':bow:: Produce 2 Gold.'\" and \"Twice per turn, after your Dynasty Phase begins, you may pay 2 Gold to turn a card in your Province face-down (if needed) and put it into play bowed\" need face-down cards IN PLAY, which the engine has no representation for (cards are put into play face-up; Hidden Weapons' face-down cards sit under a Holding, not in play), plus a granted Holding trait on them. Its Limited Honor gain with no attack and its Tireless Battle (discard a card for +2F or -2F) are expressible. Not listed as banned: Oracle labels it Legacy only.",
+    "category": "ZONE"
+  }
+}

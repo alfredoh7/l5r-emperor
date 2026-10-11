@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "content/oracle/emperor-catalogue.json"
 PUBLISHED = ROOT / "content/published/lion-crane-v1.json"
 PUBLISHED_WAVES = (ROOT / "content/published/vanilla-wave-1.json",)
+SUPPLEMENTAL = ROOT / "content/oracle/emperor-supplemental-catalogue.json"  # Emperor Edition cards the legality query omits (issue #812)
 OUTPUT = ROOT / "content/deck-pool.json"
 ARC = "Age of Conquest (Emperor)"
 EXCLUDED_TYPES = {"Proxy"}
@@ -33,12 +34,17 @@ def playable_ids(*published_paths: Path) -> set[str]:
     return ids
 
 
-def build(source: Path = SOURCE, published_path: Path = PUBLISHED, extra_published_paths: tuple[Path, ...] = PUBLISHED_WAVES) -> dict:
+def build(source: Path = SOURCE, published_path: Path = PUBLISHED, extra_published_paths: tuple[Path, ...] = PUBLISHED_WAVES, supplemental: Path | None = None) -> dict:
     data = json.loads(source.read_text(encoding="utf-8"))
+    if supplemental is None and source == SOURCE:
+        supplemental = SUPPLEMENTAL  # a fixture catalogue never picks up the real supplemental cards
+    extra = json.loads(supplemental.read_text(encoding="utf-8"))["cards"] if supplemental is not None and supplemental.exists() else []
+    extra_ids = {card["id"] for card in extra}
     playable = playable_ids(published_path, *extra_published_paths)
     entries = []
-    for card in data["cards"]:
-        if card.get("source_membership") != ARC:
+    for card in [*data["cards"], *extra]:
+        supplemental_card = card["id"] in extra_ids
+        if card.get("source_membership") != ARC and not supplemental_card:
             continue
         types = card.get("types") or []
         if any(t in EXCLUDED_TYPES for t in types):
@@ -54,6 +60,7 @@ def build(source: Path = SOURCE, published_path: Path = PUBLISHED, extra_publish
             "stats": stats,
             "text": card.get("current_oracle_text") or "",
             "playable": card["id"] in playable,
+            **({"supplemental": True} if supplemental_card else {}),
         })
     entries.sort(key=lambda entry: (entry["name"], entry["id"]))
     return {"schemaVersion": 1, "sourceArc": ARC, "count": len(entries), "cards": entries}

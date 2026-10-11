@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import the seven Emperor Edition cards the Emperor legality query omits (Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the Crab, The Governor's Estate, Well-Tended Farm) into the deck pool, client library and CARD_INVENTORY.xlsx with blocker notes; none wired.",
+  "validation": "tools/content unittest suite (193 tests): only the catalogue-art coverage test failed, and only because the seven cards' scan metadata required a new art pack; that metadata was withheld and test_catalogue_art, test_package_client, test_build_deck_pool and the new import tests pass. Inventory regenerated: 2224 cards, no Wired/Unwired status changed. Client CatalogueProbe count updated 2149->2156, not run natively.",
+  "remaining": "Catalogue art for the seven cards needs a new private art pack release. Mendon to rule whether cards Oracle lists as banned may be played before any are wired. One Koku and Well-Tended Farm need no new primitives.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/812",
+  "branch": "claude/812-supplemental-emperor-cards",
+  "updated": "2026-10-11T02:01:39.619961+00:00"
+}

@@ -30,6 +30,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 ROOT = Path(__file__).resolve().parents[2]
 DECK_POOL = ROOT / "content/deck-pool.json"
 EMPEROR_CATALOGUE = ROOT / "content/oracle/emperor-catalogue.json"
+SUPPLEMENTAL_CATALOGUE = ROOT / "content/oracle/emperor-supplemental-catalogue.json"  # issue #812
 PUBLISHED_DIR = ROOT / "content/published"
 OUTPUT = ROOT / "docs/CARD_INVENTORY.xlsx"
 
@@ -456,8 +457,9 @@ def load_sets() -> dict[str, str]:
     Promotional Ivory, Twenty Festivals) rather than an Emperor-era one. Such a card shows the earliest
     Emperor-era set it was printed in instead (issue #622)."""
     data = json.loads(EMPEROR_CATALOGUE.read_text(encoding="utf-8"))
+    supplemental = json.loads(SUPPLEMENTAL_CATALOGUE.read_text(encoding="utf-8"))["cards"] if SUPPLEMENTAL_CATALOGUE.is_file() else []
     sets: dict[str, str] = {}
-    for card in data["cards"]:
+    for card in [*data["cards"], *supplemental]:
         printings = card.get("printings") or []
         primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None) \
             or (printings[0] if printings else None)
