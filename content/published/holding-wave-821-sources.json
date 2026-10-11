@@ -1,0 +1,11 @@
+[
+  {
+    "card_id": "user-scan-imperial-estate",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-10-10",
+    "image_path": "assets/requested-scans/imperial-estate.png",
+    "image_sha256": "8b0114603056b385d00dd72f890eb8092bcae196612a1a78215532e4679e0085"
+  }
+]

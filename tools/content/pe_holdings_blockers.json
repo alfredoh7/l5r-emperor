@@ -22,9 +22,5 @@
   "oracle-l5r-10563": {
     "note": "Jizo's Mercy (Celestial, issue #653): the first Battle (\"Move a target attacking Personality home\") is buildable, but the second, \"Battle: Discard this Celestial. In this battle's resolution, before you destroy the Province, gain 4 Honor instead\", has an unresolved reading. Question for Mendon: does \"instead\" mean the Celestial's controller gains 4 Honor INSTEAD of destroying the Province (the Province survives the battle), or only before it, so the Province is still destroyed and \"instead\" has no referent; and may the Defender play it (he would not be destroying the Province) or only an Attacker who wins? The engine has the resolution hooks (BeforeResolution.cs, AfterResolution.cs); the reading must be ruled first.",
     "category": "RULES"
-  },
-  "oracle-l5r-10186": {
-    "note": "Sadahako's Artistry (Celestial, issue #653): the Honor half (\"Limited: If your Family Honor is 10 or lower: Gain 1 Honor\") is buildable, but the gift (\"Discard this card and target a card in your hand: You offer it as a gift. Show it to another player. He may accept, putting it into his hand; if he did, you gain Honor equal to its Focus Value. If he did not, discard it and draw 3 cards\") is not yet an ability. The ownership question has a precedent: Naoharu's Gift (EmperorRemainingFEvents.cs, naoharu-take) moves a hand card into the other player's hand, sets OwnerId to the taker and records OriginalOwnerId so ReturnCardsOutOfPlayToTheirOwners sends it to its owner's pile when it leaves his hand. That is Event-only code, so an ability needs a reusable gift step with the recipient's accept or refuse decision (EitherOr.cs supplies a decider). Question for Mendon: confirm that Naoharu's Gift reading (the card stays the giver's for discard-pile purposes) carries over to this Celestial.",
-    "category": "RULES"
   }
 }

@@ -3506,6 +3506,7 @@ public sealed partial class MatchEngine
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if (phase == Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
         if (phase == Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins, EndPhaseIsOwners); // issue #498: "YOUR End Phase" -- only the active player's delayed effects are due
+        if (phase == Phase.Dynasty) Wave821OpenDynastyWindow(); // issue #821 (Wave821.cs): the Governor's Estate's Reaction, after everything else that begins with the phase
     }
     private void Emit(string type, string message, int? playerId = null, string? cardId = null, int? Amount = null) => _state.Events.Add(new(_state.Events.Count + 1, type, message, playerId, cardId, Amount));
     private PlayerState Player(int id) => _state.Players[id];

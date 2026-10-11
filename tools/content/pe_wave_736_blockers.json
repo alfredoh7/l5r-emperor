@@ -7,10 +7,6 @@
     "note": "Asako Kaitoko - exp (Personality, issue #736): \"Personalities with Fallen, Kolat, Ninja, Nonhuman, or Shadowlands opposing Kaitoko have a maximum Force of 3, and actions from cards in their units may not target Kaitoko.\" Two gaps: a maximum Force is a stat cap and none exists (P9 left StatCap out; PersonalityForce is additive, so a cap cannot be written without reading the Force it caps), and the target bar applies only to actors whose Personality has one of five keywords, which an ActorSpec cannot say.",
     "category": "STAT"
   },
-  "oracle-l5r-10476": {
-    "note": "Isawa Ryuzo (Personality, issue #736): \"Fire Open: Target two Personalities, each with more Madness tokens than printed Personal Honor. They will not attack or defend in the same army.\" P11's pair restriction (NoPair) stops two cards sharing a battlefield on either side, which is stricter than the printed same-army rule (they may stand opposed at one battlefield); a same-side pair restriction is needed. Entry Honor loss and the Madness-token comparison are available.",
-    "category": "LOCK"
-  },
   "oracle-l5r-10497": {
     "note": "P'an Ku - exp (Personality, issue #736): \"Open, bow: Give a target card a Madness token\" is built (the existing panku-madness shape), but \"Limited, bow: P'an Ku may remain bowed. Take control of a target Personality with more Madness tokens than printed Personal Honor and remove those tokens. The target will not commit seppuku until P'an Ku straightens or leaves play. After P'an Ku does, give control of the target to his owner.\" needs three things together: a control change that returns when a named card straightens or leaves play (TakeControl exists; the timed return trigger does not), a seppuku bar tied to that card, and \"may remain bowed\" (a rule exempting him from straightening). One card, three new rules.",
     "category": "CONTROL"
@@ -18,9 +14,5 @@
   "oracle-l5r-10524": {
     "note": "Koan's Jingasa (Item, issue #736): \"This Personality has Shugenja, may not have more Spells than Koan cards attached, and he need not bow for his Spells with an odd Focus Value (0 is even).\" The Shugenja keyword is AttachGrantsKeyword, but P11's SpellLimit counts Spell actions performed, not Spells attached (the rule here is an attachment limit counted against Koan cards), and \"need not bow for his Spells\" is a waiver of the bow cost of a Spell's own ability, which P24's cost waivers do not cover.",
     "category": "COST"
-  },
-  "oracle-l5r-10831": {
-    "note": "Hida Kaiji - exp (Personality, issue #736): \"Will not attack or defend with other Personalities, and other Personalities will not attack or defend with Kaiji. Kaiji has +2F while unopposed, or +1F for each Personality opposing him with 6 or lower printed Force.\" The Force terms are available (a PersonalityForce hook), but the first sentence is an assignment rule over the whole army (Kaiji alone in his army, and no army that holds him holds another Personality); P11's pair restriction judges every card at the battlefield on both sides, so it would also bar him from being opposed.",
-    "category": "LOCK"
   }
 }
