@@ -1,0 +1,76 @@
+{
+  "Profile": "event-wave-829",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #829.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1576",
+      "Name": "Cross-Clan Wedding",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, choose a Personality you control and another player. The player takes control of the Personality. If he now controls the Personality, he chooses another Personality he controls; take control of him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1576.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w829-wedding"
+    },
+    {
+      "Id": "oracle-l5r-5061",
+      "Name": "Minor Blackmail",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, choose another player's Personality in play. After the next time this game his unit is assigned or an action resolves that he performed, dishonor him, and his controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5061.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w829-blackmail"
+    },
+    {
+      "Id": "oracle-l5r-8242",
+      "Name": "The Onyx Championship",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, choose one of your Shugenja in play. Permanently give him Shadowlands and the ability, \"Maho Limited, Bow this card: Destroy your other target Personality to search your discard pile, then deck, then Provinces for an Oni Personality, Recruit it (paying all costs), and lose 3 Honor.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8242.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w829-onyx"
+    }
+  ],
+  "Decks": []
+}

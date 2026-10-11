@@ -34,7 +34,7 @@ internal static partial class PromoEmperorHoldingsTests
         Check(pinned.OrderBy(x => x, StringComparer.Ordinal).SequenceEqual(CelestialIds.OrderBy(x => x, StringComparer.Ordinal)), "celestial-wave-27 pins exactly its cards");
         var blockers = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "tools/content/pe_holdings_blockers.json"))).RootElement;
         foreach (var blocked in blockers.EnumerateObject()) Check(!CelestialIds.Contains(blocked.Name), $"{blocked.Name} is blocked, so it is not published");
-        foreach (var required in new[] { "oracle-l5r-10563" }) Check(blockers.TryGetProperty(required, out _), $"{required} is recorded as blocked");
+        Check(!blockers.TryGetProperty("oracle-l5r-10563", out _) && CardCatalog.Cards.ContainsKey("oracle-l5r-10563"), "Jizo's Mercy was wired by issue #829 (celestial-wave-829), so it is no longer recorded as blocked");
         Check(!blockers.TryGetProperty("oracle-l5r-10186", out _) && CardCatalog.Cards.ContainsKey("oracle-l5r-10186"), "Sadahako's Artistry was wired by issue #821 (celestial-wave-821), so it is no longer blocked");
     }
 

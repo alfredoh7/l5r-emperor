@@ -240,6 +240,29 @@ public static partial class TrainingOpponent
 
     /// <summary>Kokujin's "Destroy a personality to take control of the loser?" (issue #827): the loser is destroyed anyway when declined, so the trade is the loser's worth against the Personality given up
     /// (Force plus Personal Honor), by at least one point, and Kokujin himself is the last to go.</summary>
+    private static double Wave829Worth(CardView? card) => card is null ? 0 : Math.Max(0, card.Force) + (card.Definition?.PersonalHonor ?? 0);
+
+    /// <summary>Benten's Blessing's multi-select (issue #829): tick its own Personalities (+1 Personal Honor helps a Proclaim and the honor race), never an enemy's, never remove one it ticked; then confirm.</summary>
+    private static double Wave829BentenScore(Ctx x, ActionOption action)
+    {
+        if (action.Label.StartsWith("Remove", StringComparison.Ordinal)) return -50;
+        return x.Card(action.CardId) is { } card && card.OwnerId == x.Self.Id ? 120 : -50;
+    }
+
+    /// <summary>The Events that stay face up in a province ask their owner a card (issue #829): Cross-Clan Wedding gives away the weakest Personality, Minor Blackmail names the other player's strongest; any
+    /// other Event takes the first offered answer.</summary>
+    private static double Wave829EventChoiceScore(Ctx x, ActionOption action, GameCommand command)
+    {
+        var effect = x.Card(action.CardId)?.Definition?.Effect;
+        var chosen = x.Card(command.TargetId);
+        return effect switch
+        {
+            Wave829Abilities.WeddingEffect when chosen is not null => 100 - Wave829Worth(chosen),
+            Wave829Abilities.BlackmailEffect when chosen is not null => 100 + Wave829Worth(chosen),
+            _ => PassScore + 1
+        };
+    }
+
     private static double Wave827KokujinScore(Ctx x, GameCommand command)
     {
         if (command.Choice == "decline") return 100;

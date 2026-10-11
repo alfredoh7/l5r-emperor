@@ -128,7 +128,7 @@ public partial class Main
             if (!_session.Online && !_autoOpponent) _decisionActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
             return true;
         }
-        if (pending?.Type == "budgetSelect") return RenderBudgetSelect(options); // Sleep (issue #667): the budgeted multi-select, Main.BudgetSelect.cs
+        if (IsMultiSelectPending(pending?.Type)) return RenderBudgetSelect(options); // Sleep (issue #667) and Benten's Blessing (issue #829): the multi-select panel, Main.BudgetSelect.cs
         if (pending?.Type == "shownChoice") return RenderShownChoice(options); // P25 (Main.ShownChoice.cs): the shown cards' faces
         if (pending is not null && RenderCandidateChoices(options)) return true;
         if (contextualDecline && options.Length == 0) return true;
