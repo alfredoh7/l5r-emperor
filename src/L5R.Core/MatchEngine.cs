@@ -266,6 +266,7 @@ public sealed partial class MatchEngine
                 ApplyAfterCommandTraits(traitSnapshot);
                 ReturnCardsOutOfPlayToTheirOwners();
                 Wave827AfterCommand(); // issue #827 (Wave827.cs): Koan's Jingasa's Spell limit, P'an Ku's straightening choice
+                Wave829AfterCommand(); // issue #829 (Wave829.cs): Benten's Blessing's choice of Personalities
                 RemoveCreatedCardsLeftInPiles();
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
@@ -1383,6 +1384,7 @@ public sealed partial class MatchEngine
             PromoEmperorAssigned(card, cavalry); // Tsuruchi Nishima's Naval, Fudo's Charging tokens (issue #653, PromoEmperorPersonalities.cs)
             FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
             P4Assigned(card); // The Menacing Sky (issue #503, EmperorP4Watches.cs): "after the next time he assigns".
+            Wave829Assigned(card); // issue #829: Minor Blackmail's watch
             FireVeiledMenaceAssigned(card); // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn)" -- to either side.
             if (!isDefender) FireConsecrationWatches(card, assignment.Value); // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "assigns ... to an attacking army".
             // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
@@ -1670,6 +1672,7 @@ public sealed partial class MatchEngine
             if (!RehonorWinners(a)) { GainHonor(attacker, ResolutionHonor(attacker, defender, destroyedDefenders * 2), "Battle victory"); CheckEarthFlowsBonus(attacker, a); }
             var province = battleProvince;
             var destroyedProvince = province is not null && !aramasuSpares && !PerfectMomentBarsDestruction(attacker) && af > df + EffectiveProvinceStrength(province) && !RendBarsProvinceDestruction(attacker); // Rend the Soul (issue #498): "You will not destroy the province in this battle's resolution"
+            if (destroyedProvince && Wave829JizoReplacesDestruction(attacker, provinceIndex)) destroyedProvince = false;
             if (destroyedProvince) { DestroyProvince(defender, province!); NotePerfectMomentDestruction(attacker); }
             if (destroyedProvince) AfterProvinceDestroyedByResolution(attacker, defender, province!, a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow = destroyedProvince;
@@ -3244,6 +3247,7 @@ public sealed partial class MatchEngine
     {
         if (RestrictionDelaysCelestial(player, province, card)) return false; // P11 (CardRestrictions.cs): a locked province's Celestial enters when the next turn begins
         province.CardId = null; card.ProvinceIndex = null;
+        Wave829CelestialRevealed(player, card); // issue #829: Shrine to the Heavens asks only when a Celestial is revealed in a Province
         var paused = EnterCelestialPlayCore(player, card, pauseReveal);
         Refill(player, province);
         return paused;
@@ -3251,7 +3255,7 @@ public sealed partial class MatchEngine
     // The entry itself (issue #667: The Sacred Rosary of the Constrictors puts a Celestial into play with no province): it replaces the controller's other Celestials and runs the entry traits.
     // P6 (AfterFacts.cs): a registered entry decision (Natsu-Togumara's choice of a Personality, Shrine to the Heavens' choice of a Celestial to keep) is asked after the Celestial is in play; when one
     // spares a card, the discard of the other Celestials waits for the answers. Returns true when the Events Phase reveal paused on the first decision (pauseReveal).
-    private void EnterCelestialPlay(PlayerState player, CardInstance card) => EnterCelestialPlayCore(player, card, pauseReveal: false);
+    private void EnterCelestialPlay(PlayerState player, CardInstance card) { Wave829CelestialRevealed(player, null); EnterCelestialPlayCore(player, card, pauseReveal: false); }
 
     private bool EnterCelestialPlayCore(PlayerState player, CardInstance card, bool pauseReveal)
     {
@@ -3263,6 +3267,7 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Celestial;
         Emit("celestialEnteredPlay", $"{Definition(card).Name} entered play.", player.Id, card.Id);
         RecordFact(FactKinds.CelestialEntered, player.Id, card.Id); // P6 (AfterFacts.cs)
+        Wave829CelestialEntered(player, card); // issue #829 (Wave829.cs): Benten's Blessing queues its choice of Personalities
         ApplyDaigotsusGuidanceTrait(); // Daigotsu's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a Celestial enters play (including this one): Discard all Kami Celestials in play."
         if (hadRyoshun && Definition(card).Effect != RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
         return asks.Count > 0 && QueueCelestialEntryAsks(player, card, asks, pauseReveal);

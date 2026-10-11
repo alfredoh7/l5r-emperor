@@ -7,10 +7,6 @@
     "note": "The Jade Championship (Event). Needs a -1F aura on Shadowlands Followers at a location (FollowerForce has no registry hook) and a mandatory trait that triggers after the resolution of an action from a Spell (no trait-after-action hook exists; AfterActionResolved offers only optional Reactions).",
     "category": "TRIG-AFTER"
   },
-  "oracle-l5r-8242": {
-    "note": "The Onyx Championship (Event). The granted Maho ability searches the discard pile, then the deck, then the Provinces for an Oni Personality and recruits it paying all costs; the engine's search primitive covers one source at a time and has no ordered multi-source search.",
-    "category": "SEARCH"
-  },
   "oracle-l5r-2904": {
     "note": "REJECTED BY MENDON (2026-10-05) for complexity: Green Nightshade Blend (transfer any tokens between two Personalities, then destroy each that now holds a Fire, Poison and Sake token) is not to be wired.",
     "category": "RULES"

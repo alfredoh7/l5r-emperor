@@ -1,0 +1,60 @@
+{
+  "Profile": "celestial-wave-829",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #829.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-959",
+      "Name": "Benten's Blessing",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Celestial enters play, choose zero to two face-up Personalities in or out of play. They have +1PH while this Celestial remains in play.\nReaction: When another player's action would target one of your Personalities, target your performing Personality and discard this Celestial to have the action target him instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-959.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w829-benten-redirect"
+      ],
+      "Effect": "w829-benten"
+    },
+    {
+      "Id": "oracle-l5r-10563",
+      "Name": "Jizo's Mercy",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Move a target attacking Personality home.\nBattle: Discard this Celestial. In this battle's resolution, before you destroy the Province, gain 4 Honor instead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10563.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w829-jizo-home",
+        "w829-jizo-mercy"
+      ],
+      "Effect": "w829-jizo"
+    }
+  ],
+  "Decks": []
+}

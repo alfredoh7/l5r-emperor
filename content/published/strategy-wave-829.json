@@ -1,0 +1,78 @@
+{
+  "Profile": "strategy-wave-829",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #829.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1239",
+      "Name": "Caught Unawares",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If you control no Personalities, target one or two Personalities: Bow them. Negate their straightening (this turn). If it is not your turn, draw a card.\nBattle: Target an enemy card with no unbowed attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1239.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "w829-caught-open",
+        "w829-caught-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5709",
+      "Name": "One Koku",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying a Gold cost: Produce one Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5709.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "w829-koku-gold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8036",
+      "Name": "The Duty of the Crab",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may choose (now) to delay the effects of losing this duel until after the next Dynasty Phase begins.\nBattle: If you control any units at the current battlefield, choose your performing Crab Clan Personality who is face-up in your provinces or discarded (not dead): Bring him into play there, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8036.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "w829-duty-focus",
+        "w829-duty-battle"
+      ],
+      "Effect": "w829-duty"
+    }
+  ],
+  "Decks": []
+}

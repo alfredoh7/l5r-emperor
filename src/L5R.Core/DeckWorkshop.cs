@@ -10,7 +10,7 @@ namespace L5R.Core;
 // StrategyCopyRule / BattleStrategy (Emperor Edition Stronghold pass, issue #486 batch 1, Eternal Victory Dojo: "Your deck may include four copies each of one or two non-Unique Strategies with Battle
 // abilities"): a Stronghold carrying that deck-construction text, and a Strategy that has a Battle ability; both read from the card's definition (DeckWorkshop.StrategyCopyRuleOf / BattleStrategyOf).
 public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null, int FateMinimumReduction = 0,
-    bool StrategyCopyRule = false, bool BattleStrategy = false)
+    bool StrategyCopyRule = false, bool BattleStrategy = false, bool CountsTowardMinimum = true)
 {
     public int ExperienceLevel => Experienced.Level(Keywords);
     public string DeckName => Experienced.DeckName(Name, Keywords);
@@ -31,6 +31,8 @@ public sealed class DeckWorkshop
     public static readonly string[] SetupSlots = ["Stronghold", "Border Keep", "Bamboo Harvesters"];
     /// <summary>Hato-gurama (issue #453 batch 5): the Fate-minimum reduction a card's printed trait gives, for a DeckCardInfo built from its definition.</summary>
     public static int FateMinimumReductionOf(CardDefinition definition) => definition.Effect == "hato-gurama" ? 1 : 0;
+    /// <summary>Stone of Remembrance (issue #829): "This Holding does not count towards your minimum deck size" -- it counts as zero cards toward the 40-card minimum (it is still a card of the deck).</summary>
+    public static bool CountsTowardMinimumOf(CardDefinition definition) => definition.Effect != Wave829Abilities.StoneEffect;
     /// <summary>Eternal Victory Dojo (issue #486 batch 1): the Stronghold's printed deck-construction text lets the deck hold four copies each of one or two non-Unique Strategies with Battle abilities.</summary>
     public static bool StrategyCopyRuleOf(CardDefinition definition) => definition.Effect == "eternal-victory-dojo";
     /// <summary>A Strategy that has a Battle ability (a Battle or Battle/Open ability among its own abilities).</summary>
@@ -111,7 +113,7 @@ public sealed class DeckWorkshop
         var warnings = new List<string>();
         foreach (var slot in SetupSlots)
             if (Cards.Where(c => c.SetupSlot == slot).Sum(c => Count(c.Id)) != 1) warnings.Add($"Select exactly one {slot} version.");
-        int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family)).Sum(c => Count(c.Id));
+        int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family) && c.CountsTowardMinimum).Sum(c => Count(c.Id));
         var dynasty = Total("Dynasty"); var fate = Total("Fate");
         if (dynasty < 40) warnings.Add($"Dynasty needs {40 - dynasty} more cards (40 minimum).");
         // Hato-gurama (issue #453 batch 5): each copy in the deck lowers the Fate minimum by one.

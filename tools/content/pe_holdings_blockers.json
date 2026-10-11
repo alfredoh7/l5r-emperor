@@ -18,9 +18,5 @@
   "oracle-l5r-9142": {
     "note": "Verdant Jungle (Region, issue #653): its Reaction, \"Before an action resolves, bow this card: Negate its effects that move any Personalities into an attacking army at this Province's battlefield\", negates only the movement part of an announced action by destination. The before-action Reaction window decides which Reactions apply in BeforeActionReactionApplies, a closed switch with no extension hook, and the movement a held action would make is known only per-ability (DeferredActionMovers) with no destination, so \"into an attacking army at this battlefield\" cannot be asked of an announced action. The first line (nonhuman Personalities enter play from this province for 1 less Gold) would be a small entry discount.",
     "category": "TRIG-ANN"
-  },
-  "oracle-l5r-10563": {
-    "note": "Jizo's Mercy (Celestial, issue #653): the first Battle (\"Move a target attacking Personality home\") is buildable, but the second, \"Battle: Discard this Celestial. In this battle's resolution, before you destroy the Province, gain 4 Honor instead\", has an unresolved reading. Question for Mendon: does \"instead\" mean the Celestial's controller gains 4 Honor INSTEAD of destroying the Province (the Province survives the battle), or only before it, so the Province is still destroyed and \"instead\" has no referent; and may the Defender play it (he would not be destroying the Province) or only an Attacker who wins? The engine has the resolution hooks (BeforeResolution.cs, AfterResolution.cs); the reading must be ruled first.",
-    "category": "RULES"
   }
 }

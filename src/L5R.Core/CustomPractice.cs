@@ -19,13 +19,14 @@ public static class CustomPractice
     {
         using var stream = typeof(CustomPractice).Assembly.GetManifestResourceStream("L5R.DeckPool.json")!;
         var pool = JsonSerializer.Deserialize<Pool>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+        // Eternal Victory Dojo (issue #486): the strategy-copy rule; Stone of Remembrance (issue #829): zero cards toward the minimum.
         return pool.Cards.Select(c =>
         {
             var def = CardCatalog.Cards.GetValueOrDefault(c.Id);
             return new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, def?.Keywords?.ToArray() ?? c.Keywords,
                 def is { ScenarioOnly: false } && c.Id.StartsWith("oracle-l5r-", StringComparison.Ordinal), def?.CreatedOnly ?? false,
                 FateMinimumReduction: def is null ? 0 : DeckWorkshop.FateMinimumReductionOf(def),
-                StrategyCopyRule: def is not null && DeckWorkshop.StrategyCopyRuleOf(def), BattleStrategy: def is not null && DeckWorkshop.BattleStrategyOf(def)); // Eternal Victory Dojo (issue #486)
+                StrategyCopyRule: def is not null && DeckWorkshop.StrategyCopyRuleOf(def), BattleStrategy: def is not null && DeckWorkshop.BattleStrategyOf(def), CountsTowardMinimum: def is null || DeckWorkshop.CountsTowardMinimumOf(def));
         }).ToArray();
     });
     public static DeckWorkshop Workshop() => new(PoolCards.Value);
