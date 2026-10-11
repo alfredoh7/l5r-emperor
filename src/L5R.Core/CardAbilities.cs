@@ -6191,7 +6191,7 @@ public sealed partial class MatchEngine
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
             Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power" or "ishibashi-attack"
                 || MechCCarriesCostCard(id) // Emperor Edition mechanics group C (issue #501): the card an optional cost spends.
-                || Wave827CarriesCostCard(id) // issue #827: Zansho - exp's bowed Follower
+                || Wave827CarriesCostCard(id)
                 || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
                 || SearchPlayCarriesCostCard(id)
                 || WlCarriesCostCard(id)
