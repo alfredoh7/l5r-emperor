@@ -359,7 +359,7 @@ public sealed partial class MatchEngine
             {
                 var card = Card(battleActionPending.CardId!);
                 foreach (var reactionId in AbilityIdsOf(card).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "after-battle-action-resolves"))
-                    AddReaction(card, reactionId, validate: true); // issue #830: listed as the engine would judge it (Shosuro Hawado - exp away from the battlefield was offered enabled, then refused)
+                    AddReaction(card, reactionId, validate: card.Zone != Zone.Hand); // issue #830: an in-play watcher with a printed condition (Shosuro Hawado - exp: "if Hawado is at the current battlefield") is listed disabled, with ValidateAbility's reason, instead of as a button that is refused
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));
         }
