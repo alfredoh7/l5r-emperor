@@ -25,7 +25,7 @@ public sealed partial class MatchEngine
             Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negatingCard.OwnerId, negatingCard.Id);
             return;
         }
-        _state.DeferredActionNegated = true;
+        _state.DeferredActionNegated = true; _reactionNegatedHeldAction = true;
         Emit("actionNegated", $"{Definition(negatingCard).Name} negates {Player(deferred.PlayerId).Name}'s action ({AbilityCatalog.All[deferred.AbilityId!].Label}).", negatingCard.OwnerId, negatingCard.Id);
     }
 

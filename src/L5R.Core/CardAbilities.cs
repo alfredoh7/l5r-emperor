@@ -5851,6 +5851,8 @@ public sealed partial class MatchEngine
             Require(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id),
                 "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it.");
         if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
+        // Rokku (issue #833): "if any enemy units are at the current battlefield" is a printed condition, not a silent no-op of the effect.
+        if (id == "rokku-move") Require(RokkuEnemyPresentAtEngagedBattlefield(player.Id), "Rokku: no enemy units are at the current battlefield.");
         // Battle Phase timing (issue #310): the Engage window's own per-trigger and per-card conditions.
         // "After engaging at X's battlefield": X's own battlefield is the one it is assigned to.
         // Dragon's Breath Castle: "after engaging at a battlefield at one of your provinces" -- the battlefield is at the Defender's province, so its controller is the Defender.
