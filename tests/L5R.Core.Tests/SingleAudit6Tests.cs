@@ -122,6 +122,28 @@ internal static partial class SingleAudit6Tests
         ("Koan's Staff: with another Koan card in the unit the Fire Battle action makes a Ranged 4 Attack and bows the Staff, as either side and never in the Action phase", KoanAttackBonus),
         ("Koan's Staff: with no other Koan card the Ranged 3 Attack cannot kill a Force-4 Personality but kills a Force-3 one", KoanAttackBase),
         ("Lost Blade of the Maharaja: the Battle action bows the Blade to bow a Personality whose Force is no higher than the wielder's, as either side and never in the Action phase", LostBladeBow),
+        ("Moments of Destiny: the Battle action pays 1 Gold and moves a Personality at home to the battlefield when he would be opposed, giving a Yojimbo Expendable, as either side and never in the Action phase", MomentsOfDestiny),
+        ("Nishiguchi: the Battle action gives an enemy Personality a Force penalty equal to his Madness tokens, as either side and never in the Action phase", NishiguchiPenalty),
+        ("Paralyzing Touch: a Monk's Battle action moves an enemy Personality to a different battlefield and bows him, as either side and never in the Action phase", ParalyzingTouchMove),
+        ("Record of Failure: the Political Limited action removes the Item and makes the owner of a dishonorably dead Personality lose Honor equal to his base Personal Honor, for the active player's Action phase only", RecordOfFailure),
+        ("Return to Action: only the Defender moves a bowed home Personality to the battlefield and straightens him, never the Attacker or in the Action phase", ReturnToActionMove),
+        ("Scholarly Hermit: the Limited action bows the Follower to put a Ring from the discard pile into hand and destroys it, for the active player's Action phase only", ScholarlyHermit),
+        ("Shinden Shorai: the Limited action recruits the face-up Personality in its province paying all costs, ignoring a Lion's Honor Requirement, for the active player's Action phase only", ShindenShoraiRecruit),
+        ("Shinden Shorai: it cannot be used on the owner's first or second turn", ShindenShoraiEarlyTurns),
+        ("Soul's Sacrifice: a Samurai with 3 or more Personal Honor moves an enemy Personality home and gains Shadowlands and Undead, as either side and never in the Action phase", SoulsSacrificeMove),
+        ("Surprise Attack: Nonhuman performers and an enemy Personality move to a new battlefield with no province, as either side and never in the Action phase", SurpriseAttackCreate),
+        ("The Arcane Cloak of the Chameleons: the Battle action moves its Scorpion wielder home, as either side and never in the Action phase", CloakMoveHome),
+        ("The Jade Temple: the Battle action bows the Holding to straighten your Spell and lets its used abilities be used again, as either side and never in the Action phase", JadeTempleStraighten),
+        ("The Shadow Court: the defending Courtier bows an enemy Personality and is watched for the turn, as the Defender only", ShadowCourtBow),
+        ("The Yasuki Peddler: the Limited action bows the Holding to draw a card for a Crab Clan player with four or fewer cards in hand, for the active player's Action phase only", PeddlerDraw),
+        ("The Yasuki Peddler: a player who is not Crab Clan, or who holds five cards, is not offered the draw and is refused", PeddlerNoDraw),
+        ("Training Follower payer: the Battle action bows the performing Follower and loses 2 Honor to draw a card, as either side and never in the Action phase", TrainingFollowerPayer),
+        ("Translated Story of Shaharazad: the Limited action bows the Item to give it a +1F token, for the active player's Action phase only", ShaharazadToken),
+        ("Watersteel Sword: the Water Open action copies an ability of another non-Unique Weapon on its wielder to the Sword for the turn, in either player's Action phase and never in a battle", WatersteelCopy),
+        ("Yoritomo Minori: the Limited action puts a discarded Personality face-up into a province, discarding the card there and a Fate card, for the active player's Action phase only", MinoriRefill),
+        ("Lost Blade of the Maharaja: a Personality with more Force than the wielder is not a target", LostBladeTooStrong),
+        ("Moments of Destiny: a Personality at home who would not be opposed stays home", MomentsNotOpposed),
+        ("Damning Ceremony: once per game, so a second use on a later turn is refused", DamningCeremonyOnce),
     ]);
 
     private static void GraveDestroy() => Windows("akodo-grave-destroy", (s, w) =>
@@ -439,14 +461,297 @@ internal static partial class SingleAudit6Tests
 
     private static void LostBladeBow() => Windows("tf-lost-blade-bow", (s, w) =>
     {
-        var wielder = Put(s, "training-crane-samurai", w.Me, w); // Force 3
+        var wielder = Put(s, "training-crane-samurai", w.Me, w); // Force 3, +3 for the Blade itself
         var blade = Gear(s, Def("tf-lost-blade-bow", "Lost Blade of the Maharaja"), wielder);
-        var equal = Put(s, "training-crane-samurai", w.Foe, w); var tooStrong = Put(s, "training-lion-samurai", w.Foe, w);
+        var equal = Put(s, "training-lion-veteran", w.Foe, w); var tooStrong = Put(s, "training-lion-veteran", w.Foe, w); Batch336Support.Force(tooStrong, 1);
         return new(w.Me, "tf-lost-blade-bow", blade.Id, equal.Id, Ids: [tooStrong.Id]);
     }, (before, e, f, w) =>
     {
-        Check(e.State.Cards[f.Target!].Bowed, "the Force 3 Personality (equal to the wielder's) was bowed");
+        Check(e.State.Cards[f.Target!].Bowed, "the Force 6 Personality (equal to the wielder's) was bowed");
         Check(e.State.Cards[f.Card].Bowed, "the Blade bowed as the cost");
-        Check(!e.State.Cards[f.Ids![0]].Bowed, "the Force 4 Personality is untouched");
+        Check(!e.State.Cards[f.Ids![0]].Bowed, "the Force 7 Personality is untouched");
     });
+
+    private static string DefA(string ability) =>
+        CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && (c.Abilities ?? []).Contains(ability)).Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).First();
+
+    private static void MomentsOfDestiny() => Windows("wlsac-moments-of-destiny", (s, w) =>
+    {
+        Put(s, "training-crane-samurai", w.Me, w); Put(s, "training-lion-samurai", w.Foe, w);
+        var home = Kw(Add(s, "training-crane-courtier", w.Me, Zone.Home), "Yojimbo");
+        var card = Add(s, Def("wlsac-moments-of-destiny", "Moments of Destiny"), w.Me, Zone.Hand);
+        return new(w.Me, "wlsac-moments-of-destiny", card.Id, home.Id);
+    }, (before, e, f, w) =>
+    {
+        Eq(e.State.Cards[f.Target!].Zone, Zone.Battlefield, "he was opposed, so he moved to the battlefield");
+        Eq(e.State.Cards[f.Target!].ProvinceIndex, 0, "the current battlefield");
+        Check(e.State.Cards[f.Target!].GrantedKeywords.Any(g => g.Keyword == "Expendable"), "a Yojimbo gains Expendable");
+        Check(e.State.Events.Count(x => x.Type == "payment") > before.Events.Count(x => x.Type == "payment"), "the Gold was paid");
+    });
+
+    private static void NishiguchiPenalty() => Windows("wl-pc-nishiguchi-penalty", (s, w) =>
+    {
+        var nishiguchi = Put(s, DefA("wl-pc-nishiguchi-penalty"), w.Me, w);
+        var target = Put(s, "training-lion-veteran", w.Foe, w);
+        for (var i = 0; i < 3; i++) target.Tokens.Add(new($"madness-{i}", "Madness", "test"));
+        return new(w.Me, "wl-pc-nishiguchi-penalty", nishiguchi.Id, target.Id);
+    }, (before, e, f, w) =>
+    {
+        Eq(ForceOf(e, f.Target!), ForceOf(MatchEngine.FromTestState(before), f.Target!) - 3, "a Force penalty of 3, one per Madness token");
+    });
+
+    private static void ParalyzingTouchMove() => Windows("paralyzing-touch-move", (s, w) =>
+    {
+        s.UnresolvedBattlefields = [0, 1];
+        var monk = Kw(Put(s, "training-crane-samurai", w.Me, w), "Monk");
+        var enemy = Put(s, "training-lion-samurai", w.Foe, w);
+        var card = Add(s, Def("paralyzing-touch-move", "Paralyzing Touch"), w.Me, Zone.Hand);
+        return new(w.Me, "paralyzing-touch-move", card.Id, enemy.Id, monk.Id);
+    }, (before, e, f, w) =>
+    {
+        Eq(e.State.Cards[f.Target!].ProvinceIndex, 1, "he moved to the other unresolved battlefield");
+        Check(e.State.Cards[f.Target!].Bowed, "and bowed, since he moved");
+    });
+
+    private static void RecordOfFailure() => Windows("record-of-failure-honor", (s, w) =>
+    {
+        var courtier = Kw(Put(s, "training-crane-courtier", w.Me, w), "Courtier");
+        var record = Gear(s, Def("record-of-failure-honor", "Record of Failure"), courtier);
+        var dead = Add(s, "training-lion-samurai", w.Foe, Zone.Dead); dead.Dishonorable = true;
+        return new(w.Me, "record-of-failure-honor", record.Id, dead.Id);
+    }, (before, e, f, w) =>
+    {
+        Eq(e.State.Players[w.Foe].Honor, before.Players[w.Foe].Honor - CardCatalog.Get("training-lion-samurai").PersonalHonor, "his owner lost Honor equal to the base Personal Honor");
+        Eq(e.State.Cards[f.Card].Zone, Zone.RemovedFromGame, "the Item was removed from the game");
+    });
+
+    private static void ReturnToActionMove() => Windows("return-to-action-move", (s, w) =>
+    {
+        var bowed = Add(s, "training-crane-samurai", w.Me, Zone.Home, bowed: true);
+        Put(s, "training-lion-samurai", w.Foe, w);
+        var card = Add(s, Def("return-to-action-move", "Return to Action"), w.Me, Zone.Hand);
+        return new(w.Me, "return-to-action-move", card.Id, bowed.Id);
+    }, (before, e, f, w) =>
+    {
+        Check(e.State.Cards[f.Target!] is { Zone: Zone.Battlefield, ProvinceIndex: 0, Bowed: false }, "moved to the battlefield and straightened after he moved");
+        Check(e.State.Cards[f.Card].Zone is Zone.FateDiscard, "the Discipline was played from hand");
+    }, ["battle-defender"], why: sc => sc == "battle-attacker" ? "Only the Defender" : "timing is unavailable now");
+
+    private static void ScholarlyHermit() => Windows("scholarly-hermit-search", (s, w) =>
+    {
+        var host = Put(s, "training-crane-samurai", w.Me, w);
+        var hermit = Gear(s, DefA("scholarly-hermit-search"), host);
+        var ring = Add(s, "training-ring-of-air", w.Me, Zone.FateDiscard);
+        return new(w.Me, "scholarly-hermit-search", hermit.Id, ring.Id);
+    }, (before, e, f, w) =>
+    {
+        Eq(e.State.Cards[f.Target!].Zone, Zone.Hand, "the Ring is in hand");
+        Check(e.State.Players[f.Me].Hand.Contains(f.Target!), "and in its owner's hand list");
+        Check(e.State.Cards[f.Card].Zone is not Zone.Attached, "the Follower was destroyed");
+    });
+
+    private static Fx ShindenFx(MatchState s, W w, int turnsTaken)
+    {
+        s.Players[w.Me].Clan = "Crane"; s.Players[w.Me].Honor = 3; s.Players[w.Me].TurnsTaken = turnsTaken;
+        var region = Add(s, Def("shinden-shorai-recruit", "Shinden Shorai"), w.Me, Zone.Region, province: 0);
+        s.Players[w.Me].Provinces[0].RegionId = region.Id;
+        var recruit = s.Cards[s.Players[w.Me].Provinces[0].CardId!]; recruit.DefinitionId = "training-lion-samurai"; recruit.FaceUp = true;
+        for (var i = 0; i < 6; i++) Add(s, "training-marketplace", w.Me, Zone.Home);
+        return new(w.Me, "shinden-shorai-recruit", region.Id, recruit.Id);
+    }
+
+    private static void ShindenShoraiRecruit() => Windows("shinden-shorai-recruit", (s, w) => ShindenFx(s, w, 3), (before, e, f, w) =>
+    {
+        Eq(e.State.Cards[f.Target!].Zone, Zone.Home, "the Personality was brought into play");
+        Check(e.State.Events.Count(x => x.Type == "payment") > before.Events.Count(x => x.Type == "payment"), "paying all costs");
+    });
+
+    private static void ShindenShoraiEarlyTurns()
+    {
+        foreach (var turns in new[] { 1, 2 })
+        {
+            var s = Table(Phase.Action, 0);
+            var f = ShindenFx(s, new W(0, 1, false, "action-active"), turns);
+            var e = MatchEngine.FromTestState(s);
+            Check(Options(e, 0, "shinden-shorai-recruit", f.Card).All(o => !o.Enabled), $"not offered on turn {turns}");
+            Check(Rejection(e, Use(e, 0, "shinden-shorai-recruit", f.Card, f.Target)).Contains("first or second turn"), "refused for the turn");
+        }
+    }
+
+    private static void SoulsSacrificeMove() => Windows("souls-sacrifice-move", (s, w) =>
+    {
+        var samurai = Kw(Put(s, "training-crane-dignitary", w.Me, w), "Samurai"); // Personal Honor 4
+        var enemy = Put(s, "training-lion-samurai", w.Foe, w);
+        var card = Add(s, Def("souls-sacrifice-move", "Soul's Sacrifice"), w.Me, Zone.Hand);
+        return new(w.Me, "souls-sacrifice-move", card.Id, enemy.Id, samurai.Id);
+    }, (before, e, f, w) =>
+    {
+        Eq(e.State.Cards[f.Target!].Zone, Zone.Home, "the enemy Personality was moved home");
+        foreach (var k in new[] { "Shadowlands", "Undead" }) Check(e.State.Cards[f.Performer!].GrantedKeywords.Any(g => g.Keyword == k && g.Duration == GrantDuration.Permanent), $"the Samurai permanently has {k}");
+    });
+
+    private static void SurpriseAttackCreate() => Windows("surprise-attack-create", (s, w) =>
+    {
+        var spirit = Kw(Put(s, "training-crane-samurai", w.Me, w), "Nonhuman");
+        var target = Add(s, "training-lion-samurai", w.Foe, Zone.Home);
+        var card = Add(s, Def("surprise-attack-create", "Surprise Attack"), w.Me, Zone.Hand);
+        return new(w.Me, "surprise-attack-create", card.Id, Sel: [Pick("performers", spirit.Id), Pick("target", target.Id)], Ids: [spirit.Id, target.Id]);
+    }, (before, e, f, w) =>
+    {
+        var created = e.State.R1.Additional.Keys.Single();
+        Eq(e.State.R1.Additional[created], -1, "a battlefield associated with no province was created");
+        foreach (var id in f.Ids!) Check(e.State.Cards[id] is { Zone: Zone.Battlefield } c && c.ProvinceIndex == created, "the performer and the target moved to the created battlefield");
+        Eq(e.State.CurrentBattleProvince, 0, "the battle in progress goes on at the current battlefield");
+    });
+
+    private static void CloakMoveHome() => Windows("pe-cloak-move-home", (s, w) =>
+    {
+        var wielder = Put(s, "training-scorpion-veteran", w.Me, w);
+        var cloak = Gear(s, Def("pe-cloak-move-home", "The Arcane Cloak of the Chameleons"), wielder);
+        Put(s, "training-lion-samurai", w.Foe, w);
+        return new(w.Me, "pe-cloak-move-home", cloak.Id, Ids: [wielder.Id]);
+    }, (before, e, f, w) => Eq(e.State.Cards[f.Ids![0]].Zone, Zone.Home, "the wielder moved home"));
+
+    private static void JadeTempleStraighten() => Windows("pe-jade-temple-straighten", (s, w) =>
+    {
+        var temple = Add(s, Def("pe-jade-temple-straighten", "The Jade Temple"), w.Me, Zone.Home);
+        var shugenja = Put(s, "training-crane-samurai", w.Me, w);
+        var spell = Add(s, "training-spell-with-ability", w.Me, Zone.Attached, bowed: true, province: w.Province, parent: shugenja.Id);
+        spell.AbilityUses["training-spell-force-boost"] = s.TurnNumber;
+        Put(s, "training-lion-samurai", w.Foe, w);
+        return new(w.Me, "pe-jade-temple-straighten", temple.Id, spell.Id);
+    }, (before, e, f, w) =>
+    {
+        Check(!e.State.Cards[f.Target!].Bowed && e.State.Cards[f.Card].Bowed, "the Spell straightens and the Temple bows");
+        Check(!e.State.Cards[f.Target!].AbilityUses.ContainsKey("training-spell-force-boost"), "its used ability may be used a second time");
+    });
+
+    private static void ShadowCourtBow() => Windows("shadow-court-bow", (s, w) =>
+    {
+        var courtier = Kw(Put(s, "training-lion-samurai", w.Me, w), "Courtier");
+        var enemy = Put(s, "training-crane-veteran", w.Foe, w);
+        var card = Add(s, Def("shadow-court-bow", "The Shadow Court"), w.Me, Zone.Hand);
+        return new(w.Me, "shadow-court-bow", card.Id, enemy.Id, courtier.Id);
+    }, (before, e, f, w) =>
+    {
+        Check(e.State.Cards[f.Target!].Bowed, "the enemy Personality is bowed");
+        Eq(e.State.ShadowCourtWatches.Count, 1, "the Courtier is watched for the turn");
+    }, ["battle-defender"], why: sc => sc == "battle-attacker" ? "performer requirement" : "timing is unavailable now");
+
+    private static Fx PeddlerFx(MatchState s, W w, string clan, int handSize)
+    {
+        s.Players[w.Me].Clan = clan;
+        var peddler = Add(s, Def("market-draw-crab", "The Yasuki Peddler"), w.Me, Zone.Home);
+        for (var i = 0; i < handSize; i++) Add(s, "training-item", w.Me, Zone.Hand);
+        return new(w.Me, "market-draw-crab", peddler.Id);
+    }
+
+    private static void PeddlerDraw() => Windows("market-draw-crab", (s, w) => PeddlerFx(s, w, "Crab", 4), (before, e, f, w) =>
+    {
+        Eq(e.State.Players[f.Me].Hand.Count, before.Players[f.Me].Hand.Count + 1, "drew a card");
+        Check(e.State.Cards[f.Card].Bowed, "the Holding bowed as the cost");
+    });
+
+    private static void PeddlerNoDraw()
+    {
+        foreach (var (clan, hand) in new[] { ("Lion", 2), ("Crab", 5) })
+        {
+            var s = Table(Phase.Action, 0);
+            var f = PeddlerFx(s, new W(0, 1, false, "action-active"), clan, hand);
+            var e = MatchEngine.FromTestState(s);
+            Check(Offered(e, f) is null, $"a {clan} player with {hand} cards is not offered the draw");
+            Rejection(e, Use(e, 0, "market-draw-crab", f.Card));
+            Eq(e.State.Players[0].Hand.Count, hand, "and draws nothing");
+            Check(!e.State.Cards[f.Card].Bowed, "the Holding is not bowed");
+        }
+    }
+
+    private static void TrainingFollowerPayer() => Windows("training-follower-honor-draw", (s, w) =>
+    {
+        var payer = Put(s, "training-follower-payer", w.Me, w);
+        var follower = Gear(s, "training-follower", payer);
+        Put(s, "training-lion-samurai", w.Foe, w);
+        return new(w.Me, "training-follower-honor-draw", payer.Id, Performer: follower.Id);
+    }, (before, e, f, w) =>
+    {
+        Check(e.State.Cards[f.Performer!].Bowed && !e.State.Cards[f.Card].Bowed, "the performing Follower bowed as the cost");
+        Eq(e.State.Players[f.Me].Honor, before.Players[f.Me].Honor - 2, "lost 2 Honor");
+        Eq(e.State.Players[f.Me].Hand.Count, before.Players[f.Me].Hand.Count + 1, "drew a card");
+    });
+
+    private static void ShaharazadToken() => Windows("wl-shaharazad-token", (s, w) =>
+    {
+        var host = Put(s, "training-crane-samurai", w.Me, w);
+        var item = Gear(s, Def("wl-shaharazad-token", "Translated Story of Shaharazad"), host);
+        return new(w.Me, "wl-shaharazad-token", item.Id);
+    }, (before, e, f, w) =>
+    {
+        Check(e.State.Cards[f.Card].Bowed, "the Item bowed as the cost");
+        Eq(e.State.Cards[f.Card].Tokens.Count(t => t.Stat == "Force" && t.Amount == 1), 1, "the Item holds a +1F token");
+    });
+
+    private static void WatersteelCopy() => Windows("w741-watersteel-copy", (s, w) =>
+    {
+        var host = Kw(Put(s, "training-crane-samurai", w.Me, w), "Water");
+        var sword = Gear(s, Def("w741-watersteel-copy", "Watersteel Sword"), host);
+        var weapon = Gear(s, "training-recon-weapon", host);
+        return new(w.Me, "w741-watersteel-copy", sword.Id, weapon.Id);
+    }, (before, e, f, w) =>
+    {
+        Check(e.State.Cards[f.Card].GrantedAbilities.Any(g => g.AbilityId == "training-weapon-attack" && g.Duration == GrantDuration.Turn), "the Sword copies the Weapon's ability for the turn");
+        Check(e.State.Cards[f.Target!].GrantedAbilities.Count == 0, "the other Weapon is unchanged");
+    });
+
+    private static void MinoriRefill() => Windows("wl-pc-minori-refill", (s, w) =>
+    {
+        var minori = Put(s, DefA("wl-pc-minori-refill"), w.Me, w);
+        var discarded = Add(s, "training-lion-samurai", w.Me, Zone.DynastyDiscard);
+        Add(s, "training-item", w.Me, Zone.Hand);
+        return new(w.Me, "wl-pc-minori-refill", minori.Id, discarded.Id, Province: 0, Ids: [s.Players[w.Me].Provinces[0].CardId!, s.Players[w.Me].Hand[0]]);
+    }, (before, e, f, w) =>
+    {
+        Eq(e.State.Players[f.Me].Provinces[0].CardId, f.Target, "the discarded Personality is in the province");
+        Check(e.State.Cards[f.Target!].FaceUp, "face-up");
+        Check(e.State.Cards[f.Ids![0]].Zone is Zone.DynastyDiscard, "the card that was there was discarded");
+        Eq(e.State.Cards[f.Ids![1]].Zone, Zone.FateDiscard, "a Fate card was discarded");
+    });
+
+    private static void LostBladeTooStrong()
+    {
+        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+        var wielder = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); // Force 3, +3 for the Blade: 6
+        var blade = Gear(s, Def("tf-lost-blade-bow", "Lost Blade of the Maharaja"), wielder);
+        var stronger = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0); Batch336Support.Force(stronger, 1); // Force 7
+        var equal = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0); // Force 6
+        var e = MatchEngine.FromTestState(s);
+        var targets = Options(e, 0, "tf-lost-blade-bow", blade.Id).Where(o => o.Enabled).SelectMany(o => o.TargetIds ?? []).ToArray();
+        Check(targets.Contains(equal.Id) && !targets.Contains(stronger.Id), "only the equal-Force Personality is offered: " + string.Join(",", targets));
+        Rejection(e, Use(e, 0, "tf-lost-blade-bow", blade.Id, stronger.Id));
+        Check(!e.State.Cards[stronger.Id].Bowed && !e.State.Cards[blade.Id].Bowed, "nothing happened");
+    }
+
+    private static void MomentsNotOpposed()
+    {
+        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+        Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var home = Add(s, "training-crane-courtier", 0, Zone.Home);
+        var card = Add(s, Def("wlsac-moments-of-destiny", "Moments of Destiny"), 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Offered(e, new(0, "wlsac-moments-of-destiny", card.Id, home.Id))!);
+        Eq(e.State.Cards[home.Id].Zone, Zone.Home, "he stays at home: nobody opposes him at the battlefield");
+        Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
+    }
+
+    private static void DamningCeremonyOnce()
+    {
+        var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
+        var host = Add(s, "training-crane-samurai", 0, Zone.Home);
+        var spell = Gear(s, Def("damning-ceremony", "Damning Ceremony"), host);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Offered(e, new(0, "damning-ceremony", spell.Id))!);
+        var later = Batch336Support.Edit(e, st => { st.TurnNumber += 2; st.Phase = Phase.Action; st.ActivePlayerId = 0; st.PriorityPlayerId = 0; st.PendingChoice = null; });
+        Check(Options(later, 0, "damning-ceremony", spell.Id).All(o => !o.Enabled), "not offered a second time");
+        Rejection(later, Use(later, 0, "damning-ceremony", spell.Id));
+        Eq(later.State.Players[0].Honor, e.State.Players[0].Honor, "the refusal cost nothing");
+    }
 }
