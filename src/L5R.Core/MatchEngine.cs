@@ -3470,6 +3470,7 @@ public sealed partial class MatchEngine
     private void Win(int winner, string reason) { _state.WinnerId = winner; _state.VictoryReason = reason; _state.Phase = Phase.Finished; _state.PendingChoice = null; Emit("matchFinished", $"{Player(winner).Name} wins: {reason}.", winner); }
     private void SetPhase(Phase phase, int priority)
     {
+        var phaseFrom = _state.Phase;
         if (PhaseFamily(phase) != PhaseFamily(_state.Phase)) ApplyDelayedEffectsAtPhaseEnd(_state.Phase); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the end of the phase that is ending.
         OnPhaseBoundary(_state.Phase, phase); // On (The Shadow's Embrace pass, issue #476 batch 6): the end of one phase and the start of the next.
         ResetMechDPhaseRecords(_state.Phase, phase); // Issue #501, mechanics group D (EmperorMechD.cs): the per-phase cards-into-hand records.
@@ -3501,6 +3502,7 @@ public sealed partial class MatchEngine
         if (phase == Phase.Dynasty && !DynastyBeforeAttack()) StraightenWaveMen(); // issue #667 (PhaseOrder.cs): with the Dynasty Phase first it is not the end of the Attack Phase
         NotePhaseOrder(phase); // issue #667: the phase-order marker
         _state.Phase = phase; _state.PriorityPlayerId = priority; _state.ConsecutivePasses = 0; Emit("phaseChanged", $"Phase: {phase}.");
+        FirePhaseBegins(phaseFrom, phase); // issue #816 (Wave816.cs): "after each phase begins" traits
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if (phase == Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
         if (phase == Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins, EndPhaseIsOwners); // issue #498: "YOUR End Phase" -- only the active player's delayed effects are due

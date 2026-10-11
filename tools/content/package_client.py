@@ -19,6 +19,10 @@ def package(root: Path) -> dict[str, int]:
     target = root / "src/L5R.Client/Content"
     target.mkdir(parents=True, exist_ok=True)
     cards = catalogue["cards"]
+    supplemental_file = root / "content/oracle/emperor-supplemental-catalogue.json"  # Emperor Edition cards outside the legality query (issue #812)
+    if supplemental_file.is_file():
+        fields = catalogue["cards"][0].keys()
+        cards = [*cards, *({field: card[field] for field in fields if field in card} for card in read("content/oracle/emperor-supplemental-catalogue.json")["cards"])]
     card_ids = {card["id"] for card in cards}
     if len(card_ids) != len(cards):
         raise ValueError("Catalogue contains duplicate canonical IDs")

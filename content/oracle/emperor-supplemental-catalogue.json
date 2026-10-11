@@ -1,0 +1,519 @@
+{
+  "cards": [
+    {
+      "automation_status": "unsupported",
+      "clans": [],
+      "current_oracle_text": "Open: If you control no Personalities, target one or two Personalities: Bow them. Negate their straightening (this turn). If it is not your turn, draw a card.\nBattle: Target an enemy card with no unbowed attachments: Bow it.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Fate"
+      ],
+      "emperor_edition_numbers": [
+        "283"
+      ],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-1239",
+      "keywords": [],
+      "legality_status": "supplemental_review",
+      "name": "Caught Unawares",
+      "oracle_id": 1239,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "Bob Stevlic"
+          ],
+          "id": "1",
+          "numbers": [
+            "283"
+          ],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        },
+        {
+          "artists": [
+            "Bob Stevlic"
+          ],
+          "id": "2",
+          "numbers": [
+            "63"
+          ],
+          "sets": [
+            "Battle of Kyuden Tonbo"
+          ],
+          "stats_overrides": {}
+        },
+        {
+          "artists": [
+            "Bob Stevlic"
+          ],
+          "id": "3",
+          "numbers": [
+            "112"
+          ],
+          "sets": [
+            "The Plague War"
+          ],
+          "stats_overrides": {}
+        }
+      ],
+      "source_ban_notes": [
+        "Banned from constructed Emperor Edition tournaments, effective September 21st, 2013"
+      ],
+      "source_legality_labels": [
+        "Destroyer War (Celestial)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=1239",
+      "stats": {
+        "cost": [
+          "0"
+        ],
+        "focus": [
+          "3"
+        ]
+      },
+      "titles": [
+        "Caught Unawares"
+      ],
+      "types": [
+        "Strategy"
+      ],
+      "version_notation": "unspecified"
+    },
+    {
+      "automation_status": "unsupported",
+      "clans": [],
+      "current_oracle_text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, choose a Personality you control and another player. The player takes control of the Personality. If he now controls the Personality, he chooses another Personality he controls; take control of him.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "emperor_edition_numbers": [
+        "15"
+      ],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-1576",
+      "keywords": [
+        "Unique"
+      ],
+      "legality_status": "supplemental_review",
+      "name": "Cross-Clan Wedding",
+      "oracle_id": 1576,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "Stu Barnes"
+          ],
+          "id": "1",
+          "numbers": [
+            "15"
+          ],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        },
+        {
+          "artists": [
+            "Eric Polak"
+          ],
+          "id": "2",
+          "numbers": [],
+          "sets": [
+            "Fire & Shadow"
+          ],
+          "stats_overrides": {}
+        }
+      ],
+      "source_ban_notes": [
+        "Banned via internet on 12/24/12 from Emperor Edition tournaments"
+      ],
+      "source_legality_labels": [
+        "Hidden Emperor (Jade)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=1576",
+      "stats": {},
+      "titles": [
+        "Cross-Clan Wedding"
+      ],
+      "types": [
+        "Event"
+      ],
+      "version_notation": "unspecified"
+    },
+    {
+      "automation_status": "unsupported",
+      "clans": [
+        "Mantis"
+      ],
+      "current_oracle_text": "This card will not produce Gold when paying for an attachment.\nAfter each phase begins: Straighten this card.\nReaction: After an action is announced, target a card (in play): Give it -2 Gold Cost.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "emperor_edition_numbers": [
+        "408"
+      ],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-4252",
+      "keywords": [
+        "Port"
+      ],
+      "legality_status": "supplemental_review",
+      "name": "Kalani's Landing",
+      "oracle_id": 4252,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "Noah Bradley"
+          ],
+          "id": "1",
+          "numbers": [
+            "408"
+          ],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        },
+        {
+          "artists": [
+            "Noah Bradley"
+          ],
+          "id": "2",
+          "keywords_override": [
+            "Port"
+          ],
+          "numbers": [],
+          "sets": [
+            "Promotional–Emperor"
+          ],
+          "stats_overrides": {
+            "cost": [
+              "4"
+            ],
+            "force": [
+              "7"
+            ],
+            "personalhonor": [
+              "2"
+            ]
+          },
+          "text_override": "This card will not produce Gold when paying for an attachment.\nAfter each phase begins: Straighten this card.\nReaction: After an action is announced, target a card (in play): Give it -2 Gold Cost."
+        }
+      ],
+      "source_ban_notes": [
+        "Banned from constructed Emperor Edition tournaments, effective September 21st, 2013"
+      ],
+      "source_legality_labels": [
+        "Legacy",
+        "Modern"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=4252",
+      "stats": {
+        "production": [
+          "4"
+        ],
+        "startinghonor": [
+          "2"
+        ],
+        "strength": [
+          "7"
+        ]
+      },
+      "titles": [
+        "Kalani's Landing"
+      ],
+      "types": [
+        "Stronghold"
+      ],
+      "version_notation": "unspecified"
+    },
+    {
+      "automation_status": "unsupported",
+      "clans": [],
+      "current_oracle_text": "Reaction: When paying a Gold cost: Produce one Gold.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Fate"
+      ],
+      "emperor_edition_numbers": [
+        "326"
+      ],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-5709",
+      "keywords": [],
+      "legality_status": "supplemental_review",
+      "name": "One Koku",
+      "oracle_id": 5709,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "Albert Tavira"
+          ],
+          "id": "1",
+          "numbers": [
+            "326"
+          ],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        },
+        {
+          "artists": [
+            "Mike Kimble"
+          ],
+          "id": "2",
+          "numbers": [],
+          "sets": [
+            "Crimson and Jade"
+          ],
+          "stats_overrides": {}
+        }
+      ],
+      "source_ban_notes": [
+        "Banned via internet on 12/24/12 from Emperor Edition tournaments"
+      ],
+      "source_legality_labels": [
+        "Clan Wars (Imperial)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=5709",
+      "stats": {
+        "cost": [
+          "0"
+        ],
+        "focus": [
+          "1"
+        ]
+      },
+      "titles": [
+        "One Koku"
+      ],
+      "types": [
+        "Strategy"
+      ],
+      "version_notation": "unspecified"
+    },
+    {
+      "automation_status": "unsupported",
+      "clans": [],
+      "current_oracle_text": "As a Focus Effect: You may choose (now) to delay the effects of losing this duel until after the next Dynasty Phase begins.\nBattle: If you control any units at the current battlefield, choose your performing Crab Clan Personality who is face-up in your provinces or discarded (not dead): Bring him into play there, paying all costs.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Fate"
+      ],
+      "emperor_edition_numbers": [
+        "362"
+      ],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-8036",
+      "keywords": [],
+      "legality_status": "supplemental_review",
+      "name": "The Duty of the Crab",
+      "oracle_id": 8036,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "Carlos NCT"
+          ],
+          "id": "1",
+          "numbers": [
+            "362"
+          ],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        }
+      ],
+      "source_ban_notes": [
+        "Banned from constructed Emperor Edition tournaments, effective September 21st, 2013"
+      ],
+      "source_legality_labels": [
+        "Legacy",
+        "Modern"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=8036",
+      "stats": {
+        "cost": [
+          "0"
+        ],
+        "focus": [
+          "2"
+        ]
+      },
+      "titles": [
+        "The Duty of the Crab"
+      ],
+      "types": [
+        "Strategy"
+      ],
+      "version_notation": "unspecified"
+    },
+    {
+      "automation_status": "unsupported",
+      "clans": [],
+      "current_oracle_text": "Your face-down Dynasty cards in play are Holdings with the trait, \":bow:: Produce 2 Gold.\" \nTwice per turn, after your Dynasty Phase begins, you may pay 2 Gold to turn a card in your Province face-down (if needed) and put it into play bowed.\nLimited: Gain 2 Honor. You may not declare an attack.\nTireless Battle: Discard a card to give a target Personality +2F or -2F.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "emperor_edition_numbers": [],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-8106",
+      "keywords": [],
+      "legality_status": "supplemental_review",
+      "name": "The Governor's Estate",
+      "oracle_id": 8106,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "IFS"
+          ],
+          "id": "1",
+          "numbers": [],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        }
+      ],
+      "source_ban_notes": [],
+      "source_legality_labels": [
+        "Legacy"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=8106",
+      "stats": {
+        "production": [
+          "4"
+        ],
+        "startinghonor": [
+          "8"
+        ],
+        "strength": [
+          "7"
+        ]
+      },
+      "titles": [
+        "The Governor's Estate"
+      ],
+      "types": [
+        "Stronghold"
+      ],
+      "version_notation": "unspecified"
+    },
+    {
+      "automation_status": "unsupported",
+      "clans": [],
+      "current_oracle_text": ":bow:: Produce 1 Gold.\nLimited, :bow:: Gain 1 Honor.",
+      "current_primary_printing_id": "1",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "emperor_edition_numbers": [
+        "56"
+      ],
+      "experience": null,
+      "historical_legality_status": "playable_by_ruling_r040",
+      "historical_text_status": "needs_era_review",
+      "id": "oracle-l5r-9292",
+      "keywords": [
+        "Farm"
+      ],
+      "legality_status": "supplemental_review",
+      "name": "Well-Tended Farm",
+      "oracle_id": 9292,
+      "playable": false,
+      "printings": [
+        {
+          "artists": [
+            "Tony Moseley"
+          ],
+          "id": "1",
+          "numbers": [
+            "56"
+          ],
+          "sets": [
+            "Emperor Edition"
+          ],
+          "stats_overrides": {}
+        },
+        {
+          "artists": [
+            "Tony Moseley"
+          ],
+          "id": "2",
+          "numbers": [
+            "17"
+          ],
+          "sets": [
+            "Hidden City"
+          ],
+          "stats_overrides": {}
+        }
+      ],
+      "source_ban_notes": [
+        "Banned via internet on 12/24/12 from Emperor Edition tournaments"
+      ],
+      "source_legality_labels": [
+        "Legacy",
+        "Modern",
+        "Rain of Blood (Diamond)"
+      ],
+      "source_membership": "Emperor Edition printing outside the Age of Conquest (Emperor) legality query",
+      "source_url": "https://oracleofthevoid.com/#cardid=9292",
+      "stats": {
+        "cost": [
+          "1"
+        ]
+      },
+      "titles": [
+        "Well-Tended Farm"
+      ],
+      "types": [
+        "Holding"
+      ],
+      "version_notation": "unspecified"
+    }
+  ],
+  "notice": "Reference-only. These cards have explicit Emperor Edition printings but are absent from the Age of Conquest (Emperor) legality query (Oracle omits banned cards from it). No historical legality is inferred; see docs/decisions/2026-10-10-supplemental-emperor-cards.md.",
+  "schema_version": 1,
+  "source": {
+    "derived_from": "content/oracle/emperor-edition/catalogue.json",
+    "name": "Oracle of the Void",
+    "record_count": 7,
+    "selected_by": "content/oracle/emperor-edition/coverage-review.json metadata_review"
+  }
+}

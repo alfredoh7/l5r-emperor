@@ -5486,6 +5486,8 @@ public sealed partial class MatchEngine
                 EmperorP3PriorityAbilities.OwnTacticalAnnounced or EmperorP3PriorityAbilities.OwnBattleAnnounced => P3AnnounceWindowOpen(ability.Trigger!, command),
                 // P6 (issue #705, AfterFacts.cs): "after you announce an action" taken by a registered watcher with a performer filter.
                 AnnounceTriggers.WithPerformer => AnnounceWithPerformerOpen(id, command),
+                // Kalani's Landing (issue #816, Wave816.cs): the announce window of any player's announced action, open to this card's controller.
+                Wave816Abilities.AnnounceAnyAction => Wave816AnnounceWindowOpen(command),
                 // P6: a Reaction that names a fact, in the window that fact opened.
                 { } factTrigger when FactTriggers.IsFact(factTrigger) => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var factSource)
                     && _state.LastResolvedAction is { } factFacts && FactApplies(factSource, id, command.PlayerId, factFacts) == true,

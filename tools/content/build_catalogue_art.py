@@ -59,6 +59,39 @@ def extend_from_verified_archive(root, base_archive, cache, output, cwebp, tag):
         scans[sha] = record
         additions[encoded.name] = webp
     index = json.loads((root/'src/L5R.Client/Content/catalogue-printings.json').read_text())['cards']
+    # Catalogue printings the base archive lacks (a card wave that adds cards, issue #812): fetch each original from its trusted Oracle URL, verify the receipt hash, encode.
+    for variants in index.values():
+        for printing in variants:
+            sha = printing['sha256']
+            if sha in scans or f'{sha}.webp' in base_names:
+                continue
+            original = cache / f'{sha}.jpg'
+            if not original.exists() or digest(original.read_bytes()) != sha:
+                url = printing.get('source_url', '')
+                if not url.startswith('https://images.oracleofthevoid.com/l5r/'):
+                    raise ValueError('Missing trusted source ' + sha)
+                with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'L5R-Emperor-art-pack/1'}), timeout=40) as response:
+                    if response.url != url:
+                        raise ValueError('Redirected source')
+                    data = response.read(8 * 1024 * 1024 + 1)
+                if len(data) > 8 * 1024 * 1024 or digest(data) != sha:
+                    raise ValueError('Source does not match receipt ' + sha)
+                original.write_bytes(data)
+            with Image.open(original) as image:
+                image.load()
+                if image.format != 'JPEG' or max(image.size) > 4096:
+                    raise ValueError(f'Invalid source scan: {sha}')
+                width, height = image.size
+            encoded = cache / f'{sha}.webp'
+            if not encoded.exists():
+                subprocess.run([cwebp, '-quiet', '-q', '85', str(original), '-o', str(encoded)], check=True)
+            with Image.open(encoded) as image:
+                image.load()
+                if image.format != 'WEBP' or image.size != (width, height):
+                    raise ValueError(f'Invalid encoded scan: {sha}')
+            webp = encoded.read_bytes()
+            scans[sha] = dict(file=encoded.name, sha256=digest(webp), bytes=len(webp), source_bytes=original.stat().st_size, width=width, height=height)
+            additions[encoded.name] = webp
     missing = {p['sha256'] for variants in index.values() for p in variants if p['sha256'] not in scans}
     if missing:
         raise ValueError(f'{len(missing)} catalogue printings remain outside the base and published art')

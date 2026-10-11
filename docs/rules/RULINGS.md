@@ -386,3 +386,17 @@ When both players hold a Reaction in an alternating Reaction window (Engage, ent
 - **Cards/primitives:** `PendingReactionOrder` (ReactionOrdering.cs); the bot orders its own Reactions first, then the other player's in the order announced.
 - **Date:** 2026-10-09
 - **Source:** Mendon's gameplay QoL list, items 3 and 4 (issue #803).
+
+### R-040 — The seven Emperor Edition cards Oracle lists as banned are playable
+Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the Crab and Well-Tended Farm (which Oracle records as banned from Emperor Edition tournaments, December 2012 or September 2013) and The Governor's Estate (Legacy-only) are playable like any other Emperor Edition card once wired. The tournament ban is kept only as a data note on each card (`source_ban_notes` in `content/oracle/emperor-supplemental-catalogue.json`, and the inventory's blocker notes); the game does not display it, restrict deck building because of it, or treat it as a rule.
+
+- **Cards/primitives:** content/oracle/emperor-supplemental-catalogue.json; the library carries no ban field.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #812).
+
+### R-041 — Kalani's Landing: targeting a card in play and reducing its Gold Cost
+Kalani's Landing's Reaction ("After an action is announced, target a card (in play): Give it -2 Gold Cost") targets a card in play with a non-zero Gold Cost. A card is in play when it is in a player's home (holdings, Personalities, Rings and other permanent-effect cards) and not explicitly out of play, or at a battlefield; a card with no printed Gold Cost has a Gold Cost of 0 and cannot be targeted. The Reaction can happen after any action; once it has been used, its window is not opened for that player again until the next turn. The target's current Gold Cost is reduced by 2 until the end of the turn.
+
+- **Cards/primitives:** Kalani's Landing (oracle-l5r-4252); the Gold Cost modifier (`ApplyModifier` with "GoldCost", read by `CardGoldCost`), the announce window for either player's action (`Wave816AnnounceWatcher`) and `EngineHooks.PhaseBegins`; docs/decisions/2026-10-10-kalanis-landing.md.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #816).

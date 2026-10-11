@@ -62,6 +62,7 @@ internal static partial class EngineHooks
         _ = DuelRulesFor.Items;
         _ = DuelRefusableWhen.Items;
         _ = TurnBegins.Items;
+        _ = PhaseBegins.Items; // issue #816: "after each phase begins" traits
         _ = TurnBeginChoices.Items;
         _ = PlayerGrantAbilities.Items;
         _ = CostWaivers.Items;

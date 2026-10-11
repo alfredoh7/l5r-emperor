@@ -44,8 +44,8 @@ def version_from_keywords(keywords: list[str]) -> tuple[int | None, str]:
     return None, "unspecified"
 
 
-def normalize_card(raw: dict) -> dict:
-    if EMPEROR_LABEL not in values(raw, "legality"):
+def normalize_card(raw: dict, require_membership: bool = True) -> dict:
+    if require_membership and EMPEROR_LABEL not in values(raw, "legality"):
         raise ValueError(f"Card {raw.get('cardid')} lacks requested Emperor membership")
     oracle_id = int(raw["cardid"])
     titles = values(raw, "title")
