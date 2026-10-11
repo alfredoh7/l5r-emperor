@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Docs only: docs/BOT_LOGIC.md, a plain-English account of the practice bot's current logic (active vs parked), and a README fix (the active equip rules were listed under the parked bullet)",
+  "validation": "Written from reading all of src/L5R.AI and checked against it; no code change",
+  "remaining": "None; ready for review. Review readings listed in section 10 of the page.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/813",
+  "branch": "claude/810-bot-logic-doc",
+  "updated": "2026-10-11T01:53:57.382593+00:00"
+}
