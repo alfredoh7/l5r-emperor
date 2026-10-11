@@ -1,0 +1,34 @@
+{
+  "Profile": "celestial-wave-821",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #821.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10186",
+      "Name": "Sadahako's Artistry",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If your Family Honor is 10 or lower: Gain 1 Honor.\nLimited: Discard this card and target a card in your hand: You offer it as a gift. Show it to another player. He may accept, putting it into his hand; if he did, you gain Honor equal to its Focus Value. If he did not, discard it and draw 3 cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10186.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w821-sadahako-honor",
+        "w821-sadahako-gift"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

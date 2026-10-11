@@ -5488,6 +5488,8 @@ public sealed partial class MatchEngine
                 AnnounceTriggers.WithPerformer => AnnounceWithPerformerOpen(id, command),
                 // Kalani's Landing (issue #816, Wave816.cs): the announce window of any player's announced action, open to this card's controller.
                 Wave816Abilities.AnnounceAnyAction => Wave816AnnounceWindowOpen(command),
+                // The Governor's Estate (issue #821, Wave821.cs): the window after its owner's Dynasty Phase begins.
+                Wave821Abilities.DynastyBegins => Wave821DynastyWindowOpen(command),
                 // P6: a Reaction that names a fact, in the window that fact opened.
                 { } factTrigger when FactTriggers.IsFact(factTrigger) => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var factSource)
                     && _state.LastResolvedAction is { } factFacts && FactApplies(factSource, id, command.PlayerId, factFacts) == true,
@@ -6532,6 +6534,7 @@ public sealed partial class MatchEngine
                     ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                else if (IsWave821OutOfPlayTarget(ability.Target)) Require(Wave821OwnProvinceCardAllows(player, target), "Choose a card in one of your provinces."); // issue #821: the Governor's Estate
                 else if (ability.Target == Wave735Abilities.SanctionTarget) Require(Wave735SanctionTargetAllows(target), "Choose a non-Loyal, face-up Personality in or out of play."); // issue #735: Suikihime's Sanction
                 else if (ability.Target == Wave742Abilities.BondsCard) Require(Wave742BondsTargetAllows(target), "Choose a Bonds of Hospitality in play."); // issue #765: the granted discard names a Strategy kept in play
                 else if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
@@ -7296,8 +7299,9 @@ public sealed partial class MatchEngine
         var runningBefore = _runningCommand;
         _runningCommand = command;
         var p3BowedBefore = P3BowedPersonalityIds(); // Hida Defenders (issue #503): the Personalities bowed before the action
+        var kaitoResolving = Wave821BeginKaito(command); // issue #821: Chuda Kaito's +3 Gold Cost while his Spell's effects resolve
         try { RunAbilityEffects(command, consumedGrant); }
-        finally { _runningCommand = runningBefore; StampNegatedBy(command.PlayerId); } // issue #667 (PerformersSled.cs): who set each negation
+        finally { _runningCommand = runningBefore; StampNegatedBy(command.PlayerId); Wave821EndKaito(kaitoResolving); } // issue #667 (PerformersSled.cs): who set each negation
         if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); issued.BowedBefore = p3BowedBefore; }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
@@ -11111,6 +11115,7 @@ public sealed partial class MatchEngine
         var inHonorChangeWindow = _state.PendingChoice?.Type == "honorChangeReaction"; // Mendon's R4 ruling (issue #492): only the Reactions that name an Honor change are on offer, and they are on offer nowhere else.
         // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): the window as its player ends his Dynasty Phase -- only the Reactions that name it are on offer, and only there.
         var inTwistOfFateWindow = _state.PendingChoice?.Type == "twistOfFateReaction";
+        var inDynastyBeginWindow = _state.PendingChoice?.Type == Wave821Abilities.DynastyWindow; // The Governor's Estate (issue #821): only its Reaction, and only there
         var inBeforeEventWindow = _state.PendingChoice?.Type == "p3BeforeEventReaction";
         var inP3EntryWindow = _state.PendingChoice?.Type == "p3EntryReaction"; // Easy Persuasion (issue #503): only the Reactions after a Personality entered play, and only there // Forging Destiny (issue #503): only the Reactions before an Event resolves, and only there
         foreach (var (source, id) in sources)
@@ -11126,6 +11131,7 @@ public sealed partial class MatchEngine
             if (inHonorChangeWindow ? !(honorChangeTrigger || id == HonorChangeReactions.UnimpeachableName) : honorChangeTrigger) continue;
             if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             if (inTwistOfFateWindow != IsTwistOfFateReaction(ability)) continue;
+            if (inDynastyBeginWindow != (ability.Timing == "Reaction" && ability.Trigger == Wave821Abilities.DynastyBegins)) continue;
             if (inBeforeEventWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3Abilities.BeforeEventTrigger)) continue;
             if (inP3EntryWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3EntryAbilities.EntryTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
@@ -11134,7 +11140,7 @@ public sealed partial class MatchEngine
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inDynastyBeginWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             var mechAAsBattle = MechAActsAsBattle(playerId, ability, source); // Beyond the Line (issue #501): a Limited or Open Recon ability used as a Battle action
             if (!phaseOk && !mechAAsBattle) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !TurnRuleLimitedAsOpen(playerId, source?.Id) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
@@ -11358,7 +11364,7 @@ public sealed partial class MatchEngine
                                     // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                     EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                     "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? inPlay
+                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? inPlay
                                 }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                    // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                    // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

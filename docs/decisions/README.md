@@ -108,3 +108,4 @@ interpretation this register's decision docs already settled.
 
 - [Practice bot battle policy](2026-10-09-bot-battle-policy.md) — accepted (owner spec): pass when the battle is decided, attack/bow target priorities, send-home rule, first-action reactions and the Border Keep refresh.
 - [Kalani's Landing (#816)](2026-10-10-kalanis-landing.md) — Mendon's ruling (R-041): a card in play with a non-zero Gold Cost is targeted after any announced action and gets -2 Gold Cost until end of turn, once per turn; wired with its attachment-production rule and the new "after each phase begins" channel.
+- [Six cards Mendon's rulings unblocked (#821)](2026-10-10-six-ruled-cards.md) — rulings R-042 to R-048: the Governor's Estate creates an Imperial Estate Holding, Hida Kaiji and Isawa Ryuzo (same-side army assignment rules), Chuda Kaito's +3 Gold Cost, Ikoma Satoru and the shared gift step (also Sadahako's Artistry), Isawa Tsumaro's Home Engage and Illusion grant.

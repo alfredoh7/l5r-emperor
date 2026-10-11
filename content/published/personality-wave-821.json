@@ -1,0 +1,151 @@
+{
+  "Profile": "personality-wave-821",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #821.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10831",
+      "Name": "Hida Kaiji",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will not attack or defend with other Personalities, and other Personalities will not attack or defend with Kaiji.\nKaiji has +2F while unopposed, or +1F for each Personality opposing him with 6 or lower printed Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10831.jpg",
+      "Keywords": [
+        "Unique",
+        "Berserker",
+        "Crab Clan",
+        "Experienced",
+        "Mutant",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w821-hida-kaiji"
+    },
+    {
+      "Id": "oracle-l5r-10476",
+      "Name": "Isawa Ryuzo",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Ryuzo enters play, lose 2 Honor.\nFire Open: Target two Personalities, each with more Madness tokens than printed Personal Honor. They will not attack or defend in the same army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10476.jpg",
+      "Keywords": [
+        "Fallen",
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w821-ryuzo-pair"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10320",
+      "Name": "Chuda Kaito",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kaito enters play: Lose 2 Honor.\nKaito has +3GC while the effects of a Spell action he performed are resolving.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10320.jpg",
+      "Keywords": [
+        "Shadowlands",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w821-chuda-kaito",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10291",
+      "Name": "Ikoma Satoru",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Show a card in your hand and choose another player: You offer him a gift. He may put the card in his hand; if he does, draw two cards. Otherwise, discard it, and Melee Attack with strength equal to its Focus Value targeting a Follower or Personality without Followers in his home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10291.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Artisan",
+        "Experienced",
+        "Lion Clan",
+        "Samurai",
+        "Turquoise Champion"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w821-satoru-gift"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10863",
+      "Name": "Isawa Tsumaro",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Air Home Engage: Move your target Air Shugenja home. Create a 0F/3C/0PH Air • Illusion • Shugenja Personality at the current battlefield; remove him from the game after the battle ends. While the Illusion is there, abilities on the target's spells have Home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10863.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Air",
+        "Elemental Master",
+        "Phoenix Clan",
+        "Shugenja",
+        "Tejina"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w821-tsumaro-illusion"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

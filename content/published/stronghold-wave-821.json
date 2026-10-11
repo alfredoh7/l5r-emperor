@@ -1,0 +1,33 @@
+{
+  "Profile": "stronghold-wave-821",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #821.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8106",
+      "Name": "The Governor's Estate",
+      "Type": "Stronghold",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 8,
+      "Text": "Your face-down Dynasty cards in play are Holdings with the trait, \"Bow this card: Produce 2 Gold.\" \nTwice per turn, after your Dynasty Phase begins, you may pay 2 Gold to turn a card in your Province face-down (if needed) and put it into play bowed.\nLimited: Gain 2 Honor. You may not declare an attack.\nTireless Battle: Discard a card to give a target Personality +2F or -2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8106.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "w821-governor-create",
+        "w821-governor-honor",
+        "w821-governor-force-up",
+        "w821-governor-force-down"
+      ],
+      "Effect": "w821-governors-estate"
+    }
+  ],
+  "Decks": []
+}
