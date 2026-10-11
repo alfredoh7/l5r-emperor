@@ -1392,6 +1392,244 @@ internal static partial class SingleReaction3Tests
         }
     }
 
+    // ---- Purify the Soul: before an action resolves, bow it: negate its effects which give Kolat, Ninja or Shadowlands to Personalities you control ------------------------------------------------------
+    private static void PurifyTheSoulNegate()
+    {
+        const string ability = "purify-soul-negate";
+        var def = Def(ability);
+        var essenceDef = Def("essence-of-undeath-recruit");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            // Essence of Undeath would permanently give the Personality it brings back Shadowlands and Undead.
+            (MatchEngine E, CardInstance? Purify, CardInstance Dead) Rig(bool withPurify = true, bool purifyBowed = false)
+            {
+                var a = Table(Phase.Action, owner); a.PriorityPlayerId = owner;
+                var maho = Add(a, "training-shugenja", owner, Zone.Home);
+                var essence = Add(a, essenceDef, owner, Zone.Attached, parent: maho.Id);
+                CardInstance? purify = null;
+                if (withPurify) { var guard = Add(a, "training-seeds5-air-shugenja", owner, Zone.Home); purify = Add(a, def, owner, Zone.Attached, bowed: purifyBowed, parent: guard.Id); }
+                var dead = Add(a, "training-crane-samurai", owner, Zone.Dead);
+                Gold(a, owner, 3);
+                var e = MatchEngine.FromTestState(a);
+                Accept(e, Offer(e, owner, "essence-of-undeath-recruit", essence.Id, dead.Id));
+                return (e, purify, dead);
+            }
+            var rig = Rig();
+            Eq(Window(rig.E), "beforeActionReaction", $"owner {owner}: a before-action window opened for Purify the Soul");
+            var command = InWindow(rig.E, owner, ability, rig.Purify!.Id, windowType: "beforeActionReaction");
+            Accept(rig.E, command);
+            Check(rig.E.State.Cards[rig.Purify.Id].Bowed, "Purify the Soul bowed as the cost");
+            Settle(rig.E);
+            var back = rig.E.State.Cards[rig.Dead.Id];
+            Eq(back.Zone, Zone.Home, "he came back into play");
+            Check(!back.GrantedKeywords.Any(k => k.Keyword == "Shadowlands") && back.GrantedKeywords.Any(k => k.Keyword == "Undead"), "Shadowlands negated, Undead still given");
+            // Control: without it Shadowlands is given; with a declined window too.
+            var without = Rig(withPurify: false); Settle(without.E);
+            Check(without.E.State.Cards[without.Dead.Id].GrantedKeywords.Any(k => k.Keyword == "Shadowlands"), "without it, Shadowlands is given");
+            var declined = Rig(); Settle(declined.E);
+            Check(declined.E.State.Cards[declined.Dead.Id].GrantedKeywords.Any(k => k.Keyword == "Shadowlands"), "declined: Shadowlands is given");
+            // A bowed Purify the Soul holds no Reaction.
+            var bowed = Rig(purifyBowed: true);
+            Check(Window(bowed.E) != "beforeActionReaction" && !CanUse(bowed.E, owner, ability, bowed.Purify!.Id), "a bowed Spell: no window");
+            // An action that gives none of the three keywords opens nothing for it.
+            var s2 = Table(Phase.Action, owner); s2.PriorityPlayerId = owner;
+            var guard2 = Add(s2, "training-seeds5-air-shugenja", owner, Zone.Home); var p2 = Add(s2, def, owner, Zone.Attached, parent: guard2.Id);
+            var bower = Add(s2, "training-bow-any-source", owner, Zone.Home); var victim = Add(s2, "training-lion-samurai", 1 - owner, Zone.Home);
+            var e2 = MatchEngine.FromTestState(s2);
+            Accept(e2, Offer(e2, owner, "training-bow-any", bower.Id, victim.Id));
+            Check(!CanUse(e2, owner, ability, p2.Id), "a bow gives no keyword: not offered");
+            // Never opened.
+            var s3 = Table(Phase.Action, owner); s3.PriorityPlayerId = owner;
+            var g3 = Add(s3, "training-seeds5-air-shugenja", owner, Zone.Home); var p3 = Add(s3, def, owner, Zone.Attached, parent: g3.Id);
+            NeverOpened(MatchEngine.FromTestState(s3), owner, ability, p3.Id, command with { CardId = p3.Id });
+        }
+    }
+
+    // ---- Redoubled Attack: after a battle's resolution ends, straighten one or two performing Personalities' units; they will not bow from the resolution ---------------------------------------------------------
+    private static void PassToResolution(MatchEngine e)
+    {
+        for (var i = 0; i < 40 && e.State.PendingChoice is not { Type: "afterResolutionReaction" }; i++)
+        {
+            if (e.State.Phase != Phase.Battle && e.State.Phase != Phase.BattleSelection) return;
+            if (e.State.UnresolvedBattlefields.Count == 0 && e.State.CurrentBattleProvince is null) return;
+            var mover = e.State.PendingChoice?.PlayerId ?? e.State.PriorityPlayerId;
+            var pass = e.QueryActions(mover).FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
+            Check(pass is not null, "nothing to pass with in " + e.State.Phase + " (" + e.State.PendingChoice?.Type + ")");
+            Accept(e, pass!.Command!);
+        }
+    }
+
+    private static void RedoubledAttackStraighten()
+    {
+        const string ability = "redoubled-attack-straighten";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            (MatchEngine E, CardInstance A, CardInstance B, CardInstance C, CardInstance Card) Rig(bool resolve = true)
+            {
+                // Player 1 attacks; the owner's Personalities win the battle (whichever seat that is).
+                var s = Table(Phase.Battle, 1);
+                var a = Bf(s, "training-crane-samurai", owner); var b = Bf(s, "training-lion-samurai", owner); var c = Bf(s, "training-crane-veteran", owner);
+                var loser = Bf(s, "training-water-personality", foe);
+                foreach (var win in new[] { a, b, c }) Batch336Support.Force(win, 20);
+                a.Bowed = true; b.Bowed = true;
+                var card = Add(s, def, owner, Zone.Hand);
+                var e = MatchEngine.FromTestState(s);
+                if (resolve) PassToResolution(e);
+                _ = loser;
+                return (e, a, b, c, card);
+            }
+            SlotSelection Units(params CardInstance[] cards) => new("units", cards.Select(x => x.Id).ToArray());
+            var rig = Rig();
+            Eq(Window(rig.E), "afterResolutionReaction", $"owner {owner}: the window opens for the player holding Redoubled Attack");
+            Eq(rig.E.State.PriorityPlayerId, owner, "and he has the first opportunity");
+            Check(CanUse(rig.E, owner, ability, rig.Card.Id), "offered"); Check(!CanUse(rig.E, foe, ability, rig.Card.Id), "not to the other player");
+            Rejection(rig.E, Use(rig.E, foe, ability, rig.Card.Id, null, null, Units(rig.A)));
+            Rejection(rig.E, Use(rig.E, owner, ability, rig.Card.Id, null, null, Units(rig.A, rig.B, rig.C)));
+            Check(rig.E.State.Cards[rig.A.Id].Zone == Zone.Battlefield && rig.E.State.Cards[rig.A.Id].Bowed, "the winners are still at the battlefield, still bowed");
+            var closed = rig.E.Clone(); Settle(closed);
+            Check(!CanUse(closed, owner, ability, rig.Card.Id), "after the window closed it is gone");
+            Rejection(closed, Use(closed, owner, ability, rig.Card.Id, null, null, Units(rig.A)) with { ExpectedVersion = closed.Version });
+            Accept(rig.E, Use(rig.E, owner, ability, rig.Card.Id, null, null, Units(rig.A, rig.B)));
+            Check(!rig.E.State.Cards[rig.A.Id].Bowed && !rig.E.State.Cards[rig.B.Id].Bowed, "their units straightened");
+            if (rig.E.State.PendingChoice is not null) // the promise lapses with the battle, so it is only readable while the window is still open
+                Check(rig.E.State.ResolutionWillNotBowCardIds.Contains(rig.A.Id) && rig.E.State.ResolutionWillNotBowCardIds.Contains(rig.B.Id) && !rig.E.State.ResolutionWillNotBowCardIds.Contains(rig.C.Id), "and they will not bow");
+            Eq(rig.E.State.Cards[rig.Card.Id].Zone, Zone.FateDiscard, "the Strategy was played");
+            Settle(rig.E);
+            // Winning Attackers go home bowed from the resolution; winning Defenders go home unbowed, so only the straightening is visible for them.
+            Eq(rig.E.State.Cards[rig.A.Id].Zone, Zone.Home, "the winners went home");
+            Check(!rig.E.State.Cards[rig.A.Id].Bowed && !rig.E.State.Cards[rig.B.Id].Bowed, "unbowed by the resolution");
+            Eq(rig.E.State.Cards[rig.C.Id].Bowed, owner == 1, "the one not chosen bowed as usual (an Attacker)");
+            // Control: declined, the winning Attackers go home bowed (the two that started bowed stay bowed as Defenders).
+            var d = Rig(); Settle(d.E);
+            Check(d.E.State.Cards[d.A.Id].Bowed && d.E.State.Cards[d.B.Id].Bowed, "declined: the two that started bowed are still bowed");
+            Eq(d.E.State.Cards[d.C.Id].Bowed, owner == 1, "declined: the third bows only as an Attacker");
+            // Before the resolution ends it is not offered.
+            var q = Rig(resolve: false);
+            NeverOpened(q.E, owner, ability, q.Card.Id, Use(q.E, owner, ability, q.Card.Id, null, null, Units(q.A)));
+        }
+    }
+
+    // ---- Shinjo Hayan: after engaging, once per turn assign your unbowed Unicorn Clan Personality in your home to the current battlefield ------------------------------------------------------------------
+    private static void HayanAssign()
+    {
+        const string ability = "hayan-assign";
+        var def = Def(ability);
+        var unicornDef = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Type == CardType.Personality && c.Clan == "Unicorn" && c.Effect == "none" && (c.Abilities ?? []).Length == 0).OrderBy(c => c.Id, StringComparer.Ordinal).First().Id;
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownerAttacks in new[] { true, false })
+            {
+                var foe = 1 - owner; var attacker = ownerAttacks ? owner : foe;
+                var label = $"owner {owner} {(ownerAttacks ? "attacking" : "defending")}";
+                CardInstance hayan = null!, unicorn = null!, tired = null!, crane = null!;
+                var e = Engage(attacker, s =>
+                {
+                    hayan = Add(s, def, owner, Zone.Home, bowed: true); // a trait: usable while he is bowed
+                    Bf(s, "training-crane-samurai", owner); Bf(s, "training-lion-samurai", foe);
+                    unicorn = Add(s, unicornDef, owner, Zone.Home); tired = Add(s, unicornDef, owner, Zone.Home, bowed: true); crane = Add(s, "training-crane-veteran", owner, Zone.Home);
+                });
+                if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e));
+                var options = Options(e, owner, ability, hayan.Id);
+                Check(options.Any(o => o.Enabled && (o.TargetIds?.Contains(unicorn.Id) ?? false)), label + ": the unbowed Unicorn is offered");
+                Check(!options.Any(o => o.TargetIds?.Contains(tired.Id) == true || o.TargetIds?.Contains(crane.Id) == true), label + ": a bowed or non-Unicorn Personality is not");
+                var command = InWindow(e, owner, ability, hayan.Id, targetId: unicorn.Id, windowType: "engageReaction");
+                Accept(e, command);
+                Check(e.State.Cards[unicorn.Id].Zone == Zone.Battlefield && e.State.Cards[unicorn.Id].ProvinceIndex == 0, label + ": assigned to the current battlefield");
+                if (ownerAttacks) Eq(e.State.Cards[unicorn.Id].AssignedToAttackTurn, e.State.TurnNumber, label + ": as an attacker");
+                else Check(e.State.Cards[unicorn.Id].AssignedToAttackTurn != e.State.TurnNumber, label + ": as a defender");
+                Check(!CanUse(e, owner, ability, hayan.Id), label + ": once per turn");
+                // Never opened (no battle engaged).
+                var s2 = Table(Phase.Action, owner); s2.PriorityPlayerId = owner; var h2 = Add(s2, def, owner, Zone.Home); Add(s2, unicornDef, owner, Zone.Home);
+                NeverOpened(MatchEngine.FromTestState(s2), owner, ability, h2.Id, command with { CardId = h2.Id });
+            }
+    }
+
+    // ---- Shosuro Takazaki: Political Engage: other players do not gain Honor for destroying your cards in this battle's resolution ------------------------------------------------------------------
+    private static void TakazakiEngage()
+    {
+        const string ability = "w738-takazaki-engage";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownerAttacks in new[] { true, false })
+            {
+                var foe = 1 - owner; var attacker = ownerAttacks ? owner : foe;
+                var label = $"owner {owner} {(ownerAttacks ? "attacking" : "defending")}";
+                int Gain(bool use, out MatchEngine engine)
+                {
+                    CardInstance takazaki = null!;
+                    var e = Engage(attacker, s =>
+                    {
+                        takazaki = Bf(s, def, owner); Bf(s, "training-lion-samurai", owner);
+                        var big = Bf(s, "training-lion-samurai", foe); Batch336Support.Force(big, 30); // the enemy wins and destroys the owner's units
+                    });
+                    var honor = Honor(e, foe);
+                    if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e));
+                    if (use)
+                    {
+                        var command = InWindow(e, owner, ability, takazaki.Id, windowType: "engageReaction");
+                        Accept(e, command);
+                        Check(e.State.RuleFlags?.Any(f => f.Kind == RuleFlagKinds.NoDestructionHonorForOthers && f.PlayerId == owner && f.Scope == RuleFlagScope.Battle) == true, label + ": a battle-scope flag for her controller");
+                        Check(!CanUse(e, owner, ability, takazaki.Id), label + ": once");
+                    }
+                    PassUntil(e, () => e.State.CurrentBattleProvince is null && e.State.PendingChoice is null || e.State.Phase != Phase.Battle && e.State.Phase != Phase.BattleSelection);
+                    Check(e.State.Cards[takazaki.Id].Zone != Zone.Battlefield, label + ": her unit was destroyed");
+                    engine = e;
+                    return Honor(e, foe) - honor;
+                }
+                var without = Gain(false, out _);
+                var with = Gain(true, out _);
+                Check(without > 0, $"{label}: without the action the winner gains Honor for the destroyed unit ({without})");
+                Eq(with, 0, label + ": with it he gains none");
+            }
+        // Outside an Engage window the Reaction is not available.
+        var idle = Table(Phase.Battle, 1); idle.PriorityPlayerId = 0; var t = Bf(idle, def, 0);
+        var ie = MatchEngine.FromTestState(idle);
+        NeverOpened(ie, 0, ability, t.Id, Use(ie, 0, ability, t.Id));
+    }
+
+    // ---- Sniping: after a Ranged Attack is targeted, give it a strength bonus equal to its current strength -----------------------------------------------------------------------------------------
+    private static void SnipingBoost()
+    {
+        const string ability = "sniping-boost";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownAttack in new[] { true, false })
+            {
+                var actor = ownAttack ? owner : 1 - owner;
+                var label = $"owner {owner}, {(ownAttack ? "his own" : "the enemy's")} Ranged Attack";
+                (MatchEngine E, CardInstance Sniping, CardInstance Victim) Rig(string kind = "Ranged", bool attack = true)
+                {
+                    var s = Table(Phase.Battle, 1); s.PriorityPlayerId = actor;
+                    var archer = Bf(s, kind == "Ranged" ? "training-followed-attacker" : "training-recon-attacker", actor);
+                    var victim = Bf(s, "training-crane-veteran", 1 - actor); // Force 5
+                    var sniping = Add(s, def, owner, Zone.Hand);
+                    Add(s, "training-attack-reactor", 0, Zone.Home); Add(s, "training-attack-reactor", 1, Zone.Home); // keep the window open so the strength can be read
+                    var e = MatchEngine.FromTestState(s);
+                    if (attack) Accept(e, Offer(e, actor, kind == "Ranged" ? "training-followed-recon-attack" : "training-weapon-attack", archer.Id, victim.Id));
+                    return (e, sniping, victim);
+                }
+                var rig = Rig();
+                Eq(Window(rig.E), "attackReaction", label + ": the Attack opens its window");
+                Eq(rig.E.State.PendingAttack!.Strength, 3, "Ranged 3");
+                var command = InWindow(rig.E, owner, ability, rig.Sniping.Id, windowType: "attackReaction");
+                Accept(rig.E, command);
+                Eq(rig.E.State.PendingAttack!.Strength, 6, label + ": the strength doubles");
+                Eq(rig.E.State.Cards[rig.Sniping.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
+                Settle(rig.E);
+                Eq(rig.E.State.Cards[rig.Victim.Id].Zone, Zone.Dead, label + ": and it destroys the 5-Force Personality");
+                var control = Rig(); Settle(control.E);
+                Check(control.E.State.Cards[control.Victim.Id].Zone != Zone.Dead, label + ": without it Ranged 3 does not");
+                // A Melee Attack, and no Attack at all: not offered.
+                var melee = Rig("Melee");
+                Eq(melee.E.State.PendingAttack?.Kind, "Melee");
+                Check(!CanUse(melee.E, owner, ability, melee.Sniping.Id), label + ": Sniping reacts only to a Ranged Attack");
+                Rejection(melee.E, Use(melee.E, owner, ability, melee.Sniping.Id));
+                var quiet = Rig(attack: false);
+                NeverOpened(quiet.E, owner, ability, quiet.Sniping.Id, command with { CardId = quiet.Sniping.Id });
+            }
+    }
+
     public static void Run(TestRunner runner) => runner.Run("single-reaction-3", [
         ("Asahina Keigo: when paying a Gold cost in any window, bowing him and discarding a card produces its Focus Value (3 Gold); not for the other player, spent, bowed or a blank card", KeigoGold),
         ("Seppun Washi: when paying a Gold cost in any window, bowing him produces 2 Gold; once per turn, never for the other player", WashiGold),
@@ -1421,5 +1659,10 @@ internal static partial class SingleReaction3Tests
         ("Legion of the Bat: after an action moves an enemy Infantry Personality to its battlefield its controller (either seat) bows him; not for Cavalry, declined or with no move", LegionOfTheBatBow),
         ("Mirumoto Rokai: after another player's action targets your Personality at his location destroy him to negate your Personality's destruction (either seat); not at another location or for a bow", RokaiNegateDestruction),
         ("Ninja Tricks: after another player's Strategy action is announced in a battle bow your Ninja to negate its effects and lose 2 Honor (either seat); not without an unbowed Ninja, for a card in play or in the Action phase", NinjaTricksNegate),
+        ("Purify the Soul: before an action that gives your Personality Shadowlands resolves, bow the Spell to negate that keyword (Undead still given); not when bowed, declined or for a plain bow", PurifyTheSoulNegate),
+        ("Redoubled Attack: after a battle's resolution ends the winning side's player straightens one or two performing Personalities' units and they do not bow from it; not before the resolution, not three, not for the other player", RedoubledAttackStraighten),
+        ("Shinjo Hayan: after engaging (either seat, attacking or defending) assign an unbowed Unicorn Clan Personality from home to the battlefield, once per turn; bowed or non-Unicorn never offered", HayanAssign),
+        ("Shosuro Takazaki: Political Engage (either seat) means the winner gains no Honor for destroying her controller's units in this battle's resolution; without it he does", TakazakiEngage),
+        ("Sniping: after a Ranged Attack is targeted (own or enemy's, either seat) double its strength so a Force 5 target dies; not against a Melee Attack or with no Attack", SnipingBoost),
     ]);
 }
