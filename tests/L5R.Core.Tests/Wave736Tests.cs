@@ -91,7 +91,7 @@ internal static class Wave736Tests
             Check(d.Type == want.Type && (d.Abilities ?? []).SequenceEqual(want.Abilities) && d.Effect == want.Effect && d.EntryHonorLoss == want.EntryLoss, $"{d.Name} is published as wired");
             Check(!d.CreatedOnly && !string.IsNullOrWhiteSpace(d.Text), $"{d.Name} prints its text and is playable");
         }
-        foreach (var id in new[] { CleansingBreath, PanKuExp, Jingasa }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // Isawa Ryuzo and Hida Kaiji - exp were wired afterwards (Wave821.cs, issue #821) // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
+        foreach (var id in new[] { CleansingBreath }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // P'an Ku - exp and Koan's Jingasa were wired by issue #827 (Wave827.cs) // Isawa Ryuzo and Hida Kaiji - exp were wired afterwards (Wave821.cs, issue #821) // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
         Check(CardCatalog.Cards.ContainsKey(Kaitoko), "Asako Kaitoko - exp, deferred by this batch for want of a stat cap, was published by issue #768");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w736-", StringComparison.Ordinal)), 11, "eleven w736 abilities");
     }

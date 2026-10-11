@@ -1,0 +1,98 @@
+{
+  "Profile": "personality-wave-827",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #827.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10486",
+      "Name": "Kokujin",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kokujin enters play, lose 6 Honor unless you are a Spider Clan player.\nBattle: Kokujin challenges a target enemy Personality. Destroy the duel's loser or, if Kokujin wins, you may destroy one of your Personalities (at any location) to take control of the loser (he joins Kokujin's army).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10486.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Inexperienced",
+        "Monk",
+        "Shadowlands",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w827-kokujin-duel"
+      ],
+      "Effect": "w827-kokujin"
+    },
+    {
+      "Id": "oracle-l5r-10497",
+      "Name": "P'an Ku",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open, Bow this card: Give a target card a Madness token.\nLimited, Bow this card: P'an Ku may remain bowed. Take control of a target Personality with more Madness tokens than printed Personal Honor and remove those tokens. The target will not commit seppuku until P'an Ku straightens or leaves play. After P'an Ku does, give control of the target to his owner.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10497.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Dragon",
+        "Experienced",
+        "Fallen",
+        "Mad Dragon",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w827-panku-madness",
+        "w827-panku-take"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10505",
+      "Name": "Zansho",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Zansho will not join a Spider Clan player.\nBattle: Bow Zansho's target unbowed Follower. Ranged Attack with strength equal to its Force, plus 2 if the Ranged Attack targets Daigotsu Arakan.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10505.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w827-zansho-ranged"
+      ],
+      "Effect": "will-not-join-spider-player"
+    }
+  ],
+  "Decks": []
+}

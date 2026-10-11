@@ -5072,7 +5072,7 @@ public sealed partial class MatchEngine
             // AttackComparedForce is the one decision point for WHICH Force a Personality's Attack
             // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
             // that needs no Follower exception.
-            if (InPlay(target) && (AtBattle(target) || AttackMayHitInDefendersHome(playerId, target) || AttackSpecReaches(abilityId, target)) && AttackComparedValue(abilityId, target) <= strength) // No Hiding Place (issue #498): a target in the Defender's home
+            if (InPlay(target) && (AtBattle(target) || AttackMayHitInDefendersHome(playerId, target) || AttackSpecReaches(abilityId, target)) && AttackComparedValue(abilityId, target, sourceId) <= strength) // No Hiding Place (issue #498): a target in the Defender's home
             {
                 DestroyAttackTarget(target, playerId);
             }
@@ -6191,6 +6191,7 @@ public sealed partial class MatchEngine
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
             Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power" or "ishibashi-attack"
                 || MechCCarriesCostCard(id) // Emperor Edition mechanics group C (issue #501): the card an optional cost spends.
+                || Wave827CarriesCostCard(id) // issue #827: Zansho - exp's bowed Follower
                 || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
                 || SearchPlayCarriesCostCard(id)
                 || WlCarriesCostCard(id)
@@ -10733,6 +10734,7 @@ public sealed partial class MatchEngine
         // A timed hold (StraightenHolds.cs: Hibernation, Visitation, Bamboo Harvesters' "will not straighten before your second turn") refuses every attempt until it is released.
         else if (StraightenHeld(card))
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
+        else if (Wave827DefersStraighten(card)) { } // P'an Ku (issue #827): "P'an Ku may remain bowed" -- his controller is asked once the command is done
         else if (P4NegatesNextStraightening(card)) { } // Drawing on the Mountain (issue #503, EmperorP4Watches.cs): "Negate his next straightening this game."
         else
         {
@@ -11278,7 +11280,7 @@ public sealed partial class MatchEngine
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).
             string?[] shownChoices = id == "ishibashi-attack" ? IshibashiShowableCards(player).Cast<string?>().DefaultIfEmpty(null).ToArray()
-                : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? WlCostCardChoices(id, player, source) /* issue #674 */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
+                : MechCCostCardChoices(id, player, source) ?? Wave827CostCardChoices(id, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? WlCostCardChoices(id, player, source) /* issue #674 */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
             // "You may compare it against ..." (issue #492, ruling R5): one offered action per thing the player may compare against; the choice rides on the command.
             string?[] compareChoices = AttackCompareOptions(id) is { } compareOptions ? compareOptions.Select(o => (string?)o.Key).ToArray()
                 : (MechEChoiceOptions(id) ?? P2ChoiceOptions(id)) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray()
@@ -11402,7 +11404,7 @@ public sealed partial class MatchEngine
                                     var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                                         ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                                     var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                                        + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
+                                        + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? Wave827CostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
                                         + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                                         + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                                     yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",

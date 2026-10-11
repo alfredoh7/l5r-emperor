@@ -1,8 +1,4 @@
 {
-  "oracle-l5r-10486": {
-    "note": "Kokujin: \"if Kokujin wins, you may destroy one of your Personalities (at any location) to take control of the loser (he joins Kokujin's army)\" is a choice made after the duel resolves, among one option per Personality of yours plus plain destruction. Duel outcomes in this engine apply directly; a deferred outcome decision needs the P1 after-action trait queue extended (EmperorP1.cs) or a new post-duel decision hook.",
-    "category": "TRIG-AFTER"
-  },
   "oracle-l5r-10404": {
     "note": "Warded Premises (Strategy): \"Before this battle's resolution: Negate all Force bonuses from actions to cards at this battlefield.\" Part of the first gap is closed: Creating Order's NegateActionForceModifiers and ActionForceModifierNegated (ForgottenLegacyBatch3.cs) already tell a Force modifier given by an action (a Modifier whose Effect is an action ability) from a trait's standing modifier, and leave tokens alone, and the Terrain's before-resolution timing exists (BeforeResolution.cs). What remains: a bonuses-only variant applied to every card at a battlefield (the existing helper negates penalties too and covers one card for the rest of the turn), and a ruling from Mendon on whether a Permanent bonus (\"Permanently give him +2F\") is negated for good or only suspended and whether Item and token bonuses count. Its second ability (put this Terrain into play at a battlefield with no Terrain, even without a unit there) is wireable.",
     "category": "EFFECT"

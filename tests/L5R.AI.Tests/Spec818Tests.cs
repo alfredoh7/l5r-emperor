@@ -17,6 +17,7 @@ internal static class Spec818Tests
         ("Item 10: Shinden bows a small unit or against an opponent over 25 Honor, otherwise only when that cannot change the attack decision", ShindenBow),
         ("Issue #825: the bot never negates its own held action, but still negates the opponent's", NeverNegatesOwnAction),
         ("Item 11: a Reaction that destroys or bows an opponent's card is always played", AlwaysDestroyOrBow),
+        ("Issue #827: Kokujin's question sacrifices the weakest Personality for a clearly stronger loser, declines otherwise; P'an Ku stays bowed; a Koan discard is answered", Wave827Decisions),
     ];
 
     private static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
@@ -267,5 +268,30 @@ internal static class Spec818Tests
             var on = TrainingOpponent.Choose(v, [action with { Command = action.Command! with { ExpectedVersion = version } }, decline with { Command = decline.Command! with { ExpectedVersion = version } }], new BotContext()).Command;
             Check(on?.AbilityId == reaction.Key, $"declined an optional destroy/bow at version {version}");
         }
+    }
+
+    private static void Wave827Decisions()
+    {
+        foreach (var (loserForce, expected) in new[] { (6, "w827KokujinChoose:weak"), (2, "w827KokujinChoose:decline") })
+        {
+            var view = MatchEngine.CreateStarterMatch().GetView(0);
+            var kokujin = Soldier("kokujin", 0, 4); var weak = Soldier("weak", 0, 2); var strong = Soldier("strong", 0, 5); var loser = Soldier("loser", 1, loserForce, "Crab");
+            view = view with
+            {
+                PendingChoice = new PendingChoice("w827KokujinChoice", 0, "kokujin", "Destroy a personality to take control of the loser?"),
+                PendingDuel = new DuelView(0, 1, "kokujin", "loser", "Chi", "Resolved", 0, false),
+                Players = [view.Players[0] with { Home = [kokujin, weak, strong] }, view.Players[1] with { Home = [loser] }]
+            };
+            ActionOption Pick(string id) => new("w827KokujinChoose", "Destroy " + id, true, null, new GameCommand("w827KokujinChoose", 0, view.Version, TargetId: id), id, DecisionCandidateIds: [id]);
+            var options = new[] { Pick("kokujin"), Pick("weak"), Pick("strong"), new ActionOption("w827KokujinChoose", "Decline", true, null, new GameCommand("w827KokujinChoose", 0, view.Version, Choice: "decline")) };
+            var command = TrainingOpponent.Choose(view, options, new BotContext()).Command!;
+            var label = command.Choice == "decline" ? "decline" : command.TargetId;
+            Check("w827KokujinChoose:" + label == expected, $"loser Force {loserForce}: expected {expected}, got {command.Type}:{label}");
+        }
+        var panKuView = MatchEngine.CreateStarterMatch().GetView(0) with { PriorityPlayerId = 0 };
+        var straighten = new[] { new ActionOption("w827PanKuStraightenChoose", "Straighten", true, null, new GameCommand("w827PanKuStraightenChoose", 0, panKuView.Version, Choice: "straighten")),
+            new ActionOption("w827PanKuStraightenChoose", "Remain", true, null, new GameCommand("w827PanKuStraightenChoose", 0, panKuView.Version, Choice: "remain"))};
+        var kept = TrainingOpponent.Choose(panKuView, straighten, new BotContext());
+        Check(kept.Command?.Choice == "remain", "P'an Ku stays bowed to keep what he took: " + kept.Command?.Choice + " / " + kept.Reason);
     }
 }

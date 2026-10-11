@@ -88,6 +88,7 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 - A Reaction that **negates** an effect: always played (1500). A Reaction that **destroys or bows** a card of the opponent's: always played (1400, issue #818).
 - A Reaction a card prints for its own entry (e.g. draws or tokens when it enters play): always played, 160 + rank bonus, unless it would only cost the bot Honor.
 - **Any other Reaction is a weighted gamble**, rolled deterministically from the match state: the chance it plays is `0.3 + 0.15 x rank` (neutral 30%, help 45%, penalize 60%, bow 75%, destroy 90%). If it plays it scores 150 + rank bonus; otherwise 50. Declining a Reaction scores 100, so a failed roll declines.
+- **Kokujin's question (issue #827):** after Kokujin wins a duel it gives up one of its own Personalities (never Kokujin unless he is the weakest) only when the loser's Force plus Personal Honor exceeds the one given up by at least 1 (score 100 + the difference - 1; declining scores 100); P'an Ku's choice to straighten or stay bowed: stays bowed (105 over 100); a Koan Spell discard: the first listed.
 - **Reaction windows with several Reactions:** it announces what it would play anyway, then says it is done; it orders its own Reactions first and the opponent's as announced. Once its order is set, it plays them (+1000).
 
 ## 8. Battle actions

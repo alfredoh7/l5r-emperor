@@ -265,6 +265,7 @@ public sealed partial class MatchEngine
                 _paymentDiscards = [];
                 ApplyAfterCommandTraits(traitSnapshot);
                 ReturnCardsOutOfPlayToTheirOwners();
+                Wave827AfterCommand(); // issue #827 (Wave827.cs): Koan's Jingasa's Spell limit, P'an Ku's straightening choice
                 RemoveCreatedCardsLeftInPiles();
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
@@ -498,6 +499,7 @@ public sealed partial class MatchEngine
         ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
+        ApplyWave827EntryEffects(playerId, card); // Kokujin (issue #827, Wave827.cs): "lose 6 Honor unless you are a Spider Clan player."
         ApplyWave734EntryEffects(playerId, card); // Bayushi Nitoshi - exp (issue #734, Wave734.cs): "After Nitoshi enters play, all players lose 3 Honor."
         ApplyWave740EntryEffects(card); // Ikoma Ayumu - exp (issue #740, Wave740.cs): "will not gain Fallen or Shadowlands".
         ApplyWave739EntryEffects(card); // Iweko Seiken (issue #739, Wave739.cs): "will not gain a Clan Alignment".
@@ -892,6 +894,7 @@ public sealed partial class MatchEngine
         Require(InPlay(card) && Definition(card).Type == CardType.Personality, "Choose your Personality in play.");
         Require(card.Dishonorable, "Only a Dishonorable Personality may perform Seppuku.");
         Require(!SeppukuBarredByPriceOfHonor(card), $"{Definition(card).Name} is not affected by the rulebook seppuku action this turn (The Price of Honor)."); // issue #503
+        Require(!SeppukuBarredByControl(card), $"{Definition(card).Name} will not commit seppuku while the Personality that took control of him stays bowed (P'an Ku)."); // issue #827
         // "May not perform actions" (issue #336, Mendon: even innate actions): Order Seppuku is the one action a Personality has of its own.
         Require(!ActionLocked(card), $"{Definition(card).Name} may not perform actions this turn.");
         Require(Keyword(card, "Samurai") || Keyword(card, "Courtier") || Keyword(card, "Shugenja"), "Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
@@ -2982,7 +2985,7 @@ public sealed partial class MatchEngine
         FinishStraightening(player, []);
     }
     private string[] EligibleForOptionalStraighten(int playerId) => _state.Cards.Values.Where(c => c.OwnerId == playerId && (c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
-        && Definition(c).Effect == "choose-straighten" && c.StraightenBlockedTurn != _state.TurnNumber || RentatsuMayStayBowed(c))).Select(c => c.Id).ToArray();
+        && Definition(c).Effect == "choose-straighten" && c.StraightenBlockedTurn != _state.TurnNumber || RentatsuMayStayBowed(c) || PanKuMayStayBowedInPhase(c))).Select(c => c.Id).ToArray();
     private void ResolveDeclineStraighten(GameCommand command)
     {
         var pending = _state.PendingChoice!;
@@ -2995,6 +2998,7 @@ public sealed partial class MatchEngine
     }
     private void FinishStraightening(PlayerState player, string[] declinedIds)
     {
+        _w827StraightenPhase = true; // issue #827: the Straighten Phase's own straightening of P'an Ku was the controller's choice (declineStraighten)
         foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached))
         {
             if (declinedIds.Contains(card.Id)) Emit("straightenDeclined", $"{Definition(card).Name} was left bowed by choice.", card.OwnerId, card.Id);
@@ -3013,6 +3017,7 @@ public sealed partial class MatchEngine
         // Chi-token path) still fires immediately if this brings the host to 0 or below.
         foreach (var infiltrator in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "cultist-infiltrator").ToArray())
             CreateToken(Card(infiltrator.AttachedTo!), "Cultist", infiltrator.Id, "Chi", -1);
+        _w827StraightenPhase = false;
         EventsPhase(player);
     }
     private void EventsPhase(PlayerState player)

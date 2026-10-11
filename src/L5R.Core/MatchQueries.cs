@@ -218,7 +218,7 @@ public sealed partial class MatchEngine
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
         // (SeppukuTiming.cs), so an offered Seppuku is never one the engine would refuse for its timing.
         if (SeppukuTimingReason(playerId) is null)
-            foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && c.Dishonorable && Definition(c).Type == CardType.Personality && !SeppukuBarredByPriceOfHonor(c) /* issue #503 */ &&
+            foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && c.Dishonorable && Definition(c).Type == CardType.Personality && !SeppukuBarredByPriceOfHonor(c) /* issue #503 */ && !SeppukuBarredByControl(c) /* issue #827 */ &&
                 (Keyword(c, "Samurai") || Keyword(c, "Courtier") || Keyword(c, "Shugenja"))))
                 Add("orderSeppuku", $"Order Seppuku · {Definition(card).Name}", OwesForcedPass(playerId) ? null : Command("orderSeppuku", card.Id),
                     OwesForcedPass(playerId) ? ForcedPassReason : ActionLocked(card) ? $"{Definition(card).Name} may not perform actions this turn." : null, card.Id);
