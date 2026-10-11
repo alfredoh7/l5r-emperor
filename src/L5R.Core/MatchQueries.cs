@@ -418,6 +418,21 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));
         }
+        else if (_state.PendingChoice is { Type: "moveReaction" } movePending)
+        {
+            // After an action moved an enemy Infantry Personality to the battlefield of Legion of the Bat (issue #279): the one watching card's own Reaction, then the pass. Before issue #833 the window
+            // listed neither, so a client offered only the engine's options could never play (or pass) the Reaction.
+            if (movePending.PlayerId == playerId && movePending.CardId is not null)
+            {
+                var watcher = Card(movePending.CardId);
+                foreach (var reactionId in AbilityIdsOf(watcher).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield"))
+                {
+                    var used = AbilityUseSpent(watcher.AbilityUses, AbilityCatalog.All[reactionId], AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
+                    AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
+                }
+            }
+            Add("declineReaction", "Pass reaction", Command("declineReaction"));
+        }
         else if (_state.PendingChoice is { Type: "afterResolutionReaction" })
         {
             // After a battle's resolution (issue #417): this player's Reactions that name it, from a hand, a discard pile or play, then the pass.
