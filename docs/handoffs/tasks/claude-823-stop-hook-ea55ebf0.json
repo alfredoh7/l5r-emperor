@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Stop hook (handoff_reminder.py): ignore this session's engine edits made before the worktree's current branch was checked out (transcript timestamps vs the HEAD reflog), so a session is no longer asked for a handoff covering another session's branch. Regression test added.",
+  "validation": "python -m unittest tools.hooks.test_handoff_reminder: 15 tests OK (one new). Replayed this session's real transcript through the hook against the affected branch: no reminder. Tooling only; no game code changed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/823",
+  "branch": "claude/823-stop-hook",
+  "updated": "2026-10-11T07:09:00.318270+00:00"
+}
