@@ -1,0 +1,32 @@
+{
+  "Profile": "stronghold-wave-816",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #816.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4252",
+      "Name": "Kalani's Landing",
+      "Type": "Stronghold",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 2,
+      "Text": "This card will not produce Gold when paying for an attachment.\nAfter each phase begins: Straighten this card.\nReaction: After an action is announced, target a card (in play): Give it -2 Gold Cost.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4252.jpg",
+      "Keywords": [
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w816-kalani-reduce"
+      ],
+      "Effect": "w816-kalanis-landing"
+    }
+  ],
+  "Decks": []
+}

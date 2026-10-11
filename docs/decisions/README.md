@@ -107,3 +107,4 @@ interpretation this register's decision docs already settled.
 - [Bayushi Kachiko (#778)](2026-10-09-bayushi-kachiko.md) — Mendon's broad reading of "attacks": the first assignment to, or move into, an attacking army costs the target's controller 2 Honor; wired with her -1F term
 
 - [Practice bot battle policy](2026-10-09-bot-battle-policy.md) — accepted (owner spec): pass when the battle is decided, attack/bow target priorities, send-home rule, first-action reactions and the Border Keep refresh.
+- [Kalani's Landing (#816)](2026-10-10-kalanis-landing.md) — Mendon's ruling (R-041): a card in play with a non-zero Gold Cost is targeted after any announced action and gets -2 Gold Cost until end of turn, once per turn; wired with its attachment-production rule and the new "after each phase begins" channel.

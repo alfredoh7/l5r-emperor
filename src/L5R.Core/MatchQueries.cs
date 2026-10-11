@@ -376,6 +376,10 @@ public sealed partial class MatchEngine
                         AddReaction(card, reactionId, label: $"{announceReaction.Label} · {Definition(performer).Name}", validate: true, performerId: performer.Id);
                 }
             }
+            // Kalani's Landing (issue #816): the Reaction of the window's card, one option carrying every card in play it may target.
+            if (announcePending.PlayerId == playerId && announcePending.CardId is { } kalaniWatcherId)
+                foreach (var kalaniReaction in AbilityIdsOf(Card(kalaniWatcherId)).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == Wave816Abilities.AnnounceAnyAction))
+                    AddTargetedReaction(Card(kalaniWatcherId), kalaniReaction, null);
             // No Hiding Place (issue #498): the announcing player's copies in hand, whichever card the window was opened for.
             foreach (var (noHidingPlace, noHidingId) in NoHidingPlaceOptions(playerId)) AddReaction(noHidingPlace, noHidingId);
             // Ikoma Ayumu, Utaku Lishan (issue #503): the watcher's own P3 Reactions, one option per target.

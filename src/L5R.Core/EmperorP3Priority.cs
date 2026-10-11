@@ -255,7 +255,8 @@ public sealed partial class MatchEngine
     }
 
     /// <summary>The next P3 watcher of the announcement not yet asked (FindAnnounceWatcher's fallback, the window's reopening), marked asked.</summary>
-    private CardInstance? P3AnnounceWatcher(GameCommand command) => P3BuiltInAnnounceWatcher(command) ?? (EngineHooks.AnnounceRegistrants.Items.Length == 0 ? null : RegisteredAnnounceWatcher(command)); // P6 (AfterFacts.cs): any registered watcher
+    // P6 (AfterFacts.cs): any registered watcher; Kalani's Landing (issue #816): a card of either player that reacts to any player's action.
+    private CardInstance? P3AnnounceWatcher(GameCommand command) => P3BuiltInAnnounceWatcher(command) ?? (EngineHooks.AnnounceRegistrants.Items.Length == 0 ? null : RegisteredAnnounceWatcher(command)) ?? Wave816AnnounceWatcher(command);
 
     private CardInstance? P3BuiltInAnnounceWatcher(GameCommand command)
     {
@@ -298,7 +299,7 @@ public sealed partial class MatchEngine
     /// then set aside behind the announce window. True when the window opened.</summary>
     private bool P3AnnounceCommand(GameCommand command, Action run)
     {
-        if (command.Type == "useAbility" || !AnnouncesBattleAction(command) && !AnnouncesTacticalAction(command)) return false;
+        if (command.Type == "useAbility" || !AnnouncesBattleAction(command) && !AnnouncesTacticalAction(command) && !Wave816Announces(command)) return false;
         P3P.Announcements.Remove(AnnounceKeyOf(command));
         var probe = P3AnnounceWatcher(command);
         if (probe is null) return false;

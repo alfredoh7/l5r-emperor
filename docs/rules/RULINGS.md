@@ -393,3 +393,10 @@ Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the
 - **Cards/primitives:** content/oracle/emperor-supplemental-catalogue.json; the library carries no ban field.
 - **Date:** 2026-10-10
 - **Source:** Mendon (issue #812).
+
+### R-041 — Kalani's Landing: targeting a card in play and reducing its Gold Cost
+Kalani's Landing's Reaction ("After an action is announced, target a card (in play): Give it -2 Gold Cost") targets a card in play with a non-zero Gold Cost. A card is in play when it is in a player's home (holdings, Personalities, Rings and other permanent-effect cards) and not explicitly out of play, or at a battlefield; a card with no printed Gold Cost has a Gold Cost of 0 and cannot be targeted. The Reaction can happen after any action; once it has been used, its window is not opened for that player again until the next turn. The target's current Gold Cost is reduced by 2 until the end of the turn.
+
+- **Cards/primitives:** Kalani's Landing (oracle-l5r-4252); the Gold Cost modifier (`ApplyModifier` with "GoldCost", read by `CardGoldCost`), the announce window for either player's action (`Wave816AnnounceWatcher`) and `EngineHooks.PhaseBegins`; docs/decisions/2026-10-10-kalanis-landing.md.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #816).

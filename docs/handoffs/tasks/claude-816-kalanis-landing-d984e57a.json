@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wired Kalani's Landing (Mantis Stronghold, stronghold-wave-816) on Mendon's ruling R-041: after any announced action its controller may target a card in play with a non-zero Gold Cost for -2 Gold Cost until end of turn, once per turn. Also: no Gold when paying for an attachment, straightens after each phase begins (new EngineHooks.PhaseBegins channel). The Gold Cost modifier primitive already existed; added its target rule, an announce window for either player's action, and the phase hook. Stacked on PR #815 (issue #812), which supplies the card record.",
+  "validation": "bash tools/check.sh --skip-client passed (Core wave-816 8 tests incl. targets, once per turn, either player's action, Strategy and Equip announced, attachment production, phase straighten; AI soak and arena unchanged); python tools/content unittest passed after the art manifest gained the bundled scan; tools/lint_comment_swallow clean. No Godot/native client run (rules-only change, no UI change).",
+  "remaining": "Depends on PR #815 (card catalogue record and art pack catalogue-art-issue812-20261010-r1, which still has to be published as a private release). Readings for Mendon in docs/decisions/2026-10-10-kalanis-landing.md: Reactions are not announced into this window; Reserve recruit uses the same route but has no dedicated test; once per game turn number.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/816",
+  "branch": "claude/816-kalanis-landing",
+  "updated": "2026-10-11T04:09:31.950274+00:00"
+}
