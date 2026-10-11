@@ -138,6 +138,12 @@ public sealed partial class MatchEngine
         }
     }
 
+    // TargetSlots' offered default for Unsettling Gathering (single-action audit, issue #833): "Gold Cost equal to or lower than the amount paid" -- the plain default pays
+    // the Variable cost's minimum (0), so every attachment that costs anything was listed disabled; the default pays the first attachment's Gold Cost instead.
+    private GameCommand? Wave741DefaultAmount(GameCommand command) =>
+        command.AbilityId == Wave741Abilities.Gathering && command.GoldAmount is null && SlotCards(command, "attachment").FirstOrDefault() is { } attachment
+            ? command with { GoldAmount = CardGoldCost(attachment) } : null;
+
     // ---- validation --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private void Wave741Validate(ValidationHookContext context)
