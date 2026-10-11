@@ -46,7 +46,7 @@ internal static class Wave736Tests
     private static int Honor(MatchEngine e, int player) => e.State.Players[player].Honor;
 
     public static void Run(TestRunner runner) => runner.Run("wave-736", [
-        ("Published as printed: fourteen cards in eight profiles with their stats, abilities and effects; six of the seven cards it deferred are still not published (Asako Kaitoko - exp was wired by issue #768)", PublishedShape),
+        ("Published as printed: fourteen cards in eight profiles with their stats, abilities and effects; four of the seven cards it deferred are still not published (Isawa Ryuzo and Hida Kaiji - exp were wired by issue #821) (Asako Kaitoko - exp was wired by issue #768)", PublishedShape),
         ("Susumu Haikaro: his destruction from battle resolution is negated, nobody else's", HaikaroImmunity),
         ("The Earth's Armor: while its Shugenja is defending, other players' cards will not bow him", EarthsArmorBow),
         ("Thunder Bow: its Personality ignores other players' effects that prevent him acting; Battle/Open transfers it to your own Personality at any location", ThunderBowCard),
@@ -91,7 +91,7 @@ internal static class Wave736Tests
             Check(d.Type == want.Type && (d.Abilities ?? []).SequenceEqual(want.Abilities) && d.Effect == want.Effect && d.EntryHonorLoss == want.EntryLoss, $"{d.Name} is published as wired");
             Check(!d.CreatedOnly && !string.IsNullOrWhiteSpace(d.Text), $"{d.Name} prints its text and is playable");
         }
-        foreach (var id in new[] { CleansingBreath, Ryuzo, PanKuExp, Jingasa, Kaiji }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
+        foreach (var id in new[] { CleansingBreath, PanKuExp, Jingasa }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // Isawa Ryuzo and Hida Kaiji - exp were wired afterwards (Wave821.cs, issue #821) // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
         Check(CardCatalog.Cards.ContainsKey(Kaitoko), "Asako Kaitoko - exp, deferred by this batch for want of a stat cap, was published by issue #768");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w736-", StringComparison.Ordinal)), 11, "eleven w736 abilities");
     }

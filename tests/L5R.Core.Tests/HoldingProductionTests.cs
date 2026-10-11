@@ -20,6 +20,8 @@ internal static class HoldingProductionTests
          "oracle-l5r-9630",
          // Issue #653: Treasure Hunter (9966) prints the CREATED Holding's "Produce 2 Gold" (the published created-only Charter, oracle-l5r-10806), as Returning Home does.
          "oracle-l5r-9966",
+         // Issue #821: The Governor's Estate (8106) prints the CREATED Holding's "Produce 2 Gold" (the Imperial Estate, user-scan-imperial-estate, its own production); the Stronghold produces its printed 4.
+         "oracle-l5r-8106",
          // Issue #653: Kenro-ji-jin's Bounty (10229), a Celestial, prints "Reaction: When paying for a Farm: Produce 1 Gold" -- a Reaction Gold source, as Seaside Bazaar's.
          "oracle-l5r-10229",
          // Issue #653 (PromoEmperorItems.cs): Mantle of the Jade Champion (9967) produces 4 Gold through its Reaction when paying for a Spell, Library of Rebirth's reactive source on an attached card.

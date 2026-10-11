@@ -70,7 +70,7 @@ public sealed partial class MatchEngine
     private bool HomeWaivesSourceLocation(AbilityDefinition ability, CardInstance? source)
     {
         if (source is null || !InPlay(source)) return false;
-        if (!ability.Home && !Keyword(source, TirelessHomeAbilities.HomeKeyword)) return false;
+        if (!ability.Home && !Keyword(source, TirelessHomeAbilities.HomeKeyword) && !Wave821GrantsHome(source) /* issue #821: Tsumaro's Illusion */) return false;
         return _state.Cards.TryGetValue(UnitHostId(source), out var unit) && unit.Zone == Zone.Home;
     }
 

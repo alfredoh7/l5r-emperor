@@ -54,7 +54,7 @@ public sealed partial class MatchEngine
                 player.DynastyDeck.Count, player.FateDeck.Count,
                 owned.Where(c => c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c => ViewCard(c)).ToArray(),
                 player.ProclaimUsedTurn == _state.TurnNumber, player.DishonorLossPending,
-                owned.Where(c => c.Zone == Zone.RemovedFromGame).Select(c => ViewCard(c)).ToArray(),
+                owned.Where(c => c.Zone == Zone.RemovedFromGame).Select((c, i) => c.FaceUp || c.OwnerId == playerId ? ViewCard(c) : HiddenRemovedView(c, i)).ToArray(), // issue #821: a face-down card removed from the game stays hidden from the other player
                 DeadCount(player.Id),
                 // Counts are public; identities are private unless already publicly focused from
                 // discard or revealed by Strike. Anonymous backs need no stable hidden card IDs.
@@ -101,6 +101,10 @@ public sealed partial class MatchEngine
             : [];
         return new($"provinceOrder-{province.Index}", pending.PlayerId, owner.Id, province.Index, pending.Prompt, options);
     }
+
+    // A card removed from the game face-down (the Governor's Estate): its owner sees it, the other player sees only that it is there.
+    private CardView HiddenRemovedView(CardInstance card, int index) =>
+        new($"hidden-p{card.OwnerId}-removed{index}", null, card.OwnerId, card.Zone, false, false, null, null, 0);
 
     private CardView ViewCard(CardInstance card, bool visible = true)
     {
@@ -776,9 +780,15 @@ public sealed partial class MatchEngine
                     // Issue #627: a player with no Cavalry unit to assign is not offered the (empty) Cavalry assignment at all.
                     else if (!(cavalrySegment && units.Length == 0))
                         foreach (var province in provinces)
-                            Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} · {units.Length} {(cavalrySegment ? "Cavalry" : "Infantry")} units",
-                                Command(actionType, assignments: units.ToDictionary(id => id, _ => province)), units.Length == 0 ? $"No unbowed {(cavalrySegment ? "Cavalry" : "Infantry")} Personalities at home." : null,
-                                targets: units, provinces: provinces);
+                        {
+                            var armyUnits = ArmyAssignmentTemplate(units, playerId, province); // issue #821 (ArmyRestrictions.cs): the "assign everyone" command never names units that will not share an army
+                            Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} · {armyUnits.Length} {(cavalrySegment ? "Cavalry" : "Infantry")} units",
+                                Command(actionType, assignments: armyUnits.ToDictionary(id => id, _ => province)), units.Length == 0 ? $"No unbowed {(cavalrySegment ? "Cavalry" : "Infantry")} Personalities at home." : null,
+                                targets: armyUnits, provinces: provinces);
+                            foreach (var solo in ArmyAssignmentSoloUnits(units, armyUnits, playerId, province))
+                                Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} with {Definition(Card(solo)).Name} alone", Command(actionType, assignments: new Dictionary<string, int> { [solo] = province }),
+                                    null, targets: [solo], provinces: [province]);
+                        }
                     // Spiritual Manipulation (issue #476 batch 4): assigning no attackers is refused while a forced target can be assigned in this segment.
                     Add("pass", attack ? (cavalrySegment ? "Assign no Cavalry attackers" : "Assign no Infantry attackers") : (cavalrySegment ? "Assign no Cavalry defenders" : "Assign no defenders"), Command("pass"),
                         attack ? ForcedAssignmentRefusal(playerId, null, cavalrySegment) : null);

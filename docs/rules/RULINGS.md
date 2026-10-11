@@ -400,3 +400,52 @@ Kalani's Landing's Reaction ("After an action is announced, target a card (in pl
 - **Cards/primitives:** Kalani's Landing (oracle-l5r-4252); the Gold Cost modifier (`ApplyModifier` with "GoldCost", read by `CardGoldCost`), the announce window for either player's action (`Wave816AnnounceWatcher`) and `EngineHooks.PhaseBegins`; docs/decisions/2026-10-10-kalanis-landing.md.
 - **Date:** 2026-10-10
 - **Source:** Mendon (issue #816).
+
+### R-042 — The Governor's Estate creates a Holding instead of putting a face-down card into play
+Where the Governor's Estate says to turn a card in your province face-down and put it into play bowed, read it as *creating* a card that is a Holding: the card in the province is removed from the game (shown in the removed-from-the-game pile only if it had been revealed before; a face-down card stays hidden) and a bowed Holding is created in the player's home. The Holding is the supplied "Imperial Estate" scan: Gold Cost 0, "Bow this card: Produce 2 Gold." The Reaction is used after the owner's Dynasty Phase begins, twice a turn, for 2 Gold each.
+
+- **Cards/primitives:** The Governor's Estate (oracle-l5r-8106), the Imperial Estate (user-scan-imperial-estate); `Wave821GovernorCreate`, the `dynastyBeginReaction` window; docs/decisions/2026-10-10-six-ruled-cards.md.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-043 — Hida Kaiji is never assigned into an army that holds another Personality of his side
+He cannot be assigned so that he joins a battlefield with other units on his side, and other units cannot be assigned into his army; the opposing army is never considered. Other units may still be moved there during the engage or battle action segment. The rule is a count of the units of his side at a battlefield (`SideUnitCount`).
+
+- **Cards/primitives:** Hida Kaiji - exp (oracle-l5r-10831); `RestrictionKind.SoleUnit`, `SideUnitsAt` (ArmyRestrictions.cs).
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-044 — Chuda Kaito's +3GC while the effects of his Spell action resolve
+Kaito's +3GC adds 3 to his Gold Cost while the effects of a Spell action he performed are resolving. A Spell or Reaction that checks a Shugenja's Gold Cost reads it: for Damning Ceremony he is considered to have a Gold Cost of 5.
+
+- **Cards/primitives:** Chuda Kaito (oracle-l5r-10320), Damning Ceremony; `Wave821BeginKaito`, the +3 term of `CardGoldCost`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-045 — The gift step: Ikoma Satoru and Naoharu's Gift use one mechanism
+Showing a hand card to another player, who may put it in his hand, is one mechanism; only the outcome differs. Naoharu's Gift: Honor equal to the card's Focus Value, or discard it and draw cards. Ikoma Satoru: draw two cards, or discard it and Melee Attack with strength equal to its Focus Value targeting a Follower or a Personality without Followers in his home. (Sadahako's Artistry is wired on the same step: reading 9 of the decision, to be confirmed.)
+
+- **Cards/primitives:** Ikoma Satoru (oracle-l5r-10291), Naoharu's Gift, Sadahako's Artistry (oracle-l5r-10186); `BeginGift`, `TransferGift` (GiftOffer.cs), `AttackTargetScope.EnemyHome`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-046 — Isawa Ryuzo's pairs will not attack or defend in the same army, and stack
+The two targeted Personalities (each with more Madness tokens than printed Personal Honor) are never assigned into one army. Ryuzo is not Unique, so there can be three pairs; a Personality can be a member of up to three pairs and so be unable to assign with three others, and a pair touches no other pair.
+
+- **Cards/primitives:** Isawa Ryuzo (oracle-l5r-10476); `RestrictionKind.NoSameArmy`, `AddSameArmyPair`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-047 — Home Reactions and Home Engage behave like Home Battle
+A Reaction with Home, and an Engage action with Home, behave as Home does on a Battle action: its unit may be at home as well as at the current battlefield. They are taken at their own timing: the Reaction's trigger, or the Engage window.
+
+- **Cards/primitives:** Isawa Tsumaro (oracle-l5r-10863); `Wave821Validate` (the Home flag on a Reaction), `HomeWaivesSourceLocation`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-048 — Tsumaro's Illusion lends Home to the target's Spell actions only while it stands at that battlefield
+While the Illusion is at the battlefield, the original Shugenja's Spell actions have Home. Destroyed, sent home or moved to a different battle, the Spells lose it; returned to the battlefield they regain it. When the battle resolves they lose it, so moving the Illusion to a new battlefield does not carry Home there.
+
+- **Cards/primitives:** Isawa Tsumaro (oracle-l5r-10863), Tsumaro's Illusion (oracle-l5r-11346); `IllusionLink`, `Wave821GrantsHome`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).

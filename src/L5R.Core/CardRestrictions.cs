@@ -42,7 +42,13 @@ public enum RestrictionKind
     /// <summary>The card may be assigned even if bowed.</summary>
     AssignWhileBowed,
     /// <summary>The card may perform at most Max Spell actions in the restriction's period (Count of them so far).</summary>
-    SpellLimit
+    SpellLimit,
+    /// <summary>(Issue #821, ArmyRestrictions.cs) The card and OtherCardId will not be assigned to attack or defend in the SAME ARMY: the same side of one battlefield. They may stand opposed at it.
+    /// A stored row names one direction; the pair is judged both ways, and a card may carry several (Isawa Ryuzo's pairs stack).</summary>
+    NoSameArmy,
+    /// <summary>(Issue #821, ArmyRestrictions.cs) The card will not be assigned into an army that holds another Personality of its side, and no other Personality of its side will be assigned into its army
+    /// (Hida Kaiji - exp). The opposing army is never considered.</summary>
+    SoleUnit
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -224,6 +230,7 @@ public sealed partial class MatchEngine
     /// <summary>The cards that would stand at the battlefield with this card: those already there and the others this command assigns to it.</summary>
     private void RequireRestrictionPairsMayAssign(CardInstance card, int battlefield, IReadOnlyDictionary<string, int> assignments)
     {
+        RequireArmyMayAssign(card, battlefield, assignments); // issue #821 (ArmyRestrictions.cs): same-army pairs and a sole unit
         var companions = _state.Cards.Values.Where(c => c.Id != card.Id && c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && c.AttachedTo is null)
             .Concat(assignments.Where(a => a.Value == battlefield && a.Key != card.Id).Select(a => Card(a.Key)));
         foreach (var other in companions)

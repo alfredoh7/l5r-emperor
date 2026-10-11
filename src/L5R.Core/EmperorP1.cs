@@ -272,7 +272,7 @@ public sealed partial class MatchEngine
                 var wielder = WielderOf(source!);
                 if (wielder is not null && InPlay(wielder))
                 {
-                    var raise = Math.Max(0, Definition(wielder).GoldCost - CardForce(wielder));
+                    var raise = Math.Max(0, Definition(wielder).GoldCost + Wave821GoldCost(wielder) /* issue #821: Chuda Kaito reads 5 while his Spell resolves */ - CardForce(wielder));
                     if (raise > 0) AddPermanentModifier(wielder, source!.Id, id, "Force", raise);
                     foreach (var keyword in new[] { "Shadowlands", "Nonhuman", "Oni" }) GiveKeywordPermanently(wielder, keyword, source!.Id);
                 }
