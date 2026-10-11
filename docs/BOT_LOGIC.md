@@ -31,15 +31,16 @@ What the profile changes:
 
 ## 3. Dynasty phase: buying and recruiting (ACTIVE)
 
-- **Holdings:** the first holdings score 160, minus 10 per holding it already owns (so the fifth is 120). With 5 to 7 holdings it scores `70 - number owned`; with 8 or more, 5 (below a pass, so it stops).
+- **Holdings:** the first holdings score 160, minus 10 per holding it already owns (so the fifth is 120). With 5 to 9 holdings it scores `70 - number owned`; with 10 or more, 5 (so it stops). If it can afford **every** face-up card in its provinces, it buys them all whatever its holdings count and discards nothing (issue #818).
 - **Personalities / Followers:** `110 + 2 x Force + 2 x Personal Honor - Gold cost`, with adjustments:
   - Proclaim-eligible: +40 (Prioritise), +20 (Neutral), -10 (Deprioritise) from the Honor profile.
   - Paying the Clan allegiance cost when it has the Honor: -20.
   - Using the Clan discount (if Proclaim is not already used this turn): -25 (Prioritise), -15 (Neutral), +15 (Deprioritise). So a deck that wants to Proclaim avoids spending the discount that turn.
   - +30 for a turn after it used the Border Keep refresh (it wants the fresh cards). Only the parked refresh sets this, so it is inactive while that rule is off.
-- **Experienced Personality overlaid for free:** 180 + 2 x Force.
+- **Experienced Personality overlaid for free:** 180 + 2 x Force, but only when it has more Personalities in play than its opponent, or the card would otherwise be discarded (issue #818); otherwise -5, so it stays in the province.
 - **Proclaim:** 1000 (always), or 40 when the profile deprioritises it.
-- **End dynasty:** 0. **Discard a province card** at the end: 20, or 40 for a Holding when it already has 8 or more.
+- **End dynasty:** 0. **Discard a province card** at the end: 20, or 40 for a Holding when it already has 10 or more. Face-up Personalities are different (issue #818): if its total Gold production (bowed Holdings counted) pays for all of them, none is discarded; otherwise it discards the cheapest, one at a time, until the rest fit, counting a Personality of its own Clan 2 Gold cheaper. With Gold for the whole row nothing is discarded at all.
+- **Catch-up recruit (issue #818):** after its second turn, when it has fewer Personalities than its opponent, buying a Personality scores +400 (above everything but Proclaim), once per turn; it then goes back to the usual scores.
 - **Border Keep first-turn ability (ACTIVE):** score 140. It cycles province cards it cannot afford; in its first two turns with fewer than 3 holdings, Personalities too; with 7+ holdings, Holdings.
 - **Border Keep once-per-game refresh (PARKED):** the 35-point default stands when parked. The parked rule would use it with 22+ producible Gold and three or more provinces holding Holdings or face-down cards.
 
@@ -59,7 +60,8 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 - **Never hurt itself:** a harmful ability (destroy, bow, penalize, Honor loss) aimed at its own card scores -50, so it passes instead of using it.
 - **Targets:** for a harmful ability, the opponent's unbowed Personality with the most Force; for a helpful one, its own. When straightening, bowed ones first.
 - **Imperial Favor:**
-  - If it has the higher Family Honor **and** more Personalities, it **always** takes the Favor (900).
+  - If it has the higher Family Honor **and** more Personalities, it **always** takes the Favor (900). So does a bot with the higher *current* Honor whose opponent's units average more Force than its own weakest unit (issue #818), whatever the Personality counts. Lobbying bows its lowest-Force Personality, then the one with the fewest attachments, then the fewest printed abilities.
+  - Defending, it always spends the Favor (Favor Battle) to send home the largest attacking unit (300 + that unit's Force).
   - With equal or fewer Personalities it takes the Favor only if that costs no bow (150), otherwise it is barely above a pass.
   - In between: 60.
   - Spending the Favor as a cost: unlimited if it can retake it for free; otherwise once, and only when it will certainly Lobby again.
@@ -69,6 +71,7 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 ## 5. Declaring and assigning attacks (ACTIVE)
 
 - The **attack planner** splits its unbowed army into as many sub-armies as it can, each sent at a province, so that **each army's Force is greater than that province's Strength plus the Force of every unbowed enemy unit at home** (it assumes any home unit can defend any province). It tries the largest number of the weakest provinces first; leftovers join the army at the strongest chosen province. If not even one army clears its threshold, it does not attack.
+- **Issue #818:** an army attacks when its Force beats the Province's Strength **and** beats the defenders' Force (not their sum); the Force each +N Force card in its hand could add (or a card it creates with Force) is added to its armies. Holding Honor-gaining Battle cards, it also sends one unit that can perform one at a Province that unit cannot destroy, while the rest attack a different Province (or alone, when nothing else can).
 - **Declare attack:** 0 if no plan exists (and -100 if it has no units). If a plan exists, `90 + planned Force - enemy home Force`, far above passing.
 - **Honor race:** if the opponent already has 40+ Honor (it wins at the start of its next turn), it attacks anything it can break, ignoring enemy defenders (declare 200, assign 150+).
 - **Attack assignment:** margin over every army > 0: `90 + Force - enemy home Force`. A single army that beats the province with no enemy at home: 80. Otherwise 0.
@@ -82,7 +85,7 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 
 ## 7. Reactions (ACTIVE)
 
-- A Reaction that **negates** an effect: always played (1500).
+- A Reaction that **negates** an effect: always played (1500). A Reaction that **destroys or bows** a card of the opponent's: always played (1400, issue #818).
 - A Reaction a card prints for its own entry (e.g. draws or tokens when it enters play): always played, 160 + rank bonus, unless it would only cost the bot Honor.
 - **Any other Reaction is a weighted gamble**, rolled deterministically from the match state: the chance it plays is `0.3 + 0.15 x rank` (neutral 30%, help 45%, penalize 60%, bow 75%, destroy 90%). If it plays it scores 150 + rank bonus; otherwise 50. Declining a Reaction scores 100, so a failed roll declines.
 - **Reaction windows with several Reactions:** it announces what it would play anyway, then says it is done; it orders its own Reactions first and the opponent's as announced. Once its order is set, it plays them (+1000).
@@ -96,7 +99,10 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 2. **The granted action is always used:** when attaching a Spell grants the additional action to use its Battle ability, the bot takes it (300, above everything) and never declines, even in a battle it has already won. Its target comes from the normal battle priorities.
 3. **Won battle, full hand:** once the battle is decided (a defender with Force at least the attacker's; an attacker whose Force exceeds the defenders plus the province's Strength) and the bot would otherwise do nothing, it equips one card at a time while its hand is **at or above its maximum**, then passes.
 4. **Undecided battle:** if equipping **at most three** attachments it can afford would move the outcome **up the ladder**, those attachments score 140. The ladder is, for a defender: loses the battle and the province, loses, ties, wins. For an attacker: loses, ties, wins, wins and destroys the province. A tie is its own rung. The Force an attachment adds is its printed Force plus the largest "+N Force" its Battle abilities give.
-   - Not counted: Force removed from the enemy (bowing or destroying a defender).
+   - Force removed from the enemy counts (issue #818): an attachment whose Battle ability bows or destroys an enemy Personality or Follower is credited with that card's Force, the largest first, so two attachments are not credited with the same card.
+
+### Attacker rules (ACTIVE, issue #818)
+An attacker nobody opposes, whose Force already destroys the Province, passes. The only actions it still plays are those that gain it Honor or cost the opponent Honor *and will actually do so*: an Honor gain printed as "if the province has not been destroyed" (Preserving Beauty) is skipped once the Province falls. Short of the Province it plays actions as usual. A bot holding as many cards as its hand limit also plays Honor gains that change nothing in a decided battle.
 
 ### Six battle rules (PARKED, off by default, `UseBattlePolicy`)
 When switched on:
@@ -113,7 +119,7 @@ When it cannot raze a province, it still attacks if it would beat every possible
 ## 9. Discarding and small choices (ACTIVE)
 
 - **Discard down to the hand limit:** it discards the lowest-valued cards first: +3 Force Strategy 8, Bow Strategy 6, Follower 5, anything else 4.
-- **Honor choices:** never lets the opponent gain Honor or loses its own by choice. Shinden: always bows rather than give the opponent Honor.
+- **Honor choices:** never lets the opponent gain Honor or loses its own by choice. Shinden (issue #818): it bows the Personality when that unit is under 15% of its army's Force or the opponent has more than 25 Honor; otherwise it bows only if that cannot change whether it would attack, and lets the opponent gain 1 Honor if it could. The same test governs an Either/Or option that bows.
 - **Either/Or:** pays Gold if it can (110), else bows (90), else other options (60), never "lose Honor".
 - **Attachment destruction** offered by an effect: always destroys an opponent's attachment (125), never its own.
 - **Search and look-at-the-top:** takes the first legal option the engine lists. Puts a found Ring into play.

@@ -30,8 +30,16 @@ public sealed class BotContext
     /// <summary>Issue #788 (Mendon): true lets the bot attack when it cannot raze a Province but can destroy the defending army (or trade favourably in a tie). OFF by default: the arena found it lost more than it won (docs/parked/2026-10-09-what-makes-a-good-l5r-bot.md).</summary>
     public bool UseTradeAttacks { get; init; } = false;
 
+    /// <summary>Issue #818 (Mendon's eleven bot changes, 2026-10-10): buy-everything and discard-by-affordability in the Dynasty Phase, the catch-up recruit, the overlay limit, lobbying and defending with the Imperial Favor, the attack and attacker-pass rules, Honor attacks, equips that count Force removed, Shinden / optional bows, and never declining an optional destroy or bow. ON by default; the arena switches it off to measure it.</summary>
+    public bool UseSpec818 { get; init; } = true;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
+
+    private int _recruitTurn = -1;
+    /// <summary>Remembers that a Personality was recruited this turn (issue #818: the catch-up priority applies to the first one only).</summary>
+    public void NoteRecruit(int turn) => _recruitTurn = turn;
+    public bool RecruitedThisTurn(int turn) => _recruitTurn == turn;
 
     /// <summary>Remembers that the Border Keep's refresh was used this turn, so the bot recruits Personalities with the fresh cards (issue #788).</summary>
     public void NoteBorderRefresh(int turn) => _borderRefreshTurn = turn;

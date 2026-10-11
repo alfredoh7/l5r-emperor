@@ -147,7 +147,7 @@ internal static class BotPolicyTests
         {
             // The threatened Personality is an unbowed one with Force, the case where the old rule allowed the Honor gain while the opponent was under 35.
             var v = harmView with { Players = [harmView.Players[0], harmView.Players[1] with { Honor = opponentHonor }], PendingChoice = new PendingChoice("shinden", 0, "mine-1", "Shinden Asahina", 1) };
-            Check(TrainingOpponent.Choose(v, [Shinden("honor"), Shinden("bow")]).Command?.Choice == "bow", $"Shinden bows rather than give the opponent Honor (opponent at {opponentHonor})");
+            Check(TrainingOpponent.Choose(v, [Shinden("honor"), Shinden("bow")], new BotContext { UseSpec818 = false }).Command?.Choice == "bow", $"Shinden bows rather than give the opponent Honor (opponent at {opponentHonor}); issue #818 refines this, see Spec818Tests");
         }
         // 3. A pure draw ability at a full hand is worth no more than passing; with room in the hand it is played.
         var draw = ability("korimi-exp2-draw");

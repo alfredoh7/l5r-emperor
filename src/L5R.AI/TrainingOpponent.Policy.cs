@@ -29,14 +29,18 @@ public static partial class TrainingOpponent
         var intent = AbilityIntent.Of(id);
         // Never aim a harmful ability (destroy, bow, penalize, an Honor loss) at the bot's own cards: that is worse than passing, so it scores below it. The target picker already
         // prefers the opponent's cards; this catches the case where only the bot's own are legal (found by the arena: Scars of War, Tsujiken and Baiko cost a bot 24 Honor).
-        if ((intent.Rank >= EffectRank.Penalize || intent.HonorLoss) && x.Card(command.TargetId) is { } victim && victim.OwnerId == x.Self.Id) return SelfHarmScore;
+        // Lobby bows one of the bot's own Personalities as its cost; that is the price of the Favor, not an attack on its own card (issue #818), so taking the Favor is scored before the self-harm test.
         if (intent.TakesFavor) return FavorTakeScore(x, intent);
+        if ((intent.Rank >= EffectRank.Penalize || intent.HonorLoss) && x.Card(command.TargetId) is { } victim && victim.OwnerId == x.Self.Id) return SelfHarmScore;
+        // Issue #818 item 5: defending, the Favor is always used to send home the largest attacking unit at a battlefield (it targets only enemy attackers), whether or not the bot can take it back.
+        if (Spec(x) && id == "favor-battle" && x.Card(command.TargetId) is { } sent && sent.OwnerId != x.Self.Id) return 300 + UnitForceOf(x, sent);
         if (intent.DiscardsFavor) return FavorSpendScore(x);
         // Mendon's spec: always play a Reaction that negates an effect; a Reaction that does not is a weighted choice (higher-ranked effects are likelier), rolled
         // deterministically from the match state so a replay makes the same choice. Declining a Reaction scores 100.
         if (intent.IsReaction)
         {
             if (intent.Negates) return 1500;
+            if (HarmsOpponentCard(x, command, intent)) return 1400; // issue #818 item 11: an optional destroy or bow of an opponent's card is never declined
             // Issue #644: a Reaction a Personality (or item) prints for its own entry -- Togashi Meiyu's and Torazu's Fire tokens, Satoshi's Dual Warfans' draw -- is
             // never a gamble: the bot always takes it, unless it would only cost the bot Honor.
             if (id is not null && AbilityCatalog.All.TryGetValue(id, out var printed) && printed.Trigger == "own-enters-play" && !intent.HonorLoss) return 160 + RankBonus(intent.Rank);
@@ -85,6 +89,7 @@ public static partial class TrainingOpponent
     private static double FavorTakeScore(Ctx x, AbilityIntent intent)
     {
         if (x.View.FavorPlayerId == x.Self.Id) return PassScore;
+        if (FavorLobbyWanted(x)) return 900; // issue #818 item 5: the opponent's units average more Force than the bot's weakest, and the bot leads on Honor
         var ahead = (x.Self.Stronghold.Definition?.StartingHonor ?? 0) > (x.Opponent.Stronghold.Definition?.StartingHonor ?? 0) && Personalities(x.Self) > Personalities(x.Opponent);
         if (ahead) return 900;
         if (Personalities(x.Self) <= Personalities(x.Opponent)) return intent.TakesFavorBowing ? PassScore + 2 : 150;
@@ -147,6 +152,7 @@ public static partial class TrainingOpponent
         var units = x.Self.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).ToArray();
         var provinces = x.Opponent.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray();
         var plan = PlanAttack(x, units, provinces);
+        if (plan is null && HonorAttackOf(x, units, provinces) is not null) return 85; // issue #818 item 8: an attack made to gain Honor
         if (plan is null) return units.Length == 0 ? -100 : TradeFor(x, units) is { } trade ? TradeScore(trade) : 0;
         if (HonorRace(x)) return 200; // the opponent wins on Honor next turn: always attack
         var force = ArmyForce(x.Self.Home.Where(c => plan.ContainsKey(c.Id) || c.AttachedTo is not null && plan.ContainsKey(c.AttachedTo)));
@@ -156,6 +162,7 @@ public static partial class TrainingOpponent
     /// <summary>Remembers the one thing the bot must carry to the next decision: that it has lobbied this turn (Lobby is once a turn).</summary>
     private static void Remember(Ctx x, GameCommand command)
     {
+        if (command.Type == "purchase" && x.Card(command.CardId)?.Definition?.Type == CardType.Personality) x.Memory.NoteRecruit(x.View.TurnNumber); // issue #818 item 2
         if (command.Type != "useAbility") return;
         var intent = AbilityIntent.Of(command.AbilityId);
         if (!intent.TakesFavor) return;
