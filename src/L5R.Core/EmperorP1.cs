@@ -233,19 +233,19 @@ public sealed partial class MatchEngine
             case EmperorP1Abilities.HakigeForce: ApplyModifier(target!, source!.Id, id, "Force", CardPersonalHonor(target!)); return false;
             case EmperorP1Abilities.NomenMoveHome: MoveHome(target!, false); return false;
             case EmperorP1Abilities.MeguBow:
-            {
-                var enemy = SlotCards(command, "target").Single();
-                if (InPlay(enemy) && !StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
-                if (SlotCards(command, "straighten").FirstOrDefault() is { } straightened && InPlay(straightened)) Straighten(straightened);
-                if (MatchesTargetStatus(enemy, TargetStatus.KolatNinjaOrShadowlands)) GainHonorFromPerformer(source!, 2, Definition(source!).Name);
-                return false;
-            }
+                {
+                    var enemy = SlotCards(command, "target").Single();
+                    if (InPlay(enemy) && !StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
+                    if (SlotCards(command, "straighten").FirstOrDefault() is { } straightened && InPlay(straightened)) Straighten(straightened);
+                    if (MatchesTargetStatus(enemy, TargetStatus.KolatNinjaOrShadowlands)) GainHonorFromPerformer(source!, 2, Definition(source!).Name);
+                    return false;
+                }
             case EmperorP1Abilities.KoisoLimited:
-            {
-                var doomed = SlotCards(command, "target").Single();
-                if (IsUnitCardWithoutAttachments(doomed)) DestroyUnitCard(doomed, player.Id);
-                return false;
-            }
+                {
+                    var doomed = SlotCards(command, "target").Single();
+                    if (IsUnitCardWithoutAttachments(doomed)) DestroyUnitCard(doomed, player.Id);
+                    return false;
+                }
             case EmperorP1Abilities.KoisoBattle:
                 if (IsUnitCardWithoutAttachments(target!)) DestroyUnitCard(target!, player.Id);
                 return false;
@@ -260,30 +260,30 @@ public sealed partial class MatchEngine
                 Emit("watchSet", $"{Definition(source).Name}: the next time this turn another player's action targets him, its effects on him are negated.", player.Id, source.Id);
                 return false;
             case EmperorP1Abilities.TaigoBow:
-            {
-                var enemy = SlotCards(command, "target").Single();
-                if (InPlay(enemy) && !StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
-                if (InPlay(enemy) && !Keyword(enemy, "Cavalry") && SlotCards(command, "destroy").FirstOrDefault() is { } collateral && IsUnitCardWithoutAttachments(collateral) && UnitHostId(collateral) == enemy.Id)
-                    DestroyUnitCard(collateral, player.Id);
-                return false;
-            }
-            case EmperorP1Abilities.DamningCeremony:
-            {
-                var wielder = WielderOf(source!);
-                if (wielder is not null && InPlay(wielder))
                 {
-                    var raise = Math.Max(0, Definition(wielder).GoldCost + Wave821GoldCost(wielder) /* issue #821: Chuda Kaito reads 5 while his Spell resolves */ - CardForce(wielder));
-                    if (raise > 0) AddPermanentModifier(wielder, source!.Id, id, "Force", raise);
-                    foreach (var keyword in new[] { "Shadowlands", "Nonhuman", "Oni" }) GiveKeywordPermanently(wielder, keyword, source!.Id);
+                    var enemy = SlotCards(command, "target").Single();
+                    if (InPlay(enemy) && !StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
+                    if (InPlay(enemy) && !Keyword(enemy, "Cavalry") && SlotCards(command, "destroy").FirstOrDefault() is { } collateral && IsUnitCardWithoutAttachments(collateral) && UnitHostId(collateral) == enemy.Id)
+                        DestroyUnitCard(collateral, player.Id);
+                    return false;
                 }
-                GainHonor(player.Id, -2, Definition(source!).Name, source);
-                return false;
-            }
+            case EmperorP1Abilities.DamningCeremony:
+                {
+                    var wielder = WielderOf(source!);
+                    if (wielder is not null && InPlay(wielder))
+                    {
+                        var raise = Math.Max(0, Definition(wielder).GoldCost + Wave821GoldCost(wielder) /* issue #821: Chuda Kaito reads 5 while his Spell resolves */ - CardForce(wielder));
+                        if (raise > 0) AddPermanentModifier(wielder, source!.Id, id, "Force", raise);
+                        foreach (var keyword in new[] { "Shadowlands", "Nonhuman", "Oni" }) GiveKeywordPermanently(wielder, keyword, source!.Id);
+                    }
+                    GainHonor(player.Id, -2, Definition(source!).Name, source);
+                    return false;
+                }
             case EmperorP1Abilities.ExtendingInfluenceCopy:
-            {
-                var shugenja = Card(command.PerformerId!);
-                return BeginCopy(shugenja, target!, id, [CopyStep.Ability], player.Id, "ability", bowedBeforeAction, GrantDuration.Turn);
-            }
+                {
+                    var shugenja = Card(command.PerformerId!);
+                    return BeginCopy(shugenja, target!, id, [CopyStep.Ability], player.Id, "ability", bowedBeforeAction, GrantDuration.Turn);
+                }
             case EmperorP1Abilities.MaraCavalry:
                 if (WielderOf(source!) is { } shaped && InPlay(shaped)) GrantKeyword(shaped, "Cavalry", source!.Id, GrantDuration.Turn);
                 return false;
@@ -538,19 +538,19 @@ public sealed partial class MatchEngine
             case EmperorP1Specs.Tamisu:
                 return TamisuCandidates().Select(c => new EitherOrOption(c.Id, $"Give {Definition(c).Name} +1F", $"{Definition(c).Name} has +1F until the end of the turn.", EitherOrKind.Choose, 0, true, null)).ToArray();
             case EmperorP1Specs.Shichiro:
-            {
-                var performer = Card(p.AffectedCardId!);
-                var name = Definition(performer).Name;
-                return [
-                    new("move", $"Move {name} home", $"{name}'s unit moves home.", EitherOrKind.Choose, 0, InPlay(performer) && performer.Zone == Zone.Battlefield, $"{name} is not at a battlefield."),
+                {
+                    var performer = Card(p.AffectedCardId!);
+                    var name = Definition(performer).Name;
+                    return [
+                        new("move", $"Move {name} home", $"{name}'s unit moves home.", EitherOrKind.Choose, 0, InPlay(performer) && performer.Zone == Zone.Battlefield, $"{name} is not at a battlefield."),
                     new("decline", "Do not move him", "Nothing happens.", EitherOrKind.Choose, 0, true, null)
-                ];
-            }
+                    ];
+                }
             default:
-            {
-                var loser = Card(p.AffectedCardId!);
-                return (InPlay(loser) ? UnitCardsWithoutAttachments(loser) : []).Select(c => new EitherOrOption(c.Id, $"Destroy {Definition(c).Name}", $"{Definition(c).Name} is destroyed.", EitherOrKind.Choose, 0, true, null)).ToArray();
-            }
+                {
+                    var loser = Card(p.AffectedCardId!);
+                    return (InPlay(loser) ? UnitCardsWithoutAttachments(loser) : []).Select(c => new EitherOrOption(c.Id, $"Destroy {Definition(c).Name}", $"{Definition(c).Name} is destroyed.", EitherOrKind.Choose, 0, true, null)).ToArray();
+                }
         }
     }
 
@@ -572,12 +572,12 @@ public sealed partial class MatchEngine
                 }
                 break;
             default:
-            {
-                // Part of the duel's action: what it destroys goes on that action's record.
-                DestroyUnitCard(Card(option.Key), p.ActingPlayerId);
-                if (_state.LastResolvedAction is { } facts) { facts.Affected.AddRange(_state.CurrentActionAffected); _state.CurrentActionAffected = []; }
-                break;
-            }
+                {
+                    // Part of the duel's action: what it destroys goes on that action's record.
+                    DestroyUnitCard(Card(option.Key), p.ActingPlayerId);
+                    if (_state.LastResolvedAction is { } facts) { facts.Affected.AddRange(_state.CurrentActionAffected); _state.CurrentActionAffected = []; }
+                    break;
+                }
         }
         return true;
     }
