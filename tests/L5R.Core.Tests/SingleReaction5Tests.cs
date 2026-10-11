@@ -223,7 +223,7 @@ internal static partial class SingleReaction5Tests
             var none = Rig(true, false, false, out var c3, out _, out _, out _);
             Check(!CanUse(none, r, ability, c3.Id), "with no other Samurai at the location there is nothing to choose");
             var bowed = Rig(true, true, true, out var c4, out _, out _, out _);
-            Check(!CanUse(bowed, r, ability, c4.Id), "a bowed Holding is not offered (the cost is its destruction, but the Reaction needs it unbowed)" );
+            Check(!CanUse(bowed, r, ability, c4.Id), "a bowed Holding is not offered (the cost is its destruction, but the Reaction needs it unbowed)");
             var quiet = Rig(false, false, true, out var c5, out _, out var h5, out _);
             NeverOpened(quiet, r, ability, c5.Id, command with { CardId = c5.Id, TargetId = h5.Id });
         }

@@ -670,5 +670,5 @@ internal static partial class SingleAudit2Tests
         Accept(e, Do(e, "selectSearchCard", f.Me, choice: HeartOfFudo));
         Check(e.State.Players[f.Me].Hand.Any(id => e.State.Cards[id].DefinitionId == HeartOfFudo), "the Heart of Fudo is in the hand");
     });
-//BODY
+    //BODY
 }

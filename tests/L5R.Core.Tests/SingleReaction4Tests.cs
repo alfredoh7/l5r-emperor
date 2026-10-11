@@ -235,7 +235,7 @@ internal static partial class SingleReaction4Tests
         var cub = Add(s, bear.DefinitionId, 0, Zone.Battlefield, province: 0);
         var attacker = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var item = Add(s, "training-item", 1, Zone.Attached, province: 0, parent: attacker.Id);
-        var b =MatchEngine.FromTestState(s);
+        var b = MatchEngine.FromTestState(s);
         Accept(b, Offer(b, 0, "tokoru-bear-bow", cub.Id, attacker.Id));
         Check(b.State.Cards[attacker.Id].Bowed && b.State.Cards[attacker.Id].Zone == Zone.Battlefield, "an attacking Personality is bowed, not destroyed");
         var c = MatchEngine.FromTestState(s);

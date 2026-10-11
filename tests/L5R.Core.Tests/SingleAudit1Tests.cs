@@ -32,7 +32,7 @@ internal static partial class SingleAudit1Tests
         var option = Options(e, f.Me, f.Ability, f.Card, f.Performer).FirstOrDefault(o => o.Enabled && o.Command?.AbilityId == f.Ability && (f.Target is null || (o.TargetIds?.Contains(f.Target) ?? false) || o.Command.TargetId == f.Target));
         if (option is null) return null;
         var command = option.Command! with { TargetId = f.Target ?? option.Command.TargetId, Selections = f.Sel ?? option.Command.Selections, Choice = f.Choice ?? option.Command.Choice, GoldAmount = f.GoldAmount ?? option.Command.GoldAmount, Province = f.Province ?? option.Command.Province, TargetPlayerId = f.TargetPlayer ?? option.Command.TargetPlayerId, CardIds = f.CardIds ?? option.Command.CardIds };
-        if (f.GoldAmount is int x) command =command with { SourceIds = e.PaymentOptions(f.Me, x).First().SourceIds }; // a variable Gold cost: pay the stated amount
+        if (f.GoldAmount is int x) command = command with { SourceIds = e.PaymentOptions(f.Me, x).First().SourceIds }; // a variable Gold cost: pay the stated amount
         if (command.SourceIds is null)
         {
             var quote = f.Target is not null && option.TargetGold is not null && option.TargetGold.TryGetValue(f.Target, out var tq) ? tq : option.Gold;
@@ -1103,5 +1103,5 @@ internal static partial class SingleAudit1Tests
         Check(Options(foe2, 1, "string-colonies-attack").First(o => o.Enabled).TargetIds!.Contains(shugenja2.Id), "not Air: the target's actions may still target him");
     }
 
-//TESTS
+    //TESTS
 }

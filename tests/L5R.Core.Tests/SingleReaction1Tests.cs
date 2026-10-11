@@ -322,7 +322,7 @@ internal static partial class SingleReaction1Tests
         var h = AtHome(def, out var suiki);
         NeverOpened(h, 0, ability, suiki.Id, command with { CardId = suiki.Id });
     }
-//MORE
+    //MORE
 
     // ---- duel windows --------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Player `c` challenges player 1-c with a plain duel; the challenged focuses from the deck, the challenger focuses a card, the challenged strikes: the window before Focus Effects
@@ -1358,7 +1358,7 @@ internal static partial class SingleReaction1Tests
         Check(first.State.PendingChoice?.Type != "additionalActionReaction" && !CanUse(first, 1, ability, c.Id), "the creating action is not an additional action: no window");
         Check(first.State.Cards[tf.Id].Bowed, "it simply resolved");
     }
-//FALLING
+    //FALLING
     // ---- before-action windows: an action targets one of this player's cards -----------------------------------------------------------------------------------------------
     private const string Bow = "training-bow-at-battle", MoveHome = "training-move-both-home";
 
