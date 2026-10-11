@@ -241,6 +241,7 @@ public sealed partial class MatchEngine
     // "May not have more Spells than Koan cards attached": the first Personality carrying a Jingasa with more Spells attached than Koan cards.
     private (CardInstance Host, int Limit, CardInstance[] Spells)? Wave827KoanExcess()
     {
+        if (!_state.Cards.Values.Any(c => c.Zone == Zone.Attached && Definition(c).Effect == Wave827Abilities.JingasaEffect)) return null; // run after every command: skip the walk when no Jingasa is in play
         foreach (var host in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Personality).OrderBy(c => c.Id, StringComparer.Ordinal))
         {
             var attached = Attachments(host.Id).ToArray();
