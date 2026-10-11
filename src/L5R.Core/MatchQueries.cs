@@ -359,7 +359,7 @@ public sealed partial class MatchEngine
             {
                 var card = Card(battleActionPending.CardId!);
                 foreach (var reactionId in AbilityIdsOf(card).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "after-battle-action-resolves"))
-                    AddReaction(card, reactionId);
+                    AddReaction(card, reactionId, validate: true); // issue #830: listed as the engine would judge it (Shosuro Hawado - exp away from the battlefield was offered enabled, then refused)
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));
         }
