@@ -39,7 +39,12 @@ internal static class Spec818Tests
         var provinces = provinceCards.Select((c, i) => new ProvinceView(i, 5, false, c, null)).ToArray();
         return view with
         {
-            Phase = Phase.Dynasty, ActivePlayerId = 0, PriorityPlayerId = 0, PendingChoice = null, TurnNumber = 8, FavorPlayerId = null,
+            Phase = Phase.Dynasty,
+            ActivePlayerId = 0,
+            PriorityPlayerId = 0,
+            PendingChoice = null,
+            TurnNumber = 8,
+            FavorPlayerId = null,
             Players = [self with { Clan = clan, TurnsTaken = turnsTaken, Stronghold = self.Stronghold with { Definition = self.Stronghold.Definition! with { GoldProduction = production }, Bowed = false }, Home = home, Army = [], Provinces = provinces, Hand = [], HandCount = 0 },
                 view.Players[1] with { Home = opponentHome ?? [], Army = [] }]
         };
@@ -141,7 +146,10 @@ internal static class Spec818Tests
         ProvinceView[] Provinces(PlayerView p) => p.Provinces.Select(q => q with { Strength = strength, Destroyed = false }).ToArray();
         return view with
         {
-            Phase = Phase.AttackDeclaration, ActivePlayerId = 0, PriorityPlayerId = 0, PendingChoice = null,
+            Phase = Phase.AttackDeclaration,
+            ActivePlayerId = 0,
+            PriorityPlayerId = 0,
+            PendingChoice = null,
             Players = [view.Players[0] with { Home = [BattlePolicyTests.Home("a", 0, ownForce, 3)], Army = [], Provinces = Provinces(view.Players[0]), Hand = hand, HandCount = hand.Length },
                 view.Players[1] with { Home = [BattlePolicyTests.Home("d", 1, enemyForce, 3)], Army = [], Provinces = Provinces(view.Players[1]) }]
         };
@@ -169,7 +177,7 @@ internal static class Spec818Tests
         var view = BattlePolicyTests.Battle(16, 0, 7, enemyExtra: []);
         view = view with { Players = [view.Players[0], view.Players[1] with { Army = [] }] };
         var generic = BattlePolicyTests.Use(view, "shunya-honor");
-        string Pick(params ActionOption[] options) => TrainingOpponent.Choose(view, [BattlePolicyTests.Pass(view), ..options], new BotContext()).Command is { } c ? c.AbilityId ?? c.Type : "none";
+        string Pick(params ActionOption[] options) => TrainingOpponent.Choose(view, [BattlePolicyTests.Pass(view), .. options], new BotContext()).Command is { } c ? c.AbilityId ?? c.Type : "none";
         var other = AbilityCatalog.All.First(p => p.Value.Timing == "Battle" && p.Value.Target == "none" && AbilityIntent.Of(p.Value) is { Rank: >= EffectRank.Bow, HonorGain: false, HonorLoss: false, IsReaction: false }).Key;
         Check(Pick(BattlePolicyTests.Use(view, other)) == "pass", "the Province already falls and the play gains no Honor: it passes");
         var honor = AbilityCatalog.All.First(p => p.Value.Timing == "Battle" && p.Value.Target == "none" && AbilityIntent.Of(p.Value) is { HonorGain: true, IsReaction: false } && !System.Text.RegularExpressions.Regex.IsMatch(p.Value.Label ?? "", "not (been )?destroyed")).Key;
