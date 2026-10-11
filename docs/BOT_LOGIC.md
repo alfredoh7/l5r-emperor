@@ -1,0 +1,129 @@
+# How the practice bot decides (plain-English review copy)
+
+This describes what `src/L5R.AI` does today on `main`. It is a reading aid for review, written from the code (issue #813); if the two ever disagree, the code is right, so fix this page. Numbers are the bot's internal scores (higher wins) and are included so you can see *how strongly* it prefers something, not just what.
+
+Status tags: **ACTIVE** (shipped and on), **PARKED** (in the code, off by default, see [the decision record](decisions/2026-10-09-bot-battle-policy.md) and [the parked note](parked/2026-10-09-what-makes-a-good-l5r-bot.md)).
+
+## 1. The basic mechanism
+
+- The bot sees only what its seat is allowed to see (its own hand, the public table) and the list of actions the engine offers. It cannot cheat or look at hidden cards.
+- At each decision it takes **every enabled action** the engine offers (except concede and wait), fills in the choices that action needs (targets, payment, province, etc.), gives each a **score**, and does the highest. Ties break by action type name, then card id, then ability id, so a replay always makes the same choices.
+- **Passing is worth 10.** Playing a card or using an ability is never scored below a pass, except the "never do this" cases below (harming itself, giving the opponent Honor), which are negative so it passes instead.
+- If it is not the bot's turn to act and nothing is offered to it, it waits.
+- If the engine refuses an answer the bot chose, the bot is told and picks a different answer at the same decision (for attacks it tries one unit at one province at a time).
+- Memory across the match: every face-up card it has seen (assuming 3 copies of a non-Unique card, 1 of a Unique), whether it lobbied this turn, how many times it has used each ability this turn, and what the engine refused.
+- Each repeat use of the same ability from the same card in one turn lowers that use's score by 20 (never below passing). This stops two bots trading a free action back and forth forever.
+
+## 2. The bot's Honor profile (ACTIVE)
+
+The bot classes its own deck as **High**, **Intermediate** or **Low** Honor:
+
+- Stronghold starting Honor 5 or more counts as a High signal; under 3 counts as a Low signal.
+- Average Personal Honor of its Personalities over 2.5 is High; under 1.5 is Low. It uses its decklist if the game supplies it, otherwise the average of its own Personalities it has seen (needs at least three); until then only the Stronghold speaks.
+- More signals wins; a tie is Intermediate.
+
+What the profile changes:
+
+| Choice | High | Low | Intermediate |
+| --- | --- | --- | --- |
+| Proclaim | Always a priority | Only when it has spare Gold (2+ left after a purchase) | Priority if within 4 Honor of the opponent or ahead; deprioritised if behind by more than 5; neutral between |
+| "Gain Honor" vs "opponent loses Honor" | Gain | Make the opponent lose | Gain if ahead or below its own starting Honor, otherwise make the opponent lose |
+
+## 3. Dynasty phase: buying and recruiting (ACTIVE)
+
+- **Holdings:** the first holdings score 160, minus 10 per holding it already owns (so the fifth is 120). With 5 to 7 holdings it scores `70 - number owned`; with 8 or more, 5 (below a pass, so it stops).
+- **Personalities / Followers:** `110 + 2 x Force + 2 x Personal Honor - Gold cost`, with adjustments:
+  - Proclaim-eligible: +40 (Prioritise), +20 (Neutral), -10 (Deprioritise) from the Honor profile.
+  - Paying the Clan allegiance cost when it has the Honor: -20.
+  - Using the Clan discount (if Proclaim is not already used this turn): -25 (Prioritise), -15 (Neutral), +15 (Deprioritise). So a deck that wants to Proclaim avoids spending the discount that turn.
+  - +30 for a turn after it used the Border Keep refresh (it wants the fresh cards). Only the parked refresh sets this, so it is inactive while that rule is off.
+- **Experienced Personality overlaid for free:** 180 + 2 x Force.
+- **Proclaim:** 1000 (always), or 40 when the profile deprioritises it.
+- **End dynasty:** 0. **Discard a province card** at the end: 20, or 40 for a Holding when it already has 8 or more.
+- **Border Keep first-turn ability (ACTIVE):** score 140. It cycles province cards it cannot afford; in its first two turns with fewer than 3 holdings, Personalities too; with 7+ holdings, Holdings.
+- **Border Keep once-per-game refresh (PARKED):** the 35-point default stands when parked. The parked rule would use it with 22+ producible Gold and three or more provinces holding Holdings or face-down cards.
+
+## 4. Action phase, outside battle
+
+### Abilities it already understood (ACTIVE)
+Fixed scores, applied to the target it picks:
+Defensive Stance (own bowed Personality) 95 + Force; Never Afraid / Crushing Destroy (enemy) 90 + Force; Incapacitated / Block Supply / Favor (Battle) 100 + Force; Kouki Force / Costly Feud 75 + Force; air/paid straighten (own bowed) 75 + Force; Crushing Force 70 + Force; Shinden 70 + Force; paid bow 65 + Force; Prepared Death 35 + Force. Anything aimed at the wrong side scores -20 (effectively never).
+
+### Everything else: read from the ability's text (ACTIVE)
+The bot never keys on a card's name. It reads the printed ability label and target category and classifies the effect, so a card wired tomorrow is scored the moment it exists.
+
+- **Effect rank, in your order:** destroy (bonus 50) > bow (40) > penalize (25) > help (10) > neutral (0). An Attack counts as destroy.
+- **Generic score = 30 + rank bonus.**
+- **Draw abilities:** +12 for each card the hand is below its maximum. A pure draw at or over the maximum is worth only a pass.
+- **Honor:** a deck that wants Honor for itself gets +25 for abilities that give it Honor; one that wants to hurt the opponent gets +25 for abilities that take it.
+- **Never hurt itself:** a harmful ability (destroy, bow, penalize, Honor loss) aimed at its own card scores -50, so it passes instead of using it.
+- **Targets:** for a harmful ability, the opponent's unbowed Personality with the most Force; for a helpful one, its own. When straightening, bowed ones first.
+- **Imperial Favor:**
+  - If it has the higher Family Honor **and** more Personalities, it **always** takes the Favor (900).
+  - With equal or fewer Personalities it takes the Favor only if that costs no bow (150), otherwise it is barely above a pass.
+  - In between: 60.
+  - Spending the Favor as a cost: unlimited if it can retake it for free; otherwise once, and only when it will certainly Lobby again.
+- **Equip outside a battle:** 60 if it produces 6+ Gold, otherwise barely above a pass.
+- **Bow Strategy:** 90 + target's Force against an unbowed enemy. **+3 Force Strategy:** 70. Against a bowed target, a pass.
+
+## 5. Declaring and assigning attacks (ACTIVE)
+
+- The **attack planner** splits its unbowed army into as many sub-armies as it can, each sent at a province, so that **each army's Force is greater than that province's Strength plus the Force of every unbowed enemy unit at home** (it assumes any home unit can defend any province). It tries the largest number of the weakest provinces first; leftovers join the army at the strongest chosen province. If not even one army clears its threshold, it does not attack.
+- **Declare attack:** 0 if no plan exists (and -100 if it has no units). If a plan exists, `90 + planned Force - enemy home Force`, far above passing.
+- **Honor race:** if the opponent already has 40+ Honor (it wins at the start of its next turn), it attacks anything it can break, ignoring enemy defenders (declare 200, assign 150+).
+- **Attack assignment:** margin over every army > 0: `90 + Force - enemy home Force`. A single army that beats the province with no enemy at home: 80. Otherwise 0.
+
+## 6. Defending (ACTIVE)
+
+- **Choosing battles:** it picks the unresolved battlefield with the most of its own army (100 + that Force).
+- **Assigning defenders:** all its unbowed home Personalities go to one province.
+  - If the attackers can destroy **every** remaining province, it defends (200) at the battlefield where its defence is likeliest to save one (largest Strength + its Force - their Force).
+  - Otherwise: attackers' Force 0 means no need (0); its Force >= theirs 95; its Force plus the threatened province's Strength >= theirs 60; only one province left 50; else 0. (The no-attackers check comes first.)
+
+## 7. Reactions (ACTIVE)
+
+- A Reaction that **negates** an effect: always played (1500).
+- A Reaction a card prints for its own entry (e.g. draws or tokens when it enters play): always played, 160 + rank bonus, unless it would only cost the bot Honor.
+- **Any other Reaction is a weighted gamble**, rolled deterministically from the match state: the chance it plays is `0.3 + 0.15 x rank` (neutral 30%, help 45%, penalize 60%, bow 75%, destroy 90%). If it plays it scores 150 + rank bonus; otherwise 50. Declining a Reaction scores 100, so a failed roll declines.
+- **Reaction windows with several Reactions:** it announces what it would play anyway, then says it is done; it orders its own Reactions first and the opponent's as announced. Once its order is set, it plays them (+1000).
+
+## 8. Battle actions
+
+- **Ordinary scoring (ACTIVE):** the same ability, Strategy and equip scores as above; targets follow the destroy > bow > penalize > help order.
+
+### Equip rules (ACTIVE, `UseEquipPolicy`, issue #788)
+1. **Attachments are valued like Strategies:** an Equip (Battle) of a Spell, or an Equip of an Item in a battle, is scored 30 + the bonus of the best Battle ability the attachment prints (destroy > bow > penalize > help). An attachment with no Battle ability keeps its ordinary equip score.
+2. **The granted action is always used:** when attaching a Spell grants the additional action to use its Battle ability, the bot takes it (300, above everything) and never declines, even in a battle it has already won. Its target comes from the normal battle priorities.
+3. **Won battle, full hand:** once the battle is decided (a defender with Force at least the attacker's; an attacker whose Force exceeds the defenders plus the province's Strength) and the bot would otherwise do nothing, it equips one card at a time while its hand is **at or above its maximum**, then passes.
+4. **Undecided battle:** if equipping **at most three** attachments it can afford would move the outcome **up the ladder**, those attachments score 140. The ladder is, for a defender: loses the battle and the province, loses, ties, wins. For an attacker: loses, ties, wins, wins and destroys the province. A tie is its own rung. The Force an attachment adds is its printed Force plus the largest "+N Force" its Battle abilities give.
+   - Not counted: Force removed from the enemy (bowing or destroying a defender).
+
+### Six battle rules (PARKED, off by default, `UseBattlePolicy`)
+When switched on:
+1. **Pass when the battle is decided**, except to gain Honor / take the opponent's, to move a unit that is not needed into an opposed battlefield, or to remove an enemy Personality that could undo the result. In-play abilities before hand cards. Never use an ability whose cost bows a unit the win depends on.
+2. **Attack target:** the highest-Force target the Attack can destroy (counting every augment the bot still has); ties go to the highest total printed Gold of the unit.
+3. **Bow target:** the Personality with the most attachments (then Gold); otherwise a Personality that destroys, an attachment that destroys, an attachment that bows, a Personality that bows, one with another Battle ability, then others.
+4. **Losing defender:** sends home a bowed or Force-less unit to save it, or a fighting unit only if the province still holds without it.
+5. **First-action reactions** (Naval, Sneak Attack, etc.) only when the battle is not already decided.
+6. **Border Keep refresh** with 22+ Gold, as in section 3.
+
+### Trade attacks (PARKED, off by default, `UseTradeAttacks`)
+When it cannot raze a province, it still attacks if it would beat every possible defender (destroying the whole defending army at no cost) or tie favourably on Gold. A unit's worth is its Gold plus attachments, +2 for a Personality. The arena found this lost slightly more than it won.
+
+## 9. Discarding and small choices (ACTIVE)
+
+- **Discard down to the hand limit:** it discards the lowest-valued cards first: +3 Force Strategy 8, Bow Strategy 6, Follower 5, anything else 4.
+- **Honor choices:** never lets the opponent gain Honor or loses its own by choice. Shinden: always bows rather than give the opponent Honor.
+- **Either/Or:** pays Gold if it can (110), else bows (90), else other options (60), never "lose Honor".
+- **Attachment destruction** offered by an effect: always destroys an opponent's attachment (125), never its own.
+- **Search and look-at-the-top:** takes the first legal option the engine lists. Puts a found Ring into play.
+- **Read the Essence:** flips an enemy face-down card (110), never its own.
+- **Any decision with no rule:** takes the first complete option, scored just above a pass (11), so it can never stall a match.
+
+## 10. Known readings worth reviewing
+
+- A tied defender counts as "winning" in the parked pass-when-won rule, but as a separate rung (tie) in the active equip ladder. The engine destroys both armies on a tie.
+- With the six rules off, the equip rule's "would otherwise do nothing" is not enforced: in a won battle the bot still makes its ordinary plays, and the hand-limit equip (100) outranks most of them.
+- The Honor race triggers at exactly 40 opponent Honor.
+- The weighted Reaction roll means the bot sometimes declines a Reaction that destroys something; this is deliberate variety, not a bug.
+- The arena results do not show that more rules make the bot stronger (see the parked note), so "what makes a good bot" is still open.
