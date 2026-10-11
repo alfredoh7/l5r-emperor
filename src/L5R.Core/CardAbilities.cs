@@ -5356,9 +5356,9 @@ public sealed partial class MatchEngine
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.
     // slotAbility (issue #336): set only by ValidateSlotCard, which judges ONE candidate of one slot of a multi-target ability by running this
     // very method for a copy of the ability whose Target is that slot's category -- so every category keeps its one definition here.
-    // Reactions that print "choose your performing X at the current battlefield" (Grateful Reward, Watchers in the Dark): a Reaction is not a Battle action, so the generic
-    // performer category would let an X at home perform it; these two name the location in their text (issue #833).
-    private static bool PerformerMustBeAtCurrentBattlefield(string abilityId) => abilityId is "grateful-reward-create" or "watchers-dark-recon";
+    // Reactions that print "choose your performing X at the current battlefield" (Grateful Reward): a Reaction is not a Battle action, so the generic performer category would let an X
+    // at home perform it, although the text names the location (issue #833). Watchers in the Dark names it too but uses its own explicit-at-battle category.
+    private static bool PerformerMustBeAtCurrentBattlefield(string abilityId) => abilityId == "grateful-reward-create";
 
     private void ValidateAbility(GameCommand command, AbilityDefinition? slotAbility = null)
     {

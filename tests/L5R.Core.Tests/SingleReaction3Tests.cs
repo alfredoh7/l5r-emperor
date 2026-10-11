@@ -43,7 +43,7 @@ internal static partial class SingleReaction3Tests
         if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e)); // the other player holds the first opportunity and has nothing to react with
         var options = Options(e, owner, ability, cardId, performerId);
         var option = options.FirstOrDefault(o => o.Enabled && (targetId is null || (o.TargetIds?.Contains(targetId) ?? false) || o.Command?.TargetId == targetId));
-        Check(option is not null, $"{ability} on {cardId} was not offered enabled to player {owner}" + (targetId is null ? "" : " against " + targetId) + ": " + string.Join("; ", e.QueryActions(owner).Select(a => $"{a.Type}:{a.Label}[{a.Enabled}] {a.Reason}")));
+        Check(option is not null, $"{ability} on {cardId} was not offered enabled to player {owner}" + (targetId is null ? "" : " against " + targetId) + ": " + string.Join("; ", e.QueryActions(owner).Select(a => $"{a.Type}:{a.Label}[{a.Enabled}] {a.Reason} targets=[{string.Join(",", a.TargetIds ?? [])}] cmdTarget={a.Command?.TargetId}")));
         var command = option!.Command!;
         if (targetId is not null) command = command with { TargetId = targetId };
         if (performerId is not null) command = command with { PerformerId = performerId };
@@ -1630,6 +1630,395 @@ internal static partial class SingleReaction3Tests
             }
     }
 
+    // ---- Tamori Ruya: after the resolution of your action that bowed a Personality, target a Personality at the same location: bow him ----------------------------------------------------------------------------
+    private static void RuyaBow()
+    {
+        const string ability = "ruya-bow";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            // kind: "battle" = her controller's Battle action bows an enemy Personality at the battlefield; "open-active"/"open-other" = his Open action in the Action phase, at home; "enemy" = the enemy's bow
+            (MatchEngine E, CardInstance Ruya, CardInstance First, CardInstance Second, CardInstance Elsewhere) Rig(string kind)
+            {
+                var battle = kind == "battle" || kind == "enemy";
+                var s = Table(battle ? Phase.Battle : Phase.Action, battle ? 1 : (kind == "open-active" ? owner : foe)); s.PriorityPlayerId = kind == "enemy" ? foe : owner;
+                var zone = battle ? Zone.Battlefield : Zone.Home; int? province = battle ? 0 : null;
+                var actor = kind == "enemy" ? foe : owner; var victimOwner = 1 - actor;
+                var ruya = Add(s, def, owner, zone, false, province);
+                var bower = battle ? Add(s, "training-battle-bower", actor, zone, false, province) : Add(s, "training-bow-any-source", actor, zone, false, province);
+                // Home is a location of its own per player: at home the second Personality must be the owner's own to share Ruya's location.
+                var first = Add(s, "training-crane-samurai", victimOwner, zone, false, province); var second = Add(s, "training-lion-samurai", battle ? victimOwner : actor, zone, false, province);
+                var elsewhere = Add(s, "training-lion-veteran", victimOwner, Zone.Home);
+                if (kind == "enemy") { /* the enemy bows one of the owner's Personalities */ first.OwnerId = owner; second.OwnerId = owner; }
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, Offer(e, actor, battle ? "training-bow-at-battle" : "training-bow-any", bower.Id, first.Id));
+                return (e, ruya, first, second, elsewhere);
+            }
+            foreach (var kind in new[] { "battle", "open-active", "open-other" })
+            {
+                var label = $"owner {owner} {kind}";
+                var rig = Rig(kind);
+                Check(rig.E.State.Cards[rig.First.Id].Bowed, label + ": the action bowed a Personality");
+                Eq(Window(rig.E), "bowReaction", label + ": her window opens for her controller's own action");
+                var command = InWindow(rig.E, owner, ability, rig.Ruya.Id, targetId: rig.Second.Id, windowType: "bowReaction");
+                Check(!Options(rig.E, owner, ability, rig.Ruya.Id).Any(o => o.Enabled && (o.TargetIds?.Contains(rig.Elsewhere.Id) ?? false)), label + ": a Personality at another location is not a target");
+                Accept(rig.E, command);
+                Check(rig.E.State.Cards[rig.Second.Id].Bowed, label + ": she bowed the second Personality");
+                Check(!CanUse(rig.E, owner, ability, rig.Ruya.Id), label + ": used once");
+                Settle(rig.E);
+                var declined = Rig(kind); Settle(declined.E);
+                Check(!declined.E.State.Cards[declined.Second.Id].Bowed, label + ": declined, nothing more is bowed");
+            }
+            // The enemy's action that bowed a Personality is not "your action": no window for her controller.
+            var enemy = Rig("enemy");
+            Check(enemy.E.State.Cards[enemy.First.Id].Bowed, "the enemy's action bowed a Personality");
+            Check(Window(enemy.E) != "bowReaction" && !CanUse(enemy.E, owner, ability, enemy.Ruya.Id), "not her controller's action: not offered");
+            // An action that bowed no Personality (a Follower): no window.
+            var s2 = Table(Phase.Battle, 1); s2.PriorityPlayerId = owner;
+            var r2 = Bf(s2, def, owner); var cardBower = Bf(s2, "training-card-bower", owner); var host = Bf(s2, "training-lion-samurai", foe);
+            var fol = Add(s2, "training-follower", foe, Zone.Attached, province: 0, parent: host.Id);
+            var e2 = MatchEngine.FromTestState(s2);
+            Accept(e2, Offer(e2, owner, "training-bow-enemy-card-at-battle", cardBower.Id, fol.Id));
+            Check(e2.State.Cards[fol.Id].Bowed && !CanUse(e2, owner, ability, r2.Id), "a bowed Follower is not a bowed Personality: not offered");
+            // Never opened.
+            var s3 = Table(Phase.Battle, 1); s3.PriorityPlayerId = owner; var r3 = Bf(s3, def, owner); Bf(s3, "training-lion-samurai", foe);
+            NeverOpened(MatchEngine.FromTestState(s3), owner, ability, r3.Id, Use(MatchEngine.FromTestState(s3), owner, ability, r3.Id));
+        }
+    }
+
+    // ---- The Perfect Moment: after the end of an Attack Phase in which you were the Defender, create an additional Attack Phase with the previous Attacker as Defender ------------------------------------------
+    private static GameCommand PassC(MatchEngine e) => new("pass", e.State.PriorityPlayerId, e.Version);
+    private static void PassTwice(MatchEngine e) { Accept(e, PassC(e)); Accept(e, PassC(e)); }
+    private static bool Event(MatchEngine e, string type) => e.State.Events.Any(x => x.Type == type);
+
+    private static void PerfectMomentDeclare()
+    {
+        const string ability = "perfect-moment-declare";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner; // the previous Attacker
+            (MatchEngine E, CardInstance Card, CardInstance ParagonA, CardInstance ParagonB, CardInstance Plain, CardInstance MoveCard) Rig()
+            {
+                var s = Table(Phase.Battle, foe);
+                s.PriorityPlayerId = owner;
+                s.CurrentBattleProvince = 3; s.UnresolvedBattlefields = [3];
+                var card = Add(s, def, owner, Zone.Hand);
+                var moveCard = Add(s, "training-move-battle-strategy", owner, Zone.Hand);
+                var paragonA = Kw(Add(s, "training-crane-samurai", owner, Zone.Home), "Paragon"); Batch336Support.Force(paragonA, 17);
+                var paragonB = Kw(Add(s, "training-crane-samurai", owner, Zone.Home), "Battle Maiden"); Batch336Support.Force(paragonB, 17);
+                var plain = Add(s, "training-crane-samurai", owner, Zone.Home); Batch336Support.Force(plain, 17);
+                var e = MatchEngine.FromTestState(s);
+                PassTwice(e); // the last battle of the other player's Attack Phase is over
+                return (e, card, paragonA, paragonB, plain, moveCard);
+            }
+            var rig = Rig();
+            Eq(Window(rig.E), "attackPhaseEndReaction", $"owner {owner}: the Defender may react to the end of the Attack Phase");
+            var command = InWindow(rig.E, owner, ability, rig.Card.Id, windowType: "attackPhaseEndReaction");
+            var e = rig.E;
+            Accept(e, command);
+            Eq(e.State.ActivePlayerId, owner, "its player declared the additional Attack Phase and is its Attacker");
+            Eq(e.State.Phase, Phase.InfantryDeclaration);
+            Eq(string.Join(",", e.State.UnresolvedBattlefields), "0,1,2,3", "a battlefield at each of the previous Attacker's provinces");
+            Check(e.State.R1.PerfectMoment is { } moment && moment.PlayerId == owner, "its restrictions are in force");
+            Check(Rejection(e, new("attack", owner, e.Version, Assignments: new() { [rig.Plain.Id] = 0 })).Length > 0, "a Personality who is neither a Paragon nor a Battle Maiden may not assign");
+            Accept(e, new("attack", owner, e.Version, Assignments: new() { [rig.ParagonA.Id] = 0, [rig.ParagonB.Id] = 1 }));
+            Accept(e, new("assignDefense", foe, e.Version, Assignments: new()));
+            Eq(e.State.Phase, Phase.BattleSelection);
+            Accept(e, new("selectBattle", owner, e.Version, Province: 0));
+            Accept(e, PassC(e)); // the previous Attacker, now the Defender, has the first opportunity and passes
+            Accept(e, Offer(e, owner, "training-move-to-battle", rig.MoveCard.Id, rig.Plain.Id));
+            Eq(e.State.Cards[rig.Plain.Id].Zone, Zone.Home, "the movement of a plain Personality was negated");
+            Check(Event(e, "moveNegated"), "and the log says it was");
+            PassTwice(e);
+            Check(e.State.Players[foe].Provinces[0].Destroyed, "the first battle destroyed province 0");
+            Accept(e, new("selectBattle", owner, e.Version, Province: 1));
+            PassTwice(e);
+            Check(!e.State.Players[foe].Provinces[1].Destroyed, "the second province survives a victory that would have destroyed it");
+            foreach (var other in new[] { 2, 3 }) { Accept(e, new("selectBattle", owner, e.Version, Province: other)); PassTwice(e); }
+            Eq(e.State.Phase, Phase.Dynasty, "the additional Attack Phase is over");
+            Eq(e.State.ActivePlayerId, foe, "the turn's own player is the active player again");
+            Check(e.State.R1.PerfectMoment is null && e.State.Players[foe].Provinces.Count(p => p.Destroyed) == 1, "the restrictions ended with it, and exactly one province was destroyed");
+            // Declined: the Dynasty Phase follows with no additional phase.
+            var d = Rig(); Accept(d.E, Decline(d.E)); Settle(d.E);
+            Check(d.E.State.R1.PerfectMoment is null && d.E.State.Phase != Phase.InfantryDeclaration, "declined: no additional Attack Phase");
+            // Never opened (a battle still in progress): not offered.
+            var s2 = Table(Phase.Battle, foe); s2.PriorityPlayerId = owner; var c2 = Add(s2, def, owner, Zone.Hand); Bf(s2, "training-crane-samurai", owner); Bf(s2, "training-lion-samurai", foe);
+            NeverOpened(MatchEngine.FromTestState(s2), owner, ability, c2.Id, Use(MatchEngine.FromTestState(s2), owner, ability, c2.Id));
+        }
+    }
+
+    // ---- To First Blood: after another player's Iaijutsu action targets your Personality, negate his destruction ---------------------------------------------------------------------------------------------
+    private static void FinishDuel(MatchEngine e)
+    {
+        for (var guard = 0; e.State.PendingDuel is { } duel && guard < 8; guard++)
+        {
+            var command = duel.Stage switch
+            {
+                "Focusing" => new GameCommand("strike", duel.TurnPlayerId, e.Version),
+                "DuelistRefocus" => new GameCommand("duelistRefocus", e.State.PriorityPlayerId, e.Version),
+                _ => throw new Exception($"unexpected duel stage {duel.Stage}")
+            };
+            Accept(e, command);
+        }
+    }
+
+    private static void ToFirstBloodNegate()
+    {
+        const string ability = "to-first-blood-negate";
+        var def = Def(ability);
+        var ichizoDef = Def("ichizo-exp-duel");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            (MatchEngine E, CardInstance Ichizo, CardInstance Target, CardInstance Card) Rig()
+            {
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = foe;
+                var ichizo = Bf(s, ichizoDef, foe); // Iaijutsu, Chi 4
+                var target = Bf(s, "training-crane-samurai", owner); // Chi 3
+                var card = Add(s, def, owner, Zone.Hand);
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, Offer(e, foe, "ichizo-exp-duel", ichizo.Id, target.Id));
+                return (e, ichizo, target, card);
+            }
+            var rig = Rig();
+            Eq(Window(rig.E), "beforeActionReaction", $"owner {owner}: the window opens for a reactor holding To First Blood");
+            var command = InWindow(rig.E, owner, ability, rig.Card.Id, windowType: "beforeActionReaction");
+            Accept(rig.E, command);
+            Settle(rig.E);
+            FinishDuel(rig.E);
+            Check(rig.E.State.Cards[rig.Target.Id].Zone is Zone.Battlefield or Zone.Home, "he lost the duel (Chi 3 against 4) but was not destroyed");
+            Eq(rig.E.State.Cards[rig.Card.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
+            Check(rig.E.State.Events.Any(x => x.Type == "duelResolved" && x.Message.Contains("Mirumoto Ichizo")), "Ichizo won");
+            // Control: without the reaction he is destroyed.
+            var c = Rig(); Settle(c.E); FinishDuel(c.E);
+            Eq(c.E.State.Cards[c.Target.Id].Zone, Zone.Dead, "without it the loser is destroyed");
+            // It answers only an Iaijutsu action.
+            var s3 = Table(Phase.Battle, 1); s3.PriorityPlayerId = foe;
+            var t3 = Bf(s3, "training-crane-samurai", owner); var c3 = Add(s3, def, owner, Zone.Hand); var b3 = Bf(s3, "training-battle-bower", foe);
+            var e3 = MatchEngine.FromTestState(s3);
+            Accept(e3, Offer(e3, foe, "training-bow-at-battle", b3.Id, t3.Id));
+            Check(!CanUse(e3, owner, ability, c3.Id), "not against an action that is not Iaijutsu");
+            // Never opened.
+            var s4 = Table(Phase.Battle, 1); s4.PriorityPlayerId = foe; Bf(s4, "training-crane-samurai", owner); var c4 = Add(s4, def, owner, Zone.Hand);
+            NeverOpened(MatchEngine.FromTestState(s4), owner, ability, c4.Id, command with { CardId = c4.Id });
+        }
+    }
+
+    // ---- Training Engage destroy: after engaging, target an enemy Personality: destroy him -------------------------------------------------------------------------------------------------------------
+    private static void EngageDestroy()
+    {
+        const string ability = "training-engage-destroy";
+        const string def = "training-engage-destroy-strategy";
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownerAttacks in new[] { true, false })
+            {
+                var foe = 1 - owner; var attacker = ownerAttacks ? owner : foe;
+                var label = $"owner {owner} {(ownerAttacks ? "attacking" : "defending")}";
+                CardInstance card = null!, mine = null!, theirs = null!;
+                var e = Engage(attacker, s =>
+                {
+                    mine = Bf(s, "training-crane-samurai", owner); theirs = Bf(s, "training-lion-samurai", foe); card = Add(s, def, owner, Zone.Hand);
+                });
+                if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e));
+                var targets = Options(e, owner, ability, card.Id).Where(o => o.Enabled).SelectMany(o => o.TargetIds ?? []).Distinct().ToArray();
+                Check(targets.SequenceEqual([theirs.Id]), label + ": only the enemy Personality is a target: " + string.Join(",", targets));
+                var command = InWindow(e, owner, ability, card.Id, targetId: theirs.Id, windowType: "engageReaction");
+                Rejection(e, command with { TargetId = mine.Id });
+                Accept(e, command);
+                Eq(e.State.Cards[theirs.Id].Zone, Zone.Dead, label + ": the enemy Personality is destroyed");
+                Eq(e.State.Cards[mine.Id].Zone, Zone.Battlefield, label + ": his own is untouched");
+                Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, label + ": the Strategy was played");
+                // After the Engage window: gone.
+                var late = Engage(attacker, s => { Bf(s, "training-crane-samurai", owner); Bf(s, "training-lion-samurai", foe); card = Add(s, def, owner, Zone.Hand); });
+                var closed = late.Clone(); Settle(closed);
+                Check(!CanUse(closed, owner, ability, card.Id), label + ": gone once the window closed");
+            }
+    }
+
+    // ---- Training duel reaction (a Holding): a Reaction before a duel begins; either duel participant's side, or neither ---------------------------------------------------------------------------------------
+    private static void DuelReactor()
+    {
+        const string ability = "training-duel-reaction";
+        const string def = "training-duel-reactor";
+        foreach (var holder in new[] { 0, 1 })
+            foreach (var holderChallenges in new[] { true, false })
+            {
+                var other = 1 - holder; var challenger = holderChallenges ? holder : other;
+                var label = $"holder {holder} {(holderChallenges ? "challenging" : "challenged")}";
+                (MatchEngine E, CardInstance Holding) Rig(bool challenge = true)
+                {
+                    var s = Table(Phase.Battle, 1); s.PriorityPlayerId = challenger;
+                    var mine = Bf(s, "training-crane-samurai", challenger); var rival = Bf(s, "training-lion-samurai", 1 - challenger);
+                    var strategy = Add(s, "training-duel-force", challenger, Zone.Hand);
+                    var holding = Add(s, def, holder, Zone.Home);
+                    var e = MatchEngine.FromTestState(s);
+                    if (challenge) Accept(e, Offer(e, challenger, "training-duel-force", strategy.Id, rival.Id, mine.Id));
+                    return (e, holding);
+                }
+                var rig = Rig();
+                Eq(Window(rig.E), "duelReaction", label + ": the window before the duel begins");
+                var command = InWindow(rig.E, holder, ability, rig.Holding.Id, windowType: "duelReaction");
+                var honor = Honor(rig.E, holder);
+                Accept(rig.E, command);
+                Eq(Honor(rig.E, holder), honor + 1, label + ": gain 1 Honor before the duel");
+                Check(!CanUse(rig.E, holder, ability, rig.Holding.Id), label + ": once");
+                Settle(rig.E); RunDuel(rig.E);
+                Eq(Honor(rig.E, holder), honor + 1, label + ": and nothing more");
+                // Declined: nothing.
+                var d = Rig(); var hd = Honor(d.E, holder); Settle(d.E);
+                Eq(Honor(d.E, holder), hd, label + ": declined, no Honor");
+                // No duel: not offered.
+                var q = Rig(challenge: false);
+                NeverOpened(q.E, holder, ability, q.Holding.Id, command with { CardId = q.Holding.Id });
+            }
+    }
+
+    // ---- Twist of Fate: before your Dynasty Phase ends, take an additional Limited or Open action ------------------------------------------------------------------------------------------------------------------
+    private static void TwistOfFateGrant()
+    {
+        const string ability = "twist-of-fate-grant";
+        var def = Def(ability);
+        var menaceDef = Def("veiled-menace-loss");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            (MatchEngine E, CardInstance Twist, CardInstance Menace, CardInstance Courtier, CardInstance Victim) Rig(bool withTwist = true)
+            {
+                var s = Table(Phase.Dynasty, owner); s.PriorityPlayerId = owner;
+                var twist = withTwist ? Add(s, def, owner, Zone.Hand) : Add(s, "training-focus-strategy", owner, Zone.Hand);
+                var menace = Add(s, menaceDef, owner, Zone.Hand); // an Open action
+                var courtier = Kw(Add(s, "training-crane-courtier", owner, Zone.Home), "Courtier");
+                var victim = Add(s, "training-lion-veteran", foe, Zone.Home); victim.Dishonorable = true;
+                return (MatchEngine.FromTestState(s), twist, menace, courtier, victim);
+            }
+            var rig = Rig();
+            Accept(rig.E, rig.E.QueryActions(owner).Single(a => a.Type == "endDynasty").Command!);
+            Eq(Window(rig.E), "twistOfFateReaction", $"owner {owner}: the window opens as the Dynasty Phase is ended");
+            Eq(rig.E.State.Phase, Phase.Dynasty, "the Dynasty Phase has not ended");
+            var command = InWindow(rig.E, owner, ability, rig.Twist.Id, windowType: "twistOfFateReaction");
+            Accept(rig.E, command);
+            Eq(rig.E.State.Cards[rig.Twist.Id].Zone, Zone.FateDiscard, "Twist of Fate was spent");
+            Eq(rig.E.State.Phase, Phase.Action, "the additional action is taken in the Action Phase");
+            Eq(rig.E.State.PriorityPlayerId, owner, "by its player");
+            var honor = Honor(rig.E, foe);
+            Accept(rig.E, Offer(rig.E, owner, "veiled-menace-loss", rig.Menace.Id, rig.Victim.Id, rig.Courtier.Id));
+            Eq(Honor(rig.E, foe), honor - 2, "the Open action resolved");
+            Eq(rig.E.State.Phase, Phase.Dynasty, "and the Dynasty Phase carries on");
+            Check(!rig.E.QueryActions(owner).Any(a => a.Type == "useAbility"), "a second additional action is not on offer");
+            // Passing the window ends the Dynasty Phase; Twist stays in hand.
+            var p = Rig(); Accept(p.E, p.E.QueryActions(owner).Single(a => a.Type == "endDynasty").Command!); Accept(p.E, Decline(p.E));
+            Check(p.E.State.Phase != Phase.Dynasty, "declined: the phase ended"); Eq(p.E.State.Cards[p.Twist.Id].Zone, Zone.Hand, "Twist of Fate was not used");
+            // Without the card there is no window. The other player's Dynasty Phase never offers it to the holder.
+            var n = Rig(withTwist: false); Accept(n.E, n.E.QueryActions(owner).Single(a => a.Type == "endDynasty").Command!);
+            Check(Window(n.E) != "twistOfFateReaction", "without the card there is no window");
+            var s2 = Table(Phase.Dynasty, foe); s2.PriorityPlayerId = foe; var held = Add(s2, def, owner, Zone.Hand);
+            var e2 = MatchEngine.FromTestState(s2);
+            Accept(e2, e2.QueryActions(foe).Single(a => a.Type == "endDynasty").Command!);
+            Check(Window(e2) != "twistOfFateReaction" && !CanUse(e2, owner, ability, held.Id), "another player's Dynasty Phase: not offered");
+            // Never opened (the Action phase).
+            var s3 = Table(Phase.Action, owner); s3.PriorityPlayerId = owner; var c3 = Add(s3, def, owner, Zone.Hand);
+            NeverOpened(MatchEngine.FromTestState(s3), owner, ability, c3.Id, command with { CardId = c3.Id });
+        }
+    }
+
+    // ---- Utaku Tairu: after a Personality assigns or moves, if he is now opposing Tairu, draw a card ----------------------------------------------------------------------------------------------------------------
+    private static void TairuExpDraw()
+    {
+        const string ability = "tairu-exp-draw";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            // (a) Tairu's controller attacks (he is already assigned); the other player's defense assignment opposes him.
+            MatchEngine AssignRig(int defendAt, out CardInstance tairu)
+            {
+                var s = MatchEngine.CreateEconomyScenario().State;
+                s.Phase = Phase.DefenseAssignment; s.ActivePlayerId = owner; s.PriorityPlayerId = foe; s.UnresolvedBattlefields = [0, 1, 2, 3];
+                tairu = Add(s, def, owner, Zone.Battlefield, province: 0);
+                var guard = Add(s, "training-lion-samurai", foe, Zone.Home);
+                Add(s, "training-focus-strategy", owner, Zone.FateDeck);
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, new GameCommand("assignDefense", foe, e.Version, Assignments: new Dictionary<string, int> { [guard.Id] = defendAt }));
+                return e;
+            }
+            var a = AssignRig(0, out var tairu);
+            Eq(Window(a), "afterActionResolvedReaction", $"owner {owner}: the assignment opposing Tairu opens the window");
+            var command = InWindow(a, owner, ability, tairu.Id, windowType: "afterActionResolvedReaction");
+            var hand = a.State.Players[owner].Hand.Count;
+            Accept(a, command);
+            Eq(a.State.Players[owner].Hand.Count, hand + 1, "Tairu's player drew a card");
+            Check(!CanUse(a, owner, ability, tairu.Id) || a.State.PendingChoice is null, "taken");
+            var away = AssignRig(2, out var t2);
+            Check(Window(away) != "afterActionResolvedReaction" || !CanUse(away, owner, ability, t2.Id), "assigned to another battlefield: nothing");
+            // (b) Tairu defends; the other player moves a Personality to his battlefield.
+            MatchEngine MoveRig(bool enemyMoves, out CardInstance tairu2)
+            {
+                var m = Table(Phase.Battle, 1); m.PriorityPlayerId = enemyMoves ? foe : owner;
+                tairu2 = Bf(m, def, owner); Bf(m, "training-lion-samurai", foe);
+                var mover = Add(m, "training-lion-samurai", enemyMoves ? foe : owner, Zone.Home);
+                var strategy = Add(m, "training-move-battle-strategy", enemyMoves ? foe : owner, Zone.Hand);
+                Add(m, "training-focus-strategy", owner, Zone.FateDeck);
+                var e = MatchEngine.FromTestState(m);
+                Accept(e, Offer(e, enemyMoves ? foe : owner, "training-move-to-battle", strategy.Id, mover.Id));
+                return e;
+            }
+            var mv = MoveRig(true, out var t3);
+            PassUntil(mv, () => CanUse(mv, owner, ability, t3.Id) || mv.State.PendingChoice is null);
+            Check(CanUse(mv, owner, ability, t3.Id), "a Personality moved to oppose him: offered");
+            var own = MoveRig(false, out var t4);
+            PassUntil(own, () => own.State.PendingChoice is null || CanUse(own, owner, ability, t4.Id));
+            Check(!CanUse(own, owner, ability, t4.Id), "his own side's Personality moving in does not oppose him");
+            // Never opened.
+            var q = Table(Phase.Battle, 1); q.PriorityPlayerId = owner; var tq = Bf(q, def, owner);
+            NeverOpened(MatchEngine.FromTestState(q), owner, ability, tq.Id, command with { CardId = tq.Id });
+        }
+    }
+
+    // ---- Watchers in the Dark: after engaging, your performing Scout at the battlefield and a card in a unit there: Reconnaissance there; abilities on cards in the target's unit may not be used ------------------------
+    private static void WatchersDarkRecon()
+    {
+        const string ability = "watchers-dark-recon";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownerAttacks in new[] { true, false })
+            {
+                var foe = 1 - owner; var attacker = ownerAttacks ? owner : foe;
+                var label = $"owner {owner} {(ownerAttacks ? "attacking" : "defending")}";
+                CardInstance card = null!, scout = null!, bower = null!, outside = null!, homeScout = null!;
+                MatchEngine Rig(bool useIt)
+                {
+                    var e = Engage(attacker, s =>
+                    {
+                        scout = Add(s, "training-scout-samurai", owner, Zone.Battlefield, bowed: true, province: 0);
+                        homeScout = Add(s, "training-scout-samurai", owner, Zone.Home);
+                        bower = Bf(s, "training-battle-bower", foe); outside = Bf(s, "training-battle-bower", foe); card = Add(s, def, owner, Zone.Hand);
+                        // the target's unit is `bower` alone; a Follower of another unit is the "outside" check
+                    });
+                    if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e));
+                    if (useIt)
+                    {
+                        var performers = Options(e, owner, ability, card.Id).Where(o => o.Enabled).Select(o => o.Command!.PerformerId).Distinct().ToArray();
+                        Check(performers.Contains(scout.Id) && !performers.Contains(homeScout.Id), label + ": the Scout at the battlefield may perform it, the one at home may not: " + string.Join(",", performers));
+                        var command = InWindow(e, owner, ability, card.Id, performerId: scout.Id, targetId: bower.Id, windowType: "engageReaction");
+                        Accept(e, command);
+                        Check(e.State.Players[1 - attacker].Provinces[0].Reconnaissance[owner], label + ": its player has Reconnaissance there");
+                    }
+                    PassUntil(e, () => e.State.PendingChoice is null);
+                    // The foe holds the priority (he passes the first opportunity if it is the owner's).
+                    for (var guard = 0; e.State.PriorityPlayerId != foe && guard < 2; guard++) Accept(e, PassC(e));
+                    return e;
+                }
+                var used = Rig(true);
+                Check(CanUse(used, foe, "training-bow-at-battle", outside.Id), label + ": a card outside the target's unit still may");
+                Check(!CanUse(used, foe, "training-bow-at-battle", bower.Id), label + ": abilities on cards in the target's unit may not be used");
+                Rejection(used, Use(used, foe, "training-bow-at-battle", bower.Id, scout.Id));
+                var control = Rig(false);
+                Check(CanUse(control, foe, "training-bow-at-battle", bower.Id), label + ": declined, his ability is available as usual");
+            }
+    }
+
     public static void Run(TestRunner runner) => runner.Run("single-reaction-3", [
         ("Asahina Keigo: when paying a Gold cost in any window, bowing him and discarding a card produces its Focus Value (3 Gold); not for the other player, spent, bowed or a blank card", KeigoGold),
         ("Seppun Washi: when paying a Gold cost in any window, bowing him produces 2 Gold; once per turn, never for the other player", WashiGold),
@@ -1664,5 +2053,13 @@ internal static partial class SingleReaction3Tests
         ("Shinjo Hayan: after engaging (either seat, attacking or defending) assign an unbowed Unicorn Clan Personality from home to the battlefield, once per turn; bowed or non-Unicorn never offered", HayanAssign),
         ("Shosuro Takazaki: Political Engage (either seat) means the winner gains no Honor for destroying her controller's units in this battle's resolution; without it he does", TakazakiEngage),
         ("Sniping: after a Ranged Attack is targeted (own or enemy's, either seat) double its strength so a Force 5 target dies; not against a Melee Attack or with no Attack", SnipingBoost),
+        ("Tamori Ruya: after her controller's own action bowed a Personality (Battle, or Open at home in either seat's Action phase) she bows a second Personality at her location; not for the enemy's bow or a bowed Follower", RuyaBow),
+        ("The Perfect Moment: after an Attack Phase in which you defended, create an additional Attack Phase with the other player defending: only Paragons or Battle Maidens assign or move, at most one province destroyed (either seat)", PerfectMomentDeclare),
+        ("To First Blood: after another player's Iaijutsu action targets your Personality (either seat) negate his destruction in the duel; not against a non-Iaijutsu action", ToFirstBloodNegate),
+        ("Training Engage destroy: after engaging (either seat, attacking or defending) destroy a targeted enemy Personality, never one's own; gone after the Engage window", EngageDestroy),
+        ("Training duel reaction (Holding): before a duel begins its holder gains 1 Honor, whether he challenges or is challenged; not without a duel", DuelReactor),
+        ("Twist of Fate: before your Dynasty Phase ends take an additional Open or Limited action (either seat), then the phase carries on; not for the other player's phase or without the card", TwistOfFateGrant),
+        ("Utaku Tairu: after a Personality assigns or moves to oppose him his controller draws a card (either seat); not for another battlefield or his own side's move", TairuExpDraw),
+        ("Watchers in the Dark: after engaging (either seat) the Scout at the battlefield gives Reconnaissance there and the target's unit's abilities may not be used, other units unaffected", WatchersDarkRecon),
     ]);
 }
