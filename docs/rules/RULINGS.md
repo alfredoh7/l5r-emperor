@@ -479,7 +479,7 @@ There is no choice. A Melee Attack Hida Chiyurei performs (printed on him, or fr
 - **Source:** Mendon, card wiring list (issue #827).
 
 ### R-053 — Koan cards: the Spell limit, the bow cost and the Robes
-A Shugenja may normally have any number of Spells attached; Koan's Jingasa limits him to as many as the number of attached cards with the Koan keyword. When he has more, his controller discards Spells down to that count. A Spell attached to him that requires him to bow is paid by the Jingasa: he does not bow to perform it. Koan's Robes add a Force bonus equal to the number of attached Koan cards (other than the Robes), and the first destruction each turn of any card in his unit by another player's card is negated: the Personality and everything attached, Spells, Followers and Items, created cards included, tokens not.
+A Shugenja may normally have any number of Spells attached; Koan's Jingasa limits him to as many as the number of attached cards with the Koan keyword. When he has more, his controller discards Spells down to that count. A Spell attached to him that requires him to bow is paid by the Jingasa: he does not bow to perform it. Koan's Robes add a Force bonus equal to the number of Koan cards in his unit, counting the Robes themselves and every other Koan-keyword card of the unit, and the first destruction each turn of any card in his unit by another player's card is negated: the Personality and everything attached, Spells, Followers and Items, created cards included, tokens not.
 
 - **Cards/primitives:** Koan's Jingasa (oracle-l5r-10524), Koan's Robes (oracle-l5r-10525); `WatchScope.Unit`, `Wave827KoanExcess`, the P24 `SpellFocusParityWaives` cost waiver.
 - **Date:** 2026-10-11

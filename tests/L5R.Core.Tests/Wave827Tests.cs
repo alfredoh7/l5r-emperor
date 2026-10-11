@@ -42,7 +42,7 @@ internal static class Wave827Tests
         ("Zansho - exp: bows one of his own attached unbowed Followers; the Ranged Attack's strength is its Force, +2 against Daigotsu Arakan; a Follower that is not his is refused", ZanshoRanged),
         ("Chiyurei's Axe: attaches only to Hida Chiyurei for 2 less Gold; his Melee Attacks compare the lower of the target's current and printed Force", AxeTerms),
         ("Koan's Jingasa: grants Shugenja; Spells beyond the Koan cards attached are discarded by the controller's choice, down to the count", JingasaLimit),
-        ("Koan's Robes: +1F for each other Koan card attached; the unit's first destruction each turn by another player's card is negated, created cards included", RobesTerms),
+        ("Koan's Robes: +1F for each Koan card in the unit, the Robes included; the unit's first destruction each turn by another player's card is negated, created cards included", RobesTerms),
     ]);
 
     // ---- published shape ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -350,10 +350,10 @@ internal static class Wave827Tests
         var baseForce = CardCatalog.Get(CraneSamurai).Force;
         var robes = Attach(s, Robes, host);
         var e = Engine(s);
-        Eq(Force(e, host), baseForce + 1, "the Robes' own printed +1F and no other Koan card");
+        Eq(Force(e, host), baseForce + 1 + 1, "the Robes' own printed +1F, plus 1F for the Robes themselves as a Koan card");
         var s2 = e.State; Attach(s2, Jingasa, host);
         var e2 = Engine(s2);
-        Eq(Force(e2, host), baseForce + 1 + 1, "one other Koan card adds 1F");
+        Eq(Force(e2, host), baseForce + 1 + 2, "the Jingasa adds a second Koan card: +1F more");
         // The unit's first destruction each turn by another player's card is negated, whichever card of the unit it is.
         var spell = Add(s2, Spell, 0, Zone.Attached, parent: host.Id);
         var e3 = Engine(s2);

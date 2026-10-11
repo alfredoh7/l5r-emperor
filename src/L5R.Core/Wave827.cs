@@ -236,7 +236,7 @@ public sealed partial class MatchEngine
 
     // ---- Koan: the Spell limit, the Robes' bonus ---------------------------------------------------------------------------------------------------------------------------------------
 
-    private int KoanCardsAttached(CardInstance host) => Attachments(host.Id).Count(a => Keyword(a, "Koan"));
+    private int KoanCardsInUnit(CardInstance host) => (Keyword(host, "Koan") ? 1 : 0) + Attachments(host.Id).Count(a => Keyword(a, "Koan"));
 
     // "May not have more Spells than Koan cards attached": the first Personality carrying a Jingasa with more Spells attached than Koan cards.
     private (CardInstance Host, int Limit, CardInstance[] Spells)? Wave827KoanExcess()
@@ -246,7 +246,7 @@ public sealed partial class MatchEngine
         {
             var attached = Attachments(host.Id).ToArray();
             if (!attached.Any(a => Definition(a).Effect == Wave827Abilities.JingasaEffect)) continue;
-            var limit = attached.Count(a => Keyword(a, "Koan"));
+            var limit = KoanCardsInUnit(host);
             var spells = attached.Where(a => Definition(a).Type == CardType.Spell).OrderBy(a => a.Id, StringComparer.Ordinal).ToArray();
             if (spells.Length > limit) return (host, limit, spells);
         }
@@ -258,7 +258,7 @@ public sealed partial class MatchEngine
         if (Definition(card).Type != CardType.Personality || !InPlay(card)) return 0;
         var attached = Attachments(card.Id).ToArray();
         var robes = attached.FirstOrDefault(a => Definition(a).Effect == Wave827Abilities.RobesEffect);
-        return robes is null ? 0 : attached.Count(a => a.Id != robes.Id && Keyword(a, "Koan"));
+        return robes is null ? 0 : KoanCardsInUnit(card);
     }
 
     private IEnumerable<ActionOption> Wave827KoanActions(int playerId)

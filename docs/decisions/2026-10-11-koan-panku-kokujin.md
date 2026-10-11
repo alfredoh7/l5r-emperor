@@ -27,8 +27,8 @@ See R-049 to R-053 in `docs/rules/RULINGS.md` for the wording. In short: Kokujin
 
 ## Readings for Mendon to confirm
 
-1. **The Jingasa's bow waiver keeps the printed parity.** The ruling says the Jingasa "satisfies that cost"; the card says "odd Focus Value" and the Robes "even". Both are kept as printed through the P24 waiver (a Focus 0 Spell is even, so the Robes' waive it and the Jingasa's do not). Say if the Jingasa should waive every Spell's bow.
-2. **The Robes count other Koan attachments**, not themselves ("other Koan cards in this unit"); the Personality's own keywords are not counted, per the ruling's "attached cards with the koan keyword". The Spell limit counts every attached Koan card, the Jingasa itself included.
+1. **The bow waivers keep the printed parity** (confirmed by Mendon, 2026-10-11: his "satisfies the cost" wording was too broad). The Jingasa waives the bow of odd-Focus Spells, the Robes of even-Focus Spells (0 is even), through the P24 waiver.
+2. **Koan cards count every Koan-keyword card in their unit, themselves included** (Mendon, 2026-10-11, after the first build): the Robes' bonus and the Jingasa's Spell limit both use that count (the Personality's own keyword too, if it has one).
 3. **Koan enforcement timing.** The Spell limit is checked after every command, never mid-action; the controller chooses which Spell to discard, one at a time, until within the limit.
 4. **P'an Ku's choice exists only while he holds a Personality.** With nothing taken he straightens as any card does. The "unless the straightening may not be negated" exception is the engine's existing unnegatable-action test. An effect's straightening is held until its command finishes (it is not applied mid-action); the Straighten Phase uses the `declineStraighten` screen.
 5. **P'an Ku's target is another player's Personality** with more Madness tokens than printed Personal Honor; the tokens are removed only if control was taken. If control is refused (Loyal, a duplicate Unique) nothing else happens.
