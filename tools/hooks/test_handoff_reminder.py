@@ -52,9 +52,10 @@ class HandoffReminderTests(unittest.TestCase):
         self.git("add", ".")
         self.git("-c", "gc.auto=0", "commit", "-m", message)
 
-    def transcript(self, *edited_paths, tool="Edit"):
+    def transcript(self, *edited_paths, tool="Edit", timestamp=None):
         path = Path(self.tmp.name) / "transcript.jsonl"
-        lines = [json.dumps({"type": "assistant", "message": {"content": [
+        stamp = {"timestamp": timestamp} if timestamp else {}
+        lines = [json.dumps({"type": "assistant", **stamp, "message": {"content": [
             {"type": "text", "text": "working"},
             {"type": "tool_use", "name": tool, "input": {"file_path": str(p)}}]}}) for p in edited_paths]
         path.write_text(chr(10).join(["not json", *lines]) + chr(10), encoding="utf-8")
@@ -127,6 +128,24 @@ class HandoffReminderTests(unittest.TestCase):
         self.write("src/L5R.Core/CardAbilities.cs", "my rules change\n")
         self.assert_reminder(self.transcript(self.root / "src/L5R.Core/CardAbilities.cs"))
         self.assert_reminder(self.transcript(self.root / "src/L5R.Core/CardAbilities.cs", tool="Write"))
+
+    def test_edits_made_before_the_current_branch_was_checked_out_do_not_remind(self):
+        # Another session switched the shared checkout onto its own branch after this session's edits (the #818 case).
+        self.git("switch", "-c", "claude/13-other-session")
+        self.write("src/L5R.Core/CardAbilities.cs", "someone else's rules change" + chr(10))
+        edited = self.root / "src/L5R.Core/CardAbilities.cs"
+        self.assert_no_reminder(self.transcript(edited, timestamp="2000-01-01T00:00:00.000Z"))
+        self.assert_reminder(self.transcript(edited, timestamp="2999-01-01T00:00:00.000Z"))
+        self.assert_reminder(self.transcript(edited))  # no timestamp: cannot be excluded
+
+    def test_a_renamed_branch_is_followed_back_to_its_checkout(self):
+        # Another session renamed its branch after checking it out (issue #823): the reflog's checkout entry names the old branch.
+        self.git("switch", "-c", "claude/13-old-name")
+        self.git("branch", "-m", "claude/13-new-name")
+        self.write("src/L5R.Core/CardAbilities.cs", "someone else's rules change" + chr(10))
+        edited = self.root / "src/L5R.Core/CardAbilities.cs"
+        self.assert_no_reminder(self.transcript(edited, timestamp="2000-01-01T00:00:00.000Z"))
+        self.assert_reminder(self.transcript(edited, timestamp="2999-01-01T00:00:00.000Z"))
 
     def test_unreadable_transcript_falls_back_to_the_branch_level_check(self):
         self.git("switch", "-c", "claude/13-other-session")
