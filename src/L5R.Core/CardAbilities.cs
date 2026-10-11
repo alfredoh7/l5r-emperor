@@ -11262,6 +11262,9 @@ public sealed partial class MatchEngine
                 // Strength of Purity (single-action audit, issue #833): the listing twin of the validation category -- without it the action was only ever listed disabled ("Choose a performing card").
                 "own-personality-honor-3-plus-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && CardPersonalHonor(c) >= 3
                     && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // The Strength of the Spider (single-action audit, issue #833): the listing twin of the validation category above -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-unbowed-spider-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && HasClanAffiliation(c, "Spider") && AtBattle(c))
+                    .OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-base-force-7-plus" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Definition(c).Force >= 7
                     && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
