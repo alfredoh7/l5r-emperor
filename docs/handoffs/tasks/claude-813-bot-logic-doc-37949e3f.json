@@ -4,6 +4,6 @@
   "validation": "Written from reading all of src/L5R.AI and checked against it; no code change",
   "remaining": "None; ready for review. Review readings listed in section 10 of the page.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/813",
-  "branch": "claude/810-bot-logic-doc",
-  "updated": "2026-10-11T01:53:57.382593+00:00"
+  "branch": "claude/813-bot-logic-doc",
+  "updated": "2026-10-11T01:54:16.604556+00:00"
 }
