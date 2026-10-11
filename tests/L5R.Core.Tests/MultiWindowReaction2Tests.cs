@@ -73,7 +73,9 @@ internal static partial class MultiWindowReaction2Tests
         switch (CardCatalog.Get(def).Type)
         {
             case CardType.Personality: return Add(s, def, owner, zone, province: at);
-            case CardType.Item: case CardType.Follower: case CardType.Spell:
+            case CardType.Item:
+            case CardType.Follower:
+            case CardType.Spell:
                 var host = Add(s, "training-lion-samurai", owner, zone, province: at);
                 return Add(s, def, owner, Zone.Attached, province: at, parent: host.Id);
             case CardType.Holding: return Add(s, def, owner, Zone.Home);

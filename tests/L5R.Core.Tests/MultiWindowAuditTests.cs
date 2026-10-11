@@ -82,27 +82,27 @@ internal static partial class MultiWindowAuditTests
             MatchEngine e; CardInstance source;
             for (var variant = 0; variant < (c.Type is CardType.Spell or CardType.Ring ? 2 : 1); variant++)
             {
-            int me; try { (e, source, me) = Build(c, scenario, variant); }
-            catch (Exception ex) { foreach (var id in c.Abilities ?? []) results.Add(new(c.Id, c.Name, id, Timing(id), scenario, false, false, "fixture: " + ex.Message, false, null)); continue; }
-            foreach (var id in c.Abilities ?? [])
-            {
-                var t = Timing(id);
-                if (!Windowed.Contains(t) || t == "Reaction") continue;
-                var best = new Probe(c.Id, c.Name, id, t, scenario, false, false, null, false, null);
-                foreach (var player in new[] { me })
+                int me; try { (e, source, me) = Build(c, scenario, variant); }
+                catch (Exception ex) { foreach (var id in c.Abilities ?? []) results.Add(new(c.Id, c.Name, id, Timing(id), scenario, false, false, "fixture: " + ex.Message, false, null)); continue; }
+                foreach (var id in c.Abilities ?? [])
                 {
-                    ActionOption[] options;
-                    try { options = Batch336Support.Options(e, player, id, source.Id); } catch (Exception ex) { best = best with { Reason = "query: " + ex.Message }; continue; }
-                    if (options.Length == 0) continue;
-                    var on = options.FirstOrDefault(o => o.Enabled && o.Command?.AbilityId == id); // split Battle/Limited twins share one label: only the offer's own command identifies the half
-                    if (on is null) { best = best with { Offered = true, Reason = options[0].Reason }; continue; }
-                    best = best with { Offered = true, Enabled = true, Reason = null };
-                    try { var r = e.Clone().Execute(on.Command!); best = best with { Executed = r.Accepted, ExecuteError = r.Accepted ? null : r.Error }; }
-                    catch (Exception ex) { best = best with { ExecuteError = "throw: " + ex.Message }; }
+                    var t = Timing(id);
+                    if (!Windowed.Contains(t) || t == "Reaction") continue;
+                    var best = new Probe(c.Id, c.Name, id, t, scenario, false, false, null, false, null);
+                    foreach (var player in new[] { me })
+                    {
+                        ActionOption[] options;
+                        try { options = Batch336Support.Options(e, player, id, source.Id); } catch (Exception ex) { best = best with { Reason = "query: " + ex.Message }; continue; }
+                        if (options.Length == 0) continue;
+                        var on = options.FirstOrDefault(o => o.Enabled && o.Command?.AbilityId == id); // split Battle/Limited twins share one label: only the offer's own command identifies the half
+                        if (on is null) { best = best with { Offered = true, Reason = options[0].Reason }; continue; }
+                        best = best with { Offered = true, Enabled = true, Reason = null };
+                        try { var r = e.Clone().Execute(on.Command!); best = best with { Executed = r.Accepted, ExecuteError = r.Accepted ? null : r.Error }; }
+                        catch (Exception ex) { best = best with { ExecuteError = "throw: " + ex.Message }; }
+                    }
+                    var prior = results.FindIndex(r => r.Card == c.Id && r.Ability == id && r.Scenario == scenario);
+                    if (prior < 0) results.Add(best); else if (best.Enabled || !results[prior].Offered && best.Offered) results[prior] = best; // another placement of the same card: keep the better probe
                 }
-                var prior = results.FindIndex(r => r.Card == c.Id && r.Ability == id && r.Scenario == scenario);
-                if (prior < 0) results.Add(best); else if (best.Enabled || !results[prior].Offered && best.Offered) results[prior] = best; // another placement of the same card: keep the better probe
-            }
             }
         }
         return results;
