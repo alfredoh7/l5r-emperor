@@ -433,6 +433,20 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));
         }
+        else if (_state.PendingChoice is { Type: "nikutaiReaction" } nikutaiPending)
+        {
+            // After a Follower in Nikutai's unit bowed (issue #279): the one watching card's own Reaction, then the pass; like moveReaction above, the window used to list neither (issue #833).
+            if (nikutaiPending.PlayerId == playerId && nikutaiPending.CardId is not null)
+            {
+                var watcher = Card(nikutaiPending.CardId);
+                foreach (var reactionId in AbilityIdsOf(watcher).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "sibling-follower-bowed"))
+                {
+                    var used = AbilityUseSpent(watcher.AbilityUses, AbilityCatalog.All[reactionId], AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
+                    AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
+                }
+            }
+            Add("declineReaction", "Pass reaction", Command("declineReaction"));
+        }
         else if (_state.PendingChoice is { Type: "afterResolutionReaction" })
         {
             // After a battle's resolution (issue #417): this player's Reactions that name it, from a hand, a discard pile or play, then the pass.
