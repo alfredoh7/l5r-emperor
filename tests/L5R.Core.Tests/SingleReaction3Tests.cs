@@ -1,0 +1,693 @@
+using L5R.Core;
+using static RegressionAssertions;
+
+// Issue #833, single-reaction audit slice 3: cards that print exactly ONE Reaction. Each test opens the Reaction's real trigger window through ordinary
+// engine play (a purchase, an assignment, an engage, a Battle or Limited action, a revealed Event ...), proves the right player is offered it and the
+// other is not, accepts it and checks the printed effect with concrete numbers/zones, then proves it is not offered (and the same command is refused)
+// once the window is closed or was never opened. Gold-source Reactions ("When paying a Gold cost") are driven through a Gold-priced action in each
+// window the cost can be paid in. A forged pending state is used only where the comment says no real path exists.
+internal static partial class SingleReaction3Tests
+{
+    private static CardInstance Add(MatchState s, string def, int owner, Zone zone, bool bowed = false, int? province = null, string? parent = null) => Batch336Support.Add(s, def, owner, zone, bowed, province, parent);
+    private static MatchState Table(Phase phase = Phase.Battle, int actor = 1) => Batch336Support.Table(phase, actor);
+    private static ActionOption[] Options(MatchEngine e, int player, string ability, string? cardId = null, string? performerId = null) => Batch336Support.Options(e, player, ability, cardId, performerId);
+    private static ActionOption Enabled(MatchEngine e, int player, string ability, string? cardId = null, string? performerId = null) => Batch336Support.Enabled(e, player, ability, cardId, performerId);
+    private static bool CanUse(MatchEngine e, int player, string ability, string? cardId = null, string? performerId = null) => Batch336Support.CanUse(e, player, ability, cardId, performerId);
+    private static GameCommand Offer(MatchEngine e, int player, string ability, string cardId, string targetId, string? performerId = null) => Batch336Support.Offer(e, player, ability, cardId, targetId, performerId);
+    private static GameCommand Use(MatchEngine e, int player, string ability, string cardId, string? targetId = null, string? performerId = null, params SlotSelection[] selections) => Batch336Support.Use(e, player, ability, cardId, targetId, performerId, selections);
+    private static string Rejection(MatchEngine e, GameCommand c) => Batch336Support.Rejection(e, c);
+    private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
+    private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
+    private static int Honor(MatchEngine e, int player) => Batch336Support.Honor(e, player);
+    private static void RunUntil(MatchEngine e, Func<bool> stop, Action? each = null) => Batch336Support.RunUntil(e, stop, each);
+    private static CardInstance Kw(CardInstance card, params string[] keywords) { foreach (var k in keywords) card.GrantedKeywords.Add(new(k, "test-fixture", GrantDuration.Permanent)); return card; }
+    private static CardInstance Bf(MatchState s, string def, int owner, bool bowed = false) => Add(s, def, owner, Zone.Battlefield, bowed, province: 0);
+    private static void Gold(MatchState s, int owner, int count) { for (var i = 0; i < count; i++) Add(s, "training-marketplace", owner, Zone.Home); }
+    private static string Def(string ability, string? name = null) =>
+        CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && (name is null || c.Name == name) && (c.Abilities ?? []).Contains(ability)).Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).First();
+    private static string Window(MatchEngine e) => e.State.PendingChoice?.Type ?? "";
+    private static GameCommand Decline(MatchEngine e) => new("declineReaction", e.State.PriorityPlayerId, e.Version);
+
+    // Declines every window still open (nobody else holds a Reaction in these positions), so the action has fully resolved.
+    private static void Settle(MatchEngine e)
+    {
+        for (var guard = 0; guard < 12 && e.State.PendingChoice is not null; guard++) Accept(e, Decline(e));
+    }
+
+    // The window is open in `e`: the Reaction is offered enabled to its owner, listed for nobody else and refused when the other player submits it; on a copy where
+    // every window is declined away the very same command is no longer offered and is refused. Returns the offered command (still unplayed in `e`).
+    private static GameCommand InWindow(MatchEngine e, int owner, string ability, string cardId, string? performerId = null, string? targetId = null, string? windowType = null)
+    {
+        Check(e.State.PendingChoice is not null, ability + ": no window is open");
+        if (windowType is not null) Check(e.State.PendingChoice!.Type == windowType, $"{ability}: the window is {e.State.PendingChoice!.Type}, not {windowType}");
+        if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e)); // the other player holds the first opportunity and has nothing to react with
+        var options = Options(e, owner, ability, cardId, performerId);
+        var option = options.FirstOrDefault(o => o.Enabled && (targetId is null || (o.TargetIds?.Contains(targetId) ?? false) || o.Command?.TargetId == targetId));
+        Check(option is not null, $"{ability} on {cardId} was not offered enabled to player {owner}" + (targetId is null ? "" : " against " + targetId) + ": " + string.Join("; ", e.QueryActions(owner).Select(a => $"{a.Type}:{a.Label}[{a.Enabled}] {a.Reason}")));
+        var command = option!.Command!;
+        if (targetId is not null) command = command with { TargetId = targetId };
+        if (performerId is not null) command = command with { PerformerId = performerId };
+        Check(!CanUse(e, 1 - owner, ability, cardId), ability + " is listed enabled for the other player");
+        Rejection(e, command with { PlayerId = 1 - owner });
+        var closed = e.Clone();
+        Settle(closed);
+        Check(closed.State.PendingChoice is null, ability + ": the window did not close");
+        Check(!CanUse(closed, owner, ability, cardId, performerId), ability + " is still offered after the window closed");
+        Rejection(closed, command with { ExpectedVersion = closed.Version });
+        return command;
+    }
+
+    // A fresh position in which the card sits in play and no window was ever opened: not offered to anyone, and its command is refused.
+    private static void NeverOpened(MatchEngine e, int owner, string ability, string cardId, GameCommand command)
+    {
+        Check(e.State.PendingChoice is null, "a window is open");
+        Check(!CanUse(e, owner, ability, cardId) && !CanUse(e, 1 - owner, ability, cardId), ability + " is offered with no window open");
+        Rejection(e, command with { ExpectedVersion = e.Version, PlayerId = owner });
+    }
+
+    // ---- Gold-source Reactions: "When paying a Gold cost" -------------------------------------------------------------------------------------------------------------------
+    private static void BowAllGold(MatchState s, int owner)
+    {
+        foreach (var c in s.Cards.Values.Where(c => c.OwnerId == owner && CardCatalog.Get(c.DefinitionId).GoldProduction > 0)) c.Bowed = true;
+    }
+
+    // Runs a 2-Gold action of the acting player's (Battle: Shusaku's Repeatable boost; Action phase: Interrogation's Open draw) in all four windows, paid by the
+    // reactor alone, and checks the reactor is no payment source for the other player. `discard` is the card Keigo must name.
+    private static void GoldWindows(string reactorDef, string ability, int produces, bool needsDiscard, Action<MatchEngine, CardInstance, int> effect)
+    {
+        foreach (var scenario in new[] { "battle-attacker", "battle-defender", "action-active", "action-other" })
+        {
+            var battle = scenario.StartsWith("battle");
+            var me = scenario is "battle-defender" or "action-active" ? 0 : 1;
+            var s = Table(battle ? Phase.Battle : Phase.Action, battle ? 1 : 0);
+            s.PriorityPlayerId = me;
+            BowAllGold(s, 0); BowAllGold(s, 1);
+            var reactor = Add(s, reactorDef, me, Zone.Home);
+            CardInstance? pitch = null;
+            if (needsDiscard) pitch = Add(s, "training-focus-strategy", me, Zone.Hand); // Focus Value 3
+            CardInstance payer;
+            string payAbility;
+            if (battle)
+            {
+                payer = Add(s, Def("wlpa-shusaku-boost"), me, Zone.Battlefield, province: 0); payAbility = "wlpa-shusaku-boost";
+                Add(s, "training-lion-samurai", 1 - me, Zone.Battlefield, province: 0);
+            }
+            else { payer = Add(s, Def("pe-interrogation-draw"), me, Zone.Hand); payAbility = "pe-interrogation-draw"; }
+            Add(s, "training-focus-strategy", me, Zone.FateDeck); // something to draw
+            var e = MatchEngine.FromTestState(s);
+            Check(e.PaymentOptions(me, 2).Any(p => p.SourceIds.SequenceEqual([reactor.Id])) || needsDiscard, $"{ability} [{scenario}]: the engine offers the reactor to pay 2 Gold");
+            Check(e.PaymentOptions(1 - me, 2).All(p => !p.SourceIds.Contains(reactor.Id)), $"{ability} [{scenario}]: the other player cannot pay with it");
+            // Keigo's amount is the payer's own choice, so the engine never suggests him and lists a Keigo-only payment disabled: the command is built by hand.
+            var command = needsDiscard ? Use(e, me, payAbility, payer.Id) with { SourceIds = [reactor.Id] } : Enabled(e, me, payAbility, payer.Id).Command! with { SourceIds = [reactor.Id] };
+            if (needsDiscard) command = command with { PaymentDiscards = new() { [reactor.Id] = pitch!.Id } };
+            var other = command with { PlayerId = 1 - me };
+            Rejection(e, other);
+            var hand = e.State.Players[me].Hand.Count; var force = e.CardForceForTest(payer.Id);
+            Accept(e, command);
+            Check(e.State.Cards[reactor.Id].Bowed, $"{ability} [{scenario}]: the reactor bowed to produce the Gold");
+            Eq(e.State.Cards[reactor.Id].AbilityUses[ability], e.State.TurnNumber, $"{ability} [{scenario}]: spent for the turn");
+            Check(!e.PaymentOptions(me, 1).Any(p => p.SourceIds.Contains(reactor.Id)), $"{ability} [{scenario}]: a bowed source produces nothing more");
+            if (battle) Eq(e.CardForceForTest(payer.Id), force + 1, $"{ability} [{scenario}]: Shusaku's +1F, so the cost was met");
+            else Eq(e.State.Players[me].Hand.Count, hand - 1 - (needsDiscard ? 1 : 0) + 1, $"{ability} [{scenario}]: Interrogation left the hand and a card was drawn");
+            effect(e, reactor, produces);
+            if (needsDiscard) Eq(e.State.Cards[pitch!.Id].Zone, Zone.FateDiscard, $"{ability} [{scenario}]: the named card was discarded");
+        }
+    }
+
+    private static void KeigoGold()
+    {
+        const string ability = "keigo-produce-gold";
+        var def = Def(ability);
+        // Every window a Gold cost can be paid in: Keigo bows and discards a Focus Value 3 card for 3 Gold; a card with no Focus Value yields nothing.
+        GoldWindows(def, ability, 3, true, (e, keigo, _) => { });
+        {
+            var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
+            BowAllGold(s, 0);
+            var keigo = Add(s, def, 0, Zone.Home);
+            var blank = Add(s, "training-crane-samurai", 0, Zone.Hand); // Focus Value 0
+            var urgency = Add(s, "training-cost-fixture", 0, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            var draw = Use(e, 0, "training-urgency-draw", urgency.Id) with { SourceIds = [keigo.Id] };
+            Check(Rejection(e, draw).Length > 0, "naming no card to discard is refused");
+            Check(Rejection(e, draw with { PaymentDiscards = new() { [keigo.Id] = blank.Id } }).Contains("produce 0"), "a card with no Focus Value produces nothing");
+            Check(!e.State.Cards[keigo.Id].Bowed && e.State.Cards[blank.Id].Zone == Zone.Hand, "a refused payment changes nothing");
+        }
+        // A Dynasty-phase recruit is a Gold cost too (a 3-Gold Personality bought from a Province with Keigo's 3 Gold).
+        {
+            var s = MatchEngine.CreateEconomyScenario().State;
+            BowAllGold(s, 0);
+            var keigo = Add(s, def, 0, Zone.Home);
+            var pitch = Add(s, "training-focus-strategy", 0, Zone.Hand);
+            var provinceCard = s.Players[0].Provinces[0].CardId!; s.Cards[provinceCard].DefinitionId = "training-honor-personality"; s.Cards[provinceCard].FaceUp = true;
+            s.Players[0].Honor = 20;
+            var e = MatchEngine.FromTestState(s);
+            Check(e.State.Phase == Phase.Dynasty, "the Dynasty phase");
+            Accept(e, new GameCommand("purchase", 0, e.Version, CardId: provinceCard, SourceIds: [keigo.Id], PaymentDiscards: new() { [keigo.Id] = pitch.Id }));
+            Check(e.State.Cards[provinceCard].Zone == Zone.Home && e.State.Cards[keigo.Id].Bowed && e.State.Cards[pitch.Id].Zone == Zone.FateDiscard, "recruited with Keigo's 3 Gold");
+        }
+        // Spent, bowed, in hand or not his: no source.
+        {
+            var s = Table(Phase.Action, 0); BowAllGold(s, 0);
+            var spent = Add(s, def, 0, Zone.Home); spent.AbilityUses[ability] = s.TurnNumber;
+            var bowed = Add(s, def, 0, Zone.Home, bowed: true);
+            var inHand = Add(s, def, 0, Zone.Hand);
+            Add(s, "training-focus-strategy", 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            var pitch = e.State.Players[0].Hand.First(h => CardCatalog.Get(e.State.Cards[h].DefinitionId).Focus > 0);
+            var urgency = Add(s, "training-cost-fixture", 0, Zone.Home); e = MatchEngine.FromTestState(s);
+            foreach (var source in new[] { spent, bowed })
+                Check(Rejection(e, Use(e, 0, "training-urgency-draw", urgency.Id) with { SourceIds = [source.Id], PaymentDiscards = new() { [source.Id] = pitch } }).Length > 0, "a spent or bowed Keigo is refused as a source");
+            Check(e.PaymentOptions(0, 1).All(p => !p.SourceIds.Contains(inHand.Id)), "Keigo in hand is no source");
+            Check(e.PaymentOptions(0, 1).All(p => !p.SourceIds.Contains(inHand.Id)), "Keigo in hand is no source");
+        }
+    }
+
+    private static void WashiGold()
+    {
+        const string ability = "washi-produce-gold";
+        var def = Def(ability);
+        Eq(AbilityCatalog.All[ability].PaymentProduction, 2);
+        GoldWindows(def, ability, 2, false, (e, washi, _) => Check(e.State.Cards[washi.Id].Bowed, "Washi bowed"));
+        // A Limited action in the Action phase and a Dynasty recruit are Gold costs too; a bowed or spent Washi produces nothing.
+        {
+            var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; BowAllGold(s, 0);
+            var washi = Add(s, def, 0, Zone.Home);
+            var urgency = Add(s, "training-cost-fixture", 0, Zone.Home);
+            Add(s, "training-focus-strategy", 0, Zone.FateDeck);
+            var e = MatchEngine.FromTestState(s);
+            var deck = e.State.Players[0].FateDeck.Count;
+            Accept(e, Use(e, 0, "training-urgency-draw", urgency.Id) with { SourceIds = [washi.Id] });
+            Eq(e.State.Players[0].FateDeck.Count, deck - 1, "the 2-Gold Limited action drew its card, paid by Washi");
+            Check(e.State.Cards[washi.Id].Bowed, "Washi bowed");
+            Eq(e.State.Cards[washi.Id].AbilityUses[ability], e.State.TurnNumber, "his Reaction is spent");
+        }
+        {
+            var s = MatchEngine.CreateEconomyScenario().State; BowAllGold(s, 0);
+            var washi = Add(s, def, 0, Zone.Home);
+            var provinceCard = s.Players[0].Provinces[0].CardId!; s.Cards[provinceCard].DefinitionId = "training-honor-personality"; s.Cards[provinceCard].FaceUp = true; // 3 Gold
+            Add(s, "training-marketplace", 0, Zone.Home);
+            s.Players[0].Honor = 20;
+            var e = MatchEngine.FromTestState(s);
+            Check(e.PaymentOptions(0, 2).Any(p => p.SourceIds.SequenceEqual([washi.Id])), "Washi pays a 2-Gold cost alone");
+            Check(e.PaymentOptions(0, 3).Any(p => p.SourceIds.Contains(washi.Id) && p.SourceIds.Length == 2), "and a 3-Gold recruit with a Marketplace");
+            Accept(e, new GameCommand("purchase", 0, e.Version, CardId: provinceCard, SourceIds: e.PaymentOptions(0, 3).First(p => p.SourceIds.Contains(washi.Id)).SourceIds));
+            Check(e.State.Cards[provinceCard].Zone == Zone.Home && e.State.Cards[washi.Id].Bowed, "recruited with Washi's 2 Gold in the payment");
+        }
+        {
+            var s = Table(Phase.Action, 0); BowAllGold(s, 0);
+            var bowed = Add(s, def, 0, Zone.Home, bowed: true);
+            var spent = Add(s, def, 0, Zone.Home); spent.AbilityUses[ability] = s.TurnNumber;
+            var inHand = Add(s, def, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            Eq(e.GoldProduced(spent.Id, 0), 0, "spent: nothing");
+            Check(e.PaymentOptions(0, 2).All(p => !p.SourceIds.Contains(inHand.Id) && !p.SourceIds.Contains(bowed.Id)), "and neither (nor one in hand) is offered");
+        }
+    }
+
+
+    // ---- Bayushi Mitsuo: after a Battle action that moved him, an additional Battle action ---------------------------------------------------------------------------------------
+    private static void MitsuoAdditional()
+    {
+        const string ability = "mitsuo-additional-action";
+        var def = Def(ability);
+        foreach (var me in new[] { 0, 1 })
+            foreach (var own in new[] { false, true })
+            {
+                // Player 1 attacks. The enemy action moves Mitsuo home (the move-both-home fixture moves its target and its source); his own Trusting Instinct moves
+                // him from home to the battlefield. Either way the controller holds the window and the extra action it grants.
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = own ? me : 1 - me;
+                var mitsuo = own ? Add(s, def, me, Zone.Home) : Bf(s, def, me);
+                var mover = Bf(s, "training-move-source", own ? me : 1 - me);
+                var bower = Bf(s, "training-battle-bower", me); var foe = Bf(s, "training-lion-samurai", 1 - me);
+                var instinct = own ? Add(s, Def("trusting-instinct-move"), me, Zone.Hand) : null;
+                var bystander = Bf(s, "training-crane-samurai", me);
+                var e = MatchEngine.FromTestState(s);
+                var label = $"me={me} own={own}";
+                if (own) Accept(e, Use(e, me, "trusting-instinct-move", instinct!.Id, null, mitsuo.Id));
+                else Accept(e, Offer(e, 1 - me, "training-move-both-home", mover.Id, mitsuo.Id));
+                Eq(e.State.Cards[mitsuo.Id].Zone, own ? Zone.Battlefield : Zone.Home, label + ": the action moved Mitsuo");
+                Eq(Window(e), "afterActionResolvedReaction", label);
+                var command = InWindow(e, me, ability, mitsuo.Id, windowType: "afterActionResolvedReaction");
+                Check(e.State.AdditionalActions.All(g => g.PlayerId != me), label + ": no extra action yet");
+                Accept(e, command);
+                Check(e.State.AdditionalActions.Any(g => g.PlayerId == me), label + ": Mitsuo's controller may take an additional action");
+                Check(!CanUse(e, me, ability, mitsuo.Id), label + ": taken once");
+                Settle(e);
+                // The additional action is a Battle action: his controller uses one now (his own Battle fixture bows the enemy).
+                Check(e.State.PendingChoice is null && e.State.AdditionalActions.Any(g => g.PlayerId == me), label + ": the extra action is still unused after the window");
+                Accept(e, Offer(e, me, "training-bow-at-battle", bower.Id, foe.Id));
+                Check(e.State.Cards[foe.Id].Bowed, label + ": the additional Battle action resolved");
+                Check(e.State.AdditionalActions.All(g => g.PlayerId != me), label + ": and is spent");
+                // The same move of somebody else does not trigger him.
+                if (!own)
+                {
+                    var t = Table(Phase.Battle, 1); t.PriorityPlayerId = 1 - me;
+                    var m2 = Bf(t, def, me); var other = Bf(t, "training-crane-samurai", me); var mv = Bf(t, "training-move-source", 1 - me);
+                    var f = MatchEngine.FromTestState(t);
+                    Accept(f, Offer(f, 1 - me, "training-move-both-home", mv.Id, other.Id));
+                    Eq(f.State.Cards[other.Id].Zone, Zone.Home, label + ": the bystander moved");
+                    Eq(f.State.Cards[m2.Id].Zone, Zone.Battlefield, label + ": Mitsuo did not");
+                    Check(!CanUse(f, me, ability, m2.Id), label + ": not offered");
+                }
+            }
+        // Never opened: standing in the battle, no action has moved him.
+        var n = Table(Phase.Battle, 1); n.PriorityPlayerId = 0;
+        var idle = Bf(n, def, 0);
+        var ne = MatchEngine.FromTestState(n);
+        NeverOpened(ne, 0, ability, idle.Id, Use(ne, 0, ability, idle.Id));
+    }
+
+    // ---- Absolution: Interrupt before an Event resolves ------------------------------------------------------------------------------------------------------------------------
+    private const string CherryBlossomFestival = "oracle-l5r-1314";
+    private static CardInstance FaceDownIn(MatchState s, string def, int owner, int province)
+    {
+        var card = Add(s, def, owner, Zone.Province, province: province); card.FaceUp = false;
+        if (s.Players[owner].Provinces[province].CardId is { } old) { s.Cards[old].Zone = Zone.DynastyDiscard; s.Cards[old].ProvinceIndex = null; }
+        s.Players[owner].Provinces[province].CardId = card.Id;
+        return card;
+    }
+
+    // Player 0 is in his Action Phase; driven with offered commands until player 1's Events Phase has revealed the Event (and its before-Event window opened).
+    private static MatchEngine RevealNextTurn(Action<MatchState> prepare)
+    {
+        var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
+        foreach (var other in s.Cards.Values.Where(c => c.OwnerId == 1 && c.Zone == Zone.Province)) other.DefinitionId = "training-marketplace";
+        prepare(s);
+        var e = MatchEngine.FromTestState(s);
+        RunUntil(e, () => e.State.PendingChoice is { Type: "p3BeforeEventReaction" or "p3MikiDarkVirtue" } || e.State.ActivePlayerId == 1 && e.State.Phase == Phase.Action);
+        return e;
+    }
+
+    private static void PassUntil(MatchEngine e, Func<bool> stop)
+    {
+        for (var guard = 0; guard < 80 && !stop(); guard++)
+        {
+            var pass = new[] { e.State.PriorityPlayerId, e.State.PendingChoice?.PlayerId ?? e.State.PriorityPlayerId }
+                .SelectMany(mover => e.QueryActions(mover)).FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
+            Check(pass is not null, $"nothing to pass with in {e.State.Phase} ({e.State.PendingChoice?.Type})");
+            Accept(e, pass!.Command!);
+        }
+        Check(stop(), $"did not reach the expected position in {e.State.Phase} ({e.State.PendingChoice?.Type})");
+    }
+
+    private static void AbsolutionNegate()
+    {
+        const string ability = "absolution-negate";
+        var def = Def(ability);
+        foreach (var holder in new[] { 0, 1 })
+        {
+            CardInstance festival = null!, absolution = null!;
+            var e = RevealNextTurn(s => { festival = FaceDownIn(s, CherryBlossomFestival, 1, 3); absolution = Add(s, def, holder, Zone.Hand); });
+            Eq(Window(e), "p3BeforeEventReaction", "the window before the Event resolves");
+            Check(e.State.Cards[festival.Id].FaceUp, "the Event was revealed");
+            var command = InWindow(e, holder, ability, absolution.Id, windowType: "p3BeforeEventReaction");
+            Accept(e, command);
+            PassUntil(e, () => e.State.PendingChoice?.Type != "p3BeforeEventReaction");
+            Eq(e.State.Cards[festival.Id].Zone, Zone.DynastyDiscard, $"holder {holder}: the negated Event was discarded without its effects");
+            Eq(e.State.Cards[absolution.Id].Zone, Zone.FateDiscard, "Absolution is spent");
+            Check(e.State.Players[1].Provinces[3].CardId is { } refill && refill != festival.Id, "the province was refilled");
+            // Control: with the same position and nobody answering, the Event resolves and stays in play.
+            CardInstance festival2 = null!;
+            var control = RevealNextTurn(s => { festival2 = FaceDownIn(s, CherryBlossomFestival, 1, 3); Add(s, def, holder, Zone.Hand); });
+            PassUntil(control, () => control.State.PendingChoice?.Type != "p3BeforeEventReaction");
+            Check(control.State.Cards[festival2.Id].Zone != Zone.DynastyDiscard, "passed: the Event resolved (it stays in play)");
+        }
+        // Only a revealed Event opens it: with no Absolution held there is no window, and in an ordinary Action phase the card is not on offer and its command is refused.
+        var none = RevealNextTurn(s => FaceDownIn(s, CherryBlossomFestival, 1, 3));
+        Check(none.State.PendingChoice?.Type != "p3BeforeEventReaction", "no Interrupt held: no window");
+        var s2 = Table(Phase.Action, 0); s2.PriorityPlayerId = 0;
+        var held = Add(s2, def, 0, Zone.Hand);
+        s2.Cards[s2.Players[0].StrongholdId].DefinitionId = "oracle-l5r-1218"; // player abilities need a published Stronghold
+        var f = MatchEngine.FromTestState(s2);
+        NeverOpened(f, 0, ability, held.Id, Use(f, 0, ability, held.Id));
+    }
+
+    // ---- An Insult Answered: Iaijutsu Revenge Reaction after another player's Honor-costing Limited/Open action ------------------------------------------------------------------
+    private static void InsultAnsweredDuel()
+    {
+        const string ability = "insult-answered-duel";
+        var def = Def(ability);
+        var baikoDef = Def("baiko-shame");
+        foreach (var performerStronger in new[] { false, true })
+        {
+            // Player 1 (active) has Baiko; his Limited action costs player 0 1 Honor (an Imperial Favor is needed for the action). Player 0 holds the Strategy and an unbowed Duelist.
+            var s = Table(Phase.Action, 1);
+            s.FavorPlayerId = 1;
+            var baiko = Add(s, baikoDef, 1, Zone.Home);
+            if (performerStronger) baiko.Modifiers.Add(new("test-source", "test", "Chi", 10));
+            var shamed = Add(s, "training-crane-samurai", 0, Zone.Home); shamed.Dishonorable = true;
+            var duelist = Add(s, "training-duelist-personality", 0, Zone.Home); // Chi 3, Duelist: wins ties
+            var bowedDuelist = Add(s, "training-duelist-personality", 0, Zone.Home, bowed: true);
+            var card = Add(s, def, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            var honor = Honor(e, 0);
+            Accept(e, Offer(e, 1, "baiko-shame", baiko.Id, shamed.Id));
+            Eq(Honor(e, 0), honor - 1, "Baiko cost player 0 1 Honor");
+            Eq(Window(e), "afterActionResolvedReaction");
+            var offer = Enabled(e, 0, ability, card.Id);
+            Check(offer.TargetIds!.SequenceEqual([baiko.Id]), "the action's performer is the only target");
+            Check(!Options(e, 0, ability, card.Id, bowedDuelist.Id).Any(o => o.Enabled && o.Label.Contains($"({bowedDuelist.Id})")), "a bowed Duelist is not a performer");
+            var command = InWindow(e, 0, ability, card.Id, performerId: duelist.Id, targetId: baiko.Id, windowType: "afterActionResolvedReaction");
+            Accept(e, command);
+            Check(e.State.PendingDuel is { } duel && duel.ChallengerId == duelist.Id && duel.ChallengedId == baiko.Id, "the Duelist challenges Baiko");
+            RunDuel(e);
+            Check(e.State.PendingDuel is null, "the duel finished");
+            var winner = performerStronger ? baiko : duelist; var loser = performerStronger ? duelist : baiko;
+            Eq(e.State.Cards[loser.Id].Zone, Zone.Dead, "the loser is destroyed");
+            Check(e.State.Cards[winner.Id].Zone != Zone.Dead, "the winner survives");
+            Eq(e.State.Cards[winner.Id].Tokens.Count(t => t.Type == "Revenge" && t.Stat == "Force" && t.Amount == 1), 2, "two +1F Revenge tokens on the winner");
+            Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy was played");
+        }
+        // The Honor loss must be the holder's, from another player's action: an action that cost nobody Honor, and one the holder performed himself, open nothing for it.
+        {
+            var s = Table(Phase.Action, 1);
+            var bower = Add(s, "training-skin-donor", 1, Zone.Home); var victim = Add(s, "training-crane-samurai", 0, Zone.Home);
+            Add(s, "training-duelist-personality", 0, Zone.Home);
+            var card = Add(s, def, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, "training-bow-any", bower.Id, victim.Id));
+            Check(Window(e) != "afterActionResolvedReaction" || !CanUse(e, 0, ability, card.Id), "no Honor loss: no Reaction");
+        }
+        {
+            // Player 0 shames his own Personality with his own Baiko: it is his action, not another player's. The Strategy in player 1's hand is not his to use either.
+            var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.FavorPlayerId = 0;
+            var baiko = Add(s, baikoDef, 0, Zone.Home); var own = Add(s, "training-crane-samurai", 0, Zone.Home); own.Dishonorable = true;
+            Add(s, "training-duelist-personality", 0, Zone.Home); Add(s, "training-duelist-personality", 1, Zone.Home);
+            var mine = Add(s, def, 0, Zone.Hand); var theirs = Add(s, def, 1, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            var honor = Honor(e, 0);
+            Accept(e, Offer(e, 0, "baiko-shame", baiko.Id, own.Id));
+            Eq(Honor(e, 0), honor - 1, "his own action cost him Honor");
+            Check(Window(e) != "afterActionResolvedReaction" || !CanUse(e, 0, ability, mine.Id), "his own action: not offered to him");
+            Check(!CanUse(e, 1, ability, theirs.Id), "player 1 lost no Honor: not offered to him");
+        }
+    }
+
+    // A pending duel driven to its end: each player focuses from the deck, then the striker strikes.
+    private static void RunDuel(MatchEngine e)
+    {
+        var focused = new HashSet<int>();
+        for (var guard = 0; e.State.PendingDuel is not null && guard < 12; guard++)
+        {
+            if (e.State.PendingChoice is { Type: "duelReaction" }) { Accept(e, Decline(e)); continue; }
+            if (e.State.PendingChoice is not null) break;
+            var p = e.State.PriorityPlayerId;
+            var options = e.QueryActions(p);
+            var focus = options.FirstOrDefault(o => o.Type == "focus" && o.Command?.Choice == "deck");
+            if (focus is not null && focused.Add(p)) { Accept(e, focus.Command!); continue; }
+            var strike = options.FirstOrDefault(o => o.Type == "strike");
+            if (strike is not null) { Accept(e, strike.Command!); continue; }
+            var accept = options.FirstOrDefault(o => o.Type == "acceptDuel");
+            if (accept is not null) { Accept(e, accept.Command!); continue; }
+            var keep = options.FirstOrDefault(o => o.Type == "duelistRefocus" && o.Command?.CardId is null);
+            if (keep is not null) { Accept(e, keep.Command!); continue; }
+            break;
+        }
+    }
+
+    // ---- Blade of Champions: when a Battle action would target a card in this unit, bow it: the action targets another of your cards ------------------------------------------------------------
+    private static void BladeRedirect()
+    {
+        const string ability = "blade-of-champions-redirect";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            MatchState Rig(out CardInstance wielder, out CardInstance blade, out CardInstance q, out CardInstance r, out CardInstance bower, out CardInstance enemyCard, Phase phase = Phase.Battle)
+            {
+                var s = Table(phase, 1); s.PriorityPlayerId = foe;
+                wielder = Bf(s, "training-lion-samurai", owner); blade = Add(s, def, owner, Zone.Attached, province: 0, parent: wielder.Id);
+                q = Bf(s, "training-crane-samurai", owner); r = Bf(s, "training-shugenja", owner);
+                bower = Bf(s, "training-battle-bower", foe); enemyCard = Bf(s, "training-lion-samurai", foe);
+                return s;
+            }
+            var s = Rig(out var w, out var b, out var q, out var r, out var bower, out var enemy);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, foe, "training-bow-at-battle", bower.Id, w.Id));
+            Eq(Window(e), "beforeActionReaction"); Eq(e.State.PriorityPlayerId, owner, "the window is the Blade's controller's");
+            Check(Options(e, owner, ability, b.Id).Where(o => o.Enabled).Select(o => o.Command!.TargetId).OrderBy(x => x, StringComparer.Ordinal).SequenceEqual(new[] { q.Id, r.Id }.OrderBy(x => x, StringComparer.Ordinal)),
+                "exactly the controller's other Personalities the bow could legally target");
+            Check(!e.State.Cards[b.Id].Bowed && !e.State.Cards[w.Id].Bowed, "nothing has happened yet");
+            foreach (var bad in new[] { w.Id, b.Id, enemy.Id, bower.Id, "not-a-card" }) Rejection(e, new GameCommand("useAbility", owner, e.Version, CardId: b.Id, TargetId: bad, AbilityId: ability));
+            var command = InWindow(e, owner, ability, b.Id, targetId: r.Id, windowType: "beforeActionReaction");
+            Accept(e, command);
+            Check(e.State.Cards[b.Id].Bowed, "the Blade is bowed as the cost");
+            Eq(e.State.PendingNegatableAbility!.TargetId, r.Id, "the action now targets the chosen card");
+            Check(!CanUse(e, owner, ability, b.Id), "and cannot react again");
+            Settle(e);
+            Check(e.State.Cards[r.Id].Bowed && !e.State.Cards[w.Id].Bowed && !e.State.Cards[q.Id].Bowed, "the action resolved on the chosen card only");
+            // Declined: the action resolves on the original target and the Blade stays unbowed.
+            var s2 = Rig(out var w2, out var b2, out _, out _, out var bower2, out _); var e2 = MatchEngine.FromTestState(s2);
+            Accept(e2, Offer(e2, foe, "training-bow-at-battle", bower2.Id, w2.Id)); Settle(e2);
+            Check(e2.State.Cards[w2.Id].Bowed && !e2.State.Cards[b2.Id].Bowed, "declined: the wielder is bowed, the Blade is not");
+            // Not a Battle action, not this unit, bowed Blade: nothing opens.
+            var s3 = Rig(out var w3, out var b3, out var q3, out _, out _, out _, Phase.Action); s3.ActivePlayerId = foe; s3.PriorityPlayerId = foe;
+            var opener = Add(s3, "training-bow-any-source", foe, Zone.Home);
+            var e3 = MatchEngine.FromTestState(s3);
+            Accept(e3, Offer(e3, foe, "training-bow-any", opener.Id, w3.Id));
+            Check(Window(e3) != "beforeActionReaction" && e3.State.Cards[w3.Id].Bowed, "an Open action is not a Battle action: it resolves at once");
+            var s4 = Rig(out _, out _, out var q4, out _, out var bower4, out _); var e4 = MatchEngine.FromTestState(s4);
+            Accept(e4, Offer(e4, foe, "training-bow-at-battle", bower4.Id, q4.Id));
+            Check(Window(e4) != "beforeActionReaction" && e4.State.Cards[q4.Id].Bowed, "a card outside the Blade's unit does not open it");
+            var s5 = Rig(out var w5, out var b5, out _, out _, out var bower5, out _); b5.Bowed = true; var e5 = MatchEngine.FromTestState(s5);
+            Accept(e5, Offer(e5, foe, "training-bow-at-battle", bower5.Id, w5.Id));
+            Check(Window(e5) != "beforeActionReaction" && e5.State.Cards[w5.Id].Bowed, "a bowed Blade cannot be used");
+            // Never opened.
+            var s6 = Rig(out _, out var b6, out _, out _, out _, out _); var e6 = MatchEngine.FromTestState(s6);
+            NeverOpened(e6, owner, ability, b6.Id, command with { CardId = b6.Id });
+        }
+    }
+
+    // ---- Chrysanthemum Blossom: after this Personality is assigned, +1F token and 1 Honor ------------------------------------------------------------------------------------------------------------
+    private static MatchState Maneuvers(Phase phase, int actor)
+    {
+        var s = MatchEngine.CreateEconomyScenario().State;
+        s.Phase = phase; s.ActivePlayerId = 0; s.PriorityPlayerId = actor; s.UnresolvedBattlefields = [0, 1, 2, 3];
+        return s;
+    }
+
+    private static void ChrysanthemumBoost()
+    {
+        const string ability = "chrysanthemum-blossom-boost";
+        var def = Def(ability);
+        foreach (var attacker in new[] { true, false })
+        {
+            // The Attacker assigns in the Infantry Declaration (player 0 attacks); the Defender in the Defense Assignment (player 1). The wearer's controller holds the window.
+            var owner = attacker ? 0 : 1;
+            var s = Maneuvers(attacker ? Phase.InfantryDeclaration : Phase.DefenseAssignment, owner);
+            var host = Add(s, "training-crane-samurai", owner, Zone.Home); var blossom = Add(s, def, owner, Zone.Attached, parent: host.Id);
+            var plain = Add(s, "training-crane-veteran", owner, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            var assign = new Dictionary<string, int> { [host.Id] = 0, [plain.Id] = 1 };
+            Accept(e, new GameCommand(attacker ? "attack" : "assignDefense", owner, e.Version, Assignments: assign));
+            Eq(e.State.Cards[host.Id].Zone, Zone.Battlefield, "he was assigned");
+            Eq(Window(e), "afterActionResolvedReaction", "after the assignment a Reaction window opens");
+            Eq(e.State.PriorityPlayerId, owner, "for the Reaction's holder");
+            var command = InWindow(e, owner, ability, blossom.Id, windowType: "afterActionResolvedReaction");
+            var force = e.CardForceForTest(host.Id); var honor = Honor(e, owner);
+            Accept(e, command);
+            Eq(e.CardForceForTest(host.Id), force + 1, "a +1F token");
+            Check(e.State.Cards[host.Id].Tokens.Any(t => t.Stat == "Force" && t.Amount == 1), "it is a token");
+            Eq(Honor(e, owner), honor + 1, "and 1 Honor");
+            Eq(e.CardForceForTest(plain.Id), CardCatalog.Get("training-crane-veteran").Force, "the unequipped Personality gets nothing");
+            Check(!CanUse(e, owner, ability, blossom.Id), "once per turn");
+            Settle(e);
+            Eq(e.State.Phase, attacker ? Phase.DefenseAssignment : e.State.Phase, "the assignment then carries on");
+            // Declined: no token, no Honor.
+            var d = Maneuvers(attacker ? Phase.InfantryDeclaration : Phase.DefenseAssignment, owner);
+            var dh = Add(d, "training-crane-samurai", owner, Zone.Home); Add(d, def, owner, Zone.Attached, parent: dh.Id);
+            var ed = MatchEngine.FromTestState(d); var forceD = ed.CardForceForTest(dh.Id); var honorD = Honor(ed, owner);
+            Accept(ed, new GameCommand(attacker ? "attack" : "assignDefense", owner, ed.Version, Assignments: new Dictionary<string, int> { [dh.Id] = 2 }));
+            Settle(ed);
+            Eq(ed.CardForceForTest(dh.Id), forceD, "declined: no token"); Eq(Honor(ed, owner), honorD, "declined: no Honor");
+            // A wearer who is not assigned, or an assignment of somebody else, opens nothing.
+            var n = Maneuvers(attacker ? Phase.InfantryDeclaration : Phase.DefenseAssignment, owner);
+            var loner = Add(n, "training-crane-samurai", owner, Zone.Home); var wearer = Add(n, "training-crane-veteran", owner, Zone.Home); var bl = Add(n, def, owner, Zone.Attached, parent: wearer.Id);
+            var en = MatchEngine.FromTestState(n);
+            Accept(en, new GameCommand(attacker ? "attack" : "assignDefense", owner, en.Version, Assignments: new Dictionary<string, int> { [loner.Id] = 0 }));
+            Check(!CanUse(en, owner, ability, bl.Id) && !CanUse(en, 1 - owner, ability, bl.Id), "assigning another Personality opens nothing for the Blossom");
+            // Never opened.
+            var q = Maneuvers(Phase.Action, owner); q.ActivePlayerId = owner;
+            var qh = Add(q, "training-crane-samurai", owner, Zone.Home); var qb = Add(q, def, owner, Zone.Attached, parent: qh.Id);
+            var eq = MatchEngine.FromTestState(q);
+            NeverOpened(eq, owner, ability, qb.Id, command with { CardId = qb.Id });
+        }
+        // A dishonorable wearer is rehonored by it instead of his controller gaining Honor (an Honor gain from a dishonorable Personality's action).
+        var dis = Maneuvers(Phase.InfantryDeclaration, 0);
+        var sad = Add(dis, "training-crane-samurai", 0, Zone.Home); sad.Dishonorable = true; var db = Add(dis, def, 0, Zone.Attached, parent: sad.Id);
+        var edis = MatchEngine.FromTestState(dis); var honorDis = Honor(edis, 0);
+        Accept(edis, new GameCommand("attack", 0, edis.Version, Assignments: new Dictionary<string, int> { [sad.Id] = 0 }));
+        Accept(edis, Enabled(edis, 0, ability, db.Id).Command!);
+        Check(!edis.State.Cards[sad.Id].Dishonorable && Honor(edis, 0) == honorDis, "a dishonorable Personality is rehonored instead");
+    }
+
+    // ---- Confusion at Court: before an action resolves whose base costs discard the Imperial Favor, negate its effects ---------------------------------------------------------------------------
+    private static void ConfusionNegate()
+    {
+        const string ability = "confusion-at-court-negate";
+        var def = Def(ability);
+        var favorDef = Def("lords-favor-straighten");
+        foreach (var holder in new[] { 0, 1 })
+            foreach (var phase in new[] { Phase.Action, Phase.Battle })
+            {
+                var performer = 1 - holder;
+                CardInstance play = null!, unit = null!, answer = null!;
+                MatchEngine Rig(bool favor = true)
+                {
+                    var s = Table(phase, performer); s.FavorPlayerId = favor ? performer : null; s.PriorityPlayerId = performer;
+                    play = Add(s, favorDef, performer, Zone.Hand);
+                    unit = Add(s, "training-lion-samurai", performer, phase == Phase.Battle ? Zone.Battlefield : Zone.Home, bowed: true, province: phase == Phase.Battle ? 0 : null);
+                    answer = Add(s, def, holder, Zone.Hand);
+                    return MatchEngine.FromTestState(s);
+                }
+                var label = $"holder {holder} in {phase}";
+                var e = Rig();
+                Accept(e, Offer(e, performer, "lords-favor-straighten", play.Id, unit.Id));
+                Eq(Window(e), "beforeActionReaction", label + ": the other player may react");
+                Check(!CanUse(e, performer, ability, answer.Id), label + ": the performer does not hold it");
+                var command = InWindow(e, holder, ability, answer.Id, windowType: "beforeActionReaction");
+                Accept(e, command);
+                Settle(e);
+                Check(e.State.Cards[unit.Id].Bowed, label + ": the straightening was negated");
+                Eq(e.State.FavorPlayerId, null, label + ": the Imperial Favor was still discarded (a negated action pays its costs)");
+                Check(e.State.Cards[answer.Id].Zone != Zone.Hand, label + ": Confusion at Court was spent");
+                Check(e.State.Cards[play.Id].Zone != Zone.Hand, label + ": the negated Strategy was still played");
+                Check(e.State.Events.Any(x => x.Type == "actionNegated"), label + ": the negation is on the record");
+                // Declined: the action resolves.
+                var d = Rig();
+                Accept(d, Offer(d, performer, "lords-favor-straighten", play.Id, unit.Id)); Settle(d);
+                Check(!d.State.Cards[unit.Id].Bowed, label + ": declined, the unit is straightened");
+                // An action whose base costs do not discard the Favor opens nothing (the Favor is held, but this Open action does not spend it).
+                if (phase == Phase.Action)
+                {
+                    var s2 = Table(phase, performer); s2.FavorPlayerId = performer; s2.PriorityPlayerId = performer;
+                    var bower = Add(s2, "training-bow-any-source", performer, Zone.Home); var victim = Add(s2, "training-crane-samurai", holder, Zone.Home);
+                    var held = Add(s2, def, holder, Zone.Hand);
+                    var e2 = MatchEngine.FromTestState(s2);
+                    Accept(e2, Offer(e2, performer, "training-bow-any", bower.Id, victim.Id));
+                    Check(!CanUse(e2, holder, ability, held.Id), label + ": no Favor discard among the costs: not offered");
+                    Check(e2.State.PendingChoice is null || e2.State.PendingChoice.Type != "beforeActionReaction" || !CanUse(e2, holder, ability, held.Id), label);
+                }
+                // Never opened.
+                var q = Rig(); NeverOpened(q, holder, ability, answer.Id, command with { CardId = answer.Id });
+            }
+    }
+
+    // ---- Detained: after engaging, bow your performing Magistrate to move home an enemy dishonorable Personality; bow his unit; his controller loses 2 Honor ----------------------------------------------------
+    // The Attacker (the active player) selects battle 0; the Engage window gives the Attacker the first opportunity and then the Defender.
+    private static MatchEngine Engage(int attacker, Action<MatchState> arrange, bool expectWindow = true)
+    {
+        var t = Table(Phase.BattleSelection, attacker); t.PriorityPlayerId = attacker; t.CurrentBattleProvince = null; t.UnresolvedBattlefields = [0];
+        arrange(t);
+        var e = MatchEngine.FromTestState(t);
+        Accept(e, new GameCommand("selectBattle", attacker, e.Version, Province: 0));
+        if (expectWindow) Eq(Window(e), "engageReaction", "the Engage window is open");
+        return e;
+    }
+
+    private static void DetainedMove()
+    {
+        const string ability = "detained-move";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownerAttacks in new[] { true, false })
+            {
+                var foe = 1 - owner; var attacker = ownerAttacks ? owner : foe;
+                var label = $"owner {owner} {(ownerAttacks ? "attacking" : "defending")}";
+                CardInstance card = null!, mag = null!, sinner = null!, follower = null!, honest = null!;
+                var e = Engage(attacker, s =>
+                {
+                    mag = Kw(Bf(s, "training-crane-samurai", owner), "Magistrate"); sinner = Bf(s, "training-lion-samurai", foe); sinner.Dishonorable = true;
+                    follower = Add(s, "training-follower", foe, Zone.Attached, province: 0, parent: sinner.Id);
+                    honest = Bf(s, "training-lion-samurai", foe); card = Add(s, def, owner, Zone.Hand);
+                });
+                if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e)); // the Attacker has the first opportunity
+                var offers = Options(e, owner, ability, card.Id, mag.Id).Where(o => o.Enabled).SelectMany(o => o.TargetIds ?? []).Distinct().ToArray();
+                Check(offers.SequenceEqual([sinner.Id]), label + ": only the dishonorable enemy is a target: " + string.Join(",", offers));
+                var command = InWindow(e, owner, ability, card.Id, performerId: mag.Id, targetId: sinner.Id, windowType: "engageReaction");
+                var theirs = Honor(e, foe); var mine = Honor(e, owner);
+                Accept(e, command);
+                Eq(e.State.Cards[sinner.Id].Zone, Zone.Home, label + ": he is moved home");
+                Check(e.State.Cards[sinner.Id].Bowed && e.State.Cards[follower.Id].Bowed, label + ": his unit is bowed");
+                Check(e.State.Cards[mag.Id].Bowed, label + ": the Magistrate bowed as the cost");
+                Eq(Honor(e, foe), theirs - 2, label + ": his controller loses 2 Honor");
+                Eq(Honor(e, owner), mine, label + ": and the Magistrate's controller loses nothing");
+                Eq(e.State.Cards[honest.Id].Zone, Zone.Battlefield, label + ": the honorable enemy is untouched");
+                Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, label + ": the Strategy was played");
+                // The performer must be an unbowed Magistrate; the target must be dishonorable and at the battlefield.
+                var n = Engage(attacker, s =>
+                {
+                    Bf(s, "training-crane-samurai", owner); Kw(Bf(s, "training-crane-veteran", owner, bowed: true), "Magistrate");
+                    var sn = Bf(s, "training-lion-samurai", foe); sn.Dishonorable = true; card = Add(s, def, owner, Zone.Hand);
+                }, expectWindow: false);
+                Check(Window(n) != "engageReaction" && !CanUse(n, owner, ability, card.Id), label + ": no unbowed Magistrate: no window, not offered");
+                // Out of the Engage window (the first Battle action) it is not offered at all.
+                var m = Engage(attacker, s =>
+                {
+                    mag = Kw(Bf(s, "training-crane-samurai", owner), "Magistrate"); sinner = Bf(s, "training-lion-samurai", foe); sinner.Dishonorable = true; card = Add(s, def, owner, Zone.Hand);
+                });
+                var late = m.Clone(); Settle(late);
+                Check(late.State.PendingChoice is null && !CanUse(late, owner, ability, card.Id), label + ": after the Engage window it is gone");
+                Rejection(late, command with { CardId = card.Id, ExpectedVersion = late.Version });
+            }
+    }
+
+    // ---- Flesh Cutter Arrows: after a Ranged Attack performed by this Personality targets a card without attached Armor, bow this card: +2 strength -------------------------------------------------------------
+    private static void FleshCutterArrows()
+    {
+        const string ability = "flesh-cutter-arrows-reaction";
+        var def = Def(ability);
+        var shikaro = Def("shikaro-attack");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            (MatchEngine E, CardInstance Arrows, CardInstance Target) Rig(bool armor = false, bool attackWithOther = false, bool attack = true, int targetForce = 5)
+            {
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = owner;
+                var host = Bf(s, shikaro, owner); // Ranged 4
+                var arrows = Add(s, def, owner, Zone.Attached, province: 0, parent: host.Id);
+                var other = Bf(s, "training-dual-attacker", owner); // a second Ranged 3 attacker without the Arrows
+                Add(s, "training-attack-reactor", foe, Zone.Home); // the opponent still holds a Reaction, so the window stays open to read the strength
+                var target = Bf(s, "training-crane-samurai", foe);
+                if (armor) Kw(Add(s, "training-weapon", foe, Zone.Attached, province: 0, parent: target.Id), "Armor");
+                var probe = MatchEngine.FromTestState(s);
+                Batch336Support.Force(target, targetForce - probe.CardForceForTest(target.Id));
+                var e = MatchEngine.FromTestState(s);
+                if (attack) Accept(e, attackWithOther ? Use(e, owner, "training-honor-cost-attack", other.Id, target.Id) : Use(e, owner, "shikaro-attack", host.Id, target.Id));
+                return (e, arrows, target);
+            }
+            // Without the Reaction a Ranged 4 does not kill a Force-5 target; with +2 (strength 6) it does.
+            var control = Rig(); Settle(control.E);
+            Check(control.E.State.Cards[control.Target.Id].Zone != Zone.Dead, $"owner {owner}: Ranged 4 spares the Force 5 target");
+            var rig = Rig();
+            Eq(rig.E.State.PendingAttack?.Strength, 4, "Shikaro's Ranged 4 Attack is pending");
+            var command = InWindow(rig.E, owner, ability, rig.Arrows.Id, windowType: "attackReaction");
+            Accept(rig.E, command);
+            Check(rig.E.State.Cards[rig.Arrows.Id].Bowed, "bowed as the cost");
+            Eq(rig.E.State.PendingAttack?.Strength, 6, "4 base + 2 from the Arrows");
+            Settle(rig.E);
+            Eq(rig.E.State.Cards[rig.Target.Id].Zone, Zone.Dead, $"owner {owner}: strength 6 destroys the Force 5 target");
+            // Armor on the target: not offered. Another Personality's Ranged Attack: not offered. No Attack yet: not offered.
+            var armored = Rig(armor: true);
+            Check(!CanUse(armored.E, owner, ability, armored.Arrows.Id), "a target with attached Armor: not offered");
+            var other = Rig(attackWithOther: true);
+            Eq(other.E.State.PendingAttack?.Kind, "Ranged");
+            Check(!CanUse(other.E, owner, ability, other.Arrows.Id), "an Attack from another Personality: not offered");
+            var quiet = Rig(attack: false);
+            NeverOpened(quiet.E, owner, ability, quiet.Arrows.Id, command with { CardId = quiet.Arrows.Id });
+        }
+    }
+
+    public static void Run(TestRunner runner) => runner.Run("single-reaction-3", [
+        ("Asahina Keigo: when paying a Gold cost in any window, bowing him and discarding a card produces its Focus Value (3 Gold); not for the other player, spent, bowed or a blank card", KeigoGold),
+        ("Seppun Washi: when paying a Gold cost in any window, bowing him produces 2 Gold; once per turn, never for the other player", WashiGold),
+        ("Bayushi Mitsuo: after a Battle action (the enemy's, or his own Trusting Instinct) moved him, his controller takes an additional Battle action; not for a bystander's move or with no window", MitsuoAdditional),
+        ("Absolution: before a revealed Event resolves either holder may negate it (the Event is discarded unresolved, Absolution spent); passing lets it resolve; never offered outside the window", AbsolutionNegate),
+        ("An Insult Answered: after another player's Honor-costing Limited action the loser's Duelist challenges the performer; the loser is destroyed and the winner gets two +1F Revenge tokens (either outcome); not for a harmless or own action", InsultAnsweredDuel),
+        ("Blade of Champions: a Battle action against a card in its unit opens the controller's window (either seat); the Blade bows and the action lands on the chosen own card; declined it lands on the wielder; not for an Open action, another unit or a bowed Blade", BladeRedirect),
+        ("Chrysanthemum Blossom: when its Personality is assigned (as Attacker or Defender) the controller gets a +1F token and 1 Honor, once; declined or another Personality assigned gives nothing; dishonorable wearer is rehonored", ChrysanthemumBoost),
+        ("Confusion at Court: before either player's Favor-discarding action resolves (Action phase or Battle) the other player negates its effects while the Favor is still discarded; not for an action with no Favor cost", ConfusionNegate),
+        ("Detained: after engaging (as Attacker or Defender) bow an unbowed Magistrate to move an enemy dishonorable Personality home, bow his unit, and his controller loses 2 Honor; not once the Engage window is over", DetainedMove),
+        ("Flesh Cutter Arrows: when its wielder's Ranged Attack targets a card without Armor, bow it for +2 strength (4 becomes 6 and kills a Force 5), for either seat; not with Armor, another attacker or no Attack", FleshCutterArrows),
+    ]);
+}
