@@ -1251,6 +1251,147 @@ internal static partial class SingleReaction3Tests
         }
     }
 
+    // ---- Legion of the Bat: after an action moved a target enemy Infantry Personality to this card's battlefield, bow the Personality -----------------------------------------------------------------
+    private static void LegionOfTheBatBow()
+    {
+        const string ability = "legion-of-bat-bow";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var mover = 1 - owner; // the enemy's own Battle action moves its Personality from home to the current battlefield
+            (MatchEngine E, CardInstance Legion, CardInstance Moved, CardInstance Move) Rig(bool cavalry = false, bool legionBowed = false, string? movedKeyword = null)
+            {
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = mover;
+                var host = Bf(s, "training-crane-samurai", owner);
+                var legion = Add(s, def, owner, Zone.Attached, bowed: legionBowed, province: 0, parent: host.Id);
+                var source = Bf(s, "training-move-source", mover);
+                var moved = Add(s, "training-crane-samurai", mover, Zone.Home);
+                if (cavalry) Kw(moved, "Cavalry");
+                if (movedKeyword is not null) Kw(moved, movedKeyword);
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, Offer(e, mover, "training-move-current", source.Id, moved.Id));
+                return (e, legion, moved, source);
+            }
+            var rig = Rig();
+            Eq(rig.E.State.Cards[rig.Moved.Id].Zone, Zone.Battlefield, "the enemy Infantry Personality arrived at the battlefield");
+            Eq(Window(rig.E), "moveReaction", $"owner {owner}: the move window");
+            var command = InWindow(rig.E, owner, ability, rig.Legion.Id, windowType: "moveReaction");
+            Check(!rig.E.State.Cards[rig.Moved.Id].Bowed, "not bowed yet");
+            Accept(rig.E, command);
+            Check(rig.E.State.Cards[rig.Moved.Id].Bowed, $"owner {owner}: the moved Personality is bowed");
+            Check(!CanUse(rig.E, owner, ability, rig.Legion.Id), "used once");
+            // Declined: not bowed.
+            var d = Rig(); Settle(d.E);
+            Check(!d.E.State.Cards[d.Moved.Id].Bowed, "declined: not bowed");
+            // A Cavalry Personality is not Infantry; a bowed Follower holds no Reaction.
+            var c = Rig(cavalry: true);
+            Check(Window(c.E) != "moveReaction" && !CanUse(c.E, owner, ability, c.Legion.Id), "Cavalry: no window");
+            // Never opened.
+            var s2 = Table(Phase.Battle, 1); s2.PriorityPlayerId = mover;
+            var h2 = Bf(s2, "training-crane-samurai", owner); var l2 = Add(s2, def, owner, Zone.Attached, province: 0, parent: h2.Id);
+            NeverOpened(MatchEngine.FromTestState(s2), owner, ability, l2.Id, command with { CardId = l2.Id });
+        }
+    }
+
+    // ---- Mirumoto Rokai: after another player's action targets your Personality at Rokai's location, destroy Rokai: negate your Personality's destruction -----------------------------------------------------
+    private static void RokaiNegateDestruction()
+    {
+        const string ability = "rokai-negate-destruction";
+        var def = Def(ability, "Mirumoto Rokai");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            (MatchEngine E, CardInstance Rokai, CardInstance Target) Rig(bool rokaiAtHome = false, bool bowOnly = false)
+            {
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = foe;
+                var attacker = Bf(s, bowOnly ? "training-battle-bower" : "training-no-attachments-destroyer", foe);
+                var rokai = rokaiAtHome ? Add(s, def, owner, Zone.Home) : Bf(s, def, owner);
+                var target = Bf(s, "training-lion-samurai", owner); // no attachments: a legal destroy target, at the same location as Rokai
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, Offer(e, foe, bowOnly ? "training-bow-at-battle" : "training-destroy-no-attachments", attacker.Id, target.Id));
+                return (e, rokai, target);
+            }
+            var rig = Rig();
+            Eq(Window(rig.E), "beforeActionReaction", $"owner {owner}: the action is held");
+            Eq(rig.E.State.Cards[rig.Target.Id].Zone, Zone.Battlefield, "not yet destroyed");
+            var command = InWindow(rig.E, owner, ability, rig.Rokai.Id, windowType: "beforeActionReaction");
+            Accept(rig.E, command);
+            Eq(rig.E.State.Cards[rig.Rokai.Id].Zone, Zone.Dead, "Rokai's own cost: destroying himself");
+            Settle(rig.E);
+            Eq(rig.E.State.Cards[rig.Target.Id].Zone, Zone.Battlefield, "negated: the original destroy never applied");
+            // Control: declined, the target is destroyed and Rokai lives.
+            var d = Rig(); Settle(d.E);
+            Eq(d.E.State.Cards[d.Target.Id].Zone, Zone.Dead, "declined: the Personality is destroyed");
+            Eq(d.E.State.Cards[d.Rokai.Id].Zone, Zone.Battlefield, "and Rokai stands");
+            // Not at Rokai's location, and an action that does not destroy.
+            var far = Rig(rokaiAtHome: true);
+            Check(Window(far.E) != "beforeActionReaction" || !CanUse(far.E, owner, ability, far.Rokai.Id), "Rokai at another location: not offered");
+            var bow = Rig(bowOnly: true);
+            Check(!CanUse(bow.E, owner, ability, bow.Rokai.Id), "a bow is not a destruction: not offered");
+            var s5 = Table(Phase.Battle, 1); s5.PriorityPlayerId = foe; var r5 = Bf(s5, def, owner);
+            NeverOpened(MatchEngine.FromTestState(s5), owner, ability, r5.Id, command with { CardId = r5.Id });
+        }
+    }
+
+    // ---- Ninja Tricks: after an action on a Strategy is announced, bow your performing Ninja at the current battlefield: negate the action's effects, lose 2 Honor ------------------------------------------
+    private static void NinjaTricksNegate()
+    {
+        const string ability = "ninja-tricks-negate";
+        var def = Def(ability);
+        var ogre = Def("ogre-savagery-bow");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            (MatchEngine E, CardInstance Ninja, CardInstance Trick, CardInstance Victim, CardInstance Ogre) Rig(bool ninja = true, bool ninjaBowed = false)
+            {
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = foe;
+                var n = Kw(Bf(s, "training-crane-samurai", owner, bowed: ninjaBowed), ninja ? ["Ninja"] : []);
+                var victim = Bf(s, "training-crane-veteran", owner);
+                var oni = Bf(s, "training-seeds5-shadowlands-oni", foe);
+                var strategy = Add(s, ogre, foe, Zone.Hand); var trick = Add(s, def, owner, Zone.Hand);
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, Offer(e, foe, "ogre-savagery-bow", strategy.Id, victim.Id, oni.Id));
+                return (e, n, trick, victim, strategy);
+            }
+            var rig = Rig();
+            Eq(Window(rig.E), "beforeActionReaction", $"owner {owner}: the window opens for the Strategy's action");
+            var command = InWindow(rig.E, owner, ability, rig.Trick.Id, performerId: rig.Ninja.Id, windowType: "beforeActionReaction");
+            var honor = Honor(rig.E, owner);
+            Accept(rig.E, command);
+            Check(rig.E.State.Cards[rig.Ninja.Id].Bowed, "the Ninja was bowed as the cost");
+            Eq(Honor(rig.E, owner), honor - 2, "2 Honor was lost");
+            Eq(rig.E.State.Cards[rig.Trick.Id].Zone, Zone.FateDiscard, "Ninja Tricks was spent");
+            Settle(rig.E);
+            Check(!rig.E.State.Cards[rig.Victim.Id].Bowed, "the action's effects were negated: he is not bowed");
+            Eq(rig.E.State.Cards[rig.Ogre.Id].Zone, Zone.FateDiscard, "the action was still taken: the Strategy is spent");
+            // Declined: the action resolves.
+            var d = Rig(); Settle(d.E);
+            Check(d.E.State.Cards[d.Victim.Id].Bowed, "declined: the action resolved"); Eq(Honor(d.E, owner), honor, "and no Honor was lost");
+            // Without a Ninja, or with the Ninja bowed: no window; the action resolves.
+            foreach (var (e, why) in new[] { (Rig(ninja: false), "no Ninja"), (Rig(ninjaBowed: true), "a bowed Ninja") })
+            {
+                Check(Window(e.E) != "beforeActionReaction" && !CanUse(e.E, owner, ability, e.Trick.Id), why + ": nothing to react with");
+                Check(e.E.State.Cards[e.Victim.Id].Bowed, why + ": the action resolved");
+            }
+            // An action on a card in play is not an action on a Strategy.
+            var s3 = Table(Phase.Battle, 1); s3.PriorityPlayerId = foe;
+            Kw(Bf(s3, "training-crane-samurai", owner), "Ninja"); var v3 = Bf(s3, "training-crane-veteran", owner); var t3 = Add(s3, def, owner, Zone.Hand);
+            var bower = Bf(s3, "training-battle-bower", foe);
+            var e3 = MatchEngine.FromTestState(s3);
+            Accept(e3, Offer(e3, foe, "training-bow-at-battle", bower.Id, v3.Id));
+            Check(!CanUse(e3, owner, ability, t3.Id), "an action on a card in play is not an action on a Strategy");
+            // A Strategy's action in the Action phase is not at the current battlefield.
+            var s4 = Table(Phase.Action, foe); s4.PriorityPlayerId = foe;
+            Kw(Add(s4, "training-crane-samurai", owner, Zone.Home), "Ninja"); var t4 = Add(s4, def, owner, Zone.Hand);
+            var favorer = Add(s4, "training-crane-samurai", foe, Zone.Home); var take = Add(s4, Def("lords-favor-take"), foe, Zone.Hand);
+            var e4 = MatchEngine.FromTestState(s4);
+            Accept(e4, Use(e4, foe, "lords-favor-take", take.Id, null, favorer.Id));
+            Check(!CanUse(e4, owner, ability, t4.Id), "an Action-phase Strategy action: no battlefield, not offered");
+            var s5 = Table(Phase.Battle, 1); s5.PriorityPlayerId = foe; Kw(Bf(s5, "training-crane-samurai", owner), "Ninja"); var t5 = Add(s5, def, owner, Zone.Hand);
+            NeverOpened(MatchEngine.FromTestState(s5), owner, ability, t5.Id, command with { CardId = t5.Id });
+        }
+    }
+
     public static void Run(TestRunner runner) => runner.Run("single-reaction-3", [
         ("Asahina Keigo: when paying a Gold cost in any window, bowing him and discarding a card produces its Focus Value (3 Gold); not for the other player, spent, bowed or a blank card", KeigoGold),
         ("Seppun Washi: when paying a Gold cost in any window, bowing him produces 2 Gold; once per turn, never for the other player", WashiGold),
@@ -1277,5 +1418,8 @@ internal static partial class SingleReaction3Tests
         ("Training Spider honor-loss Personality: after entering play (either seat) its controller loses 2 Honor", SpiderEntryHonorLoss),
         ("Satoshi's Dual Warfans: after it enters play from the hand (Equip, either seat) draw a card, once; not for an Item already in play", SatoshiWarfansDraw),
         ("Training terrain with entry reaction: played by a Battle action (either seat), its entry Reaction gains 1 Honor; refused in the Action phase", TerrainEntryReaction),
+        ("Legion of the Bat: after an action moves an enemy Infantry Personality to its battlefield its controller (either seat) bows him; not for Cavalry, declined or with no move", LegionOfTheBatBow),
+        ("Mirumoto Rokai: after another player's action targets your Personality at his location destroy him to negate your Personality's destruction (either seat); not at another location or for a bow", RokaiNegateDestruction),
+        ("Ninja Tricks: after another player's Strategy action is announced in a battle bow your Ninja to negate its effects and lose 2 Honor (either seat); not without an unbowed Ninja, for a card in play or in the Action phase", NinjaTricksNegate),
     ]);
 }
