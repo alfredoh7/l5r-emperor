@@ -678,6 +678,336 @@ internal static partial class SingleReaction3Tests
         }
     }
 
+    // ---- Grateful Reward: after engaging, choose your performing Samurai at the battlefield: create a 1F Ashigaru Cavalry Follower on him; a Paragon gains 2 Honor and draws ----------------------
+    private static void GratefulRewardCreate()
+    {
+        const string ability = "grateful-reward-create";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownerAttacks in new[] { true, false })
+                foreach (var paragon in new[] { true, false })
+                {
+                    var foe = 1 - owner; var attacker = ownerAttacks ? owner : foe;
+                    var label = $"owner {owner} {(ownerAttacks ? "attacking" : "defending")} {(paragon ? "Paragon" : "plain Samurai")}";
+                    CardInstance card = null!, samurai = null!, notSamurai = null!;
+                    var e = Engage(attacker, s =>
+                    {
+                        samurai = Kw(Bf(s, "training-crane-samurai", owner), "Samurai"); if (paragon) Kw(samurai, "Paragon");
+                        notSamurai = Bf(s, "training-shugenja", owner); Bf(s, "training-lion-samurai", foe); card = Add(s, def, owner, Zone.Hand);
+                        Kw(Add(s, "training-crane-veteran", owner, Zone.Home), "Samurai"); // a Samurai at home is not "at the current battlefield"
+                        Add(s, "training-focus-strategy", owner, Zone.FateDeck);
+                    });
+                    if (e.State.PriorityPlayerId != owner) Accept(e, Decline(e));
+                    var performers = Options(e, owner, ability, card.Id).Where(o => o.Enabled).Select(o => o.Command!.PerformerId).ToArray();
+                    Check(performers.SequenceEqual([samurai.Id]), label + ": only the performing Samurai may be chosen: " + string.Join(",", performers));
+                    var command = InWindow(e, owner, ability, card.Id, performerId: samurai.Id, windowType: "engageReaction");
+                    var honor = Honor(e, owner); var hand = e.State.Players[owner].Hand.Count; var followers = e.State.Cards.Values.Count(c => c.Zone == Zone.Attached && c.AttachedTo == samurai.Id);
+                    Accept(e, command);
+                    var made = e.State.Cards.Values.Where(c => c.Zone == Zone.Attached && c.AttachedTo == samurai.Id).ToArray();
+                    Eq(made.Length, followers + 1, label + ": one Follower attached to him");
+                    var follower = made.Single();
+                    Check(CardCatalog.Get(follower.DefinitionId).Type == CardType.Follower && follower.OwnerId == owner, label + ": a Follower of his controller's");
+                    Eq(e.CardForceForTest(follower.Id), 1, label + ": 1F");
+                    Check(e.HasKeyword(follower.Id, "Ashigaru") && e.HasKeyword(follower.Id, "Cavalry"), label + ": Ashigaru and Cavalry");
+                    Eq(Honor(e, owner), honor + (paragon ? 2 : 0), label + (paragon ? ": a Paragon gains 2 Honor" : ": no Honor for a non-Paragon"));
+                    Eq(e.State.Players[owner].Hand.Count, hand - 1 + (paragon ? 1 : 0), label + (paragon ? ": the Strategy left the hand and a card was drawn" : ": no draw"));
+                    Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, label + ": the Strategy was played");
+                    Eq(e.State.Cards[notSamurai.Id].Zone, Zone.Battlefield);
+                }
+        // No Samurai performing at the battlefield (only a Samurai at home / a non-Samurai at the battlefield): not offered, even with the window open for someone else.
+        {
+            CardInstance card = null!;
+            var e = Engage(0, s =>
+            {
+                Bf(s, "training-shugenja", 0); Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Samurai"); card = Add(s, def, 0, Zone.Hand);
+                Bf(s, "training-lion-samurai", 1); Add(s, "training-attack-reactor", 1, Zone.Home);
+            }, expectWindow: false);
+            Check(!CanUse(e, 0, ability, card.Id), "no Samurai at the battlefield: not offered");
+            Rejection(e, Use(e, 0, ability, card.Id));
+        }
+    }
+
+    // ---- Hero's Memorial: after another player's action destroyed one of your Personalities, bow this card: gain 2 Honor ----------------------------------------------------------------------
+    private static void HerosMemorialHonor()
+    {
+        const string ability = "wl-heros-memorial-honor";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            // kind: "personality" = the enemy's action destroys one of the owner's Personalities; "follower" = it destroys a Follower of his instead; "own" = the owner's action destroys an enemy Personality.
+            MatchEngine Rig(string kind, out CardInstance memorial, out int honorBefore)
+            {
+                var actor = kind == "own" ? owner : foe;
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = actor;
+                var destroyer = Bf(s, "training-no-attachments-destroyer", actor);
+                var mine = Bf(s, "training-crane-samurai", owner); var theirs = Bf(s, "training-lion-samurai", foe);
+                var follower = kind == "follower" ? Add(s, "training-follower", owner, Zone.Attached, province: 0, parent: mine.Id) : null;
+                memorial = Add(s, def, owner, Zone.Home);
+                var e = MatchEngine.FromTestState(s);
+                honorBefore = Honor(e, owner);
+                var victim = kind switch { "personality" => mine, "follower" => follower!, _ => theirs };
+                Accept(e, Offer(e, actor, "training-destroy-no-attachments", destroyer.Id, victim.Id));
+                Check(e.State.Cards[victim.Id].Zone is Zone.Dead or Zone.DynastyDiscard or Zone.FateDiscard, "the victim was destroyed");
+                return e;
+            }
+            var w = Rig("personality", out var memorial, out var honor);
+            Eq(Window(w), "afterActionResolvedReaction", $"owner {owner}: another player's action destroyed one of his Personalities");
+            var command = InWindow(w, owner, ability, memorial.Id, windowType: "afterActionResolvedReaction");
+            Accept(w, command);
+            Eq(Honor(w, owner), honor + 2, $"owner {owner}: gain 2 Honor");
+            Check(w.State.Cards[memorial.Id].Bowed, "bowing is the cost");
+            Check(!CanUse(w, owner, ability, memorial.Id), "spent");
+            // Declined: no Honor.
+            var d = Rig("personality", out _, out _); Settle(d);
+            Eq(Honor(d, owner), honor, "declined: no Honor");
+            // Another player's action that destroyed none of his, and his own action that destroyed one of the enemy's: nothing to react to.
+            var none = Rig("follower", out var m2, out _);
+            Check(!CanUse(none, owner, ability, m2.Id), "the destroyed card was not a Personality of his");
+            var own = Rig("own", out var m3, out _);
+            Check(!CanUse(own, owner, ability, m3.Id), "his own action is not another player's");
+            // A bowed Memorial holds no Reaction.
+            var s4 = Table(Phase.Battle, 1); s4.PriorityPlayerId = foe;
+            var dd = Bf(s4, "training-no-attachments-destroyer", foe); var vm = Bf(s4, "training-crane-samurai", owner); var bm = Add(s4, def, owner, Zone.Home, bowed: true);
+            var e4 = MatchEngine.FromTestState(s4);
+            Accept(e4, Offer(e4, foe, "training-destroy-no-attachments", dd.Id, vm.Id));
+            Check(!CanUse(e4, owner, ability, bm.Id), "a bowed Memorial cannot be bowed again");
+            // Never opened.
+            var q = Table(Phase.Action, 0); var qm = Add(q, def, 0, Zone.Home); var qe = MatchEngine.FromTestState(q);
+            NeverOpened(qe, 0, ability, qm.Id, command with { CardId = qm.Id });
+        }
+    }
+
+    // ---- Hida Takeuchi: after the resolution of an action that attached a Follower from your hand to Takeuchi, draw a card ----------------------------------------------------------------------
+    private static void TakeuchiDraw()
+    {
+        const string ability = "takeuchi-draw";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            GameCommand Equip(MatchEngine e, CardInstance card, CardInstance host) =>
+                new("equip", owner, e.Version, CardId: card.Id, SourceIds: e.PaymentOptions(owner, CardCatalog.Get(card.DefinitionId).GoldCost).FirstOrDefault()?.SourceIds ?? [], TargetId: host.Id);
+            MatchEngine Rig(out CardInstance takeuchi, out CardInstance other, out CardInstance follower, out CardInstance weapon)
+            {
+                var s = Table(Phase.Action, owner); s.PriorityPlayerId = owner;
+                takeuchi = Add(s, def, owner, Zone.Home); other = Add(s, "training-crane-samurai", owner, Zone.Home);
+                follower = Add(s, "training-follower", owner, Zone.Hand); weapon = Add(s, "training-weapon", owner, Zone.Hand);
+                Add(s, "training-focus-strategy", owner, Zone.FateDeck);
+                return MatchEngine.FromTestState(s);
+            }
+            var e = Rig(out var t, out var o, out var f, out var w);
+            var hand = e.State.Players[owner].Hand.Count;
+            Accept(e, Equip(e, f, t));
+            Eq(Window(e), "afterActionResolvedReaction", $"owner {owner}: the after-action window opens for the holder of the Reaction");
+            var command = InWindow(e, owner, ability, t.Id, windowType: "afterActionResolvedReaction");
+            Accept(e, command);
+            Eq(e.State.Players[owner].Hand.Count, hand - 1 + 1, "the Follower left the hand and one card was drawn");
+            Settle(e);
+            // Declined: no draw.
+            var d = Rig(out var t2, out _, out var f2, out _);
+            Accept(d, Equip(d, f2, t2)); Settle(d);
+            Eq(d.State.Players[owner].Hand.Count, hand - 1, "declined: no draw");
+            // Another host and a Weapon on Takeuchi open nothing.
+            var oe = Rig(out var t3, out var h3, out var f3, out var w3);
+            Accept(oe, Equip(oe, f3, h3));
+            Check(Window(oe) != "afterActionResolvedReaction" || !CanUse(oe, owner, ability, t3.Id), "a Follower attached to another Personality opens nothing");
+            var we = Rig(out var t4, out _, out _, out var w4);
+            Accept(we, Equip(we, w4, t4));
+            Check(Window(we) != "afterActionResolvedReaction" || !CanUse(we, owner, ability, t4.Id), "a Weapon attached to Takeuchi opens nothing");
+            // Never opened.
+            var q = Rig(out var t5, out _, out _, out _);
+            NeverOpened(q, owner, ability, t5.Id, command with { CardId = t5.Id });
+        }
+    }
+
+    // ---- Introspection: after one of your Rings enters play, search your Fate deck for a card and put it in your hand ----------------------------------------------------------------------------
+    private static void IntrospectionSearch()
+    {
+        const string ability = "introspection-search";
+        var def = Def(ability);
+        var falseFire = Def(WlSpellsRingsAbilities.FalseFireRecruit);
+        foreach (var scenario in new[] { "battle-attacker", "battle-defender", "action-active", "action-other" })
+            foreach (var ringOwner in new[] { true, false })
+            {
+                var battle = scenario.StartsWith("battle");
+                var me = scenario is "battle-defender" or "action-active" ? 0 : 1; // whoever plays the Ring (Open: either player; Battle: either side)
+                var holder = ringOwner ? me : 1 - me;
+                var label = $"{scenario} ring owner {me} holder {holder}";
+                var s = Table(battle ? Phase.Battle : Phase.Action, battle ? 1 : 0); s.PriorityPlayerId = me;
+                CardInstance ring, strategy;
+                if (battle)
+                {
+                    s.Players[1 - s.ActivePlayerId].Provinces[0].Strength = 12;
+                    Add(s, "training-crane-samurai", me, Zone.Battlefield, province: 0); Add(s, "training-lion-samurai", 1 - me, Zone.Battlefield, province: 0);
+                    ring = Add(s, "training-false-ring-of-water", me, Zone.Hand);
+                }
+                else { ring = Add(s, falseFire, me, Zone.Hand); s.Players[me].MaxHandBonus = 2; }
+                strategy = Add(s, def, holder, Zone.Hand);
+                var top = Add(s, "training-lion-samurai", holder, Zone.FateDeck); s.Players[holder].Hand.Remove(top.Id); s.Players[holder].FateDeck.Insert(0, top.Id);
+                var e = MatchEngine.FromTestState(s);
+                Check(!CanUse(e, holder, ability, strategy.Id), label + ": no Ring has entered play yet");
+                Accept(e, Enabled(e, me, battle ? "false-ring-of-water-recruit" : WlSpellsRingsAbilities.FalseFireRecruit, ring.Id).Command!);
+                Eq(e.State.Cards[ring.Id].Zone, Zone.Home, label + ": the Ring is in play");
+                if (!ringOwner)
+                {
+                    Check(!CanUse(e, holder, ability, strategy.Id), label + ": an enemy Ring gives it nothing to react to");
+                    continue;
+                }
+                Eq(Window(e), "afterActionResolvedReaction", label + ": the window opens");
+                var command = InWindow(e, holder, ability, strategy.Id, windowType: "afterActionResolvedReaction");
+                var handBefore = e.State.Players[holder].Hand.Count;
+                Accept(e, command);
+                Eq(Window(e), "searchSelect", label + ": the Fate deck search opens");
+                Eq(e.State.Cards[strategy.Id].Zone, Zone.FateDiscard, label + ": the Strategy was spent");
+                var entries = e.GetView(holder).PendingSearch!.Entries!;
+                Check(entries.Length >= 1 && entries.All(x => x.Eligible), label + ": any card qualifies");
+                Eq(e.GetView(1 - holder).PendingSearch, null, label + ": the other seat sees no search");
+                Accept(e, new GameCommand("selectSearchCard", holder, e.Version, Choice: "training-lion-samurai"));
+                Check(e.State.Players[holder].Hand.Contains(top.Id) || e.State.Players[holder].Hand.Any(id => e.State.Cards[id].DefinitionId == "training-lion-samurai"), label + ": the card was put in the hand");
+                Eq(e.State.Players[holder].Hand.Count, handBefore - 1 + 1, label + ": the Strategy left the hand, the found card entered it");
+                Check(e.State.PendingSearch is null, label + ": the search is over");
+            }
+        // Never opened.
+        var q = Table(Phase.Action, 0); var held = Add(q, def, 0, Zone.Hand); var qe = MatchEngine.FromTestState(q);
+        NeverOpened(qe, 0, ability, held.Id, Use(qe, 0, ability, held.Id));
+    }
+
+    // ---- Iuchi Kota: after an action targets one of your Personalities at Kota's battlefield, negate the Personality's movement ------------------------------------------------------------------
+    private static void KotaNegateMove()
+    {
+        const string ability = "kota-negate-move";
+        var def = Def(ability);
+        var masafuni = Def("masafuni-move");
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var foe = 1 - owner;
+            MatchEngine Rig(out CardInstance kota, out CardInstance ally, out CardInstance mover, int kotaProvince = 0)
+            {
+                var s = Table(Phase.Battle, 1); s.PriorityPlayerId = foe;
+                kota = Add(s, def, owner, Zone.Battlefield, province: kotaProvince);
+                ally = Bf(s, "training-crane-samurai", owner);
+                mover = Bf(s, masafuni, foe);
+                return MatchEngine.FromTestState(s);
+            }
+            var e = Rig(out var kota, out var ally, out var mover);
+            Accept(e, Offer(e, foe, "masafuni-move", mover.Id, ally.Id));
+            Eq(Window(e), "beforeActionReaction", $"owner {owner}: the action is held");
+            var command = InWindow(e, owner, ability, kota.Id, windowType: "beforeActionReaction");
+            Accept(e, command);
+            Settle(e);
+            Eq(e.State.Cards[ally.Id].Zone, Zone.Battlefield, "his movement was negated: he is still at the battlefield");
+            Check(!CanUse(e, owner, ability, kota.Id) || e.State.PendingChoice is null, "spent or closed");
+            // Control: without the Reaction the same action moves him home.
+            var c = Rig(out _, out var ally2, out var mover2);
+            Accept(c, Offer(c, foe, "masafuni-move", mover2.Id, ally2.Id)); Settle(c);
+            Eq(c.State.Cards[ally2.Id].Zone, Zone.Home, "declined: he goes home");
+            // Kota at another battlefield: not offered.
+            var elsewhere = Rig(out var k3, out var ally4, out var mover4, kotaProvince: 1);
+            Accept(elsewhere, Offer(elsewhere, foe, "masafuni-move", mover4.Id, ally4.Id));
+            Check(!CanUse(elsewhere, owner, ability, k3.Id), "Kota answers for a Personality at his battlefield only");
+            // An action that targets him but does not move him: not offered.
+            var bs = Table(Phase.Battle, 1); bs.PriorityPlayerId = foe;
+            var kb = Add(bs, def, owner, Zone.Battlefield, province: 0); var allyB = Bf(bs, "training-crane-samurai", owner); var bowerB = Bf(bs, "training-battle-bower", foe);
+            var be = MatchEngine.FromTestState(bs);
+            Accept(be, Offer(be, foe, "training-bow-at-battle", bowerB.Id, allyB.Id));
+            Check(!CanUse(be, owner, ability, kb.Id), "a bow is not a movement: not offered");
+            // Never opened.
+            var q = Rig(out var k5, out _, out _);
+            NeverOpened(q, owner, ability, k5.Id, command with { CardId = k5.Id });
+        }
+    }
+
+    // ---- Kakita Kenta: after an action resolves during which Kenta won a duel, move a dishonorable enemy Personality at the battlefield home -------------------------------------------------------
+    private static MatchEngine KentaDuel(int owner, bool kentaChallenges, bool kentaWins, bool dishonorable, out CardInstance kenta, out CardInstance victim)
+    {
+        var foe = 1 - owner;
+        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = kentaChallenges ? owner : foe;
+        kenta = Add(s, Def("kenta-move-home"), owner, Zone.Battlefield, province: 0); // Force 2
+        var rival = Add(s, "training-lion-samurai", foe, Zone.Battlefield, province: 0); // Force 4
+        var challengerOwner = kentaChallenges ? owner : foe;
+        if (kentaWins) Batch336Support.Force(rival, -3); else Batch336Support.Force(kenta, -2);
+        victim = Add(s, "training-lion-courtier", foe, Zone.Battlefield, province: 0); victim.Dishonorable = dishonorable;
+        var challenge = Add(s, "training-duel-force", challengerOwner, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        if (kentaChallenges) Accept(e, Offer(e, owner, "training-duel-force", challenge.Id, rival.Id, kenta.Id));
+        else Accept(e, Offer(e, foe, "training-duel-force", challenge.Id, kenta.Id, rival.Id));
+        Accept(e, new GameCommand("strike", e.State.PendingDuel!.TurnPlayerId, e.Version));
+        for (var guard = 0; e.State.PendingDuel is not null && guard < 8; guard++)
+        {
+            if (e.State.PendingDuel is { Stage: "DuelistRefocus" }) { Accept(e, new GameCommand("duelistRefocus", owner, e.Version)); continue; }
+            var step = e.QueryActions(e.State.PriorityPlayerId).FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is not "concede");
+            if (step is null) break;
+            Accept(e, step.Command!);
+        }
+        return e;
+    }
+
+    private static void KentaMoveHome()
+    {
+        const string ability = "kenta-move-home";
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var kentaChallenges in new[] { true, false })
+            {
+                var label = $"owner {owner} {(kentaChallenges ? "challenging" : "challenged")}";
+                var e = KentaDuel(owner, kentaChallenges, true, true, out var kenta, out var victim);
+                Check(e.GetView(owner).LastDuel!.Result!.WinnerId == kenta.Id, label + ": Kenta won the duel");
+                Eq(Window(e), "afterActionResolvedReaction", label + ": the duel's action resolved: the after-action window");
+                var command = InWindow(e, owner, ability, kenta.Id, targetId: victim.Id, windowType: "afterActionResolvedReaction");
+                Accept(e, command);
+                Eq(e.State.Cards[victim.Id].Zone, Zone.Home, label + ": the dishonorable enemy moved home");
+                Check(!CanUse(e, owner, ability, kenta.Id), label + ": once");
+                // A lost duel, and an honorable enemy, offer nothing.
+                var lost = KentaDuel(owner, kentaChallenges, false, true, out var k2, out _);
+                Check(lost.GetView(owner).LastDuel!.Result!.WinnerId != k2.Id, label + ": Kenta lost the duel");
+                Check(Window(lost) != "afterActionResolvedReaction" || !CanUse(lost, owner, ability, k2.Id), label + ": a lost duel offers nothing");
+                var honorable = KentaDuel(owner, kentaChallenges, true, false, out var k3, out var v3);
+                Check(!Options(honorable, owner, ability, k3.Id).Any(o => o.Enabled && (o.TargetIds?.Contains(v3.Id) ?? false)), label + ": an honorable enemy is not a target");
+                Eq(honorable.State.Cards[v3.Id].Zone, Zone.Battlefield, label + ": and stays");
+            }
+    }
+
+    // ---- Kimono of the Turquoise Champion: before an action resolves, bow it: negate any Honor losses until the action ends ---------------------------------------------------------------------------
+    private static void KimonoNegateLosses()
+    {
+        const string ability = "pe-kimono-negate-losses";
+        var def = Def(ability);
+        var poison = Def("weak-poison-force-zero");
+        foreach (var owner in new[] { 0, 1 })
+            foreach (var ownAction in new[] { false, true })
+            {
+                var foe = 1 - owner; var actor = ownAction ? owner : foe;
+                var label = $"owner {owner}, {(ownAction ? "his own" : "the enemy's")} action";
+                MatchEngine Rig(out CardInstance kimono, out CardInstance victim, bool bowed = false, bool cardIsWeakPoison = true)
+                {
+                    var s = Table(Phase.Action, actor); s.PriorityPlayerId = actor;
+                    var card = Add(s, poison, actor, Zone.Hand); victim = Add(s, "training-lion-samurai", 1 - actor, Zone.Home);
+                    var wearer = Add(s, "training-lion-samurai", owner, Zone.Home); kimono = Add(s, def, owner, Zone.Attached, bowed: bowed, parent: wearer.Id);
+                    var e = MatchEngine.FromTestState(s);
+                    Accept(e, Offer(e, actor, "weak-poison-force-zero", card.Id, victim.Id));
+                    return e;
+                }
+                var honorBefore = Honor(MatchEngine.FromTestState(Table(Phase.Action, actor)), actor);
+                var e = Rig(out var kimono, out var victim);
+                Eq(Window(e), "honorChangeReaction", label + ": the window opens before the Honor loss");
+                var command = InWindow(e, owner, ability, kimono.Id, windowType: "honorChangeReaction");
+                Accept(e, command); Settle(e);
+                Eq(Honor(e, actor), honorBefore, label + ": the Honor loss was negated");
+                Check(e.State.Cards[kimono.Id].Bowed, label + ": the Kimono bowed as the cost");
+                Check(e.State.Cards[victim.Id].Modifiers.Sum(m => m.Amount) < 0, label + ": the rest of the action stands");
+                // Declined: the performer loses the 2 Honor.
+                var d = Rig(out _, out _); Settle(d);
+                Eq(Honor(d, actor), honorBefore - 2, label + ": declined, the loss stands");
+                // A bowed Kimono holds no Reaction: no window at all.
+                var b = Rig(out var bk, out _, bowed: true);
+                Check(Window(b) != "honorChangeReaction" && !CanUse(b, owner, ability, bk.Id), label + ": a bowed Kimono opens no window");
+                Eq(Honor(b, actor), honorBefore - 2, label + ": and the loss stands");
+                // Never opened.
+                var q = Table(Phase.Action, owner); var qh = Add(q, "training-lion-samurai", owner, Zone.Home); var qk = Add(q, def, owner, Zone.Attached, parent: qh.Id);
+                var qe = MatchEngine.FromTestState(q);
+                NeverOpened(qe, owner, ability, qk.Id, command with { CardId = qk.Id });
+            }
+    }
+
     public static void Run(TestRunner runner) => runner.Run("single-reaction-3", [
         ("Asahina Keigo: when paying a Gold cost in any window, bowing him and discarding a card produces its Focus Value (3 Gold); not for the other player, spent, bowed or a blank card", KeigoGold),
         ("Seppun Washi: when paying a Gold cost in any window, bowing him produces 2 Gold; once per turn, never for the other player", WashiGold),
@@ -689,5 +1019,12 @@ internal static partial class SingleReaction3Tests
         ("Confusion at Court: before either player's Favor-discarding action resolves (Action phase or Battle) the other player negates its effects while the Favor is still discarded; not for an action with no Favor cost", ConfusionNegate),
         ("Detained: after engaging (as Attacker or Defender) bow an unbowed Magistrate to move an enemy dishonorable Personality home, bow his unit, and his controller loses 2 Honor; not once the Engage window is over", DetainedMove),
         ("Flesh Cutter Arrows: when its wielder's Ranged Attack targets a card without Armor, bow it for +2 strength (4 becomes 6 and kills a Force 5), for either seat; not with Armor, another attacker or no Attack", FleshCutterArrows),
+        ("Grateful Reward: after engaging (either seat) the performing Samurai gets a created 1F Ashigaru Cavalry Follower; a Paragon also gains 2 Honor and draws; non-Samurai never a performer", GratefulRewardCreate),
+        ("Hero's Memorial: after another player's action destroys one of your Personalities (either seat) bow it to gain 2 Honor; not for the enemy's loss, your own action or a bowed Memorial", HerosMemorialHonor),
+        ("Hida Takeuchi: after an Equip attaches a Follower from hand to him he draws his controller a card; not for another host or a Weapon", TakeuchiDraw),
+        ("Introspection: after one of your Rings enters play (Battle or Action phase, either seat) search the Fate deck for any card into hand; not for an enemy Ring or before a Ring", IntrospectionSearch),
+        ("Iuchi Kota: when an action would move your Personality at Kota's battlefield his controller negates the movement; not at home, another battlefield or for a bow", KotaNegateMove),
+        ("Kakita Kenta: after an action in which Kenta won a duel (challenging or challenged, either seat) move a dishonorable enemy home; not after a loss or for an honorable target", KentaMoveHome),
+        ("Kimono of the Turquoise Champion: before an action's Honor loss bow it to negate the loss (own or enemy action, either seat) while the rest of the action stands; not bowed", KimonoNegateLosses),
     ]);
 }
