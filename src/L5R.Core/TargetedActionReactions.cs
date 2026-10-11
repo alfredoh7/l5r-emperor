@@ -109,7 +109,7 @@ public sealed partial class MatchEngine
     /// Honor loss the action inflicts on that card's controller (GainHonor). Whole-action negation is NegateHeldAction.</summary>
     private void NegateEffects(CardInstance card, params string[] kinds)
     {
-        foreach (var kind in kinds) _state.NegatedEffects.Add(new(kind, card.Id));
+        foreach (var kind in kinds) { _state.NegatedEffects.Add(new(kind, card.Id)); _reactionNegationSink?.Add(new(kind, card.Id)); }
         Emit("effectsNegated", $"{Definition(card).Name}: the action's {(kinds.Contains("all") ? "effects" : string.Join(" and ", kinds.Select(k => k switch { "bow" => "bowing", "destroy" => "destruction", "move" => "movement", "straighten" => "straightening", _ => k })))} on it {(kinds.Length > 1 && !kinds.Contains("all") ? "are" : "is")} negated.", card.OwnerId, card.Id);
     }
 

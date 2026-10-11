@@ -269,7 +269,7 @@ public sealed partial class MatchEngine
                         result.Add(used ? slotOption with { Enabled = false, Reason = "This reaction has already been used." } : slotOption);
                         continue;
                     }
-                    if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null, validate: reactionId == WlPersAftermathAbilities.WateruAdditional); // issue #833: Wateru's "during battle" is a printed condition, so outside a battle she is listed disabled with the reason instead of as a button that is refused
+                    if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null, validate: true); // validated like a submitted command (issue #833: Suikihime listed enabled while The Forgotten Temple refused it)
                     else AddTargetedReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
