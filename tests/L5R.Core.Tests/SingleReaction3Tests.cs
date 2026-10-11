@@ -1008,6 +1008,249 @@ internal static partial class SingleReaction3Tests
             }
     }
 
+    // ---- entering-play Reactions ("After X enters play") ---------------------------------------------------------------------------------------------------------------------------------------
+    // A Personality bought from `owner`'s province 0 in his own Dynasty Phase, leaving its entering-play window open. Player 1 is made the Dynasty player for his seat.
+    private static (MatchEngine E, string Id) Buy(int owner, string def, Action<MatchState>? tweak = null, int gold = 14)
+    {
+        var s = MatchEngine.CreateEconomyScenario().State;
+        s.ActivePlayerId = owner; s.PriorityPlayerId = owner;
+        s.Players[owner].Honor = 30;
+        Gold(s, owner, gold);
+        var entering = s.Cards[s.Players[owner].Provinces[0].CardId!]; entering.DefinitionId = def; entering.FaceUp = true;
+        tweak?.Invoke(s);
+        var e = MatchEngine.FromTestState(s);
+        Check(e.State.Phase == Phase.Dynasty, "the Dynasty phase");
+        var purchases = e.QueryActions(owner).Where(a => a.Type == "purchase" && a.CardId == entering.Id).ToArray();
+        var option = purchases.FirstOrDefault(a => a.Enabled && a.Command is { ClanDiscount: false }) ?? purchases.FirstOrDefault(a => a.Enabled);
+        Check(option is not null, $"{def} is not purchasable: " + string.Join("; ", purchases.Select(a => $"[{a.Enabled}] {a.Reason}")));
+        Accept(e, option!.Command!);
+        Check(e.State.PendingChoice?.Type is "entryReaction" or "proclaim", $"{def} bought, but the window is {e.State.PendingChoice?.Type}");
+        return (e, entering.Id);
+    }
+
+    // The same Personality standing at home in an ordinary Action phase with nothing open.
+    private static MatchEngine AtHome(string def, int owner, out CardInstance card, Action<MatchState, CardInstance>? tweak = null)
+    {
+        var s = Table(Phase.Action, owner); s.PriorityPlayerId = owner;
+        card = Add(s, def, owner, Zone.Home);
+        tweak?.Invoke(s, card);
+        return MatchEngine.FromTestState(s);
+    }
+
+    private static void AyumiEntry()
+    {
+        const string ability = "ayumi-entry";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var (e, id) = Buy(owner, def);
+            var honor = Honor(e, owner);
+            var command = InWindow(e, owner, ability, id);
+            Accept(e, command);
+            Eq(Honor(e, owner), honor - 2, $"owner {owner}: lose 2 Honor, once");
+            Check(!CanUse(e, owner, ability, id), "taken once for this entry");
+            var h = AtHome(def, owner, out var ayumi);
+            NeverOpened(h, owner, ability, ayumi.Id, command with { CardId = ayumi.Id });
+        }
+    }
+
+    private static void DenheiCreate()
+    {
+        const string ability = "denhei-create";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var (e, id) = Buy(owner, def);
+            var command = InWindow(e, owner, ability, id);
+            var before = e.State.Cards.Keys.ToHashSet(); var honor = Honor(e, owner);
+            Accept(e, command);
+            var snake = e.State.Cards.Values.Single(c => !before.Contains(c.Id));
+            var created = CardCatalog.Get(snake.DefinitionId);
+            Check(created.Type == CardType.Personality && created.Force == 2 && created.Chi == 2 && created.PersonalHonor == 3 && new HashSet<string>(created.Keywords!).SetEquals(["Mantis Clan", "Nonhuman", "Snake", "Spirit"]), "the printed 2F/2C/3PH Snake");
+            Check(snake.OwnerId == owner && snake.Zone == Zone.Home, "created at home, under its creator's control");
+            Eq(Honor(e, owner), honor, "no Honor change");
+            Check(!CanUse(e, owner, ability, id), "used once");
+            // The Snake's own Open action: a bitten Personality's base abilities may not be used (offered in either player's Action phase).
+            var dainagonDef = Def("dainagon-exp-favor");
+            foreach (var active in new[] { owner, 1 - owner })
+            {
+                var s = e.State; s.Phase = Phase.Action; s.ActivePlayerId = active; s.PriorityPlayerId = owner; s.PendingChoice = null;
+                var victim = Add(s, dainagonDef, owner, Zone.Home);
+                var f = MatchEngine.FromTestState(s);
+                Check(CanUse(f, owner, "dainagon-exp-favor", victim.Id), $"owner {owner}, active {active}: before the bite his printed Open action is available");
+                Accept(f, Offer(f, owner, "denhei-snake-bite", snake.Id, victim.Id));
+                Accept(f, new GameCommand("pass", 1 - owner, f.Version));
+                Check(!CanUse(f, owner, "dainagon-exp-favor", victim.Id), $"owner {owner}, active {active}: his base abilities may not be used");
+                Check(!CanUse(f, owner, "denhei-snake-bite", snake.Id), "the Snake's Open action is once a turn");
+            }
+            var h = AtHome(def, owner, out var denhei);
+            NeverOpened(h, owner, ability, denhei.Id, command with { CardId = denhei.Id });
+        }
+    }
+
+    private static void OhsukiCreate()
+    {
+        const string ability = "ohsuki-create";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var (e, id) = Buy(owner, def, s => s.Players[owner].Clan = "Mantis"); // a Loyal Personality
+            var command = InWindow(e, owner, ability, id);
+            var before = e.State.Cards.Keys.ToHashSet();
+            Accept(e, command);
+            var sparrow = e.State.Cards.Values.Single(c => !before.Contains(c.Id));
+            var created = CardCatalog.Get(sparrow.DefinitionId);
+            Check(created.Type == CardType.Personality && created.Force == 0 && created.Chi == 2 && created.PersonalHonor == 3 && new HashSet<string>(created.Keywords!).SetEquals(["Mantis Clan", "Nonhuman", "Sparrow", "Cavalry", "Spirit"]), "the printed 0F/2C/3PH Sparrow");
+            Check(sparrow.OwnerId == owner && sparrow.Zone == Zone.Home, "created at home, under its creator's control");
+            Check(!CanUse(e, owner, ability, id), "used once");
+            // Its Limited action: gain 3 Honor if none of your provinces were destroyed since your last turn ended -- the active player only; refused after a destroyed province.
+            foreach (var active in new[] { owner, 1 - owner })
+                foreach (var destroyed in new[] { false, true })
+                {
+                    var s = e.State; s.Phase = Phase.Action; s.ActivePlayerId = active; s.PriorityPlayerId = owner; s.PendingChoice = null;
+                    s.ProvinceDestroyedSinceTurnEnd[owner] = destroyed;
+                    var f = MatchEngine.FromTestState(s);
+                    var honor = Honor(f, owner);
+                    var label = $"owner {owner}, active {active}, province destroyed {destroyed}";
+                    if (active == owner && !destroyed)
+                    {
+                        Accept(f, Enabled(f, owner, "ohsuki-sparrow-honor", sparrow.Id).Command!);
+                        Eq(Honor(f, owner), honor + 3, label + ": gain 3 Honor");
+                    }
+                    else
+                    {
+                        Check(!CanUse(f, owner, "ohsuki-sparrow-honor", sparrow.Id), label + ": not offered");
+                        Rejection(f, Use(f, owner, "ohsuki-sparrow-honor", sparrow.Id));
+                        Eq(Honor(f, owner), honor, label + ": unchanged");
+                    }
+                }
+            var h = AtHome(def, owner, out var ohsuki);
+            NeverOpened(h, owner, ability, ohsuki.Id, command with { CardId = ohsuki.Id });
+        }
+    }
+
+    private static void MasayoshiCreate()
+    {
+        const string ability = "masayoshi-create";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var (e, id) = Buy(owner, def);
+            var command = InWindow(e, owner, ability, id);
+            var force = e.CardForceForTest(id); var chi = e.PersonalityChiForTest(id);
+            var before = e.State.Cards.Keys.ToHashSet();
+            Accept(e, command);
+            var blade = e.State.Cards.Values.Single(c => !before.Contains(c.Id));
+            Check(CardCatalog.Get(blade.DefinitionId).Type == CardType.Item && e.HasKeyword(blade.Id, "Weapon"), "a Weapon Item");
+            Check(blade.AttachedTo == id && blade.Zone == Zone.Attached && blade.OwnerId == owner, "attached to Masayoshi, under his controller");
+            Eq(e.CardForceForTest(id), force + 4, "+4F"); Eq(e.PersonalityChiForTest(id), chi + 1, "+1C");
+            Check(!CanUse(e, owner, ability, id), "used once");
+            var h = AtHome(def, owner, out var masayoshi);
+            NeverOpened(h, owner, ability, masayoshi.Id, command with { CardId = masayoshi.Id });
+        }
+    }
+
+    private static void ToganinInvest()
+    {
+        const string ability = "p9-toganin-invest";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var (e, id) = Buy(owner, def, null, 20);
+            Check(Options(e, owner, ability, id).Any(o => o.Enabled), "the Invest is offered as he enters play");
+            Eq(Options(e, owner, ability, id).First(o => o.Enabled).Gold?.Cost, 5, "for 5 Gold");
+            var command = InWindow(e, owner, ability, id);
+            var force = e.CardForceForTest(id);
+            Accept(e, command with { SourceIds = e.PaymentOptions(owner, 5).First().SourceIds });
+            Eq(e.State.Cards[id].Tokens.Count(t => t.Type == "Invest" && t.Stat == "Force" && t.Amount == 1), 3, "three +1F tokens");
+            Eq(e.CardForceForTest(id), force + 3, "three more Force");
+            Check(!CanUse(e, owner, ability, id), "once");
+            // Declined: no tokens, printed Force (+1F while any other player is Crane Clan).
+            var (d, declined) = Buy(owner, def, null, 20);
+            Accept(d, Decline(d)); Settle(d);
+            Eq(d.State.Cards[declined].Tokens.Count, 0, "declined: no tokens");
+            Eq(d.CardForceForTest(declined), CardCatalog.Get(def).Force + (d.State.Players[1 - owner].Clan == "Crane" ? 1 : 0), "and his printed Force (+1F if the other player is Crane Clan)");
+            var h = AtHome(def, owner, out var toganin);
+            NeverOpened(h, owner, ability, toganin.Id, command with { CardId = toganin.Id });
+        }
+    }
+
+    private static void SpiderEntryHonorLoss()
+    {
+        const string ability = "training-honor-loss-entry";
+        const string def = "training-spider-honor-loss";
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var (e, id) = Buy(owner, def);
+            var honor = Honor(e, owner);
+            var command = InWindow(e, owner, ability, id);
+            Accept(e, command);
+            Eq(Honor(e, owner), honor - 2, $"owner {owner}: lose 2 Honor after entering play");
+            var h = AtHome(def, owner, out var spider);
+            NeverOpened(h, owner, ability, spider.Id, command with { CardId = spider.Id });
+        }
+    }
+
+    // Satoshi's Dual Warfans: an Item equipped from the hand in the Action phase (the active player); the Reaction draws a card.
+    private static void SatoshiWarfansDraw()
+    {
+        const string ability = "satoshi-warfans-draw";
+        var def = Def(ability);
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var s = Table(Phase.Action, owner); s.PriorityPlayerId = owner; s.Players[owner].Clan = "Lion";
+            var host = Add(s, "training-crane-samurai", owner, Zone.Home);
+            var warfans = Add(s, def, owner, Zone.Hand);
+            Gold(s, owner, 4); Add(s, "training-focus-strategy", owner, Zone.FateDeck);
+            var e = MatchEngine.FromTestState(s);
+            var cost = e.QueryActions(owner).Single(a => a.Type == "equip" && a.CardId == warfans.Id).Gold?.Cost ?? CardCatalog.Get(def).GoldCost;
+            Accept(e, new GameCommand("equip", owner, e.Version, CardId: warfans.Id, SourceIds: e.PaymentOptions(owner, cost).First().SourceIds, TargetId: host.Id));
+            Eq(Window(e), "entryReaction", $"owner {owner}: the entering window");
+            var command = InWindow(e, owner, ability, warfans.Id, windowType: "entryReaction");
+            var hand = e.State.Players[owner].Hand.Count;
+            Accept(e, command);
+            Eq(e.State.Players[owner].Hand.Count, hand + 1, "the card was drawn");
+            Check(!CanUse(e, owner, ability, warfans.Id), "used once");
+            Eq(e.State.Cards[warfans.Id].AttachedTo, host.Id, "and the Item stays attached");
+            // In play and no window (a fresh position): not offered.
+            var t = Table(Phase.Action, owner); t.PriorityPlayerId = owner;
+            var host2 = Add(t, "training-crane-samurai", owner, Zone.Home); var worn = Add(t, def, owner, Zone.Attached, parent: host2.Id);
+            var h = MatchEngine.FromTestState(t);
+            NeverOpened(h, owner, ability, worn.Id, command with { CardId = worn.Id });
+        }
+    }
+
+    // The synthetic Terrain: played by playStrategy as a Battle action, then its "after entering play" Reaction gains 1 Honor.
+    private static void TerrainEntryReaction()
+    {
+        const string ability = "training-terrain-entry-reaction";
+        const string def = "training-terrain-entry-reaction";
+        foreach (var owner in new[] { 0, 1 })
+        {
+            var s = Table(Phase.Battle, 1); s.PriorityPlayerId = owner;
+            Bf(s, "training-crane-samurai", 0); Bf(s, "training-lion-samurai", 1);
+            var terrain = Add(s, def, owner, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            var honor = Honor(e, owner);
+            Accept(e, new GameCommand("playStrategy", owner, e.Version, CardId: terrain.Id));
+            Eq(e.State.Cards[terrain.Id].Zone, Zone.Battlefield, "the Terrain is in play");
+            Eq(Window(e), "entryReaction", $"owner {owner}: the entering window");
+            var command = InWindow(e, owner, ability, terrain.Id, windowType: "entryReaction");
+            Accept(e, command);
+            Eq(Honor(e, owner), honor + 1, "gain 1 Honor");
+            Check(e.State.PendingChoice is null, "the window closed: nothing is left to react with");
+            Eq(e.State.PriorityPlayerId, 1 - owner, "priority passes to the opponent");
+            // Declined: nothing.
+            var d = MatchEngine.FromTestState(s); Accept(d, new GameCommand("playStrategy", owner, d.Version, CardId: terrain.Id)); Settle(d);
+            Eq(Honor(d, owner), honor, "declined: no Honor");
+            // In the Action phase a Terrain is not played (Battle only): refused, nothing changes.
+            var a = Table(Phase.Action, owner); a.PriorityPlayerId = owner; var held = Add(a, def, owner, Zone.Hand);
+            var ae = MatchEngine.FromTestState(a);
+            Rejection(ae, new GameCommand("playStrategy", owner, ae.Version, CardId: held.Id));
+            Eq(ae.State.Cards[held.Id].Zone, Zone.Hand, "still in hand");
+        }
+    }
+
     public static void Run(TestRunner runner) => runner.Run("single-reaction-3", [
         ("Asahina Keigo: when paying a Gold cost in any window, bowing him and discarding a card produces its Focus Value (3 Gold); not for the other player, spent, bowed or a blank card", KeigoGold),
         ("Seppun Washi: when paying a Gold cost in any window, bowing him produces 2 Gold; once per turn, never for the other player", WashiGold),
@@ -1026,5 +1269,13 @@ internal static partial class SingleReaction3Tests
         ("Iuchi Kota: when an action would move your Personality at Kota's battlefield his controller negates the movement; not at home, another battlefield or for a bow", KotaNegateMove),
         ("Kakita Kenta: after an action in which Kenta won a duel (challenging or challenged, either seat) move a dishonorable enemy home; not after a loss or for an honorable target", KentaMoveHome),
         ("Kimono of the Turquoise Champion: before an action's Honor loss bow it to negate the loss (own or enemy action, either seat) while the rest of the action stands; not bowed", KimonoNegateLosses),
+        ("Ikoma Ayumi: after she enters play (bought in either seat's Dynasty phase) her controller loses 2 Honor once; not offered at home", AyumiEntry),
+        ("Kitsune Denhei: after he enters play the controller creates the printed 2F/2C/3PH Snake at home whose Open bite locks a Personality's base abilities (either seat's Action phase)", DenheiCreate),
+        ("Kitsune Ohsuki: after she enters play the controller creates the printed 0F/2C/3PH Sparrow whose Limited gains 3 Honor for the active player with no province destroyed", OhsukiCreate),
+        ("Masayoshi: after he enters play a +4F/+1C Weapon is created and attached to him, once; not offered at home", MasayoshiCreate),
+        ("Yoritomo Toganin: Invest 5 Gold as he enters play gives three +1F tokens, once; declined gives none (+1F only while another player is Crane)", ToganinInvest),
+        ("Training Spider honor-loss Personality: after entering play (either seat) its controller loses 2 Honor", SpiderEntryHonorLoss),
+        ("Satoshi's Dual Warfans: after it enters play from the hand (Equip, either seat) draw a card, once; not for an Item already in play", SatoshiWarfansDraw),
+        ("Training terrain with entry reaction: played by a Battle action (either seat), its entry Reaction gains 1 Honor; refused in the Action phase", TerrainEntryReaction),
     ]);
 }
