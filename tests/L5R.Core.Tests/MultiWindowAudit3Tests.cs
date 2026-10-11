@@ -63,7 +63,8 @@ internal static partial class MultiWindowAudit3Tests
     /// against the position before), listed-but-disabled or absent and refused in every other.</summary>
     private static void Windows(string ability, string timing, Func<string, Fx> build, Action<MatchEngine, MatchEngine, Fx>? effect = null, string[]? accept = null)
     {
-        var allowed = accept ?? MultiWindowAuditTests.Expected(timing); // `accept` narrows the windows for an ability whose own card-specific condition holds in fewer windows than its timing allows
+        // `accept` narrows the windows for an ability whose own card-specific condition holds in fewer windows than its timing allows
+        var allowed = accept ?? MultiWindowAuditTests.Expected(timing);
         foreach (var window in AllWindows)
         {
             var f = build(window);
