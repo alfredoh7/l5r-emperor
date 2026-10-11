@@ -11255,6 +11255,8 @@ public sealed partial class MatchEngine
                 // Strength of the Divine, Visage of the Orochi (issue #830): the listing twin of "own-unbowed-personality-with-keyword-opposed" in the validation switch -- without it both were only ever listed disabled ("Choose a performing card").
                 "own-unbowed-personality-with-keyword-opposed" => _state.CurrentBattleProvince is not int keywordOpposedProvince || !Army(1 - playerId, keywordOpposedProvince).Any() ? []
                     : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // Strong Defenses (multi-window audit, issue #830): the listing twin of the validation category above -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-defending-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDefendingUnit(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-base-force-7-plus" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Definition(c).Force >= 7
                     && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
