@@ -32,12 +32,16 @@ internal static class BotArena
         var eventsSeen = 0;
         var actionCounts = new[] { new Dictionary<string, int>(), new Dictionary<string, int>() };
         string[] finals = ["", ""];
-        Game End(int? winner, string result, int turn, string? error = null) => new(name, opponentName, deckBot, opponentBot, winner, result, turn, clock.Elapsed.TotalSeconds, refused, error) { Actions = actionCounts, Final = finals };
+        Game End(int? winner, string result, int turn, string? error = null)
+        {
+            if (clock.Elapsed.TotalSeconds > 120) Console.WriteLine($"LONG {name} vs {opponentName} {deckBot}/{opponentBot}: {clock.Elapsed.TotalSeconds:F0}s, turn {turn}, result {result}; accepted actions seat0 {actionCounts[0].Values.Sum()} {string.Join(',', actionCounts[0].OrderByDescending(p => p.Value).Take(4).Select(p => p.Key + '=' + p.Value))}; seat1 {actionCounts[1].Values.Sum()} {string.Join(',', actionCounts[1].OrderByDescending(p => p.Value).Take(4).Select(p => p.Key + '=' + p.Value))}; refused {refused}");
+            return new(name, opponentName, deckBot, opponentBot, winner, result, turn, clock.Elapsed.TotalSeconds, refused, error) { Actions = actionCounts, Final = finals };
+        }
         MatchEngine game;
         try { game = MatchEngine.CreateCustomMatch(seed, deck, opponent); }
         catch (Exception e) { return End(null, "not playable", 0, e.Message.Split('\n')[0]); }
         var bots = new[] { deckBot, opponentBot }; var memory = new[] { Memory(deckBot), Memory(opponentBot) };
-        var sameAnswer = 0; GameCommand? lastRefused = null;
+        var sameAnswer = 0; GameCommand? lastRefused = null; var refusals = new List<string>();
         for (var n = 0; n < 6000; n++)
         {
             try
@@ -54,9 +58,26 @@ internal static class BotArena
                     if (alt.Any(x => x.Enabled && x.Type != "concede")) { seat = other; actions = alt; }
                 }
                 var view = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(game.GetView(seat)))!;
+                var thinking = Stopwatch.StartNew();
                 var decision = bots[seat] != Kind.Old ? TrainingOpponent.Choose(view, actions, memory[seat]) : LegacyTrainingOpponent.Choose(view, actions);
-                if (decision.Command is null) return End(null, "stuck", v0.TurnNumber, $"seat {seat} had no command: {decision.Reason}");
+                if (thinking.ElapsedMilliseconds > 1500 && decision.Command is not null) Console.WriteLine($"SLOW bot {thinking.ElapsedMilliseconds} ms: {name} vs {opponentName} {deckBot}/{opponentBot} seat {seat} turn {v0.TurnNumber} {Describe(decision.Command)} ({actions.Count(a => a.Enabled)} actions)");
+                if (decision.Command is null)
+                {
+                    // Issue #820: say exactly what the seat was asked, so a stall can be traced to the bot, the engine or the client.
+                    Console.WriteLine($"STUCK {name} vs {opponentName} {deckBot}/{opponentBot} seat {seat} turn {v0.TurnNumber} phase {v0.Phase} pending {v0.PendingChoice?.Type} priority {v0.PriorityPlayerId} version {view.Version}");
+                    if (game.State.PendingNegatableAbility is { } held)
+                    {
+                        Console.WriteLine("  held " + JsonSerializer.Serialize(held));
+                        foreach (var id in held.SourceIds ?? []) if (game.State.Cards.TryGetValue(id, out var src)) Console.WriteLine($"  source {id} {src.DefinitionId} owner {src.OwnerId} zone {src.Zone} bowed {src.Bowed}");
+                    }
+                    Console.WriteLine("  events: " + string.Join(" || ", game.State.Events.TakeLast(6).Select(e => e.Message)));
+                    foreach (var r in refusals) Console.WriteLine("  refused " + r);
+                    foreach (var a in actions.Where(x => x.Enabled)) Console.WriteLine($"  offered {a.Type} card={a.CardId} ability={a.Command?.AbilityId} choice={a.Command?.Choice} target={a.Command?.TargetId} targets={a.TargetIds?.Length} cmd={(a.Command is null ? "none" : "yes")} label={a.Label}");
+                    return End(null, "stuck", v0.TurnNumber, $"seat {seat} had no command: {decision.Reason}");
+                }
+                var executing = Stopwatch.StartNew();
                 var outcome = game.Execute(decision.Command);
+                if (executing.ElapsedMilliseconds > 1500) Console.WriteLine($"SLOW engine {executing.ElapsedMilliseconds} ms: {name} vs {opponentName} {deckBot}/{opponentBot} seat {seat} turn {v0.TurnNumber} {Describe(decision.Command)}");
                 if (outcome.Accepted)
                 {
                     sameAnswer = 0; lastRefused = null;
@@ -67,7 +88,7 @@ internal static class BotArena
                     finals = now.Players.Select(p => $"honor {p.Honor}, provinces left {p.Provinces.Count(x => !x.Destroyed)}, Personalities {p.Home.Concat(p.Army).Count(c => c.Definition?.Type == CardType.Personality)}").ToArray();
                     continue;
                 }
-                refused++;
+                refused++; refusals.Add($"v{view.Version} seat {seat}: {Describe(decision.Command)} {JsonSerializer.Serialize(decision.Command)} -> {outcome.Error}"); if (refusals.Count > 6) refusals.RemoveAt(0);
                 memory[seat].NoteRejection(view.Version, decision.Command, outcome.Error);
                 // The old bot cannot choose again after a refusal, so a refusal it repeats ends the game as stuck (a human would see the same error each turn).
                 if (bots[seat] == Kind.Old && lastRefused is not null && lastRefused.Type == decision.Command.Type && lastRefused.AbilityId == decision.Command.AbilityId
@@ -83,7 +104,9 @@ internal static class BotArena
 
     /// <summary>L5R_ARENA_TRADE=only compares the trade-attack rule alone (New: the six battle changes plus trade attacks; Prior: the six changes without them); otherwise New is the six changes and Prior is the bot before them.</summary>
     private static readonly bool TradeOnly = Environment.GetEnvironmentVariable("L5R_ARENA_TRADE") == "only";
-    private static BotContext Memory(Kind kind) => new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New };
+    /// <summary>L5R_ARENA_SPEC=818 compares the eleven issue #818 changes alone: New is the shipping bot (UseSpec818 on, the parked battle rules off), Prior is the same bot with UseSpec818 off. The older comparisons keep UseSpec818 off on both sides.</summary>
+    private static readonly bool Spec818Only = Environment.GetEnvironmentVariable("L5R_ARENA_SPEC") == "818";
+    private static BotContext Memory(Kind kind) => Spec818Only ? new() { UseSpec818 = kind != Kind.Prior } : new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New, UseSpec818 = false };
 
     /// <summary>
     /// Issue #788: the bot with the six battle changes (New) against the same bot without them (Prior, the bot on main before the change). Every ordered pair of decks in the folder, plus the
@@ -106,8 +129,8 @@ internal static class BotArena
                 {
                     if (a.Name == b.Name) continue;
                     n++;
-                    jobs.Add((a.Name, a.Deck, b.Name, b.Deck, Kind.New, Kind.Prior, seed + n));
-                    jobs.Add((a.Name, a.Deck, b.Name, b.Deck, Kind.Prior, Kind.New, seed + n));
+                    if (Environment.GetEnvironmentVariable("L5R_ARENA_ONLY") is not { Length: > 0 } only || only == $"{a.Name}:{b.Name}:New:Prior") jobs.Add((a.Name, a.Deck, b.Name, b.Deck, Kind.New, Kind.Prior, seed + n));
+                    if (Environment.GetEnvironmentVariable("L5R_ARENA_ONLY") is not { Length: > 0 } only2 || only2 == $"{a.Name}:{b.Name}:Prior:New") jobs.Add((a.Name, a.Deck, b.Name, b.Deck, Kind.Prior, Kind.New, seed + n));
                 }
         var results = new Game[jobs.Count];
         Parallel.For(0, jobs.Count, new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) },
@@ -120,7 +143,7 @@ internal static class BotArena
         double Choose(int m, int k) { double c = 1; for (var i = 1; i <= k; i++) c = c * (m - k + i) / i; return c; }
         var tail = total == 0 ? 1 : Math.Min(1, 2 * Enumerable.Range(Math.Max(won, lost), total - Math.Max(won, lost) + 1).Sum(k => Choose(total, k) * Math.Pow(.5, total)));
         var text = new System.Text.StringBuilder();
-        text.AppendLine($"# Bot arena: {(TradeOnly ? "trade attacks (#788)" : "battle policy (#788)")}, new bot versus the {(TradeOnly ? "same bot without trade attacks" : "bot before the change")} (seed {seed}, {seeds} seed(s), turn limit {BotSoak.TurnLimit})").AppendLine();
+        text.AppendLine($"# Bot arena: {(Spec818Only ? "Mendon's eleven changes (#818)" : TradeOnly ? "trade attacks (#788)" : "battle policy (#788)")}, new bot versus the {(Spec818Only ? "same bot with them off" : TradeOnly ? "same bot without trade attacks" : "bot before the change")} (seed {seed}, {seeds} seed(s), turn limit {BotSoak.TurnLimit})").AppendLine();
         foreach (var u in unplayable) text.AppendLine($"- NOT PLAYED: {u}");
         text.AppendLine($"Decks: {string.Join(", ", decks.Select(d => d.Name))}.");
         text.AppendLine($"Games: {results.Length}; decided {decided.Length}; no winner {results.Length - decided.Length} (turn limit, stuck or error).");
