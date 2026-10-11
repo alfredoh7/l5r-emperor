@@ -449,3 +449,38 @@ While the Illusion is at the battlefield, the original Shugenja's Spell actions 
 - **Cards/primitives:** Isawa Tsumaro (oracle-l5r-10863), Tsumaro's Illusion (oracle-l5r-11346); `IllusionLink`, `Wave821GrantsHome`.
 - **Date:** 2026-10-10
 - **Source:** Mendon (issue #821).
+
+### R-049 — Kokujin: when he wins his duel, his controller is asked whether to destroy a Personality to take control of the loser
+Kokujin's Battle duel destroys the loser. When Kokujin wins, a question opens before the outcome applies: "Destroy a personality to take control of the loser?" It lists every Personality his controller controls (bowed or unbowed, at any location, Kokujin himself included). Choosing one destroys it and takes control of the loser, who joins Kokujin's army; declining destroys the loser. The question is the engine's own step, not a Reaction window: it cannot be negated or reacted to. It is presented as a list of the legal cards, each selectable by clicking the card on the table or the entry in the list, and hovering one highlights the other.
+
+- **Cards/primitives:** Kokujin - inexperienced (oracle-l5r-10486); `w827KokujinChoice` pending decision (Wave827.cs), asked from `ResolveDuel` once per duel like Awed Witness's question.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-050 — P'an Ku may remain bowed whenever he would straighten, and the Personality he takes stays controlled until he does
+"P'an Ku may remain bowed" makes every straightening of him, the Straighten Phase's or another card's effect, the controller's choice (straighten him or leave him bowed), unless that straightening may not be negated. The Personality he takes control of stays under his controller's control until P'an Ku straightens (or leaves play) or that Personality is destroyed, and its controller cannot give it the Order Seppuku action meanwhile.
+
+- **Cards/primitives:** P'an Ku - exp (oracle-l5r-10497); `ControlReturn.RemainBowed` and `ControlReturn.NoSeppuku` (EmperorMechB.cs), the `declineStraighten` choice, `w827PanKuStraighten`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-051 — Zansho - exp bows his own attached Follower
+Zansho's Battle action bows an unbowed Follower attached to Zansho himself, as its cost; the Ranged Attack's strength is that Follower's Force, plus 2 if the Attack targets Daigotsu Arakan.
+
+- **Cards/primitives:** Zansho - exp (oracle-l5r-10505); `w827-zansho-ranged`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-052 — Chiyurei's Axe: Melee Attacks compare the lower of the target's current and printed Force, automatically
+There is no choice. A Melee Attack Hida Chiyurei performs (printed on him, or from an attached Item, Spell or action that names him as performer) is compared against the lower of the target's current Force and its printed (base) Force.
+
+- **Cards/primitives:** Chiyurei's Axe (oracle-l5r-10340); `AttackComparedValue` (Wave827AxeComparedValue).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-053 — Koan cards: the Spell limit, the bow cost and the Robes
+A Shugenja may normally have any number of Spells attached; Koan's Jingasa limits him to as many as the number of attached cards with the Koan keyword. When he has more, his controller discards Spells down to that count. A Spell attached to him that requires him to bow is paid by the Jingasa: he does not bow to perform it. Koan's Robes add a Force bonus equal to the number of Koan cards in his unit, counting the Robes themselves and every other Koan-keyword card of the unit, and the first destruction each turn of any card in his unit by another player's card is negated: the Personality and everything attached, Spells, Followers and Items, created cards included, tokens not.
+
+- **Cards/primitives:** Koan's Jingasa (oracle-l5r-10524), Koan's Robes (oracle-l5r-10525); `WatchScope.Unit`, `Wave827KoanExcess`, the P24 `SpellFocusParityWaives` cost waiver.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827). Ningen's 'Treatise on the Nezumi' is not wired: allies are out of scope.

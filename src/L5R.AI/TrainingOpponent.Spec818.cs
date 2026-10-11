@@ -237,4 +237,17 @@ public static partial class TrainingOpponent
     /// <summary>A Reaction or optional effect that destroys or bows a card of the opponent's is always taken.</summary>
     private static bool HarmsOpponentCard(Ctx x, GameCommand command, AbilityIntent intent) =>
         Spec(x) && intent.Rank >= EffectRank.Bow && (x.Card(command.TargetId) is { } t ? t.OwnerId != x.Self.Id : intent.Side == TargetSide.Enemy);
+
+    /// <summary>Kokujin's "Destroy a personality to take control of the loser?" (issue #827): the loser is destroyed anyway when declined, so the trade is the loser's worth against the Personality given up
+    /// (Force plus Personal Honor), by at least one point, and Kokujin himself is the last to go.</summary>
+    private static double Wave827KokujinScore(Ctx x, GameCommand command)
+    {
+        if (command.Choice == "decline") return 100;
+        var duel = x.View.PendingDuel;
+        var loser = duel is null ? null : x.Card(duel.ChallengedId);
+        var victim = x.Card(command.TargetId);
+        if (loser is null || victim is null) return -50;
+        double Worth(CardView card) => Math.Max(0, card.Force) + (card.Definition?.PersonalHonor ?? 0);
+        return 100 + Worth(loser) - Worth(victim) - 1 - (victim.Id == duel!.ChallengerId ? 5 : 0);
+    }
 }

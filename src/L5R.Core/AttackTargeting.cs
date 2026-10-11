@@ -147,8 +147,9 @@ public sealed partial class MatchEngine
     // Unseen Assailant (Emperor Edition remaining-cards pass, issue #492, group D): "If the Ranged Attack targeted a Personality, you may compare it against his Chi" -- Force or Chi (see below).
     // Issue #492 (Mendon's ruling R5): every "may compare" clause is the PLAYER's choice ("The player chooses."), made with the action (GameCommand.Choice, one listed option per choice) -- the engine no
     // longer picks the lower value for him (EmperorRulingR5.cs, AttackCompareChoiceOf).
-    private int AttackComparedValue(string abilityId, CardInstance target) =>
-        AttackSpecComparedValue(abilityId, target) is { } specValue ? specValue // issue #690 (P24, EffectPrimitivesAttack.cs): AttackSpec.CompareAgainst
+    private int AttackComparedValue(string abilityId, CardInstance target, string? sourceId = null) =>
+        Wave827AxeComparedValue(abilityId, target, sourceId) is { } axeValue ? axeValue // issue #827: Chiyurei's Axe
+        : AttackSpecComparedValue(abilityId, target) is { } specValue ? specValue // issue #690 (P24, EffectPrimitivesAttack.cs): AttackSpec.CompareAgainst
         : abilityId == "samuru-attack" ? CardGoldCost(target)
         : abilityId == "unseen-assailant-attack" && Definition(target).Type == CardType.Personality && AttackCompareChoiceOf(abilityId) == "chi" ? PersonalityChi(target)
         : AttackComparedValueRemainingG(abilityId, target);

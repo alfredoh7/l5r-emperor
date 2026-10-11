@@ -336,6 +336,10 @@ public static partial class TrainingOpponent
                 return sleepTarget is { Bowed: false } ? 120 + sleepTarget.Force : -50;
             case "budgetSelectConfirm": return 100;
             case "budgetSelectClear": return -100;
+            // Kokujin's question after a won duel (issue #827): give up one of its own Personalities only for a loser worth clearly more than it; P'an Ku stays bowed to keep the Personality he took; the Spell the Jingasa makes it drop is the first listed.
+            case "w827KokujinChoose": return Wave827KokujinScore(x, command);
+            case "w827PanKuStraightenChoose": return command.Choice == "remain" ? 105 : 100;
+            case "w827KoanDiscardChoose": return 100;
             // Fusako's pre-accept bow (issue #667): the bot never bows its own Personality to refuse; it accepts the duel.
             case "bowToRefuseDuel": return -100;
             // Any other decision the engine offers is answered rather than ignored (issue #642): a modest bot takes the first complete option, just above passing,
