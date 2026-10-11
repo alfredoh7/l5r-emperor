@@ -11302,12 +11302,13 @@ public sealed partial class MatchEngine
                 foreach (var costOption in costOptions)
                     foreach (var createChoice in createChoices)
                         foreach (var shownChoice in AlternativeDiscard.Choices(costOption, shownChoices, player, source))
+                            foreach (var deckPosition in id == "goju-house-guard-return" ? new string?[] { "Top", "Bottom" } : new string?[] { null }) // the card asks where on its owner's Fate deck it goes (issue #833): one offered action per end, each carrying the choice
                             foreach (var compareChoice in compareChoices)
                             {
                                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
                                 var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
                                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                                    CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
+                                    CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, DeckPosition: deckPosition, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
                                 // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
                                 if (ability.Slots is not null)
                                 {
@@ -11416,7 +11417,7 @@ public sealed partial class MatchEngine
                                     // the client swaps between them without a round trip.
                                     var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                                         ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                                    var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
+                                    var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}") + (deckPosition is null ? "" : $" · {deckPosition.ToLowerInvariant()} of your Fate deck")
                                         + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? Wave827CostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
                                         + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                                         + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");

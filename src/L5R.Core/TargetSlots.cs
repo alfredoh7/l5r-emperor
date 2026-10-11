@@ -298,7 +298,36 @@ public sealed partial class MatchEngine
         var quote = QuoteAbilityGold(defaultCommand);
         defaultCommand = defaultCommand with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
         try { ValidateAbility(defaultCommand); }
-        catch (RuleViolation e) { return new("useAbility", label, false, e.Message, defaultCommand, sourceId, Gold: quote, Slots: options); }
+        catch (RuleViolation e)
+        {
+            // The first-legal default can be an illegal pair even though a legal one exists (Iuchi Karasu at home with one other Personality at home and one at the battlefield: his first two
+            // candidates share a location). Offer the action enabled with the first legal single-slot variant of the default rather than disabled with a legal selection on the table.
+            if (LegalSlotVariant(defaultCommand, options) is { } variant)
+            {
+                var variantQuote = QuoteAbilityGold(variant);
+                return new("useAbility", label, true, null, variant with { SourceIds = variantQuote is null ? [] : variantQuote.Payments.FirstOrDefault()?.SourceIds }, sourceId, Gold: variantQuote, Slots: options);
+            }
+            return new("useAbility", label, false, e.Message, defaultCommand, sourceId, Gold: quote, Slots: options);
+        }
         return new("useAbility", label, true, null, defaultCommand, sourceId, Gold: quote, Slots: options);
+    }
+
+    private GameCommand? LegalSlotVariant(GameCommand command, TargetSlotOption[] options)
+    {
+        var tried = 0;
+        foreach (var chosen in command.Selections ?? [])
+        {
+            if (chosen.CardIds is not { Length: 1 } || options.FirstOrDefault(o => o.Slot == chosen.Slot) is not { Kind: TargetSlotKinds.Card } offered) continue;
+            foreach (var candidate in offered.CardIds)
+            {
+                if (candidate == chosen.CardIds[0] || ++tried > 64) continue;
+                var variant = command with { Selections = command.Selections!.Select(c => c.Slot == chosen.Slot ? c with { CardIds = [candidate] } : c).ToArray() };
+                var variantQuote = QuoteAbilityGold(variant);
+                variant = variant with { SourceIds = variantQuote is null ? [] : variantQuote.Payments.FirstOrDefault()?.SourceIds };
+                try { ValidateAbility(variant); return variant; }
+                catch (RuleViolation) { }
+            }
+        }
+        return null;
     }
 }
