@@ -6,7 +6,7 @@ Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the
 
 **What changed.** `tools/content/import_supplemental_emperor.py` writes `content/oracle/emperor-supplemental-catalogue.json` from the existing Emperor Edition export, in the same schema as the main catalogue. The deck pool, the client library (`library.json`, now 2,156 cards) and the inventory read it. Each card keeps its Oracle legality labels and ban note, is marked `historical_legality_status: requires_review`, and stays non-playable. The deck pool flags them `supplemental`.
 
-**Not decided.** Whether a card Oracle lists as banned from Emperor Edition tournaments (December 2012 and September 2013 bans, both after printing) may be played in this game is Mendon's call. The import takes no position, and the blocker notes in `tools/content/pe_issue812_blockers.json` say so.
+**Ruling (R-040, Mendon, 2026-10-10).** All seven are playable once wired. The ban stays as a data note on each card (`source_ban_notes`, plus the blocker notes) and is never shown in game: the client library carries no ban field and nothing restricts deck building.
 
 **Wiring triage** (read against the engine; the cards are not wired):
 
@@ -20,4 +20,4 @@ Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the
 | Kalani's Landing | RULES | After-announcement Reaction and a Gold Cost modifier on a card in play, with no stated duration |
 | The Governor's Estate | ZONE | Needs face-down cards in play and a granted Holding trait |
 
-The inventory's existing Unwired/Wired statuses were regenerated against `content/published/*.json`: none changed, since the committed workbook was already current. **Art is not included.** Their eight Emperor Edition scans are on disk, but adding them to `catalogue-printings.json` makes the art-pack coverage check (`test_catalogue_art`) demand a new private catalogue art release, which this change does not publish. They show in the library without catalogue art until a new pack is built and released (the `art-pack-release` skill).
+The inventory's existing Unwired/Wired statuses were regenerated against `content/published/*.json`: none changed, since the committed workbook was already current. **Art.** Their eight Emperor Edition scans are in `catalogue-printings.json`, and a new art pack (tag `catalogue-art-issue812-20261010-r1`, 4,636 images, the 4,628 of r1 plus 8 new WebP) was built and validated locally. It must be published as a private release before players can download it.

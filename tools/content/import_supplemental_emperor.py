@@ -5,7 +5,7 @@ Oracle's Emperor legality list omits cards it records as banned, so a handful of
 content/oracle/emperor-catalogue.json, the card library or the deck pool. content/oracle/emperor-edition/coverage-review.json names them; their raw Oracle records are
 kept in content/oracle/emperor-edition/catalogue.json. This writes them, in the same schema as emperor-catalogue.json, to content/oracle/emperor-supplemental-catalogue.json.
 
-No legality is inferred: each card keeps its source legality labels and any ban note, and is reference-only until its rules are implemented and reviewed.
+Mendon ruled (R-040, 2026-10-10) that all seven are playable once wired: each keeps its source legality labels and any ban note as DATA ONLY, never shown in game.
 Offline; standard library only.
 """
 from __future__ import annotations
@@ -33,7 +33,7 @@ def build(root: Path = ROOT) -> dict:
         card = normalize_card(record["source_record"], require_membership=False)
         if not GAME_TYPES.issuperset(card["types"]):
             raise ValueError(f"{card['name']} is not a game card: {card['types']}")
-        card.update(source_membership=MEMBERSHIP, legality_status="supplemental_review", historical_legality_status="requires_review",
+        card.update(source_membership=MEMBERSHIP, legality_status="supplemental_review", historical_legality_status="playable_by_ruling_r040",
                     source_legality_labels=[plain(label) for label in record["source_legality_labels"]],
                     source_ban_notes=[plain(note) for note in record["source_record"].get("banned", [])],
                     emperor_edition_numbers=entry["printing_number"])

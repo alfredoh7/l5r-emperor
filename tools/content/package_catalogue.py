@@ -7,6 +7,9 @@ from pathlib import Path
 
 def package(root):
     cards = {c['id']: c for c in json.loads((root/'content/oracle/emperor-catalogue.json').read_text())['cards']}
+    supplemental = root/'content/oracle/emperor-supplemental-catalogue.json'  # issue #812
+    if supplemental.is_file():
+        cards.update({c['id']: c for c in json.loads(supplemental.read_text())['cards']})
     index = {}
     for manifest in sorted((root/'content/oracle').glob('*/artwork-manifest.json')):
         data = json.loads(manifest.read_text())

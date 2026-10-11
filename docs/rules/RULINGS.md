@@ -386,3 +386,10 @@ When both players hold a Reaction in an alternating Reaction window (Engage, ent
 - **Cards/primitives:** `PendingReactionOrder` (ReactionOrdering.cs); the bot orders its own Reactions first, then the other player's in the order announced.
 - **Date:** 2026-10-09
 - **Source:** Mendon's gameplay QoL list, items 3 and 4 (issue #803).
+
+### R-040 — The seven Emperor Edition cards Oracle lists as banned are playable
+Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the Crab and Well-Tended Farm (which Oracle records as banned from Emperor Edition tournaments, December 2012 or September 2013) and The Governor's Estate (Legacy-only) are playable like any other Emperor Edition card once wired. The tournament ban is kept only as a data note on each card (`source_ban_notes` in `content/oracle/emperor-supplemental-catalogue.json`, and the inventory's blocker notes); the game does not display it, restrict deck building because of it, or treat it as a rule.
+
+- **Cards/primitives:** content/oracle/emperor-supplemental-catalogue.json; the library carries no ban field.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #812).
