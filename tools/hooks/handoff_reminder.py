@@ -108,7 +108,7 @@ def session_edit_times(transcript_path):
                 args = block.get("input") or {}
                 path = args.get("file_path") or args.get("notebook_path")
                 if path:
-                    key = os.path.normcase(os.path.normpath(str(path)))
+                    key = os.path.normcase(os.path.realpath(str(path)))  # the same file may be spelled two ways (a symlinked or 8.3 temp dir)
                     times[key] = max(times.get(key, stamp), stamp)
     return times
 
@@ -138,7 +138,7 @@ def edited_since_checkout(collab, top, files, times):
         return files
     kept = []
     for relative in files:
-        stamp = times.get(os.path.normcase(os.path.normpath(str(Path(top) / relative))))
+        stamp = times.get(os.path.normcase(os.path.realpath(str(Path(top) / relative))))
         if stamp is None or stamp >= since:
             kept.append(relative)
     return kept
