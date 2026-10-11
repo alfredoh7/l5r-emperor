@@ -36,6 +36,8 @@ public sealed record TargetSlot(string Id, string Category, string Label, int Mi
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     /// <summary>The slot names a Province (either player's, face-up or face-down) rather than a card or a player (Benediction, issue #699): its selection is a province owner and index.</summary>
     public bool IsProvince => Category == TargetSlotKinds.Province;
+    /// <summary>A province slot printed "one of your Provinces" (The Inevitable Grasp of Conquest, issue #833): only the acting player's own Provinces are offered, so the default selection is always a legal one for either seat.</summary>
+    public bool OwnProvincesOnly { get; init; }
     public bool AtResolution => Resolution is not null;
 }
 
@@ -205,6 +207,7 @@ public sealed partial class MatchEngine
             if (slot.IsProvince)
             {
                 var provinces = ProvinceSlotChoices();
+                if (slot.OwnProvincesOnly) provinces = provinces.Where(p => p.Owner == prototype.PlayerId).ToArray();
                 options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Province, slot.Min, slot.Max, [], [], ProvinceChoices: provinces));
                 if (provinces.Length < slot.Min) complete = false;
                 else if (slot.Min > 0) chosen.Add(new(slot.Id, ProvinceOwner: provinces[0].Owner, Province: provinces[0].Index));

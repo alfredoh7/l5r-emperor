@@ -69,7 +69,7 @@ public static class Wave735Abilities
             Slots: [new("personality", "personality", "A Personality"), discardSlot], Costs: [removeDiscard]);
         all[SanctionGrant] = new("Limited", "Limited: Permanently give your target non-Loyal, face-up Personality in or out of play your Clan Alignment", SanctionTarget);
         all[GraspDestroy] = new("Battle", "Battle: Destroy one of your Provinces. Other players' cards will not destroy your Personalities this battle. Discard this Celestial", "slots",
-            Slots: [new("province", TargetSlotKinds.Province, "One of your Provinces")]);
+            Slots: [new("province", TargetSlotKinds.Province, "One of your Provinces") { OwnProvincesOnly = true }]);
         return all;
     }
 }
