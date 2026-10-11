@@ -28,6 +28,7 @@ internal static class BattleRulingsRound2Tests
             ("Reactions are actions: a Reaction whose bow triggers an 'after this action' window opens it over the window it was played in, and a spent watcher opens nothing", AfterActionWindowForReaction),
             ("Reactions are actions: a Reaction that waited behind a before-action window resolves inside the window it was played in, so what it queues is deferred to that window's close", DeferredReactionResolvesInItsWindow),
             ("Reactions are actions: the targeted-by-action reactions (Jinn-Kuen's shape) apply to a Reaction that names their Merchant, and negate it", TargetedActionReactionsApplyToReactions),
+            ("Issue #825: a held action whose Gold source was bowed while its window was open is aborted when the window closes (nothing paid, nothing resolves); the window can always be closed", HeldPaymentBrokenAborts),
             ("Reactions are actions: a window set aside behind a Reaction's own window is plain serialized state -- a snapshot mid-way continues identically", SuspendedWindowIsState),
             ("Rebuilding Kyuden Hida (the Event, not the Stronghold): an Attacker holding the first opportunity through Naval Invasion, Yuki or Sneak Attack must pass; that pass counts; the Defender's first normal opportunity follows", KyudenHidaEventPinned),
             ("Deferred Attack: the pending Attack keeps the ability's SOURCE card, so an Item, Spell or Follower's Recon keyword makes the Attack a Recon action -- and the performer's keywords do not", DeferredAttackSource),
@@ -537,6 +538,26 @@ internal static class BattleRulingsRound2Tests
         Eq(e.State.PendingChoice?.Type, "engageReaction", "the Engage window is open again");
         Eq(e.State.Cards[guard.Id].Zone, Zone.Battlefield, "the Reaction's destruction of him was negated");
         Check(e.State.Events.Any(ev => ev.Type.Contains("egated")), "and the negation is announced");
+    }
+
+    private static void HeldPaymentBrokenAborts()
+    {
+        // The deferred action of seat 0 names a Gold source; the other player's Reaction then bows it. Before #825 the resolution failed ("Every Gold source must be yours ... unbowed") and
+        // declineReaction was refused for ever, a deadlock the bot arena found. The action is aborted instead and the window closes.
+        var s = Selection();
+        Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
+        var guard = Add(s, "training-merchant-free-guard", 1, Zone.Battlefield, province: 0); Add(s, "training-engage-destroy-strategy", 0, Zone.Hand);
+        var holding = s.Cards.Values.First(c => c.OwnerId == 0 && c.Zone == Zone.Home && CardCatalog.Get(c.DefinitionId).GoldProduction > 0);
+        var e = MatchEngine.FromTestState(s);
+        Take(e, 0, "selectBattle");
+        Target(e, 0, "training-engage-destroy", guard.Id);
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the guard may react, so the action is held");
+        var held = e.State; held.PendingNegatableAbility = held.PendingNegatableAbility! with { SourceIds = [holding.Id] }; held.Cards[holding.Id].Bowed = true;
+        e = MatchEngine.FromTestState(held);
+        for (var step = 0; step < 6 && e.State.PendingChoice?.Type == "beforeActionReaction"; step++) Decline(e);
+        Check(e.State.PendingChoice?.Type != "beforeActionReaction", "the window closed instead of deadlocking");
+        Check(e.State.Events.Any(ev => ev.Type == "actionNegated" && ev.Message.Contains("Gold source")), "the aborted action is announced: " + string.Join(" || ", e.State.Events.TakeLast(8).Select(ev => ev.Type + ":" + ev.Message)));
+        Eq(e.State.Cards[guard.Id].Zone, Zone.Battlefield, "nothing resolved");
     }
 
     private static void SuspendedWindowIsState()

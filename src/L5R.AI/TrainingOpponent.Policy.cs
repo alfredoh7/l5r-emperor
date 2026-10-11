@@ -39,7 +39,8 @@ public static partial class TrainingOpponent
         // deterministically from the match state so a replay makes the same choice. Declining a Reaction scores 100.
         if (intent.IsReaction)
         {
-            if (intent.Negates) return 1500;
+            // Issue #825: negating the bot's OWN held action is never what it wants (and the Gold its Reaction costs can break the action it is holding).
+            if (intent.Negates) return x.View.PendingChoice is { Type: "beforeActionReaction" } held && held.PlayerId == x.Self.Id ? SelfHarmScore : 1500;
             if (HarmsOpponentCard(x, command, intent)) return 1400; // issue #818 item 11: an optional destroy or bow of an opponent's card is never declined
             // Issue #644: a Reaction a Personality (or item) prints for its own entry -- Togashi Meiyu's and Torazu's Fire tokens, Satoshi's Dual Warfans' draw -- is
             // never a gamble: the bot always takes it, unless it would only cost the bot Honor.

@@ -1023,7 +1023,8 @@ public sealed partial class MatchEngine
     private PaymentOption[] PaymentOptionsExcluding(int playerId, int cost, IReadOnlySet<string>? exclude, PaymentSubject? paying = null)
     {
         // A source whose amount is the payer's own choice (Asahina Keigo, issue #477) is never suggested.
-        var sources = Producers(playerId, paying).Where(c => (exclude is null || !exclude.Contains(c.Id)) && !IsVariableGoldSource(c)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        var held = HeldActionSources(playerId);
+        var sources = Producers(playerId, paying).Where(c => (exclude is null || !exclude.Contains(c.Id)) && !held.Contains(c.Id) && !IsVariableGoldSource(c)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
         if (cost == 0) return [new([], 0, 0, 0)];
         // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
         // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
@@ -1062,6 +1063,11 @@ public sealed partial class MatchEngine
             // Issue #501: of two payments equally good, the one that bows fewer cards (a Reaction's Gold instead of the bow) is suggested first.
             .ThenBy(p => p.SourceIds.Count(id => !IsPaymentToken(id))).ThenBy(p => p.SourceIds.Length).ThenBy(p => string.Join(",", p.SourceIds), StringComparer.Ordinal).Take(24).ToArray();
     }
+
+    // Issue #825: the Gold sources the held (deferred) action of this player has already committed to. A payment SUGGESTED to a Reaction taken in its window never uses them again: they are spoken for
+    // (validation stays as it was, so the held action's own payment, and a redirect that must still fit it, are judged as before).
+    private IReadOnlySet<string> HeldActionSources(int playerId) =>
+        _state.PendingNegatableAbility is { } held && held.PlayerId == playerId && held.SourceIds is { Length: > 0 } ids ? ids.ToHashSet(StringComparer.Ordinal) : new HashSet<string>();
 
     private IEnumerable<CardInstance> Producers(int playerId, PaymentSubject? paying = null) => _state.Cards.Values.Where(c => ProducerControlledBy(c, playerId) && ProducerZone(c, Definition(c)) // issue #695 (PaymentHooks695.cs): a lent Holding, an Attached card, an in-play Strategy
         && !c.Bowed && (Definition(c).GoldProduction > 0 || MoneylenderTokens(c) > 0 || AlternateGoldSource(c, paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional, paying, c)));
@@ -1181,6 +1187,9 @@ public sealed partial class MatchEngine
     private void ResolveDeferredAction(GameCommand pending)
     {
         var negated = _state.DeferredActionNegated; _state.DeferredActionNegated = false;
+        // Issue #825: a Gold source the held action named was bowed or destroyed while its window was open (the other player's Reaction). The Gold was produced when the action was announced, but this
+        // engine pays at resolution, so the payment can no longer be made: the action is aborted like one whose cost was blocked, rather than leaving a window nobody can close.
+        if (HeldPaymentBroken(pending)) { AbortActionForBlockedCost(pending, brokenPayment: true); _state.NegatedEffects.Clear(); return; }
         if (negated) ResolveNegatedAction(pending, ignoreCosts: P3CostsIgnored(pending)); else ExecuteAbilityEffects(pending); // Iron Will (issue #503): its costs ignored
         _state.NegatedEffects.Clear();
         RestoreTemporaryRemovals(TemporaryRemovals.Action);

@@ -15,6 +15,7 @@ internal static class Spec818Tests
         ("Item 8: holding Honor-gaining cards, a unit goes at a Province it cannot destroy while the rest attack another", HonorAttack),
         ("Item 9: Force an equipped attachment removes from the enemy changes the outcome like Force added", EquipRemoval),
         ("Item 10: Shinden bows a small unit or against an opponent over 25 Honor, otherwise only when that cannot change the attack decision", ShindenBow),
+        ("Issue #825: the bot never negates its own held action, but still negates the opponent's", NeverNegatesOwnAction),
         ("Item 11: a Reaction that destroys or bows an opponent's card is always played", AlwaysDestroyOrBow),
     ];
 
@@ -240,6 +241,17 @@ internal static class Spec818Tests
         Check(Pick(twin) == "bow", "the other unit still attacks: bowing is fine");
     }
 
+
+    private static void NeverNegatesOwnAction()
+    {
+        var table = AttackTable(4, 6, 9);
+        var negate = AbilityCatalog.All.First(p => p.Value.Timing == "Reaction" && AbilityIntent.Of(p.Value).Negates).Key;
+        var use = new ActionOption("useAbility", negate, true, null, new("useAbility", 0, table.Version, CardId: "src", AbilityId: negate));
+        var decline = new ActionOption("declineReaction", "Decline", true, null, new("declineReaction", 0, table.Version));
+        string Pick(int actingPlayer) => TrainingOpponent.Choose(table with { PendingChoice = new PendingChoice("beforeActionReaction", actingPlayer, null, "Respond", 1) }, [use, decline], new BotContext()).Command!.Type;
+        Check(Pick(0) == "declineReaction", "its own action is held: negating it only costs it Gold and cancels its own play");
+        Check(Pick(1) == "useAbility", "the opponent's action is held: the negate is played");
+    }
 
     private static void AlwaysDestroyOrBow()
     {
