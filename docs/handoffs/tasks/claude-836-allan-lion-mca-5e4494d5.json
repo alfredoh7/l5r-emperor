@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Allan Lion MCA ships as the tenth preloaded deck (Content/preloaded-decks.json); deck-workshop test now expects ten.",
+  "validation": "deck-workshop 'ten decks that ship preloaded read cleanly against the catalogue' passes: no problems, legality fine for all ten.",
+  "remaining": "None; ready for review. Existing players get it only if their preload marker is reset; fresh installs get it on first open.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/836",
+  "branch": "claude/836-allan-lion-mca",
+  "updated": "2026-10-11T23:51:52.110242+00:00"
+}
