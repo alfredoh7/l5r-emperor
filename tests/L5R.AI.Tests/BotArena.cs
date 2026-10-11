@@ -32,7 +32,11 @@ internal static class BotArena
         var eventsSeen = 0;
         var actionCounts = new[] { new Dictionary<string, int>(), new Dictionary<string, int>() };
         string[] finals = ["", ""];
-        Game End(int? winner, string result, int turn, string? error = null) => new(name, opponentName, deckBot, opponentBot, winner, result, turn, clock.Elapsed.TotalSeconds, refused, error) { Actions = actionCounts, Final = finals };
+        Game End(int? winner, string result, int turn, string? error = null)
+        {
+            if (clock.Elapsed.TotalSeconds > 120) Console.WriteLine($"LONG {name} vs {opponentName} {deckBot}/{opponentBot}: {clock.Elapsed.TotalSeconds:F0}s, turn {turn}, result {result}; accepted actions seat0 {actionCounts[0].Values.Sum()} {string.Join(',', actionCounts[0].OrderByDescending(p => p.Value).Take(4).Select(p => p.Key + '=' + p.Value))}; seat1 {actionCounts[1].Values.Sum()} {string.Join(',', actionCounts[1].OrderByDescending(p => p.Value).Take(4).Select(p => p.Key + '=' + p.Value))}; refused {refused}");
+            return new(name, opponentName, deckBot, opponentBot, winner, result, turn, clock.Elapsed.TotalSeconds, refused, error) { Actions = actionCounts, Final = finals };
+        }
         MatchEngine game;
         try { game = MatchEngine.CreateCustomMatch(seed, deck, opponent); }
         catch (Exception e) { return End(null, "not playable", 0, e.Message.Split('\n')[0]); }
@@ -54,7 +58,9 @@ internal static class BotArena
                     if (alt.Any(x => x.Enabled && x.Type != "concede")) { seat = other; actions = alt; }
                 }
                 var view = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(game.GetView(seat)))!;
+                var thinking = Stopwatch.StartNew();
                 var decision = bots[seat] != Kind.Old ? TrainingOpponent.Choose(view, actions, memory[seat]) : LegacyTrainingOpponent.Choose(view, actions);
+                if (thinking.ElapsedMilliseconds > 1500 && decision.Command is not null) Console.WriteLine($"SLOW bot {thinking.ElapsedMilliseconds} ms: {name} vs {opponentName} {deckBot}/{opponentBot} seat {seat} turn {v0.TurnNumber} {Describe(decision.Command)} ({actions.Count(a => a.Enabled)} actions)");
                 if (decision.Command is null)
                 {
                     // Issue #820: say exactly what the seat was asked, so a stall can be traced to the bot, the engine or the client.
@@ -69,7 +75,9 @@ internal static class BotArena
                     foreach (var a in actions.Where(x => x.Enabled)) Console.WriteLine($"  offered {a.Type} card={a.CardId} ability={a.Command?.AbilityId} choice={a.Command?.Choice} target={a.Command?.TargetId} targets={a.TargetIds?.Length} cmd={(a.Command is null ? "none" : "yes")} label={a.Label}");
                     return End(null, "stuck", v0.TurnNumber, $"seat {seat} had no command: {decision.Reason}");
                 }
+                var executing = Stopwatch.StartNew();
                 var outcome = game.Execute(decision.Command);
+                if (executing.ElapsedMilliseconds > 1500) Console.WriteLine($"SLOW engine {executing.ElapsedMilliseconds} ms: {name} vs {opponentName} {deckBot}/{opponentBot} seat {seat} turn {v0.TurnNumber} {Describe(decision.Command)}");
                 if (outcome.Accepted)
                 {
                     sameAnswer = 0; lastRefused = null;
