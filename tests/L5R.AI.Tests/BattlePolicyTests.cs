@@ -26,7 +26,7 @@ internal static class BattlePolicyTests
         ("Trade attacks: the bot declares and assigns such an attack, and not when the rule is off or the defence is too strong", TradeAttackChoice),
     ];
 
-    private static CardView Home(string id, int owner, int force, int gold, string? attachedTo = null, CardType? type = null)
+    internal static CardView Home(string id, int owner, int force, int gold, string? attachedTo = null, CardType? type = null)
     {
         var def = type is null ? Person() with { GoldCost = gold } : CardCatalog.Cards.Values.First(d => d.Type == type) with { GoldCost = gold };
         return new CardView(id, def, owner, Zone.Home, true, false, null, attachedTo, force);
@@ -171,7 +171,7 @@ internal static class BattlePolicyTests
     {
         ActionOption Declare(MatchView v) => new("declareAttack", "Declare", true, null, new("declareAttack", 0, v.Version));
         ActionOption Attack(MatchView v) => new("attack", "Attack", true, null, new("attack", 0, v.Version, Assignments: []));
-        var on = new BotContext { UseBattlePolicy = true, UseTradeAttacks = true };
+        var on = new BotContext { UseBattlePolicy = true, UseTradeAttacks = true, UseSpec818 = false };
         var strong = AttackView(6, 4, 5, 9); // beats the defender, cannot raze a Strength 9 Province
         Check(TrainingOpponent.Choose(strong, [Pass(strong), Declare(strong)], on).Command?.Type == "declareAttack", "a battle it can win outright is declared even though the Province would hold");
         var assigned = TrainingOpponent.Choose(strong, [Pass(strong), Attack(strong)], on).Command;
@@ -185,8 +185,8 @@ internal static class BattlePolicyTests
     }
 
     private static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
-    private static CardDefinition Person(int force = 4) => CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force == force);
-    private static CardView Unit(string id, int owner, int force, int province = 0, bool bowed = false, CardDefinition? def = null) =>
+    internal static CardDefinition Person(int force = 4) => CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force == force);
+    internal static CardView Unit(string id, int owner, int force, int province = 0, bool bowed = false, CardDefinition? def = null) =>
         new(id, def ?? Person(), owner, Zone.Battlefield, true, bowed, province, null, force);
     /// <summary>True when the ability's cost (the text before the colon) bows something, which would take Force out of the battle.</summary>
     private static bool BowCost(AbilityDefinition a) => (a.Label ?? "").Split(':') is { Length: > 1 } parts && parts[0].Contains("Bow", StringComparison.OrdinalIgnoreCase);
@@ -194,7 +194,7 @@ internal static class BattlePolicyTests
         AbilityCatalog.All.Where(p => !p.Key.StartsWith("training-", StringComparison.Ordinal) && test(p.Key, p.Value, AbilityIntent.Of(p.Value))).OrderBy(p => p.Key, StringComparer.Ordinal).First().Key;
 
     /// <summary>A battle at province 0 with seat 0 (the bot) holding <paramref name="own"/> Force against <paramref name="enemy"/>; every Province has Strength <paramref name="strength"/>.</summary>
-    private static MatchView Battle(int own, int enemy, int strength, bool botAttacks = true, CardView[]? ownExtra = null, CardView[]? enemyExtra = null, int enemyHand = 5)
+    internal static MatchView Battle(int own, int enemy, int strength, bool botAttacks = true, CardView[]? ownExtra = null, CardView[]? enemyExtra = null, int enemyHand = 5)
     {
         var view = MatchEngine.CreateStarterMatch().GetView(0);
         ProvinceView[] Provinces(int owner) => view.Players[owner].Provinces.Select(p => p with { Strength = strength }).ToArray();
@@ -211,11 +211,11 @@ internal static class BattlePolicyTests
         };
     }
 
-    private static ActionOption Pass(MatchView v) => new("pass", "Pass", true, null, new("pass", 0, v.Version));
-    private static ActionOption Use(MatchView v, string id, string? card = "own-main", string? target = null, string[]? targets = null) =>
+    internal static ActionOption Pass(MatchView v) => new("pass", "Pass", true, null, new("pass", 0, v.Version));
+    internal static ActionOption Use(MatchView v, string id, string? card = "own-main", string? target = null, string[]? targets = null) =>
         new("useAbility", id, true, null, new("useAbility", 0, v.Version, CardId: card, AbilityId: id, TargetId: target), card, targets);
     /// <summary>The six parked battle rules are off by default; their tests switch them on.</summary>
-    private static BotContext SixRules => new() { UseBattlePolicy = true };
+    private static BotContext SixRules => new() { UseBattlePolicy = true, UseSpec818 = false }; // the older rules are measured without the issue #818 changes
     private static string Chose(MatchView v, params ActionOption[] options) => TrainingOpponent.Choose(v, options, SixRules).Command is { } c ? c.AbilityId ?? c.Type : "none";
 
     private static void Odds()

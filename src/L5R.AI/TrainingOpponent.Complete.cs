@@ -96,7 +96,8 @@ public static partial class TrainingOpponent
         var unitForces = units.Select(c => new AttackPlanner.Unit(c.Id, ArmyForce(x.Self.Home.Where(h => h.Id == c.Id || h.AttachedTo == c.Id)))).ToArray();
         var targets = x.Opponent.Provinces.Where(p => !p.Destroyed && provinces.Contains(p.Index)).Select(p => new AttackPlanner.Target(p.Index, p.Strength)).ToArray();
         // The opponent's Honor victory is coming (Mendon's rule, playtest 2026-10): the bot attacks as many Provinces as it can beat, whatever the enemy army could do in reply.
-        return AttackPlanner.Plan(unitForces, targets, HonorRace(x) ? 0 : ArmyForce(x.Opponent.Home));
+        var spec = x.Memory.UseSpec818;
+        return AttackPlanner.Plan(unitForces, targets, HonorRace(x) ? 0 : ArmyForce(x.Opponent.Home), spec ? HandForceBonuses(x) : null, spec);
     }
 
     /// <summary>The opponent already holds the Honor it needs and will win it at the start of its next turn, so the bot cannot afford a cautious attack.</summary>

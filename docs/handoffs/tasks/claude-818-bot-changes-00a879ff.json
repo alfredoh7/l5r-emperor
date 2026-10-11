@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Eleven practice-bot changes from Mendon (issue #818): Holdings to ten and buy-everything when the row is affordable; catch-up Personality recruit; Personality discards by Gold capacity; overlay only when ahead or discarding; lobby and defend with the Imperial Favor; attack force with hand bonuses and beat-each rule; attacker passes once the Province falls; Honor attacks; equips count Force removed; Shinden and optional bows; never decline an optional destroy or bow. All behind BotContext.UseSpec818 (on by default).",
+  "validation": "dotnet run tests/L5R.AI.Tests: 145/145 pass (10 new spec-818 cases; two older tests now run with UseSpec818=false), bot soak 12/12 matches finished with no stall, illegal move or exception. No arena (L5R_ARENA_DECKS) run, so strength against the old bot is unmeasured. Core and client untouched.",
+  "remaining": "Item 8 (Honor attacks) is a heuristic: it assumes any unit that meets a named performer can use the card and cannot know whether enemy units will defend. Item 6 'spend them anyway' reading used. Run the arena before relying on it. Bot-only; no native visual check needed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/818",
+  "branch": "claude/818-bot-changes",
+  "updated": "2026-10-11T05:25:57.707765+00:00"
+}

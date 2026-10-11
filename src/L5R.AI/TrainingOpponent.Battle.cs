@@ -12,8 +12,9 @@ public static partial class TrainingOpponent
     /// <summary>The battle rules applied on top of an action's ordinary score. Only the actions a player takes in a battle (an ability, a Strategy, an attachment) are affected.</summary>
     private static double Adjust(Ctx x, ActionOption action, GameCommand command, double score)
     {
-        if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
+        if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy || x.Memory.UseSpec818) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
+        if (AttackerAdjust(x, action, command, intent, score) is { } attacker) return attacker; // issue #818 items 6 and 7
         if (intent.Negates) return score; // a negating Reaction is always played (Mendon's earlier spec)
         // Equip (Battle) item 1: the additional action an attached spell grants is always used.
         if (x.Memory.UseEquipPolicy && action.Type == "useAbility" && UsesGrantedAttachmentAction(x, command)) return Math.Max(score, GrantedActionScore);
@@ -115,16 +116,53 @@ public static partial class TrainingOpponent
             foreach (var id in ids.OfType<string>().Distinct())
                 if (x.Card(id) is { Definition: { } d } card) options.Add((id, EquipForce(card), offered.Gold?.Cost ?? d.GoldCost));
         }
+        if (Spec(x)) options = WithForceRemoved(x, options); // issue #818 item 9: Force taken from the enemy changes the outcome as much as Force added
         var plan = BattlePolicy.EquipPlan(options, gold);
         var gain = options.Where(o => plan.Contains(o.Id)).Sum(o => o.Gain);
         return odds.Tier(gain) > odds.Tier() ? plan : [];
+    }
+
+    /// <summary>
+    /// Item 9: an attachment whose Battle ability destroys or bows an enemy Personality or Follower at the battlefield takes that card's Force away, which lifts the outcome exactly as the same
+    /// Force added would. The largest enemy cards are assigned to such attachments in turn, so two attachments are not credited with removing the same card.
+    /// </summary>
+    private static List<(string Id, int Gain, int Cost)> WithForceRemoved(Ctx x, List<(string Id, int Gain, int Cost)> options)
+    {
+        var enemy = EnemyArmyAt(x).Where(c => !c.Bowed && c.Definition?.Type is CardType.Personality or CardType.Follower).Select(c => Math.Max(0, c.Force)).OrderByDescending(f => f).ToList();
+        var result = new List<(string Id, int Gain, int Cost)>();
+        foreach (var o in options)
+        {
+            var removes = x.Card(o.Id) is { } card && BattlePolicy.Printed(card).Any(p => p.Ability.Timing is "Battle" or "BattleOrOpen" && !p.Intent.IsReaction && p.Intent.Rank is EffectRank.Destroy or EffectRank.Bow && p.Intent.Side != TargetSide.Own);
+            var taken = removes && enemy.Count > 0 ? enemy[0] : 0;
+            if (taken > 0) enemy.RemoveAt(0);
+            result.Add((o.Id, o.Gain + taken, o.Cost));
+        }
+        return result;
+    }
+
+    /// <summary>The worst margin among the attacking armies: each army's Force less what it must beat. Issue #818: the Force a hand can add is shared out to the armies that lack the most, and an army must
+    /// beat the Province's Strength and the defenders' Force each (not their sum).</summary>
+    private static int WeakestArmyMargin(Ctx x, (int Province, int Force)[] armies, int homeDefense)
+    {
+        var spec = Spec(x);
+        var strengths = armies.Select(a => x.Opponent.Provinces.FirstOrDefault(p => p.Index == a.Province)?.Strength ?? int.MaxValue / 2).ToArray();
+        var forces = armies.Select(a => a.Force).ToArray();
+        int Margin(int i) => forces[i] - (spec ? Math.Max(strengths[i], homeDefense) : strengths[i] + homeDefense);
+        if (spec)
+            foreach (var bonus in HandForceBonuses(x).OrderByDescending(b => b))
+            {
+                var weakest = Enumerable.Range(0, armies.Length).OrderBy(Margin).First();
+                if (Margin(weakest) > 0) break;
+                forces[weakest] += bonus;
+            }
+        return Enumerable.Range(0, armies.Length).Min(Margin);
     }
 
     private static AbilityIntent StrategyIntent(CardView? card) => card?.Definition?.Effect switch
     {
         "bow-small" => AbilityIntent.Of(new AbilityDefinition("Battle", "Bow a target enemy Personality", "enemy-personality")),
         "force-three" => AbilityIntent.Of(new AbilityDefinition("Battle", "Give a target Personality +3F", "own-personality")),
-        _ => AbilityIntent.None
+        _ => card is null ? AbilityIntent.None : BattlePolicy.Printed(card).Where(p => p.Ability.Timing is "Battle" or "BattleOrOpen").Select(p => p.Intent).DefaultIfEmpty(AbilityIntent.None).First() // issue #818: read the printed Battle ability
     };
 
     private static IEnumerable<CardView> EnemyArmyAt(Ctx x)
