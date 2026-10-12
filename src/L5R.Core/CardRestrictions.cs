@@ -61,12 +61,17 @@ public enum RestrictionUntil
     /// <summary>For the rest of the game.</summary>
     Permanent,
     /// <summary>As long as CardId is in play.</summary>
-    WhileInPlay
+    WhileInPlay,
+    /// <summary>Until the next turn of the player named by PlayerId begins (issue #835, The Egg of P'an Ku: "will not attack or defend until after your next turn begins"): UntilTurn is the number of
+    /// turns that player will have taken by then.</summary>
+    OwnersNextTurnBegins
 }
 
 /// <summary>One stored restriction. CardId names the restricted card (null for a province lock), PlayerId/ProvinceIndex the province for NoEntryFromProvince.</summary>
 public sealed record CardRestriction(string Id, RestrictionKind Kind, string? CardId = null, int? ProvinceIndex = null, int? PlayerId = null, string? Arg = null, string? OtherCardId = null,
-    RestrictionUntil Until = RestrictionUntil.Turn, int UntilTurn = 0, Phase? UntilPhase = null, int Max = 0, int Count = 0);
+    RestrictionUntil Until = RestrictionUntil.Turn, int UntilTurn = 0, Phase? UntilPhase = null, int Max = 0, int Count = 0,
+    // Issue #835: the player whose action stored it (null: unknown, or a rule's own), so Imperial Deployment can negate the "may not attack/defend" another player's action made.
+    int? ByPlayer = null);
 
 /// <summary>Who is acting. (Issue #768: UnitHeadKeywordsAny requires the Personality heading the performing card's unit to have one of the keywords; UnitHeadOpposesCardId that he opposes that card: at the same battlefield, on the other side.) Players: "any", "controller" (the target's controller) or "others" (every other player). ActionKeyword restricts to actions carrying it ("Political"); CardId names the performing
 /// card; UnitOfCardId matches the card or any card in the unit it heads (his attachments); UnitCardsOnly requires the performing card to be a Personality or an attachment (a Strategy, Holding or Ring is not "a card in a unit").</summary>
@@ -135,15 +140,16 @@ public sealed partial class MatchEngine
     private CardRestrictionState Restrictions => _state.Restrictions;
 
     /// <summary>A restriction in force on a card (stored or static): what a consult point reads.</summary>
-    internal sealed record ActiveRestriction(RestrictionKind Kind, string? Arg, string? OtherCardId, int Max, string? StoredId);
+    internal sealed record ActiveRestriction(RestrictionKind Kind, string? Arg, string? OtherCardId, int Max, string? StoredId, int? ByPlayer = null);
 
     // ---- Registration API (what a card's effect calls) ----------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>Stores a restriction on a card. UntilTurn/UntilPhase are stamped from the current turn and phase.</summary>
-    internal string AddCardRestriction(RestrictionKind kind, CardInstance card, RestrictionUntil until = RestrictionUntil.Turn, string? arg = null, string? otherCardId = null, int max = 0, string? note = null)
+    internal string AddCardRestriction(RestrictionKind kind, CardInstance card, RestrictionUntil until = RestrictionUntil.Turn, string? arg = null, string? otherCardId = null, int max = 0, string? note = null, int? ownerId = null)
     {
         var id = NextRestrictionId();
-        Restrictions.Items.Add(new(id, kind, card.Id, null, null, arg, otherCardId, until, _state.TurnNumber, until == RestrictionUntil.Phase ? _state.Phase : null, max));
+        var ownersNextTurn = until == RestrictionUntil.OwnersNextTurnBegins && ownerId is int ownerPlayer;
+        Restrictions.Items.Add(new(id, kind, card.Id, null, ownersNextTurn ? ownerId : null, arg, otherCardId, until, ownersNextTurn ? Player(ownerId!.Value).TurnsTaken + 1 : _state.TurnNumber, until == RestrictionUntil.Phase ? _state.Phase : null, max, ByPlayer: (_runningCommand ?? _attackCommandInResolution)?.PlayerId));
         if (note is not null) Emit("restrictionAdded", note, card.OwnerId, card.Id);
         return id;
     }
@@ -184,8 +190,9 @@ public sealed partial class MatchEngine
 
     // ---- Reading ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    private bool RestrictionHolds(RestrictionUntil until, string? cardId, int untilTurn, Phase? untilPhase) => until switch
+    private bool RestrictionHolds(RestrictionUntil until, string? cardId, int untilTurn, Phase? untilPhase, int? ownerId = null) => until switch
     {
+        RestrictionUntil.OwnersNextTurnBegins => ownerId is int owner && Player(owner).TurnsTaken < untilTurn,
         RestrictionUntil.Turn => untilTurn == _state.TurnNumber,
         RestrictionUntil.Phase => untilTurn == _state.TurnNumber && untilPhase == _state.Phase,
         RestrictionUntil.WhileInPlay => cardId is null || _state.Cards.TryGetValue(cardId, out var held) && InPlay(held),
@@ -197,7 +204,7 @@ public sealed partial class MatchEngine
     {
         if (Restrictions.Items.Count > 0)
             foreach (var r in Restrictions.Items)
-                if (r.CardId == card.Id && r.Kind != RestrictionKind.NoEntryFromProvince && RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase)) yield return new(r.Kind, r.Arg, r.OtherCardId, r.Max, r.Id);
+                if (r.CardId == card.Id && r.Kind != RestrictionKind.NoEntryFromProvince && RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase, r.PlayerId)) yield return new(r.Kind, r.Arg, r.OtherCardId, r.Max, r.Id, r.ByPlayer);
         if (!InPlay(card)) yield break;
         foreach (var s in CardRestrictionCatalog.For(Definition(card).Id)) yield return new(s.Kind, s.Arg, null, s.Max, null);
         foreach (var hook in EngineHooks.CardRestrictions.Items)
@@ -209,7 +216,12 @@ public sealed partial class MatchEngine
     // ---- Assignment: may not attack / defend, pairs, may assign even if bowed ------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>"May not attack" / "may not defend": the card may not be assigned on that side. The one predicate Assign and the offered unit list both ask.</summary>
-    private bool RestrictionBarsAssignment(CardInstance card, bool isDefender) => HasRestriction(card, isDefender ? RestrictionKind.NoDefend : RestrictionKind.NoAttack);
+    private bool RestrictionBarsAssignment(CardInstance card, bool isDefender)
+    {
+        var kind = isDefender ? RestrictionKind.NoDefend : RestrictionKind.NoAttack;
+        // Imperial Deployment (issue #835, AssignPrevention) and A Cleansing Breath (Prevention): another player's action's "may not attack/defend" does not bar the assignment; a rule's own restriction (no known source) still does.
+        return RestrictionsOn(card).Any(r => r.Kind == kind && !(r.ByPlayer is int by && by != card.OwnerId && (IsImmune(card, ImmunityKind.AssignPrevention, by) || IsImmune(card, ImmunityKind.Prevention, by))));
+    }
 
     private bool RestrictionAllowsAssignBowed(CardInstance card) => HasRestriction(card, RestrictionKind.AssignWhileBowed);
 
@@ -302,7 +314,7 @@ public sealed partial class MatchEngine
             EnterCelestialPlay(owner, card);
             Refill(owner, province);
         }
-        Restrictions.Items.RemoveAll(r => !RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase) && r.Until != RestrictionUntil.WhileInPlay);
+        Restrictions.Items.RemoveAll(r => !RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase, r.PlayerId) && r.Until != RestrictionUntil.WhileInPlay);
         Restrictions.TargetBars.RemoveAll(r => !RestrictionHolds(r.Until, r.TargetCardId, r.UntilTurn, r.UntilPhase) && r.Until != RestrictionUntil.WhileInPlay);
     }
 

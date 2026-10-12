@@ -57,6 +57,7 @@ public sealed partial class MatchEngine
     {
         "steel-on-steel-duel" or "sword-for-hire-create" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" or "insult-answered-duel" or "kudome-exp-duel" or "sanctioned-duel" or "fusako-duel" or WlStratTornAbilities.EyeDuel => true, // Sanctioned Duel (issue #622, IvorySpells.cs): "Destroy the duel's loser"
         Wave734Abilities.HoturiDuel or Wave734Abilities.TsukeDuel => true, // issue #734 (Wave734.cs): "Destroy the duel's loser"
+        Wave835Abilities.FoeDuel => true, // issue #835 (Wave835.cs): The Empire's Foe Exposed, "Destroy the duel's loser"
         Wave827Abilities.KokujinDuel => true, // issue #827 (Wave827.cs): "Destroy the duel's loser" (or, when Kokujin wins, a Personality of his controller's to take control of it instead)
         WlPersTornAbilities.IzaDuel or WlPersTornAbilities.KyoshiroDuel or WlPersTornAbilities.RikuDuel => true, // issue #674 (WlPersTorn.cs): "Destroy the duel's loser"
         Wave740Abilities.MagistrateDuel => true, // issue #740: A Magistrate Falls, "Destroy the duel's loser"

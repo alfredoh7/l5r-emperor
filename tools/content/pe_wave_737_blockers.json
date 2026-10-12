@@ -1,6 +1,1 @@
-{
-  "oracle-l5r-10378": {
-    "note": "Imperial Deployment (Strategy, issue #737): \"Open: Choose your performing Personality: The Empress dispatches him to the Colonies. Negate other players' cards' effects that prevent him assigning. After the next time this turn an attack is declared, straighten his unit.\" Two gaps, the first narrower than first noted. (1) P12's Prevention immunity reads movement locks, which also refuse assigning (MovementLocked and MovementKinds.Assign, MovementLocks.cs; docs/decisions/2026-10-06-p12-immunities.md), so a lock made by another player's card with a known source player is covered. Locks with no source player (Too Close to Home, The Perfect Moment) and P11's stored NoAttack/NoDefend restrictions (no source player) are not, so whether that is enough is a reading. (2) \"After the next time this turn an attack is declared, straighten his unit\": P6's nearest fact is AssignedToAttack, per Personality (AfterFacts.cs), not the declaration of an attack, and there is no one-shot next-time-this-turn watch on a fact; the reading (declaration or first assignment) needs Mendon. \"Dispatches him to the Colonies\" is flavor text with no rule.",
-    "category": "WATCH"
-  }
-}
+{}

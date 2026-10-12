@@ -269,6 +269,7 @@ public sealed partial class MatchEngine
                 SweepSpellCopies(); // issue #838
                 Wave827AfterCommand(); // issue #827 (Wave827.cs): Koan's Jingasa's Spell limit, P'an Ku's straightening choice
                 Wave829AfterCommand(); // issue #829 (Wave829.cs): Benten's Blessing's choice of Personalities
+                Wave835AfterCommand(); // issue #835 (Wave835.cs): the Heavens' Blessing's owed draws, Unbearable Weight's return to a hand
                 RemoveCreatedCardsLeftInPiles();
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
@@ -508,6 +509,7 @@ public sealed partial class MatchEngine
         ApplyWave739EntryEffects(card); // Iweko Seiken (issue #739, Wave739.cs): "will not gain a Clan Alignment".
         ApplyWave737EntryEffects(playerId, card); // Iweko Shibatsu (issue #737, Wave737.cs): "After Shibatsu enters play, gain 3 Honor." and his Clan-alignment block.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
+        ApplyWave835EntryEffects(playerId, card); // Blood of Isawa's Tribe (issue #835, Wave835.cs): "After this Spell attaches, choose an element keyword" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1280,6 +1282,7 @@ public sealed partial class MatchEngine
         _state.UnresolvedBattlefields = Player(1 - command.PlayerId).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
         Emit("attackDeclared", $"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1 - command.PlayerId).Name}'s provinces.", command.PlayerId);
         PromoAttackPhaseCreated(command.PlayerId); // issue #653: Yozo's Inspiration, Diplomacy Talks
+        Wave835AttackDeclared(); // issue #835: Imperial Deployment straightens his unit
         CreateTwoFrontsBattlefields(command.PlayerId); // Two Fronts (issue #492, rulings pass R1): a second battlefield at the marked province.
         SetPhase(Phase.InfantryDeclaration, command.PlayerId);
     }
@@ -1562,6 +1565,8 @@ public sealed partial class MatchEngine
             case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
             // A Moving Battle (issue #741, Wave741.cs): its controller may move one of his opposed attacking Personalities to an adjacent unresolved battlefield.
             case Wave741Abilities.MovingBattle: if (BeginWave741MovingBattle(source)) return; break;
+            // Warded Premises (issue #835, Wave835.cs): mandatory, read now.
+            case Wave835Abilities.WardedNegate: Wave835WardedNegate(source); break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -2161,6 +2166,7 @@ public sealed partial class MatchEngine
     // touched them may skip ceding priority.
     private void NextAction(int playerId, bool stayWithPlayer = false)
     {
+        if (Wave835FoeDuelEnded()) return; // issue #835 (Wave835.cs): the duel The Empire's Foe Exposed opened in the Events Phase is over -- the Events Phase goes on, not an Action Phase action
         if (ActionPhaseJustEnded()) return; // P13 (RuleFlags.cs): the action ended the Action Phase itself, so priority already belongs to the phase that began
         _state.ConsecutivePasses = 0; _state.PriorityPlayerId = stayWithPlayer ? playerId : 1 - playerId; EndAttackerLeadIfCeded(playerId, stayWithPlayer);
         // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.
@@ -3334,6 +3340,7 @@ public sealed partial class MatchEngine
     {
         if (player.FateDeck.Count == 0) { Emit("deckEmpty", $"{player.Name}'s Fate deck is empty; no card drawn.", player.Id); return; }
         if (P2CardIntoHandBlocked(player.Id)) return; // issue #503: The Scorpion Wall is Finished
+        if (Wave835DefersDraw(player)) return; // issue #835: the Heavens' Blessing makes a card an own Strategy draws a 2 Gold payment
         var id = player.FateDeck[0]; player.FateDeck.RemoveAt(0); player.Hand.Add(id);
         Card(id).Zone = Zone.Hand;
         NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5): "an action that put any cards into another player's hand".

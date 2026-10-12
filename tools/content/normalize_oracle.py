@@ -44,6 +44,14 @@ def version_from_keywords(keywords: list[str]) -> tuple[int | None, str]:
     return None, "unspecified"
 
 
+def name_corrections(root: Path | None = None) -> dict[str, str]:
+    """Card id -> the correctly spelled title for the cards whose Oracle title is a misspelling (content/oracle/name-corrections.json; Pierce the Tapestry, issue #835)."""
+    path = (root or Path(__file__).resolve().parents[2]) / "content/oracle/name-corrections.json"
+    if not path.exists():
+        return {}
+    return {item["card_id"]: item["canonical_name"] for item in json.loads(path.read_text(encoding="utf-8"))["corrections"]}
+
+
 def normalize_card(raw: dict, require_membership: bool = True) -> dict:
     if require_membership and EMPEROR_LABEL not in values(raw, "legality"):
         raise ValueError(f"Card {raw.get('cardid')} lacks requested Emperor membership")
@@ -51,7 +59,7 @@ def normalize_card(raw: dict, require_membership: bool = True) -> dict:
     titles = values(raw, "title")
     keywords = values(raw, "keywords")
     experience, notation = version_from_keywords(keywords)
-    display = titles[0] if titles else "Untitled"
+    display = name_corrections().get(f"oracle-l5r-{oracle_id}") or (titles[0] if titles else "Untitled")
     if notation == "experienced":
         display += " - exp" + (str(experience) if experience != 1 else "")
     elif notation == "inexperienced":

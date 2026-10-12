@@ -1,6 +1,1 @@
-{
-  "oracle-l5r-10370": {
-    "note": "Duty Over All Things (Strategy, issue #732): the scan reads \"Battle: Choose your performing discarded Yojimbo: If he would be opposed, bring him into play at the current battlefield, paying 3 less Gold if you control a Courtier or Shugenja.\" The performer of the action is a Yojimbo in the owner's discard pile, and the action recruits that same card into play at the battlefield. The engine has no support for a Dead or discarded Personality as an action's performer (AbilitySourceZoneAllows and the performer lists read cards in play; P21's province-source and zone pieces do not cover a discard-pile performer), and \"if he would be opposed\" asks whether an enemy unit stands at the battlefield the card would enter. Needs a performer-from-discard rule and a recruit of the performer by an action, with a ruling on when \"would be opposed\" is judged.",
-    "category": "ZONE"
-  }
-}
+{}

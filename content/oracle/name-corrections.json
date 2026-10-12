@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "corrections": [
+    {
+      "card_id": "oracle-l5r-10388",
+      "oracle_name": "Pierce the Tapestery",
+      "canonical_name": "Pierce the Tapestry",
+      "source_url": "https://oracleofthevoid.com/#cardid=10388",
+      "reason": "Oracle of the Void misspells the title; the card's own text spells it Pierce the Tapestry. Mendon (2026-10-11, issue #835): spell it correctly in local files and decks and collections, and keep this note to reconcile the two. The raw Oracle snapshots under assets/reference keep Oracle's spelling as evidence.",
+      "reviewed_on": "2026-10-11"
+    }
+  ]
+}

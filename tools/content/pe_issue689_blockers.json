@@ -39,10 +39,6 @@
     "category": "LOCK",
     "note": "Not wired in #689 (draft wiring removed untested): Ring of Water entry waiver plus straightening one or two cards in units, performed from Home, need their own card pass and tests."
   },
-  "oracle-l5r-10522": {
-    "category": "LOCK",
-    "note": "Needs next-controller-turn copy-removal lifecycle and straightening/attack/defend holds; historical reading remains unconfirmed."
-  },
   "oracle-l5r-10624": {
     "category": "LOCK",
     "note": "Needs P6 (after-event records and windows); P7's watch half alone does not wire it."

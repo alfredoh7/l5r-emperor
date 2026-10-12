@@ -521,6 +521,7 @@ public sealed partial class MatchEngine
         switch (abilityId)
         {
             case Wave827Abilities.KokujinDuel: Wave827KokujinOutcome(winnerId, loserIds, challengerPlayerId); break; // issue #827
+            case Wave835Abilities.FoeDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break; // issue #835: The Empire's Foe Exposed, "Destroy the duel's loser"
             case Wave734Abilities.HoturiDuel or Wave734Abilities.TsukeDuel: Wave734DuelOutcome(abilityId, loserIds, challengerPlayerId); break; // issue #734
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;

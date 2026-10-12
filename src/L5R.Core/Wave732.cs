@@ -25,6 +25,7 @@ namespace L5R.Core;
 //   Daigotsu Kikumura        "If you are a Dragon Clan player, Kikumura's Invest is 2." / "Invest 4: Create two 1F Followers and attach them to Kikumura."   w732-kikumura-invest, one ability cost term
 //
 // Not wired, with a blocker note (tools/content/pe_wave_732_blockers.json): Chiyurei's Axe (a performer trait on every Melee Attack: AttackCompareOptions is a static function of the ability id) and
+// Issue #835: Duty Over All Things was wired afterwards in Wave835.cs, on Mendon's rulings of 2026-10-11 (docs/decisions/2026-10-11-twelve-ruled-cards.md); the "not wired" note here is the state when this wave merged.
 // Duty Over All Things (a discarded Yojimbo as the action's performer, recruited by the action: no zone support for a Dead or discarded performer).
 public static class Wave732Abilities
 {

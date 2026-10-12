@@ -156,7 +156,7 @@ internal static class Wave740Tests
         var charm = CardCatalog.Get(Charm);
         Check(charm.AttackDefenseKind == "Both" && charm.AttackDefenseAmount == -2 && charm.AttackDefenseScope == "Wielder", "Fortune's Charm: -2 strength to Ranged and Melee Attacks at its wielder");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w740-", StringComparison.Ordinal)), 11, "eleven w740 abilities");
-        Check(!CardCatalog.Cards.ContainsKey("oracle-l5r-10423"), "The Empire's Foe Exposed is not published");
+        Check(CardCatalog.Cards.ContainsKey("oracle-l5r-10423"), "The Empire's Foe Exposed was wired afterwards (Wave835.cs, issue #835)");
     }
 
     private static GameCommand Advantage(MatchEngine e, int player, CardInstance performer, CardInstance discard) =>

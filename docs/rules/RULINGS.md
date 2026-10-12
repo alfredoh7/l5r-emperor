@@ -576,3 +576,93 @@ Regions with Battle actions, or Reactions that respond to Battle actions, may on
 - **Date:** 2026-10-11
 - **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
 
+### R-067 — The Egg of P'an Ku: the Egg's controller controls the copy, and the copied Personality is held back whoever's it is
+The player who controls the Egg of P'an Ku controls the copy. The copy enters play in the Egg's controller's home and may perform its printed abilities, attack, be assigned, and so on. The target that was copied (the second target) is subject to the bowing, attacking and defending constraints regardless of who it belongs to. Costs and restrictions such as Unique are ignored. A copied Personality with the Sensei trait still discards the controller's other Sensei Personalities: that is an effect of entering play, not an entrance restriction.
+
+- **Cards/primitives:** The Egg of P'an Ku - exp (oracle-l5r-10522); `w835-egg`, `CreatedCardSpec.CopyOfTarget` with `CreatedRemoval.NextTurnBegins`, a straighten hold (`StraightenPhaseEnds`, as Aramasu's Legacy), `RestrictionUntil.OwnersNextTurnBegins`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-068 — Blood of Isawa's Tribe: two choices, a confirmation for the same keyword, no Reaction window and no pass
+The Spell first queries the element keywords on the Shugenja it attached to and the player chooses one of them. The player then chooses which of the five elements replaces it. Choosing the same element asks whether they are sure they want to replace the keyword with the same keyword; they may cancel and go back to the second choice. The selection opens no Reaction window and offers no "pass reaction": the player always travels through the confirm path, even if replacing a keyword with itself changes nothing.
+
+- **Cards/primitives:** Blood of Isawa's Tribe (oracle-l5r-10347); `w835-blood` (a mandatory entry trait), `w835Blood` (the pending decision), `ReplaceElementKeyword`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-069 — A Cleansing Breath: "He centers himself." is flavor text
+The sentence has no rules effect and is ignored. The rest of the card is as printed: other players' cards' effects that prevent him assigning, moving, or performing actions are negated, and a Kensai's unit straightens.
+
+- **Cards/primitives:** A Cleansing Breath (oracle-l5r-10358); `w835-cleansing-breath` (a Prevention immunity for the turn, which also frees a stored "may not attack/defend" another player's action made).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-070 — Duty Over All Things: the Yojimbo is discarded (not dead), enters at the battlefield, and an enemy Personality must be there
+The performer must be discarded (in the discard pile, not dead). The performer enters play at the battlefield where Duty Over All Things is played, and the card may not be played unless an opposing (enemy) Personality is present at the battle when it is played.
+
+- **Cards/primitives:** Duty Over All Things (oracle-l5r-10370); `w835-duty-discount` / `w835-duty-full` (the printed "paying 3 less Gold if you control a Courtier or Shugenja" as two prices of one action), `BringDeadPersonalityIntoPlay`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-071 — Imperial Deployment: assigning only, and a mandatory straightening when an attack is declared
+It negates only the effects that block the Personality from assigning; he may still be barred from moving (assigning is not moving). It also carries a mandatory trigger that straightens his unit if an attack is declared in the turn it is played. That straightening can be stopped only by an effect that prevents the next straightening or says the Personality will not straighten.
+
+- **Cards/primitives:** Imperial Deployment (oracle-l5r-10378); `ImmunityKind.AssignPrevention` (movement locks of kind Assign and a stored NoAttack/NoDefend), `DeploymentWatch` fired by the attack declaration.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-072 — Too Close to Home bars movement, not assignment; The Perfect Moment does not touch Imperial Deployment's target
+Too Close to Home does not bar assignment to battlefields. It bars movement between battlefields, from a player's home to a battle, and from a battle to a player's home. It does not affect Imperial Deployment's negation. The Perfect Moment restricts only the Personalities of the player who played it, so it is not "another player's cards' effect" on the target of Imperial Deployment.
+
+- **Cards/primitives:** Too Close to Home (the global movement lock `P4GlobalMovementLock`: Home and ToBattlefield kinds only), The Perfect Moment (`PerfectMomentLocks`: its own player's Personalities only). The existing behaviour already followed this reading; Wave835Tests proves it.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-073 — Merchant Patronage: a Reaction in the Honor-change window
+After a player performs an action of a Holding that causes an Honor gain or loss, Merchant Patronage may be played to redirect the gain or loss to another player. If the player who played it controls one or more Courtiers, they may bow one to increase the gain or loss by 1 in addition to the redirect. The window may sit anywhere in the existing flow as long as it occurs before the gain or loss is realized.
+
+- **Cards/primitives:** Merchant Patronage (oracle-l5r-10720); `w835-patronage` / `w835-patronage-bow` in the existing before-Honor-change window (`HonorChangeReactions.Trigger`, EmperorRulingR4Honor.cs), `PatronageMark` applied by an `EngineHooks.HonorChange` registrant.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-074 — Pierce the Tapestry: the name is Tapestry, up to seven copies, a per-battle count and an additional action
+Oracle of the Void misspells the card "Pierce the Tapestery". Spell it correctly locally and add a note reconciling it with Oracle's spelling. A deck may hold up to seven copies. A counter of the Pierce the Tapestry played at a battlefield is kept so the destruction applies. Its additional actions may be negated by cards that negate additional actions.
+
+- **Cards/primitives:** Pierce the Tapestry (oracle-l5r-10388); `w835-pierce`, `DeckCopyLimit` 7, `AddPeriodCount` (Period.Battle, per player), `GrantAdditionalAction` scoped to the ability; `content/oracle/name-aliases.json` maps Oracle's spelling to this card.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-075 — The Heavens' Blessing: each card an own Strategy draws costs 2 Gold on its own
+It looks only at card draw arising from the effects of the player's own Strategy during an Action Phase and adds a 2 Gold cost to it. Draws by other cards (Traveling Peddler) are not affected. The Courtesy of the Crane costs 2 Gold to draw each card it grants to the player who plays it. Each card is its own instance, so several cards are several payments, each satisfied individually: a Gold source that produces 4 cannot be split to pay two costs.
+
+- **Cards/primitives:** The Heavens' Blessing (oracle-l5r-10558); `w835-heavens-draw`, `w835-heavens-honor` (P14 no-gain modifier, Action Phases, this turn), the `w835HeavensPay` window and `w835-heavens-pay` (a player ability).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-076 — Unbearable Weight: a card drawn into a hand is controlled by the player who holds it
+A Strategy that goes into a player's hand is controlled by them and may be played as though they owned it; when it leaves play and is discarded it goes to its owner's discard pile as usual. Discarding the top card of a Fate deck reuses the existing top-card discard (`DiscardTopOfFateDeck`) rather than a new primitive.
+
+- **Cards/primitives:** Unbearable Weight (oracle-l5r-10550); `w835-unbearable` (a Fate-deck slot and an optional target), `WeightReturn`, `OriginalOwnerId`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-077 — Warded Premises negates only the bonuses actions give
+Permanent bonuses, bonuses from attachments, and bonuses from tokens are not negated. Only bonuses from actions are negated. Bonuses from cards or tokens attached by actions are not negated.
+
+- **Cards/primitives:** Warded Premises (oracle-l5r-10404); `w835-warded-negate` (a before-resolution trait removing positive, non-permanent Force Modifiers of action abilities from cards at its battlefield), `w835-warded-play`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-078 — Revelations: the owner shows, the other player discards, the owner arranges, the Province refills face up
+Revelations shows the top five cards of the owner's Dynasty deck. After a discard of the opponent's choice, the owner decides the order of the remaining four, and then the Event's final step replaces its empty Province face up. A viewing pane lets the opponent select the card to discard; the owner then reorders the rest.
+
+- **Cards/primitives:** Revelations (oracle-l5r-10262); a P5 reveal Event, `w835-revelations-shown` (the shown-choice panel), `w835-revelations-order` (the look panel), `FaceUpRefill`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-079 — The Empire's Foe Exposed: a duel opened while the Events Phase resolves
+The Event opens a duel during the event resolution stage of the Events Phase. It does not resolve if both players do not have a Unique Personality in play; it is discarded without effect. A player with exactly one Unique Personality is not asked. If both have exactly one, they are placed into the duel at once. Otherwise each player who has a choice gets a selection panel listing only the Unique Personalities in play they control, selectable by clicking a card or from the list, with the matching cards highlighted.
+
+- **Cards/primitives:** The Empire's Foe Exposed (oracle-l5r-10423); `w835-foe` (an Event), `w835Foe` (the selection), `w835-foe-duel` (`IssueChallenge`; the loser is destroyed).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).

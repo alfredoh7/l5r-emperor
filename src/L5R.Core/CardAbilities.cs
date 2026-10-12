@@ -5495,6 +5495,8 @@ public sealed partial class MatchEngine
                 Wave816Abilities.AnnounceAnyAction => Wave816AnnounceWindowOpen(command),
                 // The Governor's Estate (issue #821, Wave821.cs): the window after its owner's Dynasty Phase begins.
                 Wave821Abilities.DynastyBegins => Wave821DynastyWindowOpen(command),
+                // The Heavens' Blessing (issue #835, Wave835.cs): the window of the cards its player owes Gold for.
+                Wave835Abilities.HeavensTrigger => Wave835WindowOpen(command),
                 // P6: a Reaction that names a fact, in the window that fact opened.
                 { } factTrigger when FactTriggers.IsFact(factTrigger) => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var factSource)
                     && _state.LastResolvedAction is { } factFacts && FactApplies(factSource, id, command.PlayerId, factFacts) == true,
@@ -6550,6 +6552,7 @@ public sealed partial class MatchEngine
                 else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
                     Require(WlItemsMiscOutOfPlayTargetAllows(player, target), "Choose a Battle Strategy from your discard pile.");
                 else if (Wave829IsOutOfPlayTarget(ability.Target)) Require(Wave829CrabCandidate(player.Id, target), "Choose a Crab Clan Personality of yours, face-up in a province or in your discard pile (not dead).");
+                else if (IsWave835OutOfPlayTarget(ability.Target)) Require(Wave835YojimboCandidate(player.Id, target), "Choose a Yojimbo Personality of yours in your discard pile (not dead)."); // issue #835: Duty Over All Things
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -11130,6 +11133,7 @@ public sealed partial class MatchEngine
         // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): the window as its player ends his Dynasty Phase -- only the Reactions that name it are on offer, and only there.
         var inTwistOfFateWindow = _state.PendingChoice?.Type == "twistOfFateReaction";
         var inDynastyBeginWindow = _state.PendingChoice?.Type == Wave821Abilities.DynastyWindow; // The Governor's Estate (issue #821): only its Reaction, and only there
+        var inHeavensWindow = _state.PendingChoice?.Type == Wave835Abilities.HeavensWindow; // The Heavens' Blessing (issue #835): only the payment for an owed card, and only there
         var inBeforeEventWindow = _state.PendingChoice?.Type == "p3BeforeEventReaction";
         var inP3EntryWindow = _state.PendingChoice?.Type == "p3EntryReaction"; // Easy Persuasion (issue #503): only the Reactions after a Personality entered play, and only there // Forging Destiny (issue #503): only the Reactions before an Event resolves, and only there
         foreach (var (source, id) in sources)
@@ -11146,6 +11150,7 @@ public sealed partial class MatchEngine
             if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             if (inTwistOfFateWindow != IsTwistOfFateReaction(ability)) continue;
             if (inDynastyBeginWindow != (ability.Timing == "Reaction" && ability.Trigger == Wave821Abilities.DynastyBegins)) continue;
+            if (inHeavensWindow != (ability.Timing == "Reaction" && ability.Trigger == Wave835Abilities.HeavensTrigger)) continue;
             if (inBeforeEventWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3Abilities.BeforeEventTrigger)) continue;
             if (inP3EntryWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3EntryAbilities.EntryTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
@@ -11154,7 +11159,7 @@ public sealed partial class MatchEngine
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inDynastyBeginWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inDynastyBeginWindow || inHeavensWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             var mechAAsBattle = MechAActsAsBattle(playerId, ability, source); // Beyond the Line (issue #501): a Limited or Open Recon ability used as a Battle action
             if (!phaseOk && !mechAAsBattle) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !TurnRuleLimitedAsOpen(playerId, source?.Id) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
@@ -11390,7 +11395,7 @@ public sealed partial class MatchEngine
                                         // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                         EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                         "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                        _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? inPlay
+                                        _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? Wave835Candidates(ability.Target, playerId) /* issue #835 */ ?? inPlay
                                     }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                        // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                        // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
