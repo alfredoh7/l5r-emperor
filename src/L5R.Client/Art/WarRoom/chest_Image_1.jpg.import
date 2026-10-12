@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byt5y6jnnvwws"
-path.bptc="res://.godot/imported/chest_Image_1.jpg-f8d6e430d0b4236cc1ec0d56ca3894b1.bptc.ctex"
-path.astc="res://.godot/imported/chest_Image_1.jpg-f8d6e430d0b4236cc1ec0d56ca3894b1.astc.ctex"
+path="res://.godot/imported/chest_Image_1.jpg-f8d6e430d0b4236cc1ec0d56ca3894b1.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "a0f116ef9795d9f4a52365538bc950aa"
@@ -16,12 +14,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/chest_Image_1.jpg"
-dest_files=["res://.godot/imported/chest_Image_1.jpg-f8d6e430d0b4236cc1ec0d56ca3894b1.bptc.ctex", "res://.godot/imported/chest_Image_1.jpg-f8d6e430d0b4236cc1ec0d56ca3894b1.astc.ctex"]
+dest_files=["res://.godot/imported/chest_Image_1.jpg-f8d6e430d0b4236cc1ec0d56ca3894b1.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

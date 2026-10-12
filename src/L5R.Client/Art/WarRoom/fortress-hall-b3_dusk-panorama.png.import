@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5fhjneapske4"
-path.bptc="res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.bptc.ctex"
-path.astc="res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.astc.ctex"
+path="res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "1804ad1baf6feb6222ed9316e42c7265"
@@ -16,12 +14,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/fortress-hall-b3_dusk-panorama.png"
-dest_files=["res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.bptc.ctex", "res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.astc.ctex"]
+dest_files=["res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

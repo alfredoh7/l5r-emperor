@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgawfpnd05asw"
-path.bptc="res://.godot/imported/column-timber-m7_column-timber-m7_1.jpg-7ed48e16540681471e1afce81428998b.bptc.ctex"
-path.astc="res://.godot/imported/column-timber-m7_column-timber-m7_1.jpg-7ed48e16540681471e1afce81428998b.astc.ctex"
+path="res://.godot/imported/column-timber-m7_column-timber-m7_1.jpg-7ed48e16540681471e1afce81428998b.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "b5d0aff6e56c83c4ff08d452c588bb83"
@@ -16,12 +14,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/column-timber-m7_column-timber-m7_1.jpg"
-dest_files=["res://.godot/imported/column-timber-m7_column-timber-m7_1.jpg-7ed48e16540681471e1afce81428998b.bptc.ctex", "res://.godot/imported/column-timber-m7_column-timber-m7_1.jpg-7ed48e16540681471e1afce81428998b.astc.ctex"]
+dest_files=["res://.godot/imported/column-timber-m7_column-timber-m7_1.jpg-7ed48e16540681471e1afce81428998b.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
