@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkt7kqya53n4n"
 path.s3tc="res://.godot/imported/war-room-m1_lacquer-grain.png-5416032420f8221d46700d6056216560.s3tc.ctex"
-path.etc2="res://.godot/imported/war-room-m1_lacquer-grain.png-5416032420f8221d46700d6056216560.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/war-room-m1_lacquer-grain.png"
-dest_files=["res://.godot/imported/war-room-m1_lacquer-grain.png-5416032420f8221d46700d6056216560.s3tc.ctex", "res://.godot/imported/war-room-m1_lacquer-grain.png-5416032420f8221d46700d6056216560.etc2.ctex"]
+dest_files=["res://.godot/imported/war-room-m1_lacquer-grain.png-5416032420f8221d46700d6056216560.s3tc.ctex"]
 
 [params]
 

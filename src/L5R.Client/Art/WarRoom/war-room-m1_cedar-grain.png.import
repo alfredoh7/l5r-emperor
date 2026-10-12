@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://dflwj3xjo6aw8"
 path.s3tc="res://.godot/imported/war-room-m1_cedar-grain.png-46d600e7e914ccd65e423248cc04c008.s3tc.ctex"
-path.etc2="res://.godot/imported/war-room-m1_cedar-grain.png-46d600e7e914ccd65e423248cc04c008.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/war-room-m1_cedar-grain.png"
-dest_files=["res://.godot/imported/war-room-m1_cedar-grain.png-46d600e7e914ccd65e423248cc04c008.s3tc.ctex", "res://.godot/imported/war-room-m1_cedar-grain.png-46d600e7e914ccd65e423248cc04c008.etc2.ctex"]
+dest_files=["res://.godot/imported/war-room-m1_cedar-grain.png-46d600e7e914ccd65e423248cc04c008.s3tc.ctex"]
 
 [params]
 

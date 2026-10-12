@@ -22,7 +22,7 @@ project/assembly_name="L5R.Client"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
-textures/vram_compression/import_etc2_astc=true
+textures/vram_compression/import_etc2_astc=false
 textures/vram_compression/import_s3tc_bptc=true
 environment/defaults/default_clear_color=Color(0.045,0.065,0.059,1)
 

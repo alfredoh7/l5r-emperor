@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bobosb4ri23ok"
 path.bptc="res://.godot/imported/chest_Image_2.jpg-d6eabbbc6de3982aec57c3a12aa4afb2.bptc.ctex"
-path.astc="res://.godot/imported/chest_Image_2.jpg-d6eabbbc6de3982aec57c3a12aa4afb2.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/chest_Image_2.jpg"
-dest_files=["res://.godot/imported/chest_Image_2.jpg-d6eabbbc6de3982aec57c3a12aa4afb2.bptc.ctex", "res://.godot/imported/chest_Image_2.jpg-d6eabbbc6de3982aec57c3a12aa4afb2.astc.ctex"]
+dest_files=["res://.godot/imported/chest_Image_2.jpg-d6eabbbc6de3982aec57c3a12aa4afb2.bptc.ctex"]
 
 [params]
 

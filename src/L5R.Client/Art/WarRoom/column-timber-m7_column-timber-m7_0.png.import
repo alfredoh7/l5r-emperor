@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://domepogm587vi"
 path.bptc="res://.godot/imported/column-timber-m7_column-timber-m7_0.png-5d236465d4f3602d00147fd77e2df9cc.bptc.ctex"
-path.astc="res://.godot/imported/column-timber-m7_column-timber-m7_0.png-5d236465d4f3602d00147fd77e2df9cc.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/column-timber-m7_column-timber-m7_0.png"
-dest_files=["res://.godot/imported/column-timber-m7_column-timber-m7_0.png-5d236465d4f3602d00147fd77e2df9cc.bptc.ctex", "res://.godot/imported/column-timber-m7_column-timber-m7_0.png-5d236465d4f3602d00147fd77e2df9cc.astc.ctex"]
+dest_files=["res://.godot/imported/column-timber-m7_column-timber-m7_0.png-5d236465d4f3602d00147fd77e2df9cc.bptc.ctex"]
 
 [params]
 

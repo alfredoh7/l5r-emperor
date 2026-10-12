@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2df37wcahev5"
 path.bptc="res://.godot/imported/table-lantern_Image_2.jpg-a90ae0bec7125b1f6d5b1e13c1557368.bptc.ctex"
-path.astc="res://.godot/imported/table-lantern_Image_2.jpg-a90ae0bec7125b1f6d5b1e13c1557368.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/table-lantern_Image_2.jpg"
-dest_files=["res://.godot/imported/table-lantern_Image_2.jpg-a90ae0bec7125b1f6d5b1e13c1557368.bptc.ctex", "res://.godot/imported/table-lantern_Image_2.jpg-a90ae0bec7125b1f6d5b1e13c1557368.astc.ctex"]
+dest_files=["res://.godot/imported/table-lantern_Image_2.jpg-a90ae0bec7125b1f6d5b1e13c1557368.bptc.ctex"]
 
 [params]
 

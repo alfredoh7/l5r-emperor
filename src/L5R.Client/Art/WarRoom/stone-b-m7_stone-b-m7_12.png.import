@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bjwapgdqe8b6n"
 path.bptc="res://.godot/imported/stone-b-m7_stone-b-m7_12.png-320cef4484fb50fa5753fda368ac36f9.bptc.ctex"
-path.astc="res://.godot/imported/stone-b-m7_stone-b-m7_12.png-320cef4484fb50fa5753fda368ac36f9.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/stone-b-m7_stone-b-m7_12.png"
-dest_files=["res://.godot/imported/stone-b-m7_stone-b-m7_12.png-320cef4484fb50fa5753fda368ac36f9.bptc.ctex", "res://.godot/imported/stone-b-m7_stone-b-m7_12.png-320cef4484fb50fa5753fda368ac36f9.astc.ctex"]
+dest_files=["res://.godot/imported/stone-b-m7_stone-b-m7_12.png-320cef4484fb50fa5753fda368ac36f9.bptc.ctex"]
 
 [params]
 

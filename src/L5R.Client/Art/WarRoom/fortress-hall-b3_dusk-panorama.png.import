@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5fhjneapske4"
 path.bptc="res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.bptc.ctex"
-path.astc="res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/fortress-hall-b3_dusk-panorama.png"
-dest_files=["res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.bptc.ctex", "res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.astc.ctex"]
+dest_files=["res://.godot/imported/fortress-hall-b3_dusk-panorama.png-9fe5f194ffb93e2050f1336c568bbe28.bptc.ctex"]
 
 [params]
 

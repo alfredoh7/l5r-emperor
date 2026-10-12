@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://5cnkerkt2nd4"
 path.bptc="res://.godot/imported/fortress-hall-b3_floor-c-m7_0.png-4889e9eb619a6fd6b1937ee74cf20b4a.bptc.ctex"
-path.astc="res://.godot/imported/fortress-hall-b3_floor-c-m7_0.png-4889e9eb619a6fd6b1937ee74cf20b4a.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/fortress-hall-b3_floor-c-m7_0.png"
-dest_files=["res://.godot/imported/fortress-hall-b3_floor-c-m7_0.png-4889e9eb619a6fd6b1937ee74cf20b4a.bptc.ctex", "res://.godot/imported/fortress-hall-b3_floor-c-m7_0.png-4889e9eb619a6fd6b1937ee74cf20b4a.astc.ctex"]
+dest_files=["res://.godot/imported/fortress-hall-b3_floor-c-m7_0.png-4889e9eb619a6fd6b1937ee74cf20b4a.bptc.ctex"]
 
 [params]
 

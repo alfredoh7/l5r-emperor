@@ -4,9 +4,8 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cj12o0kjf0qgj"
 path.bptc="res://.godot/imported/aged-column_Image_2.jpg-c1fefacf861694e46d7b89a2873f1a65.bptc.ctex"
-path.astc="res://.godot/imported/aged-column_Image_2.jpg-c1fefacf861694e46d7b89a2873f1a65.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -16,7 +15,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/aged-column_Image_2.jpg"
-dest_files=["res://.godot/imported/aged-column_Image_2.jpg-c1fefacf861694e46d7b89a2873f1a65.bptc.ctex", "res://.godot/imported/aged-column_Image_2.jpg-c1fefacf861694e46d7b89a2873f1a65.astc.ctex"]
+dest_files=["res://.godot/imported/aged-column_Image_2.jpg-c1fefacf861694e46d7b89a2873f1a65.bptc.ctex"]
 
 [params]
 

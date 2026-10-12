@@ -4,16 +4,15 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cw6khu3ha7e3"
 path.bptc="res://.godot/imported/floor-roughness-m4.jpg-953e5a3916705c02ea1bede78a753669.bptc.ctex"
-path.astc="res://.godot/imported/floor-roughness-m4.jpg-953e5a3916705c02ea1bede78a753669.astc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Art/WarRoom/floor-roughness-m4.jpg"
-dest_files=["res://.godot/imported/floor-roughness-m4.jpg-953e5a3916705c02ea1bede78a753669.bptc.ctex", "res://.godot/imported/floor-roughness-m4.jpg-953e5a3916705c02ea1bede78a753669.astc.ctex"]
+dest_files=["res://.godot/imported/floor-roughness-m4.jpg-953e5a3916705c02ea1bede78a753669.bptc.ctex"]
 
 [params]
 
