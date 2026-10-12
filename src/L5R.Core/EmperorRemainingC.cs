@@ -599,6 +599,7 @@ public sealed partial class MatchEngine
         _state.ActivePlayerId = player.Id;
         _state.UnresolvedBattlefields = Player(1 - player.Id).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
         Emit("attackDeclared", $"{player.Name} declared an additional Attack Phase ({Definition(source).Name}): a battlefield exists at each of {Player(1 - player.Id).Name}'s provinces.", player.Id, source.Id);
+        Wave835AttackDeclared(); // issue #835: Imperial Deployment
         SetPhase(Phase.InfantryDeclaration, player.Id);
     }
 

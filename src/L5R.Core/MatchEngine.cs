@@ -1278,6 +1278,7 @@ public sealed partial class MatchEngine
         _state.UnresolvedBattlefields = Player(1 - command.PlayerId).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
         Emit("attackDeclared", $"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1 - command.PlayerId).Name}'s provinces.", command.PlayerId);
         PromoAttackPhaseCreated(command.PlayerId); // issue #653: Yozo's Inspiration, Diplomacy Talks
+        Wave835AttackDeclared(); // issue #835: Imperial Deployment straightens his unit
         CreateTwoFrontsBattlefields(command.PlayerId); // Two Fronts (issue #492, rulings pass R1): a second battlefield at the marked province.
         SetPhase(Phase.InfantryDeclaration, command.PlayerId);
     }
@@ -1560,6 +1561,8 @@ public sealed partial class MatchEngine
             case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
             // A Moving Battle (issue #741, Wave741.cs): its controller may move one of his opposed attacking Personalities to an adjacent unresolved battlefield.
             case Wave741Abilities.MovingBattle: if (BeginWave741MovingBattle(source)) return; break;
+            // Warded Premises (issue #835, Wave835.cs): mandatory, read now.
+            case Wave835Abilities.WardedNegate: Wave835WardedNegate(source); break;
         }
         FinishBeforeBattleEffect(pending);
     }

@@ -384,6 +384,7 @@ public sealed partial class MatchEngine
         _state.ActivePlayerId = player.Id; // "the player who declared the attack phase is the attacker" (Mendon)
         _state.UnresolvedBattlefields = Player(1 - player.Id).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
         Emit("attackDeclared", $"{player.Name} created an additional Attack Phase ({Definition(source).Name}): a battlefield exists at each of {Player(1 - player.Id).Name}'s provinces. The Action Phase waits until it ends.", player.Id, source.Id);
+        Wave835AttackDeclared(); // issue #835: Imperial Deployment
         // The Action Phase pauses, it does not end: nothing that ends or begins a phase fires (SetPhase is bypassed), as for a battle fought inside the Action Phase (AsideBattle).
         _state.Phase = Phase.InfantryDeclaration; _state.PriorityPlayerId = player.Id; _state.ConsecutivePasses = 0; MechA.LastPasserId = null;
         Emit("phaseChanged", $"Phase: {Phase.InfantryDeclaration}.");

@@ -6550,6 +6550,7 @@ public sealed partial class MatchEngine
                 else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
                     Require(WlItemsMiscOutOfPlayTargetAllows(player, target), "Choose a Battle Strategy from your discard pile.");
                 else if (Wave829IsOutOfPlayTarget(ability.Target)) Require(Wave829CrabCandidate(player.Id, target), "Choose a Crab Clan Personality of yours, face-up in a province or in your discard pile (not dead).");
+                else if (IsWave835OutOfPlayTarget(ability.Target)) Require(Wave835YojimboCandidate(player.Id, target), "Choose a Yojimbo Personality of yours in your discard pile (not dead)."); // issue #835: Duty Over All Things
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -11386,7 +11387,7 @@ public sealed partial class MatchEngine
                                         // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
                                         EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
                                         "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                        _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? inPlay
+                                        _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? Wave835Candidates(ability.Target, playerId) /* issue #835 */ ?? inPlay
                                     }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
                                        // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                                        // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
