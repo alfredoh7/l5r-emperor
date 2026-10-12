@@ -48,7 +48,8 @@
       ],
       "Focus": 4,
       "Abilities": [
-        "courtesy-of-the-crane-focus"
+        "courtesy-of-the-crane-focus",
+        "courtesy-of-the-crane-open"
       ],
       "Effect": "none"
     }
