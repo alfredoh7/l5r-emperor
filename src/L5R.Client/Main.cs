@@ -63,6 +63,7 @@ public partial class Main : Node
     {
         GetWindow().MinSize = new Vector2I(1120, 700);
         PreloadedDecks.Seed(new DeckFileStore(ProjectSettings.GlobalizePath("user://decks"))); // the shipped decks are in My Decks from the first launch (issue #810)
+        GetTree().TreeChanged += () => _tooltipsDirty = true;
         _session.Changed += () =>
         {
             // Capture every permitted snapshot, even when several packets arrive within one rendered frame.
@@ -81,6 +82,7 @@ public partial class Main : Node
         {
             if (arg.StartsWith("--capture=")) _capturePath = arg[10..];
             if (arg.StartsWith("--capture-mode=")) _captureMode = arg[15..];
+            if (arg.StartsWith("--perf=")) _perfScenario = arg[7..];
             if (arg.StartsWith("--profile=") && arg[10..].Length is > 0 and <= 32 && arg[10..].All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) _profile = arg[10..];
         }
         GetWindow().Mode = _captureMode.Contains("fullscreen", StringComparison.Ordinal) ? Window.ModeEnum.Fullscreen : Window.ModeEnum.Windowed;
@@ -102,6 +104,7 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if (_perfScenario is not null) { StartPerf(_perfScenario); return; }
         if (OS.GetCmdlineUserArgs().Contains("--gameplay-controls-review") || _captureMode is "gameplay-controls-review" or "gameplay-controls-choices-review" or "gameplay-controls-optional-review")
         {
             var startupCapture = _capturePath; _capturePath = null;
@@ -140,6 +143,7 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
+        if (_perfScenario is not null) ProcessPerf(delta);
         if (_transitionReview) { try { ProcessTransitionReview(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (MatchDuelOpen) { ProcessMatchDuel(delta); ProcessMatchDuelCapture(delta); return; }

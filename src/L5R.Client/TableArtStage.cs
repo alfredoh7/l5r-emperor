@@ -240,8 +240,8 @@ public partial class TableArtStage : Node3D
     {
         foreach (var material in _paintedMaterials)
         {
-            material.SetShaderParameter("candle_phase", time);
-            material.SetShaderParameter("candle_motion", animate ? 1 : 0);
+            material.SetShaderParameter(ShaderParameters.CandlePhase, time);
+            material.SetShaderParameter(ShaderParameters.CandleMotion, animate ? 1 : 0);
         }
         _warRoom?.PresentLight(time, animate);
         CardPaper.SetLight(time, animate, tableLamps: _warRoom is null);
