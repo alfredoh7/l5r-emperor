@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import War Room 3D textures as BC7 (BPTC only; ASTC import disabled project-wide). Hall A/B vs lossless: 2.9% pixels differ, max 73, confined to vista and screen art.",
+  "validation": "Local reimport 11m38s wall (47 CPU-min) on M5; CI import time under test in this PR.",
+  "remaining": "Decision pending on CI import time; first-time import cost.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/879",
+  "branch": "claude/879-bc7-no-astc",
+  "updated": "2026-10-12T20:39:05.561246+00:00"
+}
