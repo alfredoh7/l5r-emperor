@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Client perf phase 3: batched pile drawing (968 to 277 table draw calls), import size caps on small-prop/stone/cloth textures (table texture memory 1042 to 592 MB, footprint 2.36 GB to about 1.47 GB), perf harness draw/texture breakdown. BC7 dropped (import stalls CI).",
+  "validation": "check.sh --skip-client passed; native board-ui, interactions, battle-presentation, main-menu, six-phase-track pass; perspective-table passed on rerun (one focus flake); ink-mat and province-ui fail identically on pre-#876 code. Pile regions under 1% of pixels differ by more than 8; hall shots differ by at most 8 in a few pixels.",
+  "remaining": "Not tested on old GPUs; remaining 2048 maps (columns, dais, floors) untouched; hand/province card draws (about 100) untouched.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/879",
+  "branch": "claude/879-draw-calls",
+  "updated": "2026-10-12T22:12:36.305263+00:00"
+}
