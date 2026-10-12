@@ -31,7 +31,7 @@ public partial class Main
     private void ProcessPerfShot()
     {
         // The auto-fitted camera settles to slightly different values from run to run; pin it so shots compare pixel for pixel.
-        if (_perfClock > 1 && _perfClock < 10) { _cameraGlide = false; _cameraFitted = false; _cameraCenter = new Vector2(974.4286f, 524); _cameraZoom = .4693618f; ApplyTableCamera(); }
+        if (_perfClock > 1 && _perfClock < 10) { _cameraGlide = false; _cameraFitted = false; _cameraCenter = new Vector2(974.4286f, 524); _cameraZoom = float.TryParse(OS.GetEnvironment("PERF_ZOOM"), System.Globalization.CultureInfo.InvariantCulture, out var zoom) ? zoom : .4693618f; ApplyTableCamera(); }
         if (_perfClock > 1 && _root.Visible) { _table.ReducedMotion = true; if (!OS.GetCmdlineUserArgs().Contains("--perf-full")) _root.Hide(); }
         if (_perfClock < 10 || _perfShotDone) return;
         _perfShotDone = true;
