@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5vs4xxulivns"
-path="res://.godot/imported/stone-a-m7_stone-a-m7_12.png-098400e506e68d4d9d373b0adbc51141.ctex"
+path.bptc="res://.godot/imported/stone-a-m7_stone-a-m7_12.png-098400e506e68d4d9d373b0adbc51141.bptc.ctex"
+path.astc="res://.godot/imported/stone-a-m7_stone-a-m7_12.png-098400e506e68d4d9d373b0adbc51141.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c5fc965007ab719bab8a103adc3e31b3"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/stone-a-m7_stone-a-m7_12.png"
-dest_files=["res://.godot/imported/stone-a-m7_stone-a-m7_12.png-098400e506e68d4d9d373b0adbc51141.ctex"]
+dest_files=["res://.godot/imported/stone-a-m7_stone-a-m7_12.png-098400e506e68d4d9d373b0adbc51141.bptc.ctex", "res://.godot/imported/stone-a-m7_stone-a-m7_12.png-098400e506e68d4d9d373b0adbc51141.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

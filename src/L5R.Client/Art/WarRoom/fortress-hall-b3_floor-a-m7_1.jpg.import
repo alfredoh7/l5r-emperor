@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbuhi1k0e262o"
-path="res://.godot/imported/fortress-hall-b3_floor-a-m7_1.jpg-eb63feff57827d5ed01dc6cb139c83d2.ctex"
+path.bptc="res://.godot/imported/fortress-hall-b3_floor-a-m7_1.jpg-eb63feff57827d5ed01dc6cb139c83d2.bptc.ctex"
+path.astc="res://.godot/imported/fortress-hall-b3_floor-a-m7_1.jpg-eb63feff57827d5ed01dc6cb139c83d2.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "76059a8b47ee4c82d292110b39c684e2"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/fortress-hall-b3_floor-a-m7_1.jpg"
-dest_files=["res://.godot/imported/fortress-hall-b3_floor-a-m7_1.jpg-eb63feff57827d5ed01dc6cb139c83d2.ctex"]
+dest_files=["res://.godot/imported/fortress-hall-b3_floor-a-m7_1.jpg-eb63feff57827d5ed01dc6cb139c83d2.bptc.ctex", "res://.godot/imported/fortress-hall-b3_floor-a-m7_1.jpg-eb63feff57827d5ed01dc6cb139c83d2.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
