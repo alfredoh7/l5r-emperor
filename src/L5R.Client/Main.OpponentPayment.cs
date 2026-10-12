@@ -83,7 +83,7 @@ public partial class Main
         row.AddThemeConstantOverride("separation", 6);
         row.AddChild(new TextureRect
         {
-            Texture = GD.Load<Texture2D>("res://Art/Payments/plain-gold-coin.png"),
+            Texture = GD.Load<Texture2D>("res://Art/Stronghold/stronghold-coin-brass.png"),
             CustomMinimumSize = new(size + 3, size + 3),
             ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
             StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,

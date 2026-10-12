@@ -1,0 +1,12 @@
+{
+  "province-strength-frame.png": {
+    "source": "src/L5R.Client/Content/Published/oracle-l5r-2388.jpg (Eternal Victory Dojo stronghold face), the Province Strength box at pixels 588,159 to 701,263",
+    "method": "Cropped from the card face; the area outside the box made transparent, the side rollers lightened 5%, the printed numeral erased. The numeral is drawn live by ProvinceModifierMarker.",
+    "approval": "Mendon, #868"
+  },
+  "stronghold-coin-brass.png": {
+    "source": "src/L5R.Client/Content/Published/oracle-l5r-4059.jpg (Journey's End Keep stronghold face), the Gold Production coin at pixels 590,286 to 702,396",
+    "method": "Cropped from the card face, area outside the rim made transparent, printed 5 erased, then gradient-mapped (same shading and relief) to the brass ramp sampled from the Family Honor fan in Art/ClanPlacard/stats.png. Numerals are drawn live. Used by the available-Gold icon, the gold flow meter, the opponent payment panel and the Dark Experiments marker.",
+    "approval": "Mendon, #882 (preferred over the generated Art/Payments/plain-gold-coin.png, now unused)"
+  }
+}

@@ -10,7 +10,7 @@ namespace L5R.Client;
 public sealed partial class GoldPaymentMeter : Control
 {
     private const int Coin = 56, Gap = 44;
-    private static readonly Texture2D CoinTexture = GD.Load<Texture2D>("res://Art/Payments/plain-gold-coin.png");
+    private static readonly Texture2D CoinTexture = GD.Load<Texture2D>("res://Art/Stronghold/stronghold-coin-brass.png");
     private int _paid; private int? _cost;
 
     public GoldPaymentMeter()

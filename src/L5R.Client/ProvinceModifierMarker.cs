@@ -8,8 +8,8 @@ namespace L5R.Client;
 public sealed partial class ProvinceModifierMarker : Control
 {
     public const float Side = 52, Gap = 8;
-    private static readonly Texture2D CoinTexture = GD.Load<Texture2D>("res://Art/Payments/plain-gold-coin.png");
-    private static readonly Texture2D FrameTexture = GD.Load<Texture2D>("res://Art/ProvinceStrength/province-strength-frame.png");
+    private static readonly Texture2D CoinTexture = GD.Load<Texture2D>("res://Art/Stronghold/stronghold-coin-brass.png");
+    private static readonly Texture2D FrameTexture = GD.Load<Texture2D>("res://Art/Stronghold/province-strength-frame.png");
     private const float FrameAspect = 113f / 104f;
     private readonly int _production, _strength;
 
