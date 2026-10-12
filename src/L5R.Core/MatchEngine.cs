@@ -199,7 +199,7 @@ public sealed partial class MatchEngine
     {
         var turnAtStart = _state.TurnNumber;
         var result = ExecuteOne(command);
-        if (result.Accepted) { SweepFortifications(); /* P15 (FortificationHoldings.cs) */ SweepZoneHistory(turnAtStart); SweepFactsAfterCommand(); } // P6 (AfterFacts.cs): facts only a comparison sees, and the drain when nothing is open // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
+        if (result.Accepted) foreach (var sweep in EngineHooks.SweepsAfterAccepted.Items) sweep(this, turnAtStart);
         return result.Accepted ? RunPassAllBattles(result) : result; // "Pass all battles" (issue #628, PassAllBattles.cs)
     }
 
@@ -208,7 +208,6 @@ public sealed partial class MatchEngine
         if (command.PlayerId is < 0 or > 1) return Reject("Unknown player.");
         if (command.ExpectedVersion != _state.Version) return Reject("The board has changed. Refresh before acting.");
         if (_state.WinnerId is not null) return Reject("The match has finished.");
-        SweepSpellCopies(); // issue #838: a copy owed to a card that left play before this command
         var original = _state;
         // Ten Thousand Temples (issue #492, group F): the answer to an Honor loss decision replays the command that reached it, from the state it started in, with the decisions made so far.
         var execute = command; MatchState? cleanBase = null;
@@ -232,6 +231,7 @@ public sealed partial class MatchEngine
             execute = decision.Command;
         }
         else _state = Copy(original);
+        RunSweeps(EngineHooks.SweepsBeforeApply); // on the working copy: a rejected command leaves the live state untouched
         var firstEvent = _state.Events.Count;
         try
         {
@@ -265,12 +265,7 @@ public sealed partial class MatchEngine
                 SpendPlansWithinPlans(execute, plansSets);
                 _paymentDiscards = [];
                 ApplyAfterCommandTraits(traitSnapshot);
-                ReturnCardsOutOfPlayToTheirOwners();
-                SweepSpellCopies(); // issue #838
-                Wave827AfterCommand(); // issue #827 (Wave827.cs): Koan's Jingasa's Spell limit, P'an Ku's straightening choice
-                Wave829AfterCommand(); // issue #829 (Wave829.cs): Benten's Blessing's choice of Personalities
-                Wave835AfterCommand(); // issue #835 (Wave835.cs): the Heavens' Blessing's owed draws, Unbearable Weight's return to a hand
-                RemoveCreatedCardsLeftInPiles();
+                RunSweeps(EngineHooks.SweepsAfterApply);
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
             }
