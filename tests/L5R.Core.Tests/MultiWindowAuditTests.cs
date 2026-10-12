@@ -33,7 +33,7 @@ internal static partial class MultiWindowAuditTests
     };
     public static readonly string[] Scenarios = ["battle-attacker", "battle-defender", "action-active", "action-other"];
 
-    private static (MatchEngine Engine, CardInstance Source, int Player) Build(CardDefinition c, string scenario, int variant = 0)
+    internal static (MatchEngine Engine, CardInstance Source, int Player) Build(CardDefinition c, string scenario, int variant = 0)
     {
         var battle = scenario.StartsWith("battle");
         var me = scenario is "battle-defender" or "action-active" ? 0 : 1; // the player whose card is probed: he holds priority
