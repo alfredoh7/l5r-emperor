@@ -14,3 +14,4 @@ resolves a look at the top cards
 published abilities, complete match
 legal complete training match
 custom Practice
+listing-consistency/ValidatedMeansListed
