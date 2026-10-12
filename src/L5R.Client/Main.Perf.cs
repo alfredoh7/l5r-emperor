@@ -16,6 +16,7 @@ public partial class Main
         _perfScenario = scenario;
         foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--perf-seconds=")) _perfSeconds = double.Parse(arg[15..], System.Globalization.CultureInfo.InvariantCulture);
         foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--perf-toggle=")) _perfToggle = arg[14..];
+        _perfDraws = OS.GetCmdlineUserArgs().Contains("--perf-draws");
         foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--perf-shot=")) _perfShot = arg[12..];
         if (!OS.GetCmdlineUserArgs().Contains("--perf-vsync")) DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
         RenderingServer.ViewportSetMeasureRenderTime(GetViewport().GetViewportRid(), true);
@@ -25,15 +26,47 @@ public partial class Main
         GD.Print($"PERF_START scenario={scenario} renderer={RenderingServer.GetCurrentRenderingMethod()} adapter={RenderingServer.GetVideoAdapterName()}");
     }
 
-    private string? _perfShot; private bool _perfShotDone;
+    private bool _perfDraws; private string? _perfShot; private bool _perfShotDone;
     // --perf-shot=path: a deterministic picture of the 3D hall alone (static light, 2D hidden) for before/after comparison.
     private void ProcessPerfShot()
     {
-        if (_perfClock > 1 && _root.Visible) { _table.ReducedMotion = true; _root.Hide(); }
+        if (_perfClock > 1 && _root.Visible) { _table.ReducedMotion = true; if (!OS.GetCmdlineUserArgs().Contains("--perf-full")) _root.Hide(); }
         if (_perfClock < 5 || _perfShotDone) return;
         _perfShotDone = true;
         GetViewport().GetTexture().GetImage().SavePng(_perfShot);
         GD.Print($"PERF_SHOT {_perfShot}");
+    }
+
+    // --perf-draws: hides each canvas subtree in turn (frame by frame) and reports how many draw calls it was responsible for.
+    private List<(string Name, CanvasItem Node)>? _drawCandidates; private int _drawIndex = -1, _drawWait; private double _drawBase;
+    private readonly List<string> _drawReport = [];
+    private void ProcessPerfDraws()
+    {
+        _table.ReducedMotion = true; // a still hall, so the 30 Hz hall redraw does not blur the counts
+        if (_perfClock < 4) return;
+        var draws = Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame);
+        if (_drawCandidates is null)
+        {
+            _drawCandidates = [];
+            void Collect(Node n, string path, int depth)
+            {
+                foreach (var c in n.GetChildren())
+                {
+                    if (c is not CanvasItem ci || !ci.Visible) continue;
+                    var name = $"{path}/{c.Name}:{c.GetType().Name}"; _drawCandidates.Add((name, ci));
+                    if (depth < 1) Collect(c, name, depth + 1);
+                }
+            }
+            Collect(_world, "world", 0); Collect(_root, "root", 0);
+            _drawBase = draws; _drawIndex = -1; _drawWait = 3;
+            GD.Print($"PERF_DRAWS_BASE {draws} candidates={_drawCandidates.Count}");
+            return;
+        }
+        if (_drawWait-- > 0) return;
+        if (_drawIndex >= 0) { var (n, node) = _drawCandidates[_drawIndex]; GD.Print($"PERF_DRAWS {_drawBase - draws,5:0} {n}"); node.Visible = true; }
+        _drawIndex++;
+        if (_drawIndex >= _drawCandidates.Count) { GetTree().Quit(); return; }
+        _drawCandidates[_drawIndex].Node.Visible = false; _drawWait = 3;
     }
 
     private string _perfToggle = ""; private bool _perfToggled;
@@ -45,6 +78,7 @@ public partial class Main
             switch (_perfToggle)
             {
                 case "shadows" when n is Light3D l: l.ShadowEnabled = false; break;
+                case "piles" when n is TablePile pile: pile.Visible = false; break;
                 case "lights" when n is OmniLight3D o: o.Visible = false; break;
                 case "hall" when n is FortressHall h: h.Visible = false; break;
                 case "oldcast" when n is MeshInstance3D m && m.Name == "StaticHallPartition": m.CastShadow = GeometryInstance3D.ShadowCastingSetting.On; break;
@@ -61,6 +95,7 @@ public partial class Main
         if (!_perfToggled && _perfToggle != "" && _perfClock > .5) ApplyPerfToggle();
         _perfClock += delta; _perfFrames.Add(delta * 1000);
         if (_perfShot is not null) ProcessPerfShot();
+        if (_perfDraws) { ProcessPerfDraws(); return; }
         if (_perfScenario == "play" && _session.Snapshot is not null && View.WinnerId is null && (_perfStep += delta) > .15)
         {
             _perfStep = 0;
