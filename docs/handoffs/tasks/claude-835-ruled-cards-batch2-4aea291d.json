@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wires twelve cards on Mendon's rulings of 2026-10-11 (Egg of P'an Ku, Blood of Isawa's Tribe, A Cleansing Breath, Duty Over All Things, Imperial Deployment, Merchant Patronage, Pierce the Tapestry, The Heavens' Blessing, Unbearable Weight, Warded Premises, Revelations, The Empire's Foe Exposed); Too Close to Home needed no change; Pierce the Tapestry spelled correctly with an Oracle alias; rulings R-067..R-079; art pack catalogue-art-issue835-20261011-r1. Shared change: the rules engine plus the local reference/library name correction (client library.json) and art pack metadata; the client gets no code change and reuses its generic decision, shown-choice and look panels.",
+  "validation": "Wave835 suite 15/15; full Core suite run once with 12 stale pinned expectations fixed and reverified; AI suite 148 pass; tools/content python tests pass; art pack installed and verified offline. Not run locally: full check.sh, Godot client import, native visual check of the shown-choice, look, Foe selection and Blood panels.",
+  "remaining": "Mendon to confirm the readings in docs/decisions/2026-10-11-twelve-ruled-cards.md; Courtesy of the Crane's Open draw action is not wired.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/835",
+  "branch": "claude/835-ruled-cards-batch2",
+  "updated": "2026-10-12T01:06:11.329307+00:00"
+}
