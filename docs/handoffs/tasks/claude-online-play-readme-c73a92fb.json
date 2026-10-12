@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add docs/ONLINE_PLAY.md: reference plan for the internet table server (public queue, password-private rooms, 15-minute reconnect close with no result, audit log with IPs, one-month retention, costs).",
+  "validation": "Docs only; no code or tests changed.",
+  "remaining": "None; planning document only. Server, client and deployment work is unstarted.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/880",
+  "branch": "claude/online-play-readme",
+  "updated": "2026-10-12T20:20:47.501864+00:00"
+}
