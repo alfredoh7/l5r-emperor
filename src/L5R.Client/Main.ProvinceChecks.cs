@@ -4,6 +4,24 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    /// <summary>A point on the tile that no other tile covers: a Region sits partly under its Dynasty card, so its centre selects the card on top.</summary>
+    private Vector2 ExposedScreenPoint(CardTile tile)
+    {
+        var rect = tile.GetGlobalRect();
+        var others = _tiles.Where(t => t != tile && t.IsVisibleInTree()).Select(t => t.GetGlobalRect()).ToArray();
+        Vector2? best = null; var bestClearance = -1f;
+        for (var row = 1; row < 8; row++)
+            for (var col = 1; col < 8; col++)
+            {
+                var p = rect.Position + rect.Size * new Vector2(col / 8f, row / 8f);
+                if (others.Any(o => o.HasPoint(p))) continue;
+                var clearance = others.Length == 0 ? 1 : others.Min(o => Math.Max(Math.Max(o.Position.X - p.X, p.X - o.End.X), Math.Max(o.Position.Y - p.Y, p.Y - o.End.Y)));
+                if (clearance > bestClearance) { best = p; bestClearance = clearance; }
+            }
+        var canvasPoint = best ?? rect.GetCenter();
+        return _world.IsAncestorOf(tile) ? _tableSurface.ProjectCanvas(canvasPoint) : canvasPoint;
+    }
+
     private async Task CheckProvinceReview(string directory)
     {
         try
@@ -25,7 +43,7 @@ public partial class Main
                 var tile = _tiles.Single(t => t.Card.Id == id);
                 RequireCamera(tile.Card.Definition is { } definition && CardTile.Artwork(definition) is not null,
                     "full scan missing for " + id);
-                var point = ScreenCenter(tile); MoveProbeMouse(point);
+                var point = ExposedScreenPoint(tile); MoveProbeMouse(point);
                 CameraMouse(MouseButton.Left, true, point); CameraMouse(MouseButton.Left, false, point);
                 RequireCamera(_selected?.Id == id, $"independent province selection: {id}; selected={_selected?.Id}, point={point}, pointer={PointerOnTable(point)}, blocked={CameraBlocked}, focus={GetWindow().HasFocus()}, hovered={TableHovered?.Name}");
                 await CoverageFrames();

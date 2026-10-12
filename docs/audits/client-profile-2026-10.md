@@ -82,3 +82,13 @@ Same machine and method, vsync off, 1440x900. Before is main at 6c4ce998 (after 
 **BC7 was dropped.** BPTC encoding takes 11m38s locally (47 CPU minutes) and stalled the Windows CI import at 30 minutes, with or without the ASTC encode. DXT is quick but changes 21% of hall pixels. Size caps give a larger saving without any of that.
 
 **Remaining.** The hall viewport and table canvas redraw rules, 2D draw calls beyond the piles (about 100 for hand and province cards), the remaining 2048 maps (columns, dais, floors, which fill large areas and were left alone), and old-GPU testing.
+
+## Phase 4 (issue #886)
+
+**Column and dais maps.** Capped at 1024 through import `process/size_limit`: table texture memory 598 to 526 MB, resident footprint about 1480 to 1380 MB; 1.0% of hall pixels differ by more than 2 of 255 (maximum 26), the crops show slightly smoother scratch highlights on the columns and no visible change on the dais. The three floor map sets were tried at 1024 too (415 MB, 1229 MB resident) but the wood grain is visibly softer (18% of hall pixels differ, maximum 48), so the floors stay at 2048.
+
+**Ink mat and province UI checks were real stale checks, not environment problems.** Earlier reports of these as "hover or focus" failures were wrong.
+- `check-ink-mat` failed with "Holding hover signal did not activate the existing card feedback". Since #780 a card takes hover only when the pointer actually moves over it (`CardTile` records a bare `MouseEntered` as pending until a mouse-motion `GuiInput` arrives). The probe emitted only `MouseEntered`. It now also sends the motion event, as a real pointer would.
+- `check-province-ui` failed with `selected=preview-0-1-a` when clicking the Region `preview-region-0-1`. Since #780 the Region sits partly under its Dynasty card, so the Region's centre selects the card on top. The check now clicks an uncovered point on the tile.
+
+Both fail on any machine from #780 onward, not just here; neither is run by CI.

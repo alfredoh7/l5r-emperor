@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Cap column and dais maps at 1024 (table texture memory 598 to 526 MB; floors kept at 2048 because 1024 visibly blurs them). Fix the ink-mat and province-ui native checks, which were stale since #780, not environmental.",
+  "validation": "check.sh --skip-client passed; native board-ui, perspective-table, interactions, battle-presentation, main-menu, six-phase-track, ink-mat and province-ui all pass (ink-mat and province-ui twice). Hall shot: 1.0% of pixels differ by more than 2/255, max 26.",
+  "remaining": "Not tested on old GPUs; floor maps and the remaining 2048 maps untouched.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/886",
+  "branch": "claude/886-maps-and-ui-checks",
+  "updated": "2026-10-12T23:44:51.966756+00:00"
+}
