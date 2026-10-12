@@ -328,6 +328,7 @@ public partial class Main
         if (IsInstanceValid(_tableTooltip)) { _tableTooltip!.QueueFree(); _tableTooltip = null; }
         _tableHover = null; _tableHoverTime = 0;
     }
+    private bool _tooltipsDirty = true; private double _tooltipPrepareClock;
     private void PrepareTableTooltips(Node node)
     {
         if (node is Control control && !string.IsNullOrEmpty(control.TooltipText))
@@ -344,7 +345,9 @@ public partial class Main
         // Token explanations use the same bounded overlay as card previews, so
         // native tooltips and the projected viewport cannot compete for the hover.
         if (token is not null) { _syncTablePointer = false; _tableSurface.ExitMouse(); }
-        PrepareTableTooltips(_world);
+        // Issue #875: the walk moves every Control's native tooltip text into metadata, which only matters once a node is added or its text is set; run it when the tree changes and a few times a second, not every frame.
+        _tooltipPrepareClock -= delta;
+        if (_tooltipsDirty || _tooltipPrepareClock <= 0) { PrepareTableTooltips(_world); _tooltipsDirty = false; _tooltipPrepareClock = .2; }
         if (token is null && _syncTablePointer && !_cameraDragging && PointerOnTable(_lastTableMouse))
         {
             _syncTablePointer = false;

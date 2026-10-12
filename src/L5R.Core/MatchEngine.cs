@@ -32,6 +32,11 @@ public sealed partial class MatchEngine
     /// <summary>Detached diagnostic snapshot, containing hidden information. Never send to a client.</summary>
     public MatchState State => Copy(_state);
     public long Version => _state.Version;
+    // Scalar reads for per-frame callers: State is a full detached copy (issue #875), so a client that only needs these asks for them directly.
+    public int? WinnerId => _state.WinnerId;
+    public int ActivePlayerId => _state.ActivePlayerId;
+    public int PriorityPlayerId => _state.PriorityPlayerId;
+    public bool HasPendingChoice => _state.PendingChoice is not null;
     public static MatchEngine CreateStarterMatch(ulong seed = 20260906) => Create(seed, "starter");
     public static MatchEngine CreateEconomyScenario(ulong seed = 20260906) => Create(seed, "economy");
     public static MatchEngine CreatePublishedMatch(ulong seed = 20260906) => Create(seed, PublishedContent.Scenario);

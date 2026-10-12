@@ -19,6 +19,8 @@ public partial class FortressHall : Node3D
     private readonly List<ShaderMaterial> _bakedFloors = [];
     private readonly Vector4[] _floorSources = new Vector4[11];
     private readonly float[] _floorEnergy = new float[11];
+    private bool? _lastAnimate; private bool _floorSourcesDirty = true;
+    private static readonly StringName PhaseParameter = "phase", MotionParameter = "motion", LightEnergyParameter = "light_energy", PracticalSourcesParameter = "practical_sources", PracticalEnergyParameter = "practical_energy";
     public override void _Ready()
     {
         var room = GD.Load<PackedScene>("res://Art/WarRoom/fortress-hall-b3.glb").Instantiate<Node3D>();
@@ -35,21 +37,21 @@ public partial class FortressHall : Node3D
                 var dimensions = body.GetAabb().Size;
                 var p = placement.GetProperty("position").EnumerateArray().Select(v => v.GetSingle()).ToArray();
                 var h = placement.GetProperty("height").GetSingle();
-                prop.Position = new Vector3(p[0],p[2],-p[1]);
-                prop.Basis = new Basis(new Vector3(placement.GetProperty("width").GetSingle()/dimensions.X,0,0),
-                    new Vector3(0,h,-h*.833f),new Vector3(0,0,placement.GetProperty("depth").GetSingle()/dimensions.Z));
+                prop.Position = new Vector3(p[0], p[2], -p[1]);
+                prop.Basis = new Basis(new Vector3(placement.GetProperty("width").GetSingle() / dimensions.X, 0, 0),
+                    new Vector3(0, h, -h * .833f), new Vector3(0, 0, placement.GetProperty("depth").GetSingle() / dimensions.Z));
                 AddChild(prop);
                 foreach (var mesh in prop.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>())
                     for (var i = 0; i < mesh.Mesh.GetSurfaceCount(); i++)
                         if (mesh.GetActiveMaterial(i) is StandardMaterial3D source)
                         {
                             var worn = (StandardMaterial3D)source.Duplicate();
-                            worn.AlbedoColor = kind == "chest" ? new Color(.65f,.50f,.35f) : new Color(.35f,.30f,.25f);
+                            worn.AlbedoColor = kind == "chest" ? new Color(.65f, .50f, .35f) : new Color(.35f, .30f, .25f);
                             worn.Metallic = kind == "chest" ? .40f : .75f;
                             worn.Roughness = .80f; worn.NormalScale = .65f;
                             if (kind == "stone")
                             {
-                                worn.AlbedoColor = new Color(.68f,.66f,.62f);
+                                worn.AlbedoColor = new Color(.68f, .66f, .62f);
                                 worn.Metallic = 0; worn.MetallicTexture = null;
                                 worn.MetallicSpecular = .12f;
                                 worn.RoughnessTexture = null; worn.Roughness = .96f;
@@ -57,26 +59,26 @@ public partial class FortressHall : Node3D
                             }
                             else if (kind == "dais")
                             {
-                                worn.AlbedoColor = new Color(.72f,.64f,.54f);
+                                worn.AlbedoColor = new Color(.72f, .64f, .54f);
                                 worn.Metallic = 0; worn.MetallicSpecular = .22f;
                                 worn.RoughnessTexture = null; worn.Roughness = .61f; worn.NormalScale = .22f;
                             }
                             else if (kind == "chest")
                             {
-                                worn.AlbedoColor = new Color(.70f,.66f,.58f);
+                                worn.AlbedoColor = new Color(.70f, .66f, .58f);
                                 worn.Metallic = .55f; worn.MetallicSpecular = .25f;
                                 worn.Roughness = .80f; worn.NormalScale = .30f;
                             }
                             else if (kind == "brazier")
                             {
-                                worn.AlbedoColor = new Color(.90f,.85f,.80f);
+                                worn.AlbedoColor = new Color(.90f, .85f, .80f);
                                 worn.Metallic = .55f; worn.MetallicSpecular = .24f;
                                 // Preserve Meshy's iron artwork and normals. Its packed
                                 // roughness has near-zero pits that sparkle under firelight.
                                 worn.RoughnessTexture = null; worn.Roughness = .82f;
                                 worn.NormalScale = .28f;
                             }
-                            mesh.SetSurfaceOverrideMaterial(i,worn);
+                            mesh.SetSurfaceOverrideMaterial(i, worn);
                         }
             }
         if (layout.RootElement.TryGetProperty("columns", out var columns))
@@ -89,7 +91,7 @@ public partial class FortressHall : Node3D
                 var p = placement.GetProperty("position").EnumerateArray().Select(v => v.GetSingle()).ToArray();
                 var w = placement.GetProperty("width").GetSingle(); var h = placement.GetProperty("height").GetSingle();
                 column.Position = new Vector3(p[0], p[2], -p[1]);
-                column.Basis = new Basis(new Vector3(w/dimensions.X,0,0),new Vector3(0,h,-h*.833f),new Vector3(0,0,w/dimensions.Z));
+                column.Basis = new Basis(new Vector3(w / dimensions.X, 0, 0), new Vector3(0, h, -h * .833f), new Vector3(0, 0, w / dimensions.Z));
                 AddChild(column);
                 foreach (var mesh in column.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>())
                     for (var i = 0; i < mesh.Mesh.GetSurfaceCount(); i++)
@@ -108,8 +110,12 @@ public partial class FortressHall : Node3D
             var kind = lamp.GetProperty("kind").GetString()!;
             var height = lamp.GetProperty("height").GetSingle();
             // Table phases match the existing cloth, frame and card candlelight.
-            var practical = new Practical { Phase = kind == "table" ? _tableLanterns.Count * 1.8f : 2.7f + _practicals.Count * 2.31f,
-                Rate = kind == "ember" ? 1.27f : 1f, Strength = kind == "room" ? .68f : 1f };
+            var practical = new Practical
+            {
+                Phase = kind == "table" ? _tableLanterns.Count * 1.8f : 2.7f + _practicals.Count * 2.31f,
+                Rate = kind == "ember" ? 1.27f : 1f,
+                Strength = kind == "room" ? .68f : 1f
+            };
             if (kind != "ember")
             {
                 var path = $"res://Art/WarRoom/{kind}-lantern.glb";
@@ -118,7 +124,7 @@ public partial class FortressHall : Node3D
                     var prop = GD.Load<PackedScene>(path).Instantiate<Node3D>();
                     prop.Name = lamp.GetProperty("name").GetString()!;
                     prop.Position = position; prop.Scale = Vector3.One * height;
-                    prop.Basis = new Basis(new Vector3(height,0,0), new Vector3(0,height,-height*.833f), new Vector3(0,0,height));
+                    prop.Basis = new Basis(new Vector3(height, 0, 0), new Vector3(0, height, -height * .833f), new Vector3(0, 0, height));
                     // GLB +Y is up. The original is normalized to a ground-contact pivot.
                     AddChild(prop);
                     foreach (var mesh in prop.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>())
@@ -130,7 +136,7 @@ public partial class FortressHall : Node3D
                             if (mesh.GetActiveMaterial(surface) is StandardMaterial3D source)
                             {
                                 var aged = (StandardMaterial3D)source.Duplicate();
-                                aged.AlbedoColor = kind == "table" ? new Color(.60f,.54f,.45f) : new Color(.29f,.24f,.18f);
+                                aged.AlbedoColor = kind == "table" ? new Color(.60f, .54f, .45f) : new Color(.29f, .24f, .18f);
                                 aged.Metallic = .40f; aged.MetallicSpecular = .30f; aged.Roughness = 1.0f; aged.NormalScale = .6f;
                                 mesh.SetSurfaceOverrideMaterial(surface, aged);
                             }
@@ -142,9 +148,13 @@ public partial class FortressHall : Node3D
             if (kind == "ember") AddBrazierFire(position, practical);
             var light = new OmniLight3D
             {
-                Name = "PracticalLight", Position = position + new Vector3(0,height*.49f,-height*.49f*.833f),
-                LightColor = new Color("ffb264"), LightSpecular = .55f, LightEnergy = lamp.GetProperty("energy").GetSingle() * .43f,
-                OmniRange = lamp.GetProperty("radius").GetSingle() * 1.25f, OmniAttenuation = 1.0f,
+                Name = "PracticalLight",
+                Position = position + new Vector3(0, height * .49f, -height * .49f * .833f),
+                LightColor = new Color("ffb264"),
+                LightSpecular = .55f,
+                LightEnergy = lamp.GetProperty("energy").GetSingle() * .43f,
+                OmniRange = lamp.GetProperty("radius").GetSingle() * 1.25f,
+                OmniAttenuation = 1.0f,
                 ShadowEnabled = kind is "table" or "ember" || lamp.GetProperty("name").GetString()!.EndsWith("_0"),
                 ShadowBias = kind == "ember" ? .002f : .008f,
                 ShadowNormalBias = kind == "ember" ? .003f : .025f,
@@ -155,16 +165,27 @@ public partial class FortressHall : Node3D
             practical.Light = light; practical.BaseEnergy = light.LightEnergy; _practicals.Add(practical);
             if (kind == "table") _tableLights.Add(light);
         }
-        AddChild(new WorldEnvironment { Environment = new Godot.Environment
+        AddChild(new WorldEnvironment
         {
-            BackgroundMode = Godot.Environment.BGMode.Color, BackgroundColor = new Color("17131a"),
-            AmbientLightSource = Godot.Environment.AmbientSource.Color,
-            AmbientLightColor = new Color("bcc1d1"), AmbientLightEnergy = .27f,
-            TonemapMode = Godot.Environment.ToneMapper.Filmic, TonemapExposure = 1.0f,
-            ReflectedLightSource = Godot.Environment.ReflectionSource.Disabled
-        }});
-        AddChild(new DirectionalLight3D { RotationDegrees = new(-38, -155, 0),
-            LightColor = new Color("9ca9cc"), LightEnergy = .12f, ShadowEnabled = false });
+            Environment = new Godot.Environment
+            {
+                BackgroundMode = Godot.Environment.BGMode.Color,
+                BackgroundColor = new Color("17131a"),
+                AmbientLightSource = Godot.Environment.AmbientSource.Color,
+                AmbientLightColor = new Color("bcc1d1"),
+                AmbientLightEnergy = .27f,
+                TonemapMode = Godot.Environment.ToneMapper.Filmic,
+                TonemapExposure = 1.0f,
+                ReflectedLightSource = Godot.Environment.ReflectionSource.Disabled
+            }
+        });
+        AddChild(new DirectionalLight3D
+        {
+            RotationDegrees = new(-38, -155, 0),
+            LightColor = new Color("9ca9cc"),
+            LightEnergy = .12f,
+            ShadowEnabled = false
+        });
         PresentLight(0, false);
         GD.Print("FORTRESS_HALL_B3: sparse hall; separate Meshy fixtures; source map/scenery; synchronized firelight with reduced-motion support.");
     }
@@ -175,42 +196,83 @@ public partial class FortressHall : Node3D
         // one light signal without repainting or moving the body.
         var fire = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/static-flame.gdshader") };
         practical.Flames.Add(fire);
-        var flame = new MeshInstance3D { Name = "CandleFlame",
+        var flame = new MeshInstance3D
+        {
+            Name = "CandleFlame",
             Mesh = new QuadMesh { Size = new Vector2(.066f, .095f) },
-            MaterialOverride = fire, Position = new Vector3(0, kind == "table" ? .255f : .455f, 0),
-            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+            MaterialOverride = fire,
+            Position = new Vector3(0, kind == "table" ? .255f : .455f, 0),
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off
+        };
         prop.AddChild(flame);
         var halo = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/practical-glow.gdshader") };
         practical.Halos.Add(halo);
-        prop.AddChild(new MeshInstance3D { Name = "CandleHalation",
-            Mesh = new QuadMesh { Size = new Vector2(1.3f, 1.3f) }, Position = new Vector3(0, .46f, 0),
+        prop.AddChild(new MeshInstance3D
+        {
+            Name = "CandleHalation",
+            Mesh = new QuadMesh { Size = new Vector2(1.3f, 1.3f) },
+            Position = new Vector3(0, .46f, 0),
             MaterialOverride = halo,
-            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off });
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off
+        });
         if (kind == "room")
         {
             // Seat the candle in the existing Meshy socket, covering the residual
             // generated bulb stem. The wick anchors the separate flame visually.
             var wax = new StandardMaterial3D { AlbedoColor = new Color("d8b977"), Roughness = .95f, MetallicSpecular = .12f };
-            prop.AddChild(new MeshInstance3D { Name="WaxCandle", Mesh=new CylinderMesh { TopRadius=.048f, BottomRadius=.054f,Height=.315f,RadialSegments=32 },
-                Position=new Vector3(0,.275f,0), MaterialOverride=wax });
-            prop.AddChild(new MeshInstance3D { Name="CharredWick", Mesh=new CylinderMesh { TopRadius=.003f, BottomRadius=.004f,Height=.023f,RadialSegments=8 },
-                Position=new Vector3(0,.441f,0), Rotation=new Vector3(0,0,-.13f),
-                MaterialOverride=new StandardMaterial3D { AlbedoColor=new Color("1b100b"),Roughness=1 } });
-            prop.AddChild(new MeshInstance3D { Name="CandleSocket", Mesh=new CylinderMesh { TopRadius=.062f, BottomRadius=.068f,Height=.018f,RadialSegments=24 },
-                Position=new Vector3(0,.120f,0), MaterialOverride=new StandardMaterial3D { AlbedoColor=new Color("594126"),Metallic=.65f,Roughness=.65f } });
+            prop.AddChild(new MeshInstance3D
+            {
+                Name = "WaxCandle",
+                Mesh = new CylinderMesh { TopRadius = .048f, BottomRadius = .054f, Height = .315f, RadialSegments = 32 },
+                Position = new Vector3(0, .275f, 0),
+                MaterialOverride = wax
+            });
+            prop.AddChild(new MeshInstance3D
+            {
+                Name = "CharredWick",
+                Mesh = new CylinderMesh { TopRadius = .003f, BottomRadius = .004f, Height = .023f, RadialSegments = 8 },
+                Position = new Vector3(0, .441f, 0),
+                Rotation = new Vector3(0, 0, -.13f),
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color("1b100b"), Roughness = 1 }
+            });
+            prop.AddChild(new MeshInstance3D
+            {
+                Name = "CandleSocket",
+                Mesh = new CylinderMesh { TopRadius = .062f, BottomRadius = .068f, Height = .018f, RadialSegments = 24 },
+                Position = new Vector3(0, .120f, 0),
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color("594126"), Metallic = .65f, Roughness = .65f }
+            });
         }
-        var glass = new StandardMaterial3D { Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-            AlbedoColor = new Color(1, .52f, .16f, .14f), Roughness = .32f, Metallic = .05f,
-            CullMode = BaseMaterial3D.CullModeEnum.Disabled, EmissionEnabled = true,
-            Emission = new Color("e88523"), EmissionEnergyMultiplier = .23f };
+        var glass = new StandardMaterial3D
+        {
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            AlbedoColor = new Color(1, .52f, .16f, .14f),
+            Roughness = .32f,
+            Metallic = .05f,
+            CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+            EmissionEnabled = true,
+            Emission = new Color("e88523"),
+            EmissionEnergyMultiplier = .23f
+        };
         practical.Windows.Add(glass);
-        prop.AddChild(new MeshInstance3D { Name = "AmberInnerWindows",
-            Mesh = new CylinderMesh { TopRadius = kind == "room" ? .15f : .20f,
-                BottomRadius = kind == "room" ? .15f : .23f, Height = .44f,
-                RadialSegments = kind == "table" ? 6 : 4, Rings = 1, CapTop = false, CapBottom = false },
-            Position = new Vector3(0, .46f, 0), Rotation = new Vector3(0, kind == "room" ? Mathf.Pi / 4 : 0, 0),
+        prop.AddChild(new MeshInstance3D
+        {
+            Name = "AmberInnerWindows",
+            Mesh = new CylinderMesh
+            {
+                TopRadius = kind == "room" ? .15f : .20f,
+                BottomRadius = kind == "room" ? .15f : .23f,
+                Height = .44f,
+                RadialSegments = kind == "table" ? 6 : 4,
+                Rings = 1,
+                CapTop = false,
+                CapBottom = false
+            },
+            Position = new Vector3(0, .46f, 0),
+            Rotation = new Vector3(0, kind == "room" ? Mathf.Pi / 4 : 0, 0),
             MaterialOverride = glass,
-            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off });
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off
+        });
     }
 
     public void SetTableLanterns(Vector2 left, Vector2 right)
@@ -226,6 +288,8 @@ public partial class FortressHall : Node3D
 
     public void PresentLight(float time, bool animate)
     {
+        // Issue #875: StringNames are built once, and the parameters that do not change per frame (the flame's motion flag, the floor's light positions) are only sent when they do.
+        var motionChanged = _lastAnimate != animate; _lastAnimate = animate;
         for (var i = 0; i < _practicals.Count; i++)
         {
             var p = _practicals[i];
@@ -234,21 +298,23 @@ public partial class FortressHall : Node3D
             p.Light.LightEnergy = p.BaseEnergy * energy;
             foreach (var flame in p.Flames)
             {
-                flame.SetShaderParameter("phase", phase);
-                flame.SetShaderParameter("motion", animate ? 1f : 0f);
-                flame.SetShaderParameter("light_energy", energy);
+                flame.SetShaderParameter(PhaseParameter, phase);
+                if (motionChanged) flame.SetShaderParameter(MotionParameter, animate ? 1f : 0f);
+                flame.SetShaderParameter(LightEnergyParameter, energy);
             }
-            foreach (var halo in p.Halos) halo.SetShaderParameter("light_energy", energy);
+            foreach (var halo in p.Halos) halo.SetShaderParameter(LightEnergyParameter, energy);
             foreach (var glass in p.Windows) glass.EmissionEnergyMultiplier = .23f * energy;
             var position = p.Light.Position;
-            _floorSources[i] = new Vector4(position.X, position.Z, p.Light.OmniRange, 0);
+            var source = new Vector4(position.X, position.Z, p.Light.OmniRange, 0);
+            if (_floorSources[i] != source) { _floorSources[i] = source; _floorSourcesDirty = true; }
             _floorEnergy[i] = energy;
         }
         foreach (var floor in _bakedFloors)
         {
-            floor.SetShaderParameter("practical_sources", _floorSources);
-            floor.SetShaderParameter("practical_energy", _floorEnergy);
+            if (_floorSourcesDirty) floor.SetShaderParameter(PracticalSourcesParameter, _floorSources);
+            floor.SetShaderParameter(PracticalEnergyParameter, _floorEnergy);
         }
+        _floorSourcesDirty = false;
     }
 
     // Same smooth signal as Art/candlelight.gdshaderinc, so actual lights follow
@@ -279,7 +345,7 @@ public partial class FortressHall : Node3D
                 if (material is StandardMaterial3D vista && material.ResourceName == "Approved distant dusk scenery")
                 {
                     vista.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
-                    vista.EmissionEnabled = false; vista.AlbedoColor = new Color(.79f,.80f,.83f);
+                    vista.EmissionEnabled = false; vista.AlbedoColor = new Color(.79f, .80f, .83f);
                     vista.TextureFilter = BaseMaterial3D.TextureFilterEnum.LinearWithMipmapsAnisotropic;
                 }
                 if (material is StandardMaterial3D standard && material.ResourceName.StartsWith("Fortress"))

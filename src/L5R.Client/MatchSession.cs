@@ -48,7 +48,7 @@ public sealed partial class MatchSession : IDisposable
         _engine = published ? MatchEngine.CreatePublishedMatch(seed) : economy ? MatchEngine.CreateEconomyScenario(seed) : MatchEngine.CreateStarterMatch(seed);
         _preparedReview = false;
         MatchKey = Guid.NewGuid().ToString("N");
-        _localSeat = published ? seat : _engine.State.ActivePlayerId;
+        _localSeat = published ? seat : _engine.ActivePlayerId;
         _practiceNameSeat = _localSeat;
         RefreshLocal();
     }
@@ -127,7 +127,7 @@ public sealed partial class MatchSession : IDisposable
     public void FollowPracticePriority()
     {
         if (_engine is null || Online) return;
-        _localSeat = _engine.State.PriorityPlayerId;
+        _localSeat = _engine.PriorityPlayerId;
         RefreshLocal();
     }
 
@@ -145,7 +145,7 @@ public sealed partial class MatchSession : IDisposable
     /// bot remembers it) and the opponent is asked once more at the same position, up to a dozen tries. Without a callback a refusal is shown as a notice, as before.</summary>
     public bool StepPracticeOpponent(Func<MatchView, ActionOption[], GameCommand?> choose, Action<GameCommand, string?, long>? refused = null)
     {
-        if (_engine is null || Online || _engine.State.WinnerId is not null || _engine.State.PriorityPlayerId == _localSeat) return false;
+        if (_engine is null || Online || _engine.WinnerId is not null || _engine.PriorityPlayerId == _localSeat) return false;
         var opponent = 1 - _localSeat;
         for (var attempt = 0; attempt < 12; attempt++)
         {
@@ -169,8 +169,8 @@ public sealed partial class MatchSession : IDisposable
     /// still prompts).</summary>
     public bool StepPracticeReaction()
     {
-        if (_engine is null || Online || _engine.State.WinnerId is not null) return false;
-        if (_engine.State.PendingChoice is null || _engine.State.PriorityPlayerId != _localSeat) return false;
+        if (_engine is null || Online || _engine.WinnerId is not null) return false;
+        if (!_engine.HasPendingChoice || _engine.PriorityPlayerId != _localSeat) return false;
         var enabled = _engine.QueryActions(_localSeat).Where(a => a.Enabled).ToArray();
         if (enabled is not [{ Type: "declineReaction" } only]) return false;
         var result = _engine.Execute(only.Command!);
