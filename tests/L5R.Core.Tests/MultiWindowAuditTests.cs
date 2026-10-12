@@ -8,9 +8,14 @@ using static RegressionAssertions;
 // in the Battle phase, Open in either player's Action phase, Limited only for the active player's Action phase. An accepted offer is also executed.
 internal static partial class MultiWindowAuditTests
 {
-    public record Probe(string Card, string Name, string Ability, string Timing, string Scenario, bool Offered, bool Enabled, string? Reason, bool Executed, string? ExecuteError);
+    public record Probe(string Card, string Name, string Ability, string Timing, string Scenario, bool Offered, bool Enabled, string? Reason, bool Executed, string? ExecuteError, bool Changed = false);
     private static readonly string[] Keywords = ["Shugenja", "Kensai", "Ninja", "Samurai", "Bushi", "Monk", "Courtier", "Duelist", "Ancestor", "Paragon", "Tactician", "Cavalry", "Naval", "Siege", "Magistrate", "Spy", "Sensei", "Fire", "Air", "Earth", "Water", "Void", "Elite", "Fallen", "Maho", "Kiho"];
     private static readonly string[] Windowed = ["Battle", "Open", "Limited", "BattleOrOpen", "Reaction"];
+
+    // Single-window cards (issue #833): exactly one Battle / Open / Limited action and no Reaction, probed the same way, plus whether the executed action changed the state at all.
+    public static IEnumerable<CardDefinition> SingleInventory() => CardCatalog.Cards.Values
+        .Where(c => !c.CreatedOnly && (c.Abilities ?? []).Where(a => Windowed.Contains(Timing(a))).Sum(a => Timing(a) == "BattleOrOpen" ? 2 : 1) == 1 && (c.Abilities ?? []).Any(a => Timing(a) is "Battle" or "Open" or "Limited"))
+        .OrderBy(c => c.Id, StringComparer.Ordinal);
 
     public static IEnumerable<CardDefinition> Inventory() => CardCatalog.Cards.Values
         .Where(c => !c.CreatedOnly && (c.Abilities ?? []).Where(a => Windowed.Contains(Timing(a))).Sum(a => Timing(a) == "BattleOrOpen" ? 2 : 1) >= 2)
@@ -97,7 +102,7 @@ internal static partial class MultiWindowAuditTests
                         var on = options.FirstOrDefault(o => o.Enabled && o.Command?.AbilityId == id); // split Battle/Limited twins share one label: only the offer's own command identifies the half
                         if (on is null) { best = best with { Offered = true, Reason = options[0].Reason }; continue; }
                         best = best with { Offered = true, Enabled = true, Reason = null };
-                        try { var r = e.Clone().Execute(on.Command!); best = best with { Executed = r.Accepted, ExecuteError = r.Accepted ? null : r.Error }; }
+                        try { var clone = e.Clone(); var before = System.Text.Json.JsonSerializer.Serialize(clone.State); var r = clone.Execute(on.Command!); best = best with { Executed = r.Accepted, ExecuteError = r.Accepted ? null : r.Error, Changed = r.Accepted && System.Text.Json.JsonSerializer.Serialize(clone.State) != before }; }
                         catch (Exception ex) { best = best with { ExecuteError = "throw: " + ex.Message }; }
                     }
                     var prior = results.FindIndex(r => r.Card == c.Id && r.Ability == id && r.Scenario == scenario);
@@ -112,14 +117,27 @@ internal static partial class MultiWindowAuditTests
     {
         var path = Environment.GetEnvironmentVariable("L5R_AUDIT_OUT");
         var all = new List<Probe>();
-        foreach (var c in Inventory()) { if (path is not null) File.WriteAllText(path + ".progress", c.Id); all.AddRange(Run(c)); }
+        foreach (var c in Environment.GetEnvironmentVariable("L5R_AUDIT_MODE") == "single" ? SingleInventory() : Inventory()) { if (path is not null) File.WriteAllText(path + ".progress", c.Id); all.AddRange(Run(c)); }
         if (path is not null) File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(all));
         // Hard invariant: an action is never enabled in a phase its printed timing does not allow.
         var wrong = all.Where(p => p.Enabled && !Expected(p.Timing).Contains(p.Scenario)).ToList();
         Batch336Support.Check(wrong.Count == 0, "enabled outside its window: " + string.Join("; ", wrong.Select(p => $"{p.Name} {p.Ability} [{p.Timing}] in {p.Scenario}")));
     }
 
+    private static void ReportSingle()
+    {
+        var path = Environment.GetEnvironmentVariable("L5R_AUDIT_OUT_SINGLE");
+        var all = new List<Probe>();
+        foreach (var c in SingleInventory()) all.AddRange(Run(c));
+        if (path is not null) File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(all));
+        var wrong = all.Where(p => p.Enabled && !Expected(p.Timing).Contains(p.Scenario)).ToList();
+        Batch336Support.Check(wrong.Count == 0, "enabled outside its window: " + string.Join("; ", wrong.Select(p => $"{p.Name} {p.Ability} [{p.Timing}] in {p.Scenario}")));
+        var refused = all.Where(p => p.Enabled && !p.Executed).ToList();
+        Batch336Support.Check(refused.Count == 0, "offered enabled but refused on execution: " + string.Join("; ", refused.Select(p => $"{p.Name} {p.Ability} in {p.Scenario}: {p.ExecuteError}")));
+    }
+
     public static void Run(TestRunner runner) => runner.Run("multi-window-audit", [
         ("Every multi-window card's actions are on offer only in the phases their printed timing allows (issue #830)", Report),
+        ("Every single-window card's action is on offer only in the phases its printed timing allows (issue #833)", ReportSingle),
     ]);
 }

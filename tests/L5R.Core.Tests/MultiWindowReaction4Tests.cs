@@ -986,6 +986,8 @@ internal static partial class MultiWindowReaction4Tests
         Check(Now(e, sibling).Bowed, "the sibling Follower bowed");
         Eq(Window(e), "nikutaiReaction");
         Check(!CanUse(e, 1, "nikutai-straighten", nikutai.Id), "not offered to the other player");
+        Check(e.QueryActions(0).Any(a => a.Enabled && a.Command?.AbilityId == "nikutai-straighten") && e.QueryActions(0).Any(a => a.Type == "declineReaction"), "listed to its player with a pass (issue #833: the window listed neither)");
+        Check(!e.QueryActions(1).Any(a => a.Command?.AbilityId == "nikutai-straighten"), "and not listed to the other player");
         Accept(e, Use(e, 0, "nikutai-straighten", nikutai.Id));
         Check(!Now(e, sibling).Bowed && Now(e, nikutai).Bowed, "the sibling Follower straightened (Nikutai stays bowed)");
         // A Follower of another unit bowing opens nothing.

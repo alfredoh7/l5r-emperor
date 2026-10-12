@@ -1683,9 +1683,8 @@ static void FollowerWave11Primitives()
         Equal(e.State.PendingChoice?.CardId, legion.Id);
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: legion.Id, AbilityId: "legion-of-bat-bow"));
         Check(e.State.Cards[michi.Id].Bowed, "Legion of the Bat bows the enemy Infantry Personality that just moved to its battlefield");
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Check(e.State.PendingChoice is null, "Two consecutive passes close the reaction window");
+        // The window now lists Legion's Reaction and its Pass like every other alternating window (issue #833), so it settles (issue #644): nothing is left to react with, it closes at once.
+        Check(e.State.PendingChoice is null, "Nobody holds another Reaction: the reaction window closed without a Pass being asked");
     }
     {
         // Negative: RecruitReserve is explicitly excluded per the card's own rule ("Recruiting a

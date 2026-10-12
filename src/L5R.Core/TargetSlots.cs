@@ -36,6 +36,8 @@ public sealed record TargetSlot(string Id, string Category, string Label, int Mi
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     /// <summary>The slot names a Province (either player's, face-up or face-down) rather than a card or a player (Benediction, issue #699): its selection is a province owner and index.</summary>
     public bool IsProvince => Category == TargetSlotKinds.Province;
+    /// <summary>A province slot printed "one of your Provinces" (The Inevitable Grasp of Conquest, issue #833): only the acting player's own Provinces are offered, so the default selection is always a legal one for either seat.</summary>
+    public bool OwnProvincesOnly { get; init; }
     public bool AtResolution => Resolution is not null;
 }
 
@@ -205,6 +207,7 @@ public sealed partial class MatchEngine
             if (slot.IsProvince)
             {
                 var provinces = ProvinceSlotChoices();
+                if (slot.OwnProvincesOnly) provinces = provinces.Where(p => p.Owner == prototype.PlayerId).ToArray();
                 options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Province, slot.Min, slot.Max, [], [], ProvinceChoices: provinces));
                 if (provinces.Length < slot.Min) complete = false;
                 else if (slot.Min > 0) chosen.Add(new(slot.Id, ProvinceOwner: provinces[0].Owner, Province: provinces[0].Index));
@@ -291,10 +294,40 @@ public sealed partial class MatchEngine
         // Mutual Support's default is a pair with different Clans (issue #622, TfStrategiesB.cs); issue #503: an aggregate condition's default (EmperorP6.cs).
         defaultCommand = TfStrategiesBDefaultSelection(defaultCommand, ability, options) ?? defaultCommand;
         defaultCommand = EmperorP6DefaultSelection(defaultCommand, ability, options) ?? defaultCommand;
+        defaultCommand = Wave741DefaultAmount(defaultCommand) ?? defaultCommand;
         var quote = QuoteAbilityGold(defaultCommand);
         defaultCommand = defaultCommand with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
         try { ValidateAbility(defaultCommand); }
-        catch (RuleViolation e) { return new("useAbility", label, false, e.Message, defaultCommand, sourceId, Gold: quote, Slots: options); }
+        catch (RuleViolation e)
+        {
+            // The first-legal default can be an illegal pair even though a legal one exists (Iuchi Karasu at home with one other Personality at home and one at the battlefield: his first two
+            // candidates share a location). Offer the action enabled with the first legal single-slot variant of the default rather than disabled with a legal selection on the table.
+            if (LegalSlotVariant(defaultCommand, options) is { } variant)
+            {
+                var variantQuote = QuoteAbilityGold(variant);
+                return new("useAbility", label, true, null, variant with { SourceIds = variantQuote is null ? [] : variantQuote.Payments.FirstOrDefault()?.SourceIds }, sourceId, Gold: variantQuote, Slots: options);
+            }
+            return new("useAbility", label, false, e.Message, defaultCommand, sourceId, Gold: quote, Slots: options);
+        }
         return new("useAbility", label, true, null, defaultCommand, sourceId, Gold: quote, Slots: options);
+    }
+
+    private GameCommand? LegalSlotVariant(GameCommand command, TargetSlotOption[] options)
+    {
+        var tried = 0;
+        foreach (var chosen in command.Selections ?? [])
+        {
+            if (chosen.CardIds is not { Length: 1 } || options.FirstOrDefault(o => o.Slot == chosen.Slot) is not { Kind: TargetSlotKinds.Card } offered) continue;
+            foreach (var candidate in offered.CardIds)
+            {
+                if (candidate == chosen.CardIds[0] || ++tried > 64) continue;
+                var variant = command with { Selections = command.Selections!.Select(c => c.Slot == chosen.Slot ? c with { CardIds = [candidate] } : c).ToArray() };
+                var variantQuote = QuoteAbilityGold(variant);
+                variant = variant with { SourceIds = variantQuote is null ? [] : variantQuote.Payments.FirstOrDefault()?.SourceIds };
+                try { ValidateAbility(variant); return variant; }
+                catch (RuleViolation) { }
+            }
+        }
+        return null;
     }
 }

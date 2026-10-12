@@ -269,7 +269,7 @@ public sealed partial class MatchEngine
                         result.Add(used ? slotOption with { Enabled = false, Reason = "This reaction has already been used." } : slotOption);
                         continue;
                     }
-                    if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
+                    if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null, validate: true); // validated like a submitted command (issue #833: Suikihime listed enabled while The Forgotten Temple refused it)
                     else AddTargetedReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
@@ -414,6 +414,35 @@ public sealed partial class MatchEngine
                     else if (AbilityCatalog.All[reactionId].Target is not ("none" or "player"))
                         AddTargetedReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
                     else AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
+                }
+            }
+            Add("declineReaction", "Pass reaction", Command("declineReaction"));
+        }
+        else if (_state.PendingChoice is { Type: "moveReaction" } movePending)
+        {
+            // After an action moved an enemy Infantry Personality to the battlefield of Legion of the Bat (issue #279): the one watching card's own Reaction, then the pass. Before issue #833 the window
+            // listed neither, so a client offered only the engine's options could never play (or pass) the Reaction.
+            if (movePending.PlayerId == playerId && movePending.CardId is not null)
+            {
+                var watcher = Card(movePending.CardId);
+                foreach (var reactionId in AbilityIdsOf(watcher).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield"))
+                {
+                    var used = AbilityUseSpent(watcher.AbilityUses, AbilityCatalog.All[reactionId], AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
+                    AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
+                }
+            }
+            Add("declineReaction", "Pass reaction", Command("declineReaction"));
+        }
+        else if (_state.PendingChoice is { Type: "nikutaiReaction" } nikutaiPending)
+        {
+            // After a Follower in Nikutai's unit bowed (issue #279): the one watching card's own Reaction, then the pass; like moveReaction above, the window used to list neither (issue #833).
+            if (nikutaiPending.PlayerId == playerId && nikutaiPending.CardId is not null)
+            {
+                var watcher = Card(nikutaiPending.CardId);
+                foreach (var reactionId in AbilityIdsOf(watcher).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "sibling-follower-bowed"))
+                {
+                    var used = AbilityUseSpent(watcher.AbilityUses, AbilityCatalog.All[reactionId], AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
+                    AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
                 }
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));

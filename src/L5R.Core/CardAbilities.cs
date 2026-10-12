@@ -5356,6 +5356,10 @@ public sealed partial class MatchEngine
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.
     // slotAbility (issue #336): set only by ValidateSlotCard, which judges ONE candidate of one slot of a multi-target ability by running this
     // very method for a copy of the ability whose Target is that slot's category -- so every category keeps its one definition here.
+    // Reactions that print "choose your performing X at the current battlefield" (Grateful Reward): a Reaction is not a Battle action, so the generic performer category would let an X
+    // at home perform it, although the text names the location (issue #833). Watchers in the Dark names it too but uses its own explicit-at-battle category.
+    private static bool PerformerMustBeAtCurrentBattlefield(string abilityId) => abilityId == "grateful-reward-create";
+
     private void ValidateAbility(GameCommand command, AbilityDefinition? slotAbility = null)
     {
         var id = command.AbilityId ?? "";
@@ -5851,6 +5855,8 @@ public sealed partial class MatchEngine
             Require(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id),
                 "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it.");
         if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
+        // Rokku (issue #833): "if any enemy units are at the current battlefield" is a printed condition, not a silent no-op of the effect.
+        if (id == "rokku-move") Require(RokkuEnemyPresentAtEngagedBattlefield(player.Id), "Rokku: no enemy units are at the current battlefield.");
         // Battle Phase timing (issue #310): the Engage window's own per-trigger and per-card conditions.
         // "After engaging at X's battlefield": X's own battlefield is the one it is assigned to.
         // Dragon's Breath Castle: "after engaging at a battlefield at one of your provinces" -- the battlefield is at the Defender's province, so its controller is the Defender.
@@ -5931,7 +5937,7 @@ public sealed partial class MatchEngine
                 // every existing "Battle"-only card this is unconditionally identical to the old
                 // AtBattle(performer) check, since actingAsBattle is always true when Timing=="Battle".
                 "own-unbowed-personality-at-battle-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
-                    HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
+                    HasKeywords(performer, ability.RequiredKeywords) && (!(actingAsBattle || PerformerMustBeAtCurrentBattlefield(id)) || AtBattle(performer)),
                 // "At any location" (issue #267, Improved Defenses): a printed exemption from the
                 // ordinary at-THIS-battlefield requirement, broadened instead of removed -- see
                 // AtAnyLocation's own doc comment (Home, the current battlefield, or another
@@ -11178,7 +11184,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-attacking-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && IsAttacking(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle-with-keyword" =>
-                    _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && (!(actingAsBattle || PerformerMustBeAtCurrentBattlefield(id)) || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-keyword-at-any-location" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtAnyLocation(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-unit-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type is CardType.Personality or CardType.Follower && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
@@ -11259,6 +11265,12 @@ public sealed partial class MatchEngine
                     : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 // Strong Defenses (multi-window audit, issue #830): the listing twin of the validation category above -- without it the action was only ever listed disabled ("Choose a performing card").
                 "own-defending-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDefendingUnit(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // Strength of Purity (single-action audit, issue #833): the listing twin of the validation category -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-personality-honor-3-plus-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && CardPersonalHonor(c) >= 3
+                    && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // The Strength of the Spider (single-action audit, issue #833): the listing twin of the validation category above -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-unbowed-spider-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && HasClanAffiliation(c, "Spider") && AtBattle(c))
+                    .OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-base-force-7-plus" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Definition(c).Force >= 7
                     && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
@@ -11296,141 +11308,142 @@ public sealed partial class MatchEngine
                 foreach (var costOption in costOptions)
                     foreach (var createChoice in createChoices)
                         foreach (var shownChoice in AlternativeDiscard.Choices(costOption, shownChoices, player, source))
-                            foreach (var compareChoice in compareChoices)
-                            {
-                                var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
-                                var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
-                                var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                                    CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
-                                // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
-                                if (ability.Slots is not null)
+                            foreach (var deckPosition in id == "goju-house-guard-return" ? new string?[] { "Top", "Bottom" } : new string?[] { null }) // the card asks where on its owner's Fate deck it goes (issue #833): one offered action per end, each carrying the choice
+                                foreach (var compareChoice in compareChoices)
                                 {
-                                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}"), source?.Id);
-                                    continue;
-                                }
-                                // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
-                                string?[] candidates = ability.Target switch
-                                {
-                                    "none" or "provinces" or "any-province" or "enemy-province" or "player" => new string?[] { null },
-                                    "own-army-personalities" => armyIds.Cast<string?>().ToArray(),
-                                    "hand" => player.Hand.ToArray(),
-                                    "own-terrain-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Strategy && Keyword(Card(h), "Terrain")).Cast<string?>().ToArray(),
-                                    "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Concat(RulebookEquipDiscardCandidates(playerId, id).Select(c => c.Id)).Cast<string?>().ToArray(), // P19: plus the discard pile when a modifier allows it
-                                    // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): another Strategy in the acting player's own hand.
-                                    "own-other-strategy-in-hand" => player.Hand.Where(h => h != source?.Id && Definition(Card(h)).Type == CardType.Strategy).Cast<string?>().ToArray(),
-                                    // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
-                                    // Spell, matching the ordinary Equip() command's own type filter).
-                                    "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
-                                    "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
-                                    "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    "own-discarded-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c)).Select(c => (string?)c.Id).ToArray(),
-                                    "own-discarded-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
-                                    "own-dead-samurai" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
-                                    "own-discarded-courtier-or-shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && IsDiscardedPersonality(c) && (Keyword(c, "Courtier") || Keyword(c, "Shugenja"))).Select(c => (string?)c.Id).ToArray(),
-                                    "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
-                                    // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
-                                    // hand or a face-up province, neither of which the in-play default reaches, so the
-                                    // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
-                                    "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
-                                    // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
-                                    // Kharmic had -- validated, but a target in a discard pile is never in the in-play
-                                    // default, so the ability was never offered. Each mirrors its own Require above.
-                                    "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    "source-if-dead" => source is { Zone: Zone.Dead } ? [source.Id] : [],
-                                    "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-                                    "own-dark-virtue-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 4: Void Tattoo's discard-pile target, mirroring its Require above.
-                                    "own-tattoo-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Tattoo") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentAction(c, "Battle")).Select(c => (string?)c.Id).ToArray(),
-                                    "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
-                                    // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
-                                    // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
-                                    "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    "personality-in-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
-                                    "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
-                                    // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
-                                    "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId, source?.Id).Select(c => (string?)c.Id).ToArray(),
-                                    // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
-                                    "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
-                                    // Seeds of Decay pass (issue #453), batch 2: the two out-of-play categories.
-                                    "enemy-face-up-personality-anywhere" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Personality && (InPlay(c) || c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
-                                    "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    // Forgotten Legacy pass (issue #467), batch 5: Wind of the Moon's out-of-play target.
-                                    "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's dead-pile target.
-                                    "own-honorably-dead-clan-personality" => _state.Cards.Values.Where(c => IsOwnHonorablyDeadClanPersonality(c, playerId, ability)).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's "a Follower in your discard pile".
-                                    "se2-own-follower-in-discard" => ShadowsEmbraceBatch2OwnFollowersInDiscard(playerId).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 6: the two out-of-play categories.
-                                    "face-up-personality-in-province" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
-                                    "own-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
-                                    EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
-                                    "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? inPlay
-                                }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
-                                   // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
-                                   // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
-                                   // keeps only the ones with enemy units. Every other ability has exactly one (null).
-                                   // A move whose destination is a rule of the ability that the player chooses between (issue #336) offers one candidate
-                                   // per battlefield the rule lists; a move with nothing to choose (and no legal battlefield) offers the single null one.
-                                   // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
-                                   // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
-                                int?[] destinations = ability.ChoosesOwnProvince ? player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => (int?)p.Index).ToArray()
-                                    : ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, _state.Players.Max(pl => pl.Provinces.Count)).Select(i => (int?)i).ToArray() /* either owner's province: sized to the larger count (bot soak, issue #642) */
-                                    : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
-                                    : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
-                                    : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
-                                foreach (var provinceOwner in ability.Target is "any-province" or "player" ? new int?[] { 0, 1 } : new int?[] { null })
-                                {
-                                    var legal = new List<GameCommand>(); string? error = null;
-                                    var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
-                                    foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
+                                    var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
+                                    var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
+                                    var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
+                                        CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, DeckPosition: deckPosition, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
+                                    // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
+                                    if (ability.Slots is not null)
                                     {
-                                        // The payment offered with each candidate is the engine's own suggestion from the ONE
-                                        // Gold quote for that candidate (issue #303) -- fixed, target-derived (Equip (Battle),
-                                        // Low Market, Your Clan Needs You!, Soshi Neiru, Shinden Shorai) or variable alike, never
-                                        // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
-                                        // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
-                                        // it always has.
-                                        var command = prototype with { TargetId = target, Province = destination, TargetPlayerId = provinceOwner };
-                                        var quote = QuoteAbilityGold(command);
-                                        command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
-                                        try { ValidateAbility(command); legal.Add(command); quotes.Add((command, quote)); }
-                                        catch (RuleViolation e) { error ??= e.Message; }
+                                        yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}"), source?.Id);
+                                        continue;
                                     }
-                                    var firstQuote = quotes.Count > 0 ? quotes[0].Quote : null;
-                                    // A target-derived cost differs per target, so every legal target ships its own quote and
-                                    // the client swaps between them without a round trip.
-                                    var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
-                                        ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                                    var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                                        + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? Wave827CostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
-                                        + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
-                                        + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
-                                    yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
-                                        legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
-                                        // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the
-                                        // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
-                                        // same field never means both; ActionOption.Type/Slots/NoTarget say which.
-                                        Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.ChoosesOwnProvince ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
-                                        Gold: firstQuote, TargetGold: targetQuotes,
-                                        // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
-                                        NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
-                                        AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label + (costOption.Verb == CostVerbs.Discard && shownChoice is not null ? ": " + Definition(Card(shownChoice)).Name : ""), ability.Label),
-                                        Movement: MovementPreview(id, ability, source, performer),
-                                        Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
+                                    // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
+                                    string?[] candidates = ability.Target switch
+                                    {
+                                        "none" or "provinces" or "any-province" or "enemy-province" or "player" => new string?[] { null },
+                                        "own-army-personalities" => armyIds.Cast<string?>().ToArray(),
+                                        "hand" => player.Hand.ToArray(),
+                                        "own-terrain-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Strategy && Keyword(Card(h), "Terrain")).Cast<string?>().ToArray(),
+                                        "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Concat(RulebookEquipDiscardCandidates(playerId, id).Select(c => c.Id)).Cast<string?>().ToArray(), // P19: plus the discard pile when a modifier allows it
+                                                                                                                                                                                                                                                                          // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): another Strategy in the acting player's own hand.
+                                        "own-other-strategy-in-hand" => player.Hand.Where(h => h != source?.Id && Definition(Card(h)).Type == CardType.Strategy).Cast<string?>().ToArray(),
+                                        // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
+                                        // Spell, matching the ordinary Equip() command's own type filter).
+                                        "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
+                                        "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
+                                        "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        "own-discarded-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c)).Select(c => (string?)c.Id).ToArray(),
+                                        "own-discarded-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                                        "own-dead-samurai" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
+                                        "own-discarded-courtier-or-shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && IsDiscardedPersonality(c) && (Keyword(c, "Courtier") || Keyword(c, "Shugenja"))).Select(c => (string?)c.Id).ToArray(),
+                                        "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
+                                        // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
+                                        // hand or a face-up province, neither of which the in-play default reaches, so the
+                                        // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
+                                        "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
+                                        // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
+                                        // Kharmic had -- validated, but a target in a discard pile is never in the in-play
+                                        // default, so the ability was never offered. Each mirrors its own Require above.
+                                        "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        "source-if-dead" => source is { Zone: Zone.Dead } ? [source.Id] : [],
+                                        "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                                        "own-dark-virtue-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 4: Void Tattoo's discard-pile target, mirroring its Require above.
+                                        "own-tattoo-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Tattoo") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentAction(c, "Battle")).Select(c => (string?)c.Id).ToArray(),
+                                        "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
+                                        // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
+                                        // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
+                                        "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        "personality-in-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
+                                        "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
+                                        // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
+                                        "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId, source?.Id).Select(c => (string?)c.Id).ToArray(),
+                                        // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
+                                        "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                                        // Seeds of Decay pass (issue #453), batch 2: the two out-of-play categories.
+                                        "enemy-face-up-personality-anywhere" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Personality && (InPlay(c) || c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                                        "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        // Forgotten Legacy pass (issue #467), batch 5: Wind of the Moon's out-of-play target.
+                                        "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's dead-pile target.
+                                        "own-honorably-dead-clan-personality" => _state.Cards.Values.Where(c => IsOwnHonorablyDeadClanPersonality(c, playerId, ability)).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's "a Follower in your discard pile".
+                                        "se2-own-follower-in-discard" => ShadowsEmbraceBatch2OwnFollowersInDiscard(playerId).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 6: the two out-of-play categories.
+                                        "face-up-personality-in-province" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
+                                        "own-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
+                                        EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
+                                        "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
+                                        _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? inPlay
+                                    }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
+                                       // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
+                                       // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
+                                       // keeps only the ones with enemy units. Every other ability has exactly one (null).
+                                       // A move whose destination is a rule of the ability that the player chooses between (issue #336) offers one candidate
+                                       // per battlefield the rule lists; a move with nothing to choose (and no legal battlefield) offers the single null one.
+                                       // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
+                                       // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
+                                    int?[] destinations = ability.ChoosesOwnProvince ? player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => (int?)p.Index).ToArray()
+                                        : ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, _state.Players.Max(pl => pl.Provinces.Count)).Select(i => (int?)i).ToArray() /* either owner's province: sized to the larger count (bot soak, issue #642) */
+                                        : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
+                                        : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
+                                        : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
+                                    foreach (var provinceOwner in ability.Target is "any-province" or "player" ? new int?[] { 0, 1 } : new int?[] { null })
+                                    {
+                                        var legal = new List<GameCommand>(); string? error = null;
+                                        var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
+                                        foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
+                                        {
+                                            // The payment offered with each candidate is the engine's own suggestion from the ONE
+                                            // Gold quote for that candidate (issue #303) -- fixed, target-derived (Equip (Battle),
+                                            // Low Market, Your Clan Needs You!, Soshi Neiru, Shinden Shorai) or variable alike, never
+                                            // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
+                                            // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
+                                            // it always has.
+                                            var command = prototype with { TargetId = target, Province = destination, TargetPlayerId = provinceOwner };
+                                            var quote = QuoteAbilityGold(command);
+                                            command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
+                                            try { ValidateAbility(command); legal.Add(command); quotes.Add((command, quote)); }
+                                            catch (RuleViolation e) { error ??= e.Message; }
+                                        }
+                                        var firstQuote = quotes.Count > 0 ? quotes[0].Quote : null;
+                                        // A target-derived cost differs per target, so every legal target ships its own quote and
+                                        // the client swaps between them without a round trip.
+                                        var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
+                                            ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
+                                        var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}") + (deckPosition is null ? "" : $" · {deckPosition.ToLowerInvariant()} of your Fate deck")
+                                            + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? Wave827CostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
+                                            + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
+                                            + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
+                                        yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
+                                            legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
+                                            // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the
+                                            // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
+                                            // same field never means both; ActionOption.Type/Slots/NoTarget say which.
+                                            Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                                : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                                : ability.ChoosesOwnProvince ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                                : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
+                                            Gold: firstQuote, TargetGold: targetQuotes,
+                                            // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
+                                            NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
+                                            AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label + (costOption.Verb == CostVerbs.Discard && shownChoice is not null ? ": " + Definition(Card(shownChoice)).Name : ""), ability.Label),
+                                            Movement: MovementPreview(id, ability, source, performer),
+                                            Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
+                                    }
                                 }
-                            }
         }
     }
     private string AbilityOptionLabel(string id, AbilityDefinition ability, string? performer, CardInstance? source, CostOption? costOption = null) =>
