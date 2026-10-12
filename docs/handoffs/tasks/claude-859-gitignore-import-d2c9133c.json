@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Commit the 194 Godot .import files for Published oracle art that were generated but untracked, matching the 1,987 already tracked; a blanket *.import ignore was rejected because the repo tracks them.",
+  "validation": "Same format as tracked imports (diff after normalising ids); CI client job",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/860",
+  "branch": "claude/859-gitignore-import",
+  "updated": "2026-10-12T03:44:03.432318+00:00"
+}
