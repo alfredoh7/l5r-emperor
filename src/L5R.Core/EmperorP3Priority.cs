@@ -406,10 +406,8 @@ public sealed partial class MatchEngine
                 Require(_state.PendingChoice?.CardId is { } entered && Keyword(Card(entered), "Henshin"), "Only a Henshin's entry.");
                 break;
             case EmperorP3PriorityAbilities.DestructiveKata:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
                 break;
             case EmperorP3PriorityAbilities.DestructiveReaction:
-                Require(source!.Zone == Zone.Home, "This Kata must be in play.");
                 Require(command.TargetPlayerId is int, "Choose a player.");
                 break;
         }

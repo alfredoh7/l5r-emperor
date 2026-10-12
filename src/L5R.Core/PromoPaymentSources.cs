@@ -177,7 +177,6 @@ public sealed partial class MatchEngine
 
     private void ValidatePromoPaymentSources(string id, CardInstance? source, PlayerState player)
     {
-        if (id == PromoPaymentSourceAbilities.ProfitsEnter) Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card is put into play from your hand.");
     }
 
     private bool? RunPromoPaymentSources(string id, GameCommand command, PlayerState player, CardInstance? source)

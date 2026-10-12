@@ -164,8 +164,7 @@ public sealed partial class MatchEngine
                 if (target is not null) Require(Definition(target).Type == CardType.Holding && CardGoldCost(target) <= CardGoldCost(source), "Choose a Holding with an equal or lower Gold Cost than this Follower's.");
                 break;
             case Wave739Abilities.MaskReanimate:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "Paneki's Mask must be in your hand.");
-                Require(!ControlsCopyOf(player.Id, Definition(source).Name), "You already control this Unique card.");
+                Require(!ControlsCopyOf(player.Id, Definition(source!).Name), "You already control this Unique card.");
                 if (target is not null) Require(WasInPlayDuringLastTurn(target), "Choose a dead Personality who was in play during your last turn.");
                 break;
             case Wave739Abilities.PoisonCup:

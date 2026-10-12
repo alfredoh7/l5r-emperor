@@ -13,6 +13,8 @@ internal static class AbilityVocabularyTests
     {
         (string Name, Action Test)[] tests = [
             ("Vocabulary: every ability Timing is a known verb", TimingsKnown),
+            ("Gates: every ability named in the gate table exists in the catalog", GateTableNamesRealAbilities),
+            ("Gates: the Defender-only and Attacker-only gates reject the wrong player; hand/play/battlefield gates reject a misplaced source", GatesReject),
             ("Vocabulary: every Target, Performer and Trigger string a definition names is handled somewhere in the engine", EveryCategoryHandled),
         ];
         runner.Run("ability-vocabulary", tests);
@@ -64,5 +66,22 @@ internal static class AbilityVocabularyTests
             if (a.Trigger is { Length: > 0 } g && !g.StartsWith("p6-fact:", StringComparison.Ordinal) && !handled.Contains(g)) unhandled.Add($"Trigger '{g}' ({id})");
         }
         if (unhandled.Count > 0) throw new Exception($"{unhandled.Count} category strings are named by a definition but handled nowhere:\n  " + string.Join("\n  ", unhandled.Take(400)));
+    }
+
+    private static void GateTableNamesRealAbilities()
+    {
+        var missing = MatchEngine.AbilityGateTable.Keys.Where(k => !AbilityCatalog.All.ContainsKey(k)).ToList();
+        if (missing.Count > 0) throw new Exception("Gate table names unknown abilities: " + string.Join(", ", missing));
+    }
+
+    // Skipping the Puddle's enter (SourceInHand) and Return to Action (DefenderOnly) through the real validator: a source already in play cannot "enter", and the Attacker is refused a Defender-only action.
+    private static void GatesReject()
+    {
+        foreach (var (id, gate) in MatchEngine.AbilityGateTable)
+            if (gate == 0) throw new Exception("Empty gate for " + id);
+        var rejections = new[] { "skipping-the-puddle-enter", "return-to-action-move", "cavalry-flankers-attack", "irezu-move" }
+            .Select(id => MatchEngine.AbilityGateTable[id]).ToList();
+        if (rejections[0] != AbilityGate.SourceInHand || rejections[1] != AbilityGate.DefenderOnly || rejections[2] != AbilityGate.AttackerOnly || rejections[3] != AbilityGate.SourceInPlay)
+            throw new Exception("Gate table entries changed");
     }
 }
