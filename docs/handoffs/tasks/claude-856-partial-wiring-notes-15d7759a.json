@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Records the two partially wired cards the printed-action sweep found (Tamori Kazushige, Togashi Korimi) as inventory notes.",
-  "validation": "Inventory regenerated (2225 cards, 2219 wired); no code change.",
+  "lane": "shared",
+  "summary": "Records the two partially wired cards the printed-action sweep found (Tamori Kazushige, Togashi Korimi) as inventory notes; the workbook is regenerated. Shared because it touches the inventory tool and the workbook.",
+  "validation": "Inventory regenerated (2225 cards, 2219 wired); no engine code change.",
   "remaining": "Wiring the two missing actions is not done.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/856",
   "branch": "claude/856-partial-wiring-notes",
-  "updated": "2026-10-12T02:49:14.925668+00:00"
+  "updated": "2026-10-12T02:49:33.110842+00:00"
 }
