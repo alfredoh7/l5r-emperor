@@ -342,6 +342,14 @@ public static partial class TrainingOpponent
             case "w827PanKuStraightenChoose": return command.Choice == "remain" ? 105 : 100;
             case "w827KoanDiscardChoose": return 100;
             // Cross-Clan Wedding (issue #829): the Personality it gives away is the least valuable it has, whether it is the first gift or the one given back; Minor Blackmail names the other player's strongest.
+            // Blood of Isawa's Tribe (issue #835): the bot takes a keyword to replace, always replaces it with a different element (the same one only asks for a confirmation), and never backs out.
+            case Wave835Abilities.BloodFrom: return 100;
+            case Wave835Abilities.BloodTo: return action.Label.Contains("the same keyword", StringComparison.Ordinal) ? 40 : 100;
+            case Wave835Abilities.BloodConfirm: return 100;
+            case Wave835Abilities.BloodCancel: case Wave835Abilities.BloodBack: return 10;
+            // The Heavens' Blessing (issue #835): the bot declines to pay 2 Gold for a card it would only draw, and a Foe duel names its first Unique Personality.
+            case Wave835Abilities.HeavensDeclineAll: return PassScore + 2;
+            case Wave835Abilities.FoePick: return 100 + (x.Card(command.TargetId)?.Force ?? 0);
             case "w829WeddingGiveChoose": return 100 - Wave829Worth(x.Card(command.TargetId));
             case "eventChoice": return Wave829EventChoiceScore(x, action, command);
             // Fusako's pre-accept bow (issue #667): the bot never bows its own Personality to refuse; it accepts the duel.

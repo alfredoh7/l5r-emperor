@@ -305,13 +305,13 @@ public sealed partial class MatchEngine
                 GrantAdditionalAction(player.Id, null, anyDiscardTiming: _state.Phase != Phase.Battle, id: NewMechAGrantId());
                 return false;
             case EmperorMechAAbilities.InokuchiStraighten:
-            {
-                Straighten(source!);
-                var grantId = NewMechAGrantId();
-                MechA.InokuchiWatches.Add(new(grantId, source!.Id, player.Id));
-                GrantAdditionalAction(player.Id, null, performerId: source.Id, requiredActionKeyword: "Iaijutsu", id: grantId);
-                return false;
-            }
+                {
+                    Straighten(source!);
+                    var grantId = NewMechAGrantId();
+                    MechA.InokuchiWatches.Add(new(grantId, source!.Id, player.Id));
+                    GrantAdditionalAction(player.Id, null, performerId: source.Id, requiredActionKeyword: "Iaijutsu", id: grantId);
+                    return false;
+                }
             case EmperorMechAAbilities.BeyondTheLine:
                 GrantAdditionalAction(player.Id, null, requiredActionKeyword: "Recon", tag: EmperorMechAAbilities.BeyondTheLineTag, id: NewMechAGrantId(), mandatory: true);
                 return false;
@@ -324,14 +324,14 @@ public sealed partial class MatchEngine
                 MechA.GrantLockBattle[player.Id] = _state.BattleNumber;
                 return false;
             case EmperorMechAAbilities.StringOfVictories:
-            {
-                foreach (var ring in _state.Cards.Values.Where(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring && c.Bowed).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
-                    Straighten(ring);
-                GrantAdditionalAction(player.Id, null, anyDiscardTiming: _state.Phase != Phase.Battle, id: NewMechAGrantId());
-                var rings = _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.FateDiscard && Definition(c).Type == CardType.Ring).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
-                var options = rings.Select(r => new EffectOption(r.Id, $"Put {Definition(r).Name} into your hand", [RingToHandEffect + r.Id])).Append(new EffectOption("none", "Put no Ring into your hand", [])).ToArray();
-                return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: you may put a Ring from your Fate discard pile into your hand.", consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            }
+                {
+                    foreach (var ring in _state.Cards.Values.Where(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring && c.Bowed).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
+                        Straighten(ring);
+                    GrantAdditionalAction(player.Id, null, anyDiscardTiming: _state.Phase != Phase.Battle, id: NewMechAGrantId());
+                    var rings = _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.FateDiscard && Definition(c).Type == CardType.Ring).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+                    var options = rings.Select(r => new EffectOption(r.Id, $"Put {Definition(r).Name} into your hand", [RingToHandEffect + r.Id])).Append(new EffectOption("none", "Put no Ring into your hand", [])).ToArray();
+                    return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: you may put a Ring from your Fate discard pile into your hand.", consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
+                }
             case EmperorMechAAbilities.AramasusLegacy:
                 BeginAramasuAttackPhase(command, player, source!, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
                 return true;
@@ -374,9 +374,20 @@ public sealed partial class MatchEngine
     {
         MechA.Aramasu = new AramasuPhaseState
         {
-            PlayerId = player.Id, TurnPlayerId = _state.ActivePlayerId, SourceId = source.Id,
-            Paused = new() { Command = command, PlayerId = command.PlayerId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant, PlayedFromDiscard = playedFromDiscard,
-                OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList() }
+            PlayerId = player.Id,
+            TurnPlayerId = _state.ActivePlayerId,
+            SourceId = source.Id,
+            Paused = new()
+            {
+                Command = command,
+                PlayerId = command.PlayerId,
+                Negated = _state.NegatedEffects.ToList(),
+                ConsumedGrant = consumedGrant,
+                PlayedFromDiscard = playedFromDiscard,
+                OpponentHonorBefore = opponentHonorBefore,
+                BowedBefore = bowedBefore.ToList(),
+                PreExistingGrants = preExistingGrants.ToList()
+            }
         };
         _state.NegatedEffects.Clear();
         // The action's own burst ends here (an ordinary action), before the phase: its grants belong to the Action Phase.
