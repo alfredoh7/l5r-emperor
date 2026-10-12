@@ -284,7 +284,7 @@ public sealed partial class MatchEngine
                     foreach (var card in cycled)
                     {
                         player.Hand.Remove(card.Id);
-                        card.Zone = Zone.FateDeck; card.FaceUp = false; card.AbilityUses.Clear();
+                        card.Zone = Zone.FateDeck; card.FaceUp = false; ResetCardState(card);
                         player.FateDeck.Add(card.Id);
                     }
                     Emit("toDeck", $"{Definition(source!).Name}: {player.Name} put {cycled.Length} card{(cycled.Length == 1 ? "" : "s")} from their hand on the bottom of their Fate deck.", player.Id, source!.Id);

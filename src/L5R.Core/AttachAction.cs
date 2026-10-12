@@ -207,8 +207,7 @@ public sealed partial class MatchEngine
         if (fromDiscard)
         {
             // A new entry into play: nothing the card carried while it was last in play (or since) follows it back.
-            attachment.Tokens.Clear(); attachment.Modifiers.Clear(); attachment.GrantedKeywords.Clear(); attachment.GrantedAbilities.Clear(); attachment.RemovedKeywords.Clear();
-            attachment.Protections.Clear(); attachment.AbilityUses.Clear(); attachment.Bowed = false; attachment.Dishonorable = false;
+            ResetCardState(attachment);
         }
         TakeControl(attachment, wielder.OwnerId);
         attachment.HostCardId = null;
