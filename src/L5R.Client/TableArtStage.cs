@@ -12,6 +12,10 @@ public partial class TableArtStage : Node3D
     private const float PlateHeight = 10;
     private Camera3D _camera = null!;
     private WarRoomStage? _warRoom;
+    private bool _useWarRoom;
+    private bool _armed;
+    private bool _prefetched;
+    private Action<WarRoomStage>? _applyCamera;
     private string? _capture;
     private double _elapsed;
     private float _lightTime;
@@ -24,8 +28,10 @@ public partial class TableArtStage : Node3D
     {
         if (!ReviewMode && !OS.GetCmdlineUserArgs().Contains("--without-war-room"))
         {
-            _warRoom = new WarRoomStage();
-            AddChild(_warRoom);
+            // The hall is about 640 MB of models and textures, so it is built when the table is first shown, not behind the title menu (issue #877).
+            _useWarRoom = true;
+            // Deferred so Main can hide the table behind the title menu first.
+            Callable.From(() => { _armed = true; EnsureWarRoom(); }).CallDeferred();
             return;
         }
         foreach (var arg in ReviewMode ? OS.GetCmdlineUserArgs() : [])
@@ -59,6 +65,30 @@ public partial class TableArtStage : Node3D
         GetViewport().SizeChanged += FitCamera;
         FitCamera();
         GD.Print($"TABLE_ART_STAGE: Blender projection mesh, complete environment plate, {(ReviewMode ? "original aspect" : "navy lantern table, table-anchored light and pan/zoom")}.");
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationVisibilityChanged) EnsureWarRoom();
+    }
+
+    /// <summary>Starts loading the hall on background threads once the player heads for a table, so entering it does not stall on disk.</summary>
+    public void PrefetchWarRoom()
+    {
+        if (!_useWarRoom || _warRoom is not null || _prefetched) return;
+        _prefetched = true;
+        ResourceLoader.LoadThreadedRequest("res://FortressHall.tscn", "", true);
+    }
+
+    private void EnsureWarRoom()
+    {
+        if (!_useWarRoom || !_armed || _warRoom is not null || !IsVisibleInTree()) return;
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        _warRoom = new WarRoomStage();
+        AddChild(_warRoom);
+        GD.Print($"WAR_ROOM_BUILD_MS: {clock.ElapsedMilliseconds}");
+        _applyCamera?.Invoke(_warRoom);
+        _warRoom.PresentLight(_lightTime, !ReviewMode && !ReducedMotion);
     }
 
     private void ApplyPaintedMaterials(Node node)
@@ -216,7 +246,9 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("left_lamp", leftLamp);
             material.SetShaderParameter("right_lamp", RightLamp);
         }
-        _warRoom?.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, leftLamp, RightLamp);
+        var lamp = leftLamp;
+        _applyCamera = room => room.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, lamp, RightLamp);
+        if (_warRoom is not null) _applyCamera(_warRoom);
         CardPaper.Table.SetShaderParameter("light_radius", extent * new Vector2(.24f, .31f));
         CardPaper.Table.SetShaderParameter("light_origin", leftWorld);
         CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * RightLamp);
@@ -244,7 +276,7 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter(ShaderParameters.CandleMotion, animate ? 1 : 0);
         }
         _warRoom?.PresentLight(time, animate);
-        CardPaper.SetLight(time, animate, tableLamps: _warRoom is null);
+        CardPaper.SetLight(time, animate, tableLamps: !_useWarRoom);
     }
 
     public override void _UnhandledKeyInput(InputEvent @event)

@@ -21,10 +21,10 @@ public partial class Main
         _titleMenu = new TitleMenu
         {
             Preferences = _preferences,
-            StartMatch = StartFromMenu,
-            PracticeSetup = ShowPracticeSetup,
+            StartMatch = seat => { _table.PrefetchWarRoom(); StartFromMenu(seat); },
+            PracticeSetup = () => { _table.PrefetchWarRoom(); ShowPracticeSetup(); },
             DuelDemo = OpenDuelDemo,
-            PrivateMatch = () => { _enteringPrivate = true; ShowOnline(); },
+            PrivateMatch = () => { _table.PrefetchWarRoom(); _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
             DeckBuilder = () => DeckBuilderDialog.Show(this),
             Resume = EnterTable,
