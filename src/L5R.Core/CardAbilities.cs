@@ -5867,8 +5867,8 @@ public sealed partial class MatchEngine
         if (id == "sound-the-retreat-move") Require(source!.Zone == Zone.Home, "This Kata must be in play.");
         if (id == "advanced-intelligence-draw") Require(!AdvancedIntelligencePlayedThisBattle(player), "You may only play one copy of Advanced Intelligence per battle.");
         if (id is "grappling-snake-negate" or "grappling-snake-bow") Require(source!.GrantedAbilities.Any(g => g.AbilityId == id && GrantHolds(g.Duration, source)), "Grappling the Snake's choice is no longer open.");
-        if (ability.Trigger == "after-engaging-at-own-battlefield")
-            Require(AtBattle(source!), "This card must be assigned to the battlefield being engaged.");
+        if (ability.Trigger == "after-engaging-at-own-battlefield" || source is not null && EngageSourceMustBeAtBattlefield(id, ability, source))
+            Require(AtBattle(source!), "This card must be assigned to the battlefield being engaged."); // issue #840: Engage is battlefield-specific
         // Daidoji Yuki: "if all your Personalities there are Scouts" sits BEFORE the effects colon, so it is a
         // requirement to take the action (core rules, constraints block), not a condition on part of the effect.
         if (id == "yuki-engage-recon")
@@ -6575,7 +6575,7 @@ public sealed partial class MatchEngine
                         or "own-unbowed-ring" or WlStratGatesAbilities.OwnUnbowedAnyLocation /* issue #674: Boiling Point */ or PromoCelestialDAbilities.RingSharingTarget /* issue #830: All Within the World straightens a Ring, never in a unit */) && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
                             or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move" or "shinoda-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
-                    if (id == WlItemsMiscFollowerAbilities.BestialEngage) Require(AtBattle(target), "The target must be at the battlefield being engaged."); // issue #838: an Engage penalty reaches only cards present at that battlefield
+                    if (EngageTargetMustBeAtBattlefield(id, ability, target)) Require(AtBattle(target), "The target must be at the battlefield being engaged."); // issues #838/#840: an Engage reaches only cards present at that battlefield
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category

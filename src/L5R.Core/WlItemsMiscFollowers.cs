@@ -46,7 +46,7 @@ public static class WlItemsMiscFollowerAbilities
         all[SycophantsStraighten] = new("Limited", "Political Limited: Bow this card: Straighten this Personality. You may use his Political abilities that may only be used once per turn a second time (this turn)", "none",
             ActionKeywords: ["Political"], Costs: ActionCost.BowSource);
         // The Bestial Ones (oracle-l5r-10677): "Engage: Give a target enemy Personality or Follower -2F."
-        all[BestialEngage] = new("Reaction", "Engage: Give a target enemy Personality or Follower -2F", "enemy-force", Trigger: "after-engaging-at-own-battlefield"); // issue #838 (rules lead): Engage is battlefield-specific -- its unit must be at the engaged battlefield, and so must the target (ValidateAbility)
+        all[BestialEngage] = new("Reaction", "Engage: Give a target enemy Personality or Follower -2F", "enemy-force", Trigger: "after-engaging-at-own-battlefield");
         return all;
     }
 }
