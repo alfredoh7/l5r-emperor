@@ -3539,7 +3539,12 @@ public sealed partial class MatchEngine
     private static CardDefinition Definition(CardInstance card) => card.Printed ?? CardCatalog.Get(card.DefinitionId);
     private static void Require(bool condition, string message) { if (!condition) throw new RuleViolation(message); }
     private sealed class RuleViolation(string message) : Exception(message);
-    private static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
+    // Issue #863: a deep copy equal to the JSON round trip below (StateCloner.cs reproduces its semantics from the serializer's own contract), several times faster.
+    internal static T Copy<T>(T value) => ReferenceJsonCopyForTests ? CopyViaJson(value) : StateCloner.Clone(value)!;
+    /// <summary>Tests only: run this thread's engines on the original JSON copy, the reference StateClonerTests plays the fast copy against.</summary>
+    [ThreadStatic] internal static bool ReferenceJsonCopyForTests;
+    /// <summary>The original copy, kept as the reference StateClonerTests compares Copy against.</summary>
+    internal static T CopyViaJson<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
 
     // Card ids are handed out in a seeded permutation, not deck-list order: a face-down card's id (offered in a target list, an action
     // command or a view) must not reveal which deck-list entry it is. A separate generator keeps the setup shuffles' sequence unchanged.
