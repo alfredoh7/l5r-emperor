@@ -39,5 +39,7 @@ public sealed partial class MatchEngine
         _ => EngineHooks.SweepsAfterAccepted.Names,
     };
 
+    internal IEnumerable<(string Name, Action Run)> SweepsForProfile() { var names = EngineHooks.SweepsAfterApply.Names; var items = EngineHooks.SweepsAfterApply.Items; for (var i = 0; i < items.Length; i++) { var sweep = items[i]; yield return ($"after-apply:{names[i]}", () => sweep(this)); } var late = EngineHooks.SweepsAfterAccepted.Items; var lateNames = EngineHooks.SweepsAfterAccepted.Names; for (var i = 0; i < late.Length; i++) { var sweep = late[i]; yield return ($"after-accepted:{lateNames[i]}", () => sweep(this, _state.TurnNumber)); } }
+
     private void RunSweeps(OrderedHooks<Action<MatchEngine>> phase) { foreach (var sweep in phase.Items) sweep(this); }
 }
