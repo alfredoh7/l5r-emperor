@@ -8,7 +8,7 @@ using static RegressionAssertions;
 internal static class Wave835Tests
 {
     private const string CleansingBreath = Wave835Abilities.CleansingBreathCard, ImperialDeployment = Wave835Abilities.ImperialDeploymentCard, WardedPremises = Wave835Abilities.WardedPremisesCard,
-        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard, Blood = Wave835Abilities.BloodCard;
+        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard, Blood = Wave835Abilities.BloodCard, Revelations = Wave835Abilities.RevelationsCard, Foe = Wave835Abilities.FoeCard;
     private const string TwoElements = "oracle-l5r-10857" /* Moshi Ikako: Air, Fire */, OneElement = "oracle-l5r-7797" /* Tamori Shosei: Earth */;
     private const string Farm = Wave829Abilities.Farm, FaceOfNinube = "oracle-l5r-2431", TravelingPeddler = "oracle-l5r-8729";
     private const string CraneSamurai = "training-crane-samurai", LionSamurai = "training-lion-samurai", Item = "training-item";
@@ -57,6 +57,8 @@ internal static class Wave835Tests
         ("The Heavens' Blessing: every card an own Strategy draws in an Action Phase is its own 2 Gold payment, declinable, never shared; a Holding's draw is free", HeavensDraws),
         ("Unbearable Weight: discards the top card of a chosen Fate deck, a Chi penalty of its Focus Value; a destroyed target's controller puts the Strategy in his hand, and it goes back to its owner's discard pile", UnbearableWeight),
         ("Blood of Isawa's Tribe: after it attaches, the Shugenja's element keywords, then the five elements, a confirmation for the same element; no pass, no Reaction window; the replacement lasts while it is attached", BloodOfIsawasTribe),
+        ("Revelations: shows the top five Dynasty cards to both players, the other player may discard one, its owner arranges the rest, and the Province refills face up", RevelationsEvent),
+        ("The Empire's Foe Exposed: a duel in the Events Phase between Unique Personalities, nothing unless each player has one, no question for a player with exactly one, destroying the loser", EmpiresFoeExposed),
         ("Merchant Patronage: on an Honor change an action of another player's Holding makes, the Honor goes to the player you choose, one larger with a bowed Courtier", MerchantPatronage),
     ]);
 
@@ -74,7 +76,9 @@ internal static class Wave835Tests
             (Heavens, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.HeavensDraw, Wave835Abilities.HeavensHonor]),
             (Unbearable, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.Unbearable]),
             (Patronage, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.PatronageRedirect, Wave835Abilities.PatronageBow]),
-            (Blood, "spell-wave-835", CardType.Spell, [])];
+            (Blood, "spell-wave-835", CardType.Spell, []),
+            (Revelations, "event-wave-835", CardType.Event, []),
+            (Foe, "event-wave-835", CardType.Event, [])];
         foreach (var (id, wave, type, abilities) in cards)
         {
             var def = CardCatalog.Get(id);
@@ -634,5 +638,149 @@ internal static class Wave835Tests
         var none = BloodTable("oracle-l5r-11328", out var h4, out var s4);
         Accept(none, new GameCommand("equip", 0, none.Version, CardId: s4.Id, TargetId: h4.Id, SourceIds: []));
         Check(none.State.PendingChoice is null, "a Shugenja with no element keyword has nothing to replace");
+    }
+
+    // ---- Revelations --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static (MatchEngine E, CardInstance Event) RevelationsTable()
+    {
+        var s = Batch336Support.Table(Phase.Straighten, 0);
+        var ev = Add(s, Revelations, 0, Zone.Province);
+        s.Players[0].Provinces[1].CardId = ev.Id; ev.ProvinceIndex = 1; ev.FaceUp = true;
+        return (Engine(s), ev);
+    }
+
+    private static void RevelationsEvent()
+    {
+        var (e, ev) = RevelationsTable();
+        var topFive = e.State.Players[0].DynastyDeck.Take(5).ToArray();
+        Eq(topFive.Length, 5, "the fixture deck has cards");
+        Call(e, "EventsPhaseForTest", 0);
+        Eq(e.State.PendingChoice?.Type, "shownChoice", "the five cards are shown and the other player chooses");
+        Eq(e.State.PendingChoice?.PlayerId, 1, "the other player decides");
+        Eq(e.State.ShownCards.Count(c => c.SourceCardId == ev.Id), 5, "all five are in the public shown-cards record");
+        var offered = e.QueryActions(1).Where(a => a.Type == "chooseShown").ToArray();
+        Check(offered.Length >= 5, "one choice per shown card, and a way to choose none");
+        Check(e.QueryActions(0).All(a => a.Type is "wait" or "concede"), "its owner waits");
+        // The other player discards the third card shown.
+        var discardedId = topFive[2];
+        var third = e.State.ShownCards.Where(c => c.SourceCardId == ev.Id).OrderBy(c => c.Sequence).ElementAt(2).Sequence.ToString();
+        Accept(e, offered.First(a => a.Command!.Choice == third).Command!);
+        Eq(e.State.Cards[discardedId].Zone, Zone.DynastyDiscard, "the chosen card is discarded");
+        Eq(e.State.PendingChoice?.Type, "lookArrange", "its owner arranges the rest");
+        Eq(e.State.PendingChoice?.PlayerId, 0, "the owner arranges");
+        var arrangements = e.QueryActions(0).Where(a => a.Type == "arrangeTopCards").ToArray();
+        Check(arrangements.Length >= 1, "the arrangements are on offer");
+        var reversed = arrangements.Last();
+        Accept(e, reversed.Command!);
+        var deck = e.State.Players[0].DynastyDeck;
+        Check(!deck.Contains(discardedId), "the discarded card left the deck");
+        var refilledWith = e.State.Players[0].Provinces[1].CardId!;
+        Check(deck.Take(3).Append(refilledWith).OrderBy(x => x).SequenceEqual(topFive.Where(x => x != discardedId).OrderBy(x => x)), "the other four went back on top: the first refilled the Province, the other three are the top of the deck");
+        Check(e.State.Cards[ev.Id].Zone == Zone.DynastyDiscard, "the Event is discarded");
+        var province = e.State.Players[0].Provinces[1];
+        Check(province.CardId is not null && e.State.Cards[province.CardId].FaceUp, "its Province refilled face up");
+        Check(e.State.Phase == Phase.Action && e.State.PendingChoice is null, "the Events Phase went on: " + e.State.Phase);
+
+        // Choosing none: all five go back for the owner to arrange.
+        var (n, nev) = RevelationsTable();
+        var five = n.State.Players[0].DynastyDeck.Take(5).ToArray();
+        Call(n, "EventsPhaseForTest", 0);
+        Accept(n, n.QueryActions(1).First(a => a.Type == "chooseShown" && a.Command!.Choice == "done").Command!);
+        Eq(n.State.PendingChoice?.Type, "lookArrange", "nothing discarded, the owner arranges all five");
+        Accept(n, n.QueryActions(0).First(a => a.Type == "arrangeTopCards").Command!);
+        Check(n.State.Players[0].DynastyDeck.Take(4).Append(n.State.Players[0].Provinces[1].CardId!).OrderBy(x => x).SequenceEqual(five.OrderBy(x => x)), "all five went back on top (one of them refilled the Province)");
+        Check(n.State.Phase == Phase.Action && n.State.Players[0].Provinces[1].CardId is { } refilled && n.State.Cards[refilled].FaceUp, "the Province refilled face up");
+
+        // A Dynasty deck with nothing in it: nothing to show, the Event is discarded and the Province stays empty.
+        var empty = Batch336Support.Table(Phase.Straighten, 0);
+        var eev = Add(empty, Revelations, 0, Zone.Province);
+        empty.Players[0].Provinces[1].CardId = eev.Id; eev.ProvinceIndex = 1; eev.FaceUp = true;
+        empty.Players[0].DynastyDeck.Clear();
+        var ee = Engine(empty);
+        Call(ee, "EventsPhaseForTest", 0);
+        Check(ee.State.PendingChoice is null && ee.State.Phase == Phase.Action && ee.State.Cards[eev.Id].Zone == Zone.DynastyDiscard, "an empty deck: the Event is discarded");
+    }
+
+    // ---- The Empire's Foe Exposed -------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static CardInstance Unique(MatchState s, string def, int owner, int chiBonus = 0)
+    {
+        var card = Add(s, def, owner, Zone.Home);
+        card.GrantedKeywords.Add(new("Unique", "fixture", GrantDuration.Permanent));
+        if (chiBonus != 0) card.Modifiers.Add(new("fixture", "fixture", "Chi", chiBonus));
+        return card;
+    }
+
+    private static (MatchEngine E, CardInstance Event, CardInstance[] Mine, CardInstance[] Theirs) FoeTable(int mineUnique, int theirsUnique, int ownChi = 20)
+    {
+        var s = Batch336Support.Table(Phase.Straighten, 0);
+        var ev = Add(s, Foe, 0, Zone.Province);
+        s.Players[0].Provinces[1].CardId = ev.Id; ev.ProvinceIndex = 1; ev.FaceUp = false;
+        var mine = Enumerable.Range(0, mineUnique).Select(i => Unique(s, CraneSamurai, 0, i == 0 ? ownChi : 0)).ToList();
+        mine.Add(Add(s, CraneSamurai, 0, Zone.Home));                    // not Unique: never offered
+        var theirs = Enumerable.Range(0, theirsUnique).Select(_ => Unique(s, LionSamurai, 1)).ToList();
+        theirs.Add(Add(s, LionSamurai, 1, Zone.Home));
+        return (Engine(s), ev, [.. mine], [.. theirs]);
+    }
+
+    private static void FinishFoeDuel(MatchEngine e)
+    {
+        for (var guard = 0; guard < 20 && (e.State.PendingDuel is not null || e.State.PendingChoice is not null); guard++)
+        {
+            var mover = e.State.PendingChoice?.PlayerId ?? e.State.PriorityPlayerId;
+            var option = e.QueryActions(mover).FirstOrDefault(a => a.Enabled && a.Command is not null && (a.Type == "focus" && a.Command.Choice == "deck" || a.Type is "strike" or "declineReaction" or "declineDuelReaction" or "duelistRefocus"));
+            if (option is null) break;
+            Accept(e, option.Command!);
+        }
+    }
+
+    private static void EmpiresFoeExposed()
+    {
+        // Exactly one Unique Personality each: no question, the duel begins at once, in the Events Phase.
+        var (e, ev, mine, theirs) = FoeTable(1, 1);
+        Call(e, "EventsPhaseForTest", 0);
+        Check(e.State.PendingDuel is { } duel && duel.ChallengerId == mine[0].Id && duel.ChallengedId == theirs[0].Id, "the owner's Unique Personality challenges the other player's");
+        Check(e.State.Phase == Phase.Events, "the duel is fought during the Events Phase");
+        FinishFoeDuel(e);
+        Check(e.State.PendingDuel is null, "the duel finished");
+        Check(e.State.Cards[theirs[0].Id].Zone is Zone.Dead or Zone.DynastyDiscard, "the duel's loser is destroyed");
+        Eq(e.State.Cards[mine[0].Id].Zone, Zone.Home, "the winner stays");
+        Check(e.State.Cards[ev.Id].Zone == Zone.DynastyDiscard, "the Event is discarded");
+        Check(e.State.Phase == Phase.Action && e.State.PendingChoice is null, "the Events Phase went on to the Action Phase: " + e.State.Phase);
+
+        // Several Unique Personalities: the owner chooses his, then the other player chooses theirs; only Unique ones are listed.
+        var (m, mev, mm, mt) = FoeTable(2, 2);
+        Call(m, "EventsPhaseForTest", 0);
+        Eq(m.State.PendingChoice?.Type, Wave835Abilities.FoeWindow, "the owner is asked first");
+        Eq(m.State.PendingChoice?.PlayerId, 0, "the Event's owner");
+        var ownerOptions = m.QueryActions(0).Where(a => a.Type == Wave835Abilities.FoePick).ToArray();
+        Eq(string.Join(",", ownerOptions.Select(a => a.Command!.TargetId).OrderBy(x => x)), string.Join(",", mm.Take(2).Select(c => c.Id).OrderBy(x => x)), "only his Unique Personalities in play");
+        Check(ownerOptions.All(a => a.DecisionCandidateIds is [var only] && only == a.Command!.TargetId), "each is a candidate card the client can highlight, by click or list");
+        NoChange(m, new(Wave835Abilities.FoePick, 0, m.Version, TargetId: mm[2].Id), "a Personality that is not Unique is not a choice");
+        NoChange(m, new(Wave835Abilities.FoePick, 0, m.Version, TargetId: mt[0].Id), "nor the other player's");
+        NoChange(m, new(Wave835Abilities.FoePick, 1, m.Version, TargetId: mt[0].Id), "the other player waits");
+        Check(m.QueryActions(1).All(a => a.Type is "wait" or "concede"), "the other player has nothing to do yet");
+        Accept(m, ownerOptions.First(a => a.Command!.TargetId == mm[1].Id).Command!);
+        Eq(m.State.PendingChoice?.PlayerId, 1, "then the other player chooses theirs");
+        var theirOptions = m.QueryActions(1).Where(a => a.Type == Wave835Abilities.FoePick).ToArray();
+        Eq(string.Join(",", theirOptions.Select(a => a.Command!.TargetId).OrderBy(x => x)), string.Join(",", mt.Take(2).Select(c => c.Id).OrderBy(x => x)), "only their Unique Personalities");
+        Accept(m, theirOptions.First(a => a.Command!.TargetId == mt[0].Id).Command!);
+        Check(m.State.PendingDuel is { } d2 && d2.ChallengerId == mm[1].Id && d2.ChallengedId == mt[0].Id, "the chosen two duel");
+
+        // One side has one Unique Personality, the other two: only the one with a choice is asked.
+        var (o, oev, om, ot) = FoeTable(1, 2);
+        Call(o, "EventsPhaseForTest", 0);
+        Eq(o.State.PendingChoice?.PlayerId, 1, "the owner has exactly one: only the other player is asked");
+        Accept(o, o.QueryActions(1).First(a => a.Type == Wave835Abilities.FoePick && a.Command!.TargetId == ot[1].Id).Command!);
+        Check(o.State.PendingDuel is { } d3 && d3.ChallengerId == om[0].Id && d3.ChallengedId == ot[1].Id, "the duel begins");
+
+        // Nobody Unique on one side: the Event is discarded without effect.
+        foreach (var (a, b) in new[] { (0, 2), (2, 0), (0, 0) })
+        {
+            var (n, nev, _, _) = FoeTable(a, b);
+            Call(n, "EventsPhaseForTest", 0);
+            Check(n.State.PendingDuel is null && n.State.PendingChoice is null && n.State.Cards[nev.Id].Zone == Zone.DynastyDiscard && n.State.Phase == Phase.Action, $"{a} and {b} Unique Personalities: discarded without effect");
+        }
     }
 }

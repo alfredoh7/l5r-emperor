@@ -89,7 +89,11 @@ public sealed partial class MatchEngine
             if (stamps.GetValueOrDefault(revealed.Card.Id) == _state.TurnNumber || !ProvinceRevealEvents.TryGet(Definition(revealed.Card).Effect, out var registration)) continue;
             stamps[revealed.Card.Id] = _state.TurnNumber;
             Emit("provinceRevealEvent", $"{Definition(revealed.Card).Name} resolves: it is face up in province {revealed.Province.Index + 1}.", context.Player.Id, revealed.Card.Id);
-            if (registration.Resolve(this, revealed) is not { } ask) continue;
+            if (registration.Resolve(this, revealed) is not { } ask)
+            {
+                if (_state.PendingChoice is not null) return true; // issue #835: a registrant that opened a decision of its own (Revelations' shown choice) pauses the phase
+                continue;
+            }
             OpenEventChoice(new PendingEventChoice { Kind = P5RevealEventKind, EventCardId = revealed.Card.Id, PlayerId = context.Player.Id, Origin = "reveal", Candidates = [.. ask.Candidates], Step = ask.Optional ? 1 : 0, Prompt = ask.Prompt });
             return true;
         }

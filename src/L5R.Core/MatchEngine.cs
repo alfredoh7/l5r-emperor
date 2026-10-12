@@ -2164,6 +2164,7 @@ public sealed partial class MatchEngine
     // touched them may skip ceding priority.
     private void NextAction(int playerId, bool stayWithPlayer = false)
     {
+        if (Wave835FoeDuelEnded()) return; // issue #835 (Wave835.cs): the duel The Empire's Foe Exposed opened in the Events Phase is over -- the Events Phase goes on, not an Action Phase action
         if (ActionPhaseJustEnded()) return; // P13 (RuleFlags.cs): the action ended the Action Phase itself, so priority already belongs to the phase that began
         _state.ConsecutivePasses = 0; _state.PriorityPlayerId = stayWithPlayer ? playerId : 1 - playerId; EndAttackerLeadIfCeded(playerId, stayWithPlayer);
         // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.

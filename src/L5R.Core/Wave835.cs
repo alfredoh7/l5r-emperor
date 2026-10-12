@@ -24,11 +24,19 @@ namespace L5R.Core;
 //   Blood of Isawa's Tribe   "After this Spell attaches, choose an element keyword (Air, Earth, Fire, Water, Void) in this Shugenja's keywords or text. While this Spell remains attached, replace all
 //                            instances of that keyword on this Shugenja with a different element keyword that you choose now."   A mandatory trait: a two-step decision after the Spell attaches (the Shugenja's
 //                            element keywords, then the five elements; the same element asks for a confirmation), with no Reaction window and no pass. P10's ReplaceElementKeyword does the replacing.
+//   Revelations              "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, show the top five cards of your Dynasty deck. Choose another player who may
+//                            discard one of the cards, put the rest back in any order, and refill this Province face-up."   A province-reveal Event (P5): the five cards are shown to both players, the other
+//                            player may discard one (the shown-choice panel), its owner arranges the rest (the look panel), and the Event's Province refills face up.
+//   The Empire's Foe Exposed "Limited: Target two Unique Personalities in play, exactly one of which is yours. Your Personality challenges the other Personality. Destroy the duel's loser."   Mendon: an Event
+//                            that opens a duel when it resolves in the Events Phase; it does nothing unless each player has a Unique Personality in play; a player with exactly one is not asked.
 public static class Wave835Abilities
 {
     public const string CleansingBreath = "w835-cleansing-breath", ImperialDeployment = "w835-imperial-deployment", WardedNegate = "w835-warded-negate", WardedPlay = "w835-warded-play",
         DutyDiscount = "w835-duty-discount", DutyFull = "w835-duty-full", Pierce = "w835-pierce", HeavensDraw = "w835-heavens-draw", HeavensHonor = "w835-heavens-honor", HeavensPay = "w835-heavens-pay",
         Unbearable = "w835-unbearable", PatronageRedirect = "w835-patronage", PatronageBow = "w835-patronage-bow";
+    public const string RevelationsCard = "oracle-l5r-10262", RevelationsEffect = "w835-revelations", RevelationsShown = "w835-revelations-shown", RevelationsOrder = "w835-revelations-order";
+    public const string FoeCard = "oracle-l5r-10423", FoeEffect = "w835-foe", FoeDuel = "w835-foe-duel", FoeWindow = "w835Foe", FoePick = "w835FoePick";
+    public const int RevelationsCount = 5;
     public const string BloodCard = "oracle-l5r-10347", BloodEffect = "w835-blood", BloodWindow = "w835Blood", BloodFrom = "w835BloodFrom", BloodTo = "w835BloodTo", BloodConfirm = "w835BloodConfirm", BloodCancel = "w835BloodCancel", BloodBack = "w835BloodBack";
     public const string HeavensTrigger = "w835-heavens-pay", HeavensWindow = "w835HeavensPay", HeavensDeclineOne = "w835HeavensDecline", HeavensDeclineAll = "w835HeavensDeclineAll";
     public const string DeckSlot = "deck", WeightTargetSlot = "target";
@@ -57,6 +65,8 @@ public static class Wave835Abilities
         all[DutyFull] = new("Battle", "Battle: If he would be opposed, Recruit your target performing discarded Yojimbo", YojimboDiscard, Cost: GoldCostRule.TargetRecruit());
         all[Pierce] = new("Battle", "Battle: Choose your performing unbowed Monk and target an enemy Personality or Follower: Give it -3F. If it has no attachments and you have played two or more other Pierce the Tapestry this battle, destroy it. If this did not destroy it, you may take an additional Battle action to play a Pierce the Tapestry",
             "enemy-personality-or-follower", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]);
+        // The duel The Empire's Foe Exposed opens when it resolves: never on a card, only named by the Event. "Destroy the duel's loser" is its outcome (ApplyDuelOutcome).
+        all[FoeDuel] = new("Limited", "Your Unique Personality challenges the other player's Unique Personality. Destroy the duel's loser", "none", IssuesDuel: true);
         all[HeavensDraw] = new("Open", "Open: Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase", "none");
         all[HeavensHonor] = new("Open", "Open: No player can gain Honor in Action Phases (this turn)", "none");
         // The payment for one owed card: a player ability, offered only in the window the owed draws open, so the ordinary Gold payment (its sources, Sakuma, Koku...) pays it.
@@ -106,8 +116,37 @@ public sealed class BloodDecision
     public string? To { get; set; }
 }
 
+/// <summary>Revelations in progress: the Event, its owner, its Province, and the ShownCard.Sequence of each of the cards shown from the top of the Dynasty deck, in deck order.</summary>
+public sealed class RevelationsState
+{
+    public string EventId { get; set; } = "";
+    public int OwnerId { get; set; }
+    public int ProvinceIndex { get; set; }
+    public List<int> Sequences { get; set; } = [];
+}
+
+/// <summary>The Empire's Foe Exposed in progress: the Event, its owner, the two Personalities (null until chosen), and whether the duel has been issued.</summary>
+public sealed class FoeState
+{
+    public string EventId { get; set; } = "";
+    public int OwnerId { get; set; }
+    public string? ChallengerId { get; set; }
+    public string? ChallengedId { get; set; }
+    public bool DuelStarted { get; set; }
+}
+
+/// <summary>A Province that refills face up the next time it refills (Revelations).</summary>
+public sealed class FaceUpRefill
+{
+    public int PlayerId { get; set; }
+    public int ProvinceIndex { get; set; }
+}
+
 public sealed class Wave835State
 {
+    public RevelationsState? Revelations { get; set; }
+    public FoeState? Foe { get; set; }
+    public List<FaceUpRefill> FaceUpRefills { get; set; } = [];
     /// <summary>Blood of Isawa's Tribe Spells that attached and whose decision has not been asked yet, in the order they attached.</summary>
     public List<string> BloodQueue { get; set; } = [];
     public BloodDecision? Blood { get; set; }
@@ -332,6 +371,149 @@ public sealed partial class MatchEngine
         if (parts.Length < 3 || !_state.Cards.TryGetValue(parts[2], out var source) || Definition(source).Type != CardType.Strategy) return false;
         w.HeavensOwed[player.Id] = w.HeavensOwed.GetValueOrDefault(player.Id) + 1;
         Emit("drawOwed", $"{player.Name}: the Heavens' Blessing means a card drawn from {Definition(source).Name} costs 2 Gold.", player.Id, source.Id);
+        return true;
+    }
+
+    // ---- Revelations -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // P5's resolve: the five cards are shown to both players (the public shown-cards record), the other player may discard one (the shown-choice panel); what is left its owner arranges (the look panel), and the
+    // Event is discarded and its Province refills face up. It is called once its Event is face up in a Province after the owner's reveal.
+    private RevealEventAsk? Wave835RevelationsResolve(RevealedEvent revealed)
+    {
+        var card = revealed.Card; var owner = Player(card.OwnerId);
+        var shown = owner.DynastyDeck.Take(Wave835Abilities.RevelationsCount).Select(Card).ToArray();
+        if (shown.Length == 0)
+        {
+            Emit("revelations", $"{Definition(card).Name}: {owner.Name}'s Dynasty deck is empty; there is nothing to show.", owner.Id, card.Id);
+            Wave835FinishRevelations(card, owner.Id, revealed.Province.Index);
+            return null;
+        }
+        var sequences = new List<int>();
+        foreach (var top in shown) { RecordShown(owner.Id, top, card, SearchDeck.Dynasty, "shows"); sequences.Add(_state.ShownCards.Count); }
+        W835.Revelations = new RevelationsState { EventId = card.Id, OwnerId = owner.Id, ProvinceIndex = revealed.Province.Index, Sequences = sequences };
+        OpenShownChoice(Wave835Abilities.RevelationsShown, card, owner.Id, 1 - owner.Id, sequences, 0, 1,
+            $"{Definition(card).Name}: {owner.Name} shows the top {shown.Length} cards of their Dynasty deck. You may discard one of them.");
+        return null;
+    }
+
+    // What the other player decided: the chosen card (if any) is discarded from the deck, then its owner arranges the others, or the Event ends at once when there is nothing to arrange.
+    private bool Wave835ShownApply(PendingShownChoice choice)
+    {
+        if (choice.SpecId != Wave835Abilities.RevelationsShown) return false;
+        var r = W835.Revelations ?? throw new RuleViolation("No Revelations is open.");
+        var owner = Player(r.OwnerId); var card = Card(r.EventId);
+        var remaining = r.Sequences.Count;
+        if (choice.Chosen.Count > 0)
+        {
+            var index = r.Sequences.IndexOf(choice.Chosen[0]);
+            if (index >= 0 && index < owner.DynastyDeck.Count)
+            {
+                var discarded = Card(owner.DynastyDeck[index]);
+                owner.DynastyDeck.RemoveAt(index);
+                discarded.Zone = Zone.DynastyDiscard; discarded.FaceUp = true;
+                Emit("cardDiscarded", $"{Player(choice.DeciderPlayerId).Name} had {owner.Name} discard {Definition(discarded).Name} from the top of the Dynasty deck ({Definition(card).Name}).", choice.DeciderPlayerId, discarded.Id);
+                remaining--;
+            }
+        }
+        else Emit("revelations", $"{Player(choice.DeciderPlayerId).Name} chose not to discard any of the cards.", choice.DeciderPlayerId, card.Id);
+        W835.Revelations = null;
+        if (remaining >= 2)
+        {
+            W835.FaceUpRefills.Add(new FaceUpRefill { PlayerId = owner.Id, ProvinceIndex = r.ProvinceIndex });
+            BeginLook(LookById(Wave835Abilities.RevelationsOrder), card, owner.Id, "event", count: remaining);
+        }
+        else Wave835FinishRevelations(card, owner.Id, r.ProvinceIndex);
+        return true;
+    }
+
+    private static LookSpec LookById(string id) => LookCatalog.All[id];
+
+    // Nothing to arrange (or nothing to show): the Event is discarded, its Province refills face up, and the Events Phase goes on.
+    private void Wave835FinishRevelations(CardInstance card, int ownerId, int provinceIndex)
+    {
+        W835.FaceUpRefills.Add(new FaceUpRefill { PlayerId = ownerId, ProvinceIndex = provinceIndex });
+        _state.PendingChoice = null;
+        ResumeEventAfterDeferral(ownerId, card.Id);
+    }
+
+    private bool? Wave835RefillFaceUp(RefillContext context)
+    {
+        if (_state.Wave835 is not { FaceUpRefills.Count: > 0 } w) return null;
+        var mark = w.FaceUpRefills.FirstOrDefault(m => m.PlayerId == context.Player.Id && m.ProvinceIndex == context.Province.Index);
+        if (mark is null) return null;
+        w.FaceUpRefills.Remove(mark);
+        return true;
+    }
+
+    // ---- The Empire's Foe Exposed -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private CardInstance[] Wave835Uniques(int playerId) =>
+        _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Keyword(c, "Unique")).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+
+    // ResolveEvent's hook (true: a decision or the duel is open and the Events Phase waits; null: not this Event, or it resolves with no effect and is discarded as any Event is).
+    private bool? ResolveWave835Event(PlayerState player, ProvinceState province, CardInstance card)
+    {
+        if (Definition(card).Effect != Wave835Abilities.FoeEffect) return null;
+        var mine = Wave835Uniques(player.Id); var theirs = Wave835Uniques(1 - player.Id);
+        if (mine.Length == 0 || theirs.Length == 0)
+        {
+            Emit("foeFizzles", $"{Definition(card).Name}: {(mine.Length == 0 ? player.Name : Player(1 - player.Id).Name)} has no Unique Personality in play; it is discarded without effect.", player.Id, card.Id);
+            return null;
+        }
+        W835.Foe = new FoeState { EventId = card.Id, OwnerId = player.Id, ChallengerId = mine.Length == 1 ? mine[0].Id : null, ChallengedId = theirs.Length == 1 ? theirs[0].Id : null };
+        return Wave835FoeAdvance();
+    }
+
+    // Asks whichever side still has a choice to make, or starts the duel. True while something is open.
+    private bool Wave835FoeAdvance()
+    {
+        var foe = W835.Foe!;
+        var card = Card(foe.EventId);
+        if (foe.ChallengerId is null) { OpenFoePick(foe, foe.OwnerId); return true; }
+        if (foe.ChallengedId is null) { OpenFoePick(foe, 1 - foe.OwnerId); return true; }
+        foe.DuelStarted = true;
+        Emit("foeDuel", $"{Definition(card).Name}: {Definition(Card(foe.ChallengerId)).Name} challenges {Definition(Card(foe.ChallengedId)).Name} to a duel.", foe.OwnerId, card.Id);
+        IssueChallenge(Wave835Abilities.FoeDuel, foe.OwnerId, foe.ChallengerId, foe.ChallengedId, "Chi", false, card);
+        // A challenge that was not issued ("will not challenge") leaves no duel: the Event is over.
+        if (_state.PendingDuel is null && _state.PendingChoice is null) { W835.Foe = null; _state.PendingChoice = null; ResumeEventAfterDeferral(foe.OwnerId, card.Id); }
+        return true;
+    }
+
+    private void OpenFoePick(FoeState foe, int playerId)
+    {
+        var card = Card(foe.EventId);
+        _state.PendingChoice = new(Wave835Abilities.FoeWindow, playerId, card.Id,
+            $"{Definition(card).Name}: choose your Unique Personality for the duel{(playerId == foe.OwnerId ? " (yours challenges)" : " (you are challenged)")}.");
+        _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
+    }
+
+    private bool HandleWave835Foe(string type, GameCommand command)
+    {
+        if (type != Wave835Abilities.FoeWindow || W835.Foe is not { } foe) return false;
+        var pending = _state.PendingChoice!;
+        Require(command.Type == Wave835Abilities.FoePick && command.PlayerId == pending.PlayerId, "Choose one of your Unique Personalities.");
+        Require(command.TargetId is not null && Wave835Uniques(pending.PlayerId).Any(c => c.Id == command.TargetId), "Choose one of your Unique Personalities in play.");
+        if (pending.PlayerId == foe.OwnerId) foe.ChallengerId = command.TargetId; else foe.ChallengedId = command.TargetId;
+        _state.PendingChoice = null;
+        Wave835FoeAdvance();
+        return true;
+    }
+
+    private IEnumerable<ActionOption>? Wave835FoeActions(PendingActionsContext context)
+    {
+        if (context.Choice.Type != Wave835Abilities.FoeWindow) return null;
+        if (context.PlayerId != context.Choice.PlayerId) return [];
+        return Wave835Uniques(context.PlayerId).Select(c => new ActionOption(Wave835Abilities.FoePick, $"{Definition(c).Name}", true, null,
+            new GameCommand(Wave835Abilities.FoePick, context.PlayerId, _state.Version, TargetId: c.Id), c.Id, DecisionCandidateIds: [c.Id],
+            DecisionLabel: context.PlayerId == W835.Foe?.OwnerId ? $"{Definition(c).Name} challenges" : $"{Definition(c).Name} is challenged")).ToArray();
+    }
+
+    // NextAction's first step: the Foe duel has ended (and every window it opened has closed), so the Event is discarded, its Province refills and the Events Phase goes on instead of an Action Phase action.
+    private bool Wave835FoeDuelEnded()
+    {
+        if (_state.Wave835?.Foe is not { DuelStarted: true } foe || _state.PendingDuel is not null) return false;
+        W835.Foe = null;
+        ResumeEventAfterDeferral(foe.OwnerId, foe.EventId);
         return true;
     }
 
@@ -584,6 +766,13 @@ public sealed partial class MatchEngine
         EngineHooks.HonorChange.Register("Wave835Patronage", 13835, static context => context.Engine.Wave835PatronageApply(context));
         EngineHooks.PendingChoice.Register("Wave835Window", 13835, static (engine, type, command) => engine.HandleWave835Window(type, command));
         EngineHooks.PendingActions.Register("Wave835WindowActions", 13835, static (engine, context) => engine.Wave835WindowActions(context));
+        EngineHooks.RefillFaceUp.Register("Wave835RefillFaceUp", 13835, static context => context.Engine.Wave835RefillFaceUp(context));
+        EngineHooks.ResolveEvent.Register("Wave835ResolveEvent", 13835, static (engine, context) => engine.ResolveWave835Event(context.Player, context.Province, context.Card));
+        EngineHooks.ShownChoiceApply.Register("Wave835Shown", 13835, static (engine, choice) => engine.Wave835ShownApply(choice));
+        EngineHooks.Looks.Register("Wave835Looks", 13835, static () => [new LookSpec(Wave835Abilities.RevelationsOrder, "Put the rest back in any order", [new LookTarget(SearchDeck.Dynasty)], Wave835Abilities.RevelationsCount - 1, [], LookDisposition.Top, Reorder: true)]);
+        ProvinceRevealEvents.Register(Wave835Abilities.RevelationsEffect, static (engine, revealed) => engine.Wave835RevelationsResolve(revealed));
+        EngineHooks.PendingChoice.Register("Wave835Foe", 13836, static (engine, type, command) => engine.HandleWave835Foe(type, command));
+        EngineHooks.PendingActions.Register("Wave835FoeActions", 13836, static (engine, context) => engine.Wave835FoeActions(context));
         EngineHooks.PendingChoice.Register("Wave835Blood", 13836, static (engine, type, command) => engine.HandleWave835Blood(type, command));
         EngineHooks.PendingActions.Register("Wave835BloodActions", 13836, static (engine, context) => engine.Wave835BloodActions(context));
     }
