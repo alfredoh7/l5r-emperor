@@ -11094,6 +11094,9 @@ public sealed partial class MatchEngine
         catch (RuleViolation e) { return e.Message; }
     }
 
+    // The listing/validation consistency check (issue #842): why the validator would refuse this command, exactly as UseAbility would see it, without executing it or touching the state.
+    internal string? AbilityRejectionForTest(GameCommand command) => AbilityRejection(NormalizeSlotCommand(command));
+
     private IEnumerable<ActionOption> AbilityActions(int playerId)
     {
         var player = Player(playerId);
