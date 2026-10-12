@@ -5590,6 +5590,7 @@ public sealed partial class MatchEngine
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
         Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey) || UnsafePassageWaives(command, source), "This ability has already been used within its limit."); // Unsafe Passage (issue #622)
+        RequireAbilityGates(id, player, source);
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
         // battlefield-presence requirement at all when used as its OPEN half (performed from Home,
@@ -5629,7 +5630,6 @@ public sealed partial class MatchEngine
             if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is { Zone: Zone.Attached }
                 || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
                 Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
-            if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");
             // Overgrown Grove (issue #264): a Region sits in Zone.Region, never AtBattle-eligible at
             // all (its own Zone check always fails) -- needs its own province-index comparison instead.
             if (id == "overgrown-grove-move")
@@ -5666,7 +5666,6 @@ public sealed partial class MatchEngine
             else if (id == "hawado-move-home")
                 Require(command.Province is null, "Moving home names no battlefield.");
             // Bayushi Irezu (issue #458): "Home Battle: If Irezu is at home..." -- his own printed condition on taking the action at all.
-            if (id == "irezu-move") Require(source!.Zone == Zone.Home, "Irezu must be at home.");
             // Yoritomo Kanaye (oracle-l5r-9579, Embers of War pass, issue #460 batch 2): "you may pay Gold equal to its Gold Cost" -- a
             // binary choice (zero, or exactly the target's own Gold Cost), narrower than Variable's own open range.
             if (id == "kanaye-bow")
@@ -5680,20 +5679,14 @@ public sealed partial class MatchEngine
         // him to.
         // A Ring is PUT INTO PLAY from the hand (never from play, and never from a discard pile): every "...-recruit" ability, real or False, needs its Ring in
         // the hand (issue #370: a Ring already in play could otherwise "put itself into play" again -- a False Ring paying its 2 Honor each time).
-        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "ring-of-void-recruit"
-            or "false-ring-of-air-recruit" or "false-ring-of-earth-recruit" or "false-ring-of-water-recruit")
-            Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Ring is put into play from your hand.");
         // Kata (issue #420): a Kata is put into play from the hand, and its Water Battle action is taken from play, at a battlefield where the enemy has units.
-        if (id == "skipping-the-puddle-enter") Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
         if (id == "skipping-the-puddle-move")
         {
-            Require(source!.Zone == Zone.Home, "This Kata must be in play.");
             Require(_state.CurrentBattleProvince is int puddleBattle && Army(1 - player.Id, puddleBattle).Any(), "There are no enemy units at the current battlefield.");
         }
         if (id == "return-to-action-move")
         {
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
-            Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
         }
         // Emperor Edition Stronghold pass (issue #486), batch 1: Kyuden Otomo - exp lets a Favor token be discarded instead (EmperorStrongholdBatch1.cs); every Favor-discard action shares this.
         if (IsFavorDiscardAbility(id)) RequireFavorDiscard(command, player);
@@ -5759,7 +5752,6 @@ public sealed partial class MatchEngine
             Require(CurrentProvinceStrength() >= 11,
                 "The current battlefield's Province Strength must be 11 or greater.");
         if (id == "kano-destroy-token") Require(source!.Tokens.Any(t => t.Type == "Master"), "Akodo Kano needs a Master token.");
-        if (id == "dairuko-rally") Require(AtBattle(source!), "Akodo Dairuko must be at the battlefield.");
         if (id == "wave-persists-move")
             Require(source!.Zone == Zone.Attached && source.AttachedTo is string waveHostId && _state.CurrentBattleProvince is not null && !AtBattle(Card(waveHostId)), "This Shugenja must be attached and not at the current battlefield.");
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
@@ -5836,7 +5828,6 @@ public sealed partial class MatchEngine
             Require(_state.CurrentBattleProvince is not null && _state.ActivePlayerId != source!.OwnerId && _state.CurrentBattleProvince == source.ProvinceIndex
                 && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
                 "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
-        if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
         if (id == "hiruma-sniper-attack") Require(HasReconnaissanceAtCurrentBattlefield(player.Id), "This action requires Reconnaissance at the current battlefield.");
         // Stormless Fury's own first Reaction: "choose your performing Thunder Shugenja" -- the just-
         // resolved action's own performer (BattleActionReactionPerformerId) must be a Thunder Shugenja
@@ -5856,7 +5847,6 @@ public sealed partial class MatchEngine
         if (id == "stormless-fury-bow")
             Require(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id),
                 "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it.");
-        if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
         // Rokku (issue #833): "if any enemy units are at the current battlefield" is a printed condition, not a silent no-op of the effect.
         if (id == "rokku-move") Require(RokkuEnemyPresentAtEngagedBattlefield(player.Id), "Rokku: no enemy units are at the current battlefield.");
         // Battle Phase timing (issue #310): the Engage window's own per-trigger and per-card conditions.
@@ -5865,8 +5855,6 @@ public sealed partial class MatchEngine
         if (id == "dbc-attacker-bow") Require(command.PlayerId == 1 - _state.ActivePlayerId, "Dragon's Breath Castle reacts to a battle at one of its controller's provinces.");
         // Seeds of Decay pass (issue #453), batch 1 (SeedsOfDecayBatch1.cs).
         if (id == "castle-of-order-redirect") Require(!CastleOfOrderUsedThisBattle(source!), "The Castle of Order's redirect may be used once per battle.");
-        if (id == "sound-the-retreat-enter") Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
-        if (id == "sound-the-retreat-move") Require(source!.Zone == Zone.Home, "This Kata must be in play.");
         if (id == "advanced-intelligence-draw") Require(!AdvancedIntelligencePlayedThisBattle(player), "You may only play one copy of Advanced Intelligence per battle.");
         if (id is "grappling-snake-negate" or "grappling-snake-bow") Require(source!.GrantedAbilities.Any(g => g.AbilityId == id && GrantHolds(g.Duration, source)), "Grappling the Snake's choice is no longer open.");
         if (ability.Trigger == "after-engaging-at-own-battlefield" || source is not null && EngageSourceMustBeAtBattlefield(id, ability, source))

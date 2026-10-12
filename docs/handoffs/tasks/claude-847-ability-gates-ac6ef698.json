@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Moves 30 recurring per-card Require lines (Attacker/Defender only, source in hand/in play/at battlefield) into AbilityGates.cs, one table checked in one place.",
+  "validation": "bash tools/check.sh --skip-client passed",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/847",
+  "branch": "claude/847-ability-gates",
+  "updated": "2026-10-12T02:06:36.703407+00:00"
+}
