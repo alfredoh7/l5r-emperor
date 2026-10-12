@@ -473,10 +473,7 @@ def load_sets() -> dict[str, str]:
 
 # Wired cards whose audited action is wired and passes its window and effect tests, but whose printed text leaves a rules question the engine cannot settle
 # alone (issues #830/#833 audits). Hand-curated; shown in the Blocker column of a Wired card until the rules lead rules (the #833 questions were answered in #838: R-063 to R-066).
-WIRED_NOTES: dict[str, str] = {
-    "oracle-l5r-7777": "Tamori Kazushige: only his +2F while defending is wired. His printed \"Open: If it is another player's turn, target one of his Personalities: Before this phase ends, straighten him. Before this turn ends, if the Personality did not assign to attack this turn, gain 2 Honor.\" has no ability (Bayushi Misaki's action is the same shape and is wired). Found by the printed-action sweep after #848.",
-    "oracle-l5r-8545": "Togashi Korimi: only his +2F while defending is wired. His printed \"Interrupt, Bow this card: After you Recruit Korimi, draw a card.\" has no ability. Found by the printed-action sweep after #848.",
-}
+WIRED_NOTES: dict[str, str] = {}
 
 # Hand-curated, same discipline as BLOCKERS: only for a card whose Set is not derivable from
 # emperor-catalogue.json at all (a created-only, Proxy-typed card absent from that catalogue --
