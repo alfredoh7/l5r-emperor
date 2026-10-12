@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Client perf phase 2: lazy war-room build with prefetch, BC7 War Room textures, freed source meshes after batching, hall rendered into an on-demand viewport. Idle table 8.4 to 3.9 ms, menu 2.29 GB to 0.41 GB resident.",
+  "validation": "check.sh --skip-client passed; native checks board-ui, perspective-table, interactions, battle-presentation, main-menu, six-phase-track pass with real rg; ink-mat and province-ui fail identically on pre-#876 code (hover/focus). Hall screenshots: freed meshes identical, viewport 1.4% pixels differ in shadow-acne dither only.",
+  "remaining": "Hall build costs about 3.1 s on first table entry; no old-GPU testing; 2D draw calls and light shadow cost untouched.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/877",
+  "branch": "claude/877-client-perf-2",
+  "updated": "2026-10-12T16:35:04.208462+00:00"
+}

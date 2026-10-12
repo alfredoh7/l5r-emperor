@@ -36,3 +36,28 @@ Run for example `"$GODOT" --path src/L5R.Client -- --perf=table --perf-seconds=1
 4. Decide on the BC7 texture import above.
 5. Find where the 2D UI spends its 970 draw calls.
 6. Measure all of this on the oldest real GPU you intend to support; a Mac M-series GPU hides most of these costs.
+
+## Phase 2 (issue #877)
+
+Same machine and method, same session, vsync off, 1440x900. Before is main at 931d2c1f.
+
+| Measure | Before | After |
+|---|---|---|
+| Title menu resident / texture memory | 2288 MB / 948 MB | 414 MB / 116 MB |
+| Table resident memory | about 2520 MB | about 2340 MB |
+| Table texture memory | 1032 MB | 576 MB |
+| Table nodes | 1603 | 687 |
+| Idle table frame time (average / p95) | 8.43 / 10.18 ms | 3.85 / 4.17 ms |
+| Played game frame time (average) | 7.6 ms | 6.0 to 6.8 ms (varies with the game) |
+
+What changed:
+- **Lazy hall.** The war room is built when the table is first shown, not at launch. Choosing Practice, a match or a private room starts a background prefetch. Building it costs about 3.1 s on this Mac, paid when the table first appears.
+- **BC7 textures.** The War Room 3D textures import as BC7 (ETC2/ASTC fallback is already enabled in the project).
+- **Freed source meshes.** The hall batches its 1306 source meshes into 288 partitions but kept the originals hidden. They are now freed after batching. The original draw-call count was already low, so merging further would not help and would risk the Compatibility renderer's per-mesh light limit.
+- **Hall viewport.** The hall renders into its own viewport that redraws on camera, window or light changes, and at 30 Hz while candles flicker (reduced motion draws it once). It no longer redraws at display rate.
+
+Pixel checks use `--perf-shot=path` (the 3D hall alone, static light, 2D hidden). Freed meshes: identical pixels. Hall viewport: 1.4% of pixels differ, all in the floor's shadow-acne dither pattern at the left edge and dais edges; the lighting and shapes match.
+
+Tried and dropped: switching off shadow casting for floor and vista meshes gave no measurable gain (interleaved A/B), so it was not kept.
+
+Still open: 2D draw calls (about 970), shadow cost on lights (about 1.5 ms), old GPU hardware testing, BC7 needs a GPU with BPTC or the ETC2/ASTC fallback.
