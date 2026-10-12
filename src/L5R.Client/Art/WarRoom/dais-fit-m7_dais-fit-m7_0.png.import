@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cg1tqlj3nscmr"
-path="res://.godot/imported/dais-fit-m7_dais-fit-m7_0.png-a7a1c26ab9bb490b5481c0ac1b81f567.ctex"
+path.bptc="res://.godot/imported/dais-fit-m7_dais-fit-m7_0.png-a7a1c26ab9bb490b5481c0ac1b81f567.bptc.ctex"
+path.astc="res://.godot/imported/dais-fit-m7_dais-fit-m7_0.png-a7a1c26ab9bb490b5481c0ac1b81f567.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bce7a8e337b77985b387f2da68765e55"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/dais-fit-m7_dais-fit-m7_0.png"
-dest_files=["res://.godot/imported/dais-fit-m7_dais-fit-m7_0.png-a7a1c26ab9bb490b5481c0ac1b81f567.ctex"]
+dest_files=["res://.godot/imported/dais-fit-m7_dais-fit-m7_0.png-a7a1c26ab9bb490b5481c0ac1b81f567.bptc.ctex", "res://.godot/imported/dais-fit-m7_dais-fit-m7_0.png-a7a1c26ab9bb490b5481c0ac1b81f567.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
