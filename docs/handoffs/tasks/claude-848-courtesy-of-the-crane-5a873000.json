@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wires The Courtesy of the Crane's Open action: an unbowed Crane Clan performer, the other player may draw a card, then the Strategy's player draws two (each of those two costs 2 Gold under The Heavens' Blessing).",
+  "validation": "wave-848 suite 2/2; full Core suite run, result recorded in the PR.",
+  "remaining": "None; ready for review. Native visual check of the Either/Or panel not done.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/848",
+  "branch": "claude/848-courtesy-of-the-crane",
+  "updated": "2026-10-12T02:09:18.275546+00:00"
+}

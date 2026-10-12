@@ -22,7 +22,7 @@ PROFILE = "strategy-wave-5"
 
 ABILITIES: dict[int, list[str]] = {
     7483: ["steel-on-steel-duel"],       # Steel on Steel
-    7996: ["courtesy-of-the-crane-focus"],  # The Courtesy of the Crane
+    7996: ["courtesy-of-the-crane-focus", "courtesy-of-the-crane-open"],  # The Courtesy of the Crane
 }
 
 
