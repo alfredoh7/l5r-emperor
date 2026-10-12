@@ -338,7 +338,7 @@ public partial class FortressHall : Node3D
         foreach (var mesh in room.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().ToArray())
         {
             if (mesh.Name.ToString().Replace("_", "").Replace(" ", "").StartsWith("Staticember"))
-            { mesh.Visible = false; continue; }
+            { mesh.QueueFree(); continue; }
             for (var i = 0; i < mesh.Mesh.GetSurfaceCount(); i++)
             {
                 var material = mesh.GetActiveMaterial(i);
@@ -383,7 +383,8 @@ public partial class FortressHall : Node3D
                 }
                 builder.AppendFrom(mesh.Mesh, i, room.GlobalTransform.AffineInverse() * mesh.GlobalTransform);
             }
-            mesh.Visible = false;
+            // The partitions below replace the source mesh; keeping it hidden still holds its vertex buffers and a node in the tree (issue #877).
+            mesh.QueueFree();
         }
         foreach (var (key, builder) in groups)
         {
