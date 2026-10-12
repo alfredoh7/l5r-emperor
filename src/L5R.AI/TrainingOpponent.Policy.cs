@@ -76,7 +76,8 @@ public static partial class TrainingOpponent
         // A deck that wants Honor for itself prefers abilities that give it Honor; one that wants to hurt the opponent prefers abilities that take it away.
         var gain = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
         if (intent.HonorGain && gain) score += 25;
-        if (intent.HonorLoss && !gain) score += 25;
+        if (intent.HonorGain && x.Memory.UseHonorAware && x.Profile.Tier == HonorTier.High) score += HighHonorGainBonus; // issue #870: a high-Honor deck wants Honor above all (abilities with a fixed score are untouched)
+        if (intent.HonorLoss && !gain && !(x.Memory.UseHonorAware && intent.SelfHonorLoss)) score += 25; // issue #870: Honor the user loses himself is not "taking the opponent's"
         return score;
     }
 

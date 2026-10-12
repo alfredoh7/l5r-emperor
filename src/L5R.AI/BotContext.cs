@@ -24,6 +24,10 @@ public sealed class BotContext
     /// <summary>Issue #788: false (the default while the arena results are inconclusive; see docs/parked) plays the bot as it was before the six battle changes (no pass-when-won, target priorities, send-home rule, reaction rule or Border Keep refresh). The arena uses it to measure the change.</summary>
     public bool UseBattlePolicy { get; init; } = false;
 
+    /// <summary>Issue #870 (Mendon's playtest note): Honor the player loses for using an ability is weighed by the deck's Honor tier (a high-Honor deck hardly ever pays it), Honor gain is worth more to a high-Honor deck, and an
+    /// Attack that cannot destroy its target is valued only for the rest of its action. An Attack that swings the battle from losing to winning is exempt from the Honor penalty. False plays the bot as it was before.</summary>
+    public bool UseHonorAware { get; init; } = true;
+
     /// <summary>Issue #788 (Mendon's equip changes): attachments valued by their Battle abilities, the additional action an attached Spell grants always used, equipping down to the hand limit once a battle is won, and equipping up to three cards to change a battle's outcome. ON by default, independent of <see cref="UseBattlePolicy"/>.</summary>
     public bool UseEquipPolicy { get; init; } = true;
 

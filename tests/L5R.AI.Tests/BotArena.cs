@@ -106,7 +106,9 @@ internal static class BotArena
     private static readonly bool TradeOnly = Environment.GetEnvironmentVariable("L5R_ARENA_TRADE") == "only";
     /// <summary>L5R_ARENA_SPEC=818 compares the eleven issue #818 changes alone: New is the shipping bot (UseSpec818 on, the parked battle rules off), Prior is the same bot with UseSpec818 off. The older comparisons keep UseSpec818 off on both sides.</summary>
     private static readonly bool Spec818Only = Environment.GetEnvironmentVariable("L5R_ARENA_SPEC") == "818";
-    private static BotContext Memory(Kind kind) => Spec818Only ? new() { UseSpec818 = kind != Kind.Prior } : new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New, UseSpec818 = false };
+    /// <summary>L5R_ARENA_SPEC=honor compares the issue #870 honor-aware scoring alone: New is the shipping bot, Prior is the same bot with UseHonorAware off.</summary>
+    private static readonly bool HonorOnly = Environment.GetEnvironmentVariable("L5R_ARENA_SPEC") == "honor";
+    private static BotContext Memory(Kind kind) => HonorOnly ? new() { UseHonorAware = kind != Kind.Prior } : Spec818Only ? new() { UseSpec818 = kind != Kind.Prior } : new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New, UseSpec818 = false };
 
     /// <summary>
     /// Issue #788: the bot with the six battle changes (New) against the same bot without them (Prior, the bot on main before the change). Every ordered pair of decks in the folder, plus the

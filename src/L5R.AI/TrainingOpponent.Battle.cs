@@ -12,6 +12,7 @@ public static partial class TrainingOpponent
     /// <summary>The battle rules applied on top of an action's ordinary score. Only the actions a player takes in a battle (an ability, a Strategy, an attachment) are affected.</summary>
     private static double Adjust(Ctx x, ActionOption action, GameCommand command, double score)
     {
+        score = HonorAwareScore(x, action, command, score); // issue #870 (TrainingOpponent.Honor.cs): the Honor an ability costs or gains, and an Attack that cannot destroy its target
         if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy || x.Memory.UseSpec818) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (AttackerAdjust(x, action, command, intent, score) is { } attacker) return attacker; // issue #818 items 6 and 7

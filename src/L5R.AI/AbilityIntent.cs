@@ -17,7 +17,9 @@ public enum EffectRank { Neutral = 0, Help = 1, Penalize = 2, Bow = 3, Destroy =
 /// </summary>
 public sealed record AbilityIntent(
     EffectRank Rank, TargetSide Side, bool Negates, bool Draws, bool TakesFavor, bool TakesFavorBowing, bool DiscardsFavor,
-    bool HonorGain, bool HonorLoss, bool IsReaction, bool IsAttack, bool Unknown)
+    bool HonorGain, bool HonorLoss, bool IsReaction, bool IsAttack, bool Unknown,
+    // Issue #870: the Honor the player using the ability loses ("Lose 4 Honor", an imperative with no other player named), and how much; HonorLoss above does not say whose.
+    bool SelfHonorLoss = false, int SelfHonorLossAmount = 0)
 {
     public static readonly AbilityIntent None = new(EffectRank.Neutral, TargetSide.None, false, false, false, false, false, false, false, false, false, true);
 
@@ -32,6 +34,9 @@ public sealed record AbilityIntent(
     private static readonly Regex GainHonor = new(@"\bgains?\s+(?:\d+|X|that much)\s+honor", RegexOptions.IgnoreCase);
     private static readonly Regex EitherHonor = new(@"gains?\s+or\s+loses?", RegexOptions.IgnoreCase);
     private static readonly Regex LoseHonor = new(@"\bloses?\s+(?:\d+|X|that much)\s+honor", RegexOptions.IgnoreCase);
+    // The imperative "Lose N Honor" is the player taking the action ("his controller loses N Honor" is third person; "each player lose 3" names players).
+    private static readonly Regex LoseOwnHonor = new(@"\blose\s+(\d+|X)\s+honor", RegexOptions.IgnoreCase);
+    private static readonly Regex NamesOtherPlayer = new(@"(player|controller|opponent|\bhe\b|\bhis\b|\bher\b|\bthey\b|\bthem\b)", RegexOptions.IgnoreCase);
 
     /// <summary>The part of a label after its last colon: the effect, as opposed to the costs before it.</summary>
     internal static string EffectText(string label)
@@ -44,6 +49,18 @@ public sealed record AbilityIntent(
     {
         var i = label.LastIndexOf(':');
         return i > 0 ? label[..i] : "";
+    }
+
+    /// <summary>Issue #870: whether the label says the player using the ability loses Honor, and how much (X counts as 3): an imperative "Lose N Honor" with no player named before it in its sentence.</summary>
+    public static (bool Loses, int Amount) SelfLoss(string label)
+    {
+        foreach (Match m in LoseOwnHonor.Matches(label))
+        {
+            var sentenceStart = Math.Max(label.LastIndexOf('.', m.Index) + 1, label.LastIndexOf(':', m.Index) + 1);
+            if (NamesOtherPlayer.IsMatch(label[sentenceStart..m.Index])) continue;
+            return (true, int.TryParse(m.Groups[1].Value, out var amount) ? amount : 3);
+        }
+        return (false, 0);
     }
 
     public static AbilityIntent Of(string? abilityId)
@@ -75,7 +92,8 @@ public sealed record AbilityIntent(
         var either = EitherHonor.IsMatch(effect);
         var honorGain = GainHonor.IsMatch(effect) || either;
         var honorLoss = (LoseHonor.IsMatch(effect) || either) && side != TargetSide.Own;
+        var (selfLoss, selfAmount) = SelfLoss(label);
         return new(rank, side, negates, Draw.IsMatch(effect), takesFavor, takesBowing, DiscardFavor.IsMatch(label), honorGain, honorLoss,
-            ability.Timing == "Reaction", isAttack, false);
+            ability.Timing == "Reaction", isAttack, false, selfLoss, selfAmount);
     }
 }
