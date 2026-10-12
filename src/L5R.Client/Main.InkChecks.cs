@@ -34,7 +34,9 @@ public partial class Main
             DeselectCard();
             var holding = _tiles.First(t => t.Card.OwnerId == Self.Id && t.Card.Zone == Zone.Home && t.Card.Definition?.Type == CardType.Holding);
             var holdingId = holding.Card.Id;
+            // A card only takes hover when the pointer actually moves over it (CardTile ignores a bare enter), so the probe sends both.
             holding.EmitSignal(Control.SignalName.MouseEntered);
+            holding.EmitSignal(Control.SignalName.GuiInput, new InputEventMouseMotion { Position = holding.Size / 2 });
             holding._Process(.2);
             if (!holding.IsInspectionHover || holding.InteractionScale <= 1)
                 throw new InvalidOperationException("Holding hover signal did not activate the existing card feedback.");
@@ -65,7 +67,7 @@ public partial class Main
                 // Honest close inspection through the ordinary camera transform;
                 // the captured match, cards and attachment membership stay intact.
                 var bays = _matTargets.Where(s => s.Id.StartsWith($"province:{Self.Id}:", StringComparison.Ordinal)).OrderBy(s => s.Bounds.Position.X).Take(2).ToArray();
-                var region = bays.Select(s => s.Bounds).Aggregate((a,b) => a.Merge(b)).Grow(32);
+                var region = bays.Select(s => s.Bounds).Aggregate((a, b) => a.Merge(b)).Grow(32);
                 _cameraCenter = region.GetCenter(); _cameraZoom = FitRegion(region); _cameraFitted = false; ApplyTableCamera();
                 _matSections.Emphasize(bays[0].Id);
                 await ToSignal(GetTree().CreateTimer(.45), SceneTreeTimer.SignalName.Timeout);
@@ -279,21 +281,21 @@ public partial class Main
         Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(8, 140) });
         _cameraCenter = savedCenter; _cameraZoom = savedZoom; _cameraFitted = savedFit; ApplyTableCamera();
         foreach (var player in View.Players)
-        foreach (var province in player.Provinces.Where(p => !p.Destroyed))
-        {
-            var id = $"province:{player.Id}:{province.Index}";
-            var descriptor = _matTargets.Single(s => s.Id == id);
-            var threshold = ProvinceThresholdArt.ThresholdBounds(descriptor.Bounds);
-            InkRequire(threshold.Position.Y > ProvinceRowY(player) + PlaneHeight(CardHeight),
-                "A fortress threshold overlaps its province card slot.");
-            InkRequire(descriptor.ProvinceNumber == province.Index + 1, "A province threshold lost its authoritative public identity.");
-            if (province.Card is null) continue;
-            var card = _tiles.Single(t => t.Card.Id == province.Card.Id);
-            var before = _matSections.CurrentBounds(id);
-            card.EmitSignal(Control.SignalName.MouseEntered); card._Process(.2);
-            InkRequire(before == _matSections.CurrentBounds(id), "Hovering a province moved its threshold.");
-            card.EmitSignal(Control.SignalName.MouseExited); card._Process(.2);
-        }
+            foreach (var province in player.Provinces.Where(p => !p.Destroyed))
+            {
+                var id = $"province:{player.Id}:{province.Index}";
+                var descriptor = _matTargets.Single(s => s.Id == id);
+                var threshold = ProvinceThresholdArt.ThresholdBounds(descriptor.Bounds);
+                InkRequire(threshold.Position.Y > ProvinceRowY(player) + PlaneHeight(CardHeight),
+                    "A fortress threshold overlaps its province card slot.");
+                InkRequire(descriptor.ProvinceNumber == province.Index + 1, "A province threshold lost its authoritative public identity.");
+                if (province.Card is null) continue;
+                var card = _tiles.Single(t => t.Card.Id == province.Card.Id);
+                var before = _matSections.CurrentBounds(id);
+                card.EmitSignal(Control.SignalName.MouseEntered); card._Process(.2);
+                InkRequire(before == _matSections.CurrentBounds(id), "Hovering a province moved its threshold.");
+                card.EmitSignal(Control.SignalName.MouseExited); card._Process(.2);
+            }
         var first = _matTargets.First(s => s.ProvinceNumber is not null);
         var reveal = _matSections.RevealProgress(first.Id);
         var geometry = _matSections.CurrentBounds(first.Id);
@@ -373,7 +375,7 @@ public partial class Main
                 "Post-settlement ink did not have a gradual reveal.");
             SyncInk(probe, [expanded, stable]);
             AdvanceInk(probe, .1); AdvanceInk(uninterrupted, .1);
-            InkRequire(Math.Abs(probe.RevealProgress(compact.Id)-uninterrupted.RevealProgress(compact.Id)) < .001f,
+            InkRequire(Math.Abs(probe.RevealProgress(compact.Id) - uninterrupted.RevealProgress(compact.Id)) < .001f,
                 "Unchanged Sync restarted the ink reveal.");
 
             // A second movement while ink is spreading cancels the obsolete
