@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://db6n0v437moft"
-path="res://.godot/imported/room-lantern_Image_2.jpg-ba32022b7c4377b897d50b5addb51d40.ctex"
+path.bptc="res://.godot/imported/room-lantern_Image_2.jpg-ba32022b7c4377b897d50b5addb51d40.bptc.ctex"
+path.astc="res://.godot/imported/room-lantern_Image_2.jpg-ba32022b7c4377b897d50b5addb51d40.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5c031ed44d81e57a3ffaf9df3b93e61d"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/room-lantern_Image_2.jpg"
-dest_files=["res://.godot/imported/room-lantern_Image_2.jpg-ba32022b7c4377b897d50b5addb51d40.ctex"]
+dest_files=["res://.godot/imported/room-lantern_Image_2.jpg-ba32022b7c4377b897d50b5addb51d40.bptc.ctex", "res://.godot/imported/room-lantern_Image_2.jpg-ba32022b7c4377b897d50b5addb51d40.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

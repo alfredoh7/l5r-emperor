@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b28gdyenoent8"
-path="res://.godot/imported/aged-column_Image_1.jpg-f9759d30c1f14a50aa83f67270612185.ctex"
+path.bptc="res://.godot/imported/aged-column_Image_1.jpg-f9759d30c1f14a50aa83f67270612185.bptc.ctex"
+path.astc="res://.godot/imported/aged-column_Image_1.jpg-f9759d30c1f14a50aa83f67270612185.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "b5d0aff6e56c83c4ff08d452c588bb83"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/aged-column_Image_1.jpg"
-dest_files=["res://.godot/imported/aged-column_Image_1.jpg-f9759d30c1f14a50aa83f67270612185.ctex"]
+dest_files=["res://.godot/imported/aged-column_Image_1.jpg-f9759d30c1f14a50aa83f67270612185.bptc.ctex", "res://.godot/imported/aged-column_Image_1.jpg-f9759d30c1f14a50aa83f67270612185.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

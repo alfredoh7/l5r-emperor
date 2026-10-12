@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://chu8ndp2yr08g"
-path="res://.godot/imported/brazier_Image_1.jpg-d39ccc3ad03412b3862596a43438435c.ctex"
+path.bptc="res://.godot/imported/brazier_Image_1.jpg-d39ccc3ad03412b3862596a43438435c.bptc.ctex"
+path.astc="res://.godot/imported/brazier_Image_1.jpg-d39ccc3ad03412b3862596a43438435c.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "45ac9754a7c90bd36e82a242cc083d80"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://Art/WarRoom/brazier_Image_1.jpg"
-dest_files=["res://.godot/imported/brazier_Image_1.jpg-d39ccc3ad03412b3862596a43438435c.ctex"]
+dest_files=["res://.godot/imported/brazier_Image_1.jpg-d39ccc3ad03412b3862596a43438435c.bptc.ctex", "res://.godot/imported/brazier_Image_1.jpg-d39ccc3ad03412b3862596a43438435c.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
