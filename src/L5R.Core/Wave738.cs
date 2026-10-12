@@ -28,6 +28,7 @@ namespace L5R.Core;
 //   The Madness Spreads       "Limited: Until your second turn from now begins, once per turn, you may take a Limited action on a Strategy as an Open action."   the P13 limited-as-open flag
 //   Chagatai's Wrath          "Limited: End the Action Phase. Discard this Celestial."                                                                         w738-chagatai-end-phase; the P13 end-action-phase flag
 //
+// Issue #835: Revelations was wired afterwards in Wave835.cs, on Mendon's rulings of 2026-10-11 (docs/decisions/2026-10-11-twelve-ruled-cards.md); the "not wired" note here is the state when this wave merged.
 // Not wired, with a blocker note (tools/content/pe_wave_738_blockers.json): Revelations (a look at the top five cards with another player's discard choice and a reorder, which neither the look nor P20's
 // search covers) and The Onyx Championship (a card given a permanent ability whose search recruits from the provinces paying all costs: P20's province recruit ignores costs).
 public static class Wave738Abilities

@@ -19,6 +19,7 @@ namespace L5R.Core;
 //   Delicate Gamble          "Political Limited: Bow your target unbowed Courtier. Discard the top card of another player's Fate deck. A target player gains or loses Honor equal to its Focus Value or 3, whichever is lower. If he lost Honor, he ignores Honor Requirements this game."   w733-gamble
 //   The False Path           the Stronghold: Monk and Fudo, Fudo's price and Honor Requirement, no Honor loss from Fudo cards, no Enlightenment victory, and the Fudo Ring search   keyword rules (P10), entry term, recruit gate (P3), Honor-change hook (P14), w733-falsepath-search
 //
+// Issue #835: Merchant Patronage and The Heavens' Blessing were wired afterwards in Wave835.cs, on Mendon's rulings of 2026-10-11 (docs/decisions/2026-10-11-twelve-ruled-cards.md); the "not wired" note here is the state when this wave merged.
 // Not wired, with a blocker note (tools/content/pe_wave_733_blockers.json): Zansho - exp (the scan's "Zansho's target unbowed Follower" does not say whose Follower: a ruling), Merchant Patronage (a Political Interrupt
 // before an action on a Holding, and the acting player choosing who gains or loses its Honor), The Heavens' Blessing (a game-long payment to draw from a Strategy's own effect in an Action Phase) and Marriage of the
 // Emerald Champion (an Event that targets, holds a dishonor bar and an Honor shield while in play, and discards itself on its controller's second turn).

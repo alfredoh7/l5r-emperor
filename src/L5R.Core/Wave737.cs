@@ -24,6 +24,7 @@ namespace L5R.Core;
 //
 // Not wired, with a blocker note (tools/content/pe_wave_737_blockers.json): Koan's Robes (a Force bonus counted by Koan cards in the unit and a waiver of the bow cost on the host's Spells: no stat term nor cost waiver of that shape is merged)
 // and Imperial Deployment ("prevent him assigning" has no immunity kind, and "an attack is declared" has no fact).
+// Issue #835: Imperial Deployment was wired afterwards in Wave835.cs, on Mendon's rulings of 2026-10-11 (docs/decisions/2026-10-11-twelve-ruled-cards.md); the "not wired" note here is the state when this wave merged.
 public static class Wave737Abilities
 {
     public const string AkumasaWatch = "w737-akumasa-watch", ShigemitsuWatch = "w737-shigemitsu-watch", ShibatsuHonor = "w737-shibatsu-honor", TaigoInterrupt = "w737-taigo-interrupt", KurokoFavor = "w737-kuroko-favor",

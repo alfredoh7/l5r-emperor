@@ -165,7 +165,7 @@ internal static class Wave738Tests
         foreach (var id in new[] { DangerousGame, Empire, OpenRecruitment, RejectedMediation })
             Check(!CardCatalog.Get(id).Text.Contains("After you reveal cards", StringComparison.Ordinal), $"{CardCatalog.Get(id).Name} prints the scan's text, without the catalogue's reveal clause");
         Check(CardCatalog.Get(Marrow).Text.Contains("after each Events Phase begins", StringComparison.Ordinal), "Suck the Marrow prints the scan's 'Events Phase'");
-        foreach (var id in new[] { Revelations }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published");
+        foreach (var id in new[] { Revelations }) Check(CardCatalog.Cards.ContainsKey(id), $"{id} was wired afterwards (Wave835.cs, issue #835)");
         Check(CardCatalog.Cards.ContainsKey(OnyxChampionship), "The Onyx Championship was wired by issue #829 (Mendon's ruling R-059)");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w738-", StringComparison.Ordinal)), 8, "eight w738 abilities");
         foreach (var id in new[] { DangerousGame, Empire, OpenRecruitment, RejectedMediation }) Check(!ProvinceRevealEvents.IsFlagged(CardCatalog.Get(id).Effect), "an ordinary Event: the P5 flag is not used");

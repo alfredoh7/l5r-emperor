@@ -1,6 +1,1 @@
-{
-  "oracle-l5r-10347": {
-    "note": "Blood of Isawa's Tribe (Spell, issue #735): \"After this card attaches: Choose an element keyword (Air, Earth, Fire, Void, Water) in this Shugenja's keywords or text. While this card is attached, replace all instances of that keyword on this Shugenja with another element keyword that you choose now.\" P10's ReplaceElementKeyword does the replacement, but the choice is the problem: it is a mandatory trait of the Spell (no \"Reaction:\" prefix) that needs two decisions in a row (which element, then which replacement) the moment the Spell attaches. Mandatory entry effects (ApplyMandatoryEntryEffects) are automatic and open no decision, and an optional Reaction would change the printed text from mandatory to optional. Opening a pending choice from inside the entry path (before the entry Reaction window, for an attach by Equip, Equip (Battle) or a search) is not a merged path, and \"in this Shugenja's keywords or text\" would also need a rule for the elements named in text. It is left unpublished rather than approximated.",
-    "category": "TRIG-ANN"
-  }
-}
+{}

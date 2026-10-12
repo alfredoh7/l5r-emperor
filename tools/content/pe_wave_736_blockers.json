@@ -1,8 +1,4 @@
 {
-  "oracle-l5r-10358": {
-    "note": "A Cleansing Breath (Strategy, issue #736): \"Battle/Open: Target your Personality at any location. He centers himself. Negate other players' cards' effects that prevent him assigning, moving or performing actions. If he is a Kensai, straighten his unit.\" The negations are P12 Prevention and movement/assignment immunities, but \"he centers himself\" has no definition anywhere in the repository (core rules, rulings or code): it names a rule the owner has not given. Needs Mendon's ruling on what centering does before the card is built; publishing it without the sentence would drop printed text.",
-    "category": "RULES"
-  },
   "oracle-l5r-10473": {
     "note": "Asako Kaitoko - exp (Personality, issue #736): \"Personalities with Fallen, Kolat, Ninja, Nonhuman, or Shadowlands opposing Kaitoko have a maximum Force of 3, and actions from cards in their units may not target Kaitoko.\" Two gaps: a maximum Force is a stat cap and none exists (P9 left StatCap out; PersonalityForce is additive, so a cap cannot be written without reading the Force it caps), and the target bar applies only to actors whose Personality has one of five keywords, which an ActorSpec cannot say.",
     "category": "STAT"

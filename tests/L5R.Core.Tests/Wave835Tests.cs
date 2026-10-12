@@ -120,6 +120,12 @@ internal static class Wave835Tests
         Check(!e2.MovementLockedForTest(kensai.Id, MovementKinds.Assign) && !e2.MovementLockedForTest(kensai.Id, MovementKinds.ToBattlefield) && !e2.MovementLockedForTest(kensai.Id, MovementKinds.Home), "assigning and moving are no longer prevented");
         Check(e2.IsImmuneForTest(kensai.Id, ImmunityKind.Prevention, 1), "other players' cards' preventions are negated");
         Check(!e2.State.Cards[kensai.Id].Bowed && !e2.State.Cards[follower.Id].Bowed, "a Kensai straightens his whole unit");
+        // A "may not attack" another player's action stored is also an effect that prevents him assigning.
+        var restricted = Batch336Support.Edit(e, st => st.Restrictions.Items.Add(new("restriction-cb", RestrictionKind.NoAttack, plain.Id, UntilTurn: st.TurnNumber, ByPlayer: 1)));
+        Check((bool)Call(restricted, "RestrictionBarsAssignment", Call(restricted, "Card", plain.Id), false)!, "the other player's restriction bars him before the Breath");
+        var breath = restricted.State.Cards.Values.First(c => c.DefinitionId == CleansingBreath);
+        Accept(restricted, Batch336Support.Offer(restricted, 0, Wave835Abilities.CleansingBreath, breath.Id, plain.Id));
+        Check(!(bool)Call(restricted, "RestrictionBarsAssignment", Call(restricted, "Card", plain.Id), false)!, "and no longer bars him after it");
         // Someone who is not a Kensai stays as he was.
         var e3 = Engine(e.State);
         var card3 = e3.State.Cards.Values.First(c => c.DefinitionId == CleansingBreath);

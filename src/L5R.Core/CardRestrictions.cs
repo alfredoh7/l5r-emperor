@@ -219,8 +219,8 @@ public sealed partial class MatchEngine
     private bool RestrictionBarsAssignment(CardInstance card, bool isDefender)
     {
         var kind = isDefender ? RestrictionKind.NoDefend : RestrictionKind.NoAttack;
-        // Imperial Deployment (issue #835, AssignPrevention): another player's action's "may not attack/defend" does not bar the assignment; a rule's own restriction (no known source) still does.
-        return RestrictionsOn(card).Any(r => r.Kind == kind && !(r.ByPlayer is int by && by != card.OwnerId && IsImmune(card, ImmunityKind.AssignPrevention, by)));
+        // Imperial Deployment (issue #835, AssignPrevention) and A Cleansing Breath (Prevention): another player's action's "may not attack/defend" does not bar the assignment; a rule's own restriction (no known source) still does.
+        return RestrictionsOn(card).Any(r => r.Kind == kind && !(r.ByPlayer is int by && by != card.OwnerId && (IsImmune(card, ImmunityKind.AssignPrevention, by) || IsImmune(card, ImmunityKind.Prevention, by))));
     }
 
     private bool RestrictionAllowsAssignBowed(CardInstance card) => HasRestriction(card, RestrictionKind.AssignWhileBowed);

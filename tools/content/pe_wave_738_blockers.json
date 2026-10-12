@@ -1,6 +1,1 @@
-{
-  "oracle-l5r-10262": {
-    "note": "Revelations (Event, issue #738): \"Show the top five cards of your Dynasty deck. Choose another player who may discard one of the cards. Put the rest back in any order. Refill this province face-up.\" The scan prints no \"After you reveal\" clause, so it is an ordinary Event that resolves when revealed. Its three steps are still not composed from what is merged: P25's shown choice (PendingShownChoice, used by Dark Audience) lets another player pick among shown cards but hangs off a search, the look (DeckLook.cs) lets its own player rearrange but has no step in which another player discards one of the shown cards before the rest go back, and the Event's own province must then refill face up (RefillSourceProvinceFaceUp is a search disposition). Batch 8 (#739) merged without this card, so no decision work is pending elsewhere; it needs a look disposition with an other-player discard and a reorder.",
-    "category": "SEARCH"
-  }
-}
+{}

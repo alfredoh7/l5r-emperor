@@ -117,7 +117,7 @@ internal static class Wave732Tests
         Check(inoue.Force == 3 && inoue.Chi == 3 && inoue.PersonalHonor == 1 && inoue.GoldCost == 6, "Morito Inoue's stats");
         Check(kikumura.Force == 2 && kikumura.Chi == 3 && kikumura.GoldCost == 4, "Kikumura's stats");
         Check(asukai.Force == 3 && asukai.Chi == 3 && asukai.PersonalHonor == 2 && asukai.GoldCost == 4 && asukai.HonorRequirement == 2, "Asukai's stats");
-        Check(CardCatalog.Cards.ContainsKey(Axe) && !CardCatalog.Cards.ContainsKey(Duty), "Chiyurei's Axe was wired afterwards (Wave827.cs, issue #827); Duty Over All Things is deferred, not published");
+        Check(CardCatalog.Cards.ContainsKey(Axe) && CardCatalog.Cards.ContainsKey(Duty), "Chiyurei's Axe was wired afterwards (Wave827.cs, issue #827); Duty Over All Things was wired afterwards (Wave835.cs, issue #835)");
         Check(AbilityCatalog.All["w732-kikumura-invest"].Cost == GoldCostRule.Fixed(4) && AbilityCatalog.All["w732-kikumura-invest"].Trigger == "own-enters-play", "Invest 4 on entering play");
         Check(TraitReactions.Is("w732-kikumura-invest") && TraitReactions.Is("w732-sengmai-kiho") && !TraitReactions.Is("w732-inoue-lend"), "the two traits are traits");
     }
