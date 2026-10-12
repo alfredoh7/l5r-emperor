@@ -106,6 +106,15 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 ### Attacker rules (ACTIVE, issue #818)
 An attacker nobody opposes, whose Force already destroys the Province, passes. The only actions it still plays are those that gain it Honor or cost the opponent Honor *and will actually do so*: an Honor gain printed as "if the province has not been destroyed" (Preserving Beauty) is skipped once the Province falls. Short of the Province it plays actions as usual. A bot holding as many cards as its hand limit also plays Honor gains that change nothing in a decided battle.
 
+### Honor cost and fruitless Attacks (ACTIVE, `UseHonorAware`, issue #870)
+
+Mendon's playtest note: a Unicorn (high-Honor) bot played A Paragon's Strength as a Ranged Attack that could not destroy its target and lost 4 Honor for nothing.
+
+- **Whose Honor.** An ability's label saying "Lose N Honor" (an imperative, with no player named in the sentence) is the user's own loss; "his controller loses N Honor" or "all players lose 3 Honor" is not (`AbilityIntent.SelfHonorLoss`). Before, the bot read any Honor loss as taking the opponent's Honor and even gave a low-Honor deck +25 for its own loss.
+- **Price by tier.** Each Honor the user loses takes 25 points off the ability for a high-Honor deck, 12 for an in-between deck, 4 for a low-Honor deck. A 4-Honor loss therefore puts a high-Honor deck's Attack (80) below passing. Honor gained is worth 35 more to a high-Honor deck (on top of the existing +25). With no Honor involved the order stays destroy, bow, penalize, help.
+- **An Attack that cannot destroy.** When no legal target has Force at or below the Attack's strength (the printed strength, "strength equal to his Force" read off the performer, the bonuses its text promises, and any augment the bot can still use), the Attack and the Honor it costs are taken off the ability and what is left is scored alone: Lion's Charge still gains Honor, a pure Attack is passed. The bot picks the highest-Force target the Attack can destroy.
+- **Exception.** A killing Attack that takes the bot from not winning the battle to winning it is played whatever Honor it costs.
+
 ### Six battle rules (PARKED, off by default, `UseBattlePolicy`)
 When switched on:
 1. **Pass when the battle is decided**, except to gain Honor / take the opponent's, to move a unit that is not needed into an opposed battlefield, or to remove an enemy Personality that could undo the result. In-play abilities before hand cards. Never use an ability whose cost bows a unit the win depends on.

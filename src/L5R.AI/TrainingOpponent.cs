@@ -155,7 +155,7 @@ public static partial class TrainingOpponent
                 var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view, x)))
                     .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
                 // Issue #788: an Attack takes the highest-Force target it can destroy, and a bow takes the unit with the most attachments (or the most dangerous printed ability).
-                var ruled = !x.Memory.UseBattlePolicy ? null : intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
+                var ruled = !(x.Memory.UseBattlePolicy || x.Memory.UseHonorAware && intent.IsAttack) ? null : intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
                     : intent.Rank == EffectRank.Bow && intent.Side == TargetSide.Enemy ? PickBowTarget(x, legal, command.AbilityId) : null;
                 var target = ruled ?? known.Card ?? PickCard(x, legal, intent, action.Label);
                 if (target is not null) command = WithTarget(command, action, target.Id);
