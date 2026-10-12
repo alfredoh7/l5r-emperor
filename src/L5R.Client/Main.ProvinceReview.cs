@@ -13,7 +13,7 @@ public partial class Main
     private long _provinceReviewRevision = 1000;
     private string? _provinceReviewConfirmed;
     private static readonly string[] ProvinceReviewScenarios =
-    ["Two visible Dynasty cards", "Second slot face down", "Choose reveal order", "Choose refill order", "Empty second slot", "Crowded province row"];
+    ["Two visible Dynasty cards", "Second slot face down", "Choose reveal order", "Choose refill order", "Empty second slot", "Crowded province row", "Dark Experiments mark"];
 
     private void StartProvinceReview()
     {
@@ -35,6 +35,8 @@ public partial class Main
             button.CustomMinimumSize = new Vector2(190, 60); button.AutowrapMode = TextServer.AutowrapMode.Off;
             _provinceReviewBar.AddChild(button);
         }
+        if (OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--province-review-scenario=")) is { } chosen && int.TryParse(chosen[27..], out var scenario) && scenario >= 0 && scenario < ProvinceReviewScenarios.Length) _provinceReviewScenario = scenario;
+        if (OS.GetCmdlineUserArgs().Contains("--province-review-seat=1")) _provinceReviewSeat = 1;
         PrepareProvinceReview(); EnterTable();
         Callable.From(FocusProvinceReview).CallDeferred();
         var output = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--province-review-checks="))?[25..];
@@ -61,20 +63,24 @@ public partial class Main
             Army = [],
             Provinces = player.Provinces.Select(province =>
             {
+                // Dark Experiments mark: province 2 is marked (-2 strength), province 3 was marked and then destroyed (no marker), province 4 is untouched.
+                if (_provinceReviewScenario == 6 && province.Index == 3) return province with { Destroyed = true, Card = null, Region = null, DynastySlots = null, DarkExperimentsMarked = true };
                 if (province.Index != 1 && _provinceReviewScenario != 5) return province;
                 var a = Face($"preview-{player.Id}-{province.Index}-a", first, player.Id, province.Index);
                 CardView? b = _provinceReviewScenario switch
                 {
                     1 or 2 or 3 => Hidden(player.Id, province.Index, 1),
-                    4 => null,
+                    4 or 6 => null,
                     _ => Face($"preview-{player.Id}-{province.Index}-b", second, player.Id, province.Index)
                 };
                 if (_provinceReviewScenario is 2 or 3) a = Hidden(player.Id, province.Index, 0);
                 return province with
                 {
+                    DarkExperimentsMarked = _provinceReviewScenario == 6,
+                    Strength = _provinceReviewScenario == 6 ? province.Strength + DarkExperimentsMark.Strength : province.Strength,
                     Card = a,
-                    Region = Face($"preview-region-{player.Id}-{province.Index}", regionDefinition, player.Id, province.Index, Zone.Region),
-                    DynastySlots = [new(0, a), new(1, b)]
+                    Region = _provinceReviewScenario == 6 ? null : Face($"preview-region-{player.Id}-{province.Index}", regionDefinition, player.Id, province.Index, Zone.Region),
+                    DynastySlots = _provinceReviewScenario == 6 ? null : [new(0, a), new(1, b)]
                 };
             }).ToArray()
         }).ToArray();

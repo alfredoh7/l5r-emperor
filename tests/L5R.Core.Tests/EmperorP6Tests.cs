@@ -311,6 +311,8 @@ internal static class EmperorP6Tests
         Accept(e, options.Single(c => c.Choice == "0:1"));
         Eq(StrengthNextTurn(e, 0, 1), before - 2, "permanently -2 strength (it outlasts the turn)");
         Check(e.State.Players[0].Provinces[1].DarkExperimentsMarked, "the province is marked");
+        Eq(DarkExperimentsMark.Strength, -2, "the board marker shows the strength change the engine applies"); Eq(DarkExperimentsMark.Production, -1, "the board marker shows the Gold Production token the engine gives");
+        Check(e.GetView(0).Players[0].Provinces.Where(p => p.Index != 1).All(p => !p.DarkExperimentsMarked), "only the chosen province carries the mark in the view");
         Eq(e.State.Cards[regionId].Zone, Zone.DynastyDiscard, "its Region was destroyed");
         Check(e.GetView(0).Players[0].Provinces[1].DarkExperimentsMarked, "the mark is public in the view");
         Eq(e.State.Cards[evt.Id].Zone, Zone.DynastyDiscard, "the Event was discarded");

@@ -244,6 +244,7 @@ public partial class Main
             Place(area, button, 0, -28, width, PlaneHeight(CardHeight) + 28); _provinceButtons[(owner.Id, province.Index)] = button;
             var slots = ProvincePresentation.Slots(province);
             AddProvincePlacard(area, owner, province, width);
+            AddProvinceModifierMarker(area, owner, province, width);
             var x = (width - slots.Length * 164) / 2;
             // A Region is attached to the Dynasty card in its province the way a Follower or Item is to a Personality: it sits underneath, showing a strip above the card (Mendon, 2026-10).
             if (province.Region is { } region)
@@ -270,6 +271,17 @@ public partial class Main
                 x += 164;
             }
         }
+    }
+
+    // Dark Experiments' mark, persistently shown with its province: the Gold Production coin and the strength box, each only while its modifier is non-zero. A destroyed province is skipped by the caller, and
+    // a province gained later is a new one the engine never marks. The viewer's own provinces carry it below the threshold frame (nearer the viewer); the opponent's above the province (farther away).
+    private void AddProvinceModifierMarker(Control area, PlayerView owner, ProvinceView province, float width)
+    {
+        if (!province.DarkExperimentsMarked) return;
+        var marker = new ProvinceModifierMarker(DarkExperimentsMark.Production, DarkExperimentsMark.Strength);
+        var y = owner.Id == View.ViewerId ? PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + 6 : -(province.Region is null ? 0 : RegionStrip) - marker.Size.Y - 6;
+        Place(area, marker, (width - marker.Size.X) / 2, y, marker.Size.X, marker.Size.Y);
+        marker.SetMeta("province_modifier", true);
     }
 
     private void AddBattlefields()
