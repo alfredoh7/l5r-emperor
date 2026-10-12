@@ -30,10 +30,12 @@ public partial class Main
     private void ProcessPerfShot()
     {
         if (_perfClock > 1 && _root.Visible) { _table.ReducedMotion = true; _root.Hide(); }
-        if (_perfClock < 5 || _perfShotDone) return;
+        // The auto-fitted camera settles to slightly different values from run to run; pin it so shots compare pixel for pixel.
+        if (_perfClock > 1 && _perfClock < 10) { _cameraGlide = false; _cameraFitted = false; _cameraCenter = new Vector2(974.4286f, 524); _cameraZoom = .4693618f; ApplyTableCamera(); }
+        if (_perfClock < 10 || _perfShotDone) return;
         _perfShotDone = true;
         GetViewport().GetTexture().GetImage().SavePng(_perfShot);
-        GD.Print($"PERF_SHOT {_perfShot}");
+        GD.Print($"PERF_SHOT {_perfShot} camera={_cameraCenter} zoom={_cameraZoom} root={_root.Scale} size={GetViewport().GetVisibleRect().Size} world={_world.Position} hall[{_table.HallDebug()}]");
     }
 
     private string _perfToggle = ""; private bool _perfToggled;

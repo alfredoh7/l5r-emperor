@@ -81,6 +81,8 @@ public partial class TableArtStage : Node3D
         if (_hallContainer is not null) { _hallContainer.Visible = IsVisibleInTree(); _hallDirty = true; }
     }
 
+    internal string HallDebug() => $"port={_hallPort?.Size} container={_hallContainer?.Size} visible={GetViewport().GetVisibleRect().Size}";
+
     private void RenderHallIfStale()
     {
         if (!_hallDirty || _hallPort is null || _hallContainer is null || !_hallContainer.IsVisibleInTree()) return;
