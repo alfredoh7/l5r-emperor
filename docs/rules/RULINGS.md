@@ -555,12 +555,12 @@ Mastering the Elements' permanent copy lasts only while the card stays in play. 
 - **Date:** 2026-10-11
 - **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
 
-### R-064 — Engage is battlefield-specific: The Bestial Ones
-An Engage action is not a home action. The Bestial Ones' Engage is not offered when its Follower's Personality is at home at the time of a battlefield engage, and it may only give its penalty to a Personality or Follower present at the same battlefield.
+### R-064 — Engage is a battlefield-specific reaction, for every card
+An Engage is not a home action. A Personality, Follower or Item taking an Engage must itself be at the battlefield being engaged, and an Engage reaches only cards present at that battlefield. Exempt: a Home Engage, an Absent Engage, and an Engage Reaction whose text names another location it may be performed from (listed by ability id in `EngageRules.cs`: Isawa Tsumaro, Recovering What Was Lost, Shinjo Hayan, The Wave Persists, Rokku, Winter Sled, False Ring of the Void). A Strategy or Item played from a hand, and a Stronghold, Holding or Region, are not unit cards in play: their own text names the battlefield they act on. First applied to The Bestial Ones (#838), then to all cards (#840).
 
-- **Cards/primitives:** The Bestial Ones (oracle-l5r-10677); `wl-bestial-engage` (`after-engaging-at-own-battlefield`, target at the engaged battlefield).
+- **Cards/primitives:** every `after-engaging` / `after-engaging-at-own-battlefield` Reaction; `EngageSourceMustBeAtBattlefield` / `EngageTargetMustBeAtBattlefield` (EngageRules.cs). Changed for Khalimpeh-jiak, Iuchi Takaki, Shosuro Takazaki, The Yari of the Shabura, The Bestial Ones and the Engage fixtures; Takaki's and New Cavalry Tactics' targets.
 - **Date:** 2026-10-11
-- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+- **Source:** Mendon, issues #838 and #840.
 
 ### R-065 — A Region is present at a battlefield when its province has one; that never gives its controller presence
 Regions with Battle actions, or Reactions that respond to Battle actions, may only be used while the Region is present at the battlefield. A Region is present when the province it is attached to has a battlefield created for it. A Region's presence does not satisfy the presence requirement of its controller: only a Personality can. Fallow Lands (own province under attack, its controller the Defender with presence there) is confirmed as implemented.
