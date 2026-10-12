@@ -294,7 +294,6 @@ public sealed partial class MatchEngine
                 Require(source is { Zone: Zone.Attached, AttachedTo: { } host } && Keyword(Card(host), "Void"), "This Shugenja is not Void.");
                 break;
             case EmperorP3Abilities.DeepSnowsEnter:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "Deep Snows is put into play from your hand.");
                 Require(!TerrainAtCurrentBattlefield() || MarshallingFieldsWaiverAvailable(player.Id), "There is already a Terrain in play at the current battlefield."); // The Marshalling Fields (issue #501)
                 break;
         }

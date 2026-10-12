@@ -288,7 +288,7 @@ internal static partial class SingleAudit3Tests
         Eq(mover.Zone, Zone.Battlefield, "the Personality moved to the battlefield"); Eq(mover.ProvinceIndex, 0, "the current one");
         Check(!mover.Bowed, "opposed, he is straightened");
         Eq(e.State.Players[f.Me].Honor, before.Players[f.Me].Honor + 2, "and his controller gains 2 Honor");
-    }, only: ["battle-defender"], why: sc => sc == "battle-attacker" ? "only the Defender" : "timing is unavailable now");
+    }, only: ["battle-defender"], why: sc => sc == "battle-attacker" ? "Only the Defender" : "timing is unavailable now");
 
     private static void BlightedRegionUnopposed()
     {

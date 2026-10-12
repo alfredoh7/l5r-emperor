@@ -64,11 +64,9 @@ public sealed partial class MatchEngine
                 break;
             // Serenity in Air: a Kata is put into play from the hand, and its Battle/Open action is taken only while it is in play (KataCards.cs, Skipping the Puddle).
             case "serenity-air-enter":
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
                 break;
             case "serenity-air-straighten":
             case "serenity-air-straighten-open":
-                Require(source!.Zone == Zone.Home, "Serenity in Air must be in play.");
                 break;
             // Void Tattoo: "discard a card unless your Personality is Void" -- the discarding entry is taken by a performer who is not Void.
             case "void-tattoo-return":
@@ -81,7 +79,6 @@ public sealed partial class MatchEngine
                 break;
             // Unstable Ground: "If there is no Terrain in play at the current battlefield" -- and it is played from the hand.
             case "unstable-ground-destroy":
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "Unstable Ground is played from your hand.");
                 Require(!TerrainAtCurrentBattlefield() || MarshallingFieldsWaiverAvailable(player.Id), "There is already a Terrain in play at the current battlefield."); // The Marshalling Fields (issue #501)
                 break;
         }

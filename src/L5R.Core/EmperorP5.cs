@@ -440,7 +440,6 @@ public sealed partial class MatchEngine
                 break;
             case EmperorP5Abilities.BiteEnter:
             case EmperorP5Abilities.EconEnter:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card is put into play from your hand.");
                 break;
             case EmperorP5Abilities.BiteDiscard:
                 Require(BitesOfWinterInPlay() > 0, "No card titled The Bite of Winter is in play.");

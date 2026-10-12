@@ -172,7 +172,6 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case Wave740Abilities.KataEnter:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
                 break;
             case Wave740Abilities.MagistrateDuel:
                 Require(command.TargetId is null || command.TargetId != command.PerformerId, "Choose a Personality other than the challenger.");
