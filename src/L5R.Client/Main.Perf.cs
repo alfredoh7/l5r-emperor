@@ -30,8 +30,10 @@ public partial class Main
     // --perf-shot=path: a deterministic picture of the 3D hall alone (static light, 2D hidden) for before/after comparison.
     private void ProcessPerfShot()
     {
+        // The auto-fitted camera settles to slightly different values from run to run; pin it so shots compare pixel for pixel.
+        if (_perfClock > 1 && _perfClock < 10) { _cameraGlide = false; _cameraFitted = false; _cameraCenter = new Vector2(974.4286f, 524); _cameraZoom = .4693618f; ApplyTableCamera(); }
         if (_perfClock > 1 && _root.Visible) { _table.ReducedMotion = true; if (!OS.GetCmdlineUserArgs().Contains("--perf-full")) _root.Hide(); }
-        if (_perfClock < 5 || _perfShotDone) return;
+        if (_perfClock < 10 || _perfShotDone) return;
         _perfShotDone = true;
         GetViewport().GetTexture().GetImage().SavePng(_perfShot);
         GD.Print($"PERF_SHOT {_perfShot}");
@@ -171,7 +173,31 @@ public partial class Main
             foreach (var c in n.GetChildren()) Walk(c);
         }
         Walk(GetTree().Root);
+        // Textures held by 3D materials (standard and shader parameters) are not node properties.
+        void Material(Material? m, string where)
+        {
+            if (m is null) return;
+            void Add(Texture2D? tex, string slot)
+            {
+                if (tex is null || seen.ContainsKey(tex.GetInstanceId())) return;
+                seen[tex.GetInstanceId()] = ((long)tex.GetWidth() * tex.GetHeight() * 4, $"{where}.{slot}", $"{tex.GetWidth()}x{tex.GetHeight()}", tex.ResourcePath);
+            }
+            if (m is BaseMaterial3D b)
+                foreach (BaseMaterial3D.TextureParam t in Enum.GetValues(typeof(BaseMaterial3D.TextureParam))) Add(b.GetTexture(t), t.ToString());
+            else if (m is ShaderMaterial sm && sm.Shader is not null)
+                foreach (var u in sm.Shader.GetShaderUniformList()) { var uniform = u.AsGodotDictionary()["name"].AsString(); var v = sm.GetShaderParameter(uniform); if (v.VariantType == Variant.Type.Object && v.AsGodotObject() is Texture2D t) Add(t, uniform); }
+        }
+        void Walk3D(Node n)
+        {
+            if (n is GeometryInstance3D g)
+            {
+                Material(g.MaterialOverride, n.Name); Material(g.MaterialOverlay, n.Name);
+                if (n is MeshInstance3D mi && mi.Mesh is not null) for (var i = 0; i < mi.Mesh.GetSurfaceCount(); i++) Material(mi.GetActiveMaterial(i), n.Name);
+            }
+            foreach (var c in n.GetChildren()) Walk3D(c);
+        }
+        Walk3D(GetTree().Root);
         GD.Print($"PERF_TEX distinct={seen.Count} total_mb={seen.Values.Sum(v => v.Bytes) / 1048576.0:0} nodes_walked={nodes}");
-        foreach (var v in seen.Values.OrderByDescending(v => v.Bytes).Take(25)) GD.Print($"PERF_TEX {v.Bytes / 1048576.0:0.0}MB {v.Size} {v.Where} src={v.Source}");
+        foreach (var v in seen.Values.OrderByDescending(v => v.Bytes).Take(40)) GD.Print($"PERF_TEX {v.Bytes / 1048576.0:0.0}MB {v.Size} {v.Where} src={v.Source}");
     }
 }
