@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dark Experiments' mark is shown persistently with its province: the payment-flow coin with -1 and the stronghold's Province Strength box (cut from the card art, numeral drawn live) with -2. Own provinces carry it below the threshold frame, the opponent's above; hidden for a destroyed province and absent on a province gained later; each shows only while non-zero. Values come from Core DarkExperimentsMark.",
+  "validation": "emperor-p6 18/18 (new assertions on the shared constants and view mark); client builds clean; whitespace format clean; native captures of the new Dark Experiments province-review fixture reviewed and approved by Mendon. tools/check-province-ui.sh fails 'Camera acceptance: independent province selection' identically on unmodified main, so it is not caused by this change.",
+  "remaining": "None; ready for review. Opponent-side (above) placement was not separately captured by me.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/868",
+  "branch": "claude/867-dark-experiments-marker",
+  "updated": "2026-10-12T05:40:57.919625+00:00"
+}
