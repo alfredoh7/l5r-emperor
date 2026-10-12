@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Ability vocabulary lint: Timings known; Target/Performer/Trigger strings must be handled by the engine (typos were silent no-ops). Mutation-checked.",
+  "validation": "bash tools/check.sh --skip-client passed; mutation (typo in w9701-honorable) fails the lint",
+  "remaining": "None; ready for review. Not converted to enums (lint chosen instead).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/845",
+  "branch": "claude/845-checked-ability-data",
+  "updated": "2026-10-12T01:40:27.832304+00:00"
+}
