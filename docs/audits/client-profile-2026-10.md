@@ -61,3 +61,24 @@ Pixel checks use `--perf-shot=path` (the 3D hall alone, static light, 2D hidden)
 Tried and dropped: switching off shadow casting for floor and vista meshes gave no measurable gain (interleaved A/B), so it was not kept.
 
 Still open: 2D draw calls (about 970), shadow cost on lights (about 1.5 ms), old GPU hardware testing, BC7 needs a GPU with BPTC or the ETC2/ASTC fallback.
+
+## Phase 3 (issue #879)
+
+Same machine and method, vsync off, 1440x900. Before is main at 6c4ce998 (after phase 2).
+
+| Measure | Before | After |
+|---|---|---|
+| Table draw calls | 968 | 277 |
+| Idle table frame time | 4.3 ms (this session) | 3.0 ms |
+| Table texture memory | 1042 MB | 592 MB |
+| Table footprint (macOS `footprint`) | 2363 MB | about 1470 MB resident |
+
+**Piles.** Four deck and discard piles produced 724 of the 968 draw calls and 61% of the idle frame, because each card layer was about eight separate shapes. They now paint in a handful of batched calls: the dark cores as one triangle batch and each kind of line as one multi-line call holding only its visible pieces (a layer only shows where the layers above do not cover it). In the pile areas under 1% of pixels differ by more than 8 of 255 (maximum 43), hairline edge pixels only; `check-board-ui`, `perspective-table`, `interactions`, `battle-presentation`, `main-menu` pass.
+
+**Where table memory goes** (macOS footprint of the running table, 2363 MB): GPU allocations 1317 MB, large CPU allocations 323 MB, small allocations 216 MB, other virtual allocations 232 MB. The title menu is 414 MB, so the table adds about 1.9 GB, over half of it textures. Textures by size: the cloth `navy-mat-topaz-4x.webp` was 6688x3764 (96 MB, 128 with mips); the brazier and the room lantern each carried two 4096x4096 maps (about 85 MB each with mips) for objects only a few dozen pixels tall; about 28 more 2048x2048 maps are 21 MB each.
+
+**What changed.** Godot import `process/size_limit` (a lossless resize, no encode time): brazier, room lantern and chest maps to 1024, stone maps to 1024, the cloth to 3344 (still twice the 1672 px source it was upscaled from). At the game camera and at near-maximum zoom the hall differs from before in at most a few hundred pixels by at most 8 of 255.
+
+**BC7 was dropped.** BPTC encoding takes 11m38s locally (47 CPU minutes) and stalled the Windows CI import at 30 minutes, with or without the ASTC encode. DXT is quick but changes 21% of hall pixels. Size caps give a larger saving without any of that.
+
+**Remaining.** The hall viewport and table canvas redraw rules, 2D draw calls beyond the piles (about 100 for hand and province cards), the remaining 2048 maps (columns, dais, floors, which fill large areas and were left alone), and old-GPU testing.
