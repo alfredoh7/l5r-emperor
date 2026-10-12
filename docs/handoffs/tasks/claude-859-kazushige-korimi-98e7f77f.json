@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wires Tamori Kazushige's Open (Misaki's watch, 2 Honor reward) and Togashi Korimi's entering-play draw; clears both from the partial-wiring notes (inventory regenerated).",
+  "validation": "wave-859 2/2; full Core suite run in the PR.",
+  "remaining": "None; readings in docs/decisions/2026-10-12-kazushige-korimi.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/859",
+  "branch": "claude/859-kazushige-korimi",
+  "updated": "2026-10-12T03:41:50.930549+00:00"
+}

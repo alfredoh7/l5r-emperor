@@ -22,7 +22,7 @@ namespace L5R.Core;
 //     (DuelStatValue), Kakita Ichigiku's challenge (IssueChallenge, ResolveDuel) and Kazehime's hand size (HandLimitFor).
 
 /// <summary>Bayushi Misaki: <paramref name="TargetId"/> is straightened when the phase ends, then checked when turn <paramref name="Turn"/> ends.</summary>
-public sealed record MisakiWatch(string TargetId, string SourceCardId, int ActingPlayerId, int Turn, bool Straightened = false);
+public sealed record MisakiWatch(string TargetId, string SourceCardId, int ActingPlayerId, int Turn, bool Straightened = false, string Kind = "");
 
 /// <summary>Bayushi Waru: the next action <paramref name="CardId"/> performs on turn <paramref name="Turn"/> is negated.</summary>
 public sealed record NextPerformedActionNegation(string CardId, int Turn, string Source);
@@ -330,6 +330,7 @@ public sealed partial class MatchEngine
             var target = Card(watch.TargetId);
             if (!InPlay(target) || target.AssignedToAttackTurn == _state.TurnNumber) continue;
             var misaki = _state.Cards.TryGetValue(watch.SourceCardId, out var found) ? found : null;
+            if (watch.Kind == Wave859Abilities.KazushigeKind) { Wave859KazushigeTurnEnd(watch, misaki); continue; } // issue #859: Tamori Kazushige's "gain 2 Honor"
             Dishonor(target, watch.ActingPlayerId);
             GainHonor(target.OwnerId, -Definition(target).PersonalHonor, misaki is null ? "Bayushi Misaki" : Definition(misaki).Name, misaki);
         }
