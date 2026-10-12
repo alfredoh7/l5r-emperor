@@ -3,3 +3,6 @@ oracle-l5r-10370
 oracle-l5r-10378
 oracle-l5r-10388
 oracle-l5r-10404
+oracle-l5r-10550
+oracle-l5r-10558
+oracle-l5r-10720

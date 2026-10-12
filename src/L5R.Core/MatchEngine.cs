@@ -267,6 +267,7 @@ public sealed partial class MatchEngine
                 ReturnCardsOutOfPlayToTheirOwners();
                 Wave827AfterCommand(); // issue #827 (Wave827.cs): Koan's Jingasa's Spell limit, P'an Ku's straightening choice
                 Wave829AfterCommand(); // issue #829 (Wave829.cs): Benten's Blessing's choice of Personalities
+                Wave835AfterCommand(); // issue #835 (Wave835.cs): the Heavens' Blessing's owed draws, Unbearable Weight's return to a hand
                 RemoveCreatedCardsLeftInPiles();
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
@@ -3335,6 +3336,7 @@ public sealed partial class MatchEngine
     {
         if (player.FateDeck.Count == 0) { Emit("deckEmpty", $"{player.Name}'s Fate deck is empty; no card drawn.", player.Id); return; }
         if (P2CardIntoHandBlocked(player.Id)) return; // issue #503: The Scorpion Wall is Finished
+        if (Wave835DefersDraw(player)) return; // issue #835: the Heavens' Blessing makes a card an own Strategy draws a 2 Gold payment
         var id = player.FateDeck[0]; player.FateDeck.RemoveAt(0); player.Hand.Add(id);
         Card(id).Zone = Zone.Hand;
         NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5): "an action that put any cards into another player's hand".

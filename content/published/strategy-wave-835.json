@@ -126,6 +126,84 @@
       ],
       "Effect": "none",
       "DeckCopyLimit": 7
+    },
+    {
+      "Id": "oracle-l5r-10558",
+      "Name": "The Heavens' Blessing",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nOpen: Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase.\nOpen: No player can gain Honor in Action Phases (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10558.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w835-heavens-draw",
+        "w835-heavens-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10550",
+      "Name": "Unbearable Weight",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, :g4:: Discard the top card of a Fate deck. You may target a Personality and give him a Chi penalty equal to the card's Focus Value. If this destroyed the target, his controller puts this Strategy in his hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10550.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w835-unbearable"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10720",
+      "Name": "Merchant Patronage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nPolitical Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it. If you control a Courtier, you may bow him to increase the gain or loss by 1.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10720.jpg",
+      "Keywords": [
+        "Kharmic",
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w835-patronage",
+        "w835-patronage-bow"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

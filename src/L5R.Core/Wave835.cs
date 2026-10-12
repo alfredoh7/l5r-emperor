@@ -15,12 +15,23 @@ namespace L5R.Core;
 //   Pierce the Tapestry      "You may include up to seven copies of this card in your deck. / Battle: Choose your performing unbowed Monk and target an enemy Personality or Follower: Give it -3F. If it has no
 //                            attachments and you have played two or more other Pierce the Tapestry this battle, destroy it. If this did not destroy it, you may take an additional Battle action to play a
 //                            Pierce the Tapestry."   A per-player, per-battle count of plays and an additional action scoped to the ability. Oracle of the Void prints the name "Pierce the Tapestery".
+//   The Heavens' Blessing    "Open: Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase. / Open: No player can gain Honor in Action Phases (this
+//                            turn)."   A game-long flag; every card a player's own Strategy would draw in an Action Phase is owed, and each owed card is its own 2 Gold payment (a window after the action).
+//   Unbearable Weight        "Limited, :g4:: Discard the top card of a Fate deck. You may target a Personality and give him a Chi penalty equal to the card's Focus Value. If this destroyed the target, his
+//                            controller puts this Strategy in his hand."   The card is controlled by whoever holds it and returns to its owner's discard pile when it leaves play.
+//   Merchant Patronage       "Political Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it. If you control a Courtier, you may bow him to increase the gain or
+//                            loss by 1."   A Reaction in the existing before-Honor-change window (EmperorRulingR4Honor.cs), on a change an action of another player's Holding makes.
 public static class Wave835Abilities
 {
     public const string CleansingBreath = "w835-cleansing-breath", ImperialDeployment = "w835-imperial-deployment", WardedNegate = "w835-warded-negate", WardedPlay = "w835-warded-play",
-        DutyDiscount = "w835-duty-discount", DutyFull = "w835-duty-full", Pierce = "w835-pierce";
+        DutyDiscount = "w835-duty-discount", DutyFull = "w835-duty-full", Pierce = "w835-pierce", HeavensDraw = "w835-heavens-draw", HeavensHonor = "w835-heavens-honor", HeavensPay = "w835-heavens-pay",
+        Unbearable = "w835-unbearable", PatronageRedirect = "w835-patronage", PatronageBow = "w835-patronage-bow";
+    public const string HeavensTrigger = "w835-heavens-pay", HeavensWindow = "w835HeavensPay", HeavensDeclineOne = "w835HeavensDecline", HeavensDeclineAll = "w835HeavensDeclineAll";
+    public const string DeckSlot = "deck", WeightTargetSlot = "target";
+    /// <summary>The Gold each card drawn from an own Strategy costs while the Heavens' Blessing is in force.</summary>
+    public const int HeavensPrice = 2;
     public const string YojimboDiscard = "w835-discarded-yojimbo";
-    public const string CleansingBreathCard = "oracle-l5r-10358", ImperialDeploymentCard = "oracle-l5r-10378", WardedPremisesCard = "oracle-l5r-10404", DutyCard = "oracle-l5r-10370", PierceCard = "oracle-l5r-10388";
+    public const string CleansingBreathCard = "oracle-l5r-10358", ImperialDeploymentCard = "oracle-l5r-10378", WardedPremisesCard = "oracle-l5r-10404", DutyCard = "oracle-l5r-10370", PierceCard = "oracle-l5r-10388", HeavensCard = "oracle-l5r-10558", UnbearableCard = "oracle-l5r-10550", PatronageCard = "oracle-l5r-10720";
 
     /// <summary>The Gold Duty Over All Things takes off the recruit when its player controls a Courtier or a Shugenja.</summary>
     public const int DutyDiscountAmount = 3;
@@ -42,6 +53,16 @@ public static class Wave835Abilities
         all[DutyFull] = new("Battle", "Battle: If he would be opposed, Recruit your target performing discarded Yojimbo", YojimboDiscard, Cost: GoldCostRule.TargetRecruit());
         all[Pierce] = new("Battle", "Battle: Choose your performing unbowed Monk and target an enemy Personality or Follower: Give it -3F. If it has no attachments and you have played two or more other Pierce the Tapestry this battle, destroy it. If this did not destroy it, you may take an additional Battle action to play a Pierce the Tapestry",
             "enemy-personality-or-follower", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]);
+        all[HeavensDraw] = new("Open", "Open: Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase", "none");
+        all[HeavensHonor] = new("Open", "Open: No player can gain Honor in Action Phases (this turn)", "none");
+        // The payment for one owed card: a player ability, offered only in the window the owed draws open, so the ordinary Gold payment (its sources, Sakuma, Koku...) pays it.
+        all[HeavensPay] = new("Reaction", "The Heavens' Blessing: pay 2 Gold to draw a card from the effects of your own Strategy", "none", PlayerAbility: true, Trigger: HeavensTrigger, Cost: GoldCostRule.Fixed(HeavensPrice),
+            UsesPerTurn: AbilityUseLimit.Unlimited);
+        all[Unbearable] = new("Limited", "Limited: Discard the top card of a Fate deck. You may target a Personality and give him a Chi penalty equal to the card's Focus Value. If this destroyed the target, his controller puts this Strategy in his hand", "slots",
+            Slots: [new(DeckSlot, "player", "A Fate deck: its owner's top card is discarded"), new(WeightTargetSlot, "personality", "A Personality to give a Chi penalty (optional)", 0, 1)]);
+        all[PatronageRedirect] = new("Reaction", "Political Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it", "player", Trigger: HonorChangeReactions.Trigger, ActionKeywords: ["Political"]);
+        all[PatronageBow] = new("Reaction", "Political Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it. Bow your performing Courtier to increase the gain or loss by 1", "player",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Trigger: HonorChangeReactions.Trigger, Costs: ActionCost.BowPerformer, ActionKeywords: ["Political"]);
         return all;
     }
 }
@@ -55,9 +76,34 @@ public sealed class DeploymentWatch
     public int Turn { get; set; }
 }
 
+/// <summary>A Merchant Patronage played on one Honor change: who takes it, and whether it is one larger (a Courtier bowed).</summary>
+public sealed class PatronageMark
+{
+    public string ActionKey { get; set; } = "";
+    public int Occurrence { get; set; }
+    public int ToPlayer { get; set; }
+    public int Bonus { get; set; }
+}
+
+/// <summary>An Unbearable Weight that destroyed its target: once it is in the discard pile, its target's controller puts it in his hand.</summary>
+public sealed class WeightReturn
+{
+    public string CardId { get; set; } = "";
+    public int ToPlayer { get; set; }
+}
+
 public sealed class Wave835State
 {
     public List<DeploymentWatch> Deployments { get; set; } = [];
+    /// <summary>The Heavens' Blessing has been played: until the game ends (never cleared).</summary>
+    public bool HeavensActive { get; set; }
+    /// <summary>Cards a player's own Strategy would have drawn in an Action Phase, each still to be paid for (player id to count).</summary>
+    public Dictionary<int, int> HeavensOwed { get; set; } = [];
+    public List<PatronageMark> Patronage { get; set; } = [];
+    public List<WeightReturn> WeightReturns { get; set; } = [];
+    /// <summary>The priority and pass count a window opened after a command took over, restored when it closes.</summary>
+    public int? ResumePriority { get; set; }
+    public int ResumePasses { get; set; }
 }
 
 public sealed partial class MatchState
@@ -106,6 +152,16 @@ public sealed partial class MatchEngine
                     var quote = QuotePurchase(player.Id, yojimbo.Id, fromDeadPile: true);
                     Require(quote.Error is null, quote.Error ?? "");
                 }
+                break;
+            // One owed card: only in the window the owed draws opened, for the player they are owed by.
+            case Wave835Abilities.HeavensPay:
+                Require(_state.PendingChoice is { Type: Wave835Abilities.HeavensWindow } window && window.PlayerId == player.Id && W835.HeavensOwed.GetValueOrDefault(player.Id) > 0, "No card drawn from your own Strategy is waiting to be paid for.");
+                break;
+            // Merchant Patronage: judged against the Honor change it is played on (the window's own held change).
+            case Wave835Abilities.PatronageRedirect:
+            case Wave835Abilities.PatronageBow:
+                Require(_state.PendingHonorChange is { } change && Wave835PatronageApplies(player.Id, change), "Merchant Patronage is played on an Honor change an action of another player's Holding makes.");
+                Require(command.TargetPlayerId is 0 or 1, "Choose who gains or loses the Honor.");
                 break;
             // Warded Premises' second ability: "if there is no Terrain in play there", from the hand.
             case Wave835Abilities.WardedPlay:
@@ -169,9 +225,195 @@ public sealed partial class MatchEngine
                     if (!destroyed) GrantAdditionalAction(player.Id, null, scopeAbilityIds: [Wave835Abilities.Pierce]);
                     return false;
                 }
+            case Wave835Abilities.HeavensDraw:
+                W835.HeavensActive = true;
+                Emit("heavensBlessing", $"{Definition(source!).Name}: until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase.", player.Id, source!.Id);
+                return false;
+            // "No player can gain Honor in Action Phases (this turn)": the P14 no-gain modifier with the Action-Phase filter, for either player.
+            case Wave835Abilities.HeavensHonor:
+                AddHonorModifier(new HonorModifier { OwnerPlayerId = player.Id, AffectedPlayerId = null, Kind = HonorModifierKinds.NoGain, Filters = [HonorModifierFilters.ActionPhaseOnly], UntilTurn = _state.TurnNumber, SourceCardId = source!.Id });
+                Emit("heavensBlessing", $"{Definition(source!).Name}: no player can gain Honor in Action Phases this turn.", player.Id, source!.Id);
+                return false;
+            // One owed card, paid for (the Gold was paid as the ability's cost): it is drawn now, outside the interception.
+            case Wave835Abilities.HeavensPay:
+                {
+                    W835.HeavensOwed[player.Id] = Math.Max(0, W835.HeavensOwed.GetValueOrDefault(player.Id) - 1);
+                    _w835Paying = true;
+                    try { Draw(player); } finally { _w835Paying = false; }
+                    return false;
+                }
+            case Wave835Abilities.Unbearable:
+                {
+                    var deckOwner = Player(SlotPlayer(command, Wave835Abilities.DeckSlot)!.Value);
+                    var focus = DiscardTopOfFateDeck(deckOwner);
+                    if (focus is int penalty && penalty > 0 && SlotCards(command, Wave835Abilities.WeightTargetSlot).FirstOrDefault() is { } victim && InPlay(victim))
+                    {
+                        var controller = victim.OwnerId;
+                        ApplyModifier(victim, source!.Id, id, "Chi", -penalty);
+                        if (!InPlay(victim) && !W835.WeightReturns.Any(r => r.CardId == source.Id))
+                        {
+                            W835.WeightReturns.Add(new WeightReturn { CardId = source.Id, ToPlayer = controller });
+                            Emit("weightDestroyed", $"{Definition(source).Name} destroyed {Definition(victim).Name}: {Player(controller).Name} puts it in his hand.", player.Id, source.Id);
+                        }
+                    }
+                    return false;
+                }
+            // Merchant Patronage: the player who takes this Honor change instead of the one it was for (or the same player), and a Courtier bowed for one more.
+            case Wave835Abilities.PatronageRedirect:
+            case Wave835Abilities.PatronageBow:
+                {
+                    var held = _state.PendingHonorChange!;
+                    var chosen = command.TargetPlayerId!.Value;
+                    W835.Patronage.RemoveAll(m => m.ActionKey == held.ActionKey && m.Occurrence == held.Occurrence);
+                    W835.Patronage.Add(new PatronageMark { ActionKey = held.ActionKey, Occurrence = held.Occurrence, ToPlayer = chosen, Bonus = id == Wave835Abilities.PatronageBow ? 1 : 0 });
+                    Emit("patronageQueued", $"{Definition(source!).Name}: {Player(chosen).Name} will {(held.Amount > 0 ? "gain" : "lose")} the Honor{(id == Wave835Abilities.PatronageBow ? ", increased by 1" : "")}.", player.Id, source!.Id);
+                    return false;
+                }
             default:
                 return null;
         }
+    }
+
+    // ---- Merchant Patronage ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // The window's judgement (HonorChangeReactionApplies): the change is made by an action of a Holding that another player controls than the one playing the Reaction.
+    private bool Wave835PatronageApplies(int reactorId, PendingHonorChange change)
+    {
+        var parts = change.ActionKey.Split('|');
+        return parts.Length >= 3 && _state.Cards.TryGetValue(parts[2], out var holding) && Definition(holding).Type == CardType.Holding && holding.OwnerId != reactorId;
+    }
+
+    private bool? Wave835HonorChangeApplies(CardInstance card, string abilityId, PendingHonorChange change)
+    {
+        if (abilityId is not (Wave835Abilities.PatronageRedirect or Wave835Abilities.PatronageBow)) return null;
+        if (!Wave835PatronageApplies(card.OwnerId, change)) return false;
+        return abilityId == Wave835Abilities.PatronageRedirect || BeforeActionReactionPerformers(card.OwnerId, AbilityCatalog.All[abilityId]).Any();
+    }
+
+    // The HonorChange hook, at the stage where the change lands: the marked change goes to the chosen player and is one larger when a Courtier was bowed. A mark belongs to its action and its occurrence.
+    private HonorChangeResult? Wave835PatronageApply(HonorChangeContext context)
+    {
+        if (context.Stage != HonorChangeStage.Applied || context.ActionKey is not { } key || _state.Wave835 is not { Patronage.Count: > 0 } w) return null;
+        var mark = w.Patronage.FirstOrDefault(m => m.ActionKey == key && m.Occurrence == _honorChangeOccurrence - 1);
+        if (mark is null) return null;
+        w.Patronage.Remove(mark);
+        var amount = context.Amount + Math.Sign(context.Amount) * mark.Bonus;
+        return new HonorChangeResult(amount, mark.ToPlayer != context.PlayerId ? mark.ToPlayer : null);
+    }
+
+    // ---- The Heavens' Blessing: the owed draws ------------------------------------------------------------------------------------------------------------------------------------------
+
+    private bool _w835Paying;
+
+    // Draw's first step: once the Blessing is in force, a card a player's own Strategy draws in an Action Phase is not drawn but owed (Mendon: each card is its own instance and its own 2 Gold payment). The
+    // other player's draw an own Strategy grants him, a Holding's draw (Traveling Peddler), a Focus Effect's and the rulebook's are not "effects of his own Strategies" and are untouched.
+    private bool Wave835DefersDraw(PlayerState player)
+    {
+        if (_state.Wave835 is not { HeavensActive: true } w || _w835Paying || _state.Phase != Phase.Action) return false;
+        if (!CurrentActionFacts(out var key, out var actorId) || actorId != player.Id) return false;
+        var parts = key.Split('|');
+        if (parts.Length < 3 || !_state.Cards.TryGetValue(parts[2], out var source) || Definition(source).Type != CardType.Strategy) return false;
+        w.HeavensOwed[player.Id] = w.HeavensOwed.GetValueOrDefault(player.Id) + 1;
+        Emit("drawOwed", $"{player.Name}: the Heavens' Blessing means a card drawn from {Definition(source).Name} costs 2 Gold.", player.Id, source.Id);
+        return true;
+    }
+
+    private bool Wave835WindowOpen(GameCommand command) =>
+        _state.PendingChoice is { Type: Wave835Abilities.HeavensWindow } pending && command.PlayerId == pending.PlayerId;
+
+    // Run after every command: a Strategy's put-back to its new controller's hand, and the first player with owed cards gets his window (nothing opens in the middle of an effect).
+    private void Wave835AfterCommand()
+    {
+        if (_state.Wave835 is not { } w) return;
+        foreach (var back in w.WeightReturns.ToArray())
+        {
+            if (!_state.Cards.TryGetValue(back.CardId, out var strategy) || strategy.Zone is Zone.Hand or Zone.RemovedFromGame) { w.WeightReturns.Remove(back); continue; }
+            if (strategy.Zone != Zone.FateDiscard) continue; // not spent yet: it follows once the action is over
+            w.WeightReturns.Remove(back);
+            if (P2CardIntoHandBlocked(back.ToPlayer)) continue;
+            strategy.OriginalOwnerId ??= strategy.OwnerId;
+            strategy.OwnerId = back.ToPlayer;
+            if (strategy.OriginalOwnerId == back.ToPlayer) strategy.OriginalOwnerId = null;
+            strategy.Zone = Zone.Hand; strategy.FaceUp = false; strategy.AbilityUses.Clear(); // a card in a hand is a fresh object: this play's once-per-turn stamp is not carried over
+            Player(back.ToPlayer).Hand.Add(strategy.Id);
+            NoteCardIntoHand(back.ToPlayer);
+            Emit("strategyTaken", $"{Player(back.ToPlayer).Name} put {Definition(strategy).Name} in his hand.", back.ToPlayer, strategy.Id);
+        }
+        if (w.HeavensOwed.Count == 0 || _state.WinnerId is not null || _state.PendingChoice is not null || _state.PendingDuel is not null || _state.PendingAttack is not null
+            || _state.PendingBeforeBattleResolve is not null || _state.PendingNegatableAbility is not null || _state.PendingHonorChange is not null) return;
+        foreach (var (playerId, owed) in w.HeavensOwed.Where(kv => kv.Value > 0).OrderBy(kv => kv.Key).ToArray())
+        {
+            var window = new PendingChoice(Wave835Abilities.HeavensWindow, playerId, null, Wave835Prompt(owed));
+            if (!Wave835CanPay(playerId, window))
+            {
+                w.HeavensOwed.Remove(playerId);
+                Emit("drawLost", $"{Player(playerId).Name} cannot pay 2 Gold: {owed} card{(owed == 1 ? "" : "s")} drawn from his own Strategy {(owed == 1 ? "is" : "are")} not drawn.", playerId);
+                continue;
+            }
+            w.ResumePriority = _state.PriorityPlayerId; w.ResumePasses = _state.ConsecutivePasses;
+            _state.PendingChoice = window;
+            _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
+            Emit("reactionWindow", "The Heavens' Blessing: a card drawn from your own Strategy may be paid for.", playerId);
+            return;
+        }
+        w.HeavensOwed = w.HeavensOwed.Where(kv => kv.Value > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
+    }
+
+    private bool Wave835CanPay(int playerId, PendingChoice window)
+    {
+        var saved = _state.PendingChoice;
+        _state.PendingChoice = window;
+        try { return AbilityActions(playerId).Any(o => o.Enabled && o.Command?.AbilityId == Wave835Abilities.HeavensPay); }
+        finally { _state.PendingChoice = saved; }
+    }
+
+    private static string Wave835Prompt(int owed) =>
+        $"The Heavens' Blessing: {owed} card{(owed == 1 ? "" : "s")} drawn from your own Strategy {(owed == 1 ? "costs" : "cost")} 2 Gold each. Pay for one now, or decline it.";
+
+    private bool HandleWave835Window(string type, GameCommand command)
+    {
+        if (type != Wave835Abilities.HeavensWindow) return false;
+        var pending = _state.PendingChoice!;
+        Require(command.PlayerId == pending.PlayerId && command.Type is "useAbility" or "declineReaction" or "pass" or Wave835Abilities.HeavensDeclineAll, "Pay 2 Gold to draw the card, or decline it.");
+        var playerId = pending.PlayerId;
+        if (command.Type == "useAbility") UseAbility(command);
+        else if (command.Type == Wave835Abilities.HeavensDeclineAll) { Emit("drawDeclined", $"{Player(playerId).Name} declined to pay for the cards drawn from his own Strategy.", playerId); W835.HeavensOwed.Remove(playerId); }
+        else { W835.HeavensOwed[playerId] = Math.Max(0, W835.HeavensOwed.GetValueOrDefault(playerId) - 1); Emit("drawDeclined", $"{Player(playerId).Name} declined to pay 2 Gold: the card is not drawn.", playerId); }
+        if (_state.PendingChoice is { Type: Wave835Abilities.HeavensWindow } open)
+        {
+            var owed = W835.HeavensOwed.GetValueOrDefault(playerId);
+            // Another card is owed and can still be paid for (a payment is its own: Gold left over from one is not carried to the next): the window stays; otherwise the rest are lost.
+            if (owed > 0 && Wave835CanPay(playerId, open))
+            {
+                _state.PendingChoice = open with { Prompt = Wave835Prompt(owed) };
+                _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
+            }
+            else
+            {
+                if (owed > 0) Emit("drawLost", $"{Player(playerId).Name} cannot pay 2 Gold again: {owed} card{(owed == 1 ? "" : "s")} drawn from his own Strategy {(owed == 1 ? "is" : "are")} not drawn.", playerId);
+                W835.HeavensOwed.Remove(playerId);
+                _state.PendingChoice = null; Wave835Resume();
+            }
+        }
+        return true;
+    }
+
+    private void Wave835Resume()
+    {
+        if (W835.ResumePriority is int priority) { _state.PriorityPlayerId = priority; _state.ConsecutivePasses = W835.ResumePasses; }
+        W835.ResumePriority = null;
+        W835.HeavensOwed = W835.HeavensOwed.Where(kv => kv.Value > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
+    }
+
+    private IEnumerable<ActionOption>? Wave835WindowActions(PendingActionsContext context)
+    {
+        if (context.Choice.Type != Wave835Abilities.HeavensWindow) return null;
+        if (context.PlayerId != context.Choice.PlayerId) return [];
+        var options = AbilityActions(context.PlayerId).Where(o => o.Command?.AbilityId == Wave835Abilities.HeavensPay || o.Command is null).ToList();
+        options.Add(new ActionOption("declineReaction", "Don't pay: the card is not drawn", true, null, new GameCommand("declineReaction", context.PlayerId, _state.Version)));
+        if (W835.HeavensOwed.GetValueOrDefault(context.PlayerId) > 1)
+            options.Add(new ActionOption(Wave835Abilities.HeavensDeclineAll, "Don't pay for any of them", true, null, new GameCommand(Wave835Abilities.HeavensDeclineAll, context.PlayerId, _state.Version)));
+        return options;
     }
 
     // ---- Imperial Deployment: the mandatory straightening ----------------------------------------------------------------------------------------------------------------------------
@@ -213,5 +455,8 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("Wave835Abilities", 13835, static abilities => abilities.AddWave835());
         EngineHooks.ValidateEarly.Register("Wave835Validate", 13835, static (engine, context) => engine.Wave835Validate(context));
         EngineHooks.RunEffects.Register("Wave835RunEffects", 13835, static (engine, context) => engine.RunWave835(context));
+        EngineHooks.HonorChange.Register("Wave835Patronage", 13835, static context => context.Engine.Wave835PatronageApply(context));
+        EngineHooks.PendingChoice.Register("Wave835Window", 13835, static (engine, type, command) => engine.HandleWave835Window(type, command));
+        EngineHooks.PendingActions.Register("Wave835WindowActions", 13835, static (engine, context) => engine.Wave835WindowActions(context));
     }
 }

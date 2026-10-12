@@ -45,5 +45,32 @@
     "image_sha256": "ae5b2d0034bb2561f29240f08c1caad0a3ab5b2f8fd5af436f54a714276ee8f1",
     "oracle_name": "Pierce the Tapestery",
     "name_note": "Oracle of the Void prints this card as \"Pierce the Tapestery\"; the card's own text and Mendon's ruling (2026-10-11) spell it Pierce the Tapestry."
+  },
+  {
+    "card_id": "oracle-l5r-10558",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10558",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10558-printing-1-image-1.webp",
+    "image_sha256": "0fbc668a19dedde43fd307d957691af7edb8e451039049d30284ddbc101314a7"
+  },
+  {
+    "card_id": "oracle-l5r-10550",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10550",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10550-printing-1-image-1.webp",
+    "image_sha256": "7ab71e4f2465fe54697906d622612ed928fabb2449a9f0c2b880d40f640e991f"
+  },
+  {
+    "card_id": "oracle-l5r-10720",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10720",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10720-printing-1-image-1.webp",
+    "image_sha256": "1a3c510caa5cc4cdb6b7334e4deb7cb836834e57b6e17e33004510d81f738273"
   }
 ]

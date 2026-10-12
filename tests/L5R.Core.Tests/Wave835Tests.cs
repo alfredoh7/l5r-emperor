@@ -8,7 +8,8 @@ using static RegressionAssertions;
 internal static class Wave835Tests
 {
     private const string CleansingBreath = Wave835Abilities.CleansingBreathCard, ImperialDeployment = Wave835Abilities.ImperialDeploymentCard, WardedPremises = Wave835Abilities.WardedPremisesCard,
-        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard;
+        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard;
+    private const string Farm = Wave829Abilities.Farm, FaceOfNinube = "oracle-l5r-2431", TravelingPeddler = "oracle-l5r-8729";
     private const string CraneSamurai = "training-crane-samurai", LionSamurai = "training-lion-samurai", Item = "training-item";
     // Fixtures: published Personalities carrying the keywords the rulings turn on.
     private const string Kensai = "oracle-l5r-10663" /* Lao-she */, Monk = "oracle-l5r-9998" /* Guest */, Yojimbo = "oracle-l5r-9819" /* Mirumoto Rokai, 3 Gold */, Courtier = "oracle-l5r-10013" /* Rokuta's Apprentice */,
@@ -51,6 +52,10 @@ internal static class Wave835Tests
         ("Warded Premises: the Terrain negates only the Force bonuses actions gave, at its battlefield; it can be put into play with no units there, and not over another Terrain", WardedPremisesTerrain),
         ("Duty Over All Things: recruits a discarded (not dead) Yojimbo at the battlefield when an enemy Personality stands there, three Gold cheaper with a Courtier or Shugenja", DutyOverAllThings),
         ("Pierce the Tapestry: -3F; the third Pierce this battle destroys a target with no attachments; a Pierce that did not destroy grants an additional Pierce action", PierceTheTapestry),
+        ("The Heavens' Blessing: no player can gain Honor in Action Phases this turn", HeavensHonor),
+        ("The Heavens' Blessing: every card an own Strategy draws in an Action Phase is its own 2 Gold payment, declinable, never shared; a Holding's draw is free", HeavensDraws),
+        ("Unbearable Weight: discards the top card of a chosen Fate deck, a Chi penalty of its Focus Value; a destroyed target's controller puts the Strategy in his hand, and it goes back to its owner's discard pile", UnbearableWeight),
+        ("Merchant Patronage: on an Honor change an action of another player's Holding makes, the Honor goes to the player you choose, one larger with a bowed Courtier", MerchantPatronage),
     ]);
 
     // ---- published shape ------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,7 +68,10 @@ internal static class Wave835Tests
             (ImperialDeployment, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.ImperialDeployment]),
             (WardedPremises, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.WardedNegate, Wave835Abilities.WardedPlay]),
             (Duty, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.DutyDiscount, Wave835Abilities.DutyFull]),
-            (Pierce, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.Pierce])];
+            (Pierce, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.Pierce]),
+            (Heavens, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.HeavensDraw, Wave835Abilities.HeavensHonor]),
+            (Unbearable, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.Unbearable]),
+            (Patronage, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.PatronageRedirect, Wave835Abilities.PatronageBow])];
         foreach (var (id, wave, type, abilities) in cards)
         {
             var def = CardCatalog.Get(id);
@@ -314,4 +322,258 @@ internal static class Wave835Tests
         var lone = Add(bare, Pierce, 0, Zone.Hand);
         Check(!Batch336Support.CanUse(Engine(bare), 0, Wave835Abilities.Pierce, lone.Id), "no Monk of yours at the battle, no Pierce");
     }
+
+    // ---- The Heavens' Blessing ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // A published-profile match (player abilities exist only there), hands emptied, every Gold source of player 0 bowed: a test puts back the sources it wants.
+    private static MatchState PublishedTable(Phase phase, int actor)
+    {
+        var s = MatchEngine.CreatePublishedMatch().State;
+        foreach (var p in s.Players) { foreach (var id in p.Hand.ToArray()) s.Cards.Remove(id); p.Hand.Clear(); }
+        s.Phase = phase; s.ActivePlayerId = actor; s.PriorityPlayerId = actor; s.PendingChoice = null;
+        foreach (var c in s.Cards.Values.Where(c => c.OwnerId == 0 && c.Zone is Zone.Home or Zone.Stronghold && CardCatalog.Get(c.DefinitionId).GoldProduction > 0)) c.Bowed = true;
+        return s;
+    }
+    private const string Shrine = Wave829Abilities.Shrine; // a Holding that produces 2 Gold
+    private static GameCommand Pay(MatchEngine e, int player) => Batch336Support.Enabled(e, player, Wave835Abilities.HeavensPay).Command!;
+    private static GameCommand Decline(MatchEngine e, int player) => new("declineReaction", player, e.Version);
+
+    private static void HeavensHonor()
+    {
+        var s = Batch336Support.Table(Phase.Action, 0);
+        var heavens = Add(s, Heavens, 0, Zone.Hand);
+        var farm = Add(s, Farm, 0, Zone.Home); var theirs = Add(s, Farm, 1, Zone.Home);
+        var e = Engine(s);
+        Accept(e, Batch336Support.Use(e, 0, Wave835Abilities.HeavensHonor, heavens.Id));
+        e = Batch336Support.Edit(e, st => st.PriorityPlayerId = 0);
+        var honor = Batch336Support.Honor(e, 0);
+        Accept(e, Batch336Support.Enabled(e, 0, Wave829Abilities.FarmHonor, farm.Id).Command!);
+        Eq(Batch336Support.Honor(e, 0), honor, "no Honor is gained in an Action Phase this turn");
+        // Either player: the other player's gain is stopped too (his Holding, used on his turn).
+        var other = Batch336Support.Edit(e, st => { st.ActivePlayerId = 1; st.PriorityPlayerId = 1; });
+        var theirHonor = Batch336Support.Honor(other, 1);
+        Accept(other, Batch336Support.Enabled(other, 1, Wave829Abilities.FarmHonor, theirs.Id).Command!);
+        Eq(Batch336Support.Honor(other, 1), theirHonor, "for either player");
+        // Only this turn.
+        var later = Batch336Support.Edit(e, st => { st.TurnNumber++; foreach (var c in st.Cards.Values) c.Bowed = false; st.ActivePlayerId = 0; st.PriorityPlayerId = 0; });
+        var laterHonor = Batch336Support.Honor(later, 0);
+        Accept(later, Batch336Support.Enabled(later, 0, Wave829Abilities.FarmHonor, farm.Id).Command!);
+        Eq(Batch336Support.Honor(later, 0), laterHonor + 1, "the next turn Honor can be gained again");
+    }
+
+    private static MatchEngine WithBlessing(Action<MatchState> arrange, bool poor = false)
+    {
+        var s = PublishedTable(Phase.Action, 0);
+        if (!poor) for (var i = 0; i < 3; i++) Add(s, Shrine, 0, Zone.Home);
+        arrange(s);
+        s.Wave835 = new Wave835State { HeavensActive = true };
+        return Engine(s);
+    }
+
+    private static void HeavensDraws()
+    {
+        // Control: without the Blessing a Strategy draws freely.
+        var free = Batch336Support.Table(Phase.Action, 0);
+        var ninubeFree = Add(free, FaceOfNinube, 0, Zone.Hand); for (var i = 0; i < 3; i++) Add(free, CraneSamurai, 0, Zone.Hand);
+        var fe = Engine(free);
+        Accept(fe, Batch336Support.Use(fe, 0, "face-ninube-draw", ninubeFree.Id));
+        Eq(fe.State.Players[0].Hand.Count, 3, "without the Blessing the shuffled cards are drawn back");
+
+        // The Blessing played: Open, sets the game-long flag.
+        var played = Batch336Support.Table(Phase.Action, 0);
+        var heavens = Add(played, Heavens, 0, Zone.Hand);
+        var pe = Engine(played);
+        Accept(pe, Batch336Support.Use(pe, 0, Wave835Abilities.HeavensDraw, heavens.Id));
+        Check(pe.State.Wave835?.HeavensActive == true, "until the game ends");
+
+        // Three cards owed: each its own payment, declinable one by one. Pay for one, decline one, pay for the last.
+        var e = WithBlessing(st => { Add(st, FaceOfNinube, 0, Zone.Hand); for (var i = 0; i < 3; i++) Add(st, CraneSamurai, 0, Zone.Hand); });
+        var ninube = e.State.Cards.Values.First(c => c.DefinitionId == FaceOfNinube);
+        Accept(e, Batch336Support.Use(e, 0, "face-ninube-draw", ninube.Id));
+        Eq(e.State.PendingChoice?.Type, Wave835Abilities.HeavensWindow, "a window asks about the owed cards, after the Strategy's effects");
+        Eq(e.State.Players[0].Hand.Count, 0, "no card was drawn yet: the hand was shuffled into the deck");
+        Eq(e.State.Wave835!.HeavensOwed[0], 3, "three cards drawn from the Strategy are owed, each its own payment");
+        Func<MatchEngine, int> gold = x => x.State.Cards.Values.Where(c => c.OwnerId == 0 && CardCatalog.Get(c.DefinitionId).GoldProduction > 0).Count(c => !c.Bowed);
+        var unbowedBefore = gold(e);
+        Accept(e, Pay(e, 0));
+        Eq(e.State.Players[0].Hand.Count, 1, "one payment, one card");
+        Check(gold(e) < unbowedBefore, "the 2 Gold was paid from a Gold source");
+        Eq(e.State.PendingChoice?.Type, Wave835Abilities.HeavensWindow, "two cards are still owed");
+        Accept(e, Decline(e, 0));
+        Eq(e.State.Players[0].Hand.Count, 1, "a declined card is not drawn");
+        Eq(e.State.Wave835!.HeavensOwed.GetValueOrDefault(0), 1, "one left");
+        Accept(e, Pay(e, 0));
+        Eq(e.State.Players[0].Hand.Count, 2, "the third was paid for");
+        Check(e.State.PendingChoice is null, "the window is closed");
+        Eq(e.State.PriorityPlayerId, 1, "priority goes back to where the Strategy left it: with the other player");
+
+        // "Decline all" ends the window at once.
+        var all = WithBlessing(st => { Add(st, FaceOfNinube, 0, Zone.Hand); for (var i = 0; i < 3; i++) Add(st, CraneSamurai, 0, Zone.Hand); });
+        Accept(all, Batch336Support.Use(all, 0, "face-ninube-draw", all.State.Cards.Values.First(c => c.DefinitionId == FaceOfNinube).Id));
+        Accept(all, new GameCommand(Wave835Abilities.HeavensDeclineAll, 0, all.Version));
+        Check(all.State.PendingChoice is null && all.State.Players[0].Hand.Count == 0, "declining all draws nothing");
+
+        // No Gold at all: nothing to ask, the cards are not drawn.
+        var broke = WithBlessing(st => { Add(st, FaceOfNinube, 0, Zone.Hand); Add(st, CraneSamurai, 0, Zone.Hand); }, poor: true);
+        Accept(broke, Batch336Support.Use(broke, 0, "face-ninube-draw", broke.State.Cards.Values.First(c => c.DefinitionId == FaceOfNinube).Id));
+        Check(broke.State.PendingChoice is null && broke.State.Players[0].Hand.Count == 0, "a player who cannot pay 2 Gold does not draw, and is not asked");
+
+        // One Gold source producing more than the 2 Gold: it pays one card, and its surplus is not carried to the next ("a 4 Gold producing holding cannot be split to pay both costs").
+        var single = WithBlessing(st =>
+        {
+            var stronghold = st.Cards.Values.Single(c => c.OwnerId == 0 && c.Zone == Zone.Stronghold);
+            Check(CardCatalog.Get(stronghold.DefinitionId).GoldProduction >= 4, "the fixture Stronghold produces at least 4 Gold");
+            stronghold.Bowed = false;
+            Add(st, FaceOfNinube, 0, Zone.Hand); for (var i = 0; i < 2; i++) Add(st, CraneSamurai, 0, Zone.Hand);
+        }, poor: true);
+        Accept(single, Batch336Support.Use(single, 0, "face-ninube-draw", single.State.Cards.Values.First(c => c.DefinitionId == FaceOfNinube).Id));
+        Eq(single.State.Wave835!.HeavensOwed[0], 2, "two cards owed");
+        Accept(single, Pay(single, 0));
+        Eq(single.State.Players[0].Hand.Count, 1, "the Stronghold's Gold paid for one card");
+        Check(single.State.PendingChoice is null && single.State.Players[0].Hand.Count == 1, "the second cannot be paid from the same source: it is not drawn and the window closes");
+
+        // A holding's draw is not "an effect of his own Strategies".
+        if (CardCatalog.Cards.ContainsKey(TravelingPeddler) && (CardCatalog.Get(TravelingPeddler).Abilities ?? []).Length > 0)
+        {
+            var holding = WithBlessing(st => { Add(st, TravelingPeddler, 0, Zone.Home); });
+            var peddler = holding.State.Cards.Values.First(c => c.DefinitionId == TravelingPeddler);
+            var drawAbility = (CardCatalog.Get(TravelingPeddler).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Limited");
+            if (drawAbility is not null && Batch336Support.Options(holding, 0, drawAbility, peddler.Id).Any(o => o.Enabled))
+            {
+                var handSize = holding.State.Players[0].Hand.Count;
+                Accept(holding, Batch336Support.Enabled(holding, 0, drawAbility, peddler.Id).Command!);
+                Eq(holding.State.Players[0].Hand.Count, handSize + 1, "a Holding's draw is free");
+                Check(holding.State.PendingChoice is null, "and nothing is asked");
+            }
+        }
+    }
+
+    // ---- Unbearable Weight ----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // The offered command with its suggested payment, given the selections the player makes.
+    private static GameCommand Paid(MatchEngine e, int player, string cardId, params SlotSelection[] selections) =>
+        Batch336Support.Enabled(e, player, Wave835Abilities.Unbearable, cardId).Command! with { Selections = selections };
+
+    private static void UnbearableWeight()
+    {
+        var s = PublishedTable(Phase.Action, 0);
+        for (var i = 0; i < 2; i++) Add(s, Shrine, 0, Zone.Home); // 4 Gold
+        var weight = Add(s, Unbearable, 0, Zone.Hand);
+        var victim = Add(s, LionSamurai, 1, Zone.Home);           // Chi 3
+        var top = Add(s, CleansingBreath, 1, Zone.FateDeck);       // Focus 4
+        s.Players[1].FateDeck.Insert(0, top.Id);
+        var e = Engine(s);
+        // Not enough Gold: the printed 4 Gold is paid.
+        var poor = Batch336Support.Edit(e, st => { foreach (var c in st.Cards.Values.Where(c => c.OwnerId == 0 && c.Zone is Zone.Home or Zone.Stronghold && CardCatalog.Get(c.DefinitionId).GoldProduction > 0)) c.Bowed = true; });
+        Check(!Batch336Support.CanUse(poor, 0, Wave835Abilities.Unbearable, weight.Id), "it costs 4 Gold");
+        var focus = CardCatalog.Get(CleansingBreath).Focus;
+        Accept(e, Paid(e, 0, weight.Id, Batch336Support.PickPlayer(Wave835Abilities.DeckSlot, 1), Batch336Support.Pick(Wave835Abilities.WeightTargetSlot, victim.Id)));
+        Eq(e.State.Cards[top.Id].Zone, Zone.FateDiscard, "the top card of the chosen Fate deck (the other player's) was discarded");
+        Check(focus >= CardCatalog.Get(LionSamurai).Chi, "its Focus Value covers his Chi");
+        Check(e.State.Cards[victim.Id].Zone is Zone.Dead or Zone.DynastyDiscard, "a Chi penalty equal to its Focus Value destroyed him");
+        var back = e.State.Cards[weight.Id];
+        Eq(back.Zone, Zone.Hand, "his controller puts the Strategy in his hand");
+        Eq(back.OwnerId, 1, "it is his to play"); Eq(back.OriginalOwnerId, 0, "and it remembers its owner");
+        Check(e.State.Players[1].Hand.Contains(weight.Id) && !e.State.Players[0].Hand.Contains(weight.Id), "it is in his hand, no longer in the giver's");
+        // He plays it as though he owned it, and when it is discarded it goes back to its owner's pile.
+        var his = Batch336Support.Edit(e, st => { st.ActivePlayerId = 1; st.PriorityPlayerId = 1; for (var i = 0; i < 2; i++) Add(st, Shrine, 1, Zone.Home); });
+        var his2 = Engine(his.State);
+        Accept(his2, Paid(his2, 1, weight.Id, Batch336Support.PickPlayer(Wave835Abilities.DeckSlot, 0)));
+        Eq(his2.State.Cards[weight.Id].Zone, Zone.FateDiscard, "played and discarded");
+        Eq(his2.State.Cards[weight.Id].OwnerId, 0, "back to its owner's discard pile");
+        Check(his2.State.Cards[weight.Id].OriginalOwnerId is null, "no longer borrowed");
+
+        // A target that survives: the Strategy stays in its owner's discard pile.
+        var t = PublishedTable(Phase.Action, 0);
+        for (var i = 0; i < 2; i++) Add(t, Shrine, 0, Zone.Home);
+        var w2 = Add(t, Unbearable, 0, Zone.Hand); var big = Add(t, LionSamurai, 1, Zone.Home); big.Modifiers.Add(new("fixture", "fixture", "Chi", 5));
+        var low = Add(t, CleansingBreath, 1, Zone.FateDeck); t.Players[1].FateDeck.Insert(0, low.Id);
+        var te = Engine(t);
+        Accept(te, Paid(te, 0, w2.Id, Batch336Support.PickPlayer(Wave835Abilities.DeckSlot, 1), Batch336Support.Pick(Wave835Abilities.WeightTargetSlot, big.Id)));
+        Check(te.State.Cards[big.Id].Zone == Zone.Home, "a target with Chi to spare survives");
+        Eq(te.State.Cards[w2.Id].Zone, Zone.FateDiscard, "and the Strategy is discarded as any Strategy");
+        Eq(te.State.Cards[w2.Id].OwnerId, 0, "to its owner's pile");
+
+        // The target is optional, and an own Fate deck may be chosen.
+        var u = PublishedTable(Phase.Action, 0);
+        for (var i = 0; i < 2; i++) Add(u, Shrine, 0, Zone.Home);
+        var w3 = Add(u, Unbearable, 0, Zone.Hand); var own = Add(u, CraneSamurai, 0, Zone.FateDeck); u.Players[0].FateDeck.Insert(0, own.Id);
+        var ue = Engine(u);
+        Accept(ue, Paid(ue, 0, w3.Id, Batch336Support.PickPlayer(Wave835Abilities.DeckSlot, 0)));
+        Eq(ue.State.Cards[own.Id].Zone, Zone.FateDiscard, "without a target the card is still discarded");
+    }
+
+    // ---- Merchant Patronage ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static MatchEngine PatronageTable(bool theirHolding = true, bool withCourtier = true)
+    {
+        var s = Batch336Support.Table(Phase.Action, 1);
+        Add(s, Farm, theirHolding ? 1 : 0, Zone.Home);
+        Add(s, Patronage, 0, Zone.Hand);
+        if (withCourtier) Add(s, Courtier, 0, Zone.Home);
+        s.PriorityPlayerId = 1;
+        return Engine(s);
+    }
+
+    private static void ClosePatronageWindow(MatchEngine e)
+    {
+        for (var guard = 0; e.State.PendingChoice is { Type: "honorChangeReaction" } && guard < 8; guard++)
+            Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+    }
+
+    private static void MerchantPatronage()
+    {
+        // The other player's Holding gains him Honor: the window opens for the Honor change, and Patronage redirects the gain to its player.
+        var e = PatronageTable();
+        var farm = e.State.Cards.Values.First(c => c.DefinitionId == Farm);
+        var patronage = e.State.Cards.Values.First(c => c.DefinitionId == Patronage);
+        var courtier = e.State.Cards.Values.First(c => c.DefinitionId == Courtier);
+        var honor0 = Batch336Support.Honor(e, 0); var honor1 = Batch336Support.Honor(e, 1);
+        Accept(e, Batch336Support.Enabled(e, 1, Wave829Abilities.FarmHonor, farm.Id).Command!);
+        Eq(e.State.PendingChoice?.Type, "honorChangeReaction", "the Honor change opens the Reaction window");
+        var options = e.QueryActions(0).Where(a => a.Enabled && a.Command?.AbilityId is Wave835Abilities.PatronageRedirect or Wave835Abilities.PatronageBow).ToArray();
+        Check(options.Any(o => o.Command!.AbilityId == Wave835Abilities.PatronageRedirect) && options.Any(o => o.Command!.AbilityId == Wave835Abilities.PatronageBow), "both the plain play and the Courtier-bowing play are offered");
+        Accept(e, new GameCommand("useAbility", 0, e.Version, patronage.Id, AbilityId: Wave835Abilities.PatronageRedirect, TargetPlayerId: 0));
+        ClosePatronageWindow(e);
+        Eq(Batch336Support.Honor(e, 1), honor1, "the Holding's controller gains nothing");
+        Eq(Batch336Support.Honor(e, 0), honor0 + 1, "the player who played Merchant Patronage gains it");
+        Check(!e.State.Cards[courtier.Id].Bowed, "no Courtier was bowed");
+
+        // Bowing a Courtier makes the gain larger by 1, in addition to the redirect.
+        var b = PatronageTable();
+        var farm2 = b.State.Cards.Values.First(c => c.DefinitionId == Farm); var p2 = b.State.Cards.Values.First(c => c.DefinitionId == Patronage); var c2 = b.State.Cards.Values.First(c => c.DefinitionId == Courtier);
+        var h0 = Batch336Support.Honor(b, 0); var h1 = Batch336Support.Honor(b, 1);
+        Accept(b, Batch336Support.Enabled(b, 1, Wave829Abilities.FarmHonor, farm2.Id).Command!);
+        Accept(b, new GameCommand("useAbility", 0, b.Version, p2.Id, AbilityId: Wave835Abilities.PatronageBow, PerformerId: c2.Id, TargetPlayerId: 0));
+        ClosePatronageWindow(b);
+        Eq(Batch336Support.Honor(b, 0), h0 + 2, "one more Honor with a bowed Courtier");
+        Eq(Batch336Support.Honor(b, 1), h1, "still redirected");
+        Check(b.State.Cards[c2.Id].Bowed, "the Courtier is bowed");
+
+        // The player may leave the gain with its player and still take the bonus (the chosen player is the original one).
+        var k = PatronageTable();
+        var fk = k.State.Cards.Values.First(c => c.DefinitionId == Farm); var pk = k.State.Cards.Values.First(c => c.DefinitionId == Patronage); var ck = k.State.Cards.Values.First(c => c.DefinitionId == Courtier);
+        var k1 = Batch336Support.Honor(k, 1);
+        Accept(k, Batch336Support.Enabled(k, 1, Wave829Abilities.FarmHonor, fk.Id).Command!);
+        Accept(k, new GameCommand("useAbility", 0, k.Version, pk.Id, AbilityId: Wave835Abilities.PatronageBow, PerformerId: ck.Id, TargetPlayerId: 1));
+        ClosePatronageWindow(k);
+        Eq(Batch336Support.Honor(k, 1), k1 + 2, "the Holding's controller keeps it, one larger");
+
+        // Your own Holding: the Reaction is not offered on it.
+        var own = PatronageTable(theirHolding: false);
+        var ownFarm = own.State.Cards.Values.First(c => c.DefinitionId == Farm);
+        own.State.ActivePlayerId = 0;
+        var ownState = own.State; ownState.ActivePlayerId = 0; ownState.PriorityPlayerId = 0;
+        var own2 = Engine(ownState);
+        Accept(own2, Batch336Support.Enabled(own2, 0, Wave829Abilities.FarmHonor, ownFarm.Id).Command!);
+        Check(own2.State.PendingChoice?.Type != "honorChangeReaction", "an action of the Patronage player's own Holding opens no window for Merchant Patronage");
+
+        // Without a Courtier only the plain redirect is offered.
+        var none = PatronageTable(withCourtier: false);
+        var nf = none.State.Cards.Values.First(c => c.DefinitionId == Farm);
+        Accept(none, Batch336Support.Enabled(none, 1, Wave829Abilities.FarmHonor, nf.Id).Command!);
+        var offered = none.QueryActions(0).Where(a => a.Enabled && a.Command?.AbilityId is Wave835Abilities.PatronageRedirect or Wave835Abilities.PatronageBow).Select(a => a.Command!.AbilityId).ToArray();
+        Check(offered.Contains(Wave835Abilities.PatronageRedirect) && !offered.Contains(Wave835Abilities.PatronageBow), "without a Courtier only the plain redirect is offered");
+    }
+
 }
