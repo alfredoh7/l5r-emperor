@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Adds the L5R_PERF-gated PerfProbe, a SweepsForProfile accessor, and docs/audits/engine-profile-2026-10.md. Shared change: it spans the rules engine (CommandSweeps.cs accessor), the test project and documentation; no behaviour change. Findings: Execute is ~76% state copy, MatchEngine.State is a full JSON copy per read, QueryActions is ~half payment-token work, sweeps are negligible.",
+  "validation": "bash tools/check.sh --skip-client passed; probe and sampling trace reproduced",
+  "remaining": "None; ready for review. Follow-ups: faster Copy, payment-token memoisation, audit shard balance.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/863",
+  "branch": "claude/862-engine-profile",
+  "updated": "2026-10-12T04:50:57.163079+00:00"
+}
