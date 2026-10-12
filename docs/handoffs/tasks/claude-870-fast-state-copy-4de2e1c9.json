@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "MatchEngine.Copy is now a contract-driven deep cloner (StateCloner.cs) that reads System.Text.Json's resolved contract per type and falls back to the JSON round trip for anything it does not understand. Engine copy is ~6-7x faster and Execute ~2.1x faster (3.1 to 1.5 ms/command). Lockstep tests compare it with the JSON copy at every step of seeded games, fixtures and all card definitions, plus independence and replay checks; three mutation checks were caught. Built by an Opus 5.5 subagent.",
+  "validation": "bash tools/check.sh --skip-client passed (agent worktree and merged tree)",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/871",
+  "branch": "claude/870-fast-state-copy",
+  "updated": "2026-10-12T05:34:51.925454+00:00"
+}
