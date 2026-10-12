@@ -16,12 +16,24 @@ public partial class Main
         _perfScenario = scenario;
         foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--perf-seconds=")) _perfSeconds = double.Parse(arg[15..], System.Globalization.CultureInfo.InvariantCulture);
         foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--perf-toggle=")) _perfToggle = arg[14..];
+        foreach (var arg in OS.GetCmdlineUserArgs()) if (arg.StartsWith("--perf-shot=")) _perfShot = arg[12..];
         if (!OS.GetCmdlineUserArgs().Contains("--perf-vsync")) DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
         RenderingServer.ViewportSetMeasureRenderTime(GetViewport().GetViewportRid(), true);
         if (scenario != "menu") { _session.StartPractice(false, true, 1); EnterTable(); }
         _perfCpu = Process.GetCurrentProcess().TotalProcessorTime; _perfWall = Stopwatch.GetTimestamp(); _perfAlloc = GC.GetTotalAllocatedBytes();
         for (var g = 0; g < 3; g++) _perfGc[g] = GC.CollectionCount(g);
         GD.Print($"PERF_START scenario={scenario} renderer={RenderingServer.GetCurrentRenderingMethod()} adapter={RenderingServer.GetVideoAdapterName()}");
+    }
+
+    private string? _perfShot; private bool _perfShotDone;
+    // --perf-shot=path: a deterministic picture of the 3D hall alone (static light, 2D hidden) for before/after comparison.
+    private void ProcessPerfShot()
+    {
+        if (_perfClock > 1 && _root.Visible) { _table.ReducedMotion = true; _root.Hide(); }
+        if (_perfClock < 5 || _perfShotDone) return;
+        _perfShotDone = true;
+        GetViewport().GetTexture().GetImage().SavePng(_perfShot);
+        GD.Print($"PERF_SHOT {_perfShot}");
     }
 
     private string _perfToggle = ""; private bool _perfToggled;
@@ -35,6 +47,7 @@ public partial class Main
                 case "shadows" when n is Light3D l: l.ShadowEnabled = false; break;
                 case "lights" when n is OmniLight3D o: o.Visible = false; break;
                 case "hall" when n is FortressHall h: h.Visible = false; break;
+                case "oldcast" when n is MeshInstance3D m && m.Name == "StaticHallPartition": m.CastShadow = GeometryInstance3D.ShadowCastingSetting.On; break;
                 case "noshadowcast" when n is GeometryInstance3D g: g.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off; break;
             }
             foreach (var c in n.GetChildren()) Walk(c);
@@ -47,6 +60,7 @@ public partial class Main
     {
         if (!_perfToggled && _perfToggle != "" && _perfClock > .5) ApplyPerfToggle();
         _perfClock += delta; _perfFrames.Add(delta * 1000);
+        if (_perfShot is not null) ProcessPerfShot();
         if (_perfScenario == "play" && _session.Snapshot is not null && View.WinnerId is null && (_perfStep += delta) > .15)
         {
             _perfStep = 0;
