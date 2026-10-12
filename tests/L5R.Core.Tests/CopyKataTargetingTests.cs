@@ -11,7 +11,7 @@ internal static class CopyKataTargetingTests
     public static void Run(TestRunner runner) => runner.Run("copy-kata-targeting", [
         ("Published shape: the four cards are the printed cards with their abilities, keywords and art", PublishedShapes),
         ("Mastering the Elements: after it enters play, paying the Spell's base Gold Cost, it permanently copies the Spell's keywords, trait and base abilities (the Scouring Flood example)", MasteringCopiesEverything),
-        ("Mastering the Elements is once per entry into play: it comes back when the card re-enters play, adds to what it already copied, and never copies abilities that copy abilities or entry abilities", MasteringReentry),
+        ("Mastering the Elements loses what it copied when it leaves play (discarded, destroyed, returned to a hand or deck); put into play again its Reaction is back and it may copy a different Spell, never abilities that copy abilities or entry abilities (rules lead, issue #838)", MasteringReentry),
         ("Mastering the Elements' target is one of your own Spells in play (never an enemy's, never itself), and the Gold is the Spell's printed cost, not its current one", MasteringTargetsAndCost),
         ("Kata: Skipping the Puddle is put into play at the right of home, discarding your other Kata, and is not put into play from play", KataEntersPlay),
         ("Skipping the Puddle's Water Battle action: a Water Shugenja moves to a battlefield with enemy units and its controller may take an additional Battle action he must perform, once per turn", WaterBattleAction),
@@ -92,9 +92,14 @@ internal static class CopyKataTargetingTests
         // The copied action is live: in a battle, Mastering's Battle action moves a defending Personality home.
         var battle = Edit(e, st => { st.PendingChoice = null; st.PriorityPlayerId = 0; st.Cards[mastering.Id].Bowed = false; });
         Check(CanUse(battle, 0, "scouring-flood-move-home", mastering.Id), "Mastering the Elements now has Scouring Flood's Battle action");
-        // It persists: nothing that resets a card that leaves play (grants, modifiers, uses) takes it away.
-        var gone = Edit(e, st => { var c = st.Cards[mastering.Id]; c.Zone = Zone.FateDiscard; c.AttachedTo = null; });
-        Check(gone.State.Cards[mastering.Id].Printed!.Effect == "scouring-flood-force", "a permanent change: the copy is part of the card for the game");
+        // Rules lead (issue #838): it lasts only while the card stays in play. Discarded, destroyed or returned to a hand or deck, it has lost what it copied.
+        foreach (var exit in new[] { Zone.FateDiscard, Zone.Hand, Zone.FateDeck, Zone.Dead })
+        {
+            var gone = Edit(e, st => { var c = st.Cards[mastering.Id]; c.Zone = exit; c.AttachedTo = null; if (exit == Zone.Hand) st.Players[0].Hand.Add(c.Id); });
+            gone.SweepSpellCopiesForTest();
+            Check(gone.State.Cards[mastering.Id].Printed is null && !gone.HasKeyword(mastering.Id, "Water") && !gone.State.Cards[mastering.Id].CopiedSpellRules, $"left play to {exit}: the copy is gone");
+        }
+        Check(e.State.Cards[mastering.Id].Printed is not null, "while it stays in play it keeps the copy");
     }
 
     private static void MasteringReentry()
@@ -102,8 +107,8 @@ internal static class CopyKataTargetingTests
         var (e, mastering, flood, wielder, host) = MasteringTable();
         Accept(e, Equip(e, mastering, host));
         Accept(e, Copy(e, mastering, flood, 2));
-        // The card leaves play and comes back; a second Spell (a Fire one carrying a different trait, an action that copies abilities and an entry ability) is copied into what it has.
-        var second = e.State.Cards.Values.First(c => c.Id == flood.Id);
+        Check(e.HasKeyword(mastering.Id, "Water"), "it copied Scouring Flood");
+        // The card leaves play and comes back; a second Spell (a Fire one carrying a different trait, an action that copies abilities and an entry ability) is copied: only that Spell, not the first.
         var back = Edit(e, st =>
         {
             var c = st.Cards[mastering.Id]; c.Zone = Zone.Hand; c.AttachedTo = null; c.Bowed = false; c.AbilityUses.Clear(); c.FaceUp = false; st.Players[0].Hand.Add(c.Id);
@@ -114,33 +119,19 @@ internal static class CopyKataTargetingTests
         var spell2 = back.State.Cards.Values.First(c => c.DefinitionId == "training-spell-with-ability");
         Accept(back, Equip(back, mastering, host));
         Eq(back.State.PendingChoice?.Type, "entryReaction", "it entered play again");
+        Check(back.State.Cards[mastering.Id].Printed is null && !back.HasKeyword(mastering.Id, "Water"), "it lost the first copy when it left play");
         Check(back.QueryActions(0).Any(x => x.Type == "useAbility" && x.Command?.AbilityId == "mastering-the-elements-copy" && x.Enabled), "and its Reaction is available again");
         Accept(back, Copy(back, mastering, spell2, 1));
         var m = back.State.Cards[mastering.Id];
-        Check(back.HasKeyword(mastering.Id, "Water") && back.HasKeyword(mastering.Id, "Fire"), "the keywords add to the ones it already copied");
-        Check(m.Printed!.Abilities!.SequenceEqual(new[] { "mastering-the-elements-copy", "scouring-flood-move-home", "training-spell-force-boost" }),
-            "the abilities add to the existing ones, without an ability that copies abilities or one that triggers on entry: " + string.Join(",", m.Printed.Abilities!));
-        Eq(m.Printed.Effect, "tsunami-force", "a card has one trait slot: the later Spell's trait replaces the earlier one");
-        Eq(back.CardForceForTest(host.Id), Def(host).Force + 6, "+6F now, not +2F");
-        Check(second.Id == flood.Id);
-        // Copying the same Spell again adds nothing twice; its trait, being a later one, is the one the card has.
-        MatchEngine Recycle(MatchEngine en, Action<MatchState>? more = null)
-        {
-            var again = Edit(en, st => { var c = st.Cards[mastering.Id]; c.Zone = Zone.Hand; c.AttachedTo = null; c.Bowed = false; c.AbilityUses.Clear(); c.FaceUp = false; st.Players[0].Hand.Add(c.Id); st.PendingChoice = null; st.PriorityPlayerId = 0; more?.Invoke(st); });
-            Accept(again, Equip(again, mastering, host));
-            return again;
-        }
-        var third = Recycle(back);
-        Accept(third, Copy(third, mastering, third.State.Cards[flood.Id], 2));
-        var abilities = third.State.Cards[mastering.Id].Printed!.Abilities!;
-        Eq(abilities.Count(x => x == "scouring-flood-move-home"), 1, "a copied ability is not added a second time");
-        Eq(abilities.Length, 3, "and nothing else changed");
-        Eq(third.State.Cards[mastering.Id].Printed!.Effect, "scouring-flood-force", "the latest Spell's trait");
-        // A Spell with no trait leaves the card's trait as it is.
-        var plainId = "";
-        var fourth = Recycle(third, st => plainId = Add(st, "training-spell", 0, Zone.Attached, province: 0, parent: st.Cards[wielder.Id].Id).Id);
-        Accept(fourth, Copy(fourth, mastering, fourth.State.Cards[plainId], 1));
-        Eq(fourth.State.Cards[mastering.Id].Printed!.Effect, "scouring-flood-force", "a Spell without a trait does not take the card's trait away");
+        Check(back.HasKeyword(mastering.Id, "Fire") && !back.HasKeyword(mastering.Id, "Water"), "it has the new Spell's keywords, not the earlier Spell's");
+        Check(m.Printed!.Abilities!.SequenceEqual(new[] { "mastering-the-elements-copy", "training-spell-force-boost" }),
+            "the new ability, without an ability that copies abilities or one that triggers on entry, and not the earlier Spell's: " + string.Join(",", m.Printed.Abilities!));
+        Eq(m.Printed.Effect, "tsunami-force", "the new Spell's trait");
+        Check(m.CopiedSpellRules, "and it will be lost again when the card leaves play");
+        // Entering play a third time starts clean once more.
+        var third = Edit(back, st => { var c = st.Cards[mastering.Id]; c.Zone = Zone.Hand; c.AttachedTo = null; c.Bowed = false; c.AbilityUses.Clear(); c.FaceUp = false; st.Players[0].Hand.Add(c.Id); st.PendingChoice = null; st.PriorityPlayerId = 0; });
+        Accept(third, Equip(third, mastering, host));
+        Check(third.State.Cards[mastering.Id].Printed is null && !third.HasKeyword(mastering.Id, "Fire"), "a third entry starts with nothing copied");
     }
 
     private static void MasteringTargetsAndCost()

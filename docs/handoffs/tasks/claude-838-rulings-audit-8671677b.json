@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Applied Mendon's rulings from the #833 audit (R-063 to R-066): The Bestial Ones' Engage is battlefield-specific (Follower's Personality and target must be at the engaged battlefield); Mastering the Elements loses its copy when it leaves play and starts clean on re-entry; Fallow Lands, Soul's Sacrifice and Rata confirmed as implemented/flavor. Inventory notes cleared.",
+  "validation": "bash tools/check.sh --skip-client green; copy-kata-targeting (loss on discard/hand/deck/dead, fresh copy on re-entry) and single-reaction-4 (Bestial Ones at home, target elsewhere) pass",
+  "remaining": "None; ready for review. Other Engage Reactions with card targets were not changed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/838",
+  "branch": "claude/838-rulings-audit",
+  "updated": "2026-10-12T00:18:58.226535+00:00"
+}

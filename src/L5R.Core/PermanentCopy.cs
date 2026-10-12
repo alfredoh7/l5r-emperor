@@ -26,6 +26,7 @@ public sealed partial class MatchEngine
         var effect = spellTrait != "none" ? spellTrait : printed.Effect;
         var newKeywords = keywords.Except(printed.Keywords ?? [], StringComparer.Ordinal).ToArray();
         copier.Printed = printed with { Keywords = keywords.ToArray(), Abilities = abilities.ToArray(), Effect = effect };
+        copier.CopiedSpellRules = true;
         Emit("spellCopied", $"{Definition(copier).Name} permanently copies {Definition(spell).Name}: {(newKeywords.Length == 0 ? "no new keywords" : string.Join(", ", newKeywords))}"
             + $"{(spellTrait != "none" ? ", its trait" : "")}{(copiedAbilities.Count == 0 ? "" : $", and {copiedAbilities.Count} abilit{(copiedAbilities.Count == 1 ? "y" : "ies")}")}.", copier.OwnerId, copier.Id);
     }
@@ -46,5 +47,17 @@ public sealed partial class MatchEngine
             if (AbilityCatalog.All.TryGetValue(id, out var ability) && CopyableAbility(ability) && !abilities.Contains(id, StringComparer.Ordinal)) { abilities.Add(id); copied++; }
         copier.Printed = printed with { Keywords = keywords.ToArray(), Abilities = abilities.ToArray() };
         Emit("personalityCopied", $"{Definition(copier).Name} permanently copies {Definition(from).Name}: {(newKeywords.Count == 0 ? "no new keywords" : string.Join(", ", newKeywords))}, and {copied} abilit{(copied == 1 ? "y" : "ies")}.", copier.OwnerId, copier.Id);
+    }
+
+    // Mastering the Elements loses what it copied when it is discarded, destroyed, or returned to a hand or deck (issue #838, rules lead); put into play again it may copy a different Spell.
+    // Run before and after every command, so no exit path has to remember it.
+    internal void SweepSpellCopiesForTest() => SweepSpellCopies();
+    private void SweepSpellCopies()
+    {
+        foreach (var card in _state.Cards.Values.Where(c => c.CopiedSpellRules && !InPlay(c)))
+        {
+            card.Printed = null; card.CopiedSpellRules = false;
+            Emit("spellCopyLost", $"{CardCatalog.Get(card.DefinitionId).Name} left play and loses what it copied.", card.OwnerId, card.Id);
+        }
     }
 }

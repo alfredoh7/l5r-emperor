@@ -1,6 +1,6 @@
 # Twelve cards on Mendon's rulings of 2026-10-11: Egg of P'an Ku, Blood of Isawa's Tribe, A Cleansing Breath, Duty Over All Things, Imperial Deployment, Merchant Patronage, Pierce the Tapestry, The Heavens' Blessing, Unbearable Weight, Warded Premises, Revelations and The Empire's Foe Exposed (issue #835)
 
-Status: **accepted** (Mendon's rulings of 2026-10-11, recorded as R-063 to R-075). Lane: rules, with decisions that reuse the client's generic panels. Engine: `src/L5R.Core/Wave835.cs` (+ small hooks named below); waves `strategy-wave-835`, `spell-wave-835`, `event-wave-835`, `item-wave-835` (`tools/content/package_wave_835.py`).
+Status: **accepted** (Mendon's rulings of 2026-10-11, recorded as R-067 to R-079). Lane: rules, with decisions that reuse the client's generic panels. Engine: `src/L5R.Core/Wave835.cs` (+ small hooks named below); waves `strategy-wave-835`, `spell-wave-835`, `event-wave-835`, `item-wave-835` (`tools/content/package_wave_835.py`).
 
 | Card | Wired as |
 |---|---|
@@ -34,4 +34,4 @@ Small hooks, each commented with the issue: `ImmunityKind.AssignPrevention` (the
 9. **Warded Premises.** The cards it reaches are every card at its battlefield (units and their attachments); it negates the bonuses present when it resolves.
 10. **Revelations.** The five cards are in the public shown-cards record; the opponent's discard and the owner's arrangement reuse the shown-choice and look panels; with one card left there is nothing to arrange.
 11. **The Empire's Foe Exposed.** The owner's Personality challenges; the duel is unrefusable and fought for Chi; the Event fires once as it resolves.
-12. **Too Close to Home and The Perfect Moment** needed no code: the existing behaviour already matches R-068.
+12. **Too Close to Home and The Perfect Moment** needed no code: the existing behaviour already matches R-072.
