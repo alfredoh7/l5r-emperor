@@ -54,17 +54,18 @@ internal static partial class ListingConsistencyTests
         return gaps;
     }
 
-    private static void ValidatedMeansListed()
+    // The catalogue is walked in Slices interleaved slices (card i belongs to slice i % Slices), each its own case, so the shards can balance a test that took 100 s as one (issue #865).
+    public const int Slices = 4;
+
+    private static void ValidatedMeansListed(int slice)
     {
-        var gaps = Find(CardCatalog.Cards.Values.Where(c => !c.CreatedOnly).OrderBy(c => c.Id, StringComparer.Ordinal));
-        Console.WriteLine($"listing-consistency: {Examined} validator-accepted combinations examined, {gaps.Count} not offered");
+        var gaps = Find(CardCatalog.Cards.Values.Where(c => !c.CreatedOnly).OrderBy(c => c.Id, StringComparer.Ordinal).Where((_, i) => i % Slices == slice));
+        Console.WriteLine($"listing-consistency slice {slice + 1}/{Slices}: {Examined} validator-accepted combinations examined, {gaps.Count} not offered");
         var path = Environment.GetEnvironmentVariable("L5R_CONSISTENCY_OUT");
-        if (path is not null) File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(gaps));
+        if (path is not null) File.WriteAllText($"{path}.{slice}", System.Text.Json.JsonSerializer.Serialize(gaps));
         var byAbility = gaps.GroupBy(g => (g.Card, g.Ability)).Select(g => $"{g.Key.Card} {g.Key.Ability} ({g.Count()}: e.g. {g.First().Scenario}, performer '{g.First().Performer}', target '{g.First().Target}' {g.First().Why})").ToList();
         Batch336Support.Check(gaps.Count == 0, $"{byAbility.Count} abilities disagree between the validator and QueryActions (accepted-but-not-offered, or offered target refused): " + string.Join("; ", byAbility.Take(40)));
     }
 
-    public static void Run(TestRunner runner) => runner.Run("listing-consistency", [
-        ("Whatever the validator accepts for a Battle / Open / Limited action -- source, performer, target -- QueryActions offers as an enabled option, in every window (issue #842)", ValidatedMeansListed),
-    ]);
+    public static void Run(TestRunner runner) => runner.Run("listing-consistency", [.. Enumerable.Range(0, Slices).Select(slice => ($"Whatever the validator accepts for a Battle / Open / Limited action -- source, performer, target -- QueryActions offers as an enabled option, in every window (issue #842) (slice {slice + 1} of {Slices})", (Action)(() => ValidatedMeansListed(slice))))]);
 }

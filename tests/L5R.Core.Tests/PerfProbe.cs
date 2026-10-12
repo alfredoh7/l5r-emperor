@@ -17,7 +17,7 @@ internal static class PerfProbeTests
 
     private static void Probe()
     {
-        long execute = 0, query = 0, commands = 0, queries = 0, copyTicks = 0, copies = 0, stateBytes = 0, sweepsTotal = 0;
+        long execute = 0, query = 0, commands = 0, queries = 0, copyTicks = 0, fastTicks = 0, stateTicks = 0, copies = 0, stateBytes = 0, sweepsTotal = 0;
         var sweepTicks = new Dictionary<string, long>();
         var optionCounts = new List<int>();
         foreach (var seed in new ulong[] { 11, 23, 37, 59 })
@@ -44,6 +44,13 @@ internal static class PerfProbeTests
                     t0 = Stopwatch.GetTimestamp();
                     var json = JsonSerializer.Serialize(game.State); var back = JsonSerializer.Deserialize<MatchState>(json);
                     copyTicks += Stopwatch.GetTimestamp() - t0; copies++; stateBytes += json.Length; GC.KeepAlive(back);
+                    var live = game.State;
+                    t0 = Stopwatch.GetTimestamp();
+                    GC.KeepAlive(MatchEngine.Copy(live)); // the engine's copy (StateCloner since #863)
+                    fastTicks += Stopwatch.GetTimestamp() - t0;
+                    t0 = Stopwatch.GetTimestamp();
+                    GC.KeepAlive(game.State);
+                    stateTicks += Stopwatch.GetTimestamp() - t0;
                     foreach (var (name, run) in game.SweepsForProfile())
                     {
                         t0 = Stopwatch.GetTimestamp();
@@ -57,6 +64,9 @@ internal static class PerfProbeTests
         Console.WriteLine($"  Execute      {Ms(execute) / commands,8:F3} ms/command   (total {Ms(execute):F0} ms)");
         Console.WriteLine($"  QueryActions {Ms(query) / queries,8:F3} ms/call      (total {Ms(query):F0} ms)");
         Console.WriteLine($"  JSON copy    {Ms(copyTicks) / copies,8:F3} ms/copy      (state {stateBytes / copies / 1024} KiB)  -> one copy per Execute at minimum = {Ms(copyTicks) / copies / (Ms(execute) / commands) * 100:F0}% of an Execute");
+        Console.WriteLine($"  Engine copy  {Ms(fastTicks) / copies,8:F3} ms/copy      ({Ms(copyTicks) / Math.Max(1e-9, Ms(fastTicks)):F1}x faster than the JSON copy)");
+        Console.WriteLine($"  Copy falls back to JSON for: {string.Join(", ", StateCloner.FallbackTypes().Select(t => t.Name).Order(StringComparer.Ordinal).DefaultIfEmpty("(nothing)"))}");
+        Console.WriteLine($"  .State read  {Ms(stateTicks) / copies,8:F3} ms/read");
         foreach (var (name, ticks) in sweepTicks.OrderByDescending(kv => kv.Value)) Console.WriteLine($"  sweep {name,-34} {Ms(ticks) / copies,8:F4} ms/run");
     }
 }
