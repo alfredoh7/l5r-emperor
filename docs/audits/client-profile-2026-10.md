@@ -45,14 +45,14 @@ Same machine and method, same session, vsync off, 1440x900. Before is main at 93
 |---|---|---|
 | Title menu resident / texture memory | 2288 MB / 948 MB | 414 MB / 116 MB |
 | Table resident memory | about 2520 MB | about 2340 MB |
-| Table texture memory | 1032 MB | 576 MB |
+| Table texture memory | 1032 MB | 1032 MB (BC7 held, see below) |
 | Table nodes | 1603 | 687 |
 | Idle table frame time (average / p95) | 8.43 / 10.18 ms | 3.85 / 4.17 ms |
 | Played game frame time (average) | 7.6 ms | 6.0 to 6.8 ms (varies with the game) |
 
 What changed:
 - **Lazy hall.** The war room is built when the table is first shown, not at launch. Choosing Practice, a match or a private room starts a background prefetch. Building it costs about 3.1 s on this Mac, paid when the table first appears.
-- **BC7 textures.** The War Room 3D textures import as BC7 (ETC2/ASTC fallback is already enabled in the project).
+- **BC7 textures: held.** Importing as BC7 cut table texture memory to 576 MB, but the Windows CI client job's Godot import stalled for 30 minutes on a 4096x4096 texture (each texture is encoded twice, BPTC and ASTC). Kept on branch `claude/877-bc7-held` until import time is solved (for example, drop the ASTC encode).
 - **Freed source meshes.** The hall batches its 1306 source meshes into 288 partitions but kept the originals hidden. They are now freed after batching. The original draw-call count was already low, so merging further would not help and would risk the Compatibility renderer's per-mesh light limit.
 - **Hall viewport.** The hall renders into its own viewport that redraws on camera, window or light changes, and at 30 Hz while candles flicker (reduced motion draws it once). It no longer redraws at display rate.
 
