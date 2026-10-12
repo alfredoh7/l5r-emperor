@@ -28,6 +28,7 @@ CARDS: dict[int, tuple[str, str, list[str], str, dict]] = {
     10558: ("strategy", "coils-of-madness", ["w835-heavens-draw", "w835-heavens-honor"], "none", {}),  # The Heavens' Blessing
     10550: ("strategy", "coils-of-madness", ["w835-unbearable"], "none", {}),  # Unbearable Weight
     10720: ("strategy", "gates-of-chaos", ["w835-patronage", "w835-patronage-bow"], "none", {}),  # Merchant Patronage
+    10347: ("spell", "torn-asunder", [], "w835-blood", {}),  # Blood of Isawa's Tribe
 }
 CARD_IDS = ["oracle-l5r-" + str(number) for number in CARDS]
 ORACLE_NAME_NOTES = {"oracle-l5r-10388": ("Pierce the Tapestery", "Oracle of the Void prints this card as \"Pierce the Tapestery\"; the card's own text and Mendon's ruling (2026-10-11) spell it Pierce the Tapestry.")}

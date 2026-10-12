@@ -8,7 +8,8 @@ using static RegressionAssertions;
 internal static class Wave835Tests
 {
     private const string CleansingBreath = Wave835Abilities.CleansingBreathCard, ImperialDeployment = Wave835Abilities.ImperialDeploymentCard, WardedPremises = Wave835Abilities.WardedPremisesCard,
-        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard;
+        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard, Blood = Wave835Abilities.BloodCard;
+    private const string TwoElements = "oracle-l5r-10857" /* Moshi Ikako: Air, Fire */, OneElement = "oracle-l5r-7797" /* Tamori Shosei: Earth */;
     private const string Farm = Wave829Abilities.Farm, FaceOfNinube = "oracle-l5r-2431", TravelingPeddler = "oracle-l5r-8729";
     private const string CraneSamurai = "training-crane-samurai", LionSamurai = "training-lion-samurai", Item = "training-item";
     // Fixtures: published Personalities carrying the keywords the rulings turn on.
@@ -55,6 +56,7 @@ internal static class Wave835Tests
         ("The Heavens' Blessing: no player can gain Honor in Action Phases this turn", HeavensHonor),
         ("The Heavens' Blessing: every card an own Strategy draws in an Action Phase is its own 2 Gold payment, declinable, never shared; a Holding's draw is free", HeavensDraws),
         ("Unbearable Weight: discards the top card of a chosen Fate deck, a Chi penalty of its Focus Value; a destroyed target's controller puts the Strategy in his hand, and it goes back to its owner's discard pile", UnbearableWeight),
+        ("Blood of Isawa's Tribe: after it attaches, the Shugenja's element keywords, then the five elements, a confirmation for the same element; no pass, no Reaction window; the replacement lasts while it is attached", BloodOfIsawasTribe),
         ("Merchant Patronage: on an Honor change an action of another player's Holding makes, the Honor goes to the player you choose, one larger with a bowed Courtier", MerchantPatronage),
     ]);
 
@@ -71,7 +73,8 @@ internal static class Wave835Tests
             (Pierce, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.Pierce]),
             (Heavens, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.HeavensDraw, Wave835Abilities.HeavensHonor]),
             (Unbearable, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.Unbearable]),
-            (Patronage, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.PatronageRedirect, Wave835Abilities.PatronageBow])];
+            (Patronage, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.PatronageRedirect, Wave835Abilities.PatronageBow]),
+            (Blood, "spell-wave-835", CardType.Spell, [])];
         foreach (var (id, wave, type, abilities) in cards)
         {
             var def = CardCatalog.Get(id);
@@ -576,4 +579,60 @@ internal static class Wave835Tests
         Check(offered.Contains(Wave835Abilities.PatronageRedirect) && !offered.Contains(Wave835Abilities.PatronageBow), "without a Courtier only the plain redirect is offered");
     }
 
+
+    // ---- Blood of Isawa's Tribe -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static GameCommand Answer(MatchEngine e, string type, string? choice = null) => new(type, e.State.PendingChoice!.PlayerId, e.Version, Choice: choice);
+    private static string[] Offered(MatchEngine e) => e.QueryActions(e.State.PendingChoice!.PlayerId).Where(a => a.Enabled && a.Type != "concede").Select(a => a.Type + ":" + (a.Command?.Choice ?? "")).ToArray();
+    private static bool HasKeyword(MatchEngine e, string cardId, string keyword) => (bool)Call(e, "Keyword", Call(e, "Card", cardId), keyword)!;
+
+    private static MatchEngine BloodTable(string shugenja, out CardInstance host, out CardInstance spell)
+    {
+        var s = Batch336Support.Table(Phase.Action, 0);
+        host = Add(s, shugenja, 0, Zone.Home);
+        spell = Add(s, Blood, 0, Zone.Hand);
+        s.PriorityPlayerId = 0;
+        return Engine(s);
+    }
+
+    private static void BloodOfIsawasTribe()
+    {
+        var e = BloodTable(TwoElements, out var host, out var spell);
+        Check(HasKeyword(e, host.Id, "Air") && HasKeyword(e, host.Id, "Fire") && !HasKeyword(e, host.Id, "Water"), "the Shugenja is Air and Fire");
+        Accept(e, new GameCommand("equip", 0, e.Version, CardId: spell.Id, TargetId: host.Id, SourceIds: []));
+        Eq(e.State.PendingChoice?.Type, Wave835Abilities.BloodWindow, "attaching opens the decision");
+        Eq(string.Join(",", Offered(e)), $"{Wave835Abilities.BloodFrom}:Air,{Wave835Abilities.BloodFrom}:Fire", "first the element keywords the Shugenja has, and only those");
+        Check(!e.QueryActions(0).Any(a => a.Type is "declineReaction" or "pass"), "there is no 'pass reaction': it is a mandatory trait");
+        Reject(e, new GameCommand("pass", 0, e.Version));
+        Reject(e, Answer(e, Wave835Abilities.BloodFrom, "Water"));
+        Accept(e, Answer(e, Wave835Abilities.BloodFrom, "Fire"));
+        Eq(string.Join(",", Offered(e).Where(o => o.StartsWith(Wave835Abilities.BloodTo, StringComparison.Ordinal))), string.Join(",", new[] { "Air", "Earth", "Fire", "Water", "Void" }.Select(x => $"{Wave835Abilities.BloodTo}:{x}")), "then the five elements, the same one included");
+        // The same element: asks whether they are sure; cancelling goes back to the five elements.
+        Accept(e, Answer(e, Wave835Abilities.BloodTo, "Fire"));
+        Eq(string.Join(",", Offered(e)), $"{Wave835Abilities.BloodConfirm}:,{Wave835Abilities.BloodCancel}:", "the same keyword asks for a confirmation");
+        Accept(e, Answer(e, Wave835Abilities.BloodCancel));
+        Check(Offered(e).Any(o => o == $"{Wave835Abilities.BloodTo}:Water"), "cancelling returns to the five elements");
+        Accept(e, Answer(e, Wave835Abilities.BloodTo, "Water"));
+        Check(e.State.PendingChoice is null, "the decision is over");
+        Check(HasKeyword(e, host.Id, "Water") && !HasKeyword(e, host.Id, "Fire") && HasKeyword(e, host.Id, "Air"), "while the Spell is attached, Fire is Water on him; Air is untouched");
+        // The replacement ends with the attachment.
+        Call(e, "DestroyAttachment", Call(e, "Card", spell.Id));
+        Check(HasKeyword(e, host.Id, "Fire") && !HasKeyword(e, host.Id, "Water"), "when the Spell leaves, his keywords are his own again");
+
+        // Confirming the same keyword changes nothing.
+        var same = BloodTable(TwoElements, out var h2, out var s2);
+        Accept(same, new GameCommand("equip", 0, same.Version, CardId: s2.Id, TargetId: h2.Id, SourceIds: []));
+        Accept(same, Answer(same, Wave835Abilities.BloodFrom, "Air"));
+        Accept(same, Answer(same, Wave835Abilities.BloodTo, "Air"));
+        Accept(same, Answer(same, Wave835Abilities.BloodConfirm));
+        Check(same.State.PendingChoice is null && HasKeyword(same, h2.Id, "Air") && HasKeyword(same, h2.Id, "Fire") && !HasKeyword(same, h2.Id, "Water"), "replacing a keyword with itself changes nothing");
+
+        // A Shugenja with one element keyword is still asked (one option); one with none is not.
+        var one = BloodTable(OneElement, out var h3, out var s3);
+        Accept(one, new GameCommand("equip", 0, one.Version, CardId: s3.Id, TargetId: h3.Id, SourceIds: []));
+        Eq(string.Join(",", Offered(one)), $"{Wave835Abilities.BloodFrom}:Earth", "one element keyword, one option");
+        var none = BloodTable("oracle-l5r-11328", out var h4, out var s4);
+        Accept(none, new GameCommand("equip", 0, none.Version, CardId: s4.Id, TargetId: h4.Id, SourceIds: []));
+        Check(none.State.PendingChoice is null, "a Shugenja with no element keyword has nothing to replace");
+    }
 }

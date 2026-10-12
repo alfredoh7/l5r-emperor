@@ -21,11 +21,15 @@ namespace L5R.Core;
 //                            controller puts this Strategy in his hand."   The card is controlled by whoever holds it and returns to its owner's discard pile when it leaves play.
 //   Merchant Patronage       "Political Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it. If you control a Courtier, you may bow him to increase the gain or
 //                            loss by 1."   A Reaction in the existing before-Honor-change window (EmperorRulingR4Honor.cs), on a change an action of another player's Holding makes.
+//   Blood of Isawa's Tribe   "After this Spell attaches, choose an element keyword (Air, Earth, Fire, Water, Void) in this Shugenja's keywords or text. While this Spell remains attached, replace all
+//                            instances of that keyword on this Shugenja with a different element keyword that you choose now."   A mandatory trait: a two-step decision after the Spell attaches (the Shugenja's
+//                            element keywords, then the five elements; the same element asks for a confirmation), with no Reaction window and no pass. P10's ReplaceElementKeyword does the replacing.
 public static class Wave835Abilities
 {
     public const string CleansingBreath = "w835-cleansing-breath", ImperialDeployment = "w835-imperial-deployment", WardedNegate = "w835-warded-negate", WardedPlay = "w835-warded-play",
         DutyDiscount = "w835-duty-discount", DutyFull = "w835-duty-full", Pierce = "w835-pierce", HeavensDraw = "w835-heavens-draw", HeavensHonor = "w835-heavens-honor", HeavensPay = "w835-heavens-pay",
         Unbearable = "w835-unbearable", PatronageRedirect = "w835-patronage", PatronageBow = "w835-patronage-bow";
+    public const string BloodCard = "oracle-l5r-10347", BloodEffect = "w835-blood", BloodWindow = "w835Blood", BloodFrom = "w835BloodFrom", BloodTo = "w835BloodTo", BloodConfirm = "w835BloodConfirm", BloodCancel = "w835BloodCancel", BloodBack = "w835BloodBack";
     public const string HeavensTrigger = "w835-heavens-pay", HeavensWindow = "w835HeavensPay", HeavensDeclineOne = "w835HeavensDecline", HeavensDeclineAll = "w835HeavensDeclineAll";
     public const string DeckSlot = "deck", WeightTargetSlot = "target";
     /// <summary>The Gold each card drawn from an own Strategy costs while the Heavens' Blessing is in force.</summary>
@@ -92,8 +96,21 @@ public sealed class WeightReturn
     public int ToPlayer { get; set; }
 }
 
+/// <summary>Blood of Isawa's Tribe's decision in progress: which Spell, who decides, the stage ("from", "to" or "confirm") and what has been chosen.</summary>
+public sealed class BloodDecision
+{
+    public string SpellId { get; set; } = "";
+    public int PlayerId { get; set; }
+    public string Stage { get; set; } = "from";
+    public string? From { get; set; }
+    public string? To { get; set; }
+}
+
 public sealed class Wave835State
 {
+    /// <summary>Blood of Isawa's Tribe Spells that attached and whose decision has not been asked yet, in the order they attached.</summary>
+    public List<string> BloodQueue { get; set; } = [];
+    public BloodDecision? Blood { get; set; }
     public List<DeploymentWatch> Deployments { get; set; } = [];
     /// <summary>The Heavens' Blessing has been played: until the game ends (never cleared).</summary>
     public bool HeavensActive { get; set; }
@@ -318,6 +335,113 @@ public sealed partial class MatchEngine
         return true;
     }
 
+    // ---- Blood of Isawa's Tribe -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // ApplyMandatoryEntryEffects' hook: the Spell attached (by any path), so its decision is owed. It opens when the command is done and nothing else is open (no Reaction window of its own).
+    private void ApplyWave835EntryEffects(int playerId, CardInstance card)
+    {
+        if (Definition(card).Effect == Wave835Abilities.BloodEffect && card.Zone == Zone.Attached && !W835.BloodQueue.Contains(card.Id)) W835.BloodQueue.Add(card.Id);
+    }
+
+    private string[] BloodElements(CardInstance host) => ElementKeywordList.Where(e => Keyword(host, e)).ToArray();
+
+    private bool OpenNextBlood(Wave835State w)
+    {
+        while (w.BloodQueue.Count > 0)
+        {
+            var spellId = w.BloodQueue[0]; w.BloodQueue.RemoveAt(0);
+            if (!_state.Cards.TryGetValue(spellId, out var spell) || spell.Zone != Zone.Attached || spell.AttachedTo is not { } hostId || !_state.Cards.TryGetValue(hostId, out var host) || !InPlay(host)) continue;
+            var elements = BloodElements(host);
+            if (elements.Length == 0)
+            {
+                Emit("bloodNothing", $"{Definition(spell).Name}: {Definition(host).Name} has no element keyword to replace.", spell.OwnerId, spell.Id);
+                continue;
+            }
+            w.Blood = new BloodDecision { SpellId = spell.Id, PlayerId = spell.OwnerId, Stage = "from" };
+            w.ResumePriority = _state.PriorityPlayerId; w.ResumePasses = _state.ConsecutivePasses;
+            _state.PendingChoice = new(Wave835Abilities.BloodWindow, spell.OwnerId, spell.Id, BloodPrompt(w.Blood, host));
+            _state.PriorityPlayerId = spell.OwnerId; _state.ConsecutivePasses = 0;
+            return true;
+        }
+        return false;
+    }
+
+    private string BloodPrompt(BloodDecision d, CardInstance host) => d.Stage switch
+    {
+        "from" => $"{Definition(Card(d.SpellId)).Name}: choose an element keyword of {Definition(host).Name} to replace.",
+        "to" => $"{Definition(Card(d.SpellId)).Name}: choose the element keyword that replaces {d.From} on {Definition(host).Name} while the Spell remains attached.",
+        _ => $"{Definition(Card(d.SpellId)).Name}: replace {d.From} with {d.From}? You chose the same keyword."
+    };
+
+    private bool HandleWave835Blood(string type, GameCommand command)
+    {
+        if (type != Wave835Abilities.BloodWindow || W835.Blood is not { } d) return false;
+        Require(command.PlayerId == d.PlayerId, "Only the Spell's controller decides.");
+        var spell = Card(d.SpellId); var host = Card(spell.AttachedTo!);
+        var choice = command.Choice;
+        switch (command.Type)
+        {
+            case Wave835Abilities.BloodFrom when d.Stage == "from":
+                Require(choice is not null && BloodElements(host).Contains(choice), "Choose one of the Shugenja's element keywords.");
+                d.From = choice; d.Stage = "to";
+                break;
+            case Wave835Abilities.BloodBack when d.Stage == "to":
+                d.From = null; d.Stage = "from";
+                break;
+            case Wave835Abilities.BloodTo when d.Stage == "to":
+                Require(choice is not null && ElementKeywordList.Contains(choice), "Choose one of the five elements.");
+                d.To = choice;
+                if (choice == d.From) { d.Stage = "confirm"; break; }
+                Wave835FinishBlood(d, spell, host);
+                return true;
+            case Wave835Abilities.BloodConfirm when d.Stage == "confirm":
+                Wave835FinishBlood(d, spell, host);
+                return true;
+            case Wave835Abilities.BloodCancel when d.Stage == "confirm":
+                d.To = null; d.Stage = "to";
+                break;
+            default:
+                throw new RuleViolation("Answer the Spell's question.");
+        }
+        _state.PendingChoice = _state.PendingChoice! with { Prompt = BloodPrompt(d, host) };
+        _state.PriorityPlayerId = d.PlayerId; _state.ConsecutivePasses = 0;
+        return true;
+    }
+
+    private void Wave835FinishBlood(BloodDecision d, CardInstance spell, CardInstance host)
+    {
+        if (d.To != d.From && d.From is { } from && d.To is { } to)
+        {
+            ReplaceElementKeyword(host.Id, from, to, spell.Id);
+            Emit("elementReplaced", $"{Definition(spell).Name}: while it remains attached, {Definition(host).Name}'s {from} is {to}.", spell.OwnerId, host.Id);
+        }
+        else Emit("elementReplaced", $"{Definition(spell).Name}: {Definition(host).Name}'s {d.From} is replaced with {d.From}: nothing changes.", spell.OwnerId, host.Id);
+        W835.Blood = null;
+        _state.PendingChoice = null;
+        Wave835Resume();
+    }
+
+    private IEnumerable<ActionOption>? Wave835BloodActions(PendingActionsContext context)
+    {
+        if (context.Choice.Type != Wave835Abilities.BloodWindow || W835.Blood is not { } d) return null;
+        if (context.PlayerId != d.PlayerId) return [];
+        var spell = Card(d.SpellId); var host = Card(spell.AttachedTo!);
+        ActionOption Option(string type, string label, string? choice = null) => new(type, label, true, null, new GameCommand(type, context.PlayerId, _state.Version, Choice: choice), DecisionLabel: label);
+        switch (d.Stage)
+        {
+            case "from":
+                return BloodElements(host).Select(e => Option(Wave835Abilities.BloodFrom, $"Replace {e}", e)).ToArray();
+            case "to":
+                {
+                    var options = ElementKeywordList.Select(e => Option(Wave835Abilities.BloodTo, e == d.From ? $"{e} (the same keyword)" : $"Replace {d.From} with {e}", e)).ToList();
+                    if (BloodElements(host).Length > 1) options.Add(Option(Wave835Abilities.BloodBack, "Choose a different keyword to replace"));
+                    return options;
+                }
+            default:
+                return [Option(Wave835Abilities.BloodConfirm, $"Yes, replace {d.From} with {d.From}"), Option(Wave835Abilities.BloodCancel, "No, choose another element")];
+        }
+    }
+
     private bool Wave835WindowOpen(GameCommand command) =>
         _state.PendingChoice is { Type: Wave835Abilities.HeavensWindow } pending && command.PlayerId == pending.PlayerId;
 
@@ -339,6 +463,8 @@ public sealed partial class MatchEngine
             NoteCardIntoHand(back.ToPlayer);
             Emit("strategyTaken", $"{Player(back.ToPlayer).Name} put {Definition(strategy).Name} in his hand.", back.ToPlayer, strategy.Id);
         }
+        if (w.BloodQueue.Count > 0 && _state.WinnerId is null && _state.PendingChoice is null && _state.PendingDuel is null && _state.PendingAttack is null && _state.PendingBeforeBattleResolve is null
+            && _state.PendingNegatableAbility is null && _state.PendingHonorChange is null && OpenNextBlood(w)) return;
         if (w.HeavensOwed.Count == 0 || _state.WinnerId is not null || _state.PendingChoice is not null || _state.PendingDuel is not null || _state.PendingAttack is not null
             || _state.PendingBeforeBattleResolve is not null || _state.PendingNegatableAbility is not null || _state.PendingHonorChange is not null) return;
         foreach (var (playerId, owed) in w.HeavensOwed.Where(kv => kv.Value > 0).OrderBy(kv => kv.Key).ToArray())
@@ -458,5 +584,7 @@ public sealed partial class MatchEngine
         EngineHooks.HonorChange.Register("Wave835Patronage", 13835, static context => context.Engine.Wave835PatronageApply(context));
         EngineHooks.PendingChoice.Register("Wave835Window", 13835, static (engine, type, command) => engine.HandleWave835Window(type, command));
         EngineHooks.PendingActions.Register("Wave835WindowActions", 13835, static (engine, context) => engine.Wave835WindowActions(context));
+        EngineHooks.PendingChoice.Register("Wave835Blood", 13836, static (engine, type, command) => engine.HandleWave835Blood(type, command));
+        EngineHooks.PendingActions.Register("Wave835BloodActions", 13836, static (engine, context) => engine.Wave835BloodActions(context));
     }
 }
