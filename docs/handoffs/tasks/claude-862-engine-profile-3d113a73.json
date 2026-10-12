@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Adds the L5R_PERF-gated PerfProbe and docs/audits/engine-profile-2026-10.md: Execute is ~76% state copy, State getter is a full JSON copy per read, QueryActions is ~half payment-token work, sweeps are negligible, local stages already run in parallel.",
+  "validation": "bash tools/check.sh --skip-client passed; probe and sampling trace reproduced",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/863",
+  "branch": "claude/862-engine-profile",
+  "updated": "2026-10-12T04:20:07.302022+00:00"
+}
