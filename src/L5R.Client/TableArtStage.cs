@@ -15,6 +15,13 @@ public partial class TableArtStage : Node3D
     private bool _useWarRoom;
     private bool _armed;
     private bool _prefetched;
+    private SubViewport? _hallPort;
+    private SubViewportContainer? _hallContainer;
+    private bool _hallDirty;
+    private float _hallLastTime;
+    private bool _hallAnimated;
+    private (Vector2, float, Vector2, float, Vector2, Vector2, Vector2) _hallCamera;
+    private const double HallFrameSeconds = 1.0 / 30;
     private Action<WarRoomStage>? _applyCamera;
     private string? _capture;
     private double _elapsed;
@@ -69,7 +76,21 @@ public partial class TableArtStage : Node3D
 
     public override void _Notification(int what)
     {
-        if (what == NotificationVisibilityChanged) EnsureWarRoom();
+        if (what != NotificationVisibilityChanged) return;
+        EnsureWarRoom();
+        if (_hallContainer is not null) { _hallContainer.Visible = IsVisibleInTree(); _hallDirty = true; }
+    }
+
+    private void RenderHallIfStale()
+    {
+        if (!_hallDirty || _hallPort is null || _hallContainer is null || !_hallContainer.IsVisibleInTree()) return;
+        _hallDirty = false;
+        _hallPort.RenderTargetUpdateMode = SubViewport.UpdateMode.Once;
+    }
+
+    public override void _ExitTree()
+    {
+        if (_hallPort is not null) RenderingServer.FramePreDraw -= RenderHallIfStale;
     }
 
     /// <summary>Starts loading the hall on background threads once the player heads for a table, so entering it does not stall on disk.</summary>
@@ -84,8 +105,18 @@ public partial class TableArtStage : Node3D
     {
         if (!_useWarRoom || !_armed || _warRoom is not null || !IsVisibleInTree()) return;
         var clock = System.Diagnostics.Stopwatch.StartNew();
+        // The hall is a still room lit by flickering candles: it renders into its own viewport that redraws only when the camera,
+        // window size or light changes, at the candle's pace, instead of every display frame (issue #877).
+        _hallPort = new SubViewport { OwnWorld3D = true, RenderTargetUpdateMode = SubViewport.UpdateMode.Disabled, HandleInputLocally = false, AudioListenerEnable3D = false, Size = (Vector2I)GetViewport().GetVisibleRect().Size };
+        _hallContainer = new SubViewportContainer { Stretch = true, MouseFilter = Control.MouseFilterEnum.Ignore, Visible = Visible };
+        _hallContainer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _hallContainer.AddChild(_hallPort);
+        AddChild(_hallContainer);
         _warRoom = new WarRoomStage();
-        AddChild(_warRoom);
+        _hallPort.AddChild(_warRoom);
+        _hallDirty = true;
+        _hallContainer.Resized += () => { if (_warRoom is not null) _applyCamera?.Invoke(_warRoom); _hallDirty = true; };
+        RenderingServer.FramePreDraw += RenderHallIfStale;
         GD.Print($"WAR_ROOM_BUILD_MS: {clock.ElapsedMilliseconds}");
         _applyCamera?.Invoke(_warRoom);
         _warRoom.PresentLight(_lightTime, !ReviewMode && !ReducedMotion);
@@ -248,7 +279,8 @@ public partial class TableArtStage : Node3D
         }
         var lamp = leftLamp;
         _applyCamera = room => room.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, lamp, RightLamp);
-        if (_warRoom is not null) _applyCamera(_warRoom);
+        var camera = (screenCenter, density, center, zoom, boardSize, extent, lamp);
+        if (_warRoom is not null && camera != _hallCamera) { _hallCamera = camera; _hallDirty = true; _applyCamera(_warRoom); }
         CardPaper.Table.SetShaderParameter("light_radius", extent * new Vector2(.24f, .31f));
         CardPaper.Table.SetShaderParameter("light_origin", leftWorld);
         CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * RightLamp);
@@ -276,6 +308,10 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter(ShaderParameters.CandleMotion, animate ? 1 : 0);
         }
         _warRoom?.PresentLight(time, animate);
+        // Static light draws once; flickering light redraws the hall at the candle's pace.
+        if (animate != _hallAnimated) { _hallAnimated = animate; _hallDirty = true; }
+        if (animate && time - _hallLastTime >= HallFrameSeconds) { _hallLastTime = time; _hallDirty = true; }
+        if (!animate && time != _hallLastTime) _hallLastTime = time;
         CardPaper.SetLight(time, animate, tableLamps: !_useWarRoom);
     }
 
