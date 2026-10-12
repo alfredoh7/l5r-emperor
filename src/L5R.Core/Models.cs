@@ -252,6 +252,9 @@ public sealed class CardInstance
     public bool Bowed { get => _bowed; set => _bowed = value && !IsTerrain(); }
     private bool IsTerrain() => (Printed ?? (CardCatalog.Cards.TryGetValue(DefinitionId, out var printed) ? printed : null)) is { Type: CardType.Strategy, Keywords: { } keywords } && keywords.Contains("Terrain");
     public string? AttachedTo { get; set; }
+    // Mastering the Elements (issue #838, rules lead): the keywords, trait and abilities it copied last only while it stays in play; set when it copies, cleared (with Printed) by SweepSpellCopies once it has left play.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool CopiedSpellRules { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
     // Abilities gained from another card's effect (Fukuzo's copied ability; a permanent grant). Usable exactly like a printed

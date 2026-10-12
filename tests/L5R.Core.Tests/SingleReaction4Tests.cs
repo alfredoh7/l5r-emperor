@@ -623,6 +623,29 @@ internal static partial class SingleReaction4Tests
                 Eq(e.CardForceForTest(target.Id), Math.Max(0, force - 2), "-2F on the target");
                 Eq(e.CardForceForTest((hitFollower ? foe : foeFollower).Id), other, "and not on the other");
             }
+        {
+            // Rules lead (issue #838): Engage is battlefield-specific. A Follower whose Personality is at home is not offered the Reaction at a battlefield engage, and its penalty reaches only cards at that battlefield.
+            CardInstance homeFollower = null!;
+            var away = Engaged(0, s =>
+            {
+                Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+                var homeHost = Add(s, "training-crane-samurai", 0, Zone.Home);
+                homeFollower = Add(s, def, 0, Zone.Attached, parent: homeHost.Id);
+                Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            }, window: false);
+            Check(away.State.PendingChoice?.Type != "engageReaction" && !away.QueryActions(0).Any(a => a.Enabled && a.Command?.AbilityId == ability), "the Follower's Personality is at home: not offered at a battlefield engage");
+            CardInstance there = null!, absent = null!, bf = null!;
+            var present = Engaged(0, s =>
+            {
+                var host = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+                there = Add(s, def, 0, Zone.Attached, province: 0, parent: host.Id);
+                bf = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+                absent = Add(s, "training-lion-samurai", 1, Zone.Home);
+            });
+            var legal = Enabled(present, 0, ability, there.Id).TargetIds!;
+            Check(legal.Contains(bf.Id) && !legal.Contains(absent.Id), "only a card at the engaged battlefield is a target: " + string.Join(",", legal));
+            Reject(present, Use(present, 0, ability, there.Id, absent.Id));
+        }
         var idle = Table(Phase.Action, 0); idle.PriorityPlayerId = 0;
         var ih = Add(idle, "training-crane-samurai", 0, Zone.Home); var it = Add(idle, def, 0, Zone.Attached, parent: ih.Id); var ie = Add(idle, "training-lion-samurai", 1, Zone.Home);
         NeverOpened(MatchEngine.FromTestState(idle), 0, ability, it.Id, Use(MatchEngine.FromTestState(idle), 0, ability, it.Id, ie.Id));
