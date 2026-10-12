@@ -150,21 +150,30 @@ public sealed class DeckFileStore(string directory)
             throw new ArgumentException("Choose another deck name; this one is reserved by Windows.");
         return Path.Combine(DirectoryPath, clean + ".txt");
     }
-    /// <summary>Puts the decks that ship with the game into this folder the first time it is asked (the marker file records that it has been): a deck of the same name is never replaced, and a deck
-    /// the player later deletes does not come back. Returns how many were written.</summary>
-    public int Preload(IEnumerable<(string Name, string Text)> decks, string markerPath)
+    /// <summary>Puts the decks that ship with the game into this folder. The marker file lists the shipped decks already offered, so a deck added in a later version is written once on the next open,
+    /// a deck of the same name is never replaced, and a deck the player deletes does not come back. A marker from the first version (no list) means <paramref name="originallyShipped"/> were offered.
+    /// Returns how many were written.</summary>
+    public int Preload(IEnumerable<(string Name, string Text)> decks, string markerPath, IEnumerable<string>? originallyShipped = null)
     {
-        if (File.Exists(markerPath)) return 0;
+        const string Header = "shipped decks offered:";
+        var offered = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (File.Exists(markerPath))
+        {
+            var lines = File.ReadAllLines(markerPath);
+            if (lines.Length > 0 && lines[0] == Header) foreach (var line in lines.Skip(1)) offered.Add(line);
+            else foreach (var name in originallyShipped ?? decks.Select(d => d.Name)) offered.Add(name);
+        }
         Directory.CreateDirectory(DirectoryPath);
         var written = 0;
         foreach (var (name, text) in decks)
         {
+            if (!offered.Add(name)) continue;
             var target = PathFor(name);
             if (File.Exists(target)) continue;
             File.WriteAllText(target, text); written++;
         }
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(markerPath))!);
-        File.WriteAllText(markerPath, $"{written} preloaded decks written");
+        File.WriteAllLines(markerPath, new[] { Header }.Concat(offered.Order(StringComparer.OrdinalIgnoreCase)));
         return written;
     }
     public static string Read(string path)

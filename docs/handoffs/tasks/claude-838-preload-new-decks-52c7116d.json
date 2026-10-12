@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Preload now records each shipped deck name in the marker and writes only decks not yet offered, so new shipped decks reach existing installs; deleted or same-named decks are never restored. A first-version marker is read as the nine original decks.",
+  "validation": "deck-workshop 16/16 incl. new-deck, deleted-deck and legacy-marker cases; client builds with no warnings; whitespace format clean.",
+  "remaining": "None; ready for review. Not packaged.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/865",
+  "branch": "claude/838-preload-new-decks",
+  "updated": "2026-10-12T04:40:42.747158+00:00"
+}
