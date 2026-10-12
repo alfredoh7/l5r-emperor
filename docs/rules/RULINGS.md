@@ -547,3 +547,32 @@ The Battle half is a recruit at a battlefield: its source is a province or the d
 - **Cards/primitives:** The Duty of the Crab (oracle-l5r-8036); `w829-duty-battle` (`BringProvincePersonalityIntoPlay` / `BringDeadPersonalityIntoPlay`), `w829-duty-focus` (a delay Focus Effect).
 - **Date:** 2026-10-11
 - **Source:** Mendon, card wiring list (issue #829). Well-Tended Farm and One Koku needed no ruling.
+
+### R-063 — Mastering the Elements loses what it copied when it leaves play; it may then copy a different Spell
+Mastering the Elements' permanent copy lasts only while the card stays in play. If it is discarded, destroyed, or returned to a hand or deck it loses the copied keywords, trait and abilities; entering play again it may copy a different Spell (the copies do not accumulate). "Once per game" means once per time in play. (Supersedes the 2026-09-21 reading that the copy persisted and added to itself.)
+
+- **Cards/primitives:** Mastering the Elements (oracle-l5r-4874); `CardInstance.CopiedSpellRules`, `SweepSpellCopies` (PermanentCopy.cs).
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+
+### R-064 — Engage is battlefield-specific: The Bestial Ones
+An Engage action is not a home action. The Bestial Ones' Engage is not offered when its Follower's Personality is at home at the time of a battlefield engage, and it may only give its penalty to a Personality or Follower present at the same battlefield.
+
+- **Cards/primitives:** The Bestial Ones (oracle-l5r-10677); `wl-bestial-engage` (`after-engaging-at-own-battlefield`, target at the engaged battlefield).
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+
+### R-065 — A Region is present at a battlefield when its province has one; that never gives its controller presence
+Regions with Battle actions, or Reactions that respond to Battle actions, may only be used while the Region is present at the battlefield. A Region is present when the province it is attached to has a battlefield created for it. A Region's presence does not satisfy the presence requirement of its controller: only a Personality can. Fallow Lands (own province under attack, its controller the Defender with presence there) is confirmed as implemented.
+
+- **Cards/primitives:** Fallow Lands (oracle-l5r-9865); `fallow-lands-reaction`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+
+### R-066 — Soul's Sacrifice gives Shadowlands and Undead to the performing Samurai; Rata's corpse line is flavor text
+"Permanently give your Samurai Shadowlands and Undead" means the performer. Rata's "sacrifices his victim's corpse" is flavor text with no rules effect: only "Draw a card" is wired.
+
+- **Cards/primitives:** Soul's Sacrifice (oracle-l5r-7385), Rata (oracle-l5r-6165).
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+

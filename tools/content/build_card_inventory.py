@@ -475,14 +475,8 @@ def load_sets() -> dict[str, str]:
 
 
 # Wired cards whose audited action is wired and passes its window and effect tests, but whose printed text leaves a rules question the engine cannot settle
-# alone (issues #830/#833 audits). Hand-curated; shown in the Blocker column of a Wired card. Each needs a ruling from the rules lead.
-WIRED_NOTES: dict[str, str] = {
-    "oracle-l5r-6165": "RULING NEEDED (issue #833 audit): Rata's \"Rata sacrifices his victim's corpse\" is not modeled; only \"Draw a card\" runs. What does sacrificing the corpse do?",
-    "oracle-l5r-7385": "RULING NEEDED (issue #833 audit): \"Permanently give your Samurai Shadowlands and Undead\" -- the engine gives it only to the performing Samurai (IvoryMovementTests asserts that reading). Is it the performer, or every Samurai you control?",
-    "oracle-l5r-4874": "RULING NEEDED (issue #833 audit): Mastering the Elements is \"Once per game\", but CopyKataTargetingTests asserts the Reaction is available again after the card re-enters play. Is once per game absolute, or once per time in play?",
-    "oracle-l5r-10677": "RULING NEEDED (issue #833 audit): The Bestial Ones' Engage has no location condition in its text and the engine offers it from a Follower whose Personality is at home. Intended?",
-    "oracle-l5r-9865": "RULING NEEDED (issue #833 audit): Fallow Lands' Reaction is gated by the engine to its own province under attack with its controller the Defender and present there; the printed text states none of that. Which gates are intended?",
-}
+# alone (issues #830/#833 audits). Hand-curated; shown in the Blocker column of a Wired card until the rules lead rules (the #833 questions were answered in #838: R-063 to R-066).
+WIRED_NOTES: dict[str, str] = {}
 
 # Hand-curated, same discipline as BLOCKERS: only for a card whose Set is not derivable from
 # emperor-catalogue.json at all (a created-only, Proxy-typed card absent from that catalogue --

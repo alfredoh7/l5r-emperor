@@ -208,6 +208,7 @@ public sealed partial class MatchEngine
         if (command.PlayerId is < 0 or > 1) return Reject("Unknown player.");
         if (command.ExpectedVersion != _state.Version) return Reject("The board has changed. Refresh before acting.");
         if (_state.WinnerId is not null) return Reject("The match has finished.");
+        SweepSpellCopies(); // issue #838: a copy owed to a card that left play before this command
         var original = _state;
         // Ten Thousand Temples (issue #492, group F): the answer to an Honor loss decision replays the command that reached it, from the state it started in, with the decisions made so far.
         var execute = command; MatchState? cleanBase = null;
@@ -265,6 +266,7 @@ public sealed partial class MatchEngine
                 _paymentDiscards = [];
                 ApplyAfterCommandTraits(traitSnapshot);
                 ReturnCardsOutOfPlayToTheirOwners();
+                SweepSpellCopies(); // issue #838
                 Wave827AfterCommand(); // issue #827 (Wave827.cs): Koan's Jingasa's Spell limit, P'an Ku's straightening choice
                 Wave829AfterCommand(); // issue #829 (Wave829.cs): Benten's Blessing's choice of Personalities
                 RemoveCreatedCardsLeftInPiles();
