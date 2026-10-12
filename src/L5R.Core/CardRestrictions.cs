@@ -61,7 +61,10 @@ public enum RestrictionUntil
     /// <summary>For the rest of the game.</summary>
     Permanent,
     /// <summary>As long as CardId is in play.</summary>
-    WhileInPlay
+    WhileInPlay,
+    /// <summary>Until the next turn of the player named by PlayerId begins (issue #835, The Egg of P'an Ku: "will not attack or defend until after your next turn begins"): UntilTurn is the number of
+    /// turns that player will have taken by then.</summary>
+    OwnersNextTurnBegins
 }
 
 /// <summary>One stored restriction. CardId names the restricted card (null for a province lock), PlayerId/ProvinceIndex the province for NoEntryFromProvince.</summary>
@@ -142,10 +145,11 @@ public sealed partial class MatchEngine
     // ---- Registration API (what a card's effect calls) ----------------------------------------------------------------------------------------------------------------------------------------------
 
     /// <summary>Stores a restriction on a card. UntilTurn/UntilPhase are stamped from the current turn and phase.</summary>
-    internal string AddCardRestriction(RestrictionKind kind, CardInstance card, RestrictionUntil until = RestrictionUntil.Turn, string? arg = null, string? otherCardId = null, int max = 0, string? note = null)
+    internal string AddCardRestriction(RestrictionKind kind, CardInstance card, RestrictionUntil until = RestrictionUntil.Turn, string? arg = null, string? otherCardId = null, int max = 0, string? note = null, int? ownerId = null)
     {
         var id = NextRestrictionId();
-        Restrictions.Items.Add(new(id, kind, card.Id, null, null, arg, otherCardId, until, _state.TurnNumber, until == RestrictionUntil.Phase ? _state.Phase : null, max, ByPlayer: (_runningCommand ?? _attackCommandInResolution)?.PlayerId));
+        var ownersNextTurn = until == RestrictionUntil.OwnersNextTurnBegins && ownerId is int ownerPlayer;
+        Restrictions.Items.Add(new(id, kind, card.Id, null, ownersNextTurn ? ownerId : null, arg, otherCardId, until, ownersNextTurn ? Player(ownerId!.Value).TurnsTaken + 1 : _state.TurnNumber, until == RestrictionUntil.Phase ? _state.Phase : null, max, ByPlayer: (_runningCommand ?? _attackCommandInResolution)?.PlayerId));
         if (note is not null) Emit("restrictionAdded", note, card.OwnerId, card.Id);
         return id;
     }
@@ -186,8 +190,9 @@ public sealed partial class MatchEngine
 
     // ---- Reading ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    private bool RestrictionHolds(RestrictionUntil until, string? cardId, int untilTurn, Phase? untilPhase) => until switch
+    private bool RestrictionHolds(RestrictionUntil until, string? cardId, int untilTurn, Phase? untilPhase, int? ownerId = null) => until switch
     {
+        RestrictionUntil.OwnersNextTurnBegins => ownerId is int owner && Player(owner).TurnsTaken < untilTurn,
         RestrictionUntil.Turn => untilTurn == _state.TurnNumber,
         RestrictionUntil.Phase => untilTurn == _state.TurnNumber && untilPhase == _state.Phase,
         RestrictionUntil.WhileInPlay => cardId is null || _state.Cards.TryGetValue(cardId, out var held) && InPlay(held),
@@ -199,7 +204,7 @@ public sealed partial class MatchEngine
     {
         if (Restrictions.Items.Count > 0)
             foreach (var r in Restrictions.Items)
-                if (r.CardId == card.Id && r.Kind != RestrictionKind.NoEntryFromProvince && RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase)) yield return new(r.Kind, r.Arg, r.OtherCardId, r.Max, r.Id, r.ByPlayer);
+                if (r.CardId == card.Id && r.Kind != RestrictionKind.NoEntryFromProvince && RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase, r.PlayerId)) yield return new(r.Kind, r.Arg, r.OtherCardId, r.Max, r.Id, r.ByPlayer);
         if (!InPlay(card)) yield break;
         foreach (var s in CardRestrictionCatalog.For(Definition(card).Id)) yield return new(s.Kind, s.Arg, null, s.Max, null);
         foreach (var hook in EngineHooks.CardRestrictions.Items)
@@ -309,7 +314,7 @@ public sealed partial class MatchEngine
             EnterCelestialPlay(owner, card);
             Refill(owner, province);
         }
-        Restrictions.Items.RemoveAll(r => !RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase) && r.Until != RestrictionUntil.WhileInPlay);
+        Restrictions.Items.RemoveAll(r => !RestrictionHolds(r.Until, r.CardId, r.UntilTurn, r.UntilPhase, r.PlayerId) && r.Until != RestrictionUntil.WhileInPlay);
         Restrictions.TargetBars.RemoveAll(r => !RestrictionHolds(r.Until, r.TargetCardId, r.UntilTurn, r.UntilPhase) && r.Until != RestrictionUntil.WhileInPlay);
     }
 

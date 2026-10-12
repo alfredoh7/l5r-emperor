@@ -8,7 +8,7 @@ using static RegressionAssertions;
 internal static class Wave835Tests
 {
     private const string CleansingBreath = Wave835Abilities.CleansingBreathCard, ImperialDeployment = Wave835Abilities.ImperialDeploymentCard, WardedPremises = Wave835Abilities.WardedPremisesCard,
-        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard, Blood = Wave835Abilities.BloodCard, Revelations = Wave835Abilities.RevelationsCard, Foe = Wave835Abilities.FoeCard;
+        Duty = Wave835Abilities.DutyCard, Pierce = Wave835Abilities.PierceCard, Heavens = Wave835Abilities.HeavensCard, Unbearable = Wave835Abilities.UnbearableCard, Patronage = Wave835Abilities.PatronageCard, Blood = Wave835Abilities.BloodCard, Revelations = Wave835Abilities.RevelationsCard, Foe = Wave835Abilities.FoeCard, Egg = Wave835Abilities.EggCard;
     private const string TwoElements = "oracle-l5r-10857" /* Moshi Ikako: Air, Fire */, OneElement = "oracle-l5r-7797" /* Tamori Shosei: Earth */;
     private const string Farm = Wave829Abilities.Farm, FaceOfNinube = "oracle-l5r-2431", TravelingPeddler = "oracle-l5r-8729";
     private const string CraneSamurai = "training-crane-samurai", LionSamurai = "training-lion-samurai", Item = "training-item";
@@ -59,6 +59,7 @@ internal static class Wave835Tests
         ("Blood of Isawa's Tribe: after it attaches, the Shugenja's element keywords, then the five elements, a confirmation for the same element; no pass, no Reaction window; the replacement lasts while it is attached", BloodOfIsawasTribe),
         ("Revelations: shows the top five Dynasty cards to both players, the other player may discard one, its owner arranges the rest, and the Province refills face up", RevelationsEvent),
         ("The Empire's Foe Exposed: a duel in the Events Phase between Unique Personalities, nothing unless each player has one, no question for a player with exactly one, destroying the loser", EmpiresFoeExposed),
+        ("The Egg of P'an Ku - exp: bows your Personality, leaves the game, creates a copy of the second target in your home, bows it and holds it back until after your next turn begins", EggOfPanKu),
         ("Merchant Patronage: on an Honor change an action of another player's Holding makes, the Honor goes to the player you choose, one larger with a bowed Courtier", MerchantPatronage),
     ]);
 
@@ -78,7 +79,8 @@ internal static class Wave835Tests
             (Patronage, "strategy-wave-835", CardType.Strategy, [Wave835Abilities.PatronageRedirect, Wave835Abilities.PatronageBow]),
             (Blood, "spell-wave-835", CardType.Spell, []),
             (Revelations, "event-wave-835", CardType.Event, []),
-            (Foe, "event-wave-835", CardType.Event, [])];
+            (Foe, "event-wave-835", CardType.Event, []),
+            (Egg, "item-wave-835", CardType.Item, [Wave835Abilities.Egg])];
         foreach (var (id, wave, type, abilities) in cards)
         {
             var def = CardCatalog.Get(id);
@@ -782,5 +784,49 @@ internal static class Wave835Tests
             Call(n, "EventsPhaseForTest", 0);
             Check(n.State.PendingDuel is null && n.State.PendingChoice is null && n.State.Cards[nev.Id].Zone == Zone.DynastyDiscard && n.State.Phase == Phase.Action, $"{a} and {b} Unique Personalities: discarded without effect");
         }
+    }
+
+    // ---- The Egg of P'an Ku ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static void EggOfPanKu()
+    {
+        var s = Batch336Support.Table(Phase.Action, 0);
+        var host = Add(s, CraneSamurai, 0, Zone.Home);
+        var egg = Add(s, Egg, 0, Zone.Attached, false, null, host.Id);
+        var other = Add(s, CraneSamurai, 0, Zone.Home);
+        var bowedAlready = Add(s, CraneSamurai, 0, Zone.Home, bowed: true);
+        var enemy = Add(s, LionSamurai, 1, Zone.Home);
+        enemy.GrantedKeywords.Add(new("Unique", "fixture", GrantDuration.Permanent));
+        var e = Engine(s);
+        var slots = Batch336Support.Options(e, 0, Wave835Abilities.Egg, egg.Id).First(o => o.Enabled).Slots!;
+        Eq(string.Join(",", slots.Single(x => x.Slot == Wave835Abilities.EggBowSlot).CardIds.OrderBy(x => x)), string.Join(",", new[] { host.Id, other.Id }.OrderBy(x => x)), "the first target: one of your unbowed Personalities");
+        Check(slots.Single(x => x.Slot == Wave835Abilities.EggCopySlot).CardIds.Contains(enemy.Id) && slots.Single(x => x.Slot == Wave835Abilities.EggCopySlot).CardIds.Contains(host.Id), "the second target is any Personality, the other player's included");
+        Accept(e, Batch336Support.Use(e, 0, Wave835Abilities.Egg, egg.Id, selections: [Batch336Support.Pick(Wave835Abilities.EggBowSlot, other.Id), Batch336Support.Pick(Wave835Abilities.EggCopySlot, enemy.Id)]));
+        Pass(e);
+        Check(e.State.Cards[other.Id].Bowed, "the first target is bowed");
+        Eq(e.State.Cards[egg.Id].Zone, Zone.RemovedFromGame, "the Item is removed from the game");
+        var copy = e.State.Cards.Values.Single(c => c.DefinitionId == LionSamurai && c.OwnerId == 0 && c.Zone == Zone.Home);
+        Eq(copy.OwnerId, 0, "the Egg's controller controls the copy");
+        Eq(copy.Zone, Zone.Home, "in his home");
+        Check(!copy.Bowed, "the copy is not bowed");
+        Check(e.State.Cards[enemy.Id].Bowed, "the second target, the other player's Personality, is bowed");
+        Check(e.State.Cards[enemy.Id].StraightenHolds.Any(h => h.Owner == 0 && h.Until == StraightenPoint.StraightenPhaseEnds), "and will not straighten until after the Egg's controller's next turn begins");
+        Check((bool)Call(e, "RestrictionBarsAssignment", Call(e, "Card", enemy.Id), false)! && (bool)Call(e, "RestrictionBarsAssignment", Call(e, "Card", enemy.Id), true)!, "nor attack nor defend");
+        Check(!(bool)Call(e, "RestrictionBarsAssignment", Call(e, "Card", copy.Id), false)!, "the copy itself may attack");
+        Check(e.State.MechD.TimedRemovals.Any(r => r.CardId == copy.Id && r.PlayerId == 0), "the copy leaves the game after the Egg's controller's next turn begins");
+        // The restrictions end as the Egg's controller's next turn begins.
+        var next = Batch336Support.Edit(e, st => { st.TurnNumber++; st.Players[0].TurnsTaken++; });
+        Check(!(bool)Call(next, "RestrictionBarsAssignment", Call(next, "Card", enemy.Id), false)! && !(bool)Call(next, "RestrictionBarsAssignment", Call(next, "Card", enemy.Id), true)!, "after his next turn begins the Personality may attack and defend again");
+        // The copy is fresh: a Unique target is copied all the same ("ignoring costs and restrictions"), and the Egg can target a Personality of its controller's own.
+        var own = Batch336Support.Table(Phase.Action, 0);
+        var h2 = Add(own, CraneSamurai, 0, Zone.Home); var egg2 = Add(own, Egg, 0, Zone.Attached, false, null, h2.Id); var mine2 = Add(own, CraneSamurai, 0, Zone.Home);
+        var oe = Engine(own);
+        Accept(oe, Batch336Support.Use(oe, 0, Wave835Abilities.Egg, egg2.Id, selections: [Batch336Support.Pick(Wave835Abilities.EggBowSlot, h2.Id), Batch336Support.Pick(Wave835Abilities.EggCopySlot, mine2.Id)]));
+        Pass(oe);
+        Eq(oe.State.Cards.Values.Count(c => c.DefinitionId == CraneSamurai && c.OwnerId == 0 && c.Zone == Zone.Home), 3, "a copy of his own Personality too");
+        // A refused command (the same card for the bow target that is already bowed) changes nothing.
+        var refuse = Engine(s);
+        NoChange(refuse, Batch336Support.Use(refuse, 0, Wave835Abilities.Egg, egg.Id, selections: [Batch336Support.Pick(Wave835Abilities.EggBowSlot, bowedAlready.Id), Batch336Support.Pick(Wave835Abilities.EggCopySlot, enemy.Id)]), "the first target must be unbowed");
+        NoChange(refuse, Batch336Support.Use(refuse, 0, Wave835Abilities.Egg, egg.Id, selections: [Batch336Support.Pick(Wave835Abilities.EggBowSlot, enemy.Id), Batch336Support.Pick(Wave835Abilities.EggCopySlot, enemy.Id)]), "the first target is one of yours");
     }
 }

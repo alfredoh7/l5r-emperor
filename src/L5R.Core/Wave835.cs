@@ -29,11 +29,15 @@ namespace L5R.Core;
 //                            player may discard one (the shown-choice panel), its owner arranges the rest (the look panel), and the Event's Province refills face up.
 //   The Empire's Foe Exposed "Limited: Target two Unique Personalities in play, exactly one of which is yours. Your Personality challenges the other Personality. Destroy the duel's loser."   Mendon: an Event
 //                            that opens a duel when it resolves in the Events Phase; it does nothing unless each player has a Unique Personality in play; a player with exactly one is not asked.
+//   The Egg of P'an Ku - exp "Limited: Bow one of your target unbowed Personalities. Remove this Item from the game. Create a copy of a target Personality, ignoring costs and restrictions. Bow the second target.
+//                            He will not straighten, attack, or defend until after your next turn begins. Remove the copy from the game after your next turn begins."   Mendon: the Egg's controller controls the
+//                            copy, which enters play in his home; the copied Personality (the second target, whoever's he is) is bowed and may not straighten, attack or defend until then.
 public static class Wave835Abilities
 {
     public const string CleansingBreath = "w835-cleansing-breath", ImperialDeployment = "w835-imperial-deployment", WardedNegate = "w835-warded-negate", WardedPlay = "w835-warded-play",
         DutyDiscount = "w835-duty-discount", DutyFull = "w835-duty-full", Pierce = "w835-pierce", HeavensDraw = "w835-heavens-draw", HeavensHonor = "w835-heavens-honor", HeavensPay = "w835-heavens-pay",
         Unbearable = "w835-unbearable", PatronageRedirect = "w835-patronage", PatronageBow = "w835-patronage-bow";
+    public const string EggCard = "oracle-l5r-10522", Egg = "w835-egg", EggBowSlot = "bow", EggCopySlot = "copy", OwnUnbowedPersonality = "w835-own-unbowed-personality";
     public const string RevelationsCard = "oracle-l5r-10262", RevelationsEffect = "w835-revelations", RevelationsShown = "w835-revelations-shown", RevelationsOrder = "w835-revelations-order";
     public const string FoeCard = "oracle-l5r-10423", FoeEffect = "w835-foe", FoeDuel = "w835-foe-duel", FoeWindow = "w835Foe", FoePick = "w835FoePick";
     public const int RevelationsCount = 5;
@@ -65,6 +69,8 @@ public static class Wave835Abilities
         all[DutyFull] = new("Battle", "Battle: If he would be opposed, Recruit your target performing discarded Yojimbo", YojimboDiscard, Cost: GoldCostRule.TargetRecruit());
         all[Pierce] = new("Battle", "Battle: Choose your performing unbowed Monk and target an enemy Personality or Follower: Give it -3F. If it has no attachments and you have played two or more other Pierce the Tapestry this battle, destroy it. If this did not destroy it, you may take an additional Battle action to play a Pierce the Tapestry",
             "enemy-personality-or-follower", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]);
+        all[Egg] = new("Limited", "Limited: Bow one of your target unbowed Personalities. Remove this Item from the game. Create a copy of a target Personality, ignoring costs and restrictions. Bow the second target. He will not straighten, attack, or defend until after your next turn begins. Remove the copy from the game after your next turn begins",
+            "slots", Slots: [new(EggBowSlot, OwnUnbowedPersonality, "Your unbowed Personality, to bow"), new(EggCopySlot, "personality", "The Personality to copy, bow and hold back")]);
         // The duel The Empire's Foe Exposed opens when it resolves: never on a card, only named by the Event. "Destroy the duel's loser" is its outcome (ApplyDuelOutcome).
         all[FoeDuel] = new("Limited", "Your Unique Personality challenges the other player's Unique Personality. Destroy the duel's loser", "none", IssuesDuel: true);
         all[HeavensDraw] = new("Open", "Open: Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase", "none");
@@ -229,6 +235,10 @@ public sealed partial class MatchEngine
 
     // ---- effects -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    // TargetAllows: "one of your target unbowed Personalities".
+    private bool Wave835TargetAllows(TargetAllowsContext context) =>
+        context.ability.Target == Wave835Abilities.OwnUnbowedPersonality && InPlay(context.target) && Definition(context.target).Type == CardType.Personality && context.target.OwnerId == context.player.Id && !context.target.Bowed;
+
     private bool? RunWave835(RunHookContext c)
     {
         var (id, command, player, source, target) = (c.id, c.command, c.player, c.source, c.target);
@@ -281,6 +291,19 @@ public sealed partial class MatchEngine
                     if (!destroyed) GrantAdditionalAction(player.Id, null, scopeAbilityIds: [Wave835Abilities.Pierce]);
                     return false;
                 }
+            // The Egg: the first target bows; the Item leaves the game; a copy of the second target is created for the Egg's controller (his home, no costs or restrictions; it leaves after his next turn begins);
+            // the second target bows and neither straightens, attacks nor defends until then, whoever controls him.
+            case Wave835Abilities.Egg:
+                {
+                    var bowed = SlotCards(command, Wave835Abilities.EggBowSlot).First();
+                    var original = SlotCards(command, Wave835Abilities.EggCopySlot).First();
+                    var name = Definition(source!).Name;
+                    if (InPlay(bowed) && !StalwartNegatesBow(bowed, player.Id)) bowed.Bowed = true;
+                    RemoveFromGame(source!);
+                    Emit("eggHatches", $"{name} is removed from the game: {player.Name} creates a copy of {Definition(original).Name}.", player.Id, original.Id);
+                    var copy = new CreatedCardSpec(CardType.Personality, CopyOfTarget: true) { RemoveWhen = CreatedRemoval.NextTurnBegins };
+                    return ExecuteCreate(c.ability, copy, command with { TargetId = original.Id }, player, beforeWindow: () => Wave835EggHold(original, player.Id, name));
+                }
             case Wave835Abilities.HeavensDraw:
                 W835.HeavensActive = true;
                 Emit("heavensBlessing", $"{Definition(source!).Name}: until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase.", player.Id, source!.Id);
@@ -328,6 +351,18 @@ public sealed partial class MatchEngine
             default:
                 return null;
         }
+    }
+
+    // The Egg's second half: the copied Personality bows and may not straighten, attack or defend until after the Egg's controller's next turn begins (a straighten hold through his Straighten Phase, as
+    // Aramasu's Legacy's, and attack and defend restrictions that end as his next turn begins).
+    private void Wave835EggHold(CardInstance original, int ownerId, string name)
+    {
+        if (!InPlay(original)) return;
+        if (!StalwartNegatesBow(original, ownerId)) original.Bowed = true;
+        AddStraightenHold(original, name, ownerId, StraightenPoint.StraightenPhaseEnds);
+        AddCardRestriction(RestrictionKind.NoAttack, original, RestrictionUntil.OwnersNextTurnBegins, ownerId: ownerId);
+        AddCardRestriction(RestrictionKind.NoDefend, original, RestrictionUntil.OwnersNextTurnBegins, ownerId: ownerId);
+        Emit("eggHold", $"{Definition(original).Name} is bowed and will not straighten, attack or defend until after {Player(ownerId).Name}'s next turn begins ({name}).", ownerId, original.Id);
     }
 
     // ---- Merchant Patronage ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -761,6 +796,7 @@ public sealed partial class MatchEngine
     internal static void RegisterWave835Hooks()
     {
         EngineHooks.Abilities.Register("Wave835Abilities", 13835, static abilities => abilities.AddWave835());
+        EngineHooks.TargetAllows.Register("Wave835TargetAllows", 13835, static (engine, context) => engine.Wave835TargetAllows(context));
         EngineHooks.ValidateEarly.Register("Wave835Validate", 13835, static (engine, context) => engine.Wave835Validate(context));
         EngineHooks.RunEffects.Register("Wave835RunEffects", 13835, static (engine, context) => engine.RunWave835(context));
         EngineHooks.HonorChange.Register("Wave835Patronage", 13835, static context => context.Engine.Wave835PatronageApply(context));

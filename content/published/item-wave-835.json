@@ -1,0 +1,33 @@
+{
+  "Profile": "item-wave-835",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #835.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10522",
+      "Name": "The Egg of P'an Ku",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow one of your target unbowed Personalities. Remove this Item from the game. Create a copy of a target Personality, ignoring costs and restrictions. Bow the second target. He will not straighten, attack, or defend until after your next turn begins. Remove the copy from the game after your next turn begins.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10522.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w835-egg"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

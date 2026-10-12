@@ -29,6 +29,7 @@ CARDS: dict[int, tuple[str, str, list[str], str, dict]] = {
     10550: ("strategy", "coils-of-madness", ["w835-unbearable"], "none", {}),  # Unbearable Weight
     10720: ("strategy", "gates-of-chaos", ["w835-patronage", "w835-patronage-bow"], "none", {}),  # Merchant Patronage
     10347: ("spell", "torn-asunder", [], "w835-blood", {}),  # Blood of Isawa's Tribe
+    10522: ("item", "coils-of-madness", ["w835-egg"], "none", {}),  # The Egg of P'an Ku - exp
     10262: ("event", "torn-asunder", [], "w835-revelations", {}),  # Revelations
     10423: ("event", "coils-of-madness", [], "w835-foe", {}),  # The Empire's Foe Exposed
 }
