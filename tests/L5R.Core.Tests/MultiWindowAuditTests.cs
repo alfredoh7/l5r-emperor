@@ -124,12 +124,15 @@ internal static partial class MultiWindowAuditTests
         Batch336Support.Check(wrong.Count == 0, "enabled outside its window: " + string.Join("; ", wrong.Select(p => $"{p.Name} {p.Ability} [{p.Timing}] in {p.Scenario}")));
     }
 
-    private static void ReportSingle()
+    // The single-window audit takes ~40 s as one case; it runs as SingleSlices interleaved cases so the shards can balance it (issue #865).
+    public const int SingleSlices = 3;
+
+    private static void ReportSingle(int slice)
     {
         var path = Environment.GetEnvironmentVariable("L5R_AUDIT_OUT_SINGLE");
         var all = new List<Probe>();
-        foreach (var c in SingleInventory()) all.AddRange(Run(c));
-        if (path is not null) File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(all));
+        foreach (var c in SingleInventory().Where((_, i) => i % SingleSlices == slice)) all.AddRange(Run(c));
+        if (path is not null) File.WriteAllText($"{path}.{slice}", System.Text.Json.JsonSerializer.Serialize(all));
         var wrong = all.Where(p => p.Enabled && !Expected(p.Timing).Contains(p.Scenario)).ToList();
         Batch336Support.Check(wrong.Count == 0, "enabled outside its window: " + string.Join("; ", wrong.Select(p => $"{p.Name} {p.Ability} [{p.Timing}] in {p.Scenario}")));
         var refused = all.Where(p => p.Enabled && !p.Executed).ToList();
@@ -138,6 +141,6 @@ internal static partial class MultiWindowAuditTests
 
     public static void Run(TestRunner runner) => runner.Run("multi-window-audit", [
         ("Every multi-window card's actions are on offer only in the phases their printed timing allows (issue #830)", Report),
-        ("Every single-window card's action is on offer only in the phases its printed timing allows (issue #833)", ReportSingle),
+        .. Enumerable.Range(0, SingleSlices).Select(slice => ($"Every single-window card's action is on offer only in the phases its printed timing allows (issue #833, slice {slice + 1} of {SingleSlices})", (Action)(() => ReportSingle(slice)))),
     ]);
 }

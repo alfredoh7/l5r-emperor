@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Splits listing-consistency (104 s) into 4 and the single-window audit (41 s) into 3 interleaved cases and registers them in slow-cases.txt, so shards balance: core shards 176/138/156 s against 207/87/132 s (slowest -15%) with the same coverage (about 5,950 combinations, 0 gaps). Test-only change.",
+  "validation": "bash tools/check.sh --skip-client passed",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/867",
+  "branch": "claude/865-balance-audit-shards",
+  "updated": "2026-10-12T05:14:42.593355+00:00"
+}
