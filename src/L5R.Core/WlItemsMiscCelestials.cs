@@ -103,7 +103,7 @@ public sealed partial class MatchEngine
                     foreach (var strategy in SlotCards(command, "strategy").ToArray())
                     {
                         if (strategy.Zone != Zone.FateDiscard || P2CardIntoHandBlocked(player.Id)) continue;
-                        strategy.Zone = Zone.Hand; strategy.FaceUp = true; strategy.AbilityUses.Clear(); // a card taken back into the hand is a fresh card (a stale once-per-turn stamp is gone)
+                        strategy.Zone = Zone.Hand; strategy.FaceUp = true; ResetCardState(strategy); // a card taken back into the hand is a fresh card (a stale once-per-turn stamp is gone)
                         player.Hand.Add(strategy.Id); NoteCardIntoHand(player.Id);
                         Emit("cardReturnedToHand", $"{player.Name} put {Definition(strategy).Name} from the discard pile into their hand.", player.Id, strategy.Id);
                     }

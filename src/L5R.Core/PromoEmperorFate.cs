@@ -192,7 +192,7 @@ public sealed partial class MatchEngine
             PromoFate.PhaseReturns.Remove(due);
             if (!_state.Cards.TryGetValue(due.CardId, out var strategy) || strategy.Zone != Zone.FateDiscard) continue; // it has left the discard pile some other way
             var owner = Player(due.PlayerId);
-            strategy.Zone = Zone.Hand; strategy.FaceUp = true; owner.Hand.Add(strategy.Id); strategy.AbilityUses.Clear();
+            strategy.Zone = Zone.Hand; strategy.FaceUp = true; owner.Hand.Add(strategy.Id); ResetCardState(strategy);
             NoteCardIntoHand(owner.Id);
             Emit("returnedToHand", $"{Definition(strategy).Name} returns to {owner.Name}'s hand before the phase ends.", owner.Id, strategy.Id);
         }

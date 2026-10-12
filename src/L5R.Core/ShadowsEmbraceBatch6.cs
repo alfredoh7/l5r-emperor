@@ -272,8 +272,7 @@ public sealed partial class MatchEngine
         {
             var owner = Player(card.OwnerId);
             var dynasty = IsDynastyCardType(Definition(card).Type);
-            card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck; card.FaceUp = false; card.ProvinceIndex = null; card.Bowed = false; card.Dishonorable = false;
-            card.Tokens.Clear(); card.Modifiers.Clear(); card.AbilityUses.Clear();
+            card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck; card.FaceUp = false; card.ProvinceIndex = null; ResetCardState(card);
             (dynasty ? owner.DynastyDeck : owner.FateDeck).Add(card.Id);
             touched.Add((owner.Id, dynasty ? SearchDeck.Dynasty : SearchDeck.Fate));
             Emit("toDeck", $"{Definition(card).Name} was shuffled into {owner.Name}'s {(dynasty ? "Dynasty" : "Fate")} deck ({Definition(source).Name}).", owner.Id, card.Id);

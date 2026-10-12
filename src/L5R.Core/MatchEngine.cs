@@ -800,7 +800,9 @@ public sealed partial class MatchEngine
         ResetCardState(lower);
     }
 
-    // A card that will enter play again (a dead Personality recruited, issue #373) is a new object: nothing of its earlier life follows it.
+    // The one place a card sheds its time in play (issue #850). A card that leaves play for a hand, a deck, a province or a pile, or that will enter play again (a dead Personality recruited, issue #373),
+    // is a new object: nothing of its earlier life follows it. AbilityVocabularyTests-style reflection test CardResetTests fails when a CardInstance property is neither reset here nor listed as identity/location.
+    internal static void ResetCardStateForTest(CardInstance card) => ResetCardState(card);
     private static void ResetCardState(CardInstance card)
     {
         card.Modifiers.Clear();
@@ -825,6 +827,8 @@ public sealed partial class MatchEngine
         card.ForceModifiersNegatedTurn = -1; card.TargetShieldTurn = -1; // Forgotten Legacy pass, batch 3 (issue #467)
         card.DeepRootsTurn = -1; // The Shadow's Embrace pass, batch 3 (issue #476)
         card.AssignedToAttackTurn = -1;
+        card.StraightenLockedTurn = -1; card.ForceContributionNegatedBattle = -1; card.AssignBowedTurn = -1; card.DestructionShieldTurn = -1; card.OpposedTurn = -1; card.ReturnAfterBattle = -1; // issue #850: every per-play stamp
+        card.PerformedActionFromTitles.Clear();
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
@@ -1931,9 +1935,7 @@ public sealed partial class MatchEngine
             // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
             // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
-            card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
-            card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed = false; card.Dishonorable = false;
-            card.StraightenBlockedTurn = -1; card.StraightenLockedTurn = -1; card.StraightenHolds.Clear(); card.PrintedHoldsSeeded = false; card.ForcePenaltiesNegatedTurn = -1; card.AssignedToAttackTurn = -1;
+            ResetCardState(card);
             var owner = Player(card.OwnerId);
             if (!owner.Provinces.Any(p => !p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice = new("yourClanNeedsYouProvince", card.OwnerId, id, $"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");

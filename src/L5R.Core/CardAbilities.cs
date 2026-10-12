@@ -10865,9 +10865,8 @@ public sealed partial class MatchEngine
         {
             RemoveAttachmentGrants(wasAttachedTo, card.Id);
             card.AttachedTo = null; card.Bowed = false;
-            card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear();
         }
-        card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; card.AbilityUses.Clear();
+        card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; ResetCardState(card);
         Player(card.OwnerId).Hand.Add(card.Id); NoteCardIntoHand(card.OwnerId); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("returnedToHand", $"{Definition(card).Name} was returned to {Player(card.OwnerId).Name}'s hand.", card.OwnerId, card.Id);
         if (wasAttachedTo is not null && InPlay(wasAttachedTo) && Definition(wasAttachedTo).Type == CardType.Personality && PersonalityChi(wasAttachedTo) <= 0) DestroyUnits([wasAttachedTo], true);
@@ -10885,8 +10884,7 @@ public sealed partial class MatchEngine
         if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
-        card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
-        card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear(); card.AbilityUses.Clear();
+        card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; ResetCardState(card);
         card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck;
         var deck = dynasty ? owner.DynastyDeck : owner.FateDeck;
         if (position == "Bottom") deck.Add(card.Id); else deck.Insert(0, card.Id);

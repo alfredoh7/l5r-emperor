@@ -675,7 +675,7 @@ public sealed partial class MatchEngine
             strategy.OriginalOwnerId ??= strategy.OwnerId;
             strategy.OwnerId = back.ToPlayer;
             if (strategy.OriginalOwnerId == back.ToPlayer) strategy.OriginalOwnerId = null;
-            strategy.Zone = Zone.Hand; strategy.FaceUp = false; strategy.AbilityUses.Clear(); // a card in a hand is a fresh object: this play's once-per-turn stamp is not carried over
+            strategy.Zone = Zone.Hand; strategy.FaceUp = false; ResetCardState(strategy); // a card in a hand is a fresh object: this play's once-per-turn stamp is not carried over
             Player(back.ToPlayer).Hand.Add(strategy.Id);
             NoteCardIntoHand(back.ToPlayer);
             Emit("strategyTaken", $"{Player(back.ToPlayer).Name} put {Definition(strategy).Name} in his hand.", back.ToPlayer, strategy.Id);

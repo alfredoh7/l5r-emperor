@@ -344,7 +344,7 @@ public sealed partial class MatchEngine
             var card = Card(cardId);
             var wasFaceUp = card.FaceUp;
             province.CardId = null;
-            card.Zone = Zone.DynastyDeck; card.ProvinceIndex = null; card.FaceUp = false; card.AbilityUses.Clear();
+            card.Zone = Zone.DynastyDeck; card.ProvinceIndex = null; card.FaceUp = false; ResetCardState(card);
             owner.DynastyDeck.Add(card.Id);
             emptied.Add(province);
             // A face-down card stays hidden: neither its name nor its id is announced.
