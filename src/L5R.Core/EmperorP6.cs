@@ -335,7 +335,7 @@ public sealed partial class MatchEngine
                         PlayerId = player.Id,
                         Origin = "reveal",
                         Candidates = candidates,
-                        Prompt = $"{Definition(card).Name}: choose a province. It permanently has -2 strength and its Region is destroyed; until the game ends a Region attaching to it is destroyed and a Holding entering play from it gets a -1 Gold Production token."
+                        Prompt = $"{Definition(card).Name}: choose a province. It permanently has {DarkExperimentsMark.Strength} strength and its Region is destroyed; until the game ends a Region attaching to it is destroyed and a Holding entering play from it gets a -1 Gold Production token."
                     });
                     return true;
                 }
@@ -376,7 +376,7 @@ public sealed partial class MatchEngine
     {
         var parts = choice.Split(':');
         var owner = Player(int.Parse(parts[0])); var province = owner.Provinces.Single(p => p.Index == int.Parse(parts[1]));
-        province.Strength -= 2;
+        province.Strength += DarkExperimentsMark.Strength;
         province.DarkExperimentsMarked = true;
         Emit("eventChose", $"{Definition(card).Name}: {owner.Name}'s province {province.Index + 1} permanently has -2 strength and is marked until the game ends.", card.OwnerId, card.Id);
         if (province.RegionId is { } regionId) DestroyRegion(Card(regionId));
@@ -394,7 +394,7 @@ public sealed partial class MatchEngine
     private void AfterHoldingEnteredFromProvinceP6(ProvinceState province, CardInstance holding)
     {
         if (!province.DarkExperimentsMarked || Definition(holding).Type != CardType.Holding) return;
-        CreateToken(holding, "Dark Experiments", holding.Id, "GoldProduction", -1);
+        CreateToken(holding, "Dark Experiments", holding.Id, "GoldProduction", DarkExperimentsMark.Production);
         Emit("darkExperiments", $"{Definition(holding).Name} entered play from a province marked by Dark Experiments: it has a -1 Gold Production token.", holding.OwnerId, holding.Id);
     }
 

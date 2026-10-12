@@ -1427,6 +1427,12 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     int UnitNumber = 0,
     // P21 (issue #697): the card a Zone.Underneath card sits under (null for the cards under the Stronghold and for any other card). A face-down under-card is redacted for the other seat.
     string? UnderHostId = null);
+/// <summary>What Dark Experiments does to the province it marks (permanent) and to each Holding that enters play from it; the board marker shows these values.</summary>
+public static class DarkExperimentsMark
+{
+    public const int Strength = -2, Production = -1;
+}
+
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
