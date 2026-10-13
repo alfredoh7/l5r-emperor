@@ -587,7 +587,7 @@ public sealed partial class MatchEngine
     private GoldQuote? QuoteRegionGold(int playerId, CardInstance region)
     {
         var def = Definition(region);
-        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost)) : null;
+        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost), Sources: PaymentSourcesFor(playerId, null)) : null;
     }
 
     /// <summary>A Strategy played with the playStrategy command pays its own printed cost. Null when free.</summary>
