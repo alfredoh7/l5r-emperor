@@ -251,7 +251,7 @@ public sealed partial class MatchEngine
         foreach (var rule in rules)
         {
             if (rule.Kind != kind) continue;
-            foreach (var carrier in _state.Cards.Values.Where(c => (InPlay(c) || rule.EventCarrier && c.Zone == Zone.EventInPlay) && rule.OwnerIs(Definition(c))))
+            foreach (var carrier in _state.Cards.Values.Where(c => (InPlay(c) || rule.EventCarrier && c.Zone == Zone.EventInPlay) && rule.OwnerIs(Definition(c)) && !SpellStaticSilenced(c)))
             {
                 if (!StandingImmunityCovers(rule, carrier, card, playerId, battlefield)) continue;
                 if (!ImmunitySourceMatches(rule.Source, kind, controller ?? carrier.OwnerId, card, sourcePlayerId, sourceCard)) continue;

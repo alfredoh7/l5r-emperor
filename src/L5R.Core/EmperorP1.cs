@@ -314,14 +314,14 @@ public sealed partial class MatchEngine
         if (Definition(card).Type != CardType.Personality) return 0;
         var bonus = Definition(card).Effect == EmperorP1Abilities.ItokuEffect && Player(card.OwnerId).Clan == "Lion" ? 1 : 0;
         if (card.Zone != Zone.Province && Keyword(card, "Nonhuman"))
-            bonus += 2 * Attachments(card.Id).Count(a => Definition(a).Effect == EmperorP1Abilities.MaraEffect);
+            bonus += 2 * StaticSpells(card).Count(a => Definition(a).Effect == EmperorP1Abilities.MaraEffect);
         return bonus;
     }
 
     // Keyword's hook: Ochiai's Bravery -- "While this Shugenja is Fire, he has Duelist."
     private bool OchiaiGrantsDuelist(CardInstance card, string keyword) =>
         keyword == "Duelist" && Definition(card).Type == CardType.Personality && card.Zone != Zone.Province
-        && Attachments(card.Id).Any(a => Definition(a).Effect == EmperorP1Abilities.OchiaiEffect) && Keyword(card, "Fire");
+        && StaticSpells(card).Any(a => Definition(a).Effect == EmperorP1Abilities.OchiaiEffect) && Keyword(card, "Fire");
 
     // ---- entering play ----
 

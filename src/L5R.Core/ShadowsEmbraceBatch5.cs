@@ -30,6 +30,8 @@ public sealed partial class MatchEngine
     // Every Spell of this batch with the given Effect attached to the Personality.
     private IEnumerable<CardInstance> AttachedWithEffect(CardInstance personality, string effect) =>
         Attachments(personality.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == effect);
+    // The same, for a Spell whose STATIC text names the Shugenja host: silenced while he is not a Shugenja (R-085).
+    private IEnumerable<CardInstance> StaticAttachedWithEffect(CardInstance personality, string effect) => StaticSpells(personality).Where(c => Definition(c).Effect == effect);
 
     // ---- Force (PersonalityForce / FollowerForce hook) ----------------------------------------------------------------------------------------------
     private int ShadowsEmbraceBatch5Force(CardInstance card)
@@ -38,9 +40,9 @@ public sealed partial class MatchEngine
         if (Definition(card).Type == CardType.Personality)
         {
             // Set the Fields Aflame: "While this Shugenja is Air or Fire, he has +1F."
-            if (Keyword(card, "Air") || Keyword(card, "Fire")) force += AttachedWithEffect(card, SetTheFieldsAflameEffect).Count();
+            if (Keyword(card, "Air") || Keyword(card, "Fire")) force += StaticAttachedWithEffect(card, SetTheFieldsAflameEffect).Count();
             // Thunder's Stamina: "This Shugenja has +3F." (Strength of the Tsunami's shape: only a Shugenja it is attached to.)
-            if (Keyword(card, "Shugenja")) force += 3 * AttachedWithEffect(card, ThundersStaminaEffect).Count();
+            if (Keyword(card, "Shugenja")) force += 3 * StaticAttachedWithEffect(card, ThundersStaminaEffect).Count();
         }
         // Channel the Moon: "While this Shugenja is Shadowlands, your opposed Nonhumans have +1F." -- each copy on a Shadowlands Shugenja of the card's controller, for a Nonhuman
         // Personality or Follower of his that is opposed (at a battlefield where the enemy army has a unit).

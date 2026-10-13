@@ -233,7 +233,7 @@ public sealed partial class MatchEngine
 
     private bool KeywordRuleApplies(KeywordRule rule, CardInstance subject, string keyword)
     {
-        if (rule.Scope == KeywordRuleScope.Self) return KeywordRuleSourceMatches(rule, subject) && KeywordRuleHolds(rule, subject, subject, keyword);
+        if (rule.Scope == KeywordRuleScope.Self) return KeywordRuleSourceMatches(rule, subject) && !SpellStaticSilenced(subject) && KeywordRuleHolds(rule, subject, subject, keyword);
         if (!rule.InAndOutOfPlay && !InPlay(subject)) return false;
         CardInstance? subjectHead = null;
         if (rule.Scope is KeywordRuleScope.Unit or KeywordRuleScope.Army)
@@ -247,7 +247,7 @@ public sealed partial class MatchEngine
             // Cheap structural tests first (a few integer or reference-like comparisons): this loop runs for every Keyword() call about a keyword such a rule names.
             if (rule.Scope == KeywordRuleScope.Unit && source.Id != subjectHead!.Id && source.AttachedTo != subjectHead.Id) continue;
             if (rule.Scope is KeywordRuleScope.Army or KeywordRuleScope.Controller && source.OwnerId != (rule.Scope == KeywordRuleScope.Army ? subjectHead!.OwnerId : subject.OwnerId)) continue;
-            if (!InPlay(source) || !KeywordRuleSourceMatches(rule, source)) continue;
+            if (!InPlay(source) || !KeywordRuleSourceMatches(rule, source) || SpellStaticSilenced(source)) continue; // R-085: a Shugenja-subject Spell on a non-Shugenja gives nothing
             var covered = rule.Scope switch
             {
                 KeywordRuleScope.Unit => UnitHostId(source) == subjectHead!.Id,
@@ -386,7 +386,7 @@ public sealed partial class MatchEngine
         if (_elementBypassCardId == card.Id) return null;
         List<ElementReplacement>? mine = null;
         foreach (var replacement in _state.KeywordRules.ElementReplacements)
-            if (replacement.CardId == card.Id) (mine ??= []).Add(replacement);
+            if (replacement.CardId == card.Id && !(replacement.SourceCardId is { } blood && _state.Cards.TryGetValue(blood, out var bloodSpell) && SpellStaticSilenced(bloodSpell))) (mine ??= []).Add(replacement); // R-085: Blood of Isawa's Tribe is silent on a non-Shugenja
         if (mine is null) return null;
         var previous = _elementBypassCardId;
         _elementBypassCardId = card.Id;

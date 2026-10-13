@@ -170,7 +170,7 @@ public sealed partial class MatchEngine
 
     // Might of the Sun: "This Shugenja has +4F." A static trait of the Spell while it is attached.
     private int PromoMightForce(CardInstance card) =>
-        Definition(card).Type == CardType.Personality ? 4 * Attachments(card.Id).Count(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == PromoEmperorFateAbilities.MightEffect) : 0;
+        Definition(card).Type == CardType.Personality ? 4 * StaticSpells(card).Count(a => Definition(a).Effect == PromoEmperorFateAbilities.MightEffect) : 0;
 
     // ---- Sinkhole's obstacles ------------------------------------------------------------------------------------------------------------------------------------------------
 
