@@ -45,6 +45,7 @@ Each worktree may need its own ignored bootstrap tools/caches; do not commit tho
 ## Checks and evidence
 
 - Rules/content/network changes: relevant regression plus `bash tools/check.sh --skip-client`.
+- Add the tests that prove the behavior you changed, not tests that restate how it is wired. A test that only checks a card or hook is registered, or that a method calls another, costs every CI shard and nightly run time and catches nothing a behavioral case would not. (Forge's contributor guide makes the same point about coding agents.)
 - Client changes: compile/import and the native UI/input checks relevant to the change. Inspect actual screenshots.
 - Record platform, resolution and exact command. Say explicitly when a check was not run.
 - GitHub Actions runs Mac/Windows foundation checks. A green Windows CI job does not verify real Windows GPU/gameplay behavior.
