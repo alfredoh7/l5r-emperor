@@ -18,3 +18,4 @@ listing-consistency/
 multi-window-audit/
 state-cloner/
 target-restriction-audit/NoRestrictionBroken
+action-copies/EveryStrategyThreeCopies
