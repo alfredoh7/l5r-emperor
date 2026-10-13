@@ -28,7 +28,7 @@ Source: `VALIDATION_REPORT.md`, the audit of commit 47416de0 against the "Rules 
 | 11 | Ongoing bonuses suppressed by temporary prevention return when it ends (EE-ACT-060) | Fix as drafted |
 | 12 | Unit Force help text says a bowed Personality zeroes his unit | Fix the text |
 | 13 | Dishonor retention outside play (EE-STATE-008) conflicted with `2026-09-20-gold-payment-rulings.md` | **Ruled 2026-10-13: adopt the package.** A face-up dishonorable Personality stays dishonorable outside play and on re-entry unless an effect rehonors him. The earlier behavior is superseded. |
-| 14 | Multi-front adjacency topology (EE-Areas-of-the-game-047) | Prove a real divergence with a fixture, then ask before changing the topology and its pinned tests |
+| 14 | Multi-front adjacency topology (EE-Areas-of-the-game-047) | **Ruled 2026-10-13: adopt the Comprehensive Rules.** A probe confirmed the divergence (siblings at one province were not adjacent; a flanking province touched the whole line). Battlefields at one province form a line, the primary first and additional battlefields in creation order; each touches its neighbours, and the flanking provinces touch only the nearer end. |
 
 ## Source-policy differences (not bugs unless ruled)
 
