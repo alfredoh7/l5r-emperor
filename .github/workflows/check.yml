@@ -3,7 +3,11 @@ name: Desktop foundation checks
 on:
   push:
     branches: [main]
+    # Issue #905: a change that touches only documentation (docs/, which includes the per-task handoffs, and the top-level notes) reads no test, so it does not occupy the Mac runner
+    # for ~20 minutes. A change that also touches code, a workflow, a skill or AGENTS.md/CLAUDE.md still runs everything.
+    paths-ignore: ['docs/**', 'README.md', 'CONTRIBUTING.md', 'PRODUCT.md', 'DESIGN.md', 'AI_HANDOFF.md']
   pull_request:
+    paths-ignore: ['docs/**', 'README.md', 'CONTRIBUTING.md', 'PRODUCT.md', 'DESIGN.md', 'AI_HANDOFF.md']
   workflow_dispatch:
 
 permissions:
@@ -126,6 +130,13 @@ jobs:
               !/assets/table/
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.timeout }}
+    env:
+      # Issue #905: a hung or crashed test run says where. The runner prints a RUN line before each case (the last one in a timed-out log is the case that hung), and a crash
+      # of the .NET process writes a dump that the last step keeps.
+      L5R_TEST_TRACE: '1'
+      DOTNET_DbgEnableMiniDump: '1'
+      DOTNET_DbgMiniDumpType: '2'
+      DOTNET_DbgMiniDumpName: ${{ github.workspace }}/artifacts/dumps/crash-%p.dmp
     defaults:
       run:
         shell: bash
@@ -182,3 +193,33 @@ jobs:
           path: artifacts/checks/*.log
           if-no-files-found: ignore
           retention-days: 7
+      - name: Keep crash dumps
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crash-dumps-${{ matrix.os }}
+          path: artifacts/dumps/*.dmp
+          if-no-files-found: ignore
+          retention-days: 3
+
+  # Issue #905: a broken main is told to the maintainers' chat as well as to whoever watches the checks. Posts only when a CI_FAILURE_WEBHOOK secret (a Discord or Slack
+  # incoming webhook) exists; without one it does nothing.
+  notify-main-failure:
+    name: Tell the maintainers main is red
+    needs: verify
+    if: always() && needs.verify.result == 'failure' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Post to the webhook, if one is configured
+        env:
+          WEBHOOK: ${{ secrets.CI_FAILURE_WEBHOOK }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ACTOR: ${{ github.actor }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "No CI_FAILURE_WEBHOOK secret is set; nothing to post."; exit 0; fi
+          MESSAGE="Main is red: desktop checks failed at ${COMMIT:0:8} (pushed by $ACTOR). $RUN_URL"
+          BODY=$(MESSAGE="$MESSAGE" python3 -c 'import json, os; m = os.environ["MESSAGE"]; print(json.dumps({"content": m, "text": m}))')
+          curl -fsS -X POST -H 'Content-Type: application/json' -d "$BODY" "$WEBHOOK"

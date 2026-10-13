@@ -36,9 +36,11 @@ public partial class Main
         if (buffered) Input.ParseInputEvent(mouse);
         else GetViewport().PushInput(mouse, true);
     }
+    // Issue #905: L5R_PROBE_NO_OS_MOUSE=1 drives the checks through Godot's input pipeline alone (PushInput), without moving the operating system's cursor, so they need neither window focus nor a free desktop.
+    private static readonly bool ProbeWithoutOsMouse = OS.GetEnvironment("L5R_PROBE_NO_OS_MOUSE") == "1";
     private void MoveProbeMouse(Vector2 point, Vector2 relative = default)
     {
-        GetViewport().WarpMouse(point);
+        if (!ProbeWithoutOsMouse) GetViewport().WarpMouse(point);
         PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = relative });
     }
     private Vector2 FindProbeCloth()

@@ -59,6 +59,9 @@ case "$l5r_godot_dir" in "$L5R_PROJECT_ROOT"/*) ;; *)
     mkdir -p "$L5R_PROJECT_ROOT/.tools/godot-nuget" && cp "$l5r_godot_dir"/GodotSharp/Tools/nupkgs/*.nupkg "$L5R_PROJECT_ROOT/.tools/godot-nuget/" 2>/dev/null || true
   fi ;;
 esac
+# Issue #905: the native UI checks drive Godot through its own input pipeline and leave the operating system's cursor alone, so they pass without window focus or a free
+# desktop (hover checks failed whenever the cursor was elsewhere). Set L5R_PROBE_NO_OS_MOUSE=0 to also warp the real cursor, as the probes used to.
+export L5R_PROBE_NO_OS_MOUSE="${L5R_PROBE_NO_OS_MOUSE:-1}"
 # Opt-in guard for scripts that need Godot. Sourcing env.sh must stay non-fatal (check.sh --skip-client
 # has no Godot), but a script that goes on to run "$GODOT" with it missing used to die silently under
 # set -e, with the error buried in a redirected log. Call this right after sourcing.

@@ -91,3 +91,12 @@ jobs:
           NIGHTLY_COMMIT: ${{ github.sha }}
           NIGHTLY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 tools/nightly/report_failure.py --repository "$NIGHTLY_REPOSITORY" --commit "$NIGHTLY_COMMIT" --run-url "$NIGHTLY_RUN_URL" --summary artifacts/nightly/summary.json
+      - name: Tell the maintainers, if a webhook is configured
+        env:
+          WEBHOOK: ${{ secrets.CI_FAILURE_WEBHOOK }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "No CI_FAILURE_WEBHOOK secret is set; nothing to post."; exit 0; fi
+          MESSAGE="The nightly production check failed on main (nightly-broken issue opened or updated). $RUN_URL"
+          BODY=$(MESSAGE="$MESSAGE" python3 -c 'import json, os; m = os.environ["MESSAGE"]; print(json.dumps({"content": m, "text": m}))')
+          curl -fsS -X POST -H 'Content-Type: application/json' -d "$BODY" "$WEBHOOK"
