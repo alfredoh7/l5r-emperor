@@ -37,7 +37,7 @@ From the [external practices assessment](audits/external-practices-2026-10.md).
 
 - **Coverage of L5R.Core**: `bash tools/coverage.sh [--filter ...]` runs the Core suite under coverlet and writes `artifacts/coverage/Summary.txt` (ReportGenerator). It is a trend report for
   rules code, not a gate, and it is slow: instrumenting the Core assembly alone took about 7 minutes for a small slice (`core/Privacy`, 24.6% line coverage), so run it on demand or in a scheduled job, not per PR.
-- **Meziantou.Analyzer** is referenced by Core, AI and Server. Every one of its 39 rules that already fires on existing code (7,262 findings, led by string-equality style, file-name and named-argument
+- **Meziantou.Analyzer** is referenced by Core, AI and Server from `Directory.Build.targets` (not the project files, so the registration tests' scratch repos, which have no package feed, build Core without it). Every one of its 39 rules that already fires on existing code (7,262 findings, led by string-equality style, file-name and named-argument
   rules) is held at suggestion in `src/L5R.Core/Meziantou.globalconfig` (referenced from `Directory.Build.props`), so the zero-warning gate is unchanged; any other rule of the package is an error for new code. `bash tools/analyzer-report.sh` lists the counts. Fix a rule's findings,
   then delete its `dotnet_diagnostic` line to enforce it. The rules worth fixing first are the ones that find bugs rather than style: culture-dependent parsing and formatting (MA0011 45, MA0075, MA0076 427),
   missing string comparison (MA0001, MA0074, MA0002 187) and unsafe regular expressions (MA0009, MA0023, MA0110, all in deck and recruit parsing).
