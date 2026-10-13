@@ -33,6 +33,8 @@ internal static class EmperorRemainingGTests
         ("Kensai's Blade: +1F while attached to a Kensai, and after engaging it attaches from the hand to a Personality of yours at the battlefield, paying its cost", KensaisBlade),
         ("Maga-yari: 3 less Gold to attach to a Paragon or Kensai, and it will not be transferred", MagaYariRules),
         ("Reserve Weapon: instead of focusing in a duel, +3 to the duel stat until the duel ends", ReserveWeaponDuel),
+        ("Reserve Weapon: each substitution is one of the four focus opportunities; at the cap only a Strike is offered", ReserveWeaponCap),
+        ("Reserve Weapon: the same cap in the replayable Duel Demo position", ReserveWeaponCapDuelDemo),
         ("Chrysanthemum Blossom: after its Personality is assigned, a Reaction gives him a +1F token and 1 Honor", ChrysanthemumBlossom),
         ("Bandit Gang: 2 Honor on entering play; after a battle's resolution, at the battlefield, its controller pays 2 Gold or it is destroyed", BanditGang),
     ]);
@@ -588,13 +590,69 @@ internal static class EmperorRemainingGTests
         var other = Duel(weapon: true, onOther: true); Accept(other, new GameCommand("focus", 1, other.Version, CardId: other.State.Players[1].Hand[0]));
         Check(!other.QueryActions(0).Any(a => a.Command?.Choice == "reserve"), "a weapon on a Personality who is not dueling is not offered");
         Check(other.Execute(new GameCommand("focus", 0, other.Version, CardId: other.State.Cards.Values.First(c => c.DefinitionId == ReserveWeapon).Id, Choice: "reserve")) is { Accepted: false }, "and the command is refused");
-        // It may be used again on his next opportunity (a trait without a use limit) and does not count towards the four-focus limit: 2 reserves = +6.
+        // It may be used again on his next opportunity (a trait without a use limit), but each use takes the place of a focus and counts against the four-focus cap: 2 reserves = +6.
         var twice = Duel(weapon: true);
         Accept(twice, new GameCommand("focus", 1, twice.Version, CardId: twice.State.Players[1].Hand[0]));
         Accept(twice, twice.QueryActions(0).First(a => a.Command?.Choice == "reserve").Command!);
         Accept(twice, new GameCommand("focus", 1, twice.Version, Choice: "deck"));
         Accept(twice, twice.QueryActions(0).First(a => a.Command?.Choice == "reserve").Command!);
         Eq(twice.State.PendingDuel!.StatBonuses.Values.Sum(), 6, "two reserves, +3 each");
+    }
+    // Issue #915 (EE-BATTLE-VAL-048, EE-Challenges-and-duels-018): the substitution is a focus opportunity. After four opportunities, replacements included, the engine offers only a Strike.
+    private static void ReserveWeaponCap()
+    {
+        // Player 1 challenges, so player 0 (the weapon's owner) is the challenged player and acts first in the Focusing stage.
+        var s = Battle(attacker: 1); s.PriorityPlayerId = 1;
+        var mine = Bf(s, "training-crane-samurai", 0);
+        Attach(s, ReserveWeapon, mine);
+        Attach(s, ReserveWeapon, mine); // a second weapon changes nothing: the cap is per player
+        var theirs = Bf(s, "training-lion-veteran", 1);
+        var challenge = Add(s, "training-duel-force", 1, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Offer(e, 1, "training-duel-force", challenge.Id, mine.Id, theirs.Id));
+        Eq(e.State.PendingDuel?.Stage, "Focusing", "the duel is in the Focusing stage");
+        Eq(e.State.PendingDuel!.TurnPlayerId, 0, "the weapon's owner is the challenged player and acts first");
+        for (var opportunity = 1; opportunity <= 4; opportunity++)
+        {
+            var offered = e.QueryActions(0).Where(a => a.Enabled && a.Command?.Choice == "reserve").ToArray();
+            Check(offered.Length == 2 && e.QueryActions(0).Any(a => a.Type == "strike"), $"opportunity {opportunity}: Reserve Weapon is offered beside the Strike");
+            Accept(e, offered[0].Command!);
+            Accept(e, new GameCommand("focus", 1, e.Version, Choice: "deck"));
+        }
+        Eq(e.State.PendingDuel!.StatBonuses.Values.Sum(), 12, "four substitutions, +3 each");
+        Eq(e.State.PendingDuel!.TurnPlayerId, 0, "it is again the weapon owner's turn");
+        var atCap = e.QueryActions(0).Where(a => a.Enabled).ToArray();
+        Check(atCap.Any(a => a.Type == "strike"), "at the cap a Strike is offered");
+        Check(!atCap.Any(a => a.Type == "focus"), "and no focus or Reserve Weapon substitution is listed");
+        var weapon = e.State.Cards.Values.First(c => c.DefinitionId == ReserveWeapon);
+        Check(e.Execute(new GameCommand("focus", 0, e.Version, CardId: weapon.Id, Choice: "reserve")) is { Accepted: false }, "a fifth substitution is refused by validation, agreeing with the listing");
+        Check(e.State.PendingDuel!.Stage == "Focusing" && e.State.PendingDuel.StatBonuses.Values.Sum() == 12, "the refusal changed nothing");
+        Accept(e, atCap.First(a => a.Type == "strike").Command!);
+        Check(e.State.PendingDuel is null || e.State.PendingDuel.Stage != "Focusing", "the Strike ends focusing");
+    }
+    // The replayable Duel Demo position with a real, published Reserve Weapon on a duellist.
+    private static void ReserveWeaponCapDuelDemo()
+    {
+        var e = MatchEngine.CreateDuelDemo();
+        var begin = e.QueryActions(e.State.PriorityPlayerId).First(a => a.Enabled && a.Type == "useAbility" && a.Command?.AbilityId == DuelDemoScenarios.Get("steel").ChallengeAbility);
+        Accept(e, begin.Command!);
+        var duel = e.State.PendingDuel!;
+        Eq(duel.Stage, "Focusing");
+        var first = e.State.PendingDuel!.TurnPlayerId;
+        var host = first == duel.ChallengerPlayerId ? duel.ChallengerId : duel.ChallengedId;
+        var s = e.State; // State is a copy: build the position with a real Reserve Weapon on the duellist and enough cards for the other side, then continue from it
+        Add(s, ReserveWeapon, first, Zone.Attached, province: s.Cards[host].ProvinceIndex, parent: host);
+        var other = 1 - first;
+        for (var i = 0; i < 4; i++) Add(s, "training-duel-challenge", other, Zone.Hand);
+        e = MatchEngine.FromTestState(s);
+        for (var i = 0; i < 4; i++)
+        {
+            Accept(e, e.QueryActions(first).First(a => a.Enabled && a.Command?.Choice == "reserve").Command!);
+            Accept(e, e.QueryActions(other).First(a => a.Enabled && a.Type == "focus").Command!);
+        }
+        Check(!e.QueryActions(first).Any(a => a.Enabled && a.Type == "focus"), "Duel Demo: no substitution after four opportunities");
+        Check(e.QueryActions(first).Any(a => a.Enabled && a.Type == "strike"), "Duel Demo: Strike is offered");
+        Check(e.Execute(new GameCommand("focus", first, e.Version, CardId: e.State.Cards.Values.First(c => c.DefinitionId == ReserveWeapon).Id, Choice: "reserve")) is { Accepted: false }, "Duel Demo: a fifth substitution is refused");
     }
     private static void ChrysanthemumBlossom()
     {
