@@ -7396,15 +7396,20 @@ public sealed partial class MatchEngine
     // offering either an out-of-play attach-as-Reaction candidate (Equip (Limited)'s own attach
     // mechanism, reused as a Reaction) or, failing that, an ordinary in-play watcher -- never both at
     // once, since the two halves live in mutually exclusive zones for any one card copy.
-    private (CardInstance Watcher, bool OutOfPlay)? FindBattleActionReactionCandidate(CardInstance performer)
+    // Issue #900: every Stormless Fury that can react to the Battle action is asked in turn (ReactionWatcherQueue.cs) -- each one in a hand, which attaches itself to the performing Thunder
+    // Shugenja, and then each one already attached to a Personality at the battlefield (one that attached during this window is excluded when its turn comes: it may not react against the action
+    // that just attached it). Before, only the first found was ever asked, and an attached one only when no hand copy was left.
+    private List<CardInstance> BattleActionReactionWatchers(CardInstance performer)
     {
-        var outOfPlay = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == performer.OwnerId && c.Zone == Zone.Hand
-            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves"));
-        if (outOfPlay is not null) return (outOfPlay, true);
-        var inPlay = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !BowedBarsAbilities(c) && !_state.BattleActionReaction1UsedCardIds.Contains(c.Id)
-            && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves"));
-        return inPlay is not null ? (inPlay, false) : null;
+        var inHand = _state.Cards.Values.Where(c => c.OwnerId == performer.OwnerId && c.Zone == Zone.Hand
+            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves")).OrderBy(c => c.Id, StringComparer.Ordinal);
+        var inPlay = _state.Cards.Values.Where(c => BattleActionWatcherInPlayEligible(c)).OrderBy(c => c.Id, StringComparer.Ordinal);
+        return inHand.Concat(inPlay).ToList();
     }
+
+    private bool BattleActionWatcherInPlayEligible(CardInstance c) => InPlay(c) && !BowedBarsAbilities(c) && !_state.BattleActionReaction1UsedCardIds.Contains(c.Id)
+        && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves");
+
     // Called from ExecuteAbilityEffects' own tail, the same spot OpenBowReactionWindow already
     // watches from -- only for an ability that is itself a genuine Battle action with an identifiable
     // performer (never for a Reaction's own resolution, already excluded by the caller).
@@ -7416,15 +7421,13 @@ public sealed partial class MatchEngine
         if (performer is null || Definition(performer).Type != CardType.Personality) return false;
         _state.BattleActionReactionPerformerId = performer.Id;
         _state.BattleActionReaction1UsedCardIds.Clear();
-        if (FindBattleActionReactionCandidate(performer) is not (CardInstance watcher, _))
+        var watchers = BattleActionReactionWatchers(performer);
+        if (watchers.Count == 0)
         {
             _state.BattleActionReactionPerformerId = null;
             return false;
         }
-        _state.PendingChoice = new("battleActionReaction", watcher.OwnerId, watcher.Id, "After the Battle action resolved: you may use this card's own reaction, or pass.", closesTo);
-        _state.ConsecutivePasses = 0;
-        _state.PriorityPlayerId = watcher.OwnerId;
-        Emit("reactionWindow", "Battle-action reaction window opened.", watcher.OwnerId, watcher.Id);
+        OpenWatcherTurns(watchers.Select(w => new WatcherTurn("battleActionReaction", w.Id, "After the Battle action resolved: you may use this card's own reaction, or pass.", null, null, closesTo)).ToList());
         return true;
     }
     // Stormless Fury's own out-of-play attach (Equip (Limited)'s own mechanism, reused as a Reaction):

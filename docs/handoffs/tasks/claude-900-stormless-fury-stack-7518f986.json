@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Stormless Fury: every copy gets its after-Battle-action window (hand copies attach to the performing Thunder Shugenja, several to the same one; attached copies then bow the performer).",
+  "validation": "bash tools/check.sh --skip-client exit 0; reaction-stacking 5/5, stormless-fury suites pass.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/900",
+  "branch": "claude/900-stormless-fury-stack",
+  "updated": "2026-10-13T07:09:48.840225+00:00"
+}

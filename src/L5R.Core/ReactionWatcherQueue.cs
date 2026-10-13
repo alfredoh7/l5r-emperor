@@ -24,6 +24,7 @@ public sealed partial class MatchEngine
         "bowReaction" => BowedAtBattlefieldReactionAbility(card) ?? BowedNearRegionReactionAbility(card) ?? OwnActionBowedPersonalityReactionAbility(card),
         "moveReaction" => MovedEnemyInfantryReactionAbility(card),
         "nikutaiReaction" => SiblingFollowerBowedReactionAbility(card),
+        "battleActionReaction" => AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "after-battle-action-resolves"),
         _ => null,
     };
 
@@ -43,7 +44,16 @@ public sealed partial class MatchEngine
         else if (turn.Type == "nikutaiReaction") _state.NikutaiReactionTargetId = turn.TargetId;
         _state.PendingChoice = new(turn.Type, watcher.OwnerId, watcher.Id, turn.Prompt, turn.ClosesTo);
         _state.ConsecutivePasses = 0; _state.PriorityPlayerId = watcher.OwnerId;
-        Emit("reactionWindow", turn.Type switch { "bowReaction" => "Bow-reaction window opened.", "moveReaction" => "Move-reaction window opened.", _ => "Nikutai reaction window opened." }, watcher.OwnerId, watcher.Id);
+        Emit("reactionWindow", turn.Type switch { "bowReaction" => "Bow-reaction window opened.", "moveReaction" => "Move-reaction window opened.", "battleActionReaction" => "Battle-action reaction window opened.", _ => "Nikutai reaction window opened." }, watcher.OwnerId, watcher.Id);
+    }
+
+    // A watcher asked later must still be able to react when its turn comes: a Stormless Fury attached by an earlier turn no longer sits in a hand and may not react against the action that attached it.
+    private bool WatcherStillEligible(CardInstance watcher, string windowType)
+    {
+        if (windowType == "battleActionReaction")
+            return watcher.Zone == Zone.Hand ? _state.BattleActionReactionPerformerId is not null && Definition(watcher).Abilities is not null && WatcherAbilityId(watcher, windowType) is not null
+                : BattleActionWatcherInPlayEligible(watcher);
+        return (InPlay(watcher) || watcher.Zone == Zone.Region) && WatcherAbilityId(watcher, windowType) is { } abilityId && Unspent(watcher, abilityId);
     }
 
     /// <summary>A single-card window of this type just closed: asks the next watcher still able to react. False when none is left (the action carries on).</summary>
@@ -53,7 +63,7 @@ public sealed partial class MatchEngine
         {
             var turn = _state.WatcherQueue[0];
             _state.WatcherQueue.RemoveAt(0);
-            if (!_state.Cards.TryGetValue(turn.WatcherId, out var watcher) || !(InPlay(watcher) || watcher.Zone == Zone.Region) || WatcherAbilityId(watcher, windowType) is not { } abilityId || !Unspent(watcher, abilityId)) continue;
+            if (!_state.Cards.TryGetValue(turn.WatcherId, out var watcher) || !WatcherStillEligible(watcher, windowType)) continue;
             StartWatcherTurn(turn);
             return true;
         }

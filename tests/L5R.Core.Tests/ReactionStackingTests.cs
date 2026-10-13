@@ -7,6 +7,7 @@ internal static class ReactionStackingTests
     public static void Run(TestRunner runner) => runner.Run("reaction-stacking", [
         ("Two Chrysanthemum Blossoms on one Personality each give +1F and 1 Honor after his assignment", TwoBlossoms),
         ("Two Entrenched Positions in the Defender's hand are each asked about the Attacker's early Battle action: passing on the first still lets him play the second", TwoEntrenchedPositions),
+        ("Several Stormless Furies in hand each attach to the performing Thunder Shugenja after his Battle action, and one already attached to another Shugenja still bows the performer",StormlessFuries),
         ("Two copies of Tamori Ruya (if the card is not Unique) are both asked about the acting player's bow", TwoRuyas),
         ("Togashi Hizumi's and Tamori Ruya's windows for the same bow are both opened, one after the other", HizumiAndRuya),
     ]);
@@ -33,6 +34,29 @@ internal static class ReactionStackingTests
         Batch336Support.Check(asked.Count == 2 && asked.Contains(first.Id) && asked.Contains(second.Id), "both copies were asked about: " + string.Join(", ", asked));
         for (var guard = 0; e.State.PendingChoice is not null && guard < 6; guard++) RegressionAssertions.Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
         Batch336Support.Check(!e.State.Cards[victim.Id].Bowed, "the second copy negated the Attacker's action");
+    }
+
+    private static void StormlessFuries()
+    {
+        const string Fury = "oracle-l5r-7512";
+        var s = Batch336Support.Table(Phase.Battle, 0);
+        var performer = Batch336Support.Add(s, "training-thunder-shugenja", 0, Zone.Battlefield, province: 0);
+        var other = Batch336Support.Add(s, "training-thunder-shugenja", 0, Zone.Battlefield, province: 0);
+        Batch336Support.Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0);
+        var worn = Batch336Support.Add(s, Fury, 0, Zone.Attached, province: 0, parent: other.Id);
+        var a = Batch336Support.Add(s, Fury, 0, Zone.Hand); var b = Batch336Support.Add(s, Fury, 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        RegressionAssertions.Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: performer.Id, AbilityId: "training-weapon-attack"));
+        var attached = new List<string>();
+        for (var guard = 0; guard < 12 && e.State.PendingChoice is { Type: "battleActionReaction" } open; guard++)
+        {
+            var mine = e.State.PriorityPlayerId == 0 ? e.QueryActions(0).FirstOrDefault(o => o.Enabled && o.Type == "useAbility" && o.CardId == open.CardId) : null;
+            if (mine is not null) { RegressionAssertions.Accept(e, mine.Command!); if (mine.Command!.AbilityId == "stormless-fury-attach") attached.Add(open.CardId!); continue; }
+            RegressionAssertions.Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+        }
+        Batch336Support.Check(attached.Contains(a.Id) && attached.Contains(b.Id), "both Furies in hand attached: " + string.Join(", ", attached));
+        Batch336Support.Check(e.State.Cards[a.Id].AttachedTo == performer.Id && e.State.Cards[b.Id].AttachedTo == performer.Id, "to the performing Shugenja");
+        Batch336Support.Check(e.State.Cards[performer.Id].Bowed, "the Fury already worn by the other Shugenja bowed the performer");
     }
 
     private static void TwoRuyas()
