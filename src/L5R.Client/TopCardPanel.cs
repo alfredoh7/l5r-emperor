@@ -75,7 +75,7 @@ public sealed partial class TopCardPanel : PanelContainer
             decks.AddThemeConstantOverride("separation", 18); _body.AddChild(decks);
             foreach (var deck in look.DeckChoices ?? [])
             {
-                var button = SidebarSkin.Button(deck.Label + "\n" + deck.CardsRemaining + " cards remaining", () =>
+                var button = SidebarSkin.Button(deck.Label, () =>
                 {
                     if (!_canSubmit) return;
                     _canSubmit = false; foreach (var b in decks.GetChildren().OfType<Button>()) b.Disabled = true;

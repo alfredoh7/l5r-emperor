@@ -5382,8 +5382,33 @@ public sealed partial class MatchEngine
         catch (RuleViolation e) { return e.Message; }
     }
 
+    /// <summary>The one refusal for a request that names a card its requester may not see (EE-Areas-of-the-game-072). It is the same text and version whatever the hidden card is or can do, and
+    /// whether or not it exists, so a rejection can never confirm that a hidden card carries an ability. It is checked before any definition-specific rule.</summary>
+    internal const string HiddenCardRefusal = "That card is not available to you.";
+
+    /// <summary>May <paramref name="viewerId"/> know this card's identity right now? It mirrors what GetView projects: decks are never visible; a hand is its owner's (or sighted); a face-down
+    /// province card only when it is face up or the viewer looked at it this turn; a face-down focused / removed / under card is its owner's; everything else is public.</summary>
+    private bool CardIdentityVisibleTo(CardInstance card, int viewerId) => card.Zone switch
+    {
+        Zone.DynastyDeck or Zone.FateDeck => false,
+        Zone.Hand => card.OwnerId == viewerId || P5.HandSights.Any(s => s.ViewerId == viewerId && s.CardId == card.Id && s.Turn == _state.TurnNumber),
+        Zone.Province => card.FaceUp || _state.ProvinceSights.Any(s => s.ViewerId == viewerId && s.CardId == card.Id && s.Turn == _state.TurnNumber),
+        Zone.Focused or Zone.Underneath or Zone.RemovedFromGame => card.FaceUp || card.OwnerId == viewerId,
+        _ => true
+    };
+
+    /// <summary>The generic refusal when the command's source card is unknown or hidden from its requester, or any other card it names is in a deck (which no one may name); otherwise null.</summary>
+    private string? HiddenCardNamed(GameCommand command)
+    {
+        if (command.CardId is { } sourceId && (!_state.Cards.TryGetValue(sourceId, out var source) || !CardIdentityVisibleTo(source, command.PlayerId))) return HiddenCardRefusal;
+        foreach (var id in new[] { command.TargetId, command.PerformerId }.Concat(command.CardIds ?? []))
+            if (id is not null && _state.Cards.TryGetValue(id, out var named) && named.Zone is Zone.DynastyDeck or Zone.FateDeck) return HiddenCardRefusal;
+        return null;
+    }
+
     private string? ValidateAbilityResult(GameCommand command, AbilityDefinition? slotAbility = null)
     {
+        if (HiddenCardNamed(command) is { } hidden) return hidden;
         var id = command.AbilityId ?? "";
         var __valid0 = AbilityCatalog.All.TryGetValue(id, out var ability);
         if (!__valid0) return "Unknown ability.";
@@ -7300,6 +7325,7 @@ public sealed partial class MatchEngine
     private void UseAbility(GameCommand command)
     {
         // A multi-target action's first card target also rides in TargetId (issue #336), so everything written for a single target sees it.
+        if (HiddenCardNamed(command) is { } hidden) throw new RuleViolation(hidden); // before any rule that reads the named card (EE-Areas-of-the-game-072)
         command = NormalizeSlotCommand(command);
         ValidateAbility(command);
         ControlReturnsOnAnnouncement(command); // issue #501 (EmperorMechB.cs): Shadow Dragon's "return control of him ... after the next time this game this ability is announced".

@@ -133,7 +133,7 @@ public partial class Main
                 var priorProvince = priorPlayer.Provinces.FirstOrDefault(p => p.Index == card.ProvinceIndex);
                 var slot = nowProvince is null ? null : ProvincePresentation.Slots(nowProvince).FirstOrDefault(s => s.Card?.Id == card.Id);
                 var hidden = priorProvince is null || slot is null ? null : ProvincePresentation.Slots(priorProvince).FirstOrDefault(s => s.Index == slot.Index)?.Card;
-                if (hidden?.Definition is null && hidden is not null && priorPlayer.DynastyDeckCount == nowPlayer.DynastyDeckCount)
+                if (hidden?.Definition is null && hidden is not null && hidden.Id == card.Id)
                     from = before.Cards.GetValueOrDefault(hidden.Id);
             }
             var fromZone = draw ? card.Zone == Zone.Hand ? Zone.FateDeck : Zone.DynastyDeck : publicDiscard ? Zone.Hand : previous!.Zone;

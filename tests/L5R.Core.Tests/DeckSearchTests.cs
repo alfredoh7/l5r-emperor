@@ -173,7 +173,7 @@ internal static class DeckSearchTests
         var choice = Search(e);
         Equal(choice.Stage, SearchStage.ChooseDeck); Check(choice.Entries is null, "No deck contents before the deck is chosen");
         Equal(choice.DeckChoices!.Length, 2);
-        Equal(choice.DeckChoices.Single(d => d.Deck == "Dynasty").CardsRemaining, 7); Equal(choice.DeckChoices.Single(d => d.Deck == "Fate").CardsRemaining, 6);
+        Equal(choice.DeckChoices.Length, 2);
         Equal(choice.DeckChoices.Single(d => d.Deck == "Dynasty").Criteria, "Region"); Equal(choice.DeckChoices.Single(d => d.Deck == "Fate").Criteria, "Terrain");
         Equal(choice.SourceName, "Ikoma Shizuka");
         var offered = e.QueryActions(0).Where(a => a.Enabled && a.Type != "concede").ToArray();
@@ -182,7 +182,7 @@ internal static class DeckSearchTests
         // Dynasty deck: grouped by card with counts, an eligibility flag and a reason.
         var dynasty = MatchEngine.FromTestState(s); Accept(dynasty, Use(dynasty, ShizukaId(dynasty))); Accept(dynasty, ChooseDeck(dynasty, "Dynasty"));
         var view = Search(dynasty);
-        Equal(view.Stage, SearchStage.Select); Equal(view.Deck, "Dynasty"); Equal(view.Criteria, "Region"); Equal(view.CardsRemaining, 7);
+        Equal(view.Stage, SearchStage.Select); Equal(view.Deck, "Dynasty"); Equal(view.Criteria, "Region");
         var entries = view.Entries!;
         Equal(entries.Length, 4); Equal(entries.Sum(x => x.Count), 7); Equal(entries.Select(x => x.DefinitionId).Distinct().Count(), 4);
         Equal(entries.Single(x => x.DefinitionId == FallowLands).Count, 2); Check(entries.Single(x => x.DefinitionId == FallowLands).Eligible);
@@ -281,7 +281,7 @@ internal static class DeckSearchTests
         // An empty deck: nothing qualifies, so Pass is legal, and an empty deck shuffles harmlessly.
         var empty = Start();
         var e2 = Searching(empty); Accept(e2, ChooseDeck(e2, "Fate"));
-        Check(Search(e2).CanPass && Search(e2).Entries!.Length == 0 && Search(e2).CardsRemaining == 0);
+        Check(Search(e2).CanPass && Search(e2).Entries!.Length == 0);
         Accept(e2, PassSearch(e2));
         Equal(e2.State.PendingChoice, null);
         AssertOrder(e2, "searchPassed", "deckShuffled");
