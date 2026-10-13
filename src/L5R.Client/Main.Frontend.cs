@@ -21,6 +21,7 @@ public partial class Main
             Preferences = _preferences,
             StartMatch = seat => { _table.PrefetchWarRoom(); StartFromMenu(seat); },
             PracticeSetup = () => { _table.PrefetchWarRoom(); ShowPracticeSetup(); },
+            Tutorial = () => { _table.PrefetchWarRoom(); StartTutorial(); },
             PrivateMatch = () => { _table.PrefetchWarRoom(); _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
             DeckBuilder = () => DeckBuilderDialog.Show(this),
@@ -59,7 +60,7 @@ public partial class Main
         ClearOpenBattlefieldReview();
         if (_titleMenu is null) return;
         _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
-        _root.Hide(); _table.Hide(); _table.SetProcess(false);
+        _root.Hide(); _table.Hide(); _table.SetProcess(false); _coachPanel?.Hide();
         _titleMenu.Show(); _titleMenu.ShowMain();
         _opponentClock = 0;
     }

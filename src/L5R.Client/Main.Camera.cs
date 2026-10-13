@@ -58,7 +58,7 @@ public partial class Main
 
     private void FitTableViewport()
     {
-        const int left = 144;
+        var left = 144 + TutorialReserve;
         _tableViewport.Position = new Vector2(left, 148);
         // Leave the fitted mat clear of the resting hand, including the small
         // upward reach of its fan. Hover can still deliberately lift a hand card.

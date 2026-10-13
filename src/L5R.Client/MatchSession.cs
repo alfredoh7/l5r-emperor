@@ -94,6 +94,21 @@ public sealed partial class MatchSession : IDisposable
 
     public bool BattleValuesReview { get; private set; }
 
+    private TutorialRunner? _tutorial;
+    /// <summary>The scripted lesson being played offline (issue #935), or null. While it runs, what the table offers and accepts is the lesson's, and the opponent's side is played by its script.</summary>
+    public TutorialRunner? Tutorial => _tutorial;
+
+    public void StartTutorial()
+    {
+        Generation++; Disconnect();
+        _tutorial = TutorialRunner.StartLessonOne(); _engine = _tutorial.Engine; _preparedReview = true;
+        MatchKey = Guid.NewGuid().ToString("N"); _localSeat = _practiceNameSeat = TutorialRunner.Seat;
+        RefreshLocal();
+    }
+
+    /// <summary>The coach panel's button.</summary>
+    public void TutorialContinue() { if (_tutorial?.Continue() == true) RefreshLocal(); }
+
     internal void StartPreparedReview(MatchEngine engine, int seat, bool battleValues = false)
     {
         ArgumentNullException.ThrowIfNull(engine);
@@ -111,7 +126,7 @@ public sealed partial class MatchSession : IDisposable
 
     public void SwitchPracticeSeat()
     {
-        if (_engine is null || Online) return;
+        if (_engine is null || Online || _tutorial is not null) return;
         _localSeat = 1 - _localSeat;
         RefreshLocal();
     }
@@ -129,7 +144,7 @@ public sealed partial class MatchSession : IDisposable
 
     public void FollowPracticePriority()
     {
-        if (_engine is null || Online) return;
+        if (_engine is null || Online || _tutorial is not null) return;
         _localSeat = _engine.PriorityPlayerId;
         RefreshLocal();
     }
@@ -137,7 +152,7 @@ public sealed partial class MatchSession : IDisposable
     private void RefreshLocal()
     {
         if (_engine is null) return;
-        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _engine.QueryActions(_localSeat), _engine.GetView(_localSeat).Scenario.StartsWith("duel-demo/", StringComparison.Ordinal) ? "Duel Demo" : "Practice");
+        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _tutorial?.Actions() ?? _engine.QueryActions(_localSeat), _engine.GetView(_localSeat).Scenario.StartsWith("duel-demo/", StringComparison.Ordinal) ? "Duel Demo" : _tutorial is not null ? "Tutorial" : "Practice");
         Changed?.Invoke();
     }
 
@@ -148,7 +163,7 @@ public sealed partial class MatchSession : IDisposable
     /// bot remembers it) and the opponent is asked once more at the same position, up to a dozen tries. Without a callback a refusal is shown as a notice, as before.</summary>
     public bool StepPracticeOpponent(Func<MatchView, ActionOption[], GameCommand?> choose, Action<GameCommand, string?, long>? refused = null)
     {
-        if (_engine is null || Online || _engine.WinnerId is not null || _engine.PriorityPlayerId == _localSeat) return false;
+        if (_engine is null || _tutorial is not null || Online || _engine.WinnerId is not null || _engine.PriorityPlayerId == _localSeat) return false;
         var opponent = 1 - _localSeat;
         for (var attempt = 0; attempt < 12; attempt++)
         {
@@ -172,7 +187,7 @@ public sealed partial class MatchSession : IDisposable
     /// still prompts).</summary>
     public bool StepPracticeReaction()
     {
-        if (_engine is null || Online || _engine.WinnerId is not null) return false;
+        if (_engine is null || _tutorial is not null || Online || _engine.WinnerId is not null) return false;
         if (!_engine.HasPendingChoice || _engine.PriorityPlayerId != _localSeat) return false;
         var enabled = _engine.QueryActions(_localSeat).Where(a => a.Enabled).ToArray();
         if (enabled is not [{ Type: "declineReaction" } only]) return false;
@@ -215,6 +230,13 @@ public sealed partial class MatchSession : IDisposable
     public async Task Submit(GameCommand command)
     {
         if (Busy) return;
+        if (_tutorial is not null)
+        {
+            var lesson = _tutorial.Execute(command);
+            if (!lesson.Accepted) Notice?.Invoke(lesson.Error ?? "That is not part of this step.");
+            RefreshLocal();
+            return;
+        }
         if (_engine is not null && !Online)
         {
             var result = _engine.Execute(command);
@@ -386,7 +408,7 @@ public sealed partial class MatchSession : IDisposable
 
     public void Disconnect()
     {
-        BattleValuesReview = false;
+        BattleValuesReview = false; _tutorial = null;
         _connection?.Cancel();
         _socket?.Dispose();
         _connection?.Dispose();

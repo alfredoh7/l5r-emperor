@@ -118,6 +118,7 @@ public partial class Main : Node
             var review = new InteractionReview(this, _captureMode, _capturePath);
             _capturePath = null; AddChild(review); return;
         }
+        if (OS.GetCmdlineUserArgs().Contains("--tutorial-review")) { StartTutorialReview(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--battle-values-review") || _captureMode == "battle-values-review")
         { StartBattleValuesReview(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode is "open-battlefield-review" or "open-battlefield-correction-review")
@@ -152,6 +153,7 @@ public partial class Main : Node
         if (ProcessMatchDuelCapture(delta)) return;
         LayoutBattlefieldHeaders();
         if (MenuVisible || PracticeVisible && _capturePath is null) return;
+        PulseTutorialPointers(); LayoutTutorialCoach();
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -536,6 +538,7 @@ public partial class Main : Node
         PrepareBattlePresentation();
         RenderBattleFeedback();
         RenderProvinceOrder();
+        SyncTutorialCoach();
         FitTableViewport();
         ObserveBattleResolution();
         FitBattleSequence();
@@ -660,8 +663,10 @@ public partial class Main : Node
         _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
         var supportTargets = SupportDraftChoices().SelectMany(a => a.TargetIds ?? []).ToHashSet();
         var performerClicks = PerformerClicks();
+        var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
+            tile.Pointed = tutorialPointed.Contains(tile.Card.Id);
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type == "forcedDiscard" && tile.Card.Id == _eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is { Type: "harshChoices", CardId: { } harshCard } && tile.Card.Id == harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
