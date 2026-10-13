@@ -640,7 +640,7 @@ internal static class BattleRulingsRound2Tests
     {
         var s = Selection(); s.Phase = Phase.Battle; s.CurrentBattleProvince = 0; s.PriorityPlayerId = 0;
         var ebizo = Add(s, Ebizo, 0, Zone.Home);
-        var performer = Add(s, performerDef, 0, Zone.Battlefield, province: 0);
+        var performer = Add(s, performerDef, 0, Zone.Battlefield, province: 0); if (CardCatalog.Get(sourceDef).Type == CardType.Spell) performer.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var source = sourceDef == performerDef ? performer : Add(s, sourceDef, 0, CardCatalog.Get(sourceDef).Type == CardType.Follower || CardCatalog.Get(sourceDef).Type is CardType.Item or CardType.Spell ? Zone.Attached : Zone.Battlefield, province: 0, parent: performer.Id);
         var target = Add(s, "training-scout-samurai", 1, Zone.Battlefield, province: 0); Add(s, "training-attack-reactor", 1, Zone.Battlefield, province: 0);
         return new(MatchEngine.FromTestState(s), ebizo, source, performer, target);
