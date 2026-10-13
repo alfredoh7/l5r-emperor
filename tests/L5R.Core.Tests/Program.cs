@@ -2308,6 +2308,20 @@ static void HonorLossImmunity()
         Equal(e.State.Cards[defender.Id].Zone, Zone.Dead);
         Equal(e.State.Players[1].Honor, honorBefore - CardCatalog.Get("training-lion-veteran").PersonalHonor, "Lion Personality Honor loss is not negated by a Spider/Fate-scoped Stronghold");
     }
+    {
+        // 2026-10-13 ruling (official rulings on Fields of the Dead, The Fingers of Bone, The Shadowed Dojo): "You do not lose Honor from cards you own" does not prevent the Honor loss from the
+        // death of a dishonorable Personality -- the loss is the rulebook's -- even when the dying Personality matches the stronghold's Clan.
+        var s = Battle(9, 2).State;
+        s.Cards[s.Players[1].StrongholdId].DefinitionId = "training-honor-immune-stronghold";
+        var defender = s.Cards.Values.Single(c => c.OwnerId == 1 && c.Zone == Zone.Battlefield);
+        defender.DefinitionId = "training-spider-honor-loss";
+        defender.Dishonorable = true;
+        var honorBefore = s.Players[1].Honor;
+        var e = MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[defender.Id].Zone, Zone.Dead);
+        Equal(e.State.Players[1].Honor, honorBefore - CardCatalog.Get("training-spider-honor-loss").PersonalHonor, "a dishonorable Spider Personality's death still costs Honor under a Spider/Fate-immune Stronghold");
+    }
 }
 static void TokenPrimitives()
 {
