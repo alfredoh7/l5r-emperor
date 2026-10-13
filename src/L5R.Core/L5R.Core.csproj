@@ -13,4 +13,5 @@
     <EmbeddedResource Include="../../content/published/*-wave-*.json" Exclude="../../content/published/*-sources.json" LogicalName="L5R.Published.%(Filename)%(Extension)" />
     <EmbeddedResource Include="PublishedWaveOrder.txt" LogicalName="L5R.WaveOrder.txt" />
   </ItemGroup>
+  <ItemGroup><PackageReference Include="Meziantou.Analyzer" Version="3.0.302" PrivateAssets="all" /></ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net10.0</TargetFramework><TreatWarningsAsErrors>true</TreatWarningsAsErrors></PropertyGroup>
   <ItemGroup><ProjectReference Include="../L5R.Core/L5R.Core.csproj" /></ItemGroup>
+  <ItemGroup><PackageReference Include="Meziantou.Analyzer" Version="3.0.302" PrivateAssets="all" /></ItemGroup>
 </Project>

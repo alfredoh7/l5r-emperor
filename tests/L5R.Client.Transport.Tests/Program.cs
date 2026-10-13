@@ -22,6 +22,7 @@ try
         ("payment source methods and private entry candidates survive the server envelope", () => { GameplayControlsProjection(); return Task.CompletedTask; }),
         ("public response context survives server state and client projection without changing actions or exposing a hand", () => { ReactionPresentationProjection(); return Task.CompletedTask; }),
         ("prepared review positions retain replay export restrictions until ordinary practice starts", PreparedReviewTests.Run),
+        ("a local crash report holds the exception, the last errors and the viewer's position, and scrubs tokens and home paths (issue #905)", () => { CrashBundleTests.Run(); return Task.CompletedTask; }),
         ("private duel round trip retains own focus, result and priority through reconnect", () => PrivateDuel(url,duelRoom,duelTokens)),
         ("live duel queue preserves immediate results, reconnects and back-to-back presentations", DuelQueue),
         ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),

@@ -16,7 +16,8 @@ var cases = new (string Name, Func<Task> Test)[]
     ("reconnect replaces old connection and rejects malformed messages", ReconnectAndMalformedInput),
     ("every command field and every Gold quote cross the wire intact (issue #303)", GoldWire),
     ("a deck search survives a server restart: the journal recovers the shuffle exactly, and each seat sees only what it may (issue #312)", SearchAndShuffleSurviveRestart),
-    ("a look at the opponent's top cards survives a server restart: the viewer's ordered cards reach only the viewer's seat, the arrangement is journaled (issue #322)", LookSurvivesRestart)
+    ("a look at the opponent's top cards survives a server restart: the viewer's ordered cards reach only the viewer's seat, the arrangement is journaled (issue #322)", LookSurvivesRestart),
+    ("a seeded match played through the server stays equal to its authoritative replay: every seat's view and action list as received over the wire equals the engine's (desync soak, issue #905)", DesyncSoak),
 };
 var failures = 0;
 foreach (var (name, test) in cases)
@@ -426,6 +427,64 @@ static Task GoldWire()
     return Task.CompletedTask;
 }
 
+// Issue #905 (Forge's network desync testing): play random enabled choices through the real server and sockets, and at checkpoints rebuild the match from the room's saved commands. The view and the
+// action list each seat last received must equal what the authoritative engine produces for that seat, in the wire's own JSON (strict: unmapped members fail), so a projection, a mapping or a
+// serialization that drops or changes anything is a failure here, and so is a live engine that disagrees with its own replay.
+static async Task DesyncSoak()
+{
+    var storage = NewStorage();
+    try
+    {
+        await using var server = await TestServer.StartAsync(storage);
+        var host = await server.CreateAsync(); var guest = await server.JoinAsync(host.RoomCode);
+        using var sockets = new DisposableSockets(await server.ConnectAsync(host), await server.ConnectAsync(guest));
+        var latest = new StateMessage?[2];
+        async Task Refresh(long sequence)
+        {
+            for (var seat = 0; seat < 2; seat++)
+            {
+                var element = await ReadTypeAsync(sockets[seat], "state", state => state.GetProperty("sequence").GetInt64() >= sequence);
+                latest[seat] = element.Deserialize<StateMessage>(Protocol.Json) ?? throw new InvalidOperationException("Empty state message.");
+            }
+        }
+        await Refresh(0);
+        var random = new Random(905); var accepted = 0; var rejected = 0; var checkpoints = 0;
+        async Task CompareWithReplay()
+        {
+            var room = (await new RoomStore(storage).LoadAllAsync()).Single(r => r.RoomCode == host.RoomCode);
+            var engine = MatchEngine.Replay(room.Replay);
+            for (var seat = 0; seat < 2; seat++)
+            {
+                var wire = latest[seat]!;
+                Check(JsonSerializer.Serialize(wire.View, Protocol.Json) == JsonSerializer.Serialize(engine.GetView(seat), Protocol.Json), $"After {accepted} commands the view seat {seat} received differs from the authoritative engine's.");
+                var expectedActions = engine.QueryActions(seat).Select(AvailableAction.FromCore).ToArray();
+                Check(JsonSerializer.Serialize(wire.Actions, Protocol.Json) == JsonSerializer.Serialize(expectedActions, Protocol.Json), $"After {accepted} commands the action list seat {seat} received differs from the authoritative engine's.");
+            }
+            checkpoints++;
+        }
+        await CompareWithReplay();
+        for (var step = 0; step < 160 && latest[0]!.View.WinnerId is null; step++)
+        {
+            var view = latest[0]!.View;
+            var seat = view.PendingChoice?.PlayerId ?? view.PriorityPlayerId;
+            var options = latest[seat]!.Actions.Where(a => a.Enabled && a.Command is not null && a.Type != "concede").ToArray();
+            if (options.Length == 0) { seat = 1 - seat; options = latest[seat]!.Actions.Where(a => a.Enabled && a.Command is not null && a.Type != "concede").ToArray(); }
+            Check(options.Length > 0, $"Neither seat had a legal action after {accepted} commands.");
+            var choice = options[random.Next(options.Length)];
+            await SendAsync(sockets[seat], new CommandEnvelope("command", Guid.NewGuid().ToString(), latest[seat]!.View.Version, choice.Command!));
+            var reply = await ReadTypeAsync(sockets[seat], "commandResult");
+            if (!reply.GetProperty("accepted").GetBoolean()) { Check(++rejected <= 12, "The server refused too many actions it had listed as enabled."); continue; }
+            accepted++;
+            await Refresh(reply.GetProperty("sequence").GetInt64());
+            if (accepted % 25 == 0) await CompareWithReplay();
+        }
+        await CompareWithReplay();
+        Check(accepted >= 60, $"Only {accepted} commands were played; the soak did not exercise the server.");
+        Console.WriteLine($"  desync soak: {accepted} commands accepted, {rejected} refused, {checkpoints} replay comparisons");
+    }
+    finally { if (Directory.Exists(storage)) Directory.Delete(storage, true); }
+}
+
 static void VerifyPrivacy(JsonElement state, int playerId)
 {
     var text = state.GetRawText();
@@ -513,4 +572,10 @@ sealed class TestServer(WebApplication app, string storage, bool ownsStorage) : 
         await app.DisposeAsync();
         if (ownsStorage && Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
     }
+}
+
+sealed class DisposableSockets(params ClientWebSocket[] sockets) : IDisposable
+{
+    public ClientWebSocket this[int seat] => sockets[seat];
+    public void Dispose() { foreach (var socket in sockets) socket.Dispose(); }
 }
