@@ -39,6 +39,7 @@ try
         ("alternative costs survive the server envelope and selected cost submission for the first four previews", () => { AlternativeCostProjection(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
         ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; }),
+        ("the action resolution area is omitted from every payload outside an open action and crosses the wire complete while one is open (issue #917)", () => { ResolutionAreaCrossesTheWire(); return Task.CompletedTask; }),
         ("a copied card's frame fields (IsCopy, CopyOfCardId, CopyOfDefinitionId, CopyConditions) and a controlled card's RealOwnerId survive the server envelope and the client's deserialization (issue #501)", () => { CopyAndControlFieldsCrossTheWire(); return Task.CompletedTask; })
     };
     foreach (var (name, test) in cases)
@@ -450,6 +451,36 @@ static void OutgoingPayload()
     Check(MatchEngine.ProtocolVersion == Protocol.Version, $"The client advertises protocol {MatchEngine.ProtocolVersion} while the server speaks {Protocol.Version}");
 }
 
+// Issue #917: a view member that is declared WhenWritingNull (MatchView.ResolutionArea) is absent from every payload outside an open action, by design (byte-identical to before);
+// ResolutionAreaCrossesTheWire proves it arrives, and arrives complete, while an action is open.
+static bool OmittedWhenNull(System.Reflection.PropertyInfo property) =>
+    property.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonIgnoreAttribute), false).Cast<System.Text.Json.Serialization.JsonIgnoreAttribute>().Any(a => a.Condition == System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull);
+
+static void ResolutionAreaCrossesTheWire()
+{
+    var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+    var s = MatchEngine.CreateEconomyScenario().State;
+    foreach (var p in s.Players) { foreach (var id in p.Hand.ToArray()) s.Cards.Remove(id); p.Hand.Clear(); }
+    s.Phase = Phase.Battle; s.ActivePlayerId = 0; s.PriorityPlayerId = 0; s.CurrentBattleProvince = 0; s.UnresolvedBattlefields = [0];
+    CardInstance AddCard(string def, int owner, Zone zone, int? province = null) { var c = new CardInstance { Id = $"wire-{s.Cards.Count}", DefinitionId = def, OwnerId = owner, Zone = zone, FaceUp = zone != Zone.Hand, ProvinceIndex = province }; s.Cards.Add(c.Id, c); if (zone == Zone.Hand) s.Players[owner].Hand.Add(c.Id); return c; }
+    var strike = AddCard("oracle-l5r-7525", 0, Zone.Hand); AddCard("oracle-l5r-5599", 0, Zone.Hand);
+    AddCard("training-scout-samurai", 0, Zone.Battlefield, 0); var enemy = AddCard("training-lion-samurai", 1, Zone.Battlefield, 0);
+    var engine = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.Invoke(null, [s])!;
+    string Wire(int viewer) { var view = engine.GetView(viewer); return System.Text.Json.JsonSerializer.Serialize(new StateMessage("state", "ABCDEFGH", viewer, view.Version, view, engine.QueryActions(viewer).Select(AvailableAction.FromCore).ToArray(), [true, true]), Protocol.Json); }
+    foreach (var viewer in new[] { 0, 1 }) Check(!Wire(viewer).Contains("resolutionArea"), "outside an open action the payload has no resolutionArea key");
+    var announce = engine.QueryActions(0).First(a => a.Enabled && a.Command?.AbilityId == "strategic-strike-attack" && a.CardId == strike.Id && (a.TargetIds?.Contains(enemy.Id) ?? false)).Command! with { TargetId = enemy.Id };
+    var result = engine.Execute(announce); Check(result.Accepted, "announcement refused: " + result.Error);
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        using var document = System.Text.Json.JsonDocument.Parse(Wire(viewer));
+        var wireView = document.RootElement.GetProperty("view");
+        Check(wireView.TryGetProperty("resolutionArea", out var area) && area.GetArrayLength() == 1 && area[0].GetProperty("card").GetProperty("id").GetString() == strike.Id, $"seat {viewer}: the resolution area crosses the wire with the card's identity");
+        var received = wireView.Deserialize<MatchView>(web)!;
+        Check(System.Text.Json.JsonSerializer.Serialize(received, web) == System.Text.Json.JsonSerializer.Serialize(engine.GetView(viewer), web), $"seat {viewer}: the client's view equals the engine's");
+        Check(received.ResolutionArea![0].Card.Zone == Zone.Resolving && received.Players[0].Hand.All(c => c.Id != strike.Id), $"seat {viewer}: Resolving survives the wire and the card is not in a hand");
+    }
+}
+
 // Issue #312: MatchView crosses the wire as the core record itself (the server serializes StateMessage.View, the client
 // deserializes MatchView with the same web defaults), so a new view field can only be lost by a mapping layer or an ignore
 // attribute. Prove it for the two new fields and, by reflection, for EVERY MatchView property, on the exact server envelope; and
@@ -484,7 +515,7 @@ static void SearchViewsCrossTheWire()
             var received = wireView.Deserialize<MatchView>(web)!;
             Check(System.Text.Json.JsonSerializer.Serialize(received, web) == System.Text.Json.JsonSerializer.Serialize(view, web), $"{stage}/viewer {viewer}: the client's MatchView differs from the engine's");
             foreach (var property in typeof(MatchView).GetProperties())
-                Check(wireView.TryGetProperty(char.ToLowerInvariant(property.Name[0]) + property.Name[1..], out _), $"MatchView.{property.Name} is missing from the wire envelope: a field would be dropped online");
+                Check(wireView.TryGetProperty(char.ToLowerInvariant(property.Name[0]) + property.Name[1..], out _) || OmittedWhenNull(property), $"MatchView.{property.Name} is missing from the wire envelope: a field would be dropped online");
             var receivedActions = document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!;
             Check(receivedActions.Length == actions.Length, $"{stage}: an action was dropped");
             for (var i = 0; i < actions.Length; i++)
@@ -561,7 +592,7 @@ static void LookViewsCrossTheWire()
             var received = wireView.Deserialize<MatchView>(web)!;
             Check(System.Text.Json.JsonSerializer.Serialize(received, web) == System.Text.Json.JsonSerializer.Serialize(view, web), $"{stage}/viewer {viewer}: the client's MatchView differs from the engine's");
             foreach (var property in typeof(MatchView).GetProperties())
-                Check(wireView.TryGetProperty(char.ToLowerInvariant(property.Name[0]) + property.Name[1..], out _), $"MatchView.{property.Name} is missing from the wire envelope: a field would be dropped online");
+                Check(wireView.TryGetProperty(char.ToLowerInvariant(property.Name[0]) + property.Name[1..], out _) || OmittedWhenNull(property), $"MatchView.{property.Name} is missing from the wire envelope: a field would be dropped online");
             var receivedActions = document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!;
             Check(receivedActions.Length == actions.Length, $"{stage}: an action was dropped");
             for (var i = 0; i < actions.Length; i++)
@@ -668,7 +699,7 @@ static async Task PublishedPlay(string url)
             var element = type == typeof(MatchView) ? json.RootElement : type == typeof(BattleStepView) ? json.RootElement.GetProperty("battleStep")
                 : type == typeof(BeforeResolutionEffectView) ? json.RootElement.GetProperty("battleStep").GetProperty("beforeResolutionEffects")[0] : json.RootElement.GetProperty("battleStep").GetProperty("engageClaims")[0];
             foreach (var property in type.GetProperties())
-                Check(element.TryGetProperty(System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(property.Name), out _), $"{type.Name}.{property.Name} is missing from the serialized view.");
+                Check(element.TryGetProperty(System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(property.Name), out _) || OmittedWhenNull(property), $"{type.Name}.{property.Name} is missing from the serialized view.");
         }
     foreach (var options in new[] { Protocol.Json, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web) })
     {
