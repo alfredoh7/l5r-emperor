@@ -46,9 +46,16 @@ internal static class ForgottenLegacyBatch3Tests
         Check(listed.Order(StringComparer.Ordinal).SequenceEqual(Wave.Order(StringComparer.Ordinal)), "the manifest pins exactly the wired cards");
         var expected = new Dictionary<string, string[]>
         {
-            [GameOfDice] = ["game-of-dice-draw"], [YojimbosDuty] = ["yojimbos-duty-recruit", "yojimbos-duty-straighten"], [AccidentalConfession] = ["accidental-confession-dishonor"],
-            [BrokenAlliance] = ["broken-alliance-destroy", "broken-alliance-move"], [CastAside] = ["cast-aside-straighten", "cast-aside-bow"], [Consideration] = ["consideration-boost"],
-            [CreatingOrder] = ["creating-order-negate", "creating-order-straighten"], [DuelOfHaiku] = ["duel-of-haiku"], [EntrenchedPosition] = ["entrenched-negate", "entrenched-bow"], [FeintAndStrike] = ["feint-strike-focus", "feint-strike-move"],
+            [GameOfDice] = ["game-of-dice-draw"],
+            [YojimbosDuty] = ["yojimbos-duty-recruit", "yojimbos-duty-straighten"],
+            [AccidentalConfession] = ["accidental-confession-dishonor"],
+            [BrokenAlliance] = ["broken-alliance-destroy", "broken-alliance-move"],
+            [CastAside] = ["cast-aside-straighten", "cast-aside-bow"],
+            [Consideration] = ["consideration-boost"],
+            [CreatingOrder] = ["creating-order-negate", "creating-order-straighten"],
+            [DuelOfHaiku] = ["duel-of-haiku"],
+            [EntrenchedPosition] = ["entrenched-negate", "entrenched-bow"],
+            [FeintAndStrike] = ["feint-strike-focus", "feint-strike-move"],
         };
         foreach (var id in Wave)
         {

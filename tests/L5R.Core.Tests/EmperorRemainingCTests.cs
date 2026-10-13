@@ -361,7 +361,7 @@ internal static class EmperorRemainingCTests
         var poison = Add(s, WeakPoison, 1, Zone.Hand);
         var e = MatchEngine.FromTestState(s);
         Accept(e, Offer(e, 0, "shameful-injury-negate", card.Id, target.Id));
-        Check(e.State.Cards[target.Id].Modifiers.All(m => m.Effect == "a-trait"), "the action's penalty is gone, the trait's bonus stays");
+        Check(e.State.Cards[target.Id].Modifiers.Where(m => m.SuppressedTurn != e.State.TurnNumber).All(m => m.Effect == "a-trait"), "the action's penalty is set aside, the trait's bonus stays");
         Check(e.State.Cards[target.Id].ForceModifiersNegatedTurn == e.State.TurnNumber, "new ones are refused this turn");
         // A Personality not at the battlefield is no target.
         var t = Table(Phase.Battle, 1); t.PriorityPlayerId = 0;

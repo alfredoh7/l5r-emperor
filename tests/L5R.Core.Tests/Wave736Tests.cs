@@ -158,9 +158,9 @@ internal static class Wave736Tests
         Accept(e, Batch336Support.Offer(e, 0, Wave736Abilities.PathPeace, spell.Id, target.Id));
         var after = e.State.Cards[target.Id];
         Check(e.State.Cards[spell.Id].Bowed, "the Spell is bowed as the cost");
-        Check(!after.Modifiers.Any(m => m.Stat == "Force" && m.Amount < 0) && after.Modifiers.Any(m => m.Stat == "Force" && m.Amount == 1), "the penalty is removed and the bonus stays");
+        Check(!after.Modifiers.Any(m => m.Stat == "Force" && m.Amount < 0 && m.SuppressedTurn != e.State.TurnNumber) && after.Modifiers.Any(m => m.Stat == "Force" && m.Amount == 1 && m.SuppressedTurn != e.State.TurnNumber), "the penalty is set aside and the bonus stays");
         Call(e, "ApplyModifier", e.State.Cards[target.Id], "test-source", "test-effect", "Force", -3);
-        Check(!e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Force" && m.Amount < 0), "a new penalty is not applied this turn");
+        Check(!e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Force" && m.Amount == -3), "a new penalty is not applied this turn");
         Check(e.IsImmune(e.State.Cards[target.Id], ImmunityKind.Prevention, 0), "effects of a player other than his controller that prevent him acting are negated");
         Check(!e.IsImmune(e.State.Cards[target.Id], ImmunityKind.Prevention, 1), "his own controller's are not");
     }
