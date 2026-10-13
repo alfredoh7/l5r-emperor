@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "A second A Paragon's Strength offered only the Ranged Attack because no enemy remained for the send-home action; the engine is right (retested: with enough enemies each of three copies sends one home). The client play prompt now names the action that is unavailable and why.",
+  "validation": "action-copies 3/3; client builds.",
+  "remaining": "Native visual check of the new prompt line by Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/911",
+  "branch": "claude/911-second-copy-wrong-action",
+  "updated": "2026-10-13T17:35:52.247014+00:00"
+}
