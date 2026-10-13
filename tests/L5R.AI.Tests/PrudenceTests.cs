@@ -47,7 +47,10 @@ internal static class PrudenceTests
         var view = MatchEngine.CreateStarterMatch().GetView(0);
         return view with
         {
-            Phase = Phase.Action, PendingChoice = null, ActivePlayerId = 0, PriorityPlayerId = 0,
+            Phase = Phase.Action,
+            PendingChoice = null,
+            ActivePlayerId = 0,
+            PriorityPlayerId = 0,
             Players = [view.Players[0] with { TurnsTaken = 6, Home = own, Army = [] }, view.Players[1] with { Home = theirs, Army = [] }]
         };
     }
