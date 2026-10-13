@@ -806,6 +806,8 @@ public sealed partial class MatchEngine
     // The one place a card sheds its time in play (issue #850). A card that leaves play for a hand, a deck, a province or a pile, or that will enter play again (a dead Personality recruited, issue #373),
     // is a new object: nothing of its earlier life follows it. AbilityVocabularyTests-style reflection test CardResetTests fails when a CardInstance property is neither reset here nor listed as identity/location.
     internal static void ResetCardStateForTest(CardInstance card) => ResetCardState(card);
+    private static bool KeepsDishonorOutsidePlay(CardInstance card) =>
+        card.FaceUp && card.Zone is Zone.Dead or Zone.DynastyDiscard or Zone.FateDiscard or Zone.RemovedFromGame or Zone.Province && Definition(card).Type == CardType.Personality;
     private static void ResetCardState(CardInstance card)
     {
         card.Modifiers.Clear();
@@ -819,7 +821,11 @@ public sealed partial class MatchEngine
         card.AbilityUses.Clear();
         card.RentatsuHeld = false; card.BarrierTurn = -1; // Emperor Edition Personality pass (issue #477), batch 4.
         card.Bowed = false;
-        card.Dishonorable = false;
+        // R-082 (EE-STATE-008, Mendon 2026-10-13): a face-up dishonorable Personality stays dishonorable outside play and on re-entry, unless an effect rehonors him.
+        // "Face up" is judged by where the card is when it is reset: a public zone (a discard pile, the dead pile, removed from the game, a face-up province).
+        // A hand or a deck is hidden, so a Personality sent there (or reset before he is moved there) loses the status. A caller that resets a card still in play
+        // and then moves it to a public zone (Your Clan Needs You!, Step Through the Void) carries the status across itself.
+        card.Dishonorable = card.Dishonorable && KeepsDishonorOutsidePlay(card);
         card.StraightenBlockedTurn = -1;
         card.StraightenHolds.Clear();
         card.PrintedHoldsSeeded = false;
@@ -1939,7 +1945,9 @@ public sealed partial class MatchEngine
             // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
             // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
+            var wasDishonorable = card.Dishonorable; // R-082: he goes into a province face up, a public zone, so the status travels with him
             ResetCardState(card);
+            card.Dishonorable = wasDishonorable;
             var owner = Player(card.OwnerId);
             if (!owner.Provinces.Any(p => !p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice = new("yourClanNeedsYouProvince", card.OwnerId, id, $"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");

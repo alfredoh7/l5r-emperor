@@ -1437,7 +1437,7 @@ static void SecondCityRestBatch()
     // action only for an Ancestor moved by a Water-keyword Shugenja.
     {
         var s = StrongholdBattle("oracle-l5r-1218");
-        var host = Add(s, "training-crane-samurai", 0, Zone.Home); // Intervening Spirit's own wielder, not at the battlefield
+        var host = Add(s, "training-crane-samurai", 0, Zone.Home); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915) // Intervening Spirit's own wielder, not at the battlefield
         var spirit = Add(s, "oracle-l5r-3788", 0, Zone.Attached, attachedTo: host.Id);
         var mover = Add(s, "training-lion-samurai", 0, Zone.Home);
         Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); // enemy presence
@@ -1456,7 +1456,7 @@ static void SecondCityRestBatch()
         // must be at the current battlefield already (no "even if" clause of its own, so it falls back
         // to the ordinary attached-Spell-source AtBattle Require -- Scouring Flood/Earth's Hunger's
         // own precedent), which also doubles as the Defender's own presence for this Battle action.
-        var host = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+        var host = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var flows = Add(s, "oracle-l5r-8038", 1, Zone.Attached, province: 0, attachedTo: host.Id);
         var mover = Add(s, "training-lion-samurai", 1, Zone.Home);
         Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);

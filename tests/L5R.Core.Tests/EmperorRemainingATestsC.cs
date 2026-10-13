@@ -372,10 +372,31 @@ internal static partial class EmperorRemainingATests
         var strong = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0); // Force 6
         var boosted = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         Add(s, "training-follower", 1, Zone.Attached, province: 0, parent: boosted.Id); // unit total 4 + 2 = 6
+        // Issue #915 (EE-STATE-039, EE-Card-types-086): the TOTAL unit Force counts bowed cards. A 4F Personality with a bowed 2F Follower contributes only 4 to a battle but totals 6: not a target.
+        var bowedFollowerUnit = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        Add(s, "training-follower", 1, Zone.Attached, bowed: true, province: 0, parent: bowedFollowerUnit.Id);
+        // A bowed 6F Personality contributes nothing, yet his unit totals 6: not a target either.
+        var bowedStrong = Add(s, "training-lion-veteran", 1, Zone.Battlefield, bowed: true, province: 0);
+        // Counter-cases where the total really is lower than 5: a Force-reduced Personality (6 - 4 = 2) with a bowed 2F Follower totals 4, and a bowed 4F Personality totals 4.
+        var reduced = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0);
+        reduced.Modifiers.Add(new("test-source", "test", "Force", -4));
+        Add(s, "training-follower", 1, Zone.Attached, bowed: true, province: 0, parent: reduced.Id);
+        var bowedWeak = Add(s, "training-lion-samurai", 1, Zone.Battlefield, bowed: true, province: 0);
         var e = MatchEngine.FromTestState(s);
         Check(!CanUse(e, 0, "fortitude-bow", card.Id, bowed.Id), "a bowed Berserker may not perform");
         var option = Batch336Support.Options(e, 0, "fortitude-bow", card.Id, berserker.Id).First(o => o.Enabled);
         Check(option.TargetIds!.Contains(weak.Id) && !option.TargetIds.Contains(strong.Id) && !option.TargetIds.Contains(boosted.Id), "only an enemy unit with total Force below the Berserker's BASE Force (5), not his current 3 or a stronger unit");
+        Check(!option.TargetIds.Contains(bowedFollowerUnit.Id) && !option.TargetIds.Contains(bowedStrong.Id), "bowed cards still count towards the unit's total Force: neither a 4F + bowed 2F unit nor a bowed 6F Personality is listed");
+        Check(option.TargetIds.Contains(reduced.Id) && option.TargetIds.Contains(bowedWeak.Id), "units whose total really is lower than 5 are listed");
+        // Validation agrees with the listing: the command naming a 6F unit with a bowed Follower is refused and changes nothing.
+        var version = e.Version;
+        Check(e.Execute(option.Command! with { TargetId = bowedFollowerUnit.Id }) is { Accepted: false }, "executing against the 6F-total unit is refused");
+        Check(e.Execute(option.Command! with { TargetId = bowedStrong.Id }) is { Accepted: false }, "and against the bowed 6F Personality");
+        Eq(e.Version, version, "a refusal changes nothing");
+        Accept(e, option.Command! with { TargetId = reduced.Id });
+        Check(e.State.Cards[reduced.Id].Bowed, "a unit whose total is 4 is bowed");
+        e = MatchEngine.FromTestState(s);
+        option = Batch336Support.Options(e, 0, "fortitude-bow", card.Id, berserker.Id).First(o => o.Enabled);
         Accept(e, option.Command! with { TargetId = weak.Id });
         Check(e.State.Cards[weak.Id].Bowed, "the target was bowed");
         Eq(ForceMod(e, berserker.Id), 0, "his current Force penalty was negated");

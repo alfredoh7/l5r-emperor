@@ -306,10 +306,13 @@ public sealed partial class MatchEngine
     private void ReserveWeaponFocus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
+        var usedList = command.PlayerId == duel.ChallengerPlayerId ? duel.ChallengerFocused : duel.ChallengedFocused;
+        Require(usedList.Count + P2FocusSubstitutions(command.PlayerId) < 4, "You have already focused four times this duel and must Strike."); // core rules: an "instead of focusing" substitution counts against the cap of four
         var weapon = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var chosen) ? chosen : null;
         Require(weapon is not null && ReserveWeaponsFor(command.PlayerId, duel).Any(w => w.Id == weapon.Id), "Choose a Reserve Weapon on your dueling Personality.");
         var personalityId = command.PlayerId == duel.ChallengerPlayerId ? duel.ChallengerId : duel.ChallengedId;
         duel.StatBonuses[personalityId] = duel.StatBonuses.GetValueOrDefault(personalityId) + 3;
+        P2.FocusSubstitutions[FocusSubstitutionKey(command.PlayerId)] = P2FocusSubstitutions(command.PlayerId) + 1; // each use consumes one of the four focus opportunities
         Emit("duelReserveWeapon", $"{Player(command.PlayerId).Name} gave {Definition(Card(personalityId)).Name} +3 to his duel stat instead of focusing ({Definition(weapon!).Name}).", command.PlayerId, weapon!.Id);
         duel.TurnPlayerId = 1 - command.PlayerId;
         _state.PriorityPlayerId = duel.TurnPlayerId;

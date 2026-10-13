@@ -236,7 +236,7 @@ internal static class DaigotsuBofanaTests
             {
                 var s = Table();
                 var bofana = Add(s, Bofana, 0, Zone.Battlefield, province: 0);
-                var wielder = Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0); // printed Force 5
+                var wielder = Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0); wielder.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915) // printed Force 5
                 Force(wielder, wielderForce - 5);
                 var attachment = Add(s, def, 1, Zone.Attached, province: 0, parent: wielder.Id);
                 Add(s, "training-farm", 1, Zone.Hand); Add(s, "training-farm", 1, Zone.Hand);
