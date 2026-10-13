@@ -1470,7 +1470,7 @@ public sealed record ProvinceOrderOption(string Id, string Label, int[] Slots, G
 // a UI can show it directly and a future card can read it without re-deriving its own filter.
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
-    CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
+    CardView[] Hand, int HandCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
     int DeadCount, CardView[]? Focused = null,
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.

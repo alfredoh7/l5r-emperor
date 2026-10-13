@@ -115,3 +115,5 @@ interpretation this register's decision docs already settled.
 - [Twelve cards on Mendon's rulings (#835)](2026-10-11-twelve-ruled-cards.md) — accepted: rulings R-067 to R-079: the Egg of P'an Ku, Blood of Isawa's Tribe, A Cleansing Breath, Duty Over All Things, Imperial Deployment, Merchant Patronage, Pierce the Tapestry, The Heavens' Blessing, Unbearable Weight, Warded Premises, Revelations and The Empire's Foe Exposed.
 
 - [A bowed Personality may use his unbowed attachments' abilities](2026-10-12-bowed-host-attachment-abilities.md) — accepted ruling R-080, from the Comprehensive Rules clarification of 2013-06-05.
+
+- [No deck counts; generic hidden-card refusals](2026-10-13-no-deck-counts.md) — current Dynasty/Fate deck sizes are hidden from both seats (protocol 4); a request naming a hidden card gets one fixed error.

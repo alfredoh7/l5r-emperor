@@ -9,8 +9,9 @@ public sealed partial class MatchEngine
     /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
     /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
     /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
-    /// alternative-cost metadata.</summary>
-    public const int ProtocolVersion = 3;
+    /// alternative-cost metadata.
+    /// 4: PlayerView no longer carries DynastyDeckCount/FateDeckCount, and the look/search deck views no longer carry CardsRemaining (current deck sizes are hidden information, EE-STATE-014).</summary>
+    public const int ProtocolVersion = 4;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;
