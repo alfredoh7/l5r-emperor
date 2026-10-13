@@ -42,7 +42,7 @@ internal static class BatchProfile
         var a = pool.Build(seed, 0, out var ra); var b = pool.Build(seed, 1, out var rb);
         if (!ra.Ready || !rb.Ready) return;
         var created = Stopwatch.GetTimestamp();
-        var game = MatchEngine.CreateCustomMatch(seed, a, b);
+        var game = MatchEngine.CreateCustomMatch(seed, a, b); game.AllowIdleBattlePasses();
         t.Create += Stopwatch.GetTimestamp() - created; t.Games++;
         var contexts = new[] { new BotContext(), new BotContext() };
         var retries = 0;

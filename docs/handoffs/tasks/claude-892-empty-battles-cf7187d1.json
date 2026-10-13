@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Idle-battle passes now apply only in a match with no human opponent (MatchState.IdleBattlePasses, set by solo practice against the bot and by bot batches, recorded in the replay): against the bot the engine passes for the human player and the bot alike; between two humans the pass stays the player's own or the engine's once they take Pass all battles. The last-battlefield selection applies everywhere. Per Mendon.",
+  "validation": "check.sh --skip-client passes (idle-battles suite now 9 cases incl. human-vs-human, flagged human, replay of the flag; server test for unreplayable saved rooms); native battle-presentation and interactions pass; board-ui and perspective-table fail on real-mouse hover, board-ui identically on unmodified main (environmental).",
+  "remaining": "None; ready to merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/894",
+  "branch": "claude/892-empty-battles",
+  "updated": "2026-10-13T05:33:02.169354+00:00"
+}

@@ -43,7 +43,7 @@ internal static class BotSoak
         }
         catch (Exception e) { result.Findings.Add(new("setup", seed, 0, "-", "-", "deck", "Deck generation threw: " + e.Message)); return result; }
         MatchEngine game;
-        try { game = MatchEngine.CreateCustomMatch(seed, a, b); }
+        try { game = MatchEngine.CreateCustomMatch(seed, a, b); game.AllowIdleBattlePasses(); } // bots only: nobody to bluff (issue #894)
         catch (Exception e) { result.Findings.Add(new("exception", seed, 0, "-", "-", "CreateCustomMatch", "Engine threw creating a Ready match: " + e.Message)); return result; }
         var recent = new Queue<string>();
         var contexts = new[] { new BotContext(), new BotContext() }; // one memory per seat, as a client keeps

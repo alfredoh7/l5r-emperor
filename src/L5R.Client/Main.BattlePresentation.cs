@@ -34,6 +34,7 @@ public partial class Main
         var events = next.View.Events.Where(e => e.Sequence > sequence).ToArray();
         if (!events.Any(e => e.Type is "battleResolved" or "unitDestroyed" or "attachmentDestroyed") || next.View.Version == _presentedResolutionVersion) return;
         _presentedResolutionVersion = next.View.Version;
+        if (NothingWasFought(_motionView, next.View, events)) return; // issue #894: battles with no unit on either side (the engine now settles them without asking) get no outcome beat
         _battleOutcomeText = events.FirstOrDefault(e => e.Type == "provinceDestroyed")?.Message
             ?? events.First(e => e.Type is "battleResolved" or "unitDestroyed" or "attachmentDestroyed").Message;
         var casualties = events.Where(e => e.Type is "unitDestroyed" or "attachmentDestroyed").ToArray();
@@ -47,6 +48,14 @@ public partial class Main
         _presentationSnapshot = next with { View = _motionView, Actions = [] };
         _battlePresentationStage = 1; _battlePresentationClock = 0;
         _chosen = null; _selected = null; _expandedUnits.Clear(); _assignments.Clear(); _sources.Clear(); _assignmentUnit = null;
+    }
+
+    // A resolution that destroyed nothing, moved nobody and changed no Honor: the armies stand exactly as they did, so there is no outcome to hold the table for.
+    private static bool NothingWasFought(MatchView before, MatchView after, GameEvent[] events)
+    {
+        if (events.Any(e => e.Type is "unitDestroyed" or "attachmentDestroyed" or "provinceDestroyed" or "honorChanged")) return false;
+        string[] Army(MatchView view) => view.Players.SelectMany(p => p.Army).Select(c => $"{c.Id}@{c.ProvinceIndex}/{c.Bowed}/{c.Zone}").Order(StringComparer.Ordinal).ToArray();
+        return Army(before).SequenceEqual(Army(after));
     }
 
     private void ProcessBattlePresentation(double delta)

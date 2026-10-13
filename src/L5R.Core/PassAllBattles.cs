@@ -66,6 +66,7 @@ public sealed partial class MatchEngine
         if (_state.WinnerId is not null || !InBattles()) return null;
         var player = _state.PriorityPlayerId;
         if (HasOpenDecisionState()) return NextPassAllReactionDecline();
+        if (NextIdleBattleCommand() is { } idle) return idle; // issue #894 (IdleBattles.cs): an empty battle with nothing to play, or the one battlefield left
         if (player is not (0 or 1) || !PassAllBattlesOn(player)) return null;
         if (_state.Phase == Phase.Battle) return new("pass", player, _state.Version);
         return player == _state.ActivePlayerId && _state.UnresolvedBattlefields.Count > 0
@@ -98,6 +99,7 @@ public sealed partial class MatchEngine
             _commands.RemoveRange(recorded, _commands.Count - recorded);
             events.AddRange(done.Events);
             if (done.Accepted) continue;
+            if (!PassAllBattlesOn(next.PlayerId)) break; // an idle-battle command (IdleBattles.cs) the rules refused: the player decides for themselves, no flag is involved
             // The engine could not pass for the player (a rule stands in the way): the pass ends, and the player decides for themselves.
             var first = _state.Events.Count;
             _state.PassAllBattles[next.PlayerId] = false;
