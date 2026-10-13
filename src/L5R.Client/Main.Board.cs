@@ -45,6 +45,7 @@ public partial class Main
             tile.RestAngle = Math.Clamp(offset * .028f, -.13f, .13f);
             Place(_hand, tile, start + i * step, Math.Abs(offset) * 1.4f - 1, HandCardSide, HandCardSide);
         }
+        AddResolutionArea();
         foreach (var tile in _tiles) _currentBows[tile.Card.Id] = tile.Card.Bowed;
         RenderClanHud(); RenderPiles(); ApplyTableCamera();
         EndTableMotion(motion);

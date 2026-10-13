@@ -393,8 +393,8 @@ internal static partial class MultiWindowReaction1Tests
         const string ability = "precision-boost";
         var def = Def(ability);
         AttackReaction(ability, def, 1, false, 4, true, true, ["Ranged", "Melee"]);
-        var e = Battle(s => { Add(s, def, 1, Zone.Hand); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); });
-        var card = e.State.Cards.Values.Single(c => c.DefinitionId == def);
+        var e = Battle(s => { Add(s, def, 1, Zone.Hand); Add(s, def, 1, Zone.Hand); /* issue #917: a second copy -- the card being played is in the resolution area and cannot react to its own Attack */ Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); });
+        var card = e.State.Cards.Values.First(c => c.DefinitionId == def);
         Accept(e, Offer(e, 1, "precision-attack", card.Id, e.State.Cards.Values.First(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield).Id));
         Eq(e.State.PendingChoice?.Type, "attackReaction", "its own Battle Attack opens the window");
     }

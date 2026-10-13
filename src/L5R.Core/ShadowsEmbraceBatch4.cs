@@ -184,7 +184,7 @@ public sealed partial class MatchEngine
             // Unstable Ground: the Scout was bowed as the cost; the target is destroyed and the Terrain enters play at the battlefield.
             case "unstable-ground-destroy":
                 DestroyTargetCard(target!, player.Id);
-                if (TerrainAtCurrentBattlefield() && source!.Zone == Zone.Hand) SpendMarshallingFieldsWaiver(player.Id, source); // The Marshalling Fields (issue #501): the restriction was ignored
+                if (TerrainAtCurrentBattlefield() && PlayedFromHand(source)) SpendMarshallingFieldsWaiver(player.Id, source); // The Marshalling Fields (issue #501): the restriction was ignored
                 PutTerrainIntoPlay(player, source!);
                 return false;
             // Void Tattoo: the discard (unless Void) and the removal were the costs.
@@ -310,8 +310,8 @@ public sealed partial class MatchEngine
     // "Put this card into play there": PlayStrategy's own Terrain placement, from the hand to the current battlefield.
     private void PutTerrainIntoPlay(PlayerState player, CardInstance terrain)
     {
-        if (terrain.Zone != Zone.Hand || _state.CurrentBattleProvince is not int province) return;
-        player.Hand.Remove(terrain.Id);
+        if (!PlayedFromHand(terrain) || _state.CurrentBattleProvince is not int province) return;
+        player.Hand.Remove(terrain.Id); LeaveResolutionArea(terrain);
         terrain.Zone = Zone.Battlefield; terrain.ProvinceIndex = province; terrain.FaceUp = true;
         player.TerrainPlayedThisBattle = true; // Ring of Water's own recruitment condition
         Emit("terrainPlayed", $"{player.Name} put {Definition(terrain).Name} into play as Terrain at this battlefield.", player.Id, terrain.Id);

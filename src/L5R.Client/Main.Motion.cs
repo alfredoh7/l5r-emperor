@@ -40,9 +40,10 @@ public partial class Main
             TablePiles.ToDictionary(p => (p.OwnerId, p.PileZone), p => (PileCorners(p), p.ShownCount,
                 _world.GetGlobalTransform().AffineInverse() * p.GlobalPosition)));
     }
+    // Issue #917: the resolution area is a public zone of its own, so a card travelling hand -> area -> discard pile is followed through it.
     private static IEnumerable<CardView> VisibleCards(MatchView view) => view.Players.SelectMany(p => p.Home.Concat(p.Army)
         .Concat(p.Hand).Concat(p.Discard).Concat(p.Celestials ?? [])
-        .Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold));
+        .Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold)).Concat((view.ResolutionArea ?? []).Select(e => e.Card));
     private void EndTableMotion(MotionFrame? before)
     {
         _motionView = View;

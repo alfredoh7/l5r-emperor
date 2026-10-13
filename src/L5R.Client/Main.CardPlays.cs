@@ -91,7 +91,7 @@ public partial class Main
             if (e.Type is not ("strategyPlayed" or "abilityUsed") || e.CardId is not string id || e.PlayerId is not int who) continue;
             if (who == View.ViewerId && !CardPlayTiming.ShowOwnPlays) continue;
             if (!cards.TryGetValue(id, out var card) || card.Definition is null || !queued.Add(id)) continue;
-            var discarded = card.Zone is Zone.FateDiscard or Zone.DynastyDiscard;
+            var discarded = card.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Resolving; // issue #917: a card still resolving (paused on a choice) is on its way to the discard pile
             if (!discarded && !CardPlayTiming.ShowBoardAbilities) continue;
             if (discarded) _showcasedPlays.Add(id);
             _playQueue.Enqueue(new(card, e.Message, discarded));

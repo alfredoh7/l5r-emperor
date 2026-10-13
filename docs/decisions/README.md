@@ -117,3 +117,5 @@ interpretation this register's decision docs already settled.
 - [A bowed Personality may use his unbowed attachments' abilities](2026-10-12-bowed-host-attachment-abilities.md) — accepted ruling R-080, from the Comprehensive Rules clarification of 2013-06-05.
 
 - [No deck counts; generic hidden-card refusals](2026-10-13-no-deck-counts.md) — current Dynasty/Fate deck sizes are hidden from both seats (protocol 4); a request naming a hidden card gets one fixed error.
+
+- [Action resolution area (#917)](2026-10-13-action-resolution-area.md) — accepted and built (Phase 1, Strategies and Rings): a played card leaves the hand for Zone.Resolving at announcement, public to both seats, shown in MatchView.ResolutionArea; the Attack/Duel stopgap stays.

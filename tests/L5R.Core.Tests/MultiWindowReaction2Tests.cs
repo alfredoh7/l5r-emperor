@@ -658,7 +658,7 @@ internal static partial class MultiWindowReaction2Tests
             Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy was spent");
         }
         Quiet(def, "precision-reduce", "precision-boost");
-        var s2 = Table(Phase.Battle, 0); var atk = Add(s2, def, 0, Zone.Hand); Add(s2, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
+        var s2 = Table(Phase.Battle, 0); var atk = Add(s2, def, 0, Zone.Hand); Add(s2, def, 0, Zone.Hand); /* issue #917: a second copy -- the card being played is in the resolution area and cannot react to its own Attack */ Add(s2, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
         var enemy = Add(s2, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
         var e2 = MatchEngine.FromTestState(s2);
         Accept(e2, Raw(e2, 0, "precision-attack", atk.Id, enemy.Id));

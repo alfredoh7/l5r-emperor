@@ -368,7 +368,7 @@ internal static class EitherOrTests
         Eq(option.Gold!.Cost, 2);
         var paying = option.Command!.SourceIds!;
         Accept(e, option.Command with { TargetId = r.Ally.Id });
-        Eq(Now(e, strategy.Id).Zone, Zone.Hand, "still in hand: the action is deferred whole while the window is open");
+        Eq(Now(e, strategy.Id).Zone, Zone.Resolving, "in the resolution area (issue #917), not the hand: the action is deferred whole while the window is open");
         Check(paying.All(id => !Now(e, id).Bowed), "and nothing is paid yet");
         ReactWithSakuma(e, r.Sakuma);
         Answer(e, 1, "negate");

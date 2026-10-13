@@ -252,7 +252,7 @@ public sealed partial class MatchEngine
                 return false;
             case PromoEmperorFateAbilities.Adroitness:
                 Straighten(target!);
-                if (source is not null && source.Zone is Zone.Hand or Zone.FateDiscard)
+                if (source is not null && (PlayedFromHand(source) || source.Zone == Zone.FateDiscard))
                     PromoFate.PhaseReturns.Add(new PromoPhaseReturn(source.Id, player.Id, PhaseFamily(_state.Phase)));
                 return false;
             default:

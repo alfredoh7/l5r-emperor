@@ -346,7 +346,7 @@ public sealed partial class MatchEngine
     // ---- Sharing Gossip ----
 
     private int SharingGossipCount(CardInstance source) =>
-        _state.Cards.Values.Count(c => c.Zone == Zone.FateDiscard && Definition(c).Name == "Sharing Gossip") + (source.Zone == Zone.Hand ? 1 : 0);
+        _state.Cards.Values.Count(c => c.Zone == Zone.FateDiscard && Definition(c).Name == "Sharing Gossip") + (PlayedFromHand(source) ? 1 : 0);
 
     // ---- Brotherhood Schism: "Rings will not enter play if their owner has already put a Ring into play this turn" ----
 
