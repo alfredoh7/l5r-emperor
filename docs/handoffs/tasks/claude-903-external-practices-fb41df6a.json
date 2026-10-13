@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Assessment of Forge and the Godot/C# ecosystem (Chickensoft, gdUnit4, godot-ci, Godot assets) against this repo: 18 ranked recommendations by theme, what we already have, what to skip, licences.",
+  "validation": "Documentation only. Three researchers read the repositories through gh and the web; the claims that matter most were checked against our tree (Dependabot, PR template, CODEOWNERS and the zero-match test guard already exist; main CI has no docs-only path filter). Items not verified are marked unverified in the document.",
+  "remaining": "Adoption not started; rules-adjacent items 5 and 6 need the rules lead.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/903",
+  "branch": "claude/903-external-practices",
+  "updated": "2026-10-13T07:30:02.553606+00:00"
+}
