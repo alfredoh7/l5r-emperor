@@ -10,5 +10,6 @@
     <ProjectReference Include="../../src/L5R.Server/L5R.Server.csproj" />
     <Compile Include="../../src/L5R.Client/MatchDuelFlow.cs" Link="MatchDuelFlow.cs" />
     <Compile Include="../../src/L5R.Client/MatchSession.cs" Link="MatchSession.cs" />
+    <Compile Include="../../src/L5R.Client/CrashBundle.cs" Link="CrashBundle.cs" />
   </ItemGroup>
 </Project>

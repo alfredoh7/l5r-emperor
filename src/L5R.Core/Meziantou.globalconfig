@@ -1,0 +1,41 @@
+# Issue #905: Meziantou.Analyzer (referenced by Core, AI and Server). Every rule that already fires on existing code is held at suggestion so the zero-warning gate stays green; any other
+# rule of the package is an error for new code. Fix a rule's findings, then delete its line to enforce it (docs/CODE_QUALITY.md; `bash tools/analyzer-report.sh` lists the counts).
+# It lives beside Core, not in .editorconfig, because the registration tests copy src/ and Directory.Build.props into a scratch repo and the settings must travel with them.
+is_global = true
+dotnet_diagnostic.MA0001.severity = suggestion
+dotnet_diagnostic.MA0002.severity = suggestion
+dotnet_diagnostic.MA0003.severity = suggestion
+dotnet_diagnostic.MA0004.severity = suggestion
+dotnet_diagnostic.MA0006.severity = suggestion
+dotnet_diagnostic.MA0007.severity = suggestion
+dotnet_diagnostic.MA0008.severity = suggestion
+dotnet_diagnostic.MA0009.severity = suggestion
+dotnet_diagnostic.MA0011.severity = suggestion
+dotnet_diagnostic.MA0015.severity = suggestion
+dotnet_diagnostic.MA0016.severity = suggestion
+dotnet_diagnostic.MA0020.severity = suggestion
+dotnet_diagnostic.MA0023.severity = suggestion
+dotnet_diagnostic.MA0028.severity = suggestion
+dotnet_diagnostic.MA0029.severity = suggestion
+dotnet_diagnostic.MA0031.severity = suggestion
+dotnet_diagnostic.MA0038.severity = suggestion
+dotnet_diagnostic.MA0048.severity = suggestion
+dotnet_diagnostic.MA0051.severity = suggestion
+dotnet_diagnostic.MA0052.severity = suggestion
+dotnet_diagnostic.MA0058.severity = suggestion
+dotnet_diagnostic.MA0071.severity = suggestion
+dotnet_diagnostic.MA0074.severity = suggestion
+dotnet_diagnostic.MA0075.severity = suggestion
+dotnet_diagnostic.MA0076.severity = suggestion
+dotnet_diagnostic.MA0078.severity = suggestion
+dotnet_diagnostic.MA0089.severity = suggestion
+dotnet_diagnostic.MA0099.severity = suggestion
+dotnet_diagnostic.MA0106.severity = suggestion
+dotnet_diagnostic.MA0110.severity = suggestion
+dotnet_diagnostic.MA0140.severity = suggestion
+dotnet_diagnostic.MA0158.severity = suggestion
+dotnet_diagnostic.MA0159.severity = suggestion
+dotnet_diagnostic.MA0160.severity = suggestion
+dotnet_diagnostic.MA0179.severity = suggestion
+dotnet_diagnostic.MA0193.severity = suggestion
+dotnet_diagnostic.MA0204.severity = suggestion
