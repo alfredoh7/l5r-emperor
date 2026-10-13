@@ -23,8 +23,7 @@ public sealed partial class MatchEngine
             foreach (var other in SlotCandidateCards(command.PlayerId))
             {
                 if (other.Id == target.Id) continue;
-                try { ValidateAbility(command with { TargetId = other.Id }, slotAbility); }
-                catch (RuleViolation) { continue; }
+                if (TryValidateAbility(command with { TargetId = other.Id }, slotAbility) is not null) continue;
                 throw new RuleViolation($"{Definition(target).Name} may not be targeted by another player's action while another legal target ({Definition(other).Name}) is available.");
             }
         }

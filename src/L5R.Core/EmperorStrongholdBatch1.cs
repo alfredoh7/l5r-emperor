@@ -188,12 +188,14 @@ public sealed partial class MatchEngine
     // Validation of the Favor discard cost: the Imperial Favor, or (with the cost option) a Favor token.
     private void RequireFavorDiscard(GameCommand command, PlayerState player)
     {
-        if (command.CostOption == FavorTokenCostOption)
-        {
-            Require(FavorTokenSource(player.Id) is not null, "Your Kyuden Otomo has no Favor token to discard.");
-            return;
-        }
-        Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
+        if (FavorDiscardRejection(command, player) is { } why) throw new RuleViolation(why);
+    }
+
+    // RequireFavorDiscard's reason as a value (null when the discard is allowed), for ValidateAbilityResult (issue #890).
+    private string? FavorDiscardRejection(GameCommand command, PlayerState player)
+    {
+        if (command.CostOption == FavorTokenCostOption) return FavorTokenSource(player.Id) is not null ? null : "Your Kyuden Otomo has no Favor token to discard.";
+        return _state.FavorPlayerId == player.Id ? null : "You must control the Imperial Favor to discard it.";
     }
 
     // The cost itself.
@@ -365,7 +367,7 @@ public sealed partial class MatchEngine
         {
             var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, AbilityId: id, Provinces: set.Length == 0 ? null : set, Province: set.Length == 0 ? null : set[0]);
             string? error = null;
-            try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+            error = TryValidateAbility(command);
             var label = ability.Label + (set.Length == 0 ? "" : $" · province{(set.Length == 1 ? "" : "s")} {string.Join(" and ", set.Select(p => p + 1))}");
             yield return new("useAbility", label, error is null, error, error is null ? command : null, source?.Id, null, set.Length == 0 ? null : set);
         }

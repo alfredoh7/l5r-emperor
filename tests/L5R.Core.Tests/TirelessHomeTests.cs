@@ -156,7 +156,7 @@ internal static class TirelessHomeTests
     {
         // The id list of ValidateAbility's bowed-source rule is left in place beside the flag: every id it named before issue #672 is still named there...
         var source = File.ReadAllText(Path.Combine(RepoRoot(), "src/L5R.Core/CardAbilities.cs"));
-        var start = source.IndexOf("Require(!source.Bowed || id is \"shinden-choice\"", StringComparison.Ordinal);
+        var start = source.IndexOf("if (!(!source.Bowed || id is \"shinden-choice\"", StringComparison.Ordinal); // ValidateAbilityResult returns the refusal (issue #890)
         var end = source.IndexOf("\"Abilities on bowed cards cannot be used.\"", start, StringComparison.Ordinal);
         Check(start > 0 && end > start, "the bowed-source rule located");
         var rule = source[start..end];
