@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Bot prudence (issue 902): effects on both sides only when the opponent loses clearly more; create a cheap Personality first; bows never aimed at bowed cards (the bot was keeping the engine's default first-legal target for every targeted ability, now it chooses by intent); never claim the first battle action as Defender or without units on both sides; keep Gold for the Dynasty phase in the first turns.",
-  "validation": "bash tools/check.sh --skip-client exit 0; prudence tests 6/6; arena (L5R_ARENA_SPEC=prudence, 12 decks, 264 games): new bot 174 wins vs 90 without the rules (65.9%, p<0.0001).",
-  "remaining": "None; ready for review. Positive Sneak Attack use (when claiming is good) is unchanged.",
+  "lane": "shared",
+  "summary": "Bot prudence (issue 902): effects on both sides only when the opponent loses clearly more; create a cheap Personality first; bows never aimed at bowed cards (the bot kept the engine's default first-legal target for every targeted ability, now it chooses by intent); never claim the first battle action as Defender or without units on both sides; keep Gold for the Dynasty phase in the first turns. Touches bot (rules lane) plus bot tests and docs.",
+  "validation": "bash tools/check.sh --skip-client exit 0; prudence tests 6/6; arena (L5R_ARENA_SPEC=prudence, 12 decks, 264 games): 174 wins vs 90 without the rules (65.9%, p<0.0001).",
+  "remaining": "None; ready for review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/902",
   "branch": "claude/902-bot-prudence",
-  "updated": "2026-10-13T07:59:39.191433+00:00"
+  "updated": "2026-10-13T07:59:53.226208+00:00"
 }
