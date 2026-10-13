@@ -51,7 +51,7 @@ public sealed partial class MatchEngine
                 // other province leaves it null, keeping the legacy Card field as the whole story (the PR #544 view contract).
                 { FortificationIds = FortificationsOf(player.Id, p.Index), DynastySlots = p.CardId2 is null ? null : [new(0, p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp)), new(1, ViewCard(Card(p.CardId2), Card(p.CardId2).FaceUp))] }).ToArray(), // issue #503
                 player.Id == playerId ? player.Hand.Select(id => ViewCard(Card(id))).ToArray() : [], player.Hand.Count,
-                player.DynastyDeck.Count, player.FateDeck.Count,
+                // Current Dynasty/Fate deck sizes are hidden information (EE-STATE-014): no seat's projection carries them, not even the deck owner's.
                 owned.Where(c => c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c => ViewCard(c)).ToArray(),
                 player.ProclaimUsedTurn == _state.TurnNumber, player.DishonorLossPending,
                 owned.Where(c => c.Zone == Zone.RemovedFromGame).Select((c, i) => c.FaceUp || c.OwnerId == playerId ? ViewCard(c) : HiddenRemovedView(c, i)).ToArray(), // issue #821: a face-down card removed from the game stays hidden from the other player

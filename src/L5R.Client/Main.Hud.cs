@@ -86,7 +86,7 @@ public partial class Main
         body.AddChild(Palette.Text(player.Clan + " · " + name, 27, Palette.Gold, true));
         if (deck)
         {
-            body.AddChild(Palette.Wrapped($"{(zone == Zone.FateDeck ? player.FateDeckCount : player.DynastyDeckCount)} cards remain. Deck contents and order are hidden.", 19));
+            body.AddChild(Palette.Wrapped("Deck size, contents and order are hidden.", 19));
             if (zone == Zone.FateDeck) body.AddChild(Palette.Text($"{player.HandCount} cards in hand", 18));
             return;
         }

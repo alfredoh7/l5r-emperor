@@ -134,14 +134,14 @@ public sealed record LookCardView(int Position, string DefinitionId, CardDefinit
 /// viewed cards may legally take it), so "choose exactly 1 to put in your hand" is Min = Max = 1.</summary>
 public sealed record LookRuleView(string Disposition, string Label, int Min, int Max);
 
-/// <summary>One deck the viewer may choose to look at, with whose it is (public) and its size (public).</summary>
-public sealed record LookDeckChoiceView(string Deck, int OwnerId, bool OwnDeck, string Label, int CardsRemaining);
+/// <summary>One deck the viewer may choose to look at, with whose it is (public). Its size is hidden information and is never sent.</summary>
+public sealed record LookDeckChoiceView(string Deck, int OwnerId, bool OwnDeck, string Label);
 
 /// <summary>PRIVATE to the viewing player (null in everyone else's view). Stage "ChooseDeck": DeckChoices. Stage "Arrange":
 /// Cards (top first, at most Requested), Rules, Remainder (where an unclaimed card goes) and CanReorder. Requested is N;
 /// Cards.Length is smaller when the deck has fewer cards left.</summary>
 public sealed record LookView(string Stage, string SourceCardId, string SourceName, string Label, string Prompt,
-    LookDeckChoiceView[]? DeckChoices, string? Deck, int? DeckOwnerId, bool OwnDeck, int Requested, int CardsRemaining,
+    LookDeckChoiceView[]? DeckChoices, string? Deck, int? DeckOwnerId, bool OwnDeck, int Requested,
     LookCardView[]? Cards, LookRuleView[]? Rules, string Remainder, bool CanReorder);
 
 public sealed partial class MatchEngine
@@ -378,13 +378,12 @@ public sealed partial class MatchEngine
                 spec.Targets.Select(t =>
                 {
                     var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
-                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count);
+                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck");
                 }).ToArray(),
-                null, null, false, look.Count, 0, null, null, spec.Remainder, spec.Reorder);
+                null, null, false, look.Count, null, null, spec.Remainder, spec.Reorder);
         var cards = ViewedCards(look);
         var offered = OfferedDispositions(spec);
         return new("Arrange", source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, null, look.Deck, look.DeckOwnerId, look.DeckOwnerId == viewerId, look.Count,
-            LookDeckList(look.DeckOwnerId!.Value, look.Deck!).Count,
             cards.Select((c, i) => new LookCardView(i, c.DefinitionId, Copy(Definition(c)),
                 offered.Select(d => { var (legal, reason) = LookLegal(look, spec, c, d); return new LookDispositionView(d, DispositionLabel(d, spec), legal, reason); }).ToArray())).ToArray(),
             LookRules(spec).Select(r => { var (min, max) = LookBounds(look, spec, cards, r); return new LookRuleView(r.Disposition, DispositionLabel(r.Disposition, spec), min, max); }).ToArray(),

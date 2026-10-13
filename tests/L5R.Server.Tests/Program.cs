@@ -373,7 +373,7 @@ static async Task LookSurvivesRestart()
             for (var s = 0; s < 2; s++) latest[s] = await ReadLargeTypeAsync(sockets[s], "state", state => state.GetProperty("sequence").GetInt64() == 3);
             Check(reference.Execute(new GameCommand("arrangeTopCards", 0, 2, CardIds: ["2:top", "0:discard", "1:bottom"])).Accepted, "The reference match accepts the same arrangement");
             Check(latest[0].GetProperty("view").GetProperty("pendingLook").ValueKind == JsonValueKind.Null, "The look is over");
-            Check(latest[1].GetProperty("view").GetProperty("players")[1].GetProperty("fateDeckCount").GetInt32() == reference.State.Players[1].FateDeck.Count, "The owner's deck count reflects the discard");
+            foreach (var seat in latest) Check(!seat.GetRawText().Contains("deckcount", StringComparison.OrdinalIgnoreCase) && !seat.GetRawText().Contains("cardsremaining", StringComparison.OrdinalIgnoreCase), "No seat's state carries a current deck count, even after a look");
             foreach (var socket in sockets) socket.Dispose();
         }
         // ---- second server: restart; the arrangement is part of the journal ----

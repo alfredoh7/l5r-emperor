@@ -109,9 +109,9 @@ public sealed partial class MatchEngine
     // uses). As with Tireless Efforts, the Force tokens already on him are left alone: a token is a card-state object that outlasts the turn, not a turn-long bonus.
     private void NegateActionForceModifiers(CardInstance card)
     {
-        var removed = card.Modifiers.RemoveAll(m => m.Stat == "Force" && AbilityCatalog.All.TryGetValue(m.Effect, out var giving) && IsAction(giving));
+        var removed = SuppressModifiers(card, m => m.Stat == "Force" && AbilityCatalog.All.TryGetValue(m.Effect, out var giving) && IsAction(giving));
         card.ForceModifiersNegatedTurn = _state.TurnNumber;
-        Emit("forceModifiersNegated", $"{Definition(card).Name}: every Force bonus and penalty on him from actions is negated for the turn{(removed > 0 ? $" ({removed} removed)" : "")}.", card.OwnerId, card.Id);
+        Emit("forceModifiersNegated", $"{Definition(card).Name}: every Force bonus and penalty on him from actions is negated for the turn{(removed > 0 ? $" ({removed} set aside until the turn ends)" : "")}.", card.OwnerId, card.Id);
     }
 
     private bool ActionForceModifierNegated(CardInstance card, string? stat, int amount) =>

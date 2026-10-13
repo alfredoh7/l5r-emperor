@@ -154,7 +154,7 @@ public sealed partial class MatchEngine
             Emit("honorGainNegated", $"{name} does not gain Honor ({reason}; The Forgotten Temple).", playerId, source?.Id);
             return 0;
         }
-        var from = reason == "Dishonorable death" ? null
+        var from = _rulebookHonorChange ? null
             : source ?? (_runningCommand?.CardId is string runningId && _state.Cards.TryGetValue(runningId, out var running) ? running : null);
         if (from is not null && (from.OriginalOwnerId ?? from.OwnerId) == playerId)
         {

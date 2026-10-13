@@ -3,6 +3,15 @@ using L5R.Core;
 
 internal static class RegressionAssertions
 {
+    /// <summary>Issue #913: every cost-bearing GoldQuote carries its payment methods, and every source the engine suggests (and so accepts) is one of them.</summary>
+    public static void QuoteCarriesSources(GoldQuote quote, string where)
+    {
+        Require(quote.Sources is not null, $"{where}: the quote has no Sources");
+        var ids = quote.Sources!.Select(s => s.Id).ToHashSet();
+        foreach (var payment in quote.Payments)
+            Require(payment.SourceIds.All(ids.Contains), $"{where}: a suggested source [{string.Join(",", payment.SourceIds)}] is not among Sources [{string.Join(",", ids)}]");
+    }
+
     public static void Accept(MatchEngine engine, GameCommand command)
     {
         var duplicated = ReactionProbe.Before(engine); // issue #898: L5R_REACTION_PROBE=1 checks every reaction window a suite reaches

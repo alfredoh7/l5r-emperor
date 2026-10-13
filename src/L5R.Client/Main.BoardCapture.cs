@@ -395,8 +395,8 @@ public partial class Main
             var dialog = GetChildren().OfType<AcceptDialog>().Last(d => !d.IsQueuedForDeletion());
             var actual = HudDescendants(dialog).OfType<CardTile>().Select(t => t.Card.Id).Order().ToArray();
             if (!expected.SequenceEqual(actual)) throw new InvalidOperationException("Pile inspection exposed a deck card or omitted a discarded card.");
-            var count = pile.PileZone switch { Zone.DynastyDeck => player.DynastyDeckCount, Zone.FateDeck => player.FateDeckCount, _ => expected.Length };
-            if (pile.Count != count || !pile.TooltipText.Contains($"{count} cards", StringComparison.Ordinal)) throw new InvalidOperationException("Pile hover count disagrees with the projected view.");
+            var deck = pile.PileZone is Zone.DynastyDeck or Zone.FateDeck;
+            if (deck ? pile.Count != TablePile.DeckDepth || System.Text.RegularExpressions.Regex.IsMatch(pile.TooltipText, @"\b\d+ cards\b(?! in hand)") : pile.Count != expected.Length || !pile.TooltipText.Contains($"{expected.Length} cards", StringComparison.Ordinal)) throw new InvalidOperationException("Pile hover text discloses a deck size or disagrees with the projected public pile.");
             dialog.Hide(); dialog.QueueFree();
         }
         var badge = _clanHud.GetChildren().OfType<ClanPlaque>().Last();

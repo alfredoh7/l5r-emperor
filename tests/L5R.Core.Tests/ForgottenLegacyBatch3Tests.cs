@@ -31,6 +31,7 @@ internal static class ForgottenLegacyBatch3Tests
         ("Cast Aside the Weak: straightens its performing Samurai's whole unit; separately, bows a target enemy card without attachments and destroys it only when the Samurai is a Paragon", CastAsideScenario),
         ("Consideration: a Tactician gives another of his controller's Personalities +3F, and the next action of another player's that targets him this turn is negated (its costs still paid); the shield is then spent", ConsiderationScenario),
         ("Creating Order: negates the Force bonuses and penalties from actions on one or two Personalities (a trait's modifier is kept) and refuses new ones this turn; or straightens both their units -- one shared use", CreatingOrderScenario),
+        ("Creating Order hides the Force modifiers from actions without deleting them: a permanent one counts again from the next turn with its source and permanence, a turn's one whose duration ended does not, and the hidden state survives a save", CreatingOrderSuppresses),
         ("Duel of Haiku: an Open duel on Personal Honor; the winner's controller gains 1 Honor and the loser is bowed and dishonored", DuelOfHaikuScenario),
         ("Entrenched Position: the Defender negates a Battle action the Attacker announces while he still holds the first opportunity he claimed (the action is still taken); once the Attacker has ceded priority no window opens; its Battle half bows an enemy card without attachments", EntrenchedPositionScenario),
         ("Feint & Strike: its Commander with a Follower destroys an attachment in the target's unit and moves him home (no attachment slot without a Follower); as a Focus Effect, the duel winner's controller must discard a card", FeintAndStrikeScenario),
@@ -45,9 +46,16 @@ internal static class ForgottenLegacyBatch3Tests
         Check(listed.Order(StringComparer.Ordinal).SequenceEqual(Wave.Order(StringComparer.Ordinal)), "the manifest pins exactly the wired cards");
         var expected = new Dictionary<string, string[]>
         {
-            [GameOfDice] = ["game-of-dice-draw"], [YojimbosDuty] = ["yojimbos-duty-recruit", "yojimbos-duty-straighten"], [AccidentalConfession] = ["accidental-confession-dishonor"],
-            [BrokenAlliance] = ["broken-alliance-destroy", "broken-alliance-move"], [CastAside] = ["cast-aside-straighten", "cast-aside-bow"], [Consideration] = ["consideration-boost"],
-            [CreatingOrder] = ["creating-order-negate", "creating-order-straighten"], [DuelOfHaiku] = ["duel-of-haiku"], [EntrenchedPosition] = ["entrenched-negate", "entrenched-bow"], [FeintAndStrike] = ["feint-strike-focus", "feint-strike-move"],
+            [GameOfDice] = ["game-of-dice-draw"],
+            [YojimbosDuty] = ["yojimbos-duty-recruit", "yojimbos-duty-straighten"],
+            [AccidentalConfession] = ["accidental-confession-dishonor"],
+            [BrokenAlliance] = ["broken-alliance-destroy", "broken-alliance-move"],
+            [CastAside] = ["cast-aside-straighten", "cast-aside-bow"],
+            [Consideration] = ["consideration-boost"],
+            [CreatingOrder] = ["creating-order-negate", "creating-order-straighten"],
+            [DuelOfHaiku] = ["duel-of-haiku"],
+            [EntrenchedPosition] = ["entrenched-negate", "entrenched-bow"],
+            [FeintAndStrike] = ["feint-strike-focus", "feint-strike-move"],
         };
         foreach (var id in Wave)
         {
@@ -214,11 +222,12 @@ internal static class ForgottenLegacyBatch3Tests
         var e = MatchEngine.FromTestState(s);
         var option = Enabled(e, 0, "creating-order-negate", order.Id);
         Accept(e, option.Command! with { TargetId = first.Id, Selections = [Pick("targets", first.Id, second.Id)] });
-        Check(e.State.Cards[first.Id].Modifiers.All(m => m.Effect == "a-trait"), "the action's penalty is gone, the trait's bonus stays");
-        Check(e.State.Cards[second.Id].Modifiers.Count == 0, "the action's bonus is gone from the second target too");
+        Check(e.State.Cards[first.Id].Modifiers.Where(m => m.SuppressedTurn != e.State.TurnNumber).All(m => m.Effect == "a-trait"), "the action's penalty is set aside, the trait's bonus stays");
+        Check(e.State.Cards[second.Id].Modifiers.All(m => m.SuppressedTurn == e.State.TurnNumber), "the action's bonus is set aside on the second target too");
         Check(!CanUse(e, 0, "creating-order-straighten", order.Id), "one shared use");
         Accept(e, Offer(e, 1, "weak-poison-force-zero", poison.Id, first.Id));
-        Check(e.State.Cards[first.Id].Modifiers.All(m => m.Effect == "a-trait"), "a new Force penalty from an action is not applied this turn");
+        Check(e.State.Cards[first.Id].Modifiers.Where(m => m.SuppressedTurn != e.State.TurnNumber).All(m => m.Effect == "a-trait"), "a new Force penalty from an action is not applied this turn");
+        Check(e.State.Cards[first.Id].Modifiers.All(m => m.Effect is "a-trait" or "weak-poison-force-zero"), "and it is not kept hidden either");
 
         var s2 = Table(Phase.Action, 0);
         var order2 = Add(s2, CreatingOrder, 0, Zone.Hand);
@@ -229,6 +238,33 @@ internal static class ForgottenLegacyBatch3Tests
         var option2 = Enabled(e2, 0, "creating-order-straighten", order2.Id);
         Accept(e2, option2.Command! with { TargetId = a.Id, Selections = [Pick("targets", a.Id, b.Id)] });
         Check(!e2.State.Cards[a.Id].Bowed && !e2.State.Cards[aFollower.Id].Bowed && !e2.State.Cards[b.Id].Bowed, "both targets' units straightened");
+    }
+
+    private static void CreatingOrderSuppresses()
+    {
+        var s = Table(Phase.Action, 0);
+        var order = Add(s, CreatingOrder, 0, Zone.Hand);
+        var target = Add(s, "training-lion-samurai", 1, Zone.Home);
+        var printed = CardCatalog.Get("training-lion-samurai").Force;
+        target.Modifiers.Add(new("fx", "consideration-boost", "Force", 2, Permanent: true)); // an action's permanent +2
+        target.Modifiers.Add(new("fx", "consideration-boost", "Force", 3)); // an action's bonus for the turn
+        target.Modifiers.Add(new("fx", "a-trait", "Force", 1, Permanent: true)); // a standing trait's
+        var e = MatchEngine.FromTestState(s);
+        Eq(e.CardForceForTest(target.Id), printed + 6, "before");
+        Accept(e, Enabled(e, 0, "creating-order-negate", order.Id).Command! with { TargetId = target.Id, Selections = [Pick("targets", target.Id)] });
+        Eq(e.CardForceForTest(target.Id), printed + 1, "during the prevention only the trait counts");
+        Eq(e.State.Cards[target.Id].Modifiers.Count, 3, "nothing was deleted");
+        Check(e.State.Cards[target.Id].Modifiers.Any(m => m.Permanent && m.Source == "fx" && m.Amount == 2), "the permanent modifier keeps its source, amount and permanence");
+
+        // The save: a detached copy through JSON keeps the hidden state.
+        var saved = System.Text.Json.JsonSerializer.Deserialize<MatchState>(System.Text.Json.JsonSerializer.Serialize(e.State))!;
+        Eq(MatchEngine.FromTestState(saved).CardForceForTest(target.Id), printed + 1, "after a save and load it is still hidden this turn");
+
+        // The next turn: the turn's own modifier is swept as ever (its duration ended during the prevention); the permanent one is back.
+        var later = saved;
+        later.Cards[target.Id].Modifiers.RemoveAll(m => !m.Permanent); // FinishTurn's sweep
+        later.TurnNumber++;
+        Eq(MatchEngine.FromTestState(later).CardForceForTest(target.Id), printed + 3, "the permanent +2 applies again with the trait's +1; the turn's +3 ended during the prevention and does not return");
     }
 
     private static void DuelOfHaikuScenario()
