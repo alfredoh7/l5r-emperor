@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Normal views carry no current Dynasty/Fate deck counts for either seat (PlayerView counts and look/search CardsRemaining removed, protocol 3 to 4; client draws decks at fixed depth with no number). useAbility naming a hidden/unknown card is refused with one fixed message before any definition-specific rule (EE-Areas-of-the-game-072).",
+  "validation": "Core tests 4534/4534 (incl. new hidden-information suite); server tests 10/10; client transport 22/22; dotnet build src/L5R.Client OK; check_format clean. Native Godot client not run (no graphical session): pile dialog, tooltips and fixed-depth decks unverified visually.",
+  "remaining": "ContentVersion bump left to lead; client native visual/input check of piles and duel Fate pile pending; deck-size threshold costs (Overgrown Grove, Improved Defenses) still refuse on small decks (owner-only).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/919",
+  "branch": "claude/919-no-deck-counts",
+  "updated": "2026-10-13T19:10:48.179372+00:00"
+}
