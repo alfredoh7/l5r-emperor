@@ -160,3 +160,10 @@ offline. `Play Latest.bat`, `Play Latest.command`, `tools/run.sh`, `tools/check.
 (the glob takes the first `Godot*_mono_*.exe`), bump the `Godot.NET.Sdk/<version>` in the client project files if the
 version changed, and delete each worktree's stale `.tools/godot-nuget/*.nupkg` so `env.sh` refills them. Never commit
 `.tools/`.
+
+## Native UI checks and the real mouse (issue #905)
+
+Hover checks used to warp the operating system's cursor and then push the same motion into Godot, so they failed whenever the cursor was elsewhere or the window had no focus (board-ui,
+perspective-table, ink-mat and province-ui all did, on a machine nobody was sitting at). `tools/env.sh` now sets `L5R_PROBE_NO_OS_MOUSE=1`: the probes use `Viewport.PushInput` only, and
+those four checks pass without focus. Run with `L5R_PROBE_NO_OS_MOUSE=0` to warp the cursor as before, for a rare check of real windowing. New probes should move the mouse through
+`MoveProbeMouse` (Main.CameraCapture.cs), not `Input.WarpMouse`.
