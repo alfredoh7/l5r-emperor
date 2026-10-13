@@ -88,9 +88,24 @@ public partial class TableArtStage : Node3D
         _hallPort.RenderTargetUpdateMode = SubViewport.UpdateMode.Once;
     }
 
+    // The pre-draw hook follows the node's time in the tree: a duel reparents the table (exit then enter), and the hall must keep refreshing afterwards (issue #927).
+    private bool _hallSubscribed;
+    private void SubscribeHall()
+    {
+        if (_hallSubscribed) return;
+        RenderingServer.FramePreDraw += RenderHallIfStale; _hallSubscribed = true;
+    }
+
+    public override void _EnterTree()
+    {
+        if (_hallPort is null) return;
+        SubscribeHall(); _hallDirty = true;
+    }
+
     public override void _ExitTree()
     {
-        if (_hallPort is not null) RenderingServer.FramePreDraw -= RenderHallIfStale;
+        if (!_hallSubscribed) return;
+        RenderingServer.FramePreDraw -= RenderHallIfStale; _hallSubscribed = false;
     }
 
     /// <summary>Starts loading the hall on background threads once the player heads for a table, so entering it does not stall on disk.</summary>
@@ -116,7 +131,7 @@ public partial class TableArtStage : Node3D
         _hallPort.AddChild(_warRoom);
         _hallDirty = true;
         _hallContainer.Resized += () => { if (_warRoom is not null) _applyCamera?.Invoke(_warRoom); _hallDirty = true; };
-        RenderingServer.FramePreDraw += RenderHallIfStale;
+        SubscribeHall();
         GD.Print($"WAR_ROOM_BUILD_MS: {clock.ElapsedMilliseconds}");
         _applyCamera?.Invoke(_warRoom);
         _warRoom.PresentLight(_lightTime, !ReviewMode && !ReducedMotion);

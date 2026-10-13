@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Fix: the war room hall's pre-draw refresh hook was removed when the table left the tree and never restored. A duel reparents the table, so after the first duel in a game the hall stopped refreshing (camera moves and candle flicker would freeze) and each later exit logged 'Attempt to disconnect a nonexistent connection ... frame_pre_draw'. The hook now follows _EnterTree/_ExitTree.",
+  "validation": "check.sh --client-only passes; check-duel-match no longer logs any frame_pre_draw disconnect error (the 20 Button mouse_entered/mouse_exited disconnect errors in that check are old: they also appear at 931d2c1f, before the hall viewport existed).",
+  "remaining": "The Button mouse_entered/mouse_exited disconnect errors in check-duel-match are pre-existing and not addressed here.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/926",
+  "branch": "claude/927-hall-resubscribe",
+  "updated": "2026-10-13T19:32:52.831845+00:00"
+}
