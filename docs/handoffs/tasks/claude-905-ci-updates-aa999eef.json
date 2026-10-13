@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Updates and CI reliability from the external practices assessment: docs-only changes skip the desktop CI (check.yml paths-ignore), RUN trace lines and crash dumps for hung or crashed test runs, failure webhooks for main and the nightly (CI_FAILURE_WEBHOOK secret, no-op without it), preview release notes from handoff records (tools/collaboration/release_notes.py), a no-wiring-tests policy line, and native UI checks that drive Godot's input pipeline instead of warping the OS cursor (board-ui, perspective-table, ink-mat, province-ui now pass without window focus).",
+  "validation": "check.sh --skip-client passes; zizmor pedantic and tools/security/check_policy.py clean on the changed workflows; 7 new release-notes tests; board-ui, perspective-table, interactions, province-ui and ink-mat pass with L5R_PROBE_NO_OS_MOUSE=1 on a desktop where board-ui and perspective-table had failed on real-mouse hover.",
+  "remaining": "Webhook needs a CI_FAILURE_WEBHOOK secret to post; docs-only filter and dump upload are first exercised by the next docs-only and failing runs; other recommendations follow in separate PRs.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/905",
+  "branch": "claude/905-ci-updates",
+  "updated": "2026-10-13T07:50:34.408774+00:00"
+}

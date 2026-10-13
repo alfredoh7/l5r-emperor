@@ -40,6 +40,8 @@ internal sealed class TestRunner
         return true;
     }
 
+    private static readonly bool trace = Environment.GetEnvironmentVariable("L5R_TEST_TRACE") == "1";
+
     public void Run(string suite, IEnumerable<(string Name, Action Test)> tests)
     {
         var count = 0; var failuresBefore = failed;
@@ -59,6 +61,7 @@ internal sealed class TestRunner
             if (owner != shardIndex) continue;
             selected++; count++;
             if (list) { Console.WriteLine(label); continue; }
+            if (trace) Console.WriteLine("RUN  " + label); // L5R_TEST_TRACE=1 (CI): the last RUN line of a log that stops is the case that hung (issue #905)
             var clock = Stopwatch.StartNew();
             try { test(); Console.WriteLine("PASS " + label); }
             catch (Exception ex) { failed++; failures.Add(label); Console.Error.WriteLine($"FAIL {label}\n{ex}"); }
