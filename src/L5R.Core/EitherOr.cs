@@ -491,7 +491,8 @@ public sealed partial class MatchEngine
     }
 
     private GoldQuote EitherOrGoldQuote(PendingEitherOr p, EitherOrOption option) =>
-        new(option.GoldCost, GoldCostKind.Fixed, $"{Definition(Card(p.SourceCardId)).Name}: {option.Label.ToLowerInvariant()}", null, PaymentOptions(p.DeciderPlayerId, option.GoldCost, EitherOrPayingFor(p)));
+        new(option.GoldCost, GoldCostKind.Fixed, $"{Definition(Card(p.SourceCardId)).Name}: {option.Label.ToLowerInvariant()}", null, PaymentOptions(p.DeciderPlayerId, option.GoldCost, EitherOrPayingFor(p)),
+            Sources: PaymentSourcesFor(p.DeciderPlayerId, EitherOrPayingFor(p))); // the same subject ValidatePayment uses, so a published alternative source is selectable
 
     // ---- the deciding player's legal actions ----
 

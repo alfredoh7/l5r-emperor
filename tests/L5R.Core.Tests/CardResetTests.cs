@@ -18,7 +18,7 @@ internal static class CardResetTests
     public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [("Leave play: ResetCardState returns every per-play CardInstance property to its default", ResetCoversEveryField),
-            ("R-081: a face-up dishonorable Personality keeps Dishonorable in a public zone and loses it in a hand, a deck or face down", DishonorOutsidePlay)];
+            ("R-082: a face-up dishonorable Personality keeps Dishonorable in a public zone and loses it in a hand, a deck or face down", DishonorOutsidePlay)];
         runner.Run("card-reset", tests);
     }
 
@@ -50,7 +50,7 @@ internal static class CardResetTests
         if (left.Count > 0) throw new Exception("ResetCardState leaves these per-play properties set (reset them, or list them as kept): " + string.Join(", ", left));
     }
 
-    // R-081 (EE-STATE-008, Mendon 2026-10-13): the status follows a face-up Personality out of play; a hidden zone or a face-down card has no public status.
+    // R-082 (EE-STATE-008, Mendon 2026-10-13): the status follows a face-up Personality out of play; a hidden zone or a face-down card has no public status.
     private static void DishonorOutsidePlay()
     {
         bool After(string definition, Zone zone, bool faceUp)

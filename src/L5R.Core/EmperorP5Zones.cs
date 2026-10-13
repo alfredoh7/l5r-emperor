@@ -207,7 +207,7 @@ public sealed partial class MatchEngine
             ResetCardState(attachment);
             attachment.Zone = Zone.RemovedFromGame; attachment.ProvinceIndex = null; // AttachedTo is kept: the attachments stay attached
         }
-        var wasDishonorable = shugenja.Dishonorable; // R-081: removed from the game face up, he keeps the status and returns with it
+        var wasDishonorable = shugenja.Dishonorable; // R-082: removed from the game face up, he keeps the status and returns with it
         ResetCardState(shugenja);
         shugenja.Dishonorable = wasDishonorable;
         shugenja.Zone = Zone.RemovedFromGame; shugenja.ProvinceIndex = null;

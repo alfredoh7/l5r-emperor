@@ -524,7 +524,7 @@ public sealed partial class MatchEngine
         var priced = QuotePurchase(playerId, card.Id, fromDynastyDeck: true);
         var cost = priced.Cost + 2;
         var paying = new PaymentSubject(card, PaymentKind.Recruit);
-        var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} entry price {priced.Cost} + 2 ({Definition(Card(search.SourceCardId)).Name})", null, PaymentOptions(playerId, cost, paying));
+        var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} entry price {priced.Cost} + 2 ({Definition(Card(search.SourceCardId)).Name})", null, PaymentOptions(playerId, cost, paying), Sources: PaymentSourcesFor(playerId, paying));
         yield return new("chooseSearchPayment", $"Pay {cost} Gold: bring {Definition(card).Name} into play", quote.Payments.Length > 0, quote.Payments.Length > 0 ? null : "You cannot pay for him.",
             new GameCommand("chooseSearchPayment", playerId, _state.Version, SourceIds: quote.Payments.FirstOrDefault()?.SourceIds), card.Id, Gold: quote);
         yield return new("chooseSearchPayment", $"Do not pay: {Definition(card).Name} is discarded", true, null, new GameCommand("chooseSearchPayment", playerId, _state.Version, Choice: "decline"), card.Id);
@@ -675,7 +675,7 @@ public sealed partial class MatchEngine
     private (int PlayerId, int Amount) EmperorRemainingCHonorChange(int playerId, int amount, string reason)
     {
         if (amount == 0) return (playerId, 0);
-        if (!_payingActionCost && CurrentActionKey() is { } key)
+        if (!_payingActionCost && !_rulebookHonorChange && CurrentActionKey() is { } key)
         {
             if (RemC.RedirectActionKey == key && !RemC.RedirectSpent && (RemC.RedirectOccurrence < 0 || RemC.RedirectOccurrence == _honorChangeOccurrence - 1) && playerId != RemC.RedirectToPlayer
                 && RemC.RedirectCourtierId is { } courtierId && _state.Cards.TryGetValue(courtierId, out var courtier) && InPlay(courtier) && PersonalityChi(courtier) >= Math.Abs(amount))

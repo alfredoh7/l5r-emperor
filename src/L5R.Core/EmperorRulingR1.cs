@@ -110,16 +110,24 @@ public sealed partial class MatchEngine
         : R1.Additional.TryGetValue(battlefield, out var associated) && associated >= 0 ? $"the additional battlefield at province {associated + 1}"
         : "the battlefield without a province";
 
-    /// <summary>The battlefields next to `current`: those at the provinces next to its province in the Defender's line (destroyed provinces slide together), every battlefield of each such province
-    /// (an additional one at it included). A battlefield without a province has none (Mendon: "There are no adjacent provinces to a battlefield that is not at a province").</summary>
+    /// <summary>The battlefields associated with one of the Defender's provinces, left to right: the province's own (primary) battlefield first, then each additional one in creation order.</summary>
+    private int[] BattlefieldLine(int province) => new[] { province }.Concat(R1.Additional.Where(a => a.Value == province).Select(a => a.Key).Order()).ToArray();
+
+    /// <summary>The battlefields next to `current`, left to right, by the Comprehensive Rules' topology (Mendon, 2026-10-13, validation report EE-Areas-of-the-game-047): battlefields at adjacent provinces are
+    /// adjacent (destroyed provinces slide together); battlefields associated with one province form a line between the flanking provinces, the leftmost next to the left province, the rightmost next to the
+    /// right one and each next to its neighbour(s) within the province. A battlefield without a province has none (Mendon: "There are no adjacent provinces to a battlefield that is not at a province").</summary>
     private IEnumerable<int> AdjacentBattlefields(int current)
     {
         if (BattlefieldProvinceIndex(current) is not int province) yield break;
-        foreach (var neighbour in AdjacentProvinces(1 - _state.ActivePlayerId, province))
-        {
-            yield return neighbour;
-            foreach (var extra in R1.Additional.Where(a => a.Value == neighbour).Select(a => a.Key).Order()) yield return extra;
-        }
+        var provinces = Player(1 - _state.ActivePlayerId).Provinces;
+        var line = BattlefieldLine(province);
+        var position = Array.IndexOf(line, current);
+        if (position == 0)
+            for (var i = province - 1; i >= 0; i--) if (!provinces[i].Destroyed) { yield return BattlefieldLine(i)[^1]; break; }
+        if (position > 0) yield return line[position - 1];
+        if (position < line.Length - 1) yield return line[position + 1];
+        if (position == line.Length - 1)
+            for (var i = province + 1; i < provinces.Count; i++) if (!provinces[i].Destroyed) { yield return BattlefieldLine(i)[0]; break; }
     }
 
     /// <summary>The battlefields the Attacker may assign attackers to at the declaration: every one of the Defender's provinces that stands, and each additional battlefield the declaration created (Two Fronts).</summary>

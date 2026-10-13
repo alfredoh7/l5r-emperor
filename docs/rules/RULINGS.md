@@ -676,7 +676,14 @@ The Event opens a duel during the event resolution stage of the Events Phase. It
 - **Date:** 2026-10-12
 - **Source:** Mendon, from the Comprehensive Rules clarification (Bowed and unbowed, 2013-06-05) — [decision](../decisions/2026-10-12-bowed-host-attachment-abilities.md); text in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md).
 
-### R-081 — A face-up dishonorable Personality stays dishonorable outside play and on re-entry
+### R-081 — Battlefield adjacency: battlefields sharing a province form a line between the flanking provinces
+Battlefields at adjacent provinces are adjacent (destroyed provinces slide together; "left" and "right" follow the Defender's province line). A battlefield with no province is adjacent to nothing. When several battlefields are associated with one province (Two Fronts and the like) they are arranged in a line between the flanking provinces: the leftmost is adjacent to the province on the left, the rightmost to the province on the right, and each is adjacent to its neighbour(s) within that province, so siblings are adjacent to each other and a flanking province touches only the nearer end of the line. Order within a province: the province's primary battlefield is leftmost, and additional battlefields follow in creation order (the last created is rightmost).
+
+- **Cards/primitives:** Sea Troll Predator (oracle-l5r-6522), Moto Gunso (oracle-l5r-5320), `personality-at-adjacent-battlefield`, every "adjacent unresolved battlefield" move; `AdjacentBattlefields` (EmperorRulingR1.cs); supersedes the "every battlefield of each neighbouring province" reading of [R1 and the predator pass](../decisions/2026-09-19-hotako-yoshitada-predator-liuxeung.md).
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation report EE-Areas-of-the-game-047 — [decision](../decisions/2026-10-13-validation-report-reading.md); Comprehensive Rules, Battlefields (text in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md)). Issue #920.
+
+### R-082 — A face-up dishonorable Personality stays dishonorable outside play and on re-entry
 A Personality who is dishonorable and face up keeps the Dishonorable status when he leaves play (the dead pile, a discard pile, removed from the game, a face-up province) and when he enters play again, unless an effect rehonors him. A hand or a deck is hidden and a face-down card has no public status, so a Personality sent there loses it. Dishonorable death's Honor loss, "dishonorably dead" checks (`IsDishonorablyDead`, Ivory Political) and Seppuku read the same flag and are unchanged. Supersedes the At Any Cost line of the 2026-09-20 gold-payment rulings (he used to return honorable).
 
 - **Cards/primitives:** `MatchEngine.ResetCardState` / `KeepsDishonorOutsidePlay`; At Any Cost (oracle-l5r-639), Akodo Kobi, Essence of Undeath, I Give You My Name, Shinjo's Guidance and other dead-pile recruits; Your Clan Needs You!; Step Through the Void; Sensei discarded from play.

@@ -1,6 +1,6 @@
 {
   "lane": "shared",
-  "summary": "ResetCardState keeps Dishonorable for a face-up Personality in a public zone (dead/discard/removed/face-up province); hand, deck and face-down lose it. R-081 supersedes the 2026-09-20 At Any Cost line; regressions in GoldRulingsTests.AtAnyCostEntry and CardResetTests.",
+  "summary": "ResetCardState keeps Dishonorable for a face-up Personality in a public zone (dead/discard/removed/face-up province); hand, deck and face-down lose it. R-082 supersedes the 2026-09-20 At Any Cost line; regressions in GoldRulingsTests.AtAnyCostEntry and CardResetTests.",
   "validation": "Core suite 4532/4532 passed; check.sh --skip-client run before push (see PR)",
   "remaining": "None; ready for review. ContentVersion bump: yes, one bump by the lead (dead Personalities recruited by At Any Cost etc. now enter dishonorable; old journals replay differently).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/916",
