@@ -14,6 +14,9 @@ internal static class IdleBattlesTests
         ("A battle with a unit on the battlefield stays manual", UnitsKeepTheBattleManual),
         ("A decision or window that is open is never answered by the engine", OpenDecisionIsNotAnswered),
         ("An engine built from a test state does nothing unless the test asks", OffForTestStates),
+        ("Between two human players the pass in an empty battle is the player's own: the last battlefield is still chosen, but nobody is passed for", HumansPassForThemselves),
+        ("A human who has taken Pass all battles is passed for in an empty battle, with or without the no-human-opponent flag", FlaggedHumanIsPassedFor),
+        ("The no-human-opponent flag is part of the replay, so a replay reaches the same state", FlagIsReplayed),
     ]);
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -21,13 +24,17 @@ internal static class IdleBattlesTests
     private static CardInstance Add(MatchState s, string def, int owner, Zone zone, bool bowed = false, int? province = null, string? parent = null) => Batch336Support.Add(s, def, owner, zone, bowed, province, parent);
 
     // Player 0 attacks (BattleSelection), no units anywhere, no cards in hand.
-    private static MatchState Table(bool idle, params int[] battlefields)
+    private static MatchState Table(bool idle, params int[] battlefields) => Table(idle, idle, battlefields);
+
+    // `passes`: a match with no human opponent (IdleBattlePasses); `idle` alone is the human-vs-human case.
+    private static MatchState Table(bool idle, bool passes, int[] battlefields)
     {
         var s = MatchEngine.CreateEconomyScenario().State;
         foreach (var p in s.Players) { foreach (var id in p.Hand.ToArray()) s.Cards.Remove(id); p.Hand.Clear(); }
         s.Phase = Phase.BattleSelection; s.ActivePlayerId = 0; s.PriorityPlayerId = 0; s.CurrentBattleProvince = null;
         s.UnresolvedBattlefields = (battlefields.Length == 0 ? [0, 1, 2] : battlefields).ToList();
         if (idle) s.IdleBattleSkips = true;
+        if (passes) s.IdleBattlePasses = true;
         return s;
     }
 
@@ -105,5 +112,55 @@ internal static class IdleBattlesTests
         Check(result.Accepted, result.Error ?? "");
         Eq(e.State.Phase, Phase.Battle, "left as a script wrote it");
         Eq(Resolved(result), 0);
+    }
+
+    private static void HumansPassForThemselves()
+    {
+        var e = MatchEngine.FromTestState(Table(true, passes: false, [0, 1, 2]));
+        var result = e.Execute(new("selectBattle", 0, e.Version, Province: 0));
+        Check(result.Accepted, result.Error ?? "");
+        Eq(e.State.Phase, Phase.Battle, "the battle waits for the Defender's own pass");
+        Eq(e.State.PriorityPlayerId, 1);
+        Eq(Resolved(result), 0);
+        var pass = e.Execute(new("pass", 1, e.Version)); Check(pass.Accepted, pass.Error ?? "");
+        Eq(e.State.Phase, Phase.Battle, "and for the Attacker's");
+        Eq(e.State.PriorityPlayerId, 0);
+        var last = e.Execute(new("pass", 0, e.Version)); Check(last.Accepted, last.Error ?? "");
+        Eq(Resolved(last), 1, "two passes resolve it");
+        // Two battlefields left: the Attacker chooses; one left after that: chosen for them.
+        var again = MatchEngine.FromTestState(Table(true, passes: false, [1, 2]));
+        var second = again.Execute(new("selectBattle", 0, again.Version, Province: 1)); Check(second.Accepted, second.Error ?? "");
+        Eq(again.State.Phase, Phase.Battle);
+        var lone = MatchEngine.FromTestState(Table(true, passes: false, [2]));
+        Eq(lone.State.Phase, Phase.BattleSelection);
+        var chosen = lone.Execute(new("selectBattle", 0, lone.Version, Province: 2)); Check(chosen.Accepted, chosen.Error ?? "");
+        Eq(lone.State.Phase, Phase.Battle, "a human still takes their own passes in the last battle");
+    }
+
+    private static void FlaggedHumanIsPassedFor()
+    {
+        var e = MatchEngine.FromTestState(Table(true, passes: false, [0, 1]));
+        var flag = e.Execute(new("passAllBattles", 0, e.Version)); Check(flag.Accepted, flag.Error ?? "");
+        Eq(e.State.Phase, Phase.Battle, "the Attacker's flag chose the first battle; the Defender is not flagged and passes for themselves");
+        var defenderPasses = 0;
+        while (e.State.Phase == Phase.Battle && defenderPasses < 5)
+        {
+            Eq(e.State.PriorityPlayerId, 1, "only the unflagged Defender is ever asked");
+            var pass = e.Execute(new("pass", 1, e.Version)); Check(pass.Accepted, pass.Error ?? ""); defenderPasses++;
+        }
+        Eq(defenderPasses, 2, "one pass per battle, the Attacker's own passes and the choosing of the second battle made for them");
+        Check(e.State.Phase is not (Phase.Battle or Phase.BattleSelection), "the flagged Attacker was passed for in every battle");
+    }
+
+    private static void FlagIsReplayed()
+    {
+        var e = MatchEngine.CreateStarterMatch(31); e.AllowIdleBattlePasses();
+        var replay = e.ExportReplay();
+        Check(replay.IdleBattlePasses, "the flag is exported");
+        var json = System.Text.Json.JsonSerializer.Deserialize<ReplayRecord>(System.Text.Json.JsonSerializer.Serialize(replay))!;
+        Check(json.IdleBattlePasses, "and survives the journal");
+        var back = MatchEngine.Replay(json);
+        Eq(System.Text.Json.JsonSerializer.Serialize(back.State), System.Text.Json.JsonSerializer.Serialize(e.State), "the replay reaches the same state");
+        Check(!MatchEngine.CreateStarterMatch(31).ExportReplay().IdleBattlePasses, "a match that did not ask exports false");
     }
 }

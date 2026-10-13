@@ -103,6 +103,6 @@ public partial class Main
         _presentationSnapshot = null; _battlePresentationStage = 0; _motionView = null; _cameraGlide = false;
         _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
         _selected = null; _selectedHomeReminder = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear();
-        _session.StartPractice(false, true, seat); EnterTable();
+        _session.StartPractice(false, true, seat); _session.AllowIdleBattlePasses(); EnterTable();
     }
 }

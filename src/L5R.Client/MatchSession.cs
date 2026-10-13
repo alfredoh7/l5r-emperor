@@ -116,6 +116,9 @@ public sealed partial class MatchSession : IDisposable
         RefreshLocal();
     }
 
+    /// <summary>The practice opponent is the bot, so nobody can read anything from the engine passing in an empty battle for a player with nothing to play (issue #894).</summary>
+    public void AllowIdleBattlePasses() => _engine?.AllowIdleBattlePasses();
+
     public void StartCustomPractice(Deck yourDeck, Deck opponentDeck)
     {
         // Construct and validate before disconnecting/replacing a running session.

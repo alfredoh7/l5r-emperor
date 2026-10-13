@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Battles with no combatants resolve themselves: an empty battlefield where the player holding the priority has nothing to play is passed for them, and the last battlefield is chosen for the chooser. In 30 seeded bot matches 61% of battles were empty (selectBattle,pass,pass); battle-phase commands fell by about a third. Client skips the outcome beat for resolutions that changed nothing; the server skips saved rooms whose commands no longer replay instead of failing to start.",
-  "validation": "check.sh --skip-client passes; new idle-battles suite (6 cases); core and AI suites unchanged (engines built from a test state leave the rules off; 32 scripted tests would otherwise need new scripts); native battle-presentation and interactions pass; board-ui and perspective-table fail on real-mouse hover, and board-ui fails identically on unmodified main (environmental).",
-  "remaining": "Mendon to confirm the one reading in the decision note (the engine passes without asking when a player truly has nothing to play).",
+  "summary": "Idle-battle passes now apply only in a match with no human opponent (MatchState.IdleBattlePasses, set by solo practice against the bot and by bot batches, recorded in the replay): against the bot the engine passes for the human player and the bot alike; between two humans the pass stays the player's own or the engine's once they take Pass all battles. The last-battlefield selection applies everywhere. Per Mendon.",
+  "validation": "check.sh --skip-client passes (idle-battles suite now 9 cases incl. human-vs-human, flagged human, replay of the flag; server test for unreplayable saved rooms); native battle-presentation and interactions pass; board-ui and perspective-table fail on real-mouse hover, board-ui identically on unmodified main (environmental).",
+  "remaining": "None; ready to merge.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/894",
   "branch": "claude/892-empty-battles",
-  "updated": "2026-10-13T05:01:22.655767+00:00"
+  "updated": "2026-10-13T05:33:02.169354+00:00"
 }

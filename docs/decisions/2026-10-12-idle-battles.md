@@ -17,10 +17,13 @@ choice away from a player.
    the pass (and the Pass-all button, a decline or a concede): the engine passes for them. Anything a player could play there keeps the battle waiting for them. That includes a
    Battle action or Strategy, a move-to-battle action from hand (`BattleAbsentMovesTests`), and an Engage action or Reaction, which opens its window as before. A player who
    "intends to move a Personality there" therefore has an action to do it with, and is asked.
+   **Only in a match with no human opponent** (`MatchState.IdleBattlePasses`, set by solo practice against the bot and by bot batches; recorded in the replay). Mendon's call: a bot
+   cannot read anything into a fast pass, so against the bot the engine passes for the human player and for the bot alike; between two human players the pass stays the player's own
+   to make, or becomes the engine's once they take Pass all battles (#628), so the speed of a reply never says whether a player had something to play.
 2. **The last battlefield.** When one battlefield is left to choose, the player choosing (the Attacker, or the Defender under Warded Paths) has no choice, so it is selected.
 
 A player who has playable actions and chooses to use none still has **Pass all battles** (#628) for the rest of the Attack Phase; when both players take it, every remaining battle is
-resolved at once, as before.
+resolved at once, as before. The last-battlefield rule (2) reveals nothing and applies in every match.
 
 ## Measured
 
@@ -40,7 +43,3 @@ battle now costs the Attacker one selection, or none for the last one.
 - Saved private rooms whose commands the engine no longer replays (a pass in an empty battle, for one) are skipped with a warning like rooms saved under other content, instead of
   stopping the server from starting; their files stay on disk.
 
-## Reading for Mendon to confirm
-
-1. Rule 1 hands a pass to the player without asking when they have nothing to play. If you want the opponent never to learn that from the speed of the reply, say so and it can be limited
-   to a player who has taken Pass all battles.
