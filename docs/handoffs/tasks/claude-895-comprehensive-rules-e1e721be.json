@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Adds docs/rules/COMPREHENSIVE_RULES.md, the Emperor Edition Comprehensive Rules converted from the saved rules.l5r.com copy (core rules, glossary, changes from Celestial, and the Specific Card Rulings A-Z, taken from the CE_Rulings pages because the EE_Rulings pages are empty). Records ruling R-080 (a bowed Personality may use his unbowed attachments' abilities) with a decision doc, and updates SOURCES.md. Spans the rules and decisions docs, hence shared.",
+  "validation": "Documentation only. Converted text spot-checked for the Bowed and unbowed clarification, the Perform glossary entry and card-ruling entries; no navigation or edit-link residue.",
+  "remaining": "None; ready for review. Talk pages, Celestial core rules and format pages were not converted.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/895",
+  "branch": "claude/895-comprehensive-rules",
+  "updated": "2026-10-13T04:54:03.414580+00:00"
+}

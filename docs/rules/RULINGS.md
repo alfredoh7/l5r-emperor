@@ -666,3 +666,12 @@ The Event opens a duel during the event resolution stage of the Events Phase. It
 - **Cards/primitives:** The Empire's Foe Exposed (oracle-l5r-10423); `w835-foe` (an Event), `w835Foe` (the selection), `w835-foe-duel` (`IssueChallenge`; the loser is destroyed).
 - **Date:** 2026-10-11
 - **Source:** Mendon, card wiring list (issue #835).
+
+## Bowing and performers
+
+### R-080 — A bowed Personality may use the abilities of his unbowed attachments
+"Abilities on a bowed card can not be used" refers to the card carrying the ability. An Item or Spell's ability is blocked only when that attachment is bowed; the host Personality, who performs it, may be bowed (unless the text says "unbowed", R-035). "Even if this card is bowed" lets a bowed attachment use the ability.
+
+- **Cards/primitives:** every Item and Spell action; Nightingale Blade (oracle-l5r-5556) with a bowed Bayushi Utoro (oracle-l5r-10249) is the case that raised it; Celestial Sword of the Crab - exp, Fubatsu Plate, Mantle of the Jade Champion - exp2 and Strength of the Tsunami print the attachment-bowed permission. The engine behaved this way in the Utoro case; no change.
+- **Date:** 2026-10-12
+- **Source:** Mendon, from the Comprehensive Rules clarification (Bowed and unbowed, 2013-06-05) — [decision](../decisions/2026-10-12-bowed-host-attachment-abilities.md); text in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md).

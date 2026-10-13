@@ -11,7 +11,7 @@ project plan. The previous brief is a design reference, not a rules authority.
 | [AEG Aftermath rules insert](https://www.aftertheboardgame.com/_downloads/acf35bc3d6c0a80fe153343f9bcaddb8) | Link located; contents not verified. Needed for late-arc terminology and mechanics. |
 | [AEG Coils of Madness rules insert](https://www.aftertheboardgame.com/_downloads/b6a58af41b8649607eb690fffa435fab) | Link located; contents not verified. |
 | [AEG Gates of Chaos rules insert](https://www.aftertheboardgame.com/_downloads/ff85a44458ca4e608284e17d872509d3) | Link located; contents not verified. |
-| Emperor Comprehensive Rules / final errata and bans | Not yet obtained as an authenticated dated period snapshot. This remains a release dependency. |
+| Emperor Comprehensive Rules / final errata and bans | A saved copy of the rules.l5r.com wiki (Emperor Edition core rules, glossary, changes from Celestial, and the card-ruling archive) is converted in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md). It is an undated wiki snapshot, not an authenticated dated period snapshot, so final errata and bans remain a release dependency. |
 
 The normalizer records the API request, retrieval date and raw SHA-256 in
 `content/oracle/emperor-catalogue.json`. The current classification does not
