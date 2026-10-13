@@ -146,11 +146,14 @@ public static partial class TrainingOpponent
                 var offered = selectable.Where(id => !id.StartsWith("hidden-", StringComparison.Ordinal)).ToArray();
                 command = command with { CardIds = [(offered.Length > 0 ? offered : selectable)[0]] };
             }
-            else if (command.CardIds is null && action.TargetIds is { Length: > 0 } && command.TargetId is null)
+            // Issue #902: the engine's default command already names the first legal target (found while tracing a bot that bowed a bowed Personality), so the bot chooses by what the ability does instead of keeping it.
+            else if (command.CardIds is null && action.TargetIds is { Length: > 0 } && (command.TargetId is null || x.Memory.UsePrudence))
             {
                 var intent = AbilityIntent.Of(command.AbilityId);
                 var refused = x.Memory.RejectedTargets(view.Version, command.AbilityId, command.CardId, "useAbility");
                 var legal = action.TargetIds.Where(id => !refused.Contains(id)).ToArray();
+                // Issue #902: a bow is aimed at a card that is not already bowed; when every target is, the action is kept, not spent.
+                if (x.Memory.UsePrudence) legal = legal.Where(id => !BowWasted(intent, x.Card(id))).ToArray();
                 if (legal.Length == 0) return null;
                 var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view, x)))
                     .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
@@ -168,6 +171,8 @@ public static partial class TrainingOpponent
             var refusedTargets = x.Memory.RejectedTargets(view.Version, command.AbilityId, command.CardId, action.Type);
             var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id) && !refusedTargets.Contains(c.Id)).ToArray();
             if (targetCards.Length == 0) return refusedTargets.Count > 0 ? null : Complete(x, action, command);
+            // Issue #902: a Strategy that bows takes an unbowed target; with none, it is not played.
+            if (x.Memory.UsePrudence && action.Type == "playStrategy" && StrategyIntent(x.Card(command.CardId)) is { Rank: EffectRank.Bow } bowing && bowing.Side != TargetSide.Own && targetCards.All(c => c.Bowed)) return null;
             var ordered = targetCards.OrderBy(c => c.Bowed).ThenByDescending(c => c.Force);
             var bowStrategy = x.Memory.UseBattlePolicy && action.Type == "playStrategy" && x.Card(command.CardId)?.Definition?.Effect == "bow-small" ? PickBowTarget(x, targetCards.Select(c => c.Id).ToArray(), null) : null;
             var withTarget = WithTarget(command, action, bowStrategy?.Id ?? ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);

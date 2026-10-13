@@ -13,6 +13,7 @@ public static partial class TrainingOpponent
     private static double Adjust(Ctx x, ActionOption action, GameCommand command, double score)
     {
         score = HonorAwareScore(x, action, command, score); // issue #870 (TrainingOpponent.Honor.cs): the Honor an ability costs or gains, and an Attack that cannot destroy its target
+        score = PrudenceScore(x, action, command, score); // issue #902 (TrainingOpponent.Prudence.cs): mutual effects, early economy, the first-action claim
         if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy || x.Memory.UseSpec818) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (AttackerAdjust(x, action, command, intent, score) is { } attacker) return attacker; // issue #818 items 6 and 7

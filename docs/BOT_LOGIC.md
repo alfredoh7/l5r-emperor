@@ -58,7 +58,7 @@ The bot never keys on a card's name. It reads the printed ability label and targ
 - **Draw abilities:** +12 for each card the hand is below its maximum. A pure draw at or over the maximum is worth only a pass.
 - **Honor:** a deck that wants Honor for itself gets +25 for abilities that give it Honor; one that wants to hurt the opponent gets +25 for abilities that take it.
 - **Never hurt itself:** a harmful ability (destroy, bow, penalize, Honor loss) aimed at its own card scores -50, so it passes instead of using it.
-- **Targets:** for a harmful ability, the opponent's unbowed Personality with the most Force; for a helpful one, its own. When straightening, bowed ones first.
+- **Targets:** for a harmful ability, the opponent's unbowed Personality with the most Force; for a helpful one, its own. When straightening, bowed ones first. A bow never goes to a card that is already bowed (Prudence, below).
 - **Imperial Favor:**
   - If it has the higher Family Honor **and** more Personalities, it **always** takes the Favor (900). So does a bot with the higher *current* Honor whose opponent's units average more Force than its own weakest unit (issue #818), whatever the Personality counts. Lobbying bows its lowest-Force Personality, then the one with the fewest attachments, then the fewest printed abilities.
   - Defending, it always spends the Favor (Favor Battle) to send home the largest attacking unit (300 + that unit's Force).
@@ -114,6 +114,17 @@ Mendon's playtest note: a Unicorn (high-Honor) bot played A Paragon's Strength a
 - **Price by tier.** Each Honor the user loses takes 25 points off the ability for a high-Honor deck, 12 for an in-between deck, 4 for a low-Honor deck. A 4-Honor loss therefore puts a high-Honor deck's Attack (80) below passing. Honor gained is worth 35 more to a high-Honor deck (on top of the existing +25). With no Honor involved the order stays destroy, bow, penalize, help.
 - **An Attack that cannot destroy.** When no legal target has Force at or below the Attack's strength (the printed strength, "strength equal to his Force" read off the performer, the bonuses its text promises, and any augment the bot can still use), the Attack and the Honor it costs are taken off the ability and what is left is scored alone: Lion's Charge still gains Honor, a pure Attack is passed. The bot picks the highest-Force target the Attack can destroy.
 - **Exception.** A killing Attack that takes the bot from not winning the battle to winning it is played whatever Honor it costs.
+
+### Prudence (ACTIVE, `UsePrudence`, issue #902)
+
+Mendon's playtest notes on a Scorpion Lethargy deck: it played Mysterious Deaths on its first turn with nothing to destroy, bowed Personalities that were already bowed, and Sneak Attack was wasted. None of the rules below names a card; each reads the printed text.
+
+- **An effect on both sides** ("Each player targets a unit he controls ... Destroy all targets") is played only when the opponent loses clearly more. The bot's cheapest unit (its Personality's Gold Cost plus everything attached) must be worth at least 3 less than the opponent's cheapest, or the bot must have no Personality in play while the opponent has one. Otherwise the ability scores just under passing. A Personality-creating ability scores 200 while the bot holds such an effect that the new unit (worth 0) would make worth playing: the created Personality becomes its cheapest unit, so it is made first.
+- **Bows hit unbowed cards.** A bow (a Personality, Follower, attachment, Holding or Ring alike) is aimed at a card that is not already bowed. With no unbowed legal target the action is not played at all, which keeps it in hand in case something straightens. Before, the bot kept the engine's default target (the first legal card, by id) and never looked at its bow state; with a choice to make it now picks by what the ability does (an opponent's unbowed Personality with the most Force when it hurts, its own when it helps).
+- **Claiming the first action of a battle** ("The Attacker has the first opportunity ...") is done only by the Attacker, at a battlefield where both sides have units. A Defender never claims it, and an Attacker without units of its own there, or against none, does not.
+- **Economy first.** The Action phase comes before the Dynasty phase of the same turn, so Gold spent on a card from the hand in the Action phase is Gold the Dynasty phase cannot spend on Holdings and Personalities. In its first two turns, with fewer than 3 Holdings and a card in a province to buy, the bot does not pay Gold for a card from the hand in the Action phase (Reactions excepted).
+- The Honor an effect costs is weighed separately (the section above), so a high-Honor deck still declines Mysterious Deaths for the 4 Honor even when the units favor it.
+- **Measured** (`L5R_ARENA_SPEC=prudence`, the bot-arena battle-policy filter, 12 decks, every ordered pair twice with the bots swapped, one seed): the bot with the rules won 174 of 264 games against the same bot without them (65.9%, sign test p < 0.0001). Most of the gain is the target choice: with a choice to make the bot used to keep the engine's default target, the first legal card by id.
 
 ### Six battle rules (PARKED, off by default, `UseBattlePolicy`)
 When switched on:
