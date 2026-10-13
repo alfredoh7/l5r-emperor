@@ -1162,7 +1162,7 @@ public sealed partial class MatchEngine
             _state.ReactionOrderSkipped = null;
             if (pending.Type == "proclaim") ApplyPendingEntryEffects();
             Emit("reactionClosed", reason);
-            if (pending.Type is "bowReaction" or "moveReaction" or "nikutaiReaction" && OpenNextWatcherTurn(pending.Type)) return; // issue #898: the next watching card asks, the action carries on after the last
+            if (pending.Type is "bowReaction" or "moveReaction" or "nikutaiReaction" or "battleActionReaction" && OpenNextWatcherTurn(pending.Type)) return; // issue #898: the next watching card asks, the action carries on after the last
             // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
             if (pending.Type == "battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
             // The after-resolution window (issue #417, AfterResolution.cs): the resolution goes on with the winners' return home.
