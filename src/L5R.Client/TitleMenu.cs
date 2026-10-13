@@ -5,8 +5,9 @@ namespace L5R.Client;
 public partial class TitleMenu : Control
 {
     public Action PracticeSetup = () => { };
+    /// <summary>Starts the tutorial once there is one; until then the menu entry says so (the tutorial is being built).</summary>
+    public Action? Tutorial;
     public Action<int> StartMatch = _ => { };
-    public Action DuelDemo = () => { };
     public Action PrivateMatch = () => { }, Library = () => { }, DeckBuilder = () => { }, Resume = () => { }, PreferencesChanged = () => { };
     public Func<bool> CanResume = () => false;
     public Func<bool> IsOnline = () => false;
@@ -119,17 +120,16 @@ public partial class TitleMenu : Control
         Clear("play");
         if (CanResume()) Entry("Return to table", Resume, 44);
         Entry("Practice", PracticeSetup);
-        Entry("Duel Demo", BeginDuelDemo, 43);
+        Entry("Tutorial", BeginTutorial, 43);
         Entry("Back", ShowMain, 43);
         _message.Text = "Choose saved decks or presets for a match against the practice opponent.";
         FocusFirst();
     }
-    private void BeginDuelDemo()
+    private void BeginTutorial()
     {
-        if (!IsOnline()) { DuelDemo(); return; }
-        Clear("leave-for-duel");
-        Entries.AddChild(Palette.Wrapped("Leave your private table to open Duel Demo? This disconnects your seat; it does not concede.", 25));
-        Entry("Leave table and open demo", DuelDemo, 39);
+        if (Tutorial is { } start) { start(); return; }
+        Clear("tutorial");
+        Entries.AddChild(Palette.Wrapped("The tutorial is being built. It will teach the game one step at a time.", 25));
         Entry("Back", ShowPlay, 43); FocusFirst();
     }
     private void Begin(int seat)

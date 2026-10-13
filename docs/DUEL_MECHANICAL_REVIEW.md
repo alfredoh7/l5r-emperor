@@ -28,7 +28,7 @@ The full list and current expected setup behavior are in [DuelDemoScenarios.cs](
 
 ## Evidence and code map
 
-- [Latest local checks, native assertions and screenshots](screenshots/duel-demo/stakes/validation.json): 491 automated checks; canonical 8–7; thirteen special-stage flows; compact reduced motion; 43-step guidance/source-inspection flow. These ran for the gameplay implementation above, not as part of this documentation update.
+- [Latest local checks, native assertions and screenshots](archive/duel-demo/screenshots/stakes/validation.json): 491 automated checks; canonical 8–7; thirteen special-stage flows; compact reduced motion; 43-step guidance/source-inspection flow. These ran for the gameplay implementation above, not as part of this documentation update.
 - [Mac and Windows CI](https://github.com/alfredoh7/l5r-emperor/actions/runs/35144641423) and [context/handoff CI](https://github.com/alfredoh7/l5r-emperor/actions/runs/35144641434) passed on that implementation. Windows CI is not native Windows graphical playtesting.
 - [DuelPresentation.cs](../src/L5R.Core/DuelPresentation.cs): public records, observed consequences, completion/return state and legal duel decisions.
 - [Dueling.cs](../src/L5R.Core/Dueling.cs), [CardAbilities.cs](../src/L5R.Core/CardAbilities.cs), [MatchEngine.cs](../src/L5R.Core/MatchEngine.cs): challenge, original resolution and aftermath hooks.

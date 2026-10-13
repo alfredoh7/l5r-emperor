@@ -10,7 +10,6 @@ public partial class Main
     private static void Click(Button button) => button.EmitSignal(BaseButton.SignalName.Pressed);
     private void ProcessMenuCapture(double delta)
     {
-        if (_captureMode.StartsWith("menu-duel", StringComparison.Ordinal)) { ProcessDuelDemoCapture(delta); return; }
         _captureClock += delta;
         if (_captureClock < .7) return;
         var menu = _titleMenu!;

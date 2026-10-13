@@ -131,7 +131,7 @@ public partial class Main
                 || _session.Generation != generation || _session.Online
                 || _session.Snapshot?.View.ViewerId != (switched ? 1 - originalSeat : originalSeat)) return;
             if (switched) Render();
-            if (!MenuVisible && !DuelDemoOpen && !PracticeVisible && !MatchDuelOpen) _root.Visible = true;
+            if (!MenuVisible && !PracticeVisible && !MatchDuelOpen) _root.Visible = true;
         };
         body.AddChild(Palette.Wrapped("Hand the device to the other player before revealing their private hand.", 21));
         body.AddChild(SidebarSkin.Button("I'm ready · reveal my hand", () =>
