@@ -27,7 +27,7 @@ Source: `VALIDATION_REPORT.md`, the audit of commit 47416de0 against the "Rules 
 | 10 | A numeric zero Gold Cost can be voluntarily overpaid (EE-ACT-030) | **On hold indefinitely.** Offering optional overpayment adds friction that far outweighs its gameplay value. Revisit only if it can be done with virtually no cost to the player. |
 | 11 | Ongoing bonuses suppressed by temporary prevention return when it ends (EE-ACT-060) | Fix as drafted |
 | 12 | Unit Force help text says a bowed Personality zeroes his unit | Fix the text |
-| 13 | Dishonor retention outside play (EE-STATE-008) conflicts with `2026-09-20-gold-payment-rulings.md` | Interview the rules lead before any change |
+| 13 | Dishonor retention outside play (EE-STATE-008) conflicted with `2026-09-20-gold-payment-rulings.md` | **Ruled 2026-10-13: adopt the package.** A face-up dishonorable Personality stays dishonorable outside play and on re-entry unless an effect rehonors him. The earlier behavior is superseded. |
 | 14 | Multi-front adjacency topology (EE-Areas-of-the-game-047) | Prove a real divergence with a fixture, then ask before changing the topology and its pinned tests |
 
 ## Source-policy differences (not bugs unless ruled)
