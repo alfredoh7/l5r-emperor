@@ -156,6 +156,10 @@ public sealed class SuspendedWindow
     // The window's own target and the targets still to come (issue #336, TargetWindows.cs): a Reaction that opens a window of its own must not clobber them.
     public string? ReactionWindowTargetId { get; set; }
     public List<string> ReactionWindowRemaining { get; set; } = [];
+    // The record of the action an after-action window is about (issue #898): a Reaction played in the window records its own resolution, and the window's Reactions still read the action's.
+    public ResolvedActionFacts? LastResolvedAction { get; set; }
+    // The watchers of this single-card window still to be asked after it (ReactionWatcherQueue.cs).
+    public List<WatcherTurn> WatcherQueue { get; set; } = [];
 }
 
 /// <summary>A keyword granted by another card rather than printed. Duration is "Attachment"
@@ -1315,6 +1319,8 @@ public sealed class ResolvedActionFacts
     public List<int> FavorDiscarders { get; set; } = [];
     // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
     public bool WordsHaveStrengthPlayed { get; set; }
+    // Issue #898: Reactions printed "You may only play one copy of X in reaction to any one resolution" (Grief), recorded when a copy is played so another cannot answer the same resolution.
+    public List<string> OneCopyPlayed { get; set; } = [];
     // P6 (issue #705, AfterFacts.cs): the fact this record stands for when AbilityId is a fact sentinel (FactTriggers.Sentinel); null for an action's record.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public FactRecord? Fact { get; set; }

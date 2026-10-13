@@ -318,7 +318,8 @@ public sealed partial class MatchEngine
     {
         if (_state.AnnouncedActionNegated) return false;
         var kind = AnnounceRecord(pending).Kind;
-        if (P3AnnounceWatcher(pending) is { } watcher) { OpenAnnounceWindowFor(pending, watcher); return true; }
+        var nextWatcher = pending.AbilityId is not null && AbilityCatalog.All.TryGetValue(pending.AbilityId, out var announcedAbility) ? InPlayAnnounceWatcher(pending, announcedAbility) : null; // issue #898: the announcement's other in-play watchers
+        if ((nextWatcher ?? NextEntrenchedWatcher(pending) ?? P3AnnounceWatcher(pending)) is { } watcher) { OpenAnnounceWindowFor(pending, watcher); return true; }
         if (kind == "command") { _state.PriorityPlayerId = pending.PlayerId; runCommand(pending); return true; }
         if (kind == "additional") { ResolveOrDeferAdditionalAction(pending); return true; }
         return false;

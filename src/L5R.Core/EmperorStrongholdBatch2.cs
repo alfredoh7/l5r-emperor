@@ -62,14 +62,24 @@ public sealed partial class MatchEngine
 
     // The card that may react to this announcement: Tsuruchi Yakusho's (a Ranged Battle action, the watcher at the battle) or Suitengu's Torch (a Thunder Battle action of its
     // controller's, a Reaction not yet used this turn).
-    private CardInstance? FindAnnounceWatcher(GameCommand command, AbilityDefinition ability)
+    // No Hiding Place (issue #498): a Strategy in the announcing player's hand (EmperorFollowupsAttack.cs); Ikoma Ayumu, Utaku Lishan (issue #503).
+    private CardInstance? FindAnnounceWatcher(GameCommand command, AbilityDefinition ability) =>
+        InPlayAnnounceWatcher(command, ability) ?? NoHidingPlaceWatcher(command) ?? P3AnnounceWatcher(command);
+
+    // Issue #898: every in-play watcher of the announcement is asked in turn, not just the first found: each is marked asked on the announcement's record when its window opens, and the window's close
+    // asks the next (P3ContinueAnnounce).
+    private CardInstance? InPlayAnnounceWatcher(GameCommand command, AbilityDefinition ability)
     {
         var ranged = ability.Timing == "Battle" && AttackKind(command.AbilityId!) == "Ranged";
         var thunder = ThunderBattleAction(command, ability);
-        var inPlay = !ranged && !thunder ? null : _state.Cards.Values.FirstOrDefault(c => c.OwnerId == command.PlayerId && InPlay(c) && !c.Bowed
+        if (!ranged && !thunder) return null;
+        var record = AnnounceRecord(command);
+        var inPlay = _state.Cards.Values.Where(c => c.OwnerId == command.PlayerId && InPlay(c) && !c.Bowed && !record.Asked.Contains(c.Id)
             && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction"
-                && (ranged && d.Trigger == "own-ranged-action-announced" && (AtBattle(c) || a == TfGearAbilities.LookoutDestroy /* issue #622: Lookout reacts from anywhere in play */) || thunder && d.Trigger == TorchAnnounceTrigger && Unspent(c, a))));
-        return inPlay ?? NoHidingPlaceWatcher(command) ?? P3AnnounceWatcher(command); // No Hiding Place (issue #498): a Strategy in the announcing player's hand (EmperorFollowupsAttack.cs); Ikoma Ayumu, Utaku Lishan (issue #503).
+                && (ranged && d.Trigger == "own-ranged-action-announced" && (AtBattle(c) || a == TfGearAbilities.LookoutDestroy /* issue #622: Lookout reacts from anywhere in play */) || thunder && d.Trigger == TorchAnnounceTrigger && Unspent(c, a))))
+            .OrderBy(c => c.Id, StringComparer.Ordinal).FirstOrDefault();
+        if (inPlay is not null) record.Asked.Add(inPlay.Id);
+        return inPlay;
     }
 
     // The rest of an announced action once its announce window has closed (Suitengu's Torch, Tsuruchi Yakusho): the "before an action resolves" windows every announced action
