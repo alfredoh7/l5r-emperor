@@ -179,7 +179,7 @@ public sealed partial class MatchEngine
                 return false;
             case Wave737Abilities.CrystalTearsPlay:
                 {
-                    if (_state.CurrentBattleProvince is not int battlefield || source!.Zone != Zone.Hand) return false;
+                    if (_state.CurrentBattleProvince is not int battlefield || !PlayedFromHand(source)) return false;
                     // "Destroy a Terrain (if able)": the Terrain already at the battlefield is replaced.
                     foreach (var existing in _state.Cards.Values.Where(t => t.Zone == Zone.Battlefield && t.ProvinceIndex == battlefield && Keyword(t, "Terrain") && t.Id != source.Id).OrderBy(t => t.Id, StringComparer.Ordinal).Take(1).ToArray())
                         DiscardTerrain(existing);

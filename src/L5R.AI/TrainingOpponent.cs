@@ -57,6 +57,7 @@ public static partial class TrainingOpponent
             foreach (var c in p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.Celestials ?? []).Concat(p.EventsInPlay ?? [])
                 .Concat(p.Underneath ?? []).Concat(p.Provinces.Select(q => q.Card).OfType<CardView>()).Append(p.Stronghold))
                 map.TryAdd(c.Id, c);
+        foreach (var entry in view.ResolutionArea ?? []) map.TryAdd(entry.Card.Id, entry.Card); // issue #917: the held action's source sits in the resolution area, not in a hand
         return map;
     }
 

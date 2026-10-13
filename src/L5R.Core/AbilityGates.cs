@@ -70,7 +70,7 @@ public sealed partial class MatchEngine
         if (gates.HasFlag(AbilityGate.AttackerOnly)) Require(player.Id == _state.ActivePlayerId, "Only the Attacker may take this action.");
         if (gates.HasFlag(AbilityGate.DefenderOnly)) Require(player.Id != _state.ActivePlayerId, "Only the Defender may take this action.");
         if (source is null) return;
-        if (gates.HasFlag(AbilityGate.SourceInHand)) Require(source.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card is put into play from your hand.");
+        if (gates.HasFlag(AbilityGate.SourceInHand)) Require(SourceInHand(source, player), "This card is put into play from your hand.");
         if (gates.HasFlag(AbilityGate.SourceInPlay)) Require(source.Zone == Zone.Home, "This card must be in play.");
         if (gates.HasFlag(AbilityGate.SourceAtBattle)) Require(AtBattle(source), "This card must be at the current battlefield.");
     }

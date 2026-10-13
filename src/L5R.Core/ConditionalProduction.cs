@@ -126,6 +126,6 @@ public sealed partial class MatchEngine
         // Equip (Battle) and Soshi Neiru's equip price the attachment by its printed cost: they pay for that attachment too (Platinum Mine, The Shadow's Embrace pass issue #476 batch 6).
         if (command.AbilityId is "equip-battle" or "neiru-equip" && priced is not null && Definition(priced).Type is CardType.Follower or CardType.Item or CardType.Spell)
             return new(priced, PaymentKind.Equip, ability, command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? equipper : null); // issue #501: the wielder
-        return source is null ? null : new(source, source.Zone == Zone.Hand ? PaymentKind.Play : PaymentKind.Action, ability);
+        return source is null ? null : new(source, PlayedFromHand(source) ? PaymentKind.Play : PaymentKind.Action, ability);
     }
 }

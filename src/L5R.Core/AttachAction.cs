@@ -137,7 +137,7 @@ public sealed partial class MatchEngine
         CardInstance attachment;
         if (spec.Card == AttachSource.Self)
         {
-            Require(source is not null && (source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || source.Zone == Zone.FateDiscard && source.OwnerId == player.Id && spec.Pile == AttachPile.Own), "This card must be in your hand (or, for a card that names its own discard pile, in it) to be attached.");
+            Require(source is not null && (SourceInHand(source, player) || source.Zone == Zone.FateDiscard && source.OwnerId == player.Id && spec.Pile == AttachPile.Own), "This card must be in your hand (or, for a card that names its own discard pile, in it) to be attached.");
             Require(command.TargetId is null, "This action has no target.");
             attachment = source!;
         }
@@ -202,8 +202,8 @@ public sealed partial class MatchEngine
     {
         var def = Definition(attachment);
         var fromDiscard = attachment.Zone is Zone.FateDiscard or Zone.Underneath; // P21: a card from under a host is a new entry into play like one from a discard pile
-        if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
-        Player(attachment.OwnerId).Hand.Remove(attachment.Id);
+        if (!fromDiscard && PlayedFromHand(attachment)) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
+        Player(attachment.OwnerId).Hand.Remove(attachment.Id); LeaveResolutionArea(attachment);
         if (fromDiscard)
         {
             // A new entry into play: nothing the card carried while it was last in play (or since) follows it back.

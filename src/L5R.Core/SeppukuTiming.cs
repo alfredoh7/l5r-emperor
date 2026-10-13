@@ -41,6 +41,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingNegatableAbility), s => s.PendingNegatableAbility is not null),
         (nameof(MatchState.PendingOutOfPlayActionReaction), s => s.PendingOutOfPlayActionReaction is not null),
         (nameof(MatchState.PendingAnnouncedAction), s => s.PendingAnnouncedAction is not null),
+        (nameof(MatchState.ResolutionArea), s => s.ResolutionArea.Count > 0), // issue #917: a card still resolving means an action is mid-flight (a leaked entry fails safe)
         (nameof(MatchState.PendingBrashDraws), s => s.PendingBrashDraws > 0),
         (nameof(MatchState.PendingOverconfidentDraws), s => s.PendingOverconfidentDraws.Count > 0),
         (nameof(MatchState.PendingForcedDiscards), s => s.PendingForcedDiscards.Count > 0),
@@ -85,6 +86,13 @@ public sealed partial class MatchEngine
     public static IReadOnlyList<string> SeppukuDecisionStateNames => DecisionStateNames.Value;
     private static readonly Lazy<IReadOnlyList<string>> NonDecisionStateNames = new(() => Array.AsReadOnly(NotDecisionStates.Concat(EngineHooks.NonDecisionState.Names).ToArray()));
     public static IReadOnlyList<string> SeppukuNonDecisionStateNames => NonDecisionStateNames.Value;
+
+    private bool HasOpenDecisionStateExceptArea()
+    {
+        foreach (var decision in DecisionStates) if (decision.Name != nameof(MatchState.ResolutionArea) && decision.Open(_state)) return true;
+        foreach (var decision in EngineHooks.DecisionState.Items) if (decision(_state)) return true;
+        return false;
+    }
 
     private bool HasOpenDecisionState()
     {

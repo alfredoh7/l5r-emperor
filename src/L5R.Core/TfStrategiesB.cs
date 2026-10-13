@@ -180,7 +180,7 @@ public sealed partial class MatchEngine
             // The Eternal Rainbows: any Terrain at the battlefield is destroyed (if able), the Terrain enters play, and the target has +2F while it stays.
             case TfStrategiesBAbilities.RainbowsPlay:
                 {
-                    if (_state.CurrentBattleProvince is int battlefield && source!.Zone == Zone.Hand)
+                    if (_state.CurrentBattleProvince is int battlefield && PlayedFromHand(source))
                     {
                         foreach (var existing in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && Keyword(c, "Terrain") && c.Id != source.Id).OrderBy(c => c.Id, StringComparer.Ordinal).Take(1).ToArray())
                             DiscardTerrain(existing);

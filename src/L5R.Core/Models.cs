@@ -43,7 +43,9 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDecla
 // only in passing -- entering play immediately discards every OTHER Celestial that same player
 // controls, so at most one survives at rest.
 // Underneath (issue #503, The New Foundries): a card set face-up under a Stronghold -- public, not in play (EmperorP5Zones.cs).
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath }
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath,
+    // Issue #917 (ResolutionArea.cs): the temporary resolution area of rules step A -- a Strategy or Ring from the hand sits here, face up and out of play, from announcement until its action ends. Appended last: the enum serializes by name.
+    Resolving }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -1002,6 +1004,8 @@ public sealed partial class MatchState
     // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility
     // already uses for beforeActionReaction.
     public GameCommand? PendingAnnouncedAction { get; set; }
+    // Issue #917 (ResolutionArea.cs): the cards in the resolution area, oldest first (a Reaction played in response sits above the action it answers).
+    public List<ResolutionEntry> ResolutionArea { get; set; } = [];
     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): set by its Reaction inside an "announceReaction" window; the announced action then resolves negated
     // (ResolveNegatedAction: taken, its costs paid, no effects) when the window closes. Cleared as it is read.
     public bool AnnouncedActionNegated { get; set; }
@@ -1540,6 +1544,10 @@ public sealed record BeforeResolutionEffectView(string Id, string Kind, int Play
 /// Status describes the triggering moment, never a receipt claiming that the player's latest Reaction fully resolved.</summary>
 public sealed record ReactionPresentationView(string Title, string Context, string Status, string DeclineLabel,
     string DeclineConsequence, string? ParentContext = null, bool IsNested = false);
+/// <summary>Issue #917: one card in the resolution area -- the card, who played it, and the ability being resolved.</summary>
+public sealed record ResolutionEntry(string CardId, int OwnerId, string AbilityId);
+/// <summary>Issue #917: PUBLIC to both seats. Depth 0 is the oldest (the action the later ones answer).</summary>
+public sealed record ResolutionEntryView(CardView Card, int OwnerId, string AbilityId, string AbilityLabel, int Depth);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
@@ -1583,6 +1591,9 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     public int? ActionPhaseTurnPlayerId { get; init; }
     // Issue #667 (PhaseOrder.cs): the six printed phases by name in the order this turn is running in, PUBLIC and identical for both seats; null while the usual order (Straighten, Events, Action, Attack, Dynasty, End) runs.
     public string[]? PhaseOrder { get; init; }
+    // Issue #917 (ResolutionArea.cs): the resolution area, oldest first, PUBLIC and identical for both seats; null when empty so a payload outside an open action is unchanged. Declared last.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ResolutionEntryView[]? ResolutionArea { get; init; }
 }
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);

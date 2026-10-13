@@ -123,8 +123,8 @@ public partial class CardTile : Button
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
         var inspecting = (Hovered || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
-        var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
-        var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
+        var targetLift = inspecting ? Card.Zone is Zone.Hand or Zone.Resolving ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
+        var targetScale = inspecting ? Card.Zone is Zone.Hand or Zone.Resolving ? 1.22f : 1.06f : 1f;
         ZIndex = Hovered ? 70 : HasFocus() ? 20 : IsSelected ? 10 : 0;
         if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
         _bowAngle = ReducedMotion ? _bowDestination : Mathf.MoveToward(_bowAngle, _bowDestination, (float)delta * Mathf.Pi * 3);
@@ -175,7 +175,7 @@ public partial class CardTile : Button
     public override bool _HasPoint(Vector2 point)
     {
         if (Geometry2D.IsPointInPolygon(point, LocalFaceCorners(2))) return true;
-        if (!_hover || Card.Zone != Zone.Hand) return false;
+        if (!_hover || Card.Zone is not (Zone.Hand or Zone.Resolving)) return false;
         // Keep the original pick area while lifting. Otherwise a pointer on the
         // bottom edge repeatedly enters/exits as the card moves away from it.
         return ContainsRestingFace(point);

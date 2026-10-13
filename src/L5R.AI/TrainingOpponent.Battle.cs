@@ -22,7 +22,7 @@ public static partial class TrainingOpponent
         if (x.Memory.UseEquipPolicy && action.Type == "useAbility" && UsesGrantedAttachmentAction(x, command)) return Math.Max(score, GrantedActionScore);
         var odds = x.Odds;
         var source = x.Card(command.CardId);
-        var inPlay = source is not null && source.OwnerId == x.Self.Id && !x.Self.Hand.Any(h => h.Id == source.Id);
+        var inPlay = source is not null && source.OwnerId == x.Self.Id && source.Zone != Zone.Resolving && !x.Self.Hand.Any(h => h.Id == source.Id); // issue #917: a card being resolved is not in play
 
         // Rule 5: the first action of a combat taken through a Reaction (Naval, Sneak Attack, ...) is only worth claiming when the bot will have something to do with it,
         // that is when the battle is not already won. Then it prefers to destroy, bow, move, penalize, and last help, and above all a buff that lifts a unit past an Attack.

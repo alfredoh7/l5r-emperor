@@ -8,6 +8,7 @@ internal static class RegressionAssertions
         var duplicated = ReactionProbe.Before(engine); // issue #898: L5R_REACTION_PROBE=1 checks every reaction window a suite reaches
         var result = engine.Execute(command);
         Require(result.Accepted, $"{command}: {result.Error ?? "Rejected"}");
+        Require(engine.ResolutionAreaInvariantViolation() is not { } areaViolation, $"{command}: {engine.ResolutionAreaInvariantViolation()}"); // issue #917: the resolution area is consistent after every accepted command
         ReactionProbe.Observe(engine);
         ReactionProbe.After(duplicated, command, engine);
     }

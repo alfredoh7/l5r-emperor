@@ -209,7 +209,7 @@ public sealed partial class MatchEngine
                 Require(source is not null && source.Zone == Zone.Home, "Seeking the Question must be in play.");
                 break;
             case EmperorP1Abilities.SeekingEnter:
-                Require(source is not null && source.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
+                Require(source is not null && SourceInHand(source, player), "A Kata is put into play from your hand.");
                 break;
             case EmperorP1Abilities.BakishiShield:
                 Require(source is not null && BakishiApplies(source), "Bakishi did not just perform an action that destroyed a card at the current battlefield.");

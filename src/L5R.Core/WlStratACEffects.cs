@@ -51,7 +51,7 @@ public sealed partial class MatchEngine
         {
             case WlStratACAbilities.CenterEnter:
             case WlStratACAbilities.FuryEnter:
-                Require(source is { Zone: Zone.Hand } && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
+                Require(source is not null && SourceInHand(source, player), "A Kata is put into play from your hand.");
                 break;
             case WlStratACAbilities.CenterStraighten:
                 Require(source is { Zone: Zone.Home }, "This Kata must be in play.");
@@ -155,7 +155,7 @@ public sealed partial class MatchEngine
                 return false;
             case WlStratACAbilities.NoWayOutPlay:
                 {
-                    if (_state.CurrentBattleProvince is int battlefield && source!.Zone == Zone.Hand)
+                    if (_state.CurrentBattleProvince is int battlefield && PlayedFromHand(source))
                     {
                         foreach (var existing in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && Keyword(c, "Terrain") && c.Id != source.Id).OrderBy(c => c.Id, StringComparer.Ordinal).Take(1).ToArray())
                             DiscardTerrain(existing);

@@ -58,6 +58,7 @@ public sealed class BotContext
         foreach (var player in view.Players)
             foreach (var card in PublicCards(player))
                 Note(card);
+        foreach (var entry in view.ResolutionArea ?? []) Note(entry.Card); // issue #917: the card being resolved is public from its announcement
     }
 
     private static IEnumerable<CardView> PublicCards(PlayerView p) =>

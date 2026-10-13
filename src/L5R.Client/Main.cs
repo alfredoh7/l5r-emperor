@@ -585,7 +585,7 @@ public partial class Main : Node
         var previewFlip = _previewBowFlip == card.Id; if (previewFlip) _previewBowFlip = null;
         var previewBowed = _previewBows.Contains(card.Id) && !card.Bowed;
         if (previewBowed) card = card with { Bowed = true };
-        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = previewFlip ? !card.Bowed : Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone is Zone.Hand or Zone.Resolving ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = previewFlip ? !card.Bowed : Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
@@ -595,7 +595,7 @@ public partial class Main : Node
         }
         if (card.Zone is Zone.Region or Zone.Celestial) tile.ContextHelp = SupportContext(card);
         tile.CelestialMount = card.Zone == Zone.Celestial;
-        if (card.Zone != Zone.Hand) tile.ProjectToScreen = _tableSurface.ProjectCanvas;
+        if (card.Zone is not (Zone.Hand or Zone.Resolving)) tile.ProjectToScreen = _tableSurface.ProjectCanvas; // issue #917: a card in the resolution area is drawn flat, like the hand, never on the table plane
         BindStatTransition(tile);
         _tiles.Add(tile); return tile;
     }
@@ -769,7 +769,7 @@ public partial class Main : Node
     // The engine's own figure (CardView.GoldProduced, which also covers a Personality that can bow for Gold while a cost is being paid: Yoritomo
     // Sakuma, issue #338). The client holds no production rule of its own (issue #578); payment sources come from the quote (PaymentMethods).
     private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? 0;
-    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
+    private CardView? FindCard(string id) => (View.ResolutionArea ?? []).Select(e => e.Card).Concat(View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold))).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.InfantryDeclaration => "Assign attackers", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
     private void SetNotice(string message) { _matchDuel?.Notify(message); _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
     public override void _ExitTree() => _session.Dispose();

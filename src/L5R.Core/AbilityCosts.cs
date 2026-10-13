@@ -214,7 +214,7 @@ public sealed partial class MatchEngine
         }
         foreach (var cost in ability.Costs ?? [])
         {
-            if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
+            if (cost.UnlessInHand && PlayedFromHand(source)) continue;
             // Emperor Edition remaining-cards pass, group C (issue #492): "Bow one or more of your performing X" -- every card of the performing slot pays.
             if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability)) yield return (cost, performing); continue; }
             // Capturing the Soul (issue #492): every card chosen for the slot is bowed, each a cost of its own.
@@ -242,7 +242,7 @@ public sealed partial class MatchEngine
         if (ability.Costs is null) return;
         foreach (var cost in ability.Costs)
         {
-            if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
+            if (cost.UnlessInHand && PlayedFromHand(source)) continue;
             if (MomokoWaivesCost(command, cost.Verb)) { NoteMomokoWaivedCost(command, cost.Verb); continue; } // Isawa Momoko (issue #501): the action's non-destruction costs are ignored
             if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability).ToArray()) performing.Bowed = true; continue; } // issue #492, group C
             if (cost.Verb == CostVerbs.LoseHonor)

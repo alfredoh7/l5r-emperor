@@ -5336,20 +5336,21 @@ public sealed partial class MatchEngine
         ability.Costs?.Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !c.UnlessInHand) == true;
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
+        IsResolving(source) ? true // issue #917: the card whose announced action is being re-validated (a redirect, a held window) is in the resolution area; UseAbility itself refuses a second announcement
+        : ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
         : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
         : Wave739SourceZoneAllows(ability, source, player) is bool w739Zone ? w739Zone // issue #739 (Wave739.cs): Paneki's Mask is used from its player's hand
         : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)
-        : ability.Attach?.Card == AttachSource.Self ? (ability.FromDiscard ? source.Zone == Zone.FateDiscard && source.OwnerId == player.Id : source.Zone == Zone.Hand && player.Hand.Contains(source.Id)) // Blade of Perfection (issue #492): attached from the discard pile
+        : ability.Attach?.Card == AttachSource.Self ? (ability.FromDiscard ? source.Zone == Zone.FateDiscard && source.OwnerId == player.Id : SourceInHand(source, player)) // Blade of Perfection (issue #492): attached from the discard pile
             : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
-            : ability.Trigger == "before-proclaim-resolves" ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) // Turning the Story (issue #453, batch 2)
-            : ability.Trigger == EntrenchedTrigger ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
+            : ability.Trigger == "before-proclaim-resolves" ? SourceInHand(source, player) // Turning the Story (issue #453, batch 2)
+            : ability.Trigger == EntrenchedTrigger ? SourceInHand(source, player) // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
             : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
             // A Reaction that returns its own card from a discard pile (Never Safe) is taken from there; any other after-resolution Reaction from a hand or from play.
             : ability.FromDiscard ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
-            : ability.Trigger == AfterResolutionTrigger ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source)
+            : ability.Trigger == AfterResolutionTrigger ? SourceInHand(source, player) || InPlay(source)
             // A Ring (issue #194) may use its printed action from hand too -- "you may discard
             // this Ring from your hand to use its ability without cost" -- in addition to the
             // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
@@ -5357,7 +5358,7 @@ public sealed partial class MatchEngine
             // A card in a discard pile is a legal source only as a Discipline play, or as the Battle action a granted additional
             // action names (Daigotsu Bofana - exp): PlayableFromDiscard. A non-Strategy, non-Ring card (a Personality, Item, Follower) is
             // not usable from hand at all, only in play or by those two ways.
-            : Definition(source).Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id)
+            : Definition(source).Type is CardType.Strategy or CardType.Ring ? SourceInHand(source, player) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id)
             : InPlay(source) || PlayableFromDiscard(ability, source, player.Id);
 
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.
@@ -7301,7 +7302,9 @@ public sealed partial class MatchEngine
     {
         // A multi-target action's first card target also rides in TargetId (issue #336), so everything written for a single target sees it.
         command = NormalizeSlotCommand(command);
+        Require(command.CardId is null || !_state.Cards.TryGetValue(command.CardId, out var announcing) || !IsResolving(announcing), "This card is already being resolved.");
         ValidateAbility(command);
+        EnterResolutionArea(command); // issue #917 (ResolutionArea.cs): a Strategy or Ring from the hand leaves the hand for the resolution area as it is announced
         ControlReturnsOnAnnouncement(command); // issue #501 (EmperorMechB.cs): Shadow Dragon's "return control of him ... after the next time this game this ability is announced".
         NoteP1Announcement(command); // Issue #503 (EmperorP1.cs): Osote, Bakishi, Sanetomo.
         NoteTurnRuleAnnouncement(command); // P4 (TurnBoundaryRules.cs): a Limited action only a standing rule allowed spends that rule's use for the turn
@@ -7453,7 +7456,7 @@ public sealed partial class MatchEngine
     // ExecuteAbilityEffects below (an Attack deferred behind its reaction window).
     private void SpendHandPlayedCard(PlayerState player, CardInstance? source)
     {
-        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
+        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && PlayedFromHand(source)) DiscardFate(player, source);
     }
     // Issue #320: every Attack case in RunAbilityEffects' switch does `if (ResolveOrDeferAttack(...)) return;`,
     // so an Attack that opens the attackReaction window skips the tail that discards a hand-played
@@ -7593,7 +7596,7 @@ public sealed partial class MatchEngine
         if (ability.IssuesDuel)
         {
             PayAbilityCosts(ability, command, player, source); // Issue #503: a duel-issuing ability's declared costs (Ochiai's Bravery's "bow this card") are paid as any action's are, before its effect (the duel).
-            if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+            if (source is not null && Definition(source).Type == CardType.Strategy && PlayedFromHand(source)) DiscardFate(player, source);
             // A duel issued by a Reaction (An Insult Answered; issue #453, batch 2) sets the window it was played in aside, as any window a Reaction opens does (ReactionsAreActions.cs).
             if (ability.Timing == "Reaction") SuspendOpenWindow();
             // A Discipline card played from a discard pile is spent the same way: out of the pile the moment it is
@@ -9611,8 +9614,8 @@ public sealed partial class MatchEngine
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             case "training-look-show": BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, count: 2); return;
             case "banish-all-doubt-look":
-                if (source!.Zone == Zone.Hand) DiscardFate(player, source);
-                BeginLook(ability.Look!, source, player.Id, "ability", bowedBeforeAction); return;
+                if (PlayedFromHand(source)) DiscardFate(player, source);
+                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             // Battle Phase timing (issues #309/#310): the Engage window's consumers. Every claim only RECORDS the
             // request; who actually acts first is decided when the window closes (ResolveFirstOpportunity), so the
             // order claims are made in never matters and claims never stack.
@@ -10986,7 +10989,7 @@ public sealed partial class MatchEngine
     }
     private void DiscardFate(PlayerState player, CardInstance card)
     {
-        player.Hand.Remove(card.Id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
+        player.Hand.Remove(card.Id); LeaveResolutionArea(card); card.Zone = Zone.FateDiscard; card.FaceUp = true;
         Emit("fateDiscarded", $"{player.Name} discarded {Definition(card).Name}.", player.Id, card.Id);
     }
     // Removed from Game (core rules Glossary, issue #184): terminal and permanent -- unlike
@@ -10997,7 +11000,7 @@ public sealed partial class MatchEngine
     private void RemoveFromGame(CardInstance card)
     {
         if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
-        card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
+        LeaveResolutionArea(card); card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
         // Fukuzo's copies (issue #338, Mendon): they end only when he is reshuffled into the Dynasty deck (ToOwnerDeck) or removed from the game (here).
         // Copy-duration grants only: a permanent change of a removed card is still what a later copy from it reads (Fukuzo's own cost removes the donor
         // BEFORE the snapshot, which must still see the donor's permanent grants).

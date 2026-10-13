@@ -113,7 +113,7 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is [{ Verb: CostVerb.Bow } only] && CostSubjectCard(only, ability, command, source) is { } optionSubject && IsRingInPlay(optionSubject)) return optionSubject;
         foreach (var cost in ability.Costs ?? [])
         {
-            if (cost.Verb != CostVerb.Bow || cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots || cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
+            if (cost.Verb != CostVerb.Bow || cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots || cost.UnlessInHand && PlayedFromHand(source)) continue;
             var subject = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (IsRingInPlay(subject) && !CostExempt(cost, source, subject)) return subject;
         }

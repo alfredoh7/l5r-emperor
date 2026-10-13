@@ -272,6 +272,7 @@ public sealed partial class MatchEngine
                 _paymentDiscards = [];
                 ApplyAfterCommandTraits(traitSnapshot);
                 RunSweeps(EngineHooks.SweepsAfterApply);
+                ReconcileResolutionArea(); // issue #917
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
             }
