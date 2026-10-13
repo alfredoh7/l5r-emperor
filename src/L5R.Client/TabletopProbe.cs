@@ -15,13 +15,13 @@ public partial class TabletopProbe : Control
         AddChild(new ColorRect { Color=new Color("101c25"),Size=GetViewportRect().Size,MouseFilter=MouseFilterEnum.Ignore });
         var def=PublishedContent.Snapshot.Cards.First(d=>d.Type==CardType.Stronghold);
         var card=new CardView("fixture",def,0,Zone.Stronghold,true,false,null,null,0,0);
-        var player=new PlayerView(0,"Fixture","Lion",12,1,card,[],[],[],[],0,40,40,[],false,false,[],0);
+        var player=new PlayerView(0,"Fixture","Lion",12,1,card,[],[],[],[],0,[],false,false,[],0);
         foreach(var (count,col) in new[]{0,1,8,20,40}.Select((n,i)=>(n,i)))
         {
             var label=Palette.Text($"{count} cards",22); label.Position=new Vector2(90+col*260,26);AddChild(label);
             foreach(var row in new[]{0,1})
             {
-                var p=new TablePile(player with{ DynastyDeckCount=count,FateDeckCount=count },row==0?Zone.DynastyDeck:Zone.FateDeck,()=>{})
+                var p=new TablePile(player,row==0?Zone.DynastyDeck:Zone.FateDeck,()=>{})
                 { Position=new Vector2(95+col*260,140+row*270),Size=new Vector2(150,210) };
                 AddChild(p);_piles.Add(p);
             }

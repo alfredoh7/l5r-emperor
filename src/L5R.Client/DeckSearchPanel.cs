@@ -55,7 +55,7 @@ public sealed partial class DeckSearchPanel : PanelContainer
         context.AddChild(Palette.Wrapped(search.Deck is null ? "Choose a deck" : "Your " + PlaceName(search), 23, Palette.Gold));
         context.AddChild(Palette.Wrapped("Private search", 19, Palette.PaperDim)); context.AddChild(new HSeparator());
         context.AddChild(Palette.Wrapped(search.Criteria is null ? search.Prompt : "Choose: " + search.Criteria, 21));
-        if (search.Deck is not null) context.AddChild(Palette.Wrapped(search.CardsRemaining + " cards remaining\nGrouped by type and name", 17, Palette.PaperDim));
+        if (search.Deck is not null) context.AddChild(Palette.Wrapped("Grouped by type and name", 17, Palette.PaperDim));
         context.AddChild(Palette.Wrapped(search.Stage == SearchStage.ChooseDeck ? "Choose a deck to open its card list." : _multi ? ManyHint(search) : "Select one card, then confirm.", 17, Palette.PaperDim));
         var center = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill }; center.AddThemeConstantOverride("separation", 12); row.AddChild(center);
         _filter = new LineEdit { PlaceholderText = "Find a card…", ClearButtonEnabled = true, CustomMinimumSize = new(0, 44), Visible = search.Stage == SearchStage.Select };
@@ -93,7 +93,7 @@ public sealed partial class DeckSearchPanel : PanelContainer
         foreach (var deck in _search.DeckChoices ?? [])
         {
             var action = _actions.FirstOrDefault(a => a.Type == "chooseSearchDeck" && a.Command?.Choice == deck.Deck);
-            var button = SidebarSkin.Button(deck.Label + "\n" + deck.Criteria + " · " + deck.CardsRemaining + " cards", () =>
+            var button = SidebarSkin.Button(deck.Label + "\n" + deck.Criteria, () =>
             {
                 if (action is not { Enabled: true, Command: not null } || !_canSubmit) return;
                 _canSubmit = false;

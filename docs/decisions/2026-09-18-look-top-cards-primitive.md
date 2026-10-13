@@ -66,9 +66,9 @@ All on the `MatchView` the client already receives (`MatchView.PendingLook`, `Lo
 
 - `Stage`: `ChooseDeck` or `Arrange`.
 - `SourceCardId`, `SourceName`, `Label` ("Look at the top four cards of any Fate deck"), `Prompt`: which card started it and what is being asked.
-- Stage `ChooseDeck`: `DeckChoices[]` = `{Deck, OwnerId, OwnDeck, Label, CardsRemaining}`. No contents yet. The choice command is `chooseLookDeck` with `Choice = Deck` and `TargetPlayerId = OwnerId`.
+- Stage `ChooseDeck`: `DeckChoices[]` = `{Deck, OwnerId, OwnDeck, Label}` (deck sizes are no longer sent; see 2026-10-13-no-deck-counts). No contents yet. The choice command is `chooseLookDeck` with `Choice = Deck` and `TargetPlayerId = OwnerId`.
 - Stage `Arrange`:
-  - `Deck`, `DeckOwnerId`, `OwnDeck` (false when looking at the opponent's deck: the UI should say so), `Requested` (N), `CardsRemaining` (deck size; `Cards.Length` is smaller than `Requested` when the deck is short).
+  - `Deck`, `DeckOwnerId`, `OwnDeck` (false when looking at the opponent's deck: the UI should say so), `Requested` (N); `Cards.Length` is smaller than `Requested` when the deck is short (the deck size itself is not sent).
   - `Cards[]` = `{Position, DefinitionId, Definition, Dispositions[]}`, top first. `Definition` is the full `CardDefinition` for the hover/large card. `Dispositions[]` = `{Disposition, Label, Legal, Reason}`: every disposition the spec offers for the look, and whether **this** card may take it (`Reason` is the short disabled-tooltip text, null when legal, e.g. "Not a Strategy", "Only cards from your own deck may be put in your hand").
   - `Rules[]` = `{Disposition, Label, Min, Max}`: how many cards must and may take each optional disposition, already capped by the viewed cards. "Choose exactly one to put in your hand" is `Min = Max = 1`. `Min = 0, Max = 1` is "you may". A rule with `Max = 0` cannot be used on this look and should not be shown.
   - `Remainder` (`top` or `bottom`): where a card goes when the player names no other disposition for it. `CanReorder`: whether the cards going back into the deck may be dragged into a different order (when false, sending them in the viewed order is the only legal arrangement).

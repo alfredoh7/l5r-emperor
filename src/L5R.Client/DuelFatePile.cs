@@ -16,8 +16,8 @@ public partial class DuelFatePile : TooltipButton
     public Rect2 TopFace=>Face(_shown);
     public DuelFatePile(PlayerView player,Action open)
     {
-        OwnerId=player.Id;_count=player.FateDeckCount;_shown=_count;Flat=true;
-        TooltipText=$"{player.Clan} · Fate deck\n{_count} cards · contents and order remain hidden.";
+        OwnerId=player.Id;_count=TablePile.DeckDepth;_shown=_count;Flat=true;
+        TooltipText=$"{player.Clan} · Fate deck\nSize, contents and order remain hidden.";
         MouseDefaultCursorShape=CursorShape.PointingHand;TextureFilter=TextureFilterEnum.LinearWithMipmaps;
         foreach(var state in new[]{"normal","hover","pressed","focus"})AddThemeStyleboxOverride(state,new StyleBoxEmpty());
         Pressed+=open;MouseEntered+=QueueRedraw;MouseExited+=QueueRedraw;
