@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bump ContentVersion to emperor-lion-crane-0.5.0: R-083 (stronghold immunity does not prevent a dishonorable death's Honor loss), R-084 (Great Sacrifice total unit Force), R-085 (Spell statics by printed subject, Tempest of Flame on any host). Docs updated.",
+  "validation": "Server and Core replay/version suites; CI full gate.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/941",
+  "branch": "claude/941-contentversion-0-5",
+  "updated": "2026-10-13T22:52:55.208398+00:00"
+}
