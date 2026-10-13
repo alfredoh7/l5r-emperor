@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rulings 2026-10-13: Great Sacrifice compares UnitTotalForce (R-084); Shugenja-subject Spell static effects silent on a non-Shugenja host via a shared gate, This-Personality Spells unchanged (R-085); Tempest of Flame Shugenja gate removed",
+  "validation": "rulings-936 regressions pass; full gate pending",
+  "remaining": "Ambiguous non-host-subject Spell statics left for Mendon; ContentVersion bump advisable at next bump",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/936",
+  "branch": "claude/935-sacrifice-total-spell-static",
+  "updated": "2026-10-13T22:04:59.352239+00:00"
+}

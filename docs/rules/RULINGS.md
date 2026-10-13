@@ -689,3 +689,17 @@ A Personality who is dishonorable and face up keeps the Dishonorable status when
 - **Cards/primitives:** `MatchEngine.ResetCardState` / `KeepsDishonorOutsidePlay`; At Any Cost (oracle-l5r-639), Akodo Kobi, Essence of Undeath, I Give You My Name, Shinjo's Guidance and other dead-pile recruits; Your Clan Needs You!; Step Through the Void; Sensei discarded from play.
 - **Date:** 2026-10-13
 - **Source:** Mendon, validation report EE-STATE-008 (item 13) — [decision](../decisions/2026-10-13-validation-report-reading.md); supersedes [2026-09-20](../decisions/2026-09-20-gold-payment-rulings.md).
+
+### R-084 — Great Sacrifice compares the enemy unit's total Force
+Great Sacrifice's target is an enemy unit whose total Force (the Personality and all his Followers, bowed or not) is equal to or lower than the performer's Force, plus Personal Honor, plus one if he is defending. It is the same unit total Fortitude uses, not the unit's current battle contribution. Supersedes item 11 of the [2026-09-21 second-city pass](../decisions/2026-09-21-second-city-pass.md) for the unit total.
+
+- **Cards/primitives:** Great Sacrifice (oracle-l5r-2900); `enemy-unit-within-performer-sacrifice`, `UnitTotalForce`, `SacrificeReach`.
+- **Date:** 2026-10-13
+- **Source:** Mendon, following the validation report — [decision](../decisions/2026-10-13-spell-static-subject.md). Issue #936.
+
+### R-085 — A Spell's static effect follows its printed subject
+A Spell attached to a Personality who is not currently a Shugenja provides no actions (#928) and, when its printed static text names the Shugenja host as the subject ("This Shugenja has +3F", "While this Shugenja is Water, he ...", his destruction or bowing), no static effect either. When the text says "This Personality" the effect works on any host. The Spell stays attached and the effect returns when the host is a Shugenja again, by printing or a granted keyword. A static whose subject is not the host is unchanged and listed for a later ruling (Incite the Phantoms, Channel the Moon, Erosion, Drawing on the Mountain, The Tapestry Perceived, Conflagration, the unit and battle-order sentences of Thunder's Stamina, Hitomi's Devotion and Warded Paths).
+
+- **Cards/primitives:** the 26 Spells in `ShugenjaSubjectStaticSpells` (CardCopy.cs); Scouring Flood, Tempest of Flame and The Thunderer's Protection are "This Personality" and unchanged; full audit table in the [decision](../decisions/2026-10-13-spell-static-subject.md).
+- **Date:** 2026-10-13
+- **Source:** Mendon, following the validation report. Issue #936.
