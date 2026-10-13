@@ -82,6 +82,9 @@ public partial class UnitStandardProbe : Control
                 foreach (var card in _faces)
                     if (Geometry2D.IntersectPolygons(polygon,card.FaceCornersOnViewport()).Count > 0) throw new Exception("Standard overlaps a card face");
                 if (b.Card.UnitForce != b.CardAnchor.Card.UnitForce) throw new Exception("Standard detached from server view");
+                // Issue #913: the help text follows the engine (each card counts on its own; Elite counts bowed), never "a bowed Personality zeroes the unit".
+                var help = UnitStandard.ExplainUnit(b.Card);
+                if (help.Contains("entire unit contribute 0") || !help.Contains("does not stop his unbowed Followers") || !help.Contains("Elite")) throw new Exception("Unit Force help contradicts the engine: " + help);
             }
             if (_step++ == 0)
             {

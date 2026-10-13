@@ -349,7 +349,7 @@ public partial class Main
 
     private int SelectedProduction() => _chosen is not null && QuoteFor(_chosen) is { Sources: { } methods }
         ? methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced)
-        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
+        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self)); // opponent-payment panel: its own card list
 
     private void RenderAssignments()
     {

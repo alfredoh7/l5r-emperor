@@ -524,7 +524,7 @@ public sealed partial class MatchEngine
         var priced = QuotePurchase(playerId, card.Id, fromDynastyDeck: true);
         var cost = priced.Cost + 2;
         var paying = new PaymentSubject(card, PaymentKind.Recruit);
-        var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} entry price {priced.Cost} + 2 ({Definition(Card(search.SourceCardId)).Name})", null, PaymentOptions(playerId, cost, paying));
+        var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} entry price {priced.Cost} + 2 ({Definition(Card(search.SourceCardId)).Name})", null, PaymentOptions(playerId, cost, paying), Sources: PaymentSourcesFor(playerId, paying));
         yield return new("chooseSearchPayment", $"Pay {cost} Gold: bring {Definition(card).Name} into play", quote.Payments.Length > 0, quote.Payments.Length > 0 ? null : "You cannot pay for him.",
             new GameCommand("chooseSearchPayment", playerId, _state.Version, SourceIds: quote.Payments.FirstOrDefault()?.SourceIds), card.Id, Gold: quote);
         yield return new("chooseSearchPayment", $"Do not pay: {Definition(card).Name} is discarded", true, null, new GameCommand("chooseSearchPayment", playerId, _state.Version, Choice: "decline"), card.Id);

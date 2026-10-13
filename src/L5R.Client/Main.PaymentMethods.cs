@@ -5,9 +5,11 @@ namespace L5R.Client;
 
 public partial class Main
 {
-    private PaymentSource[] PaymentMethods(GoldQuote quote) => quote.Sources ??
-        Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => !c.Bowed && Production(c, Self) > 0)
-            .Select(c => new PaymentSource(c.Id, c.Id, "bow", $"Bow this card: {Production(c, Self)} Gold", Production(c, Self))).ToArray();
+    // Exactly the engine's methods and token ids. The client never invents a method from a card's printed production: a quote with no
+    // Sources (an older payload) offers none, so no id the engine did not name can be selected, and a published alternative such as
+    // Jade Mine's "#alt" is selectable only because the engine listed it.
+    private static readonly PaymentSource[] NoPaymentMethods = [];
+    private static PaymentSource[] PaymentMethods(GoldQuote quote) => quote.Sources ?? NoPaymentMethods;
 
     // "reduce" (issue #667, Profits: "reduce the total Gold produced by 1") is the one method that produces less than zero.
     private static bool PaymentMethodUnderstood(PaymentSource method) =>
