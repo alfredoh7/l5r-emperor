@@ -11,6 +11,7 @@ internal static class HonorModifiersTests
         ("An each-gain reduction applies to both players when it says so, floors at 0 and is not consumed; no-gain and no-loss stop only their direction", EachAndNo),
         ("A modifier lapses after its turn; an unless-controls filter and the action-phase filter switch it off; an unknown filter never matches", FiltersAndExpiry),
         ("A registrant's redirect moves the change to the other player, and a match with no modifier serializes without the store", RedirectAndBaseline),
+        ("A Dishonorable death's loss is the rulebook's: an own-card next-change modifier neither changes nor is consumed by it, and a real card effect still consumes it", DishonorableDeathIsRulebook),
         ("Without Shiro Chugo's mark the APPLIED-stage registrant leaves a change alone (his reduction itself stays covered by the existing Chugo suites)", ChugoThroughChannel),
     ]);
 
@@ -51,6 +52,23 @@ internal static class HonorModifiersTests
         e.AddHonorModifier(new() { OwnerPlayerId = 0, AffectedPlayerId = 0, Kind = HonorModifierKinds.NextChange, Delta = 1, Filters = [HonorModifierFilters.OwnCards] });
         e.GainHonorForTest(0, -2, "own loss", mine.Id);
         Eq(Honor(e, 0), start + 6, "a loss grows by 1 as well (3 lost)");
+    }
+
+    private static void DishonorableDeathIsRulebook()
+    {
+        var (e, mine, theirs) = Table();
+        mine.Dishonorable = true; // training-crane-samurai: a Personality with a printed Personal Honor
+        var loss = CardCatalog.Get("training-crane-samurai").PersonalHonor;
+        e.State.Players[0].Honor = 10;
+        e.AddHonorModifier(new() { OwnerPlayerId = 0, AffectedPlayerId = 0, Kind = HonorModifierKinds.NextChange, Delta = 1, Filters = [HonorModifierFilters.OwnCards, HonorModifierFilters.NotProclaim] });
+        e.AddHonorModifier(new() { OwnerPlayerId = 0, AffectedPlayerId = 0, Kind = HonorModifierKinds.NoLoss, Filters = [HonorModifierFilters.ActionEffects] });
+        e.DestroyUnitsForTest(mine.Id);
+        Eq(e.State.Cards[mine.Id].Zone, Zone.Dead, "he died");
+        Eq(Honor(e, 0), 10 - loss, "the rulebook loss is his printed Personal Honor, unmodified");
+        Eq(e.HonorModifierList.Count, 2, "neither modifier was consumed or applied");
+        e.GainHonorForTest(0, -2, "own card effect", theirs.Id.Length > 0 ? mine.Id : null);
+        Eq(e.HonorModifierList.Count, 1, "a real own-card effect consumes the next-change modifier");
+        Eq(Honor(e, 0), 10 - loss - 3, "and its loss grew by 1");
     }
 
     private static void ProclaimKinds()

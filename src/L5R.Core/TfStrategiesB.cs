@@ -220,7 +220,7 @@ public sealed partial class MatchEngine
     {
         if (amount >= 0 || _state.TfStrategiesBHonorWatches.Count == 0) return amount;
         _state.TfStrategiesBHonorWatches.RemoveAll(w => w.Turn != _state.TurnNumber || w.Remaining <= 0);
-        if (reason == "Dishonorable death" || ControlsForgottenTemple(playerId)) return amount; // the rulebook's own loss is from no card; the Temple's loss "may not be increased"
+        if (_rulebookHonorChange || ControlsForgottenTemple(playerId)) return amount; // the rulebook's own loss is from no card; the Temple's loss "may not be increased"
         var from = source ?? (_runningCommand?.CardId is string runningId && _state.Cards.TryGetValue(runningId, out var running) ? running : null);
         if (from is null) return amount;
         var fromPlayer = from.OriginalOwnerId ?? from.OwnerId;

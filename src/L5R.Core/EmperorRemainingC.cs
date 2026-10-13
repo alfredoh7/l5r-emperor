@@ -675,7 +675,7 @@ public sealed partial class MatchEngine
     private (int PlayerId, int Amount) EmperorRemainingCHonorChange(int playerId, int amount, string reason)
     {
         if (amount == 0) return (playerId, 0);
-        if (!_payingActionCost && CurrentActionKey() is { } key)
+        if (!_payingActionCost && !_rulebookHonorChange && CurrentActionKey() is { } key)
         {
             if (RemC.RedirectActionKey == key && !RemC.RedirectSpent && (RemC.RedirectOccurrence < 0 || RemC.RedirectOccurrence == _honorChangeOccurrence - 1) && playerId != RemC.RedirectToPlayer
                 && RemC.RedirectCourtierId is { } courtierId && _state.Cards.TryGetValue(courtierId, out var courtier) && InPlay(courtier) && PersonalityChi(courtier) >= Math.Abs(amount))

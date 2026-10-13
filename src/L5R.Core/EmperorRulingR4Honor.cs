@@ -76,7 +76,7 @@ public sealed partial class MatchEngine
     private void OfferHonorChangeWindow(int playerId, int amount, string reason)
     {
         _p3LastHonorChange = null;
-        if (_payingActionCost || _state.PendingHonorChange is not null || _state.PendingChoice is { Type: "honorChangeReaction" }) return;
+        if (_payingActionCost || _rulebookHonorChange || _state.PendingHonorChange is not null || _state.PendingChoice is { Type: "honorChangeReaction" }) return;
         if (!CurrentActionFacts(out var key, out var actorId) && !P3NonActionHonorChange(playerId, amount, out key, out actorId)) return; // Destructive Priorities (issue #503): a gain no action made
         var occurrence = _honorChangeOccurrence++;
         _p3LastHonorChange = (key, occurrence);
