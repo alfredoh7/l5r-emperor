@@ -141,7 +141,7 @@ public sealed partial class MatchEngine
     // GainHonor's hook: the Honor gained or lost by the marked action's effects is reduced by 2, to at most 0 (a gain of 1 becomes 0, a loss of 3 becomes a loss of 1).
     private int ChugoReducedHonorChange(int playerId, int amount, string reason)
     {
-        if (amount == 0 || _state.HonorReducedActionKey is not { } key || key != CurrentActionKey()) return amount;
+        if (amount == 0 || _rulebookHonorChange || _state.HonorReducedActionKey is not { } key || key != CurrentActionKey()) return amount;
         var reduced = amount > 0 ? Math.Max(0, amount - 2) : Math.Min(0, amount + 2);
         Emit("honorChangeReduced", $"{Player(playerId).Name}'s Honor {(amount > 0 ? "gain" : "loss")} from {reason} was reduced by 2 (Shiro Chugo){(reduced == 0 ? " to 0" : "")}.", playerId);
         return reduced;

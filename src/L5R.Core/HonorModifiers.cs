@@ -124,14 +124,16 @@ public sealed partial class MatchEngine
     private (int PlayerId, int Amount) ApplyHonorChangeHooks(HonorChangeStage stage, int playerId, int amount, string reason, CardInstance? source)
     {
         if (amount == 0) return (playerId, amount);
-        CurrentActionFacts(out var actionKey, out _);
-        var command = _runningCommand;
-        var card = source ?? (command?.CardId is { } id && _state.Cards.TryGetValue(id, out var running) ? running : null);
+        // A rulebook change (a Dishonorable death's loss) is caused by no card and no action: no card effect's modifier, scope or targeting reaches it.
+        var actionKey = "";
+        if (!_rulebookHonorChange) CurrentActionFacts(out actionKey, out _);
+        var command = _rulebookHonorChange ? null : _runningCommand;
+        var card = _rulebookHonorChange ? null : source ?? (command?.CardId is { } id && _state.Cards.TryGetValue(id, out var running) ? running : null);
         var targeted = new List<string>();
         if (command?.TargetId is { } target) targeted.Add(target);
         if (command?.CardIds is { } ids) targeted.AddRange(ids);
         var context = new HonorChangeContext(this, stage, playerId, amount, reason, string.IsNullOrEmpty(actionKey) ? null : actionKey, card?.Id, card?.OwnerId, card is not null && card.OwnerId == playerId,
-            _proclaimAction is not null, targeted);
+            _proclaimAction is not null && !_rulebookHonorChange, targeted);
         foreach (var hook in EngineHooks.HonorChange.Items)
         {
             if (hook(context) is not { } result) continue;

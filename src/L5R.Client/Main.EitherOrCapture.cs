@@ -7,6 +7,7 @@ namespace L5R.Client;
 public partial class Main
 {
     private bool _eitherCaptureStarted, _eitherReviewBusy;
+    private string? _eitherJadeMine;
     private MatchEngine _eitherFixture = null!;
     private Button[] _eitherReviewButtons = [];
     private void ProcessEitherCapture(double delta)
@@ -20,17 +21,21 @@ public partial class Main
         var state = MatchEngine.CreatePublishedTestMatch(42).State;
         SupportFixtureCard(state, 9624, 0, Zone.Home); SupportFixtureCard(state, 7151, 0, Zone.Home);
         SupportFixtureCard(state, 9941, 0, Zone.Hand); SupportFixtureCard(state, 9485, 1, Zone.Home);
-        if (mode is not ("sakuma" or "hesitation")) SupportFixtureCard(state, "training-either-or-source", 1, Zone.Home);
+        string? jadeMine = null;
+        if (mode == "jade") jadeMine = SupportFixtureCard(state, "oracle-l5r-10614", 1, Zone.Home).Id; // Issue #913: a published Jade Mine, payable only by its "#alt" token
+        _eitherJadeMine = jadeMine;
+        if (mode is not ("sakuma" or "hesitation" or "jade")) SupportFixtureCard(state, "training-either-or-source", 1, Zone.Home);
         var actor = mode == "hesitation" ? 0 : 1;
         state.Phase = Phase.Action; state.ActivePlayerId = state.PriorityPlayerId = actor; state.PendingChoice = null;
+        if (mode == "jade") foreach (var card in state.Cards.Values.Where(c => c.OwnerId == 1 && c.Id != jadeMine && CardCatalog.Get(c.DefinitionId).GoldProduction > 0)) card.Bowed = true;
         if (mode is "disabled" or "automatic")
         {
             foreach (var card in state.Cards.Values.Where(c => c.OwnerId == 0 && (CardCatalog.Get(c.DefinitionId).GoldProduction > 0 || c.DefinitionId == "oracle-l5r-9624"))) card.Bowed = true;
             if (mode == "automatic") state.Players[0].Honor = 0;
         }
         _eitherFixture = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [state])!;
-        await LoadSupportFixture(_eitherFixture, mode is "sakuma" or "hesitation" ? 1 : 0);
-        if (mode == "sakuma")
+        await LoadSupportFixture(_eitherFixture, mode is "sakuma" or "hesitation" or "jade" ? 1 : 0);
+        if (mode is "sakuma" or "jade")
         {
             var target = state.Cards.Values.First(c => c.OwnerId == 0 && c.DefinitionId == "oracle-l5r-7151").Id;
             await TakeEitherFixture(1, "yogo-adi-choice", target);
@@ -105,6 +110,7 @@ public partial class Main
         try
         {
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false);
+            if (_captureMode.EndsWith("-jade", StringComparison.Ordinal)) { await CaptureEitherJade(); return; }
             await PrepareEitherReview();
             if (_captureMode.EndsWith("-review", StringComparison.Ordinal)) { GD.Print("EITHER_OR_REVIEW_READY: prepared Sakuma choice; use the review controls for all five cases and either seat."); return; }
             if (_captureMode.Contains("review"))
@@ -157,6 +163,27 @@ public partial class Main
             GD.Print("EITHER_OR_PASS: native Gold/negation, reaction resume, three choices, disabled reasons, waiting privacy, keyboard, bow/pass, auto-resolution, selection reset and source hover"); GetTree().Quit();
         }
         catch (Exception e) { await SupportCapture("-failure"); GD.PushError(e.ToString()); GetTree().Quit(1); }
+    }
+    // Issue #913: the engine's Either/Or quote carries its payment methods, so a published Jade Mine's "#alt" token is a selectable, submittable source.
+    private async Task CaptureEitherJade()
+    {
+        await PrepareEitherReview("jade");
+        var mine = _eitherJadeMine!; var alt = mine + "#alt";
+        SupportRequire(View.PendingEitherOr?.ViewerDecides == true, "The paying seat is not asked");
+        await PickEither("pay");
+        var quote = QuoteFor(_chosen!)!;
+        SupportRequire(quote.Sources?.Any(m => m.Id == alt) == true, "The engine quote does not list Jade Mine's alternative token");
+        var box = _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(c => c.GetMeta("payment_source_id", "").AsString() == alt);
+        SupportRequire(!box.Disabled, "The engine's token is not selectable in the payment panel");
+        _sources.Clear(); RenderInspector(); await EventFrames(6);
+        box = _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(c => c.GetMeta("payment_source_id", "").AsString() == alt);
+        await SupportClick(box);
+        SupportRequire(_sources.Contains(alt) && _sources.Count == 1, "Choosing the token did not keep the engine's id");
+        SupportRequire(_paymentConfirm is { Disabled: false }, "The token covers the cost but Confirm stayed disabled");
+        await SupportCapture("-jade");
+        await ConfirmEither();
+        SupportRequire(View.PendingEitherOr is null && _eitherFixture.State.Cards[mine].Bowed && _eitherFixture.State.Cards[mine].StraightenHolds.Count == 1, "The engine did not accept the token payment");
+        GD.Print("EITHER_OR_PASS: Jade Mine alternative token selected from the Either/Or quote and accepted by the engine"); GetTree().Quit();
     }
     private static bool ContainsEitherPreview(Node node) => node.HasMeta("card_preview") || node.GetChildren(true).Any(ContainsEitherPreview);
 }
