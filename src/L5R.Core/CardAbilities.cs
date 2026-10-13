@@ -3940,7 +3940,7 @@ public sealed partial class MatchEngine
     private bool HasPrintedOrGrantedKeyword(CardInstance card, string keyword)
     {
         if (Definition(card).Keywords is { } printed) foreach (var word in printed) if (string.Equals(word, keyword, StringComparison.Ordinal)) return true;
-        foreach (var grant in card.GrantedKeywords) if (string.Equals(grant.Keyword, keyword, StringComparison.Ordinal)) return true;
+        foreach (var grant in card.GrantedKeywords) if (string.Equals(grant.Keyword, keyword, StringComparison.Ordinal) && GrantedKeywordLive(card, grant)) return true;
         return false;
     }
 
@@ -5310,7 +5310,7 @@ public sealed partial class MatchEngine
     };
     private int PersonalityChi(CardInstance card) => Definition(card).Chi + StatModifier(card, "Chi") + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi)
         // A Dragon's Favor: "While this Shugenja is Thunder, he has +1C."
-        + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "dragons-favor-chi" && Keyword(card, "Thunder"))
+        + StaticSpells(card).Count(c => Definition(c).Effect == "dragons-favor-chi" && Keyword(card, "Thunder"))
         + RyoshunChiBonus(card) // Ryoshun's Guidance (Forgotten Legacy pass, issue #467).
         + EmperorP6ChiBonus(card) + RemAItemChiModifiers(card) + RegisteredPersonalityChi(card); // Illusory Defense (issue #503, EmperorP6.cs). A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
 
@@ -6775,7 +6775,7 @@ public sealed partial class MatchEngine
                                                                                                                                                                                                                                                                                 // other than a Stronghold (a Region is never one: no Region of the reference catalogue carries Jade, and a Region's own discard is its province's).
                                                                                                                                                                                                                                                                                 "non-stronghold-card-with-keyword" => type is not (CardType.Stronghold or CardType.Region) && HasKeywords(target, ability.RequiredKeywords),
                                                                                                                                                                                                                                                                                 // Great Sacrifice: "an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending".
-                                                                                                                                                                                                                                                                                "enemy-unit-within-performer-sacrifice" => personality && !own && BattleForce(target) <= SacrificeReach(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                "enemy-unit-within-performer-sacrifice" => personality && !own && UnitTotalForce(target) <= SacrificeReach(Card(command.PerformerId!)),
                                                                                                                                                                                                                                                                                 // Rage of the Spirits: an enemy Personality or Follower with Force lower than or equal to the performing Spirit's.
                                                                                                                                                                                                                                                                                 "enemy-force-lte-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(Card(command.PerformerId!)),
                                                                                                                                                                                                                                                                                 // Interference: "a target Stronghold" -- either player's.

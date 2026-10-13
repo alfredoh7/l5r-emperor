@@ -99,7 +99,7 @@ public sealed partial class MatchEngine
 
     // Channeling the Fallen: "This Shugenja has +5F."
     private int PromoDPersonalityForce(CardInstance card) =>
-        Keyword(card, "Shugenja") ? Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == PromoCelestialDAbilities.ChannelingForceEffect) * 5 : 0;
+        StaticSpells(card).Count(c => Definition(c).Effect == PromoCelestialDAbilities.ChannelingForceEffect) * 5;
 
     // Colonist's Mark: "After an action targets this Personality" -- its wielder, by any player's action. The cost is a discarded card, so a controller holding none has nothing to
     // react with and no window opens for it (issue #644: a player with no Reaction is never asked to pass).

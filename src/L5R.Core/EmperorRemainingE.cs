@@ -171,7 +171,7 @@ public sealed partial class MatchEngine
         if (Definition(card).Type != CardType.Personality) return 0;
         var force = 0;
         // Warded Paths: "While this Shugenja is defending, he has +3F." (One for each Spell carrying it.)
-        if (card.Zone == Zone.Battlefield && IsDefendingUnit(card)) force += 3 * AttachedWithEffect(card, WardedPathsEffect).Count();
+        if (card.Zone == Zone.Battlefield && IsDefendingUnit(card)) force += 3 * StaticAttachedWithEffect(card, WardedPathsEffect).Count();
         // Shinjo's Guidance: "Unicorn Clan Personalities have +1F while they have an attachment." (Either player's, one for each Celestial.)
         if (HasClanAffiliation(card, "Unicorn") && HasAttachments(card)) force += CelestialsInPlay(ShinjosGuidanceEffect);
         return force;
