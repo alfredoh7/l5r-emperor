@@ -202,8 +202,7 @@ public sealed partial class MatchEngine
         _state.Cards.Values.Where(c => InPlay(c)).Any(c => (Definition(c).Abilities ?? []).Any(id =>
         {
             if (!AbilityCatalog.All.TryGetValue(id, out var ability) || ability.Timing != "Reaction" || ability.Trigger != "before-focus-effects") return false;
-            try { ValidateAbility(new GameCommand("useAbility", c.OwnerId, _state.Version, CardId: c.Id, AbilityId: id)); return true; }
-            catch (RuleViolation) { return false; }
+            return TryValidateAbility(new GameCommand("useAbility", c.OwnerId, _state.Version, CardId: c.Id, AbilityId: id)) is null;
         }));
 
     // Test seam: the Gold a recruit of the card would cost the player now.

@@ -27,6 +27,9 @@ internal sealed class AllocationListener : System.Diagnostics.Tracing.EventListe
 
 internal static class BatchProfile
 {
+    private static readonly bool Hashing = Environment.GetEnvironmentVariable("L5R_PROFILE_HASH") is not null;
+    private static readonly System.Security.Cryptography.IncrementalHash Digest = System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
+
     private sealed class Totals
     {
         public long Views, Actions, Copies, Bot, Execute, Create, ViewsAlloc, ActionsAlloc, CopiesAlloc, BotAlloc, ExecuteAlloc; public int Decisions, Games, Finished, Turns, Refused;
@@ -59,7 +62,9 @@ internal static class BatchProfile
             }
             t.Actions += Stopwatch.GetTimestamp() - mark; t.ActionsAlloc += GC.GetAllocatedBytesForCurrentThread() - bytes;
             mark = Stopwatch.GetTimestamp(); bytes = GC.GetAllocatedBytesForCurrentThread();
-            actions = JsonSerializer.Deserialize<ActionOption[]>(JsonSerializer.Serialize(actions))!;
+            var actionsJson = JsonSerializer.Serialize(actions);
+            if (Hashing) Digest.AppendData(System.Text.Encoding.UTF8.GetBytes(actionsJson)); // every option, reason and quote the engine listed, in order
+            actions = JsonSerializer.Deserialize<ActionOption[]>(actionsJson)!;
             var seatView = game.GetView(seat);
             t.Views += Stopwatch.GetTimestamp() - mark; t.ViewsAlloc += GC.GetAllocatedBytesForCurrentThread() - bytes;
             mark = Stopwatch.GetTimestamp(); bytes = GC.GetAllocatedBytesForCurrentThread();
@@ -117,6 +122,7 @@ internal static class BatchProfile
             foreach (var site in sites.OrderByDescending(x => x.Value).Take(14)) Console.WriteLine($"  THROW {site.Value} {site.Key}");
             Console.WriteLine($"  PROFILE alloc_kb_per_decision views={t.ViewsAlloc / 1024 / Math.Max(1, t.Decisions)} actions={t.ActionsAlloc / 1024 / Math.Max(1, t.Decisions)} execute={t.ExecuteAlloc / 1024 / Math.Max(1, t.Decisions)} harness_json={t.CopiesAlloc / 1024 / Math.Max(1, t.Decisions)} bot={t.BotAlloc / 1024 / Math.Max(1, t.Decisions)}");
             if (allocations is not null) { var sum = allocations.ByType.Values.Sum(); foreach (var kv in allocations.ByType.OrderByDescending(x => x.Value).Take(25)) Console.WriteLine($"  ALLOC {100.0 * kv.Value / sum,5:0.0}% {kv.Key}"); }
+            if (Hashing) Console.WriteLine($"  PROFILE listing_hash={Convert.ToHexString(Digest.GetHashAndReset())[..16]} (over every action list of {t.Decisions} decisions)");
             Console.WriteLine($"  PROFILE memory alloc={(GC.GetTotalAllocatedBytes(true) - alloc) / 1048576}MB gc0={GC.CollectionCount(0) - gc0} per_decision_us={Ms(total) * 1000 / Math.Max(1, t.Decisions):0}");
         })
     ];

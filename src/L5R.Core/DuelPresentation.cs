@@ -149,14 +149,12 @@ public sealed partial class MatchEngine
                     {
                         foreach (var (substituteCommand, substituteLabel) in HesMineDuelOptions(card, playerId))
                         {
-                            try { ValidateAbility(substituteCommand); Add(substituteCommand, substituteLabel); }
-                            catch (RuleViolation) { }
+                            if (TryValidateAbility(substituteCommand) is null) Add(substituteCommand, substituteLabel);
                         }
                         continue;
                     }
                     var command = new GameCommand("useAbility", playerId, _state.Version, CardId: card.Id, AbilityId: id);
-                    try { ValidateAbility(command); Add(command, def.Label); }
-                    catch (RuleViolation) { }
+                    if (TryValidateAbility(command) is null) Add(command, def.Label);
                 }
             Add(Command("declineReaction"), "Pass reaction");
         }
