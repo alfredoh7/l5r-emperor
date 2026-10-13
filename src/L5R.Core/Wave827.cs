@@ -256,8 +256,7 @@ public sealed partial class MatchEngine
     private int Wave827Force(CardInstance card)
     {
         if (Definition(card).Type != CardType.Personality || !InPlay(card)) return 0;
-        var attached = Attachments(card.Id).ToArray();
-        var robes = attached.FirstOrDefault(a => Definition(a).Effect == Wave827Abilities.RobesEffect);
+        var robes = Attachments(card.Id).FirstOrDefault(a => Definition(a).Effect == Wave827Abilities.RobesEffect);
         return robes is null ? 0 : KoanCardsInUnit(card);
     }
 
