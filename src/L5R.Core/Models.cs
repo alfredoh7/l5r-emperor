@@ -43,9 +43,8 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDecla
 // only in passing -- entering play immediately discards every OTHER Celestial that same player
 // controls, so at most one survives at rest.
 // Underneath (issue #503, The New Foundries): a card set face-up under a Stronghold -- public, not in play (EmperorP5Zones.cs).
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath,
-    // Issue #917 (ResolutionArea.cs): the temporary resolution area of rules step A -- a Strategy or Ring from the hand sits here, face up and out of play, from announcement until its action ends. Appended last: the enum serializes by name.
-    Resolving }
+// Resolving (issue #917, ResolutionArea.cs): the temporary resolution area of rules step A -- a Strategy or Ring from the hand sits here, face up and out of play, from announcement until its action ends. Appended last: the enum serializes by name.
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath, Resolving }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,

@@ -1,6 +1,24 @@
 # Action resolution area (issue #917)
 
-Status: **proposed** (design only, no engine change). Lane: rules. Source: VALIDATION_REPORT finding 5 (EE-ACT-005, EE-Abilities-and-actions-021). Reproduction: branch `claude/917-resolution-area-repro`, `tests/L5R.Core.Tests/ResolutionAreaReproTests.cs` (fails on `main` by design; not for merge).
+Status: **accepted and implemented** (Phase 1: Strategies and Rings). Lane: rules (shared client contract). Source: VALIDATION_REPORT finding 5 (EE-ACT-005, EE-Abilities-and-actions-021). Issue #917; design PR #918 (superseded by this record); implementation PR is linked from the issue. The reproduction (branch `claude/917-resolution-area-repro`) is inverted into `tests/L5R.Core.Tests/ResolutionAreaTests.cs`.
+
+## Decisions (Mendon, final) and what was built
+
+1. **Option A** (zone-based). `Zone.Resolving` appended last in the string-serialized `Zone` enum; `MatchState.ResolutionArea` (`ResolutionEntry { CardId, OwnerId, AbilityId }`, oldest first); the card leaves `Player.Hand` in `UseAbility` immediately after `ValidateAbility` succeeds (`EnterResolutionArea`, `ResolutionArea.cs`); public to both seats from announcement; trailing nullable `MatchView.ResolutionArea` (`[JsonIgnore(WhenWritingNull)]`, so every payload outside an open action is byte-identical); public event `cardResolving`.
+2. **Phase 1 scope: Strategy and Ring only.** Events, Disciplines from a discard pile, hand Items/Followers/Personalities and deck abilities are unchanged.
+3. **The Attack and Duel stopgap stays** (issue #320): a hand-played Attack or Dueling Strategy is discarded as its `attackReaction` / duel window opens. Holding it until `ResolveAttack` / `ResolveDuel` ends (rule 1914) is not done.
+4. A resolving card cannot be picked by a forced or random hand discard and does not count as "has a card in hand" (rule 995 reading). Confirmed.
+5. Its identity is public from announcement. Confirmed.
+6. **No `ContentVersion` bump** (replays are command lists). Confirmed.
+
+As built, beyond the original sketch:
+
+- `PlayedFromHand(card)` (`Zone.Hand` or `Zone.Resolving`) replaces the post-announcement `source.Zone == Zone.Hand` reads (payment kind, Marshalling Fields waiver, Terrain, cost `UnlessInHand` waivers, Adroitness, Sincerity/Honesty removal, attach placement, the tail discards). Announcement-time legality stays on `Zone.Hand` (`SourceInHand`), except that re-validating the held command (a redirect, a held window) accepts the card in the area; `UseAbility` itself refuses to announce a card that is already resolving.
+- Exit goes through `LeaveResolutionArea` (`DiscardFate`, `RemoveFromGame`, attach, Terrain). `ReconcileResolutionArea` runs after every command: it drops an entry whose card moved by another route, and discards a card still resolving once nothing else is pending (rule 1914). That net also spends Strategies whose action paused for a look or an Either/Or choice and whose resume path never discarded them (Lessons from the Heralds, The Power of a Word), which used to stay in the hand.
+- `ResolutionArea` is in the Seppuku `DecisionStates` list. Test invariant (`RegressionAssertions.Accept`): every entry's card is `Resolving`, every `Resolving` card has one entry, and a non-empty area implies another decision is open.
+- Self-reaction is gone at the root: a card in the area is neither a hand-Reaction candidate for its own action nor a hand-discard candidate (Precision could previously react to its own Attack; two tests now hold a second copy).
+- AI: the card index (`TrainingOpponent.AllCards`, `BotContext.Observe`) includes the area; the `inPlay` test excludes `Zone.Resolving`.
+- Client: `Main.ResolutionArea.cs` draws the area above the right end of the hand tray; `FindCard`, `VisibleCards` (flight inference hand -> area -> discard pile) and the card-play showcase read it; `CardTile` / `Tile` treat `Resolving` like the hand (no table-plane projection). The hand count and tray never include the card. An older client that does not know the `Resolving` zone string cannot deserialize the view; client and server ship from the same build and mixed versions are not supported.
 
 ## The defect
 
@@ -103,7 +121,7 @@ New: `MatchView.ResolutionArea` (ordered, public, oldest first), `Zone.Resolving
 
 Core: ~250-350 lines in about 10 files (`Models.cs`, `CardAbilities.cs`, `ActionNegation.cs`, `MatchQueries.cs`, `SeppukuTiming.cs`, the ~25 `PlayedFromHand` sites) plus ~400 lines of tests and an unknown number (estimate 10-30) of existing tests that assert mid-window hand state and need updating. Client: ~150-250 lines (strip, motion source, tile zone handling) plus a capture. AI: ~10 lines. One focused rules PR (about a day with the full Core suite and probe runs) and one client PR. Option C alone is ~40 lines plus ~4 tests.
 
-## Open questions for Mendon
+## Open questions (all answered above)
 
 1. Zone-based Option A, or the cheap view-only Option C first?
 2. Phase 1 scope: Strategy and Ring only (recommended), or every card whose action is taken from hand?
