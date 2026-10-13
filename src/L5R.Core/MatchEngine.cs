@@ -2476,7 +2476,7 @@ public sealed partial class MatchEngine
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card, "Elite") || Attachments(card.Id).Any(a => Definition(a).AttachGrantsEliteEffect
-        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card, wielderKeyword) && !(Definition(a).Type == CardType.Spell && SpellStaticSilenced(a))) // Bo of Water: "While this Shugenja is Water" (R-085)
+        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card, wielderKeyword) && !(Definition(a).Type == CardType.Spell && SpellStaticSilenced(a)))
         // Incite the Phantoms (oracle-l5r-3732, issue #460 batch 5): "While this Shugenja is Earth, your Spirits contribute Force to their
         // army even while bowed" -- broader than Bo of Water's own single-card AttachGrantsEliteEffectWhileWielderHas: every Spirit the
         // controller owns, not only the Spell's own wielder (EmbersOfWarBatch5.cs, InciteThePhantomsActive).
