@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Hide unusable abilities/reactions from the sidebar lists; Surety of Purpose now targets enemy Personalities only; new Core target-restriction audit of every Battle/Open/Limited action's performer and target against its printed label (no other violations found).",
+  "validation": "dotnet build src/L5R.Client ok; bash tools/check.sh --skip-client: core-1/2/3 and python pass; ai suite spec-818/HonorAttack re-pinned (Surety became enemy-targeting) and spec-818 13/13; target-restriction-audit 3/3.",
+  "remaining": "Reaction-timed abilities are not probed by the audit; sidebar change needs a native visual check by Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/892",
+  "branch": "claude/892-unusable-actions-and-target-audit",
+  "updated": "2026-10-13T03:07:35.287573+00:00"
+}

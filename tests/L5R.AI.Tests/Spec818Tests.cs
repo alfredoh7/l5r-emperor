@@ -195,14 +195,14 @@ internal static class Spec818Tests
     private static void HonorAttack()
     {
         // The bot holds a Battle card that gains Honor, and two units that cannot raze anything; it sends the weaker at a Province it cannot destroy.
-        var honorCardDef = CardCatalog.Cards.Values.FirstOrDefault(d => d.Type == CardType.Strategy && BattlePolicy.Printed(new CardView("x", d, 0, Zone.Hand, true, false, null, null, 0)).Any(p => p.Ability.Timing is "Battle" && p.Intent.HonorGain && !p.Intent.IsReaction && p.Intent.Side != TargetSide.Enemy));
+        var honorCardDef = CardCatalog.Cards.Values.FirstOrDefault(d => d.Type == CardType.Strategy && d.Name == "Fear Me!" /* issue #892: pinned; the first match used to be Surety of Purpose, which needs an enemy target now that its Target is enemy-only */ && BattlePolicy.Printed(new CardView("x", d, 0, Zone.Hand, true, false, null, null, 0)).Any(p => p.Ability.Timing is "Battle" && p.Intent.HonorGain && !p.Intent.IsReaction && p.Intent.Side != TargetSide.Enemy));
         Check(honorCardDef is not null, "the catalogue has an Honor-gaining Battle Strategy");
         var table = AttackTable(3, 6, 9);
         var holder = new CardView("hc", honorCardDef!, 0, Zone.Hand, true, false, null, null, 0);
         var withCard = table with { Players = [table.Players[0] with { Hand = [holder], HandCount = 1 }, table.Players[1]] };
         var declare = new ActionOption("declareAttack", "Declare", true, null, new("declareAttack", 0, withCard.Version));
         var pass = BattlePolicyTests.Pass(withCard);
-        Check(TrainingOpponent.Choose(withCard, [pass, declare], new BotContext()).Command?.Type == "declareAttack", "with an Honor card in hand it attacks a Province it cannot destroy, to play it");
+        Check(TrainingOpponent.Choose(withCard, [pass, declare], new BotContext()).Command?.Type == "declareAttack", "with an Honor card (" + honorCardDef!.Name + ") in hand it attacks a Province it cannot destroy, to play it");
         Check(TrainingOpponent.Choose(table, [BattlePolicyTests.Pass(table), new ActionOption("declareAttack", "Declare", true, null, new("declareAttack", 0, table.Version))], new BotContext()).Command?.Type == "pass", "with no such card it does not");
         var attack = TrainingOpponent.Choose(withCard, [pass, new ActionOption("attack", "Attack", true, null, new("attack", 0, withCard.Version, Assignments: []))], new BotContext()).Command;
         Check(attack is { Type: "attack", Assignments.Count: 1 } && attack.Assignments.ContainsKey("a"), "the unit is assigned to the attack");

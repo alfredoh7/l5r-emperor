@@ -1165,7 +1165,7 @@ public static class AbilityCatalog
         // local catalogue's own text paraphrase suggested), the same as Wrathful Ancestor's below.
         ["bow-before-my-will"] = new("Battle", "Choose your performing unbowed Paragon and target an enemy card: Bow it. Negate its next straightening (this turn) if your Paragon is Shadowlands. Lose 2 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"]),
         // No "unbowed" qualifier printed on the Performer -- same shape as Again!'s own precedent.
-        ["surety-of-purpose"] = new("Battle", "Choose your performing Paragon and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor", "lower-or-equal-honor-than-performer", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Paragon"]),
+        ["surety-of-purpose"] = new("Battle", "Choose your performing Paragon and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor", "enemy-personality-honor-lte-performer", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Paragon"]),
         ["unexpected-support"] = new("Battle", "Choose your performing unbowed Commander and target an enemy card with as many or fewer Followers than the performer: Bow it. Negate its next straightening (this turn)", "enemy-fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Commander"]),
         // "This movement will not be negated": deliberately NOT added to MoveOrStraightenKind below,
         // so Tamori Tamoko's own curated negation interrupt (which only ever recognizes ability ids
