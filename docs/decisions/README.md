@@ -113,3 +113,5 @@ interpretation this register's decision docs already settled.
 
 - [Farm, Wedding, Koku and eight more (#829)](2026-10-11-farm-wedding-koku-batch.md) — accepted: eleven cards wired on rulings R-054 to R-062; ten readings for Mendon are listed.
 - [Twelve cards on Mendon's rulings (#835)](2026-10-11-twelve-ruled-cards.md) — accepted: rulings R-067 to R-079: the Egg of P'an Ku, Blood of Isawa's Tribe, A Cleansing Breath, Duty Over All Things, Imperial Deployment, Merchant Patronage, Pierce the Tapestry, The Heavens' Blessing, Unbearable Weight, Warded Premises, Revelations and The Empire's Foe Exposed.
+
+- [A bowed Personality may use his unbowed attachments' abilities](2026-10-12-bowed-host-attachment-abilities.md) — accepted ruling R-080, from the Comprehensive Rules clarification of 2013-06-05.
