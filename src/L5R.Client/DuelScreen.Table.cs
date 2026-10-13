@@ -35,6 +35,7 @@ public partial class DuelScreen
         .Reverse().FirstOrDefault(t => t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
     internal int UprightCount => _tiles.Values.Count(t => t.HasMeta("upright") && t.Card.Definition?.Type == CardType.Personality);
     internal int VisibleDiscardPiles => _piles.Values.Count(p => p.PileZone == Zone.FateDiscard);
+    private Dictionary<int, int> _priorHandCounts = [];
     private void RenderCards(bool animate = true)
     {
         if (_plane is null) return;
@@ -47,6 +48,7 @@ public partial class DuelScreen
         _tiles.Clear(); _piles.Clear(); _tableLabels.Clear(); _landing = null; _dragGhost = null;
         if (Snapshot is null) { foreach (var tile in oldTiles.Values) tile.QueueFree(); return; }
         var view = Snapshot.View; var record = view.LastDuel;
+        var priorHand = _priorHandCounts; _priorHandCounts = view.Players.ToDictionary(p => p.Id, p => p.HandCount);
         var participants = record is null ? view.Players.SelectMany(p => p.Army.Concat(p.Home)).Where(c => c.Definition?.Type == CardType.Personality && c.Definition.Id != "oracle-l5r-5095").Take(2).ToArray() : [record.Challenger, record.Challenged];
         var attachments = record?.Attachments ?? view.Players.SelectMany(p => p.Army.Concat(p.Home)).Where(c => c.Zone == Zone.Attached).ToArray();
         var discarded = view.Players.SelectMany(p => p.Discard.Concat(p.RemovedFromGame)).ToDictionary(c => c.Id);
@@ -153,10 +155,10 @@ public partial class DuelScreen
                 }
                 else if (!CinematicBusy && (!old.TryGetValue(card.Id, out var previous) || previous.Card.Zone != Zone.Focused) && old.Count > 0)
                 {
-                    // Public deck-count change distinguishes a deck draw; hidden hands remain backs.
+                    // A face-down card that appears while the public hand count did not fall came from the deck (deck sizes are hidden); hidden hands remain backs.
                     var key = (card.OwnerId, Zone.FateDeck);
                     var player = view.Players.First(p => p.Id == card.OwnerId);
-                    var fromDeck = counts.TryGetValue(key, out var priorCount) && priorCount > player.FateDeckCount;
+                    var fromDeck = !card.FaceUp && priorHand.TryGetValue(card.OwnerId, out var priorHandCount) && priorHandCount <= player.HandCount;
                     var destination = tile.FaceCornersOnViewport();
                     Vector2[] origin;
                     Texture2D? face = null;

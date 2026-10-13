@@ -8,6 +8,8 @@ public partial class TablePile : TooltipButton
 {
     public int OwnerId { get; }
     public Zone PileZone { get; }
+    /// <summary>Decorative stack height of a deck. The real deck size is hidden information (EE-STATE-014) and never reaches the client, so every deck is drawn the same.</summary>
+    public const int DeckDepth = 20;
     public int Count { get; }
     private readonly Texture2D? _face;
     public static readonly Texture2D DynastyBack = GD.Load<Texture2D>("res://Art/original-dynasty-back.png");
@@ -45,14 +47,14 @@ public partial class TablePile : TooltipButton
         _fate = zone is Zone.FateDeck or Zone.FateDiscard;
         _discard = zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.RemovedFromGame;
         var cards = zone == Zone.RemovedFromGame ? player.RemovedFromGame : player.Discard.Where(c => c.Zone == zone).ToArray();
-        Count = zone == Zone.FateDeck ? player.FateDeckCount : zone == Zone.DynastyDeck ? player.DynastyDeckCount : cards.Length;
+        Count = zone is Zone.FateDeck or Zone.DynastyDeck ? DeckDepth : cards.Length;
         _shownCount = Count;
         Material = CardPaper.Table;
         var name = zone == Zone.RemovedFromGame ? "Removed from the Game" : (_fate ? "Fate" : "Dynasty") + (_discard ? " discard" : " deck");
         // The projection doesn't expose chronological pile order. The face is a
         // representative public card, not a claim about the top of an ordered pile.
         _face = _discard && (recentDiscard ?? cards.FirstOrDefault()?.Definition) is { } def ? CardTile.Artwork(def) : null;
-        TooltipText = $"{player.Clan} · {name}\n{Count} cards" + (zone == Zone.FateDeck ? $" · {player.HandCount} in hand" : "") +
+        TooltipText = $"{player.Clan} · {name}" + (zone is Zone.FateDeck or Zone.DynastyDeck ? "" : $"\n{Count} cards") + (zone == Zone.FateDeck ? $" · {player.HandCount} in hand" : "") +
             (_discard ? "\nClick to inspect the pile. The face previews a public discard." : "\nDeck contents and order remain hidden.");
         Flat = true; Text = ""; MouseDefaultCursorShape = CursorShape.PointingHand;
         TextureFilter = TextureFilterEnum.LinearWithMipmaps;
