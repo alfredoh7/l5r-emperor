@@ -690,6 +690,13 @@ A Personality who is dishonorable and face up keeps the Dishonorable status when
 - **Date:** 2026-10-13
 - **Source:** Mendon, validation report EE-STATE-008 (item 13) — [decision](../decisions/2026-10-13-validation-report-reading.md); supersedes [2026-09-20](../decisions/2026-09-20-gold-payment-rulings.md).
 
+### R-083 — Stronghold Honor-loss immunity does not prevent a dishonorable death's Honor loss
+"You do not lose Honor from ... cards you own" (Foothold of the Mad, Keep of the Dead, Steel Soul Dojo, The Plain of Glass, The Castle of Order, The Otoro Estate, The Shadow's Lair, The False Path) does not prevent the Honor loss from the death of a dishonorable Personality. That loss is a rulebook effect and comes from the rulebook, not from the dying Personality or any card (Comprehensive Rules, "From"; the Honor loss after a dishonorable death). The Forgotten Temple already treats it this way (reduced to 1, not negated).
+
+- **Cards/primitives:** the eight strongholds above; `MatchEngine.GainHonorCore` (the immunity check is skipped while `_rulebookHonorChange`); `HonorLossImmunity`, `FootholdNegatesLoss`, `HonorLossNegatedByKeyword`.
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation work follow-up — [decision](../decisions/2026-10-13-validation-report-reading.md); the official rulings on Fields of the Dead, The Fingers of Bone and The Shadowed Dojo in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md) ("Does not prevent honor loss from death of dishonored Personalities").
+
 ### R-084 — Great Sacrifice compares the enemy unit's total Force
 Great Sacrifice's target is an enemy unit whose total Force (the Personality and all his Followers, bowed or not) is equal to or lower than the performer's Force, plus Personal Honor, plus one if he is defending. It is the same unit total Fortitude uses, not the unit's current battle contribution. Supersedes item 11 of the [2026-09-21 second-city pass](../decisions/2026-09-21-second-city-pass.md) for the unit total.
 

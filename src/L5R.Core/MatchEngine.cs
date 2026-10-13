@@ -3407,7 +3407,7 @@ public sealed partial class MatchEngine
     /// <summary>The reason a Dishonorable Personality's death costs its controller Honor. That loss is the rulebook's (core rules Glossary, "Dead / Destroy"), not an effect of any card or action.</summary>
     internal const string DishonorableDeathReason = "Dishonorable death";
     // True while GainHonor works out a rulebook change (a Dishonorable death's loss): the card and action in progress did not cause it, so every channel that asks "from a card's effect" /
-    // "from the action's effects" stays out of it. The stronghold Honor-loss immunity is the documented exception: it keeps judging the dying Personality as the loss's named source.
+    // "from the action's effects" stays out of it, the stronghold Honor-loss immunities included (2026-10-13 ruling).
     private bool _rulebookHonorChange;
     private void GainHonor(int playerId, int amount, string reason, CardInstance? source = null)
     {
@@ -3430,7 +3430,8 @@ public sealed partial class MatchEngine
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
         amount = ForgottenTempleHonorChange(playerId, amount, reason, source);
         if (amount == 0) return;
-        if (amount < 0 && !CurrentActionUnnegatable() && HonorLossNegated(playerId, source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
+        // A Dishonorable death's loss is the rulebook's, not a card's: "You do not lose Honor from cards you own" does not prevent it (official rulings on Fields of the Dead, The Fingers of Bone and The Shadowed Dojo; Mendon, 2026-10-13).
+        if (amount < 0 && !_rulebookHonorChange && !CurrentActionUnnegatable() && HonorLossNegated(playerId, source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
         {
             Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated.", playerId, source?.Id);
             return;
