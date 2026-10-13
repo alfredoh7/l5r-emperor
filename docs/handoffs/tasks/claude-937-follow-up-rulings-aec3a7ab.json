@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Records Mendon's follow-up rulings: Great Sacrifice total unit Force, Spell statics by printed subject, stronghold Honor-loss immunity kept for dishonorable death (a deliberate departure from the official rulings on Fields of the Dead, Fingers of Bone, Shadowed Dojo), after-dishonored hooks fire on status change only.",
+  "validation": "Docs only.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/937",
+  "branch": "claude/937-follow-up-rulings",
+  "updated": "2026-10-13T21:57:27.249542+00:00"
+}
