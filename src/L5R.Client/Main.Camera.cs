@@ -221,7 +221,7 @@ public partial class Main
         // focus checks and ordinary game input routing remain in force.
         if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
         { GetViewport().SetInputAsHandled(); return; }
-        if (_tableSurface is null || MenuVisible || DuelDemoOpen || _transitionReview || MatchDuelOpen) return;
+        if (_tableSurface is null || MenuVisible || _transitionReview || MatchDuelOpen) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.

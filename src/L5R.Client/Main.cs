@@ -151,7 +151,7 @@ public partial class Main : Node
         if (MatchDuelOpen) { ProcessMatchDuel(delta); ProcessMatchDuelCapture(delta); return; }
         if (ProcessMatchDuelCapture(delta)) return;
         LayoutBattlefieldHeaders();
-        if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
+        if (MenuVisible || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -493,7 +493,7 @@ public partial class Main : Node
             if (key.Keycode == Key.Escape) _seatHandoff.QueueFree();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview || MatchDuelOpen) return;
+        else if (MenuVisible || PracticeVisible || _transitionReview || MatchDuelOpen) return;
         else if (key.Keycode == Key.Escape && _playProceed is not null) { ProceedCardPlay(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
@@ -513,7 +513,7 @@ public partial class Main : Node
         ObserveDecisionSession(_session.Snapshot);
         if (_transitionReview && _transitionRoom is not null) return;
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
-        if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
+        if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
             _opponentPaymentKey = null; _eitherOrKey = null; _eitherNoticeMatch = null; _eitherNotice = null;

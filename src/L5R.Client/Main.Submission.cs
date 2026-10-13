@@ -33,7 +33,7 @@ public partial class Main
     // Confirmation keys never repeat game commands while a key is held down.
     private bool GuardRepeatedSubmissionInput(InputEvent input)
     {
-        if (MenuVisible || DuelDemoOpen || PracticeVisible || MatchDuelOpen || _session.Snapshot is null) return false;
+        if (MenuVisible || PracticeVisible || MatchDuelOpen || _session.Snapshot is null) return false;
         if (input is InputEventKey { Pressed: true, Echo: true } key && key.Keycode is Key.Enter or Key.KpEnter or Key.Space)
         {
             GetViewport().SetInputAsHandled();

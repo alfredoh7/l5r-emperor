@@ -1,8 +1,10 @@
-# Duel Demo within L5R
+# Duel Demo within L5R (archived)
 
-Integration update: [PR #268](https://github.com/alfredoh7/l5r-emperor/pull/268) now uses this same screen in normal matches and preserves this isolated sandbox. See [live duel integration](DUEL_MATCH_INTEGRATION.md).
+> **Archived on 2026-10-13 (issue #926).** The sandbox described here, Play → Duel Demo and its host, was removed from the app. This is the record of how it worked. The shared duel screen, the live-duel integration and the Core duel logic it exercised are unchanged and still ship; see [the archive note](README.md) for what was removed, what stayed, and how to restore it.
 
-Status: implemented on PR #220 for issue #205. Alfredo approved the current presentation, including stakes/resolution, on September 16, 2026. mdornbrook's mechanical/interface review remains open; [the review packet](DUEL_MECHANICAL_REVIEW.md) identifies decisions and reproducible cases. This is part of the normal application; there is no separate game, preferences profile or export preset.
+Integration update: [PR #268](https://github.com/alfredoh7/l5r-emperor/pull/268) now uses this same screen in normal matches and preserves this isolated sandbox. See [live duel integration](../../DUEL_MATCH_INTEGRATION.md).
+
+Status: implemented on PR #220 for issue #205. Alfredo approved the current presentation, including stakes/resolution, on September 16, 2026. mdornbrook's mechanical/interface review remains open; [the review packet](../../DUEL_MECHANICAL_REVIEW.md) identifies decisions and reproducible cases. This is part of the normal application; there is no separate game, preferences profile or export preset.
 
 ## Play
 
@@ -76,7 +78,7 @@ Native Windows graphical acceptance remains open. Local Mac frame samples are ev
 
 The latest presentation follows the approved close composition: upright original champion cards with attachment headers behind, flat focus lanes/hand, original Fate backs, with no redundant stat numerals on the mat; final totals remain in Duel details. Menu → Public piles retains actual public discards without decorative corner cards. The bottom result strip is removed; Continue sits on the mat and aftermath details remain optional. Main-game `CardPreview` still handles all permitted inspection.
 
-The opening introduces each champion once after engine acceptance/reactions reach focusing. The result presents legal reveal frames, a restrained ink cut, actual destinations and a held verdict. Skip/Space/Escape and reduced motion never submit game commands. The menu pauses cinematics. Duels are silent, and introductions omit the extra 3D grass behind the champions. See [the accepted motion decision](decisions/2026-09-16-duel-cinema.md) and [native/source evidence](screenshots/duel-demo/cinema/index.html).
+The opening introduces each champion once after engine acceptance/reactions reach focusing. The result presents legal reveal frames, a restrained ink cut, actual destinations and a held verdict. Skip/Space/Escape and reduced motion never submit game commands. The menu pauses cinematics. Duels are silent, and introductions omit the extra 3D grass behind the champions. See [the accepted motion decision](../../decisions/2026-09-16-duel-cinema.md) and [native/source evidence](screenshots/cinema/index.html).
 
 ## September 16 UI and camera follow-up
 
@@ -84,7 +86,7 @@ A gold brush **DUEL** mark appears during the introductions and fades as the cam
 
 The opening now renders public champion/attachment copies in a temporary 3D viewport: low wide shot, perspective push toward the challenger, opposing close-up, then a film cut to the exact interactive mat. Each introduction name follows the projected position above its own stack. Selective blur and a broad opposite-side gradient/vignette keep the featured stack clear and its opponent subdued on Godot's Compatibility renderer. The temporary stage is freed on completion, skip or reset. This camera staging does not change gameplay locations or disclose hidden cards.
 
-Source prompts/font provenance are in [duel-ui-polish](../assets/ui/duel-ui-polish/README.md); native comparisons and validation are in [polish evidence](screenshots/duel-demo/polish/index.html). The printed cards and engine-selected attachments intentionally retain their actual identities rather than the invented cards in the concept.
+Source prompts/font provenance are in [duel-ui-polish](../../../assets/ui/duel-ui-polish/README.md); native comparisons and validation are in [polish evidence](screenshots/polish/index.html). The printed cards and engine-selected attachments intentionally retain their actual identities rather than the invented cards in the concept.
 
 ## After demo acceptance
 
@@ -102,7 +104,7 @@ Native coverage includes the canonical path, full-motion additional scenarios, c
 
 ## Atmosphere prototype
 
-The native atmosphere review adds shared wind timing, instanced segmented grass, slowly moving painted sky bands and visual wind modulation. Extra 3D grass appears only in the playable view; duel audio is removed. See [the prototype, reproduction steps and acceptance limits](DUEL_ATMOSPHERE.md). It does not change authoritative dueling behavior or close the mechanical review.
+The native atmosphere review adds shared wind timing, instanced segmented grass, slowly moving painted sky bands and visual wind modulation. Extra 3D grass appears only in the playable view; duel audio is removed. See [the prototype, reproduction steps and acceptance limits](../../DUEL_ATMOSPHERE.md). It does not change authoritative dueling behavior or close the mechanical review.
 
 
 ## Own focused-card inspection — September 17

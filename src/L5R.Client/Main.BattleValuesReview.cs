@@ -68,7 +68,7 @@ public partial class Main
         if (_valuesReviewBar is null) return;
         _valuesReviewBar.Position = new Vector2(360, 145);
         _valuesReviewBar.Size = new Vector2(Math.Min(900, _layoutWidth - SidebarWidth - 380), 42);
-        _valuesReviewBar.Visible = _session.BattleValuesReview && !MenuVisible && !DuelDemoOpen;
+        _valuesReviewBar.Visible = _session.BattleValuesReview && !MenuVisible;
     }
 
     private async Task CaptureBattleValuesStartup(string path)

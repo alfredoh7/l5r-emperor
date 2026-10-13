@@ -26,7 +26,7 @@ The live playtest deck and frozen automated-test deck are separated by merged PR
 
 mdornbrook has accepted repository access and is playing/reviewing mechanics. Alfredo owns UI/QoL improvements. Both lanes progress on separate task branches, coordinated through AGENTS.md and docs/COLLABORATION.md. Validate complete matches and disputed interactions. Use the rules-review issue template and `docs/RULES_REVIEW.md`. Reproduce each accepted discrepancy as a focused engine/client case before changing behavior.
 
-The shared Crimson Standoff screen now serves normal matches and the isolated **Play → Duel Demo** through merged #268. [DUEL_DEMO.md](DUEL_DEMO.md) and [DUEL_MECHANICAL_REVIEW.md](DUEL_MECHANICAL_REVIEW.md) retain the original review evidence. Current duel follow-ups belong to #448: live-duel concession controls, paused Focus Effect choices/beats and native round trips on the integrated build. The merged baseline does not close those follow-ups.
+The shared Crimson Standoff screen serves normal matches (merged #268). The isolated **Play → Duel Demo** sandbox was removed from the app and archived on 2026-10-13 ([archive note](archive/duel-demo/README.md), #926); [DUEL_DEMO.md](archive/duel-demo/DUEL_DEMO.md) and [DUEL_MECHANICAL_REVIEW.md](DUEL_MECHANICAL_REVIEW.md) retain the original review evidence. Current duel follow-ups belong to #448: live-duel concession controls, paused Focus Effect choices/beats and native round trips on the integrated build. The merged baseline does not close those follow-ups.
 
 ## Open acceptance gates
 
