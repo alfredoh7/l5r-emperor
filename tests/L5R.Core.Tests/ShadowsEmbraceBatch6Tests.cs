@@ -292,7 +292,7 @@ internal static class ShadowsEmbraceBatch6Tests
         Accept(e2, new GameCommand("selectSearchCard", 0, e2.Version, Choice: "training-expensive-holding"));
         Eq(e2.State.PendingChoice?.Type, "searchRecruitPay", "it must be paid for");
         var pay = e2.QueryActions(0).First(a => a.Type == "chooseSearchPayment" && a.Enabled && a.Command!.Choice is null);
-        Eq(pay.Gold!.Cost, 4, "6 less 2");
+        Eq(pay.Gold!.Cost, 4, "6 less 2"); QuoteCarriesSources(pay.Gold!, "search recruit (holding)");
         var e3 = MatchEngine.FromTestState(e2.State);
         Accept(e2, pay.Command!);
         Check(e2.State.Cards[expensive.Id].Zone == Zone.Home && !e2.State.Cards[expensive.Id].Bowed, "paid: in play, unbowed");

@@ -854,7 +854,7 @@ internal static class EmperorRemainingCTests
         Accept(r, r.QueryActions(0).Single(o => o.Type == "selectSearchCard" && o.Command!.Choice == "training-honor-personality").Command!);
         Eq(r.State.PendingChoice?.Type, "searchRecruitPay", "the price is paid");
         var pay = r.QueryActions(0).Single(o => o.Type == "chooseSearchPayment" && o.Command!.Choice != "decline");
-        Eq(pay.Gold!.Cost, 5, "Gold Cost 3 plus two more (no Clan discount, no allegiance)");
+        Eq(pay.Gold!.Cost, 5, "Gold Cost 3 plus two more (no Clan discount, no allegiance)"); QuoteCarriesSources(pay.Gold!, "search recruit (Personality)");
         Accept(r, pay.Command!);
         var entered = r.State.Cards.Values.Single(c => c.DefinitionId == "training-honor-personality");
         Check(entered.Zone == Zone.Home && entered.OwnerId == 0 && !r.State.Players[0].DynastyDeck.Contains(entered.Id), "he came into play at home, out of the deck");
