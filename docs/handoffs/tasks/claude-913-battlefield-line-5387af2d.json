@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Battlefield adjacency follows the Comprehensive Rules line (R-081): siblings at one province adjacent, flanks touch the nearer end, province-less battlefield adjacent to nothing.",
+  "validation": "dotnet run Core tests --filter adjacen 37/37; bash tools/check.sh --skip-client passed (3 shards, 1512/1513/1512 cases). check_format clean. Client untouched (no adjacency logic there).",
+  "remaining": "None; ready for review. ContentVersion bump needed: engine adjacency behaviour changed (Two Fronts moves).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/920",
+  "branch": "claude/913-battlefield-line",
+  "updated": "2026-10-13T19:30:02.212980+00:00"
+}

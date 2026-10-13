@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Every cost-bearing GoldQuote now carries Sources: Either/Or (with the Regret subject), deck-search recruit payments (Personality and Holding) and the Region quote were missing them, so a published Jade Mine's #alt token the engine accepted was not selectable. Client PaymentMethods no longer derives methods from printed production (no Sources means no methods). Unit Force help text corrected to the engine rule (each card counts alone; a bowed Personality does not suppress unbowed Followers; Elite counts while bowed).",
+  "validation": "Core: Either/Or Jade Mine quote test fails without the fix, passes with it; search-recruit quotes assert Sources; native Windows Godot checks passed: either-or (normal, reduced, new jade token path), gold-payment, unit-standard, opponent-payment. Full check.sh --skip-client result recorded in the PR.",
+  "remaining": "No ContentVersion change needed (no card data change). Opponent-payment panel still lists holdings by card id (no token UI); QuoteRegionGold is unreachable today (every Region costs 0). Native visual check of the Jade Mine checkbox in the Either/Or panel is for Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/922",
+  "branch": "claude/922-quote-sources",
+  "updated": "2026-10-13T18:49:11.312316+00:00"
+}

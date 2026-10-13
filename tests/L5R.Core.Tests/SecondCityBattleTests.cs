@@ -268,7 +268,7 @@ internal static partial class SecondCityBattleTests
         Eq(View(e, target.Id).Force, 2, "Force 3 - 2 + 1 before");
         Accept(e, Enabled(e, 0, "tireless-efforts-negate", strategy.Id, target.Id).Command!);
         Eq(View(e, target.Id).Force, 4, "the -2 is gone, the +1 stays");
-        Check(e.State.Cards[target.Id].Modifiers.Count == 2 && e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Chi" && m.Amount == -1), "the Chi penalty is not touched");
+        Check(e.State.Cards[target.Id].Modifiers.Count(m => m.SuppressedTurn != e.State.TurnNumber) == 2 && e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Chi" && m.Amount == -1 && m.SuppressedTurn is null), "the Chi penalty is not touched");
         Eq(e.State.Cards[target.Id].ForcePenaltiesNegatedTurn, e.State.TurnNumber, "the flag is set for this turn");
         // A NEW penalty this turn (a Battle action of the enemy's own: -2F) is not applied. Built as a second position with the flag already set.
         var b = Table(Phase.Battle, 1);

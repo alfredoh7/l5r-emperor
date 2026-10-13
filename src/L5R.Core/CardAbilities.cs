@@ -5207,7 +5207,7 @@ public sealed partial class MatchEngine
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
     // Tokens contribute here too: unlike Modifiers (cleared every FinishTurn), a token's stat bonus
     // persists until the token itself is destroyed or its host leaves play (core rules Glossary — Token).
-    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount)
+    private int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat && m.SuppressedTurn != _state.TurnNumber).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount)
         + card.Tokens.Where(t => t.Stat2 == stat).Sum(t => t.Amount2) // issue #503: a two-stat token (Shosuro Keirei's Poison)
         + card.Tokens.Where(t => t.Stat3 == stat).Sum(t => t.Amount3); // issue #690 (P24, EffectPrimitivesTokens.cs): a three-stat token
     // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
