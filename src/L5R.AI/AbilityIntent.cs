@@ -19,7 +19,9 @@ public sealed record AbilityIntent(
     EffectRank Rank, TargetSide Side, bool Negates, bool Draws, bool TakesFavor, bool TakesFavorBowing, bool DiscardsFavor,
     bool HonorGain, bool HonorLoss, bool IsReaction, bool IsAttack, bool Unknown,
     // Issue #870: the Honor the player using the ability loses ("Lose 4 Honor", an imperative with no other player named), and how much; HonorLoss above does not say whose.
-    bool SelfHonorLoss = false, int SelfHonorLossAmount = 0)
+    bool SelfHonorLoss = false, int SelfHonorLossAmount = 0,
+    // Issue #902: "each player ... destroy / bow" hits both sides' units; "create a ... Personality" adds a unit of the user's; "has the first opportunity" gives one side the first action of a battle.
+    bool Mutual = false, bool CreatesPersonality = false, bool ClaimsFirstOpportunity = false)
 {
     public static readonly AbilityIntent None = new(EffectRank.Neutral, TargetSide.None, false, false, false, false, false, false, false, false, false, true);
 
@@ -36,6 +38,9 @@ public sealed record AbilityIntent(
     private static readonly Regex LoseHonor = new(@"\bloses?\s+(?:\d+|X|that much)\s+honor", RegexOptions.IgnoreCase);
     // The imperative "Lose N Honor" is the player taking the action ("his controller loses N Honor" is third person; "each player lose 3" names players).
     private static readonly Regex LoseOwnHonor = new(@"\blose\s+(\d+|X)\s+honor", RegexOptions.IgnoreCase);
+    private static readonly Regex EachPlayer = new(@"\beach player\b", RegexOptions.IgnoreCase);
+    private static readonly Regex CreatePersonality = new(@"\bcreate\b[^.]*\bPersonalit", RegexOptions.IgnoreCase);
+    private static readonly Regex FirstOpportunity = new(@"\bfirst opportunity\b", RegexOptions.IgnoreCase);
     private static readonly Regex NamesOtherPlayer = new(@"(player|controller|opponent|\bhe\b|\bhis\b|\bher\b|\bthey\b|\bthem\b)", RegexOptions.IgnoreCase);
 
     /// <summary>The part of a label after its last colon: the effect, as opposed to the costs before it.</summary>
@@ -94,6 +99,7 @@ public sealed record AbilityIntent(
         var honorLoss = (LoseHonor.IsMatch(effect) || either) && side != TargetSide.Own;
         var (selfLoss, selfAmount) = SelfLoss(label);
         return new(rank, side, negates, Draw.IsMatch(effect), takesFavor, takesBowing, DiscardFavor.IsMatch(label), honorGain, honorLoss,
-            ability.Timing == "Reaction", isAttack, false, selfLoss, selfAmount);
+            ability.Timing == "Reaction", isAttack, false, selfLoss, selfAmount,
+            EachPlayer.IsMatch(effect) && (Destroy.IsMatch(effect) || Bow.IsMatch(effect)), CreatePersonality.IsMatch(effect), FirstOpportunity.IsMatch(label));
     }
 }

@@ -257,6 +257,7 @@ runner.Run("spec-818", Spec818Tests.Tests); // issue #818: Mendon's eleven bot c
 runner.Run("battle-policy", BattlePolicyTests.Tests); // issue #788: the six battle changes to the practice bot
 runner.Run("honor-aware", HonorAwareTests.Tests); // issue #870: the Honor an ability costs or gains, and an Attack that cannot destroy
 runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
+runner.Run("prudence", PrudenceTests.Tests); // issue #902: Mendon's bot notes
 runner.Run("bot-profile", BatchProfile.Tests); // issue #888: opt-in timing of seeded bot-vs-bot matches
 return runner.Finish();
 

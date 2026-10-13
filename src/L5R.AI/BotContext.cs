@@ -28,6 +28,9 @@ public sealed class BotContext
     /// Attack that cannot destroy its target is valued only for the rest of its action. An Attack that swings the battle from losing to winning is exempt from the Honor penalty. False plays the bot as it was before.</summary>
     public bool UseHonorAware { get; init; } = true;
 
+    /// <summary>Issue #902 (Mendon's bot notes): general prudence. An effect that hits both sides is played only when the opponent loses clearly more; a bow is aimed at an unbowed card or not played; a claim on the first action of a battle is made only by an Attacker with units on both sides; and in the first turns, while it is still building its economy, Gold is kept for the Dynasty phase instead of spent on cards from the hand. False plays the bot as it was before.</summary>
+    public bool UsePrudence { get; init; } = true;
+
     /// <summary>Issue #788 (Mendon's equip changes): attachments valued by their Battle abilities, the additional action an attached Spell grants always used, equipping down to the hand limit once a battle is won, and equipping up to three cards to change a battle's outcome. ON by default, independent of <see cref="UseBattlePolicy"/>.</summary>
     public bool UseEquipPolicy { get; init; } = true;
 
