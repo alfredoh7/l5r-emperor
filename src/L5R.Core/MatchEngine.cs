@@ -2260,7 +2260,9 @@ public sealed partial class MatchEngine
     // attacking-two/attacking-four Effects above.
     // A Force cap (issue #768, ForceCaps.cs) lowers the total below; it is applied here, once, so every reader of a Personality's Force sees it.
     private int PersonalityForce(CardInstance card) => ApplyForceCaps(card, PersonalityForceUncapped(card));
-    private int PersonalityForceUncapped(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
+    private int PersonalityForceUncapped(CardInstance card) => Math.Max(0, PersonalityForceRaw(card));
+    // The Force total before the floor at 0 and before any cap: what a Set measures its bonus or penalty from (core rules Glossary, "Set"), so the stated value is also right once a cap leaves or a penalty ends.
+    private int PersonalityForceRaw(CardInstance card) => Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2328,7 +2330,7 @@ public sealed partial class MatchEngine
         // Immolation (oracle-l5r-10127, issue #453 batch 5): "This Shugenja has +3F, or +4F while he is Fire" -- Effect-keyed on the attached Spell, like tsunami-force above.
         + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "immolation-force" && Keyword(card, "Shugenja")).Sum(_ => Keyword(card, "Fire") ? 4 : 3)
         + RemAItemForceModifiers(card) // A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
-        + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card));
+        + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card);
     // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
     // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
     // "Magistrate" is a Keyword() check (printed or granted -- Justice of the Crane grants it), and the
@@ -2371,7 +2373,8 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + WlItemsMiscFollowerForce(card) /* A Fever in the Blood (issue #674) */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0, FollowerForceRaw(card));
+    private int FollowerForceRaw(CardInstance card) => Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + WlItemsMiscFollowerForce(card) /* A Fever in the Blood (issue #674) */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2403,7 +2406,7 @@ public sealed partial class MatchEngine
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
     }) + UnitFollowerBoost(card) + AkioFollowerBoost(card) + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card) + ZanshoFollowerBoost(card)
-        + XiaoFollowerBoost(card)); // Moto Xiao (Forgotten Legacy pass, issue #467 batch 2): "Followers in Xiao's army have +1F."
+        + XiaoFollowerBoost(card); // Moto Xiao (Forgotten Legacy pass, issue #467 batch 2): "Followers in Xiao's army have +1F."
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2528,7 +2531,7 @@ public sealed partial class MatchEngine
             : Definition(card).Type is CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring ? Zone.FateDiscard
             : Zone.DynastyDiscard;
         card.FaceUp = true; card.Tokens.Clear();
-        if (Definition(card).Type == CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId, -Definition(card).PersonalHonor, "Dishonorable death", card);
+        if (Definition(card).Type == CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId, -Definition(card).PersonalHonor, DishonorableDeathReason, card);
         // Yasuki Tsujiken (oracle-l5r-9469): "Until Tsujiken leaves play..." -- his own watches end
         // the moment HE dies (a no-op RemoveAll for every other Personality, since TsujikenId only
         // ever matches marks placed by this exact CardInstance).
@@ -3391,10 +3394,21 @@ public sealed partial class MatchEngine
         var def = Definition(source);
         return (rule.Clan is not null && HasClanAffiliation(source, rule.Clan)) || (rule.Fate && IsFateCardType(def.Type));
     }
+    /// <summary>The reason a Dishonorable Personality's death costs its controller Honor. That loss is the rulebook's (core rules Glossary, "Dead / Destroy"), not an effect of any card or action.</summary>
+    internal const string DishonorableDeathReason = "Dishonorable death";
+    // True while GainHonor works out a rulebook change (a Dishonorable death's loss): the card and action in progress did not cause it, so every channel that asks "from a card's effect" /
+    // "from the action's effects" stays out of it. The stronghold Honor-loss immunity is the documented exception: it keeps judging the dying Personality as the loss's named source.
+    private bool _rulebookHonorChange;
     private void GainHonor(int playerId, int amount, string reason, CardInstance? source = null)
     {
+        var outer = _rulebookHonorChange;
+        _rulebookHonorChange = reason == DishonorableDeathReason;
+        try { GainHonorCore(playerId, amount, reason, source); } finally { _rulebookHonorChange = outer; }
+    }
+    private void GainHonorCore(int playerId, int amount, string reason, CardInstance? source)
+    {
         if (amount == 0) return;
-        if (PromoEmperorHonorLossPrevented(playerId, amount, source)) return; // Den of Iniquity (issue #653, PromoEmperorHoldings.cs): "Other players will not lose Honor from your Spells."
+        if (!_rulebookHonorChange && PromoEmperorHonorLossPrevented(playerId, amount, source)) return; // Den of Iniquity (issue #653, PromoEmperorHoldings.cs): "Other players will not lose Honor from your Spells."
         (playerId, amount) = ApplyHonorChangeHooks(HonorChangeStage.Standing, playerId, amount, reason, source); // P14 (HonorModifiers.cs): standing modifiers, so the window below opens with the modified amount
         if (amount == 0) return;
         OfferHonorChangeWindow(playerId, amount, reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
@@ -3415,21 +3429,21 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
-        if (amount < 0 && !CurrentActionUnnegatable() && HonorLossNegatedWithEffects(playerId))
+        if (amount < 0 && !_rulebookHonorChange && !CurrentActionUnnegatable() && HonorLossNegatedWithEffects(playerId))
         {
             Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.", playerId, source?.Id);
             return;
         }
         // Unimpeachable Name played in the window before this loss (Mendon's R4 ruling): the same reduction, for the action it was played on.
-        if (amount < 0 && playerId == _state.UnimpeachablePlayerId && _state.UnimpeachableActionKey is { } unimpeachableKey && unimpeachableKey == CurrentActionKey())
+        if (amount < 0 && !_rulebookHonorChange && playerId == _state.UnimpeachablePlayerId && _state.UnimpeachableActionKey is { } unimpeachableKey && unimpeachableKey == CurrentActionKey())
         {
             var reducedByName = Math.Min(0, amount + 3);
             Emit("honorLossReduced", $"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name{(reducedByName == 0 ? " to 0" : "")}.", playerId, source?.Id);
             amount = reducedByName;
             if (amount == 0) return;
         }
-        if (RenyuReducesLoss(playerId, amount, reason)) return; // Kuni Renyu (issue #503, EmperorP6.cs): Honor losses from an action that targeted him are reduced to 0.
-        if (amount < 0 && playerId == _state.HonorLossReductionPlayerId)
+        if (!_rulebookHonorChange && RenyuReducesLoss(playerId, amount, reason)) return; // Kuni Renyu (issue #503, EmperorP6.cs): Honor losses from an action that targeted him are reduced to 0.
+        if (amount < 0 && !_rulebookHonorChange && playerId == _state.HonorLossReductionPlayerId)
         {
             var reduced = Math.Min(0, amount + 3);
             if (reduced == 0) { Emit("honorLossReduced", $"{Player(playerId).Name}'s Honor loss from {reason} was reduced to 0 by Unimpeachable Name.", playerId, source?.Id); return; }
@@ -3444,7 +3458,7 @@ public sealed partial class MatchEngine
         if (amount == -1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId, reason)) return; // issue #501: an unnegatable action's loss is not negated
         // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
         if (amount < 0 && !CurrentActionUnnegatable() && TenThousandTemplesNegates(playerId, amount, reason)) return; // issue #501: nor by Ten Thousand Temples
-        amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
+        if (!_rulebookHonorChange) amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
         amount = TfStrategiesBHonorLoss(playerId, amount, reason, source); // Mercantile Conflict (TfStrategiesB.cs): "the next two Honor losses from your cards are increased by 1 each".
         var player = Player(playerId); player.Honor += amount;
         if (amount < 0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
@@ -3452,7 +3466,7 @@ public sealed partial class MatchEngine
         NoteBattleResolutionHonor(playerId, amount, reason); // On (The Shadow's Embrace pass, issue #476 batch 6).
         if (player.Honor <= -20) player.DishonorLossPending = true;
         Emit("honorChanged", $"{player.Name}: {amount:+#;-#;0} Honor ({reason}).", playerId, Amount: amount);
-        if (amount < 0) P4HonorLost(playerId, source); // No Time for Games (issue #503, EmperorP4More.cs): "after the next time (this turn) you lose Honor from another player's card effect".
+        if (amount < 0 && !_rulebookHonorChange) P4HonorLost(playerId, source); // No Time for Games (issue #503, EmperorP4More.cs): "after the next time (this turn) you lose Honor from another player's card effect".
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
         // single shared choke point every Honor change already funnels through here means "may be
         // negated, modified, or redirected by cards that affect honor gains" (the user's own

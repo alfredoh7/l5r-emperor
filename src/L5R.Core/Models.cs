@@ -125,8 +125,11 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total. Permanent: "permanently give him +2F" (Spirit of the Berserker) -- kept when the
-/// turn ends (FinishTurn), unlike every other modifier, and reset with the card when it goes back to a hand or a deck.</summary>
-public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount, bool Permanent = false);
+/// turn ends (FinishTurn), unlike every other modifier, and reset with the card when it goes back to a hand or a deck. SuppressedTurn: the turn a temporary prevention ("negate all current and new Force
+/// penalties on him", Tireless Efforts; Creating Order) hides the modifier for (it lasts that turn; it does not end the modifier) -- it keeps its source, amount and Permanent state, counts for nothing
+/// (StatModifier) during SuppressedTurn, and applies again from the next turn on, unless its own duration ended first (FinishTurn sweeps a turn's modifier whether or not it is hidden).</summary>
+public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount, bool Permanent = false,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? SuppressedTurn = null);
 
 /// <summary>One negation a "before an action resolves" reaction has set on a card for the deferred command:
 /// Kind is "destroy", "move", "straighten", "bow" (each consumed by its first match) or "all" (Champion of

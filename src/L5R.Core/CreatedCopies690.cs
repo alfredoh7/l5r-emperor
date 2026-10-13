@@ -289,6 +289,19 @@ public sealed partial class MatchEngine
         _ => throw new InvalidOperationException($"{stat} is not a stat that is read as a current value.")
     };
 
+    /// <summary>A stat before any floor at 0 and any cap: Force may be below 0 here, and a Force or Personal Honor cap is not applied. A Set measures from this.</summary>
+    private int RawStat(CardInstance card, string stat) => stat switch
+    {
+        "Force" => Definition(card).Type switch
+        {
+            CardType.Personality => PersonalityForceRaw(card),
+            CardType.Follower => FollowerForceRaw(card),
+            _ => Definition(card).Force + StatModifier(card, "Force")
+        },
+        "PersonalHonor" => CardPersonalHonorUncapped(card),
+        _ => CurrentStat(card, stat)
+    };
+
     // ---- Set, Copy, Exchange ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private static bool StatCanBeSet(CardDefinition definition, string stat) => stat switch
@@ -303,23 +316,23 @@ public sealed partial class MatchEngine
     internal bool SetStat(CardInstance card, string stat, int value, string sourceId, string effect, bool permanent = false)
     {
         Require(StatCanBeSet(Definition(card), stat), $"{Definition(card).Name} has no {stat} to set.");
-        return InPlay(card) && GiveSufficient(card, stat, value - CurrentStat(card, stat), value, sourceId, effect, permanent);
+        return InPlay(card) && GiveSufficient(card, stat, value - RawStat(card, stat), sourceId, effect, permanent);
     }
 
+    internal void ApplyModifierForTest(string cardId, int force) => ApplyModifier(Card(cardId), "test-setter", "modifier-test", "Force", force);
+    internal bool SetStatForTest(string cardId, string stat, int value, bool permanent = false) => SetStat(Card(cardId), stat, value, "test-setter", "set-test", permanent);
+
     // The bonus or penalty of a Set, worked out by the caller (an Exchange works both out from the noted values before either is given). False when nothing was applied.
-    private bool GiveSufficient(CardInstance card, string stat, int delta, int value, string sourceId, string effect, bool permanent)
+    // The delta is measured from the stat's raw value (RawStat: no floor, no cap), so a Force floored at 0 gets exactly enough to reach the stated value, and a capped Force is set underneath its cap.
+    private bool GiveSufficient(CardInstance card, string stat, int delta, string sourceId, string effect, bool permanent)
     {
         if (delta == 0 || !InPlay(card)) return false;
-        var flooredForce = stat == "Force" && delta > 0 && CurrentStat(card, stat) == 0;
         var modifiers = card.Modifiers.Count;
         if (permanent) AddPermanentModifier(card, sourceId, effect, stat, delta); else ApplyModifier(card, sourceId, effect, stat, delta);
         if (!InPlay(card)) return true; // a Chi penalty that destroyed him
         if (card.Modifiers.Count != modifiers + 1) return false; // negated or delayed
         // "A Personality reduced to 0 Chi is destroyed": ApplyModifier sees to it for the turn's penalty; a permanent one is judged here.
         if (permanent && stat == "Chi" && Definition(card).Type == CardType.Personality && PersonalityChi(card) <= 0) { DestroyUnits([card], true); return true; }
-        // Force is never read below 0, so a bonus measured from a floored 0 can fall short of the stated value: it is topped up to what is sufficient.
-        if (flooredForce && CurrentStat(card, stat) is var reached && reached < value)
-            card.Modifiers[^1] = card.Modifiers[^1] with { Amount = card.Modifiers[^1].Amount + value - reached };
         return true;
     }
 
@@ -344,8 +357,9 @@ public sealed partial class MatchEngine
             ? $"{Definition(a).Name}'s {StatName(statA)} ({notedA}) and {StatName(statB)} ({notedB}) are {(permanent ? "permanently " : "")}exchanged."
             : $"{Definition(a).Name}'s {StatName(statA)} ({notedA}) and {Definition(b).Name}'s {StatName(statB)} ({notedB}) are {(permanent ? "permanently " : "")}exchanged.", a.OwnerId, a.Id);
         // Simultaneous: both bonuses or penalties are worked out from the noted values before either is given.
-        GiveSufficient(a, statA, notedB - notedA, notedB, sourceId, effect, permanent);
-        GiveSufficient(b, statB, notedA - notedB, notedA, sourceId, effect, permanent);
+        var (deltaA, deltaB) = (notedB - RawStat(a, statA), notedA - RawStat(b, statB));
+        GiveSufficient(a, statA, deltaA, sourceId, effect, permanent);
+        GiveSufficient(b, statB, deltaB, sourceId, effect, permanent);
     }
 
     private static string StatName(string stat) => stat == "PersonalHonor" ? "Personal Honor" : stat;

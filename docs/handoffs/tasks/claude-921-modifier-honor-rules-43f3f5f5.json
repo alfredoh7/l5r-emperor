@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rules audit #921. (8) A Dishonorable death's Honor loss is now a rulebook change in GainHonor: card-effect Honor modifiers, action-scoped reductions/reactions (Chugo, Unimpeachable Name, Renyu, Solid Defense/Rhetoric window, Nexus of Lies, Den of Iniquity, Court Scribe/own-card filters) neither change nor are consumed by it; the stronghold Honor-loss immunity policy is unchanged. (9) Set/Copy/Exchange measure the necessary modifier from the raw Force/Personal Honor (no floor, no cap). (11) Tireless Efforts and Creating Order now hide the modifiers they negate (AppliedModifier.SuppressedTurn) instead of deleting them, so a surviving permanent modifier counts again next turn.",
+  "validation": "Regressions in honor-modifiers, force-cap, forgotten-legacy-batch-3; full gate run before push (see PR).",
+  "remaining": "Needs a ContentVersion bump (engine outcomes change for replays). Gift Armor/Aka-beko/Peace of the Kami purges and one-shot cleanses still delete (not duration-bound).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/921",
+  "branch": "claude/921-modifier-honor-rules",
+  "updated": "2026-10-13T18:40:04.122965+00:00"
+}

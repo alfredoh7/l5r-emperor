@@ -16,6 +16,8 @@ internal static class ForceCapTests
         ("Negating Force penalties on a card (Tireless Efforts' shape) negates the cap on that card only, for the turn", NegatedOnOneCard),
         ("Incense Mill's one-shot cleanse negates the caps binding the card then, saved with the match, for the turn", CleansedForTheTurn),
         ("A Force-penalty immunity, on one card or on a player's cards by keyword, negates the cap; removing it restores the cap", ImmunityNegates),
+        ("Setting a Force measures the bonus or penalty from the uncapped, unfloored Force, so the stated value is right while the cap binds, after it leaves, over a floor and beside other modifiers", SetBeneathCap),
+        ("Tireless Efforts' shape hides a permanent Force penalty for the turn instead of deleting it: it counts again next turn, a turn's penalty does not return", NegatedPenaltyReturns),
         ("The capped Force is what the table shows and what the armies total", ShownAndTotalled),
     ]);
 
@@ -73,6 +75,66 @@ internal static class ForceCapTests
             Batch336Support.Force(buffed, 3); // a +3F bonus on top of a 4F printed Force
             Eq(MatchEngine.FromTestState(s).CardForceForTest(buffed.Id), 3, "a bonus does not lift the Force over the maximum");
         });
+    }
+
+    private static void SetBeneathCap()
+    {
+        WithCaps(3, () =>
+        {
+            var s = Table();
+            var source = Fixture(s, Source, 0, 5);
+            var target = Fixture(s, "six", 1, 6, "Fallen"); // capped at 3
+            var e = MatchEngine.FromTestState(s);
+            Eq(e.CardForceForTest(target.Id), 3, "capped");
+            Check(e.SetStatForTest(target.Id, "Force", 5), "the Set applied");
+            Eq(e.CardForceForTest(target.Id), 3, "the cap still binds: set to 5, shown 3");
+            Check(e.MoveHomeByEffectForTest(source.Id, 1), "the cap source leaves");
+            Eq(e.CardForceForTest(target.Id), 5, "after the cap leaves Force is the stated 5, not 8");
+        });
+        WithCaps(3, () =>
+        {
+            var s = Table();
+            Fixture(s, Source, 0, 5);
+            var target = Fixture(s, "six", 1, 6, "Fallen");
+            var e = MatchEngine.FromTestState(s);
+            e.SetStatForTest(target.Id, "Force", 2);
+            Eq(e.CardForceForTest(target.Id), 2, "set under the cap: the stated 2 shows");
+        });
+        {
+            var s = Table();
+            var weak = Fixture(s, "weak", 1, 4);
+            Batch336Support.Force(weak, -6); // 4F - 6: read as 0
+            var e = MatchEngine.FromTestState(s);
+            Eq(e.CardForceForTest(weak.Id), 0, "floored at 0");
+            e.SetStatForTest(weak.Id, "Force", 3);
+            Eq(e.CardForceForTest(weak.Id), 3, "set from a floored Force reaches the stated value");
+            e.ApplyModifierForTest(weak.Id, 2); // another modifier stacks on top
+            Eq(e.CardForceForTest(weak.Id), 5, "a later modifier stacks on the set value");
+        }
+        {
+            var s = Table();
+            var buffed = Fixture(s, "buffed", 1, 4);
+            Batch336Support.Force(buffed, 2); // 6F
+            var e = MatchEngine.FromTestState(s);
+            e.SetStatForTest(buffed.Id, "Force", 5);
+            Eq(e.CardForceForTest(buffed.Id), 5, "an existing +2 is part of the base the Set measures from");
+        }
+    }
+
+    private static void NegatedPenaltyReturns()
+    {
+        var s = Table();
+        var card = Fixture(s, "weighed", 1, 6);
+        card.Modifiers.Add(new("fx", "an-action", "Force", -2, Permanent: true));
+        card.Modifiers.Add(new("fx", "an-action", "Force", -1));
+        var e = MatchEngine.FromTestState(s);
+        Eq(e.CardForceForTest(card.Id), 3, "before");
+        e.NegateForcePenaltiesForTest(card.Id);
+        Eq(e.CardForceForTest(card.Id), 6, "both penalties are negated for the turn");
+        var later = e.State;
+        later.Cards[card.Id].Modifiers.RemoveAll(m => !m.Permanent);
+        later.TurnNumber++;
+        Eq(MatchEngine.FromTestState(later).CardForceForTest(card.Id), 4, "the permanent -2 is back next turn; the turn's -1 ended");
     }
 
     private static void LapsesWithTheSource()
