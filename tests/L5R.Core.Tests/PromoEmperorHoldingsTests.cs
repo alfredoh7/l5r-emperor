@@ -408,7 +408,7 @@ internal static partial class PromoEmperorHoldingsTests
     {
         var s = Battle(0);
         var temple = Add(s, JadeTemple, 0, Zone.Home);
-        var shugenja = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var shugenja = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); shugenja.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var spell = Add(s, "training-spell-with-ability", 0, Zone.Attached, bowed: true, province: 0, parent: shugenja.Id);
         var enemyHost = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var enemySpell = Add(s, "training-spell-with-ability", 1, Zone.Attached, bowed: true, province: 0, parent: enemyHost.Id);

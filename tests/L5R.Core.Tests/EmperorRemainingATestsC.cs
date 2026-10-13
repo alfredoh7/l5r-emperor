@@ -395,7 +395,7 @@ internal static partial class EmperorRemainingATests
         Eq(e.Version, version, "a refusal changes nothing");
         Accept(e, option.Command! with { TargetId = reduced.Id });
         Check(e.State.Cards[reduced.Id].Bowed, "a unit whose total is 4 is bowed");
-        e =MatchEngine.FromTestState(s);
+        e = MatchEngine.FromTestState(s);
         option = Batch336Support.Options(e, 0, "fortitude-bow", card.Id, berserker.Id).First(o => o.Enabled);
         Accept(e, option.Command! with { TargetId = weak.Id });
         Check(e.State.Cards[weak.Id].Bowed, "the target was bowed");

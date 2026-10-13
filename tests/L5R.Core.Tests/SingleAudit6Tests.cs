@@ -246,7 +246,7 @@ internal static partial class SingleAudit6Tests
 
     private static void DamningCeremony() => Windows("damning-ceremony", (s, w) =>
     {
-        var host = Put(s, "training-crane-samurai", w.Me, w); // Gold Cost 5, Force 3
+        var host = Put(s, "training-crane-samurai", w.Me, w); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // Gold Cost 5, Force 3; a Spell needs a Shugenja host (issue #915)
         var spell = Gear(s, Def("damning-ceremony", "Damning Ceremony"), host);
         return new(w.Me, "damning-ceremony", spell.Id, Ids: [host.Id]);
     }, (before, e, f, w) =>
@@ -335,7 +335,7 @@ internal static partial class SingleAudit6Tests
 
     private static Fx SniperFx(MatchState s, W w, bool recon)
     {
-        var host = Put(s, "training-crane-samurai", w.Me, w);
+        var host = Put(s, "training-crane-samurai", w.Me, w); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var sniper = Gear(s, Def("hiruma-sniper-attack", "Hiruma Sniper"), host);
         var target = Put(s, "training-lion-samurai", w.Foe, w);
         if (recon && w.Battle) s.Players[1 - s.ActivePlayerId].Provinces[0].Reconnaissance[w.Me] = true;
@@ -539,7 +539,7 @@ internal static partial class SingleAudit6Tests
 
     private static void ScholarlyHermit() => Windows("scholarly-hermit-search", (s, w) =>
     {
-        var host = Put(s, "training-crane-samurai", w.Me, w);
+        var host = Put(s, "training-crane-samurai", w.Me, w); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var hermit = Gear(s, DefA("scholarly-hermit-search"), host);
         var ring = Add(s, "training-ring-of-air", w.Me, Zone.FateDiscard);
         return new(w.Me, "scholarly-hermit-search", hermit.Id, ring.Id);
@@ -615,7 +615,7 @@ internal static partial class SingleAudit6Tests
     private static void JadeTempleStraighten() => Windows("pe-jade-temple-straighten", (s, w) =>
     {
         var temple = Add(s, Def("pe-jade-temple-straighten", "The Jade Temple"), w.Me, Zone.Home);
-        var shugenja = Put(s, "training-crane-samurai", w.Me, w);
+        var shugenja = Put(s, "training-crane-samurai", w.Me, w); shugenja.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var spell = Add(s, "training-spell-with-ability", w.Me, Zone.Attached, bowed: true, province: w.Province, parent: shugenja.Id);
         spell.AbilityUses["training-spell-force-boost"] = s.TurnNumber;
         Put(s, "training-lion-samurai", w.Foe, w);
@@ -681,7 +681,7 @@ internal static partial class SingleAudit6Tests
 
     private static void ShaharazadToken() => Windows("wl-shaharazad-token", (s, w) =>
     {
-        var host = Put(s, "training-crane-samurai", w.Me, w);
+        var host = Put(s, "training-crane-samurai", w.Me, w); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var item = Gear(s, Def("wl-shaharazad-token", "Translated Story of Shaharazad"), host);
         return new(w.Me, "wl-shaharazad-token", item.Id);
     }, (before, e, f, w) =>
@@ -745,7 +745,7 @@ internal static partial class SingleAudit6Tests
     private static void DamningCeremonyOnce()
     {
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
-        var host = Add(s, "training-crane-samurai", 0, Zone.Home);
+        var host = Add(s, "training-crane-samurai", 0, Zone.Home); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var spell = Gear(s, Def("damning-ceremony", "Damning Ceremony"), host);
         var e = MatchEngine.FromTestState(s);
         Accept(e, Offered(e, new(0, "damning-ceremony", spell.Id))!);

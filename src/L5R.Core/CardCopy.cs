@@ -89,7 +89,7 @@ public sealed partial class MatchEngine
         && !(card.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && Keyword(host, "Shugenja"));
 
     private IEnumerable<string> AbilityIdsOf(CardInstance card) => RemovedAbilitiesFilter(card, P5AbilitiesRemoved(card) || SpellHostIsNotShugenja(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
-                                                                                                                                // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
+                                                                                                                                                                // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
         (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal).Where(GrantedTraits.IsNot)); // issue #667 (AbilityRemoval.cs): permanently removed abilities are left out. P22 (issue #690): a trait is not an ability.
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
