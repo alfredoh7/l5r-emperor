@@ -675,3 +675,10 @@ The Event opens a duel during the event resolution stage of the Events Phase. It
 - **Cards/primitives:** every Item and Spell action; Nightingale Blade (oracle-l5r-5556) with a bowed Bayushi Utoro (oracle-l5r-10249) is the case that raised it; Celestial Sword of the Crab - exp, Fubatsu Plate, Mantle of the Jade Champion - exp2 and Strength of the Tsunami print the attachment-bowed permission. The engine behaved this way in the Utoro case; no change.
 - **Date:** 2026-10-12
 - **Source:** Mendon, from the Comprehensive Rules clarification (Bowed and unbowed, 2013-06-05) — [decision](../decisions/2026-10-12-bowed-host-attachment-abilities.md); text in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md).
+
+### R-081 — A face-up dishonorable Personality stays dishonorable outside play and on re-entry
+A Personality who is dishonorable and face up keeps the Dishonorable status when he leaves play (the dead pile, a discard pile, removed from the game, a face-up province) and when he enters play again, unless an effect rehonors him. A hand or a deck is hidden and a face-down card has no public status, so a Personality sent there loses it. Dishonorable death's Honor loss, "dishonorably dead" checks (`IsDishonorablyDead`, Ivory Political) and Seppuku read the same flag and are unchanged. Supersedes the At Any Cost line of the 2026-09-20 gold-payment rulings (he used to return honorable).
+
+- **Cards/primitives:** `MatchEngine.ResetCardState` / `KeepsDishonorOutsidePlay`; At Any Cost (oracle-l5r-639), Akodo Kobi, Essence of Undeath, I Give You My Name, Shinjo's Guidance and other dead-pile recruits; Your Clan Needs You!; Step Through the Void; Sensei discarded from play.
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation report EE-STATE-008 (item 13) — [decision](../decisions/2026-10-13-validation-report-reading.md); supersedes [2026-09-20](../decisions/2026-09-20-gold-payment-rulings.md).

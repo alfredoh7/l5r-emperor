@@ -207,7 +207,9 @@ public sealed partial class MatchEngine
             ResetCardState(attachment);
             attachment.Zone = Zone.RemovedFromGame; attachment.ProvinceIndex = null; // AttachedTo is kept: the attachments stay attached
         }
+        var wasDishonorable = shugenja.Dishonorable; // R-081: removed from the game face up, he keeps the status and returns with it
         ResetCardState(shugenja);
+        shugenja.Dishonorable = wasDishonorable;
         shugenja.Zone = Zone.RemovedFromGame; shugenja.ProvinceIndex = null;
         P5.SteppedUnits.Add(new(shugenja.Id, attachments.Select(a => a.Id).ToArray(), _state.TurnNumber, player.Id, Definition(source).Name));
         Emit("removedFromGame", $"{Definition(source).Name}: {Definition(shugenja).Name} was removed from the game with his attachments; his unit returns before this turn ends.", shugenja.OwnerId, shugenja.Id);

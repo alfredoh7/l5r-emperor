@@ -17,7 +17,8 @@ internal static class CardResetTests
 
     public static void Run(TestRunner runner)
     {
-        (string Name, Action Test)[] tests = [("Leave play: ResetCardState returns every per-play CardInstance property to its default", ResetCoversEveryField)];
+        (string Name, Action Test)[] tests = [("Leave play: ResetCardState returns every per-play CardInstance property to its default", ResetCoversEveryField),
+            ("R-081: a face-up dishonorable Personality keeps Dishonorable in a public zone and loses it in a hand, a deck or face down", DishonorOutsidePlay)];
         runner.Run("card-reset", tests);
     }
 
@@ -47,5 +48,22 @@ internal static class CardResetTests
         var fresh = new CardInstance();
         var left = props.Where(p => JsonSerializer.Serialize(p.GetValue(card)) != JsonSerializer.Serialize(p.GetValue(fresh))).Select(p => p.Name).ToList();
         if (left.Count > 0) throw new Exception("ResetCardState leaves these per-play properties set (reset them, or list them as kept): " + string.Join(", ", left));
+    }
+
+    // R-081 (EE-STATE-008, Mendon 2026-10-13): the status follows a face-up Personality out of play; a hidden zone or a face-down card has no public status.
+    private static void DishonorOutsidePlay()
+    {
+        bool After(string definition, Zone zone, bool faceUp)
+        {
+            var card = new CardInstance { DefinitionId = definition, Zone = zone, FaceUp = faceUp, Dishonorable = true };
+            MatchEngine.ResetCardStateForTest(card);
+            return card.Dishonorable;
+        }
+        const string Samurai = "training-lion-samurai";
+        foreach (var zone in new[] { Zone.Dead, Zone.DynastyDiscard, Zone.FateDiscard, Zone.RemovedFromGame, Zone.Province })
+            if (!After(Samurai, zone, true)) throw new Exception($"a face-up dishonorable Personality in {zone} should stay dishonorable");
+        foreach (var zone in new[] { Zone.Hand, Zone.DynastyDeck, Zone.FateDeck, Zone.Home, Zone.Battlefield })
+            if (After(Samurai, zone, true)) throw new Exception($"a Personality reset in {zone} (hidden or still in play) should lose the status");
+        if (After(Samurai, Zone.Province, false)) throw new Exception("a face-down Personality has no public status");
     }
 }

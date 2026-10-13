@@ -796,13 +796,15 @@ internal static class GoldRulingsTests
         Accept(le, Retarget(hOption, hotako.Id));
         Eq(le.State.Cards[hotako.Id].Zone, Zone.Battlefield); Eq(Honor(le, 1), lionHonor - 2, "Hotako's 'After Hotako enters play: lose 2 Honor'");
 
-        // A dead Personality returns as a new card: nothing of his earlier life follows him.
+        // A dead Personality returns as a new card: nothing of his earlier life follows him -- except that a face-up dishonorable Personality stays dishonorable
+        // outside play and on re-entry (R-081, EE-STATE-008; supersedes the 2026-09-20 reading in which he came back honorable).
         var fresh = Recruit(); var dead = Dead(fresh, Genshin);
         dead.Dishonorable = true; dead.Bowed = true; dead.Modifiers.Add(new("test-source", "test", "Force", 3)); dead.AbilityUses["old"] = 3;
         var fe = MatchEngine.FromTestState(fresh.S);
         Accept(fe, Retarget(Enabled(fe, 0, RecruitAbility, fresh.Card.Id), dead.Id));
         var back = fe.State.Cards[dead.Id];
-        Check(!back.Dishonorable && !back.Bowed && back.Modifiers.Count == 0 && back.AbilityUses.Count == 0, "a new card");
+        Check(back.Dishonorable, "a dishonorable dead Personality returns dishonorable (R-081)");
+        Check(!back.Bowed && back.Modifiers.Count == 0 && back.AbilityUses.Count == 0, "a new card");
     }
 
     private static void AtAnyCostBattleAndPrice()
