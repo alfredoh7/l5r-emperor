@@ -10664,42 +10664,26 @@ public sealed partial class MatchEngine
         region.ProvinceIndex is int regionProvince && personality.ProvinceIndex is int battlefield && BattlefieldProvinceIndex(battlefield) is int battlefieldProvince && Math.Abs(regionProvince - battlefieldProvince) <= 1 && region.OwnerId != _state.ActivePlayerId;
     private string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-action-bowed-personality");
+    // Every watcher that can react to this action's bow gets its own window in turn (ReactionWatcherQueue.cs): Hizumi-type cards at a battlefield where a Personality bowed, Quagmire-type Regions
+    // next to one, and the acting player's Ruya-type cards. They used to be tie-broken to the first one found.
     private bool OpenBowReactionWindow(int actingPlayerId, HashSet<string> bowedBeforeAction, int closesTo)
     {
         var newlyBowed = _state.Cards.Values.Where(c => c.Bowed && !bowedBeforeAction.Contains(c.Id) && Definition(c).Type == CardType.Personality).ToArray();
         if (newlyBowed.Length == 0) return false;
         var atABattlefield = newlyBowed.Where(AtBattle).ToArray();
-        var hizumi = atABattlefield.Length > 0 ? _state.Cards.Values.FirstOrDefault(c => InPlay(c) && AtBattle(c) && BowedAtBattlefieldReactionAbility(c) is { } hizumiAbility && Unspent(c, hizumiAbility) && atABattlefield.Any(nb => nb.ProvinceIndex == c.ProvinceIndex)) : null;
-        if (hizumi is not null)
+        var turns = new List<WatcherTurn>();
+        if (atABattlefield.Length > 0)
         {
-            SuspendOpenWindow();
-            _state.BowReactionCandidateIds = atABattlefield.Where(nb => nb.ProvinceIndex == hizumi.ProvinceIndex).Select(c => c.Id).ToList();
-            _state.PendingChoice = new("bowReaction", hizumi.OwnerId, hizumi.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
-            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = hizumi.OwnerId;
-            Emit("reactionWindow", "Bow-reaction window opened.", hizumi.OwnerId, hizumi.Id);
-            return true;
+            foreach (var hizumi in _state.Cards.Values.Where(c => InPlay(c) && AtBattle(c) && BowedAtBattlefieldReactionAbility(c) is { } hizumiAbility && Unspent(c, hizumiAbility) && atABattlefield.Any(nb => nb.ProvinceIndex == c.ProvinceIndex)).OrderBy(c => c.Id, StringComparer.Ordinal))
+                turns.Add(new("bowReaction", hizumi.Id, "After the bow resolved: you may use this card's own reaction, or pass.", atABattlefield.Where(nb => nb.ProvinceIndex == hizumi.ProvinceIndex).Select(c => c.Id).ToArray(), null, closesTo));
+            foreach (var quagmire in _state.Cards.Values.Where(c => c.Zone == Zone.Region && !c.Bowed && BowedNearRegionReactionAbility(c) is { } quagmireAbility && Unspent(c, quagmireAbility) && atABattlefield.Any(nb => RegionIsNear(c, nb))).OrderBy(c => c.Id, StringComparer.Ordinal))
+                turns.Add(new("bowReaction", quagmire.Id, "After the bow resolved: you may use this card's own reaction, or pass.", atABattlefield.Where(nb => RegionIsNear(quagmire, nb)).Select(c => c.Id).ToArray(), null, closesTo));
         }
-        var quagmire = atABattlefield.Length > 0 ? _state.Cards.Values.FirstOrDefault(c => c.Zone == Zone.Region && !c.Bowed && BowedNearRegionReactionAbility(c) is { } quagmireAbility && Unspent(c, quagmireAbility)
-            && atABattlefield.Any(nb => RegionIsNear(c, nb))) : null;
-        if (quagmire is not null)
-        {
-            SuspendOpenWindow();
-            _state.BowReactionCandidateIds = atABattlefield.Where(nb => RegionIsNear(quagmire, nb)).Select(c => c.Id).ToList();
-            _state.PendingChoice = new("bowReaction", quagmire.OwnerId, quagmire.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
-            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = quagmire.OwnerId;
-            Emit("reactionWindow", "Bow-reaction window opened.", quagmire.OwnerId, quagmire.Id);
-            return true;
-        }
-        var ruya = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == actingPlayerId && InPlay(c) && OwnActionBowedPersonalityReactionAbility(c) is { } ruyaAbility && Unspent(c, ruyaAbility));
-        if (ruya is not null)
-        {
-            SuspendOpenWindow();
-            _state.PendingChoice = new("bowReaction", ruya.OwnerId, ruya.Id, "After your own action bowed a Personality: you may use this card's own reaction, or pass.", closesTo);
-            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = ruya.OwnerId;
-            Emit("reactionWindow", "Bow-reaction window opened.", ruya.OwnerId, ruya.Id);
-            return true;
-        }
-        return false;
+        foreach (var ruya in _state.Cards.Values.Where(c => c.OwnerId == actingPlayerId && InPlay(c) && OwnActionBowedPersonalityReactionAbility(c) is { } ruyaAbility && Unspent(c, ruyaAbility)).OrderBy(c => c.Id, StringComparer.Ordinal))
+            turns.Add(new("bowReaction", ruya.Id, "After your own action bowed a Personality: you may use this card's own reaction, or pass.", null, null, closesTo));
+        if (turns.Count == 0) return false;
+        OpenWatcherTurns(turns);
+        return true;
     }
     private string? MovedEnemyInfantryReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield");
@@ -10717,14 +10701,10 @@ public sealed partial class MatchEngine
         if (cardId is null || !_state.Cards.ContainsKey(cardId)) return false;
         var personality = Card(cardId);
         if (Definition(personality).Type != CardType.Personality || IsCavalryUnit(personality)) return false;
-        var legion = _state.Cards.Values.FirstOrDefault(c => c.Zone == Zone.Attached && c.ProvinceIndex == personality.ProvinceIndex
-            && c.OwnerId != personality.OwnerId && MovedEnemyInfantryReactionAbility(c) is { } legionAbility && Unspent(c, legionAbility));
-        if (legion is null) return false;
-        SuspendOpenWindow();
-        _state.MoveReactionTargetId = personality.Id;
-        _state.PendingChoice = new("moveReaction", legion.OwnerId, legion.Id, "After the resolution of an action that moved an enemy Infantry Personality to this card's battlefield: you may use this card's own reaction, or pass.", closesTo);
-        _state.ConsecutivePasses = 0; _state.PriorityPlayerId = legion.OwnerId;
-        Emit("reactionWindow", "Move-reaction window opened.", legion.OwnerId, legion.Id);
+        var legions = _state.Cards.Values.Where(c => c.Zone == Zone.Attached && c.ProvinceIndex == personality.ProvinceIndex
+            && c.OwnerId != personality.OwnerId && MovedEnemyInfantryReactionAbility(c) is { } legionAbility && Unspent(c, legionAbility)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        if (legions.Length == 0) return false;
+        OpenWatcherTurns(legions.Select(legion => new WatcherTurn("moveReaction", legion.Id, "After the resolution of an action that moved an enemy Infantry Personality to this card's battlefield: you may use this card's own reaction, or pass.", null, personality.Id, closesTo)).ToList());
         return true;
     }
     private string? SiblingFollowerBowedReactionAbility(CardInstance card) =>
@@ -10743,14 +10723,11 @@ public sealed partial class MatchEngine
     {
         var newlyBowedFollowers = _state.Cards.Values.Where(c => c.Bowed && !bowedBeforeAction.Contains(c.Id) && Definition(c).Type == CardType.Follower && c.Zone == Zone.Attached).ToArray();
         if (newlyBowedFollowers.Length == 0) return false;
-        var nikutai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && c.Zone == Zone.Attached && SiblingFollowerBowedReactionAbility(c) is { } nikutaiAbility && Unspent(c, nikutaiAbility)
-            && newlyBowedFollowers.Any(f => f.Id != c.Id && f.AttachedTo == c.AttachedTo));
-        if (nikutai is null) return false;
-        SuspendOpenWindow();
-        _state.NikutaiReactionTargetId = newlyBowedFollowers.First(f => f.Id != nikutai.Id && f.AttachedTo == nikutai.AttachedTo).Id;
-        _state.PendingChoice = new("nikutaiReaction", nikutai.OwnerId, nikutai.Id, "Even if this card is bowed, after a Follower in this unit bowed: you may straighten it, or pass.", closesTo);
-        _state.ConsecutivePasses = 0; _state.PriorityPlayerId = nikutai.OwnerId;
-        Emit("reactionWindow", "Nikutai reaction window opened.", nikutai.OwnerId, nikutai.Id);
+        var watchers = _state.Cards.Values.Where(c => InPlay(c) && c.Zone == Zone.Attached && SiblingFollowerBowedReactionAbility(c) is { } nikutaiAbility && Unspent(c, nikutaiAbility)
+            && newlyBowedFollowers.Any(f => f.Id != c.Id && f.AttachedTo == c.AttachedTo)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        if (watchers.Length == 0) return false;
+        OpenWatcherTurns(watchers.Select(nikutai => new WatcherTurn("nikutaiReaction", nikutai.Id, "Even if this card is bowed, after a Follower in this unit bowed: you may straighten it, or pass.", null,
+            newlyBowedFollowers.First(f => f.Id != nikutai.Id && f.AttachedTo == nikutai.AttachedTo).Id, closesTo)).ToList());
         return true;
     }
 

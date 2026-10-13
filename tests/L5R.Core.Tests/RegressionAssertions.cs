@@ -5,8 +5,11 @@ internal static class RegressionAssertions
 {
     public static void Accept(MatchEngine engine,GameCommand command)
     {
+        var duplicated=ReactionProbe.Before(engine); // issue #898: L5R_REACTION_PROBE=1 checks every reaction window a suite reaches
         var result=engine.Execute(command);
         Require(result.Accepted,$"{command}: {result.Error ?? "Rejected"}");
+        ReactionProbe.Observe(engine);
+        ReactionProbe.After(duplicated,command,engine);
     }
 
     public static void Reject(MatchEngine engine,GameCommand command)

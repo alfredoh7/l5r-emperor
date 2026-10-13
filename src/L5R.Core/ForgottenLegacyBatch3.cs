@@ -29,17 +29,30 @@ public sealed partial class MatchEngine
         if (_state.Phase != Phase.Battle || _state.CurrentBattleProvince is null || _state.PendingChoice is not null) return false;
         if (_state.AttackerLeadBattle != _state.BattleNumber || command.PlayerId != _state.ActivePlayerId) return false;
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Timing is not ("Battle" or "BattleOrOpen")) return false;
-        var defender = 1 - command.PlayerId;
-        var watcher = Player(defender).Hand.Select(Card).FirstOrDefault(c => (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d)
-            && d.Timing == "Reaction" && d.Trigger == EntrenchedTrigger && !(c.AbilityUses.TryGetValue(d.UsageKey ?? a, out var used) && used == _state.TurnNumber)));
-        if (watcher is null) return false;
+        if (EntrenchedWatcher(command) is not { } watcher) return false;
         _state.PendingAnnouncedAction = command;
-        _state.PendingChoice = new("announceReaction", defender, watcher.Id, "The Attacker announced a Battle action before your first opportunity: you may negate it (Entrenched Position), or pass.");
+        _state.PendingChoice = new("announceReaction", watcher.OwnerId, watcher.Id, "The Attacker announced a Battle action before your first opportunity: you may negate it (Entrenched Position), or pass.");
         _state.ConsecutivePasses = 0;
-        _state.PriorityPlayerId = defender;
-        Emit("reactionWindow", "Announce reaction window opened.", defender, watcher.Id);
+        _state.PriorityPlayerId = watcher.OwnerId;
+        Emit("reactionWindow", "Announce reaction window opened.", watcher.OwnerId, watcher.Id);
         return true;
     }
+
+    // Issue #898: every Defender's card that can negate the announced action is asked in turn (each is marked asked on the announcement's record), not only the first found in the hand.
+    private CardInstance? EntrenchedWatcher(GameCommand command)
+    {
+        var record = AnnounceRecord(command);
+        var defender = 1 - command.PlayerId;
+        var watcher = Player(defender).Hand.Select(Card).Where(c => !record.Asked.Contains(c.Id)).OrderBy(c => c.Id, StringComparer.Ordinal).FirstOrDefault(c => (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d)
+            && d.Timing == "Reaction" && d.Trigger == EntrenchedTrigger && !(c.AbilityUses.TryGetValue(d.UsageKey ?? a, out var used) && used == _state.TurnNumber)));
+        if (watcher is not null) record.Asked.Add(watcher.Id);
+        return watcher;
+    }
+
+    // The window's close, for an announcement that was held for the Defender (the Attacker still leads the battle): the next of the Defender's watchers is asked.
+    private CardInstance? NextEntrenchedWatcher(GameCommand pending) =>
+        _state.Phase == Phase.Battle && _state.AttackerLeadBattle == _state.BattleNumber && pending.PlayerId == _state.ActivePlayerId && pending.AbilityId is not null && AbilityCatalog.All.TryGetValue(pending.AbilityId, out var ability) && ability.Timing is "Battle" or "BattleOrOpen"
+            ? EntrenchedWatcher(pending) : null;
 
     private void NegateAnnouncedAction(CardInstance negatingCard)
     {

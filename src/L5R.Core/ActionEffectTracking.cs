@@ -43,7 +43,25 @@ public sealed partial class MatchEngine
     // the same "who priority returns to once every window this action opens has closed" every one of those already threads through).
     // performerId (issue #453, batch 2): the Personality who performed the action, for a Reaction that targets "the action's performer" (An Insult Answered); the Honor
     // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
+    // "You may only play one copy of X in reaction to any one resolution": the Reactions the after-action window offers once per resolution (a second copy has nothing to react to).
+    private static readonly HashSet<string> OneCopyPerResolution = ["grief-dishonor"];
+
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null, IEnumerable<string>? targetIds = null)
+    {
+        // Issue #898: a Reaction played in an after-action window is an action too and records its own resolution, but the window's other Reactions still answer the action the window
+        // opened for (two Chrysanthemum Blossoms on one Personality both react to his assignment). The window's record is kept: given back at once when the Reaction opens no window of its
+        // own, and carried on the window it sets aside when it does.
+        var outer = _state.PendingChoice is { Type: "afterActionResolvedReaction" } && AbilityCatalog.All.TryGetValue(abilityId, out var played) && played.Timing == "Reaction" ? _state.LastResolvedAction : null;
+        var suspended = _state.SuspendedWindows.Count;
+        var opened = FinishActionEffectTrackingCore(abilityId, playerId, sourceId, closesTo, performerId, targetIds);
+        if (outer is null) return opened;
+        if (OneCopyPerResolution.Contains(abilityId) && !outer.OneCopyPlayed.Contains(abilityId)) outer.OneCopyPlayed.Add(abilityId);
+        if (_state.SuspendedWindows.Count > suspended) _state.SuspendedWindows[suspended].LastResolvedAction = outer;
+        else _state.LastResolvedAction = outer;
+        return opened;
+    }
+
+    private bool FinishActionEffectTrackingCore(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null, IEnumerable<string>? targetIds = null)
     {
         ClearActionScopedModifiers(ActionKeyPrefix(playerId, sourceId, abilityId)); // P6 (AfterFacts.cs): "until the action ends" modifiers end with the action
         WlAfterActionResolved(abilityId, playerId, sourceId); // issue #674 (WlSpellsRings.cs): The Thunderer's Protection bows the action's performers after it resolves
@@ -202,7 +220,7 @@ public sealed partial class MatchEngine
             // Kyuden Otomo - exp: "After you take the Imperial Favor" (the resolved action took it for him, and he still holds it).
             "eternal-victory-draw" => facts.PlayerId == playerId && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
             "otomo-favor-token" => OtomoFavorTraitApplies(playerId),
-            "grief-dishonor" => facts.Affected.Any(a => a.Kind == DestroyedKind && Definition(Card(a.CardId)).Type == CardType.Personality),
+            "grief-dishonor" => !facts.OneCopyPlayed.Contains(abilityId) && facts.Affected.Any(a => a.Kind == DestroyedKind && Definition(Card(a.CardId)).Type == CardType.Personality),
             "cast-two-shadows-move" => facts.Affected.Any(a => a.Kind == MovedKind && a.FromBattlefield is not null && Card(a.CardId) is { Zone: Zone.Home } moved
                 && moved.OwnerId == playerId && Definition(moved).Type == CardType.Personality && InNinjaUnit(moved)),
             // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs): Isawa Kimi - exp 2 and Shiba Tsukimi - exp 4.
