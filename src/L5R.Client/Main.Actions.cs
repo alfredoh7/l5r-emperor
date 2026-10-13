@@ -103,7 +103,7 @@ public partial class Main
             // Copies use ordinary engine actions; keep those controls near their result summary.
             if (_chosen is null && View.PendingChoice is null && CardChanges.Entries(_selected).Any(e => e.Copied))
             {
-                foreach (var action in Actions.Where(a => a.CardId == _selected.Id && a.Type is not "proclaim")) AddAction(details, action);
+                foreach (var action in Actions.Where(a => a.CardId == _selected.Id && a.Type is not "proclaim" && Listable(a))) AddAction(details, action);
                 cardActionsRendered = true;
             }
             var artwork = CardTile.Artwork(def);
@@ -142,13 +142,13 @@ public partial class Main
         if (View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction")
         {
             RenderReactionTarget();
-            foreach (var reaction in Actions.Where(a => a.Type == "useAbility")) AddAction(_inspector, reaction);
+            foreach (var reaction in Actions.Where(a => a.Type == "useAbility" && Listable(a))) AddAction(_inspector, reaction);
             return;
         }
         if (_selected is { } supportCard && IsSupportCard(supportCard) && View.PendingChoice is null)
         { RenderSupportActions(supportCard); return; }
         if (!cardActionsRendered)
-            foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
+            foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim" && Listable(a))) AddAction(_inspector, action);
         if (_selected is { ActionLocked: true, Definition: not null } inspected)
             _inspector.AddChild(SidebarSkin.Button("Inspect card", () => InspectLockedCard(inspected)));
         if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
@@ -156,7 +156,7 @@ public partial class Main
             var action = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
             if (action is not null) _inspector.AddChild(SidebarSkin.Button("Assign units…", () => Choose(action), true));
         }
-        foreach (var action in Actions.Where(a => a.Type is "selectBattle" or "discardHand" || a.Type == "useAbility" && a.CardId is null)) AddAction(_inspector, action);
+        foreach (var action in Actions.Where(a => a.Type is "selectBattle" or "discardHand" || a.Type == "useAbility" && a.CardId is null && Listable(a))) AddAction(_inspector, action);
         AddDecisionReviewNavigation();
     }
 
@@ -462,6 +462,10 @@ public partial class Main
     }
 
     private void CancelChoice() { _playPrompt = null; ResetDecisionSelection(); SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
+
+    // An ability or reaction that cannot be used right now (no legal target or performer, a condition unmet, Honor too low to Lobby) is not offered at all; the engine still
+    // lists it with its reason, but a menu of things the player cannot do only hides the ones they can.
+    private static bool Listable(ActionOption option) => option.Enabled || option.Type != "useAbility";
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {

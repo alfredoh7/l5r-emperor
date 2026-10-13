@@ -105,7 +105,7 @@ public partial class Main
                 _decisionActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
             return true;
         }
-        var options = Actions.Where(a => a.Type is not ("declineReaction" or "concede" or "wait" or "orderSeppuku")).ToArray();
+        var options = Actions.Where(a => a.Type is not ("declineReaction" or "concede" or "wait" or "orderSeppuku") && (a.Enabled || a.Type is not ("useAbility" or "playStrategy" or "equip"))).ToArray();
         if (options.Length > 0)
         {
             _inspector.AddChild(Palette.Text("Choose a reaction", 18, Palette.Gold));
