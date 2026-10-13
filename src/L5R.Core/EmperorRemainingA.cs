@@ -203,8 +203,8 @@ public sealed partial class MatchEngine
             "rem-a-personality-chi-lte-performer" => personality && command.PerformerId is not null && PersonalityChi(target) <= PersonalityChi(Card(command.PerformerId)),
             // Deception Revealed: "a Personality or Follower".
             "rem-a-personality-or-follower" => personality || type == CardType.Follower && target.Zone == Zone.Attached,
-            // Fortitude: "an enemy unit with lower total Force than your Berserker's base Force" -- the unit's Personality is the target (core rules: a unit is targeted through its Personality).
-            "rem-a-enemy-unit-total-force-lt-performer-base" => personality && !own && command.PerformerId is not null && BattleForce(target) < Definition(Card(command.PerformerId)).Force,
+            // Fortitude (issue #915, EE-STATE-039): the unit TOTAL counts every card of the unit, bowed or not (UnitTotalForce), not its current battle contribution. The unit's Personality is the target (core rules: a unit is targeted through its Personality).
+            "rem-a-enemy-unit-total-force-lt-performer-base" => personality && !own && command.PerformerId is not null && UnitTotalForce(target) < Definition(Card(command.PerformerId)).Force,
             // Deception Revealed's Reaction: a Ring the action just resolved bowed (the record is read as the after-action window opens), still bowed.
             "rem-a-ring-bowed-by-last-action" => type == CardType.Ring && target.Bowed && _state.LastResolvedAction is { } facts && facts.Affected.Any(a => a.Kind == BowedRingKind && a.CardId == target.Id),
             _ => false

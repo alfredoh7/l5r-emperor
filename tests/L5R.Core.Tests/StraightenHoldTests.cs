@@ -369,7 +369,7 @@ internal static class StraightenHoldTests
     {
         // Home: the Attacker's Scouring Flood would move a defending Personality home; the one under a Home lock stays, the other goes.
         var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 1;
-        var host = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+        var host = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var flood = Add(s, ScouringFlood, 1, Zone.Attached, province: 0, parent: host.Id);
         var lockedDefender = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
         var freeDefender = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
@@ -379,7 +379,7 @@ internal static class StraightenHoldTests
         Eq(e.State.Cards[lockedDefender.Id].Zone, Zone.Battlefield, "a Home lock negates the effect that would move him home");
         Check(e.State.Events.Any(x => x.Type == "moveNegated" && x.CardId == lockedDefender.Id), "logged");
         var t = Table(Phase.Battle, 1); t.PriorityPlayerId = 1;
-        var host2 = Add(t, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+        var host2 = Add(t, "training-crane-samurai", 1, Zone.Battlefield, province: 0); host2.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var flood2 = Add(t, ScouringFlood, 1, Zone.Attached, province: 0, parent: host2.Id);
         var free2 = Add(t, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
         var f = MatchEngine.FromTestState(t);
@@ -388,7 +388,7 @@ internal static class StraightenHoldTests
 
         // A lock of another kind does not stop it, and a lock is for its own turn only.
         var u = Table(Phase.Battle, 1); u.PriorityPlayerId = 1;
-        var host3 = Add(u, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+        var host3 = Add(u, "training-crane-samurai", 1, Zone.Battlefield, province: 0); host3.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var flood3 = Add(u, ScouringFlood, 1, Zone.Attached, province: 0, parent: host3.Id);
         var wrongKind = Add(u, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
         wrongKind.MovementLocks.Add(new("test", u.TurnNumber, MovementKinds.ToBattlefield));

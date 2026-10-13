@@ -47,7 +47,7 @@ internal static class ActionLockTests
     {
         var s = Table(Phase.Action, actor: 1);
         var hotako = Add(s, Hotako, 1, Zone.Home);
-        var locked = Add(s, "training-battle-bower", 0, Zone.Battlefield, province: 0);
+        var locked = Add(s, "training-battle-bower", 0, Zone.Battlefield, province: 0); locked.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var item = Add(s, "training-bow-item", 0, Zone.Attached, province: 0, parent: locked.Id);
         var spell = Add(s, "training-bow-spell", 0, Zone.Attached, province: 0, parent: locked.Id);
         var follower = Add(s, "training-bow-follower", 0, Zone.Attached, province: 0, parent: locked.Id);
