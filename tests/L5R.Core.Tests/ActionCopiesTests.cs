@@ -6,8 +6,27 @@ internal static class ActionCopiesTests
 {
     public static void Run(TestRunner runner) => runner.Run("action-copies", [
         ("A Paragon's Strength: three copies each perform the same Battle action in one battle", ParagonThreeCopies),
+        ("A Paragon's Strength: each copy sends one more enemy home while enemies with equal or lower Personal Honor remain; when none is left only the Ranged Attack is offered", SendHomeUntilNoTargetRemains),
         ("Every non-unique Strategy's action can be performed once for each of three copies in the same phase (no copy is barred by a use of another)", EveryStrategyThreeCopies),
     ]);
+
+    private static void SendHomeUntilNoTargetRemains()
+    {
+        var s = Batch336Support.Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+        var paragon = Batch336Support.Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        paragon.GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent));
+        for (var i = 0; i < 2; i++) Batch336Support.Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var copies = Enumerable.Range(0, 3).Select(_ => Batch336Support.Add(s, Paragon, 0, Zone.Hand)).ToArray();
+        var e = MatchEngine.FromTestState(s);
+        for (var i = 0; i < 3; i++)
+        {
+            var offers = e.QueryActions(0).Where(a => a.CardId == copies[i].Id && a.Type == "useAbility").ToArray();
+            var move = offers.FirstOrDefault(a => a.Enabled && a.Command?.AbilityId == "paragon-strength-move");
+            Batch336Support.Check(offers.Any(a => a.Enabled && a.Command?.AbilityId == "paragon-strength-attack"), $"copy {i + 1}: the Ranged Attack is offered");
+            if (i < 2) { Batch336Support.Check(move is not null, $"copy {i + 1}: sending an enemy home is offered while one is left"); Play(e, 0, move!); }
+            else Batch336Support.Check(move is null, "copy 3: both enemies are home, so sending one home is not offered");
+        }
+    }
 
     private static readonly string[] Windowed = ["Battle", "Open", "Limited", "BattleOrOpen"];
 
@@ -120,6 +139,7 @@ internal static class ActionCopiesTests
             {
                 var offered = Batch336Support.Options(e, 0, ability, copy.Id).FirstOrDefault(o => o.Enabled);
                 Batch336Support.Check(offered is not null, $"{ability}: copy {played + 1} of 3 was not offered: " + string.Join("; ", Batch336Support.Options(e, 0, ability, copy.Id).Select(o => $"[{o.Enabled}] {o.Reason}")));
+                Batch336Support.Check(offered!.Command!.AbilityId == ability, $"{ability}: the option for copy {played + 1} carries {offered.Command.AbilityId}");
                 var target = offered!.TargetIds?.FirstOrDefault();
                 RegressionAssertions.Accept(e, offered.Command! with { TargetId = target ?? offered.Command.TargetId });
                 for (var guard = 0; e.State.PendingChoice is not null && guard < 8; guard++) RegressionAssertions.Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));

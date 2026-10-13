@@ -76,6 +76,10 @@ public partial class Main
             var switchTo = SidebarSkin.Button("Play instead: " + Placard(option), () => BeginPlayPrompt(option));
             switchTo.AutowrapMode = TextServer.AutowrapMode.WordSmart; box.AddChild(switchTo);
         }
+        // Issue #911: when a card's other action cannot be taken now (a second A Paragon's Strength once the enemy it could send home is gone), say so here instead of silently offering only the one left.
+        foreach (var unavailable in Actions.Where(o => !o.Enabled && o.CardId == card.Id && o.Type is "equip" or "playStrategy" or "useAbility" && PlayKey(o) != choice.Key && o.Reason is not null)
+                     .GroupBy(PlayKey).Select(g => g.First()).Where(o => others.All(other => other.Key != PlayKey(o))))
+            box.AddChild(Palette.Wrapped($"Not available now: {Placard(unavailable)} ({unavailable.Reason})", 13, Palette.PaperDim));
         var confirm = SidebarSkin.Button("Confirm play", ConfirmPlay, true); confirm.Disabled = _session.Busy;
         _decisionActions.AddChild(confirm);
         _decisionActions.AddChild(SidebarSkin.Button("Cancel", CancelChoice));
