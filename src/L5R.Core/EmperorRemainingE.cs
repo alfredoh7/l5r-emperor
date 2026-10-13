@@ -356,7 +356,7 @@ public sealed partial class MatchEngine
         {
             var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, AbilityId: id, Provinces: set.Length == 0 ? null : set, Province: set.Length == 0 ? null : set[0]);
             string? error = null;
-            try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+            error = TryValidateAbility(command);
             var label = ability.Label + (set.Length == 0 ? "" : $" · province{(set.Length == 1 ? "" : "s")} {string.Join(" and ", set.Select(p => p + 1))}");
             yield return new("useAbility", label, error is null, error, error is null ? command : null, source?.Id, null, set.Length == 0 ? null : set);
         }

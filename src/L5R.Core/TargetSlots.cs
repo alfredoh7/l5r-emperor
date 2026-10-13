@@ -174,9 +174,15 @@ public sealed partial class MatchEngine
     // work; the payment step is skipped (the whole command is priced once, by the caller).
     private void ValidateSlotCard(GameCommand command, AbilityDefinition ability, TargetSlot slot, string cardId)
     {
-        Require(_state.Cards.ContainsKey(cardId), "Unknown card.");
+        if (SlotCardRejection(command, ability, slot, cardId) is { } why) throw new RuleViolation(why);
+    }
+
+    // ValidateSlotCard's reason as a value (null when the candidate is legal), for the listing, which judges every candidate of every slot.
+    private string? SlotCardRejection(GameCommand command, AbilityDefinition ability, TargetSlot slot, string cardId)
+    {
+        if (!_state.Cards.ContainsKey(cardId)) return "Unknown card.";
         // The selections stay on the command: a category that compares a candidate with the cards another slot holds (Dislodge the Foe's opposing Personality) reads them.
-        ValidateAbility(command with { TargetId = cardId },
+        return TryValidateAbility(command with { TargetId = cardId },
             ability with { Target = slot.Category, Slots = null, TargetMustBe = slot.MustBe, RequireNoAttachments = false });
     }
 
@@ -222,21 +228,21 @@ public sealed partial class MatchEngine
             var firstProbe = new Dictionary<string, int>(StringComparer.Ordinal); // P25: the first probe (earlier selection) under which a candidate satisfies the slot's cross-constraint
             foreach (var candidate in SlotCandidateCards(prototype.PlayerId))
             {
-                RuleViolation? refused = null;
+                string? refused = null;
                 for (var probeIndex = 0; probeIndex < probes.Length; probeIndex++)
                 {
                     var probe = probes[probeIndex];
+                    if (SlotCardRejection(probe, ability, slot, candidate.Id) is { } why) { refused ??= why; continue; }
                     try
                     {
-                        ValidateSlotCard(probe, ability, slot, candidate.Id);
                         if (slot.CrossConstraint is { } cross && !cross(this, [.. (probe.Selections ?? []).SelectMany(s => s.CardIds ?? []).Select(Card), candidate]))
-                        { refused ??= new RuleViolation(slot.CrossConstraintReason ?? $"{slot.Label}: that choice may not be made with the earlier ones."); continue; }
+                        { refused ??= slot.CrossConstraintReason ?? $"{slot.Label}: that choice may not be made with the earlier ones."; continue; }
                         refused = null; firstProbe[candidate.Id] = probeIndex; break;
                     }
-                    catch (RuleViolation e) { refused ??= e; }
+                    catch (RuleViolation e) { refused ??= e.Message; }
                 }
                 if (refused is null) legal.Add(candidate.Id);
-                else refusals[refused.Message] = refusals.GetValueOrDefault(refused.Message) + 1;
+                else refusals[refused] = refusals.GetValueOrDefault(refused) + 1;
             }
             options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), [], NotPrimary: slot.Performing || slot.CostOnly));
             if (!slot.ProbeDefaultOnlyForLaterSlots) offered.Add((slot.Id, legal.ToArray()));
@@ -297,8 +303,7 @@ public sealed partial class MatchEngine
         defaultCommand = Wave741DefaultAmount(defaultCommand) ?? defaultCommand;
         var quote = QuoteAbilityGold(defaultCommand);
         defaultCommand = defaultCommand with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
-        try { ValidateAbility(defaultCommand); }
-        catch (RuleViolation e)
+        if (TryValidateAbility(defaultCommand) is { } defaultRefusal)
         {
             // The first-legal default can be an illegal pair even though a legal one exists (Iuchi Karasu at home with one other Personality at home and one at the battlefield: his first two
             // candidates share a location). Offer the action enabled with the first legal single-slot variant of the default rather than disabled with a legal selection on the table.
@@ -307,7 +312,7 @@ public sealed partial class MatchEngine
                 var variantQuote = QuoteAbilityGold(variant);
                 return new("useAbility", label, true, null, variant with { SourceIds = variantQuote is null ? [] : variantQuote.Payments.FirstOrDefault()?.SourceIds }, sourceId, Gold: variantQuote, Slots: options);
             }
-            return new("useAbility", label, false, e.Message, defaultCommand, sourceId, Gold: quote, Slots: options);
+            return new("useAbility", label, false, defaultRefusal, defaultCommand, sourceId, Gold: quote, Slots: options);
         }
         return new("useAbility", label, true, null, defaultCommand, sourceId, Gold: quote, Slots: options);
     }
@@ -324,8 +329,7 @@ public sealed partial class MatchEngine
                 var variant = command with { Selections = command.Selections!.Select(c => c.Slot == chosen.Slot ? c with { CardIds = [candidate] } : c).ToArray() };
                 var variantQuote = QuoteAbilityGold(variant);
                 variant = variant with { SourceIds = variantQuote is null ? [] : variantQuote.Payments.FirstOrDefault()?.SourceIds };
-                try { ValidateAbility(variant); return variant; }
-                catch (RuleViolation) { }
+                if (TryValidateAbility(variant) is null) return variant;
             }
         }
         return null;

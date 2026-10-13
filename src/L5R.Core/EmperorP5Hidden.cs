@@ -116,7 +116,7 @@ public sealed partial class MatchEngine
             {
                 var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, AbilityId: id, CardIds: set.Length == 0 ? null : set);
                 string? error = null;
-                try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+                error = TryValidateAbility(command);
                 yield return new("useAbility", ability.Label + (set.Length == 0 ? "" : " · " + string.Join(" and ", set.Select(DescribeHiddenProvince))), error is null, error, error is null ? command : null, source?.Id, set);
             }
             yield break;
@@ -129,7 +129,7 @@ public sealed partial class MatchEngine
             {
                 var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, TargetId: holding.Id, AbilityId: id, Choice: choice);
                 string? error = null;
-                try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+                error = TryValidateAbility(command);
                 var what = choice == "gold" ? "its Gold-producing trait" : AbilityCatalog.All[choice].Label;
                 yield return new("useAbility", $"{ability.Label} · {Definition(holding).Name}: {what}", error is null, error, error is null ? command : null, source?.Id, [holding.Id]);
             }

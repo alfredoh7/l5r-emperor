@@ -62,10 +62,28 @@ About 33% more matches per second, 26% less wall time, a third less allocation, 
 - **GC settings** (bigger gen0, non-concurrent, server GC): a 10x drop in collections changed nothing, so time is allocation volume and work, not pauses. Server GC gave about 10%
   on this batch; it is a runtime option for a batch runner, not something the game client should change.
 
+## Phase 2: no more exceptions for ordinary refusals (issue #890)
+
+`ValidateAbility` was a 1,750-line `void` that refused by throwing. It now returns the refusal as a string (`ValidateAbilityResult`, null when the command is legal):
+`ValidateAbility` wraps it and throws the same message for every command path, and `TryValidateAbility` (message or null) serves the action listing. The 197 `Require(...)` /
+`throw new RuleViolation(...)` statements that sit directly in the method became `if (!cond) return message;`, done by a one-off Roslyn rewrite (not in the repo) so no check was
+retyped by hand; checks inside a lambda, local function, try body or finally were left throwing, since a conversion there would change what is caught. The same was done for the
+"Choose a performing card" check, the Favor-discard check and the slot-candidate check, and the listing's catch sites now call `TryValidateAbility`.
+
+| | Before | After |
+|---|---|---|
+| `RuleViolation` thrown per decision | 120 | 2.3 |
+
+What is left are throws from registered validation hooks and helpers (`RegisteredValidateEarly`, `ValidateWielderCosts`, `RequireLegalAttackTarget`), a few hundred per thousand decisions.
+
+**Speed.** Interleaved A/B against main after #889, 20 matches, three rounds: 35.3 / 34.5 / 34.1 s before, 32.3 / 31.9 / 33.4 s after, about 6% less wall time. That is less than
+the sampler's 18% suggested: the trace charged some of the garbage collector's work to the throw sites.
+
+**Proof it is the same engine.** `L5R_PROFILE_HASH=1` hashes the JSON of every action list the engine produces (every option, disabled reason and quote, in order). Main and this
+branch give the same hash over 30 seeded matches (11,213 decisions, hash F57A99959BBCD681) and over 40 more (13,270 decisions, hash 324ED2B93F6BB9F0).
+
 ## What remains
 
-1. **Exceptions as control flow: about 18% of a decision.** `ValidateAbility` is about 1,750 lines of `Require` checks; `QueryActions` calls it about 290 times per decision
-   and about 120 of those throw. The next step is a non-throwing `TryValidate` that returns the message the same checks produce, converted check by check and guarded by the
-   existing listing/validation consistency tests (#842). That is a real refactor, not a patch.
+1. **Hook-based throws.** The rest of the exceptions come from registered validation hooks and helpers; converting them the same way is mechanical but each hook is its own file.
 2. `GetView` costs about 0.65 ms for about 200 cards; most of that is the `CardView` and its definition copy, so it only falls with fewer or lighter copies.
 3. The harness copies views and actions through JSON on every decision (11%); a bot runner that does not need detached copies would save it.

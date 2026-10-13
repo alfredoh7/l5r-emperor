@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Engine speed 2: ValidateAbility now returns its refusal as a string (ValidateAbilityResult) instead of throwing; ValidateAbility wraps it for every command path, TryValidateAbility serves the action listing. 197 checks converted by a one-off Roslyn rewrite; slot-candidate, performer and Favor-discard checks too. RuleViolation throws per decision 120 to 2.3; about 6% less wall time on 20 bot matches.",
+  "validation": "check.sh --skip-client passes; differential hash of every action list (options, reasons, quotes) identical to main over 11,213 and 13,270 decisions (seeds 1.. and 2000..); interleaved A/B vs main, three rounds; TirelessHomeTests source scan updated for the new shape.",
+  "remaining": "Hook-based throws (RegisteredValidateEarly, ValidateWielderCosts, RequireLegalAttackTarget) still throw, about 2 per decision.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/890",
+  "branch": "claude/890-try-validate",
+  "updated": "2026-10-13T02:15:50.298946+00:00"
+}
