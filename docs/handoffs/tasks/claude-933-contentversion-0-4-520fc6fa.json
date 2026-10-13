@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bump ContentVersion to emperor-lion-crane-0.4.0: one bump for the validation-report corrections (Reserve Weapon focus cap, Fortitude total Force, Spell host, dishonorable-death Honor, Set arithmetic, prevention hiding, dishonor persistence, battlefield line, resolution area, hidden-information changes). Docs updated.",
+  "validation": "bash tools/check.sh --skip-client (see PR).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/933",
+  "branch": "claude/933-contentversion-0-4",
+  "updated": "2026-10-13T20:50:57.573677+00:00"
+}
