@@ -90,12 +90,16 @@ static async Task IncompatibleRoomSkipped()
         var old = MatchEngine.CreateStarterMatch(5).ExportReplay() with { ContentVersion = "emperor-lion-crane-0.2.0" };
         await store.SaveAsync(new PersistedRoom(1, "ABCDEFGH", DateTimeOffset.UtcNow, seats, old, []));
         await store.SaveAsync(new PersistedRoom(1, "JKLMNPQR", DateTimeOffset.UtcNow, seats, MatchEngine.CreateStarterMatch(6).ExportReplay(), []));
+        // Current content, but commands the engine refuses (a pass nobody could make): skipped like the other, not a failed start.
+        await store.SaveAsync(new PersistedRoom(1, "STUVWXYZ", DateTimeOffset.UtcNow, seats, MatchEngine.CreateStarterMatch(7).ExportReplay() with { Commands = [new GameCommand("pass", 0, 999)] }, []));
         await using (var server = await TestServer.StartAsync(storage))
         {
             Check((await server.Http.PostAsync("/rooms/JKLMNPQR/join", null)).IsSuccessStatusCode, "The current-content room is recovered.");
             Check(!(await server.Http.PostAsync("/rooms/ABCDEFGH/join", null)).IsSuccessStatusCode, "The incompatible room is not loaded.");
+            Check(!(await server.Http.PostAsync("/rooms/STUVWXYZ/join", null)).IsSuccessStatusCode, "A room whose commands no longer replay is not loaded either.");
         }
         Check(File.Exists(Path.Combine(storage, "ABCDEFGH.room.json")), "The incompatible room file stays on disk.");
+        Check(File.Exists(Path.Combine(storage, "STUVWXYZ.room.json")), "So does the one that no longer replays.");
     }
     finally { if (Directory.Exists(storage)) Directory.Delete(storage, true); }
 }

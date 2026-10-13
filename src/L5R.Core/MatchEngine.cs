@@ -83,13 +83,14 @@ public sealed partial class MatchEngine
         return clone;
     }
 
-    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray());
+    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray(), _state.IdleBattlePasses);
     public static MatchEngine Replay(ReplayRecord replay)
     {
         if (replay.ContentVersion != ContentVersion) throw new ArgumentException("Replay content version is not supported.");
         var engine = replay.Scenario == CustomPractice.Scenario
             ? replay.CustomDecks is { Length: 2 } decks ? CreateCustomMatch(replay.Seed, decks[0], decks[1]) : throw new ArgumentException("Custom replay is missing its two deck snapshots.")
             : Create(replay.Seed, replay.Scenario);
+        if (replay.IdleBattlePasses) engine.AllowIdleBattlePasses(); // match setup, before the first command (issue #894)
         foreach (var command in replay.Commands)
         {
             var result = engine.Execute(command);

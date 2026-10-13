@@ -1588,4 +1588,4 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
 public sealed record ProvinceSightView(int OwnerId, int Province, string DefinitionId, CardDefinition Definition);
-public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);
+public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null, bool IdleBattlePasses = false);
