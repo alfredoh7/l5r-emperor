@@ -143,7 +143,11 @@ public sealed partial class MatchEngine
             bonus += 1;
         // Pearl of Rage (oracle-l5r-5903, a Spell): "This Shugenja has +1F for each Pearl card you control and in your discard piles."
         if (Definition(card).Type == CardType.Personality)
-            bonus += Attachments(card.Id).Count(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == PearlOfRageEffect) * PearlCount(card.OwnerId);
+        {
+            // Issue #888: the Pearl count scans every card, so it is taken only when a Pearl of Rage is attached (the product is 0 otherwise).
+            var pearlsOfRage = Attachments(card.Id).Count(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == PearlOfRageEffect);
+            if (pearlsOfRage > 0) bonus += pearlsOfRage * PearlCount(card.OwnerId);
+        }
         return bonus;
     }
 

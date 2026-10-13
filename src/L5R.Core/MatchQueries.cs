@@ -123,7 +123,9 @@ public sealed partial class MatchEngine
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
-    public ActionOption[] QueryActions(int playerId)
+    public ActionOption[] QueryActions(int playerId) => QueryActionsScoped(playerId); // QueryScope.cs
+
+    private ActionOption[] QueryActionsUnscoped(int playerId)
     {
         if (playerId is < 0 or > 1) return [];
         if (_state.WinnerId is not null) return [];

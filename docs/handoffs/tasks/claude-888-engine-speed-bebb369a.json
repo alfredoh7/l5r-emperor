@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Engine speed: profile seeded headless bot-vs-bot matches (new bot-profile runner) and speed up the hot paths. Pearl count only when a Pearl of Rage is attached, Gold payment tokens remembered for one QueryActions call, token hooks sort only offering cards, allocation-free Keyword test. 20 matches: 49.5 s to 36.9 s, 0.41 to 0.54 matches/s, allocation 46 to 31 GB, identical play.",
+  "validation": "check.sh --skip-client passed; core and AI suites pass under L5R_VERIFY_QUERY_SCOPE=1 (every reused remembered token list recomputed and compared); new bot-profile query-scope test; interleaved A/B against main, three rounds.",
+  "remaining": "Exceptions as control flow in ValidateAbility (about 18% of a decision) need a non-throwing TryValidate; documented in docs/audits/engine-bot-batch-profile-2026-10.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/888",
+  "branch": "claude/888-engine-speed",
+  "updated": "2026-10-13T01:09:40.332484+00:00"
+}

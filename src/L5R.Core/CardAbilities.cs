@@ -3937,6 +3937,13 @@ public sealed partial class MatchEngine
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
+    private bool HasPrintedOrGrantedKeyword(CardInstance card, string keyword)
+    {
+        if (Definition(card).Keywords is { } printed) foreach (var word in printed) if (string.Equals(word, keyword, StringComparison.Ordinal)) return true;
+        foreach (var grant in card.GrantedKeywords) if (string.Equals(grant.Keyword, keyword, StringComparison.Ordinal)) return true;
+        return false;
+    }
+
     private bool Keyword(CardInstance card, string keyword)
     {
         if (KeywordRemoved(card, keyword)) return false;
@@ -3946,7 +3953,7 @@ public sealed partial class MatchEngine
         if (keyword == "Experienced") return ExperienceLevel(card) > 0;
         if (keyword == "Unaligned" && Definition(card).Type == CardType.Personality && ClanAlignments(card).Length == 0)
             return true;
-        var printedOrGranted = (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+        var printedOrGranted = HasPrintedOrGrantedKeyword(card, keyword); // issue #888: a plain loop (this runs for every keyword test of every card in every view and query)
         // Kitsuki Minori (issue #223): "does not have Overconfident (in and out of play) if any
         // other player is Lion Clan" -- a SUBTRACTIVE conditional, the opposite of Tamori Yayu's own
         // additive one below. A live check, not a one-time flag: Stronghold Clan never changes
