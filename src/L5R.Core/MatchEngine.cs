@@ -5,7 +5,7 @@ namespace L5R.Core;
 /// <summary>Single-threaded authoritative simulator. Execute validates on a detached state and commits atomically.</summary>
 public sealed partial class MatchEngine
 {
-    public const string ContentVersion = "emperor-lion-crane-0.4.0";
+    public const string ContentVersion = "emperor-lion-crane-0.5.0";
     /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
     /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
     /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/

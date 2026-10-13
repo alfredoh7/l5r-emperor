@@ -23,7 +23,7 @@ All JSON uses camelCase. `GET /health` returns `status`, `protocolVersion`, and 
 5. Send the hello below within ten seconds, using the versions returned by `/health` or the reservation.
 
 ```json
-{"type":"hello","protocolVersion":1,"contentVersion":"emperor-lion-crane-0.4.0"}
+{"type":"hello","protocolVersion":1,"contentVersion":"emperor-lion-crane-0.5.0"}
 ```
 
 The server then sends an independent state to each connected player:
@@ -87,4 +87,4 @@ The dependency-free integration executable starts real ephemeral Kestrel servers
 
 A `useAbility` command includes `cardId` (absent for rulebook Favor actions), `abilityId`, optional `performerId`, `targetId`, `cardIds` (ordered Border Keep selection), and payment `sourceIds`. `chooseShinden` includes `choice: "bow"` or `"honor"`; only the targeted Personality's controller may answer. Actor and expected version remain bound by the authenticated envelope. Favor ownership and straightening restrictions appear in the projected view.
 
-Content version is `emperor-lion-crane-0.4.0`. Replays and rooms saved under another content version are deliberately rejected as incompatible: the server logs a warning, skips those room files (they stay on disk, untouched) and starts without them. There is no silent migration of saved match semantics.
+Content version is `emperor-lion-crane-0.5.0`. Replays and rooms saved under another content version are deliberately rejected as incompatible: the server logs a warning, skips those room files (they stay on disk, untouched) and starts without them. There is no silent migration of saved match semantics.
