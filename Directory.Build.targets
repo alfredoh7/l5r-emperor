@@ -8,4 +8,10 @@
     <Error Condition="'$(TreatWarningsAsErrors)' != 'true'"
            Text="The zero-warning baseline requires TreatWarningsAsErrors=true. Fix new warnings instead of disabling the gate." />
   </Target>
+
+  <!-- Issue #905: Meziantou.Analyzer on the engine projects. Here, not in the project files, so the scratch repos of the registration tests (which copy Core and Directory.Build.props
+       but have no package feed) build Core without it. The held rules are in src/L5R.Core/Meziantou.globalconfig. -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'L5R.Core' Or '$(MSBuildProjectName)' == 'L5R.AI' Or '$(MSBuildProjectName)' == 'L5R.Server'">
+    <PackageReference Include="Meziantou.Analyzer" Version="3.0.302" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

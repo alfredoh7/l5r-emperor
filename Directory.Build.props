@@ -6,4 +6,8 @@
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
+  <!-- Issue #905: the held Meziantou.Analyzer rules (see the file's header). Inert in a project that does not reference the analyzer. -->
+  <ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)src/L5R.Core/Meziantou.globalconfig')">
+    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)src/L5R.Core/Meziantou.globalconfig" />
+  </ItemGroup>
 </Project>

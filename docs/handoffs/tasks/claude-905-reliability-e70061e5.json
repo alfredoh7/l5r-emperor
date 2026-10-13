@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Reliability tools from the external practices assessment: Meziantou.Analyzer on Core, AI and Server (referenced from Directory.Build.targets so scratch repos without a feed build Core without it; rules that already fire held at suggestion, any other rule enforced; tools/analyzer-report.sh counts), a Core coverage trend script, a server-path desync soak, local-only crash reports with a Godot-free composer, and a Movie Maker spike result.",
+  "validation": "check.sh (with the native client build and import) passed before the analyzer reference moved; after it, check.sh --skip-client passes, including both scratch-repo registration tests that failed on the Windows runner (no package feed); 10 server integration checks including the soak; 22 client transport checks including the crash bundle.",
+  "remaining": "Analyzer backlog (7,262 findings in 39 rules) is documented, not fixed; coverage is on demand; Stryker and a Sentry pilot deferred.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/905",
+  "branch": "claude/905-reliability",
+  "updated": "2026-10-13T08:36:56.695917+00:00"
+}

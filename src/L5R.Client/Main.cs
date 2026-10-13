@@ -61,6 +61,8 @@ public partial class Main : Node
 
     public override void _Ready()
     {
+        CrashReports.Install(CrashContext); // issue #905: a local crash report for a runtime-level failure; nothing is sent
+        if (OS.GetCmdlineUserArgs().Contains("--write-crash-report")) { GD.Print("CRASH_REPORT: " + CrashReports.Write(new InvalidOperationException("crash report probe"))); SetProcess(false); SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); GetTree().Quit(); return; } // a check that the report can be written here
         GetWindow().MinSize = new Vector2I(1120, 700);
         PreloadedDecks.Seed(new DeckFileStore(ProjectSettings.GlobalizePath("user://decks"))); // the shipped decks are in My Decks from the first launch (issue #810)
         GetTree().TreeChanged += () => _tooltipsDirty = true;
