@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Design only: authoritative action resolution area (Zone.Resolving plus ordered MatchState.ResolutionArea) so a hand-played Strategy leaves Hand/HandCount at announcement. Blast radius of all Hand readers, lifecycle, view/event/replay impact, tests, risks and size. No engine change.",
+  "validation": "Reproduced on current main with a failing Core test (branch claude/917-resolution-area-repro, not for merge): a Strategic Strike paused in the announce window is still in the owner's hand list and counted in HandCount. No other checks; docs only.",
+  "remaining": "Design needs Mendon's review of the open questions (zone vs view-only, scope, Attack stopgap, rulings, ContentVersion). Implementation, client rendering and AI index not started.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/917",
+  "branch": "claude/917-resolution-area-design",
+  "updated": "2026-10-13T18:32:00.777842+00:00"
+}
