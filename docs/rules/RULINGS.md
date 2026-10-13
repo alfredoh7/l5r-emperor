@@ -689,3 +689,11 @@ A Personality who is dishonorable and face up keeps the Dishonorable status when
 - **Cards/primitives:** `MatchEngine.ResetCardState` / `KeepsDishonorOutsidePlay`; At Any Cost (oracle-l5r-639), Akodo Kobi, Essence of Undeath, I Give You My Name, Shinjo's Guidance and other dead-pile recruits; Your Clan Needs You!; Step Through the Void; Sensei discarded from play.
 - **Date:** 2026-10-13
 - **Source:** Mendon, validation report EE-STATE-008 (item 13) — [decision](../decisions/2026-10-13-validation-report-reading.md); supersedes [2026-09-20](../decisions/2026-09-20-gold-payment-rulings.md).
+
+### R-083 — Stronghold Honor-loss immunity does not prevent a dishonorable death's Honor loss
+"You do not lose Honor from ... cards you own" (Foothold of the Mad, Keep of the Dead, Steel Soul Dojo, The Plain of Glass, The Castle of Order, The Otoro Estate, The Shadow's Lair, The False Path) does not prevent the Honor loss from the death of a dishonorable Personality. That loss is a rulebook effect and comes from the rulebook, not from the dying Personality or any card (Comprehensive Rules, "From"; the Honor loss after a dishonorable death). The Forgotten Temple already treats it this way (reduced to 1, not negated).
+
+- **Cards/primitives:** the eight strongholds above; `MatchEngine.GainHonorCore` (the immunity check is skipped while `_rulebookHonorChange`); `HonorLossImmunity`, `FootholdNegatesLoss`, `HonorLossNegatedByKeyword`.
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation work follow-up — [decision](../decisions/2026-10-13-validation-report-reading.md); the official rulings on Fields of the Dead, The Fingers of Bone and The Shadowed Dojo in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md) ("Does not prevent honor loss from death of dishonored Personalities").
+
