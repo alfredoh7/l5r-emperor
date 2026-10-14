@@ -7,6 +7,8 @@ public sealed class MenuPreferences
     public bool Fullscreen, ReducedMotion;
     /// <summary>Issue #660: hold a card an opponent plays on screen until the player presses Proceed. Off by default; saved between launches.</summary>
     public bool PausedAnimation;
+    /// <summary>Show each Dynasty card turned face-up, one at a time, as the Events Phase reveals it. Off by default; saved between launches.</summary>
+    public bool FlipDynastyCards;
     public bool VSync = true;
     public bool DuelGuidance = true;
     public float Atmosphere = .65f;
@@ -31,6 +33,7 @@ public sealed class MenuPreferences
         Fullscreen = config.GetValue("display", "fullscreen", false).AsBool();
         ReducedMotion = config.GetValue("display", "reduced_motion", false).AsBool();
         PausedAnimation = config.GetValue("display", "paused_animation", false).AsBool();
+        FlipDynastyCards = config.GetValue("display", "flip_dynasty_cards", false).AsBool();
         VSync = config.GetValue("display", "vsync", true).AsBool();
         Atmosphere = Mathf.Clamp((float)config.GetValue("display", "atmosphere", .65f).AsDouble(), 0, 1);
         if (!float.IsFinite(Atmosphere)) Atmosphere = .65f;
@@ -45,6 +48,7 @@ public sealed class MenuPreferences
         config.SetValue("display", "fullscreen", Fullscreen);
         config.SetValue("display", "reduced_motion", ReducedMotion);
         config.SetValue("display", "paused_animation", PausedAnimation);
+        config.SetValue("display", "flip_dynasty_cards", FlipDynastyCards);
         config.SetValue("display", "vsync", VSync);
         config.SetValue("display", "atmosphere", Atmosphere);
         config.SetValue("menu", "lantern_strength", LanternStrength);

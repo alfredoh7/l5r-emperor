@@ -183,6 +183,7 @@ public partial class TitleMenu : Control
         Toggle("VSync", Preferences.VSync, value => Preferences.VSync = value);
         Toggle("Reduced motion", Preferences.ReducedMotion, value => Preferences.ReducedMotion = value, "Keeps the lantern steady.");
         Toggle("Paused Animation", Preferences.PausedAnimation, value => Preferences.PausedAnimation = value, "Holds a card your opponent plays on screen until you press Proceed (or Enter).");
+        Toggle("Flip Dynasty Cards", Preferences.FlipDynastyCards, value => Preferences.FlipDynastyCards = value, "In the Events Phase, shows each Dynasty card being turned face-up, one at a time.");
         var strength = Palette.Text($"Lantern flicker · {Preferences.LanternStrength:P0}", 22); Entries.AddChild(strength);
         var slider = new HSlider { MinValue = 0, MaxValue = 1, Step = .05, Value = Preferences.LanternStrength, Modulate = Palette.Gold, CustomMinimumSize = new Vector2(0, 28), TooltipText = "Strength of the slow lantern light across the screen and room. Approved default: 85%." }; Entries.AddChild(slider);
         slider.ValueChanged += value => { Preferences.LanternStrength = (float)value; strength.Text = $"Lantern flicker · {Preferences.LanternStrength:P0}"; Changed(); };
