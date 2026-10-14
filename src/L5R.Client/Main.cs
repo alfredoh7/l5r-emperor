@@ -187,6 +187,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal)) { ProcessDirectPlayCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-table-click", StringComparison.Ordinal)) { ProcessTableClickCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-card-motion", StringComparison.Ordinal)) { ProcessCardMotionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
@@ -649,7 +650,9 @@ public partial class Main : Node
         var purchase = Actions.FirstOrDefault(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled);
         var multiSlot = card.ProvinceIndex is int index && card.Zone == Zone.Province &&
             ProvincePresentation.Slots(View.Players.Single(p => p.Id == card.OwnerId).Provinces.Single(p => p.Index == index)).Length > 1;
-        if (purchase is not null && !multiSlot) Choose(purchase); else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
+        if (purchase is not null && !multiSlot) Choose(purchase);
+        else if (StartInPlayAbility(card)) { } // issue #954: the first click on a card in play with one usable ability starts it; hovering inspects
+        else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
     }
 
     private void Highlight()

@@ -59,6 +59,21 @@ public partial class Main
         if (NeedsFurtherInput(choice)) Choose(choice.Option); else _playPrompt = (card.Id, choice.Key);
     }
 
+    /// <summary>
+    /// Clicking one of your own cards in play starts its ability when that is unambiguous: exactly one ability can be used now and nothing about who performs it is left to choose. A card with several usable
+    /// abilities, or one whose performer is one of several Personalities, keeps today's behaviour (the card is selected and its abilities are listed) until the player's choice can be made on the table.
+    /// Hovering the card still inspects it.
+    /// </summary>
+    private bool StartInPlayAbility(CardView card)
+    {
+        if (card.OwnerId != View.ViewerId || card.Zone is Zone.Hand or Zone.Province or Zone.Resolving || card.ActionLocked || _chosen is not null) return false;
+        if (View.PendingChoice is not null || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId || _session.Busy || PresentationBusy) return false;
+        var choices = PlayChoices(card).Where(c => c.Option.Type == "useAbility").ToArray();
+        if (choices.Length != 1 || choices[0].Variants.Select(v => v.Command?.PerformerId).Distinct().Count() > 1) return false;
+        SelectReactionSource(choices[0].Option); Choose(choices[0].Option);
+        return _chosen is not null;
+    }
+
     private void BeginPlayPrompt(ActionOption option)
     {
         if (option.CardId is null || _session.Busy || PresentationBusy) return;

@@ -1,0 +1,67 @@
+using Godot;
+using L5R.Core;
+
+namespace L5R.Client;
+
+// Issue #954 (table clicks, phase 2): the first click on one of your cards in play starts its ability when exactly one can be used; hovering inspects. Fixtures are real published cards in a prepared state.
+public partial class Main
+{
+    private bool _tableClickStarted;
+
+    private void ProcessTableClickCapture(double delta)
+    {
+        _captureClock += delta; if (_tableClickStarted || _captureClock < 1.5) return;
+        _tableClickStarted = true; _ = CheckTableClick();
+    }
+
+    private async Task CheckTableClick()
+    {
+        try
+        {
+            // 1. Agasha Kodo's only ability ("Target a Holding: Straighten it") starts from the Personality, and the bowed Holding is then a highlighted target on the table.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 142, 0, Zone.Home); SupportFixtureCard(s, 4664, 0, Zone.Home, bowed: true); });
+            var kodo = View.Players[0].Home.Single(c => c.Definition?.Name == "Agasha Kodo");
+            var usable = Actions.Where(a => a.Enabled && a.CardId == kodo.Id && a.Type == "useAbility").ToArray();
+            SupportRequire(usable.Length == 1, $"Agasha Kodo should have one usable ability: {usable.Length} / " + string.Join(" | ", Actions.Where(a => a.CardId == kodo.Id).Select(a => $"{a.Type}/{a.Enabled}/{a.Reason}")));
+            SelectCard(kodo); await EventFrames(4);
+            SupportRequire(_chosen is { Type: "useAbility" } && _chosen.Command?.AbilityId == "kodo-straighten", "Clicking the Personality did not start its ability");
+            var holding = View.Players[0].Home.First(c => c.Definition?.Type == CardType.Holding && c.Bowed);
+            SupportRequire(_tiles.Single(t => t.Card.Id == holding.Id).LegalTarget, "The bowed Holding is not highlighted as the target");
+            SelectCard(holding); await EventFrames(3);
+            SupportRequire(_chosen?.Command?.TargetId == holding.Id, "Clicking the Holding did not choose it as the target");
+
+            // 2. Taruko's ability has nothing to choose: the click opens the action for its final Confirm.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 4537, 0, Zone.Home, bowed: true); });
+            var taruko = View.Players[0].Home.Single(c => c.Definition?.Name == "Komori Taruko");
+            SelectCard(taruko); await EventFrames(4);
+            SupportRequire(_chosen?.Command?.AbilityId == "taruko-straighten", "Clicking Taruko did not start her ability");
+
+            // 3. A Personality with no usable ability is simply selected, as before; a second click deselects.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 229, 0, Zone.Home); });
+            var plain = View.Players[0].Home.Single(c => c.Definition?.Type == CardType.Personality);
+            SupportRequire(!Actions.Any(a => a.Enabled && a.CardId == plain.Id && a.Type == "useAbility"), "The control Personality unexpectedly has a usable ability");
+            SelectCard(plain); await EventFrames(3);
+            SupportRequire(_chosen is null && _selected?.Id == plain.Id, "A card with no usable ability should just be selected");
+            SelectCard(plain); await EventFrames(3);
+            SupportRequire(_selected is null, "A second click should deselect");
+
+            // 4. Not while the opponent holds priority or while another action is being reviewed.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; s.PriorityPlayerId = 1; SupportFixtureCard(s, 4537, 0, Zone.Home, bowed: true); });
+            var waiting = View.Players[0].Home.Single(c => c.Definition?.Name == "Komori Taruko");
+            SelectCard(waiting); await EventFrames(3);
+            SupportRequire(_chosen is null, "A click must not start an ability out of turn");
+
+            // 5. A Celestial (a support card) starts its only usable ability from its tile too: Akodo's Guidance, in a battle, is a Melee Attack for a Lion player.
+            await LoadDirectPlay(s => { BattleSetup(s); s.Players[0].Clan = "Lion"; SupportFixtureCard(s, 311, 0, Zone.Celestial); });
+            var guidance = View.Players[0].Celestials!.Single();
+            var guidanceUsable = Actions.Where(a => a.Enabled && a.CardId == guidance.Id && a.Type == "useAbility").ToArray();
+            SupportRequire(guidanceUsable.Length >= 1, "Akodo's Guidance has no usable ability in the prepared battle: " + string.Join(" | ", Actions.Where(a => a.CardId == guidance.Id).Select(a => $"{a.Type}/{a.Enabled}/{a.Reason}")));
+            SelectCard(guidance); await EventFrames(4);
+            SupportRequire(_chosen is { Type: "useAbility" } && _chosen.CardId == guidance.Id, "Clicking the Celestial did not start its ability");
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; a card with no usable ability is only selected; nothing starts out of turn.");
+            GetTree().Quit(0);
+        }
+        catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
+    }
+}
