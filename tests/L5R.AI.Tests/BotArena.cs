@@ -13,7 +13,7 @@ using L5R.Core;
 //   new/new and old/old are mirror controls, which show how strong the deck is against a preset when both sides use the same bot.
 internal static class BotArena
 {
-    private enum Kind { New, Old, Prior }
+    private enum Kind { New, Old, Prior, Cav, NoCav }
     private sealed record Game(string Deck, string Opponent, Kind DeckBot, Kind OpponentBot, int? Winner, string Result, int Turn, double Seconds, int Refused, string? Error)
     {
         /// <summary>Per seat: how many times each kind of action was taken, and the final Honor / provinces left / personalities in play.</summary>
@@ -110,7 +110,7 @@ internal static class BotArena
     private static readonly bool HonorOnly = Environment.GetEnvironmentVariable("L5R_ARENA_SPEC") == "honor";
     /// <summary>L5R_ARENA_SPEC=prudence compares the issue #902 prudence rules alone: New is the shipping bot, Prior is the same bot with UsePrudence off.</summary>
     private static readonly bool PrudenceOnly = Environment.GetEnvironmentVariable("L5R_ARENA_SPEC") == "prudence";
-    private static BotContext Memory(Kind kind) => PrudenceOnly ? new() { UsePrudence = kind != Kind.Prior } : HonorOnly ? new() { UseHonorAware = kind != Kind.Prior } : Spec818Only ? new() { UseSpec818 = kind != Kind.Prior } : new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New, UseSpec818 = false };
+    private static BotContext Memory(Kind kind) => kind is Kind.Cav or Kind.NoCav ? new() { UseCavalryDefense = kind == Kind.Cav } : PrudenceOnly ? new() { UsePrudence = kind != Kind.Prior } : HonorOnly ? new() { UseHonorAware = kind != Kind.Prior } : Spec818Only ? new() { UseSpec818 = kind != Kind.Prior } : new() { UseBattlePolicy = kind != Kind.Prior || TradeOnly, UseTradeAttacks = TradeOnly && kind == Kind.New, UseSpec818 = false };
 
     /// <summary>
     /// Issue #788: the bot with the six battle changes (New) against the same bot without them (Prior, the bot on main before the change). Every ordered pair of decks in the folder, plus the
@@ -172,6 +172,59 @@ internal static class BotArena
             text.AppendLine().AppendLine("## Games without a winner");
             foreach (var g in unfinished.Take(40)) text.AppendLine($"- {g.Deck} vs {g.Opponent}, {g.DeckBot}/{g.OpponentBot}: {g.Result}, turn {g.Turn}{(g.Error is null ? "" : " - " + g.Error)}");
         }
+        Console.WriteLine(text.ToString());
+        if (reportPath is not null) File.WriteAllText(reportPath, text.ToString());
+    }
+
+    /// <summary>
+    /// Issue #946: every preloaded deck except the Unicorn deck plays the Unicorn deck (a Cavalry deck) <paramref name="games"/> times with the defense guidance on (Cav) and <paramref name="games"/> times with it off (NoCav,
+    /// the bot before the change). The Unicorn deck is always piloted by the NoCav bot, so only the tested deck's defense differs. Games are paired by seed, and the tested deck alternates seats.
+    /// </summary>
+    public static void RunCavalry(string preloadedDecks, int games, ulong seed, string? reportPath)
+    {
+        const string cavalryDeck = "Unicorn Maidens";
+        var entries = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(File.ReadAllText(preloadedDecks))!;
+        var decks = new List<(string Name, Deck Deck)>(); var unplayable = new List<string>();
+        foreach (var e in entries)
+        {
+            try { var d = DeckFormat.Parse(e["text"]); if (CustomPractice.Review(d).Ready) decks.Add((e["name"], d)); else unplayable.Add(e["name"]); }
+            catch (Exception ex) { unplayable.Add($"{e["name"]}: {ex.Message}"); }
+        }
+        var unicorn = decks.Single(d => d.Name == cavalryDeck).Deck;
+        var testers = decks.Where(d => d.Name != cavalryDeck).ToArray();
+        var jobs = new List<(string Deck, Deck D, Kind Arm, int Game, int Seat)>();
+        foreach (var t in testers) foreach (var arm in new[] { Kind.Cav, Kind.NoCav }) for (var g = 0; g < games; g++) jobs.Add((t.Name, t.Deck, arm, g, g % 2));
+        var results = new (Game Game, int Seat)[jobs.Count];
+        Parallel.For(0, jobs.Count, new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) }, i =>
+        {
+            var j = jobs[i]; var s = seed + (ulong)j.Game;
+            // Seat 0 plays first. The tested deck sits in the seat Game % 2; Play puts its first deck in seat 0.
+            var game = j.Seat == 0 ? Play(j.Deck, j.D, cavalryDeck, unicorn, j.Arm, Kind.NoCav, s, TimeSpan.FromMinutes(12)) : Play(cavalryDeck, unicorn, j.Deck, j.D, Kind.NoCav, j.Arm, s, TimeSpan.FromMinutes(12));
+            results[i] = (game, j.Seat);
+        });
+        var text = new System.Text.StringBuilder();
+        text.AppendLine($"# Bot arena: defending against the Unicorn deck, defense guidance on versus off (issue #946; seed {seed}, {games} games per deck and bot, turn limit {BotSoak.TurnLimit})").AppendLine();
+        foreach (var u in unplayable) text.AppendLine($"- NOT PLAYED: {u}");
+        text.AppendLine($"Each deck plays {cavalryDeck} {games} times with the new bot (Cav) and {games} times with the previous bot (NoCav); {cavalryDeck} always uses the previous bot. The tested deck alternates seats; both bots see the same seeds.").AppendLine();
+        text.AppendLine("| Deck | Previous bot W-L-U | New bot W-L-U | Difference (wins) |").AppendLine("| --- | --- | --- | --- |");
+        (int W, int L, int U) Tally(IEnumerable<(Game Game, int Seat)> set) => (set.Count(r => r.Game.Winner == r.Seat), set.Count(r => r.Game.Winner is int w && w != r.Seat), set.Count(r => r.Game.Winner is null));
+        foreach (var t in testers)
+        {
+            var old = Tally(results.Where((r, i) => jobs[i].Deck == t.Name && jobs[i].Arm == Kind.NoCav)); var now = Tally(results.Where((r, i) => jobs[i].Deck == t.Name && jobs[i].Arm == Kind.Cav));
+            text.AppendLine($"| {t.Name} | {old.W}-{old.L}-{old.U} | {now.W}-{now.L}-{now.U} | {now.W - old.W:+#;-#;0} |");
+        }
+        var allOld = Tally(results.Where((r, i) => jobs[i].Arm == Kind.NoCav)); var allNew = Tally(results.Where((r, i) => jobs[i].Arm == Kind.Cav));
+        text.AppendLine($"| **All** | **{allOld.W}-{allOld.L}-{allOld.U}** | **{allNew.W}-{allNew.L}-{allNew.U}** | **{allNew.W - allOld.W:+#;-#;0}** |").AppendLine();
+        foreach (var arm in new[] { Kind.NoCav, Kind.Cav })
+            foreach (var seat in new[] { 0, 1 })
+            {
+                var t = Tally(results.Where((r, i) => jobs[i].Arm == arm && r.Seat == seat));
+                text.AppendLine($"- {(arm == Kind.Cav ? "New" : "Previous")} bot, tested deck in seat {seat}: {t.W}-{t.L}-{t.U}");
+            }
+        var turns = (Kind arm) => results.Where((r, i) => jobs[i].Arm == arm && r.Game.Winner is not null).Select(r => r.Game.Turn).DefaultIfEmpty(0).Average();
+        text.AppendLine($"- Average game length (decided games): previous bot turn {turns(Kind.NoCav):F1}, new bot turn {turns(Kind.Cav):F1}.");
+        var open = results.Where(r => r.Game.Winner is null).ToArray();
+        if (open.Length > 0) { text.AppendLine().AppendLine("## Games without a winner (U)"); foreach (var r in open.Take(40)) text.AppendLine($"- {r.Game.Deck} vs {r.Game.Opponent}: {r.Game.Result}, turn {r.Game.Turn}{(r.Game.Error is null ? "" : " - " + r.Game.Error)}"); }
         Console.WriteLine(text.ToString());
         if (reportPath is not null) File.WriteAllText(reportPath, text.ToString());
     }

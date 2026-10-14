@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (bot AI code, tests and BOT_LOGIC.md): bot defense and attack guidance for Cavalry. Defending: when the attacker assigns no infantry but has unbowed Cavalry at home, the bot weighs its Force against the attacker's possible Cavalry army (+0.1 per hand card and printed Battle action until 1), commits infantry to the most valuable province, adds an army per further sub-army that reaches 1, holds Cavalry defenders back for the Cavalry Maneuvers Segment, and keeps leftovers home unless they print a Battle action (UseCavalryDefense). Attacking: Cavalry is held for the Cavalry Maneuvers Segment, planned against the visible defense (UseCavalryAttack). Both on by default. Adds an opt-in Cavalry arena. No engine, wire or UI change.",
+  "validation": "bash tools/check.sh --skip-client passed with the new cavalry-defense tests. Arena, 9 preloaded decks x 10 games x 2 bots against Unicorn Maidens: previous bot 49-41, new bot 49-41 (two decks differ by one game each, in opposite directions).",
+  "remaining": "Interpretations to confirm: ratio read as defender/attacker (confirmed by Mendon); most valuable province ranks face-up Personalities by Gold cost without an affordability check; in the Cavalry segment the plan is recomputed and infantry already sent stay where they are. The rule rarely triggers against the current bots, so the arena cannot show a benefit yet.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/946",
+  "branch": "claude/946-bot-cavalry-defense",
+  "updated": "2026-10-14T18:31:52.915405+00:00"
+}

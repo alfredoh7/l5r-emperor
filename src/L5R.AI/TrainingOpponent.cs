@@ -100,22 +100,24 @@ public static partial class TrainingOpponent
             if (action.Type == "attack")
             {
                 // Mendon's spec (issue #642): as many sub-armies as can each beat their province plus every unit that could defend it.
-                var plan = PlanAttack(x, units, provinces);
-                if (HonorAttackOf(x, units, provinces) is { } honorAttack) return command with { Assignments = honorAttack.Assignments }; // issue #818 item 8
+                var assigned = AlreadyAssigned(x);
+                var plan = PlanAttack(x, units, provinces, assigned) is { } whole ? HoldCavalry(x, OfferedOnly(whole, units)) : null;
+                if (HonorAttackOf(x, units, provinces) is { } honorAttack) return command with { Assignments = HoldCavalry(x, honorAttack.Assignments) }; // issue #818 item 8
                 if (plan is not null) return command with { Assignments = plan };
                 if (TradeFor(x, units) is { } trade)
                 {
                     var weakest = opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index;
-                    return command with { Assignments = trade.UnitIds.ToDictionary(id => id, _ => weakest, StringComparer.Ordinal) };
+                    return command with { Assignments = HoldCavalry(x, trade.UnitIds.ToDictionary(id => id, _ => weakest, StringComparer.Ordinal)) };
                 }
-                if (command.Assignments is { Count: > 0 }) return command; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
+                if (command.Assignments is { Count: > 0 }) return command with { Assignments = HoldCavalry(x, command.Assignments) }; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
+            if (action.Type == "assignDefense" && CavalryDefensePlan(x, action, units) is { } cavalryDefense) return command with { Assignments = cavalryDefense }; // issue #946
             // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
             var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
                 : lastStand ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
-            return command with { Assignments = units.ToDictionary(c => c.Id, _ => target) };
+            return command with { Assignments = action.Type == "attack" ? HoldCavalry(x, units.ToDictionary(c => c.Id, _ => target)) : units.ToDictionary(c => c.Id, _ => target) };
         }
         if (action.Type == "discardHand")
         {
@@ -261,7 +263,7 @@ public static partial class TrainingOpponent
                 return DeclareScore(x);
             case "attack":
                 if (command.Assignments is not { Count: > 0 }) return -100;
-                var assignments = command.Assignments;
+                var assignments = WholeAttack(x, action, command.Assignments);
                 if (Spec(x)) // issue #818 item 8: the unit sent only to gain Honor is not part of the attack that must destroy a Province
                 {
                     var (honorUnits, honorProvinces) = AttackInputs(x, action);
@@ -271,11 +273,11 @@ public static partial class TrainingOpponent
                         if (assignments.Count == 0) return 85;
                     }
                 }
-                var attacking = self.Home.Where(c => assignments.ContainsKey(c.Id) || c.AttachedTo is not null && assignments.ContainsKey(c.AttachedTo));
+                var attacking = self.Home.Concat(x.Memory.UseCavalryAttack ? self.Army : []).Where(c => assignments.ContainsKey(c.Id) || c.AttachedTo is not null && assignments.ContainsKey(c.AttachedTo));
                 var force = ArmyForce(attacking);
                 var homeDefense = ArmyForce(opponent.Home);
                 // Every army in the assignment must beat its own province plus every unit that could defend it.
-                var armies = assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
+                var armies = assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Concat(x.Memory.UseCavalryAttack ? self.Army : []).Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
                 if (HonorRace(x) && armies.Length > 0) return 150 + armies.Length; // the opponent wins on Honor at the start of its turn: destroy every Province the army can
                 var weakestArmyMargin = armies.Length == 0 ? int.MinValue : WeakestArmyMargin(x, armies.Select(a => (a.Province, a.Force)).ToArray(), homeDefense);
                 if (weakestArmyMargin > 0) return 90 + force - homeDefense;
@@ -284,7 +286,7 @@ public static partial class TrainingOpponent
             case "assignDefense":
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
-                if (enemyForce == 0) return 0;
+                if (enemyForce == 0) return CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // issue #946: nobody is assigned yet, but Cavalry is on its way
                 if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
             case "pass": return PassScore;
