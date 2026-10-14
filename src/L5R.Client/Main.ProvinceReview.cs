@@ -78,6 +78,7 @@ public partial class Main
                 {
                     DarkExperimentsMarked = _provinceReviewScenario == 6,
                     Strength = _provinceReviewScenario == 6 ? province.Strength + DarkExperimentsMark.Strength : province.Strength,
+                    StrengthModifier = _provinceReviewScenario == 6 ? DarkExperimentsMark.Strength : province.StrengthModifier,
                     Card = a,
                     Region = _provinceReviewScenario == 6 ? null : Face($"preview-region-{player.Id}-{province.Index}", regionDefinition, player.Id, province.Index, Zone.Region),
                     DynastySlots = _provinceReviewScenario == 6 ? null : [new(0, a), new(1, b)]

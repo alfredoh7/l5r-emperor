@@ -1462,6 +1462,11 @@ public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardV
     public ProvinceCardSlotView[]? DynastySlots { get; init; }
     /// <summary>P15 (issue #719): the ids of the Fortification Holdings that guard this Province (public: a Holding in play is face up). Null when none.</summary>
     public string[]? FortificationIds { get; init; }
+    /// <summary>What every change to this province's strength currently adds to its printed strength (permanent and timed effects, Regions, Terrain, static bonuses, minus caps), as Strength - printed.
+    /// Zero when unchanged or when the printed strength is not recorded (prepared fixtures). The board shows it beside the province whenever it is not zero.</summary>
+    public int StrengthModifier { get; init; }
+    /// <summary>The named timed effects inside StrengthModifier ("Ring of Earth +3"); the remainder is permanent or ongoing. Null when there are none.</summary>
+    public string[]? StrengthNotes { get; init; }
 }
 public sealed record ProvinceCardSlotView(int Index, CardView? Card);
 /// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,

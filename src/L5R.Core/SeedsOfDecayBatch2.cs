@@ -68,19 +68,20 @@ public sealed partial class MatchEngine
     }
 
     // The part of a province's current strength that ends with the turn.
-    private int TimedProvinceStrength(ProvinceState province)
+    private int TimedProvinceStrength(ProvinceState province) => TimedProvinceStrengthParts(province).Sum(part => part.Amount);
+
+    // Each timed effect on the province with its source's name, for the strength sum above and for the modifier the view shows beside the province.
+    private IEnumerable<(string Source, int Amount)> TimedProvinceStrengthParts(ProvinceState province)
     {
         var ownerId = _state.Players.First(p => p.Provinces.Contains(province)).Id;
-        var total = 0;
         // UntilBattle (Kaiu Hideaki, Emperor Edition Personality pass, issue #477 batch 2): a strength that lasts only until that battle's resolution begins (ExpireUntilResolutionProvinceStrength).
         foreach (var effect in _state.ProvinceStrengthEffects.Where(e => e.Turn == _state.TurnNumber && e.PlayerId == ownerId && (e.UntilBattle is null || e.UntilBattle == _state.BattleNumber)))
         {
-            if (effect.Kind == ProvinceEffectFlat) { if (effect.ProvinceIndex == province.Index) total += effect.Amount; }
+            if (effect.Kind == ProvinceEffectFlat) { if (effect.ProvinceIndex == province.Index) yield return (effect.Source, effect.Amount); }
             else if (effect.Kind == ProvinceEffectPerDishonorableAttacker)
-                total += effect.Amount * _state.Cards.Values.Count(c => c.OwnerId != ownerId && c.Zone == Zone.Battlefield && c.ProvinceIndex == province.Index
-                    && Definition(c).Type == CardType.Personality && IsAttacking(c) && MatchesTargetStatus(c, TargetStatus.IsDishonorable));
+                yield return (effect.Source, effect.Amount * _state.Cards.Values.Count(c => c.OwnerId != ownerId && c.Zone == Zone.Battlefield && c.ProvinceIndex == province.Index
+                    && Definition(c).Type == CardType.Personality && IsAttacking(c) && MatchesTargetStatus(c, TargetStatus.IsDishonorable)));
         }
-        return total;
     }
 
     // ---- Assignment watches ----
