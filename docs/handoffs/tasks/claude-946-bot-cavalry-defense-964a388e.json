@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Bot defense guidance: when the attacker assigns no infantry but has unbowed Cavalry at home, the bot weighs its Force against the attacker's total possible Cavalry army (+0.1 per hand card and printed Battle action until 1), commits infantry to the most valuable province, adds an army per further sub-army that reaches 1, and keeps leftovers home unless they print a Battle action. Behind BotContext.UseCavalryDefense (on by default).",
+  "lane": "shared",
+  "summary": "Shared change (bot AI code, tests and BOT_LOGIC.md): bot defense guidance. When the attacker assigns no infantry but has unbowed Cavalry at home, the bot weighs its Force against the attacker's total possible Cavalry army (+0.1 per hand card and printed Battle action until 1), commits infantry to the most valuable province, adds an army per further sub-army that reaches 1, and keeps leftovers home unless they print a Battle action. Behind BotContext.UseCavalryDefense (on by default). No engine, wire or UI change.",
   "validation": "bash tools/check.sh --skip-client passed, including new cavalry-defense planner and bot decision tests and the bot soak. Not measured in the bot arena.",
-  "remaining": "Interpretations to confirm: ratio read as defender/attacker (confirmed by Mendon); 'most valuable province' ranks face-up Personalities by Gold cost without an affordability check; the rule applies only to the infantry defense step with no attackers assigned; arena measurement not run.",
+  "remaining": "Interpretations to confirm: ratio read as defender/attacker (confirmed by Mendon); 'most valuable province' ranks face-up Personalities by Gold cost without an affordability check; applies only to the infantry defense step with no attackers assigned; arena measurement not run.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/946",
   "branch": "claude/946-bot-cavalry-defense",
-  "updated": "2026-10-14T17:26:56.472008+00:00"
+  "updated": "2026-10-14T17:33:32.034025+00:00"
 }
