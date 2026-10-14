@@ -62,7 +62,10 @@ internal static class CavalryDefenseTests
         ];
         MatchView Table(int ownForce, int horses, int horseForce, int hand = 0) => view with
         {
-            Phase = Phase.DefenseAssignment, ActivePlayerId = 1, PriorityPlayerId = 0, PendingChoice = null,
+            Phase = Phase.DefenseAssignment,
+            ActivePlayerId = 1,
+            PriorityPlayerId = 0,
+            PendingChoice = null,
             Players = [view.Players[0] with { Home = [Unit("own-1", 0, ownForce, Infantry)], Army = [], Provinces = Provinces(), HandCount = hand, Hand = [] },
                 view.Players[1] with { Home = Enumerable.Range(0, horses).Select(i => Unit("h-" + i, 1, horseForce, cavalry)).ToArray(), Army = [] }]
         };
