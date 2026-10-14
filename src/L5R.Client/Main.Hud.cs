@@ -61,7 +61,7 @@ public partial class Main
         body.AddThemeConstantOverride("separation", 9);
         body.AddChild(Palette.Text("Emperor", 32, Palette.Gold, true));
         body.AddChild(Palette.Wrapped(_status.Text, 16, Palette.PaperDim));
-        foreach (var (text, action) in new (string, Action)[] { ("Practice", ShowPractice), ("Private match", ShowOnline), ("Card library", () => LibraryDialog.Show(this)), ("Match history", ShowHistory), ("Settings", ShowSettings), ("Main menu", ShowMainMenu), ("Export practice replay", ExportReplay), ("Rules coverage", ShowCoverage), ("Concede…", ShowConcede) })
+        foreach (var (text, action) in new (string, Action)[] { ("Practice", ShowPractice), ("Private match", ShowOnline), ("Card library", () => LibraryDialog.Show(this)), ("Match history", ShowHistory), ("Settings", ShowSettings), ("Main menu", ShowMainMenu), ("Export practice replay", ExportReplay), ("Rules coverage", ShowCoverage), (TutorialActive ? "Leave tutorial…" : "Concede…", ShowConcede) })
         {
             var button = SidebarSkin.Button(text, () => { dialog.QueueFree(); action(); });
             if (text == "Export practice replay" && !_session.CanExportPracticeReplay)

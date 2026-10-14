@@ -21,6 +21,7 @@ public partial class Main
             Preferences = _preferences,
             StartMatch = seat => { _table.PrefetchWarRoom(); StartFromMenu(seat); },
             PracticeSetup = () => { _table.PrefetchWarRoom(); ShowPracticeSetup(); },
+            Tutorial = () => { _table.PrefetchWarRoom(); StartTutorial(); },
             PrivateMatch = () => { _table.PrefetchWarRoom(); _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
             DeckBuilder = () => DeckBuilderDialog.Show(this),
@@ -59,12 +60,18 @@ public partial class Main
         ClearOpenBattlefieldReview();
         if (_titleMenu is null) return;
         _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
-        _root.Hide(); _table.Hide(); _table.SetProcess(false);
+        _root.Hide(); _table.Hide(); _table.SetProcess(false); _coachPanel?.Hide();
         _titleMenu.Show(); _titleMenu.ShowMain();
         _opponentClock = 0;
     }
     private void ShowConcede()
     {
+        if (TutorialActive)
+        {
+            // The table menu that called this is still closing; ask once it has gone so two exclusive dialogs never overlap.
+            GetTree().CreateTimer(.08).Timeout += () => Confirm("Leave the tutorial?", "Your progress in this lesson is not saved. You can start it again from Play → Tutorial.", LeaveTutorial);
+            return;
+        }
         if (_session.Snapshot is null || View.WinnerId is not null) return;
         Confirm("Concede this match?", "The other player will win the current match.", () => _ = Submit(new L5R.Core.GameCommand("concede", View.ViewerId, View.Version)));
     }

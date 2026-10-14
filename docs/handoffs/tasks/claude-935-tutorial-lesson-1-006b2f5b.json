@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Merged main into the tutorial branch; full non-client checks and the native tutorial walk pass.",
+  "validation": "tools/check.sh --skip-client passed; tools/check-tutorial.sh passed",
+  "remaining": "Final unlock-everything lesson and later lessons",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/935",
+  "branch": "claude/935-tutorial-lesson-1",
+  "updated": "2026-10-14T02:54:32.179341+00:00"
+}
