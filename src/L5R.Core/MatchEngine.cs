@@ -3332,6 +3332,14 @@ public sealed partial class MatchEngine
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength, max) : strength;
     }
+    // The net change from the printed strength that the view shows (ProvinceView.StrengthModifier). A destroyed province has none; one without a recorded printed strength cannot say.
+    private int StrengthModifierOf(ProvinceState province) => province.Destroyed || province.PrintedStrength <= 0 ? 0 : EffectiveProvinceStrength(province) - province.PrintedStrength;
+    private string[]? StrengthNotesOf(ProvinceState province)
+    {
+        if (StrengthModifierOf(province) == 0) return null;
+        var notes = TimedProvinceStrengthParts(province).Where(part => part.Amount != 0).Select(part => $"{part.Source} {part.Amount:+#;-#}").ToArray();
+        return notes.Length == 0 ? null : notes;
+    }
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in

@@ -82,6 +82,20 @@ internal static class EmperorRulingR3Tests
         Check(CardCatalog.Get(WillingSpirits).Text.Contains("permanently"), "Willing Spirits says permanently");
         // A Region's strength is "while attached": Fallow Lands is read live off the province's Region and goes with it (Program.cs' Fallow Lands suite pins the removal).
         Check(CardCatalog.Get("oracle-l5r-9865").Text.StartsWith("This province has +2 strength."), "Fallow Lands is a passive Region strength");
+
+        // The view shows every one of those changes as the province's net modifier, so the board can mark it (Willing Spirits' +2 was never shown).
+        var view = e.GetView(0).Players[0].Provinces;
+        Check(printed > 0, "the table records a printed strength");
+        Eq(view[0].StrengthModifier, 2, "a permanent change is in the view as a modifier");
+        Check(view.Skip(1).All(p => p.StrengthModifier == 0 && p.StrengthNotes is null), "an unchanged province shows none");
+        e.GiveProvinceStrengthForTest(0, 0, -5, null, "Ring of Earth");
+        e.GiveProvinceStrengthForTest(0, 1, 3, null, "Ring of Earth");
+        view = e.GetView(1).Players[0].Provinces;
+        Eq(view[0].StrengthModifier, -3, "permanent and timed changes add up, for either seat");
+        Eq(view[1].StrengthModifier, 3, "a timed raise is shown while it lasts");
+        Check(view[1].StrengthNotes!.SequenceEqual(["Ring of Earth +3"]), "and names its source");
+        e.GiveProvinceStrengthForTest(0, 2, -printed - 4, null, "Burn the Towers");
+        Eq(e.GetView(0).Players[0].Provinces[2].StrengthModifier, -printed, "strength floors at zero, so the modifier cannot show more than the province lost");
     }
 
     private static void SincerityScenario()
