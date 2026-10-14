@@ -3,13 +3,13 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     /// <summary>The tutorial's table (issue #935): a prepared offline match against the practice opponent, never reachable from a room or a deck.
-    /// Crane (you) and Lion (the bot) on explicit, ordered decks so each lesson meets exactly the cards it teaches with. The match is built the way
+    /// Lion (you) and Lion (the bot) on explicit, ordered decks so each lesson meets exactly the cards it teaches with. The match is built the way
     /// <see cref="CreatePublished"/> builds one, but stops before the first turn: both Fate hands are empty and every province is still face down.
-    /// The opponent has already taken its first turn, so you are the second player, which is why you start with the bowed Bamboo Harvesters. Lion starts with more Honor (7 against 6) and goes first, as it would in a real match.</summary>
+    /// The opponent has already taken its first turn, so you are the second player, which is why you start with the bowed Bamboo Harvesters. Both Strongholds start at 7 Honor, a tie the opponent won, so it goes first as it would in a real match.</summary>
     public static MatchEngine CreateTutorial()
     {
         const ulong seed = 935;
-        var state = new MatchState { Players = [new() { Id = 0, Name = "You", Clan = "Crane" }, new() { Id = 1, Name = "Opponent", Clan = "Lion" }] };
+        var state = new MatchState { Players = [new() { Id = 0, Name = "You", Clan = "Lion" }, new() { Id = 1, Name = "Opponent", Clan = "Lion" }] };
         var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
         {

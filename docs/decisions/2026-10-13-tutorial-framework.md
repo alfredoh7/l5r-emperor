@@ -7,9 +7,10 @@ Lesson 1 teaches cards and card types over the first two turns; the order and co
 - Lessons are scripts over the real engine (`L5R.Core/Tutorial`), not new rules and not new engine surface: the fixture is an ordinary prepared table, the lock is a filter on the options the engine offers plus a
   check on submitted commands, and the opponent's side is played by the script. Authoritative legality stays in Core; the client presents.
 - Kept inside `L5R.Core` (as a folder, `internal` helpers on `MatchEngine`) rather than a new project, so it needs no new CI registration and reaches the engine's private turn start and draw without a public API.
-- You are Crane (Shinden Asahina) against Lion (Halls of Memory), the pinned profile's pairing. Lion has more starting Honor and goes first, so you are second and start with the bowed Bamboo Harvesters.
-- The Personality bought on turn one is Akodo Uehara (Lion, Samurai, Tactician): textbook trait plus printed action. A Crane player pays full price for him, which the lesson uses to mention Clan discount.
-- Cards in the lesson are wired catalogue cards, not training fixtures: Willing Spirits (Event), Fallow Lands (Region), Megumi's Guidance (Celestial), Tell the Tale, One Koku, Veteran Skirmishers, Light Armor,
+- You are Lion (Halls of Memory) against a Lion practice opponent. Both Strongholds start at 7 Honor, a tie the opponent wins, so it goes first and you are second with the bowed Bamboo Harvesters. (Revised from Crane against Lion at the rules lead's direction: a Lion Personality belongs in a Lion deck.)
+- The Personality bought on turn one is Akodo Uehara (Lion, Samurai, Tactician): textbook trait plus printed action. He is "boxable": at the Clan discount he costs 3 Gold, exactly the Stronghold's production, so he is paid for with the Stronghold alone.
+- No card that Oracle lists as banned (R-040: One Koku, Kalani's Landing, Caught Unawares, Cross-Clan Wedding, The Duty of the Crab, Well-Tended Farm) appears in a tutorial deck, so new players do not expect to meet them; a test enforces it. The Reaction example is Truce.
+- Cards in the lesson are wired catalogue cards, not training fixtures: Willing Spirits (Event), Fallow Lands (Region), Megumi's Guidance (Celestial), Tell the Tale, Truce, Veteran Skirmishers, Light Armor,
   Ember's Final Fire, Ring of Fire, Crushing Strength.
 
 **Interpretations to confirm.** "Boxable" Personality was read as "inexpensive and straightforward". The Event is Willing Spirits, which resolves when revealed but whose effect (+2 strength on each of your provinces)

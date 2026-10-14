@@ -22,8 +22,8 @@ internal static class TutorialLessonOne
         new() { Id = id, Title = title, Body = body, Button = button, Highlight = highlight, OnContinue = then };
 
     private static TutorialStep Do(string id, string title, string body, Func<TutorialLookup, GameCommand, bool> allow, Func<TutorialLookup, IEnumerable<string>>? highlight = null,
-        Func<TutorialLookup, GameCommand, bool>? accept = null, string? hint = null, Func<TutorialLookup, IEnumerable<string>>? targets = null, int[]? onlyProvinces = null) =>
-        new() { Id = id, Title = title, Body = body, Instruction = Instructions[id], Allow = allow, Accept = accept, Highlight = highlight, Targets = targets, OnlyProvinces = onlyProvinces, RefusalHint = hint ?? "Do the highlighted move the lesson asks for." };
+        Func<TutorialLookup, GameCommand, bool>? accept = null, string? hint = null, Func<TutorialLookup, IEnumerable<string>>? targets = null, int[]? onlyProvinces = null, Func<GameCommand, bool>? variant = null) =>
+        new() { Variant = variant, Id = id, Title = title, Body = body, Instruction = Instructions[id], Allow = allow, Accept = accept, Highlight = highlight, Targets = targets, OnlyProvinces = onlyProvinces, RefusalHint = hint ?? "Do the highlighted move the lesson asks for." };
 
     private static Func<TutorialLookup, IEnumerable<string>> Both(Func<TutorialLookup, IEnumerable<string>> first, Func<TutorialLookup, IEnumerable<string>> second) => look => first(look).Concat(second(look));
 
@@ -34,7 +34,7 @@ internal static class TutorialLessonOne
         ["pass-action"] = "Press \"Pass action\" in the right-hand panel.",
         ["decline-attack"] = "Press \"Decline to attack\" in the right-hand panel.",
         ["buy-farm"] = "Click Small Farm in your provinces, then press \"Recruit Small Farm\".",
-        ["buy-uehara"] = "Click Akodo Uehara in your provinces. Click your Stronghold and your Border Keep to pay with them. Press \"Recruit\".",
+        ["buy-uehara"] = "Click Akodo Uehara in your provinces. The purchase options read \"3 Gold · Clan discount\". Click your Stronghold (Halls of Memory) to pay, then press \"Recruit\".",
         ["end-dynasty"] = "Press \"End Dynasty Phase\" in the right-hand panel.",
         ["tell-tale"] = "Click Tell the Tale in your hand, then press \"Confirm play\".",
         ["equip-follower"] = "Click Veteran Skirmishers in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Bamboo Harvesters to pay. Press \"Attach\".",
@@ -52,13 +52,13 @@ internal static class TutorialLessonOne
     [
         // ---- The table before the first turn ----------------------------------------------------------------------------------------------------------------------------
         Say("welcome", "Welcome to Legend of the Five Rings",
-            "You will learn the cards by playing a short game against a practice opponent. You are Crane, the opponent is Lion. Take your time: press Continue whenever you are ready. " +
+            "You will learn the cards by playing a short game against a practice opponent. You are the Lion Clan, and so is the opponent: a mirror match. Take your time: press Continue whenever you are ready. " +
             "Only the move a step asks for will work, so you cannot go wrong."),
         Say("stronghold", "Your Stronghold",
-            "This is your Stronghold, Shinden Asahina. It never leaves play, and the three icons on its right set your game: Gold 4 (what it produces when it bows), " +
-            "Province Strength 6 (how hard each of your provinces is to destroy) and starting Family Honor 6 (your score).", Own(TutorialCards.YourStronghold)),
+            "This is your Stronghold, Halls of Memory. It never leaves play, and the three icons on its right set your game: Gold 3 (what it produces when it bows), " +
+            "Province Strength 7 (how hard each of your provinces is to destroy) and starting Family Honor 7 (your score).", Own(TutorialCards.YourStronghold)),
         Say("honor", "Family Honor",
-            "Honor is the heart of the game. Yours starts at 6; the Lion Stronghold starts at 7, so Lion goes first and has already taken a turn. You win by destroying all four of your opponent's " +
+            "Honor is the heart of the game. Yours starts at 7 and so does your opponent's. A tie is settled by chance, and the opponent won it, so it goes first and has already taken a turn. You win by destroying all four of your opponent's " +
             "provinces, or by starting your turn with 40 Honor. There are two more victories, which we will meet later.", Own(TutorialCards.YourStronghold)),
         Say("border-keep", "Border Keep",
             "Border Keep is a Holding, a card that makes Gold. Bow it (turn it sideways) to produce 2 Gold. Bowed cards straighten again at the start of your turn. " +
@@ -67,7 +67,7 @@ internal static class TutorialLessonOne
             "Bamboo Harvesters is another Holding that produces 2 Gold, but it starts bowed and will not straighten before your second turn. " +
             "The player who goes second begins the game with it.", Own(TutorialCards.BambooHarvesters)),
         Say("provinces", "Provinces and the Dynasty deck",
-            "Your four provinces sit in a row, each holding one face-down card from your Dynasty deck. Every province has the Province Strength of your Stronghold, 6. " +
+            "Your four provinces sit in a row, each holding one face-down card from your Dynasty deck. Every province has the Province Strength of your Stronghold, 7. " +
             "When a province is emptied, it is refilled at once from the top of the Dynasty deck.", Provinces(0, 1, 2, 3)),
         Say("dynasty-cards", "Dynasty cards",
             "The Dynasty deck holds your Personalities (characters), Holdings (Gold), Events, Regions and Celestials. A card in a province is face down, a secret even from you, " +
@@ -86,8 +86,8 @@ internal static class TutorialLessonOne
             "\"After your next turn begins, permanently give each of your provinces +2 strength\", so your provinces will be tougher next turn. Regions and Celestials also take effect when revealed.",
             Provinces(0)),
         Say("face-up", "What you can buy",
-            "The other three provinces are face up. Daidoji Tsunehiko costs 8 Gold, Akodo Kisho needs 10 Family Honor and you have 6, and Doji Atsumichi costs 8 Gold. " +
-            "You have 6 Gold to spend (the Stronghold's 4 and the Border Keep's 2), so you cannot buy any of them.", Provinces(1, 2, 3)),
+            "The other three provinces are face up. Matsu Hana costs 9 Gold (7 with the Clan discount for your own Clan, which we will meet), Ikoma Hakige needs 12 Family Honor and you have 7, and Kitsu Akai costs 10 Gold. " +
+            "You have 5 Gold to spend (the Stronghold's 3 and the Border Keep's 2), so you cannot buy any of them.", Provinces(1, 2, 3)),
         Say("action-phase", "The Action phase",
             "In the Action phase the players take turns using an action or passing, and the phase ends when both pass in a row. The Border Keep has an action for this exact moment: " +
             "on your first turn it puts province cards you choose on the bottom of your Dynasty deck and refills those provinces face up.", Own(TutorialCards.BorderKeep)),
@@ -116,14 +116,15 @@ internal static class TutorialLessonOne
             Move("purchase", card: TutorialCards.SmallFarm), Provinces(1)),
         Say("personality-anatomy", "Anatomy of a Personality",
             "Akodo Uehara is a Personality. Force 1 is his strength in battle. Chi 3 is his resilience: a Personality with 0 Chi is destroyed. Honor Requirement 6: your Family Honor must be at least " +
-            "this to bring him into play, and yours is exactly 6. Gold cost 5. Personal Honor 2 is how honorable he is himself, which Proclaim and other cards use.", Provinces(2)),
+            "this to bring him into play, and yours is 7. Gold cost 5. Personal Honor 2 is how honorable he is himself, which Proclaim and other cards use.", Provinces(2)),
         Say("personality-text", "Keywords, a trait and an ability",
             "Under his name are his keywords: Lion Clan, Samurai, Tactician. Then comes a trait, \"+1F while he opposes a Phoenix Clan Personality\", which is always on. " +
             "Last is an ability, \"Limited: Look at the top card of your Fate deck...\", which you choose to use. We will compare these again soon.", Provinces(2)),
         Do("buy-uehara", "Buy a Personality",
-            "Paying: your Stronghold and Border Keep together give 4 + 2 Gold, and the extra 1 is lost. He is a Lion and you are Crane, so you pay the full 5. A Personality of your own Clan costs 2 less.",
-            Move("purchase", card: TutorialCards.AkodoUehara), Both(Provinces(2), Own(TutorialCards.YourStronghold, TutorialCards.BorderKeep)),
-            accept: (_, command) => command is { ClanDiscount: false, ClanAllegiance: false }, hint: "Buy Akodo Uehara at his full cost."),
+            "Akodo Uehara is Lion Clan, like you, so you may use the Clan discount: a Personality of your own Clan costs 2 less, here 3 Gold. That is exactly what your Stronghold produces on its own, so pay with the Stronghold alone and keep the Border Keep.",
+            Move("purchase", card: TutorialCards.AkodoUehara), Both(Provinces(2), Own(TutorialCards.YourStronghold)),
+            accept: (look, command) => command is { ClanDiscount: true, ClanAllegiance: false } && command.SourceIds is [var source] && source == look.Stronghold(TutorialRunner.Seat),
+            hint: "Buy Akodo Uehara with the Clan discount (3 Gold) and pay with the Stronghold alone.", variant: command => command is { ClanDiscount: true, ClanAllegiance: false }),
 
         // ---- The forgotten Fate draw ---------------------------------------------------------------------------------------------------------------------------------------------
         Say("forgot", "We forgot something!",
@@ -131,12 +132,12 @@ internal static class TutorialLessonOne
             then: engine => engine.TutorialDraw(TutorialRunner.Seat, 6)),
         Say("hand", "Your hand",
             "These six cards are your hand, and only you can see them. Each is a different kind of Fate card. We will go through them one at a time.",
-            Hand(TutorialCards.TellTheTale, TutorialCards.OneKoku, TutorialCards.VeteranSkirmishers, TutorialCards.LightArmor, TutorialCards.EmbersFinalFire, TutorialCards.RingOfFire)),
+            Hand(TutorialCards.TellTheTale, TutorialCards.Truce, TutorialCards.VeteranSkirmishers, TutorialCards.LightArmor, TutorialCards.EmbersFinalFire, TutorialCards.RingOfFire)),
         Say("strategy-limited", "A Strategy: Limited action",
             "Strategies are played from your hand and then discarded. Tell the Tale says \"Limited: Gain 1 Honor\". A Limited action can only be used by the player whose turn it is, during the Action phase. " +
             "The number at the bottom, its Focus Value, matters in duels.", Hand(TutorialCards.TellTheTale)),
         Say("strategy-reaction", "A Strategy: Reaction",
-            "One Koku says \"Reaction: When paying a Gold cost: Produce one Gold\". A Reaction is played in response to the exact moment it names, even on your opponent's turn.", Hand(TutorialCards.OneKoku)),
+            "Truce says \"Reaction: When paying for a Personality with a Clan alignment different than your own: Produce 2 Gold\". A Reaction is played in response to the exact moment it names, even on your opponent's turn.", Hand(TutorialCards.Truce)),
         Say("follower", "A Follower",
             "Veteran Skirmishers is a Follower, a unit of troops. It attaches to a Personality, adding its Force (3) to his unit, and costs 2 Gold to attach. A Personality and everything attached to him are one unit.",
             Hand(TutorialCards.VeteranSkirmishers)),

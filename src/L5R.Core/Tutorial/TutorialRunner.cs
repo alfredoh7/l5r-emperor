@@ -17,6 +17,8 @@ internal sealed class TutorialStep
     public Func<TutorialLookup, GameCommand, bool>? Allow { get; init; }
     /// <summary>Action step: the parameters the lesson requires on the command itself (the cards chosen for a province refresh, the unit equipped), checked when it is submitted.</summary>
     public Func<TutorialLookup, GameCommand, bool>? Accept { get; init; }
+    /// <summary>Narrows which of the engine's variants of one action is offered (a purchase's Clan-discount and full-cost forms), so the others never appear.</summary>
+    public Func<GameCommand, bool>? Variant { get; init; }
     /// <summary>Action step: exactly what to do for the lesson to move on, shown apart from the explanation. There is no button until it is done.</summary>
     public string? Instruction { get; init; }
     public string RefusalHint { get; init; } = "Follow the highlighted step first.";
@@ -77,7 +79,7 @@ public sealed class TutorialRunner
         if (Current is not { IsAction: true } step || _engine.PriorityPlayerId != Seat)
             return offered.Select(a => a with { Enabled = false, Reason = "Read the tutorial note, then press its button." }).ToArray();
         var targets = step.Targets?.Invoke(_lookup).ToHashSet();
-        return offered.Select(a => a.Enabled && a.Command is { } command && step.Allow!(_lookup, command)
+        return offered.Select(a => a.Enabled && a.Command is { } command && step.Allow!(_lookup, command) && (step.Variant is null || step.Variant(command))
             ? a with
             {
                 TargetIds = targets is not null && a.TargetIds is not null ? a.TargetIds.Where(targets.Contains).ToArray() : a.TargetIds,

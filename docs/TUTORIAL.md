@@ -5,7 +5,7 @@ Lesson 1 ("Cards and card types") is built. Lessons 2+ are not.
 
 ## How it works
 
-- **The real engine plays the lesson.** `MatchEngine.CreateTutorial()` builds a prepared table (Crane against Lion on ordered decks) and stops before the first turn. Nothing in the rules changed.
+- **The real engine plays the lesson.** `MatchEngine.CreateTutorial()` builds a prepared table (a Lion mirror on ordered decks) and stops before the first turn. Nothing in the rules changed.
   Lion has the higher starting Honor, so it has already taken the first turn and you are second, with the bowed Bamboo Harvesters, as in a real match.
 - **A lesson is data.** `src/L5R.Core/Tutorial/TutorialLessonOne.cs` is an ordered list of steps. A *narration* step has a button; an *action* step names the one move it wants (`Allow`),
   optionally the parameters that move must have (`Accept`) and the cards or provinces the table may offer (`Targets`, `OnlyProvinces`). Highlights name the cards the note is about.

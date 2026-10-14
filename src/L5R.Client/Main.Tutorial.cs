@@ -159,7 +159,7 @@ public partial class Main
         ["pass-action"] = "click:Pass action",
         ["decline-attack"] = "click:Decline to attack",
         ["buy-farm"] = "select:Small Farm;click:Recruit",
-        ["buy-uehara"] = "select:Akodo Uehara;select:Shinden Asahina;select:Border Keep;click:Recruit",
+        ["buy-uehara"] = "select:Akodo Uehara;select:Halls of Memory;click:Recruit",
         ["end-dynasty"] = "click:End Dynasty Phase",
         ["tell-tale"] = "select:Tell the Tale;click:Confirm play",
         ["equip-follower"] = "select:Veteran Skirmishers;click:Confirm play;click:Akodo Uehara;select:Bamboo Harvesters;click:Attach",

@@ -11,7 +11,7 @@ internal static class TutorialTests
         ("Only the first province may be attacked, and the opponent defends exactly the province you chose", AttackOnlyTheFirstProvince),
         ("The cards and numbers the lesson's text quotes are the catalogue's", QuotedNumbers),
         ("Every action step tells the player exactly what to do and every note step has a button, so no step is a dead end", EveryStepSaysWhatToDo),
-        ("The table starts paused: face-down provinces, empty hands, Crane to move second with bowed Bamboo Harvesters against Lion who has already taken a turn", StartingTable),
+        ("The table starts paused: face-down provinces, empty hands, a Lion mirror, you move second with bowed Bamboo Harvesters against an opponent who has already taken a turn", StartingTable),
     ]);
 
     private static void Expect(bool condition, string message) { if (!condition) throw new Exception(message); }
@@ -58,7 +58,7 @@ internal static class TutorialTests
         var view = runner.Engine.GetView(TutorialRunner.Seat);
         Expect(seen.Count == seen.Distinct().Count(), "every step ran once");
         Expect(view.Players[1].Provinces.Count(p => p.Destroyed) == 1 || view.Players[1].Provinces.Count(p => !p.Destroyed) == 3, "your opponent lost exactly one province");
-        Expect(view.Players[TutorialRunner.Seat].Honor == 9, $"Honor: 6, +1 Tell the Tale, +2 for the destroyed Personality (twice one card), got {view.Players[TutorialRunner.Seat].Honor}");
+        Expect(view.Players[TutorialRunner.Seat].Honor == 10, $"Honor: 7, +1 Tell the Tale, +2 for the destroyed Personality (twice one card), got {view.Players[TutorialRunner.Seat].Honor}");
         Expect(runner.Engine.WinnerId is null, "the game goes on");
     }
 
@@ -123,21 +123,25 @@ internal static class TutorialTests
     private static void QuotedNumbers()
     {
         var stronghold = CardCatalog.Get(TutorialCards.YourStronghold);
-        Expect(stronghold.GoldProduction == 4 && stronghold.ProvinceStrength == 6 && stronghold.StartingHonor == 6, "Shinden Asahina: Gold 4, strength 6, Honor 6");
+        Expect(stronghold.GoldProduction == 3 && stronghold.ProvinceStrength == 7 && stronghold.StartingHonor == 7, "Halls of Memory: Gold 3, strength 7, Honor 7");
         Expect(CardCatalog.Get(TutorialCards.FoeStronghold).StartingHonor == 7 && CardCatalog.Get(TutorialCards.FoeStronghold).ProvinceStrength == 7, "Halls of Memory: Honor 7, strength 7");
         Expect(CardCatalog.Get(TutorialCards.BorderKeep).GoldProduction == 2 && CardCatalog.Get(TutorialCards.BambooHarvesters).GoldProduction == 2, "both starting Holdings produce 2 Gold");
         var uehara = CardCatalog.Get(TutorialCards.AkodoUehara);
         Expect(uehara is { Force: 1, Chi: 3, PersonalHonor: 2, HonorRequirement: 6, GoldCost: 5 }, "Akodo Uehara: 1F, 3C, 2PH, Honor Requirement 6, cost 5");
+        Expect(uehara.GoldCost - 2 == stronghold.GoldProduction, "Uehara at the Clan discount costs exactly what the Stronghold produces");
         Expect(uehara.Keywords!.Contains("Samurai") && uehara.Keywords.Contains("Tactician") && uehara.Keywords.Contains("Lion Clan"), "Uehara's keywords");
-        Expect(CardCatalog.Get(TutorialCards.DaidojiTsunehiko).GoldCost == 8 && CardCatalog.Get(TutorialCards.DojiAtsumichi).GoldCost == 8 && CardCatalog.Get(TutorialCards.AkodoKisho).HonorRequirement == 10, "the cards the Border Keep cycles away");
+        Expect(CardCatalog.Get(TutorialCards.MatsuHana).GoldCost == 9 && CardCatalog.Get(TutorialCards.KitsuAkai).GoldCost == 10 && CardCatalog.Get(TutorialCards.IkomaHakige).HonorRequirement == 12, "the cards the Border Keep cycles away");
         Expect(CardCatalog.Get(TutorialCards.SmallFarm).GoldCost == 0 && CardCatalog.Get(TutorialCards.SmallFarm).GoldProduction == 1, "Small Farm: free, 1 Gold");
         Expect(CardCatalog.Get(TutorialCards.VeteranSkirmishers) is { Force: 3, GoldCost: 2 }, "Veteran Skirmishers: 3 Force, 2 Gold");
         Expect(CardCatalog.Get(TutorialCards.LightArmor) is { Force: 3, GoldCost: 2 }, "Light Armor: +3 Force, 2 Gold");
         Expect(CardCatalog.Get(TutorialCards.FoeDefender).Force == 2, "Ikoma Shika defends with 2 Force");
-        foreach (var (id, type) in new[] { (TutorialCards.TellTheTale, CardType.Strategy), (TutorialCards.OneKoku, CardType.Strategy), (TutorialCards.VeteranSkirmishers, CardType.Follower), (TutorialCards.LightArmor, CardType.Item),
+        foreach (var (id, type) in new[] { (TutorialCards.TellTheTale, CardType.Strategy), (TutorialCards.Truce, CardType.Strategy), (TutorialCards.VeteranSkirmishers, CardType.Follower), (TutorialCards.LightArmor, CardType.Item),
             (TutorialCards.EmbersFinalFire, CardType.Spell), (TutorialCards.RingOfFire, CardType.Ring), (TutorialCards.WillingSpirits, CardType.Event), (TutorialCards.FallowLands, CardType.Region), (TutorialCards.MegumisGuidance, CardType.Celestial) })
             Expect(CardCatalog.Get(id).Type == type, $"{CardCatalog.Get(id).Name} is a {type}");
-        Expect(CardCatalog.Get(TutorialCards.TellTheTale).Text.StartsWith("Limited", StringComparison.Ordinal) && CardCatalog.Get(TutorialCards.OneKoku).Text.StartsWith("Reaction", StringComparison.Ordinal), "the Strategies are a Limited and a Reaction");
+        var banned = new[] { "oracle-l5r-5709", "oracle-l5r-4252", "oracle-l5r-1239", "oracle-l5r-1576", "oracle-l5r-8036", "oracle-l5r-9292" }; // One Koku, Kalani's Landing, Caught Unawares, Cross-Clan Wedding, The Duty of the Crab, Well-Tended Farm (R-040)
+        var cards = TutorialCards.YourDynasty.Concat(TutorialCards.YourFate).Concat(TutorialCards.DynastyFiller).Concat(TutorialCards.FateFiller).Concat(TutorialCards.FoeDynasty).ToArray();
+        Expect(cards.All(id => !banned.Contains(id)), "no card the tournament ban list names appears in the tutorial");
+        Expect(CardCatalog.Get(TutorialCards.TellTheTale).Text.StartsWith("Limited", StringComparison.Ordinal) && CardCatalog.Get(TutorialCards.Truce).Text.StartsWith("Reaction", StringComparison.Ordinal), "the Strategies are a Limited and a Reaction");
     }
 
     private static void EveryStepSaysWhatToDo()
@@ -153,7 +157,7 @@ internal static class TutorialTests
         var state = runner.Engine.State;
         Expect(state.Players.All(p => p.Hand.Count == 0), "nobody has drawn Fate cards");
         Expect(state.Players[TutorialRunner.Seat].Provinces.All(p => !state.Cards[p.CardId!].FaceUp), "your provinces are face down");
-        Expect(state.Players[0].Clan == "Crane" && state.Players[1].Clan == "Lion" && state.Players[0].Honor == 6 && state.Players[1].Honor == 7, "Crane at 6 Honor against Lion at 7");
+        Expect(state.Players.All(p => p.Clan == "Lion" && p.Honor == 7), "a Lion mirror, both at 7 Honor");
         var bamboo = state.Cards.Values.Single(c => c.DefinitionId == TutorialCards.BambooHarvesters);
         Expect(bamboo is { OwnerId: 0, Bowed: true, Zone: Zone.Home }, "the second player has the bowed Bamboo Harvesters");
         Expect(state.Players[1].TurnsTaken == 1 && state.Players[0].TurnsTaken == 0, "Lion has taken its first turn; yours is next");
