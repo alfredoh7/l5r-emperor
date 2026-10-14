@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared (UI + presentation of rules events): card showcase now covers every opponent play and every Event/Region/Celestial entering play for either player; new 'Flip Dynasty Cards' setting (default Off) turns each Events-Phase revealed Dynasty card over in place on the table, one at a time. Client only, reads the public event log; no engine change. Mendon has standing cross-lane authority.",
+  "validation": "dotnet build 0 errors; tools/check-card-motion-ui.sh (new native probe, real engine Events-Phase reveal; Flip Off/On, Paused Animation, reduced motion) PASS; check-paused-animation-ui.sh normal+reduced PASS; check-main-menu.sh PASS. No native probe for an opponent purchase beat; no human Windows playtest.",
+  "remaining": "Human playtest of pacing; flip defaults Off.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/948",
+  "branch": "claude/948-card-animations",
+  "updated": "2026-10-14T17:41:03.130670+00:00"
+}

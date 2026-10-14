@@ -124,6 +124,7 @@ public partial class Main
                     restingTile.AddChild(new TableCardReflow { Card = restingTile, From = start, To = restingTile.Position, ReducedMotion = () => _reducedMotion });
             }
             if (attaching) continue;
+            if (moved && card.Zone is Zone.DynastyDiscard or Zone.FateDiscard && _showcasedPlays.Contains(card.Id)) continue; // shown travelling to the pile by the card showcase (issue #630)
             if (!moved && !draw && !publicDiscard) continue;
             Vector2[]? from = before.Cards.GetValueOrDefault(card.Id);
             if (draw && card.Zone == Zone.Province)

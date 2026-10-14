@@ -32,7 +32,13 @@ internal static class CardPlayTiming
 // shown early. The practice opponent waits while a beat is showing (PlayShowcaseBusy), so its next move cannot cut the card short.
 public partial class Main
 {
-    private sealed record PlayBeat(CardView Card, string Caption, bool Discarded);
+    /// <summary>Flip: the face-down card is turned over where it lies on the table (Cover covers it until its turn). Holdable: Paused Animation may stop on it (the flip of a card that merely stays in its province never does).</summary>
+    private sealed record PlayBeat(CardView Card, string Caption, bool Discarded, CardFlip? Cover = null, bool Holdable = true);
+
+    // What an opponent playing a card looks like in the public log: a strategy or ability, a card brought into play (a purchase or "put into play"), an attachment, a Terrain, a Kata, an overlay.
+    private static readonly HashSet<string> CardPlayEvents = ["strategyPlayed", "abilityUsed", "cardEnteredPlay", "equipped", "terrainPlayed", "strategyEnteredPlay", "kataEnteredPlay", "personalityOverlayed"];
+    // How an Event, Region or Celestial enters play: revealed in a province in the Events Phase, then resolved, attached or put in play. Shown for either player, since neither chose it.
+    private static readonly HashSet<string> EntersPlayEvents = ["provinceRevealed", "eventEnteredPlay", "eventResolved", "regionAttached", "regionDiscarded", "celestialEnteredPlay"];
 
     private string? _playsMatchKey;
     private long _playsSeen = -1;
@@ -40,6 +46,9 @@ public partial class Main
     private Control? _playCurrent;
     /// <summary>Played cards this update is showcasing: the older quick discard flight skips them, so a card is not shown twice.</summary>
     private readonly HashSet<string> _showcasedPlays = [];
+
+    /// <summary>Every beat that has started in this match, in order (the native checks read it).</summary>
+    private readonly List<(string CardId, bool Flip)> _playsStarted = [];
 
     private bool PlayShowcaseBusy => _playQueue.Count > 0 || _playCurrent is not null && IsInstanceValid(_playCurrent);
 
@@ -85,23 +94,62 @@ public partial class Main
         var fresh = View.Events.Where(e => e.Sequence > _playsSeen).ToArray();
         if (fresh.Length > 0) _playsSeen = fresh[^1].Sequence;
         var cards = VisibleCards(View).Concat(View.Players.SelectMany(p => p.EventsInPlay ?? [])).GroupBy(c => c.Id).ToDictionary(g => g.Key, g => g.First());
-        var queued = new HashSet<string>();
+        var beats = new Dictionary<string, PlayBeat>(); // insertion order is event order; Dictionary keeps it while nothing is removed
+        var order = new List<string>();
+        var claimedSlots = new HashSet<(int Player, int Province, int Slot)>();
         foreach (var e in fresh)
         {
-            if (e.Type is not ("strategyPlayed" or "abilityUsed") || e.CardId is not string id || e.PlayerId is not int who) continue;
-            if (who == View.ViewerId && !CardPlayTiming.ShowOwnPlays) continue;
-            if (!cards.TryGetValue(id, out var card) || card.Definition is null || !queued.Add(id)) continue;
+            if (e.CardId is not string id || e.PlayerId is not int who || !cards.TryGetValue(id, out var card) || card.Definition is null) continue;
             var discarded = card.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Resolving; // issue #917: a card still resolving (paused on a choice) is on its way to the discard pile
+            var entering = card.Definition.Type is CardType.Event or CardType.Region or CardType.Celestial && EntersPlayEvents.Contains(e.Type);
+            var cover = e.Type == "provinceRevealed" && !beats.ContainsKey(id) ? CoverForFlip(card, who, claimedSlots) : null;
+            if (entering || cover is not null)
+            {
+                // The later event of a reveal (resolved, attached, entered play) says more than "revealed", so it supplies the caption.
+                if (beats.TryGetValue(id, out var shown)) { if (e.Type != "provinceRevealed") beats[id] = shown with { Caption = e.Message }; continue; }
+                beats[id] = new(card, e.Message, discarded, cover, entering); order.Add(id);
+                continue;
+            }
+            if (!CardPlayEvents.Contains(e.Type) || who == View.ViewerId && !CardPlayTiming.ShowOwnPlays || beats.ContainsKey(id)) continue;
             if (!discarded && !CardPlayTiming.ShowBoardAbilities) continue;
-            if (discarded) _showcasedPlays.Add(id);
-            _playQueue.Enqueue(new(card, e.Message, discarded));
+            beats[id] = new(card, e.Message, discarded); order.Add(id);
+        }
+        foreach (var id in order)
+        {
+            if (beats[id].Discarded) _showcasedPlays.Add(id);
+            _playQueue.Enqueue(beats[id]);
         }
         if (_playCurrent is null || !IsInstanceValid(_playCurrent)) StartNextCardPlay();
     }
 
+    /// <summary>"Flip Dynasty Cards": covers the face-down card where it lies on the table so it can be turned over in its turn. The cards are still hidden in the previous view (and in the tiles drawn
+    /// from it, which this runs before replacing), so the slot is found there: a card that stays in its province by its own place, an Event/Region/Celestial (which leaves it) by being the next
+    /// face-down slot of that player's reveal. Not under reduced motion.</summary>
+    private CardFlip? CoverForFlip(CardView card, int who, HashSet<(int Player, int Province, int Slot)> claimed)
+    {
+        if (!_preferences.FlipDynastyCards || _reducedMotion || CardTile.Artwork(card.Definition!) is not { } face) return null;
+        if (_motionView is not { } prior || prior.ViewerId != View.ViewerId || prior.Players.FirstOrDefault(p => p.Id == who) is not { } before) return null;
+        var hidden = before.Provinces.Where(p => !p.Destroyed)
+            .SelectMany(p => ProvincePresentation.Slots(p).Where(s => s.Card is { Definition: null }).Select(s => (Province: p.Index, Slot: s.Index, Card: s.Card!)))
+            .Where(h => !claimed.Contains((who, h.Province, h.Slot))).ToArray();
+        (int Province, int Slot, CardView Card)? found = null;
+        if (card.Zone == Zone.Province && card.ProvinceIndex is int index && View.Players.First(p => p.Id == who).Provinces.FirstOrDefault(p => p.Index == index) is { } now
+            && ProvincePresentation.Slots(now).FirstOrDefault(s => s.Card?.Id == card.Id) is { } slot)
+            found = hidden.Where(h => h.Province == index && h.Slot == slot.Index).Select(h => ((int, int, CardView)?)h).FirstOrDefault();
+        else if (card.Zone != Zone.Province && hidden.Length > 0) found = hidden[0];
+        if (found is not { } place) return null;
+        var tile = _tiles.FirstOrDefault(t => IsInstanceValid(t) && t.Card.Id == place.Card.Id);
+        if (tile is null) return null;
+        claimed.Add((who, place.Province, place.Slot));
+        var cover = new CardFlip { From = tile.FaceCornersOnViewport().Select(p => p / _root.Scale.X).ToArray(), Face = face, Back = TablePile.DynastyBack };
+        _root.AddChild(cover);
+        return cover;
+    }
+
     private void ClearCardPlays()
     {
-        _playQueue.Clear();
+        foreach (var queued in _playQueue) if (queued.Cover is { } cover && IsInstanceValid(cover)) cover.QueueFree();
+        _playQueue.Clear(); _playsStarted.Clear();
         if (_playCurrent is not null && IsInstanceValid(_playCurrent)) _playCurrent.QueueFree();
         _playCurrent = null; _playsMatchKey = null; _playsSeen = -1;
         _playProceed = null; _proceedButton = null; _proceedHintShown = false; SetPlayHeld(false);
@@ -112,7 +160,26 @@ public partial class Main
         _playCurrent = null; _playProceed = null;
         if (_playQueue.Count == 0) { SetPlayHeld(false); return; }
         var beat = _playQueue.Dequeue();
-        var paused = _preferences.PausedAnimation;
+        _playsStarted.Add((beat.Card.Id, beat.Cover is not null));
+        if (beat.Cover is { } cover && IsInstanceValid(cover))
+        {
+            // Turned over on the table, in its own province, before anything else is shown of it.
+            _playCurrent = cover;
+            cover.Done = () =>
+            {
+                if (IsInstanceValid(cover)) cover.QueueFree();
+                if (_playCurrent != cover) return;
+                if (beat.Holdable) ShowBeat(beat); else StartNextCardPlay();
+            };
+            cover.Begin();
+            return;
+        }
+        ShowBeat(beat);
+    }
+
+    private void ShowBeat(PlayBeat beat)
+    {
+        var paused = _preferences.PausedAnimation && beat.Holdable;
         if (paused) { SetPlayHeld(true); ReleaseTableFocus(); HideTableTooltip(); }
         var height = CardPlayTiming.CardHeight; var width = height * .72f;
         var stage = new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 60, Modulate = new Color(1, 1, 1, 0) };
