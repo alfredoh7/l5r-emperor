@@ -214,6 +214,12 @@ internal static class BotSoak
             var folder = Env("L5R_ARENA_DECKS");
             if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the battle-policy arena"); return; }
             BotArena.RunPolicy(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, int.TryParse(Env("L5R_ARENA_SEEDS"), out var seeds) ? seeds : 1, Env("L5R_ARENA_REPORT"));
+        }),
+        ("bot-arena: Cavalry defense (issue #946), the preloaded decks against the Unicorn deck with the defense guidance on versus off (opt-in, set L5R_ARENA_CAVALRY to the preloaded-decks.json path)", () =>
+        {
+            var decks = Env("L5R_ARENA_CAVALRY");
+            if (decks is null) { Console.WriteLine("  SKIP: set L5R_ARENA_CAVALRY to src/L5R.Client/Content/preloaded-decks.json to run the Cavalry defense arena"); return; }
+            BotArena.RunCavalry(decks, int.TryParse(Env("L5R_ARENA_GAMES"), out var games) ? games : 10, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, Env("L5R_ARENA_REPORT"));
         })
     ];
 }

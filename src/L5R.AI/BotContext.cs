@@ -43,6 +43,9 @@ public sealed class BotContext
     /// <summary>Issue #946 (Mendon's defense guidance): when the attacker commits no infantry but has Cavalry at home, the bot weighs the attacker's possible Cavalry army against its own Force (see <see cref="DefensePlanner"/>) and commits its infantry to the most valuable provinces it can hold. ON by default; the arena switches it off to measure it.</summary>
     public bool UseCavalryDefense { get; init; } = true;
 
+    /// <summary>Issue #946 (Mendon): attacking, the bot holds its Cavalry units back in the Infantry Maneuvers Segment and assigns them in the Cavalry Maneuvers Segment, planning the whole army against the defense it can then see. ON by default; the arena switches it off to measure it.</summary>
+    public bool UseCavalryAttack { get; init; } = true;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 

@@ -42,4 +42,35 @@ public static partial class TrainingOpponent
     }
 
     private static bool HasBattleAction(CardView card) => !card.Bowed && !card.ActionLocked && BattlePolicy.Printed(card).Any(p => p.Ability.Timing is "Battle" or "BattleOrOpen");
+
+    // ---- Attacking: Cavalry waits for its own segment (issue #946) --------------------------------------------------------------------------------------------------------
+
+    /// <summary>The Personalities the bot already sent in this Attack Phase's Infantry Maneuvers Segment; the Cavalry joins them.</summary>
+    private static CardView[] AlreadyAssigned(Ctx x) =>
+        x.Memory.UseCavalryAttack && x.View.Phase == Phase.CavalryDeclaration ? x.Self.Army.Where(c => c.Definition?.Type == CardType.Personality && c.ProvinceIndex is not null).ToArray() : [];
+
+    /// <summary>The part of a whole-army plan that this segment may assign: the units it offers.</summary>
+    private static Dictionary<string, int> OfferedOnly(Dictionary<string, int> plan, CardView[] offered) =>
+        plan.Where(p => offered.Any(c => c.Id == p.Key)).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
+
+    /// <summary>In the Infantry Maneuvers Segment the bot assigns only units that are not Cavalry; the Cavalry is assigned in the Cavalry Maneuvers Segment, when the defense is visible.</summary>
+    private static Dictionary<string, int> HoldCavalry(Ctx x, Dictionary<string, int> assignments) =>
+        !x.Memory.UseCavalryAttack || x.View.Phase != Phase.InfantryDeclaration ? assignments
+            : assignments.Where(p => x.Self.Home.FirstOrDefault(c => c.Id == p.Key) is not { } unit || !IsCavalryUnit(x.Self, unit)).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
+
+    /// <summary>The attack as the scores read it: the whole army, not only this segment's part. In the Infantry segment, the plan the infantry assignment is the part of; in the Cavalry segment, the infantry already sent plus these Cavalry.</summary>
+    private static Dictionary<string, int> WholeAttack(Ctx x, ActionOption action, Dictionary<string, int>? assignments)
+    {
+        assignments ??= [];
+        if (!x.Memory.UseCavalryAttack) return assignments;
+        if (x.View.Phase == Phase.CavalryDeclaration)
+        {
+            var merged = new Dictionary<string, int>(assignments, StringComparer.Ordinal);
+            foreach (var unit in AlreadyAssigned(x)) if (unit.ProvinceIndex is int province) merged.TryAdd(unit.Id, province);
+            return merged;
+        }
+        if (x.View.Phase != Phase.InfantryDeclaration) return assignments;
+        var (units, provinces) = AttackInputs(x, action);
+        return PlanAttack(x, units, provinces) is { } whole && HoldCavalry(x, whole) is var part && part.Count == assignments.Count && part.All(p => assignments.TryGetValue(p.Key, out var sent) && sent == p.Value) ? whole : assignments;
+    }
 }

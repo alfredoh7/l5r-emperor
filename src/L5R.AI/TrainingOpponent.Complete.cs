@@ -91,9 +91,10 @@ public static partial class TrainingOpponent
     }
 
     /// <summary>Mendon's attack rule (issue #642): see <see cref="AttackPlanner"/>. Units are the unbowed Personalities that may be assigned, each counted with its attached Followers.</summary>
-    private static Dictionary<string, int>? PlanAttack(Ctx x, CardView[] units, int[] provinces)
+    private static Dictionary<string, int>? PlanAttack(Ctx x, CardView[] units, int[] provinces, CardView[]? alreadyAssigned = null)
     {
-        var unitForces = units.Select(c => new AttackPlanner.Unit(c.Id, ArmyForce(x.Self.Home.Where(h => h.Id == c.Id || h.AttachedTo == c.Id)))).ToArray();
+        // Issue #946: the Personalities already sent in the Infantry Maneuvers Segment are part of the army the Cavalry joins.
+        var unitForces = units.Concat(alreadyAssigned ?? []).Select(c => new AttackPlanner.Unit(c.Id, ArmyForce(x.Self.Home.Concat(x.Self.Army).Where(h => h.Id == c.Id || h.AttachedTo == c.Id)))).ToArray();
         var targets = x.Opponent.Provinces.Where(p => !p.Destroyed && provinces.Contains(p.Index)).Select(p => new AttackPlanner.Target(p.Index, p.Strength)).ToArray();
         // The opponent's Honor victory is coming (Mendon's rule, playtest 2026-10): the bot attacks as many Provinces as it can beat, whatever the enemy army could do in reply.
         var spec = x.Memory.UseSpec818;

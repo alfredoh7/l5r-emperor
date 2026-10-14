@@ -8,6 +8,7 @@ internal static class CavalryDefenseTests
     [
         ("DefensePlanner: parity needs Force / threat + 0.1 per hand card and Battle action to reach 1; one army per sub-army that reaches 1 alone; leftovers stay home unless they print a Battle action", Planner),
         ("Bot: with no infantry assigned against it, it commits its infantry to the most valuable province when it can match the attacker's possible Cavalry, and passes when it cannot or there is none", BotDefends),
+        ("Bot attack: the Infantry Maneuvers Segment assigns only infantry; the Cavalry waits and is assigned in the Cavalry Maneuvers Segment to join the infantry already sent", CavalryWaits),
     ];
 
     private static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
@@ -83,5 +84,37 @@ internal static class CavalryDefenseTests
         var none = Table(8, 0, 0);
         Check(TrainingOpponent.Choose(none, [Pass(none), Defend(none)]).Command?.Type == "pass", "no Cavalry at home and nobody attacking: nothing to defend against");
         Check(TrainingOpponent.Choose(even, [Pass(even), Defend(even)], new BotContext { UseCavalryDefense = false }).Command?.Type == "pass", "switched off, it plays as before");
+    }
+
+    private static void CavalryWaits()
+    {
+        var view = MatchEngine.CreateStarterMatch().GetView(0);
+        var cavalry = CardCatalog.Get("training-cavalry");
+        var foot = Infantry;
+        ProvinceView[] Provinces() => Enumerable.Range(0, 4).Select(i => new ProvinceView(i, 3, false, null, null)).ToArray();
+        MatchView Table(Phase phase, CardView[] home, CardView[] army) => view with
+        {
+            Phase = phase,
+            ActivePlayerId = 0,
+            PriorityPlayerId = 0,
+            PendingChoice = null,
+            Players = [view.Players[0] with { Home = home, Army = army, Hand = [], HandCount = 0 }, view.Players[1] with { Home = [], Army = [], Provinces = Provinces() }]
+        };
+        ActionOption Pass(MatchView v) => new("pass", "Pass", true, null, new("pass", 0, v.Version));
+        ActionOption Attack(MatchView v, params string[] ids) => new("attack", "Attack", true, null, null, TargetIds: ids, Provinces: [0, 1, 2, 3]);
+
+        var infantry = Table(Phase.InfantryDeclaration, [Unit("foot", 0, 6, foot), Unit("horse", 0, 6, cavalry)], []);
+        var first = TrainingOpponent.Choose(infantry, [Pass(infantry), Attack(infantry, "foot", "horse")]);
+        Check(first.Command?.Type == "attack" && first.Command.Assignments?.Keys.SequenceEqual(["foot"]) == true, "Infantry segment: only the infantry is assigned (got " + string.Join(",", first.Command?.Assignments?.Keys.ToArray() ?? []) + ")");
+        var held = TrainingOpponent.Choose(infantry, [Pass(infantry), Attack(infantry, "foot", "horse")], new BotContext { UseCavalryAttack = false });
+        Check(held.Command?.Assignments?.ContainsKey("horse") == true, "switched off, the Cavalry goes with the infantry as before");
+
+        var onlyHorse = Table(Phase.InfantryDeclaration, [Unit("horse", 0, 9, cavalry)], []);
+        Check(TrainingOpponent.Choose(onlyHorse, [Pass(onlyHorse), Attack(onlyHorse, "horse")]).Command?.Type == "pass", "Only Cavalry at home: nothing is assigned in the Infantry segment");
+
+        var sent = Unit("foot", 0, 6, foot) with { Zone = Zone.Battlefield, ProvinceIndex = 0 };
+        var second = Table(Phase.CavalryDeclaration, [Unit("horse", 0, 6, cavalry)], [sent]);
+        var chosen = TrainingOpponent.Choose(second, [Pass(second), Attack(second, "horse")]);
+        Check(chosen.Command?.Type == "attack" && chosen.Command.Assignments?.Keys.SequenceEqual(["horse"]) == true, "Cavalry segment: the Cavalry is assigned (got " + chosen.Command?.Type + ")");
     }
 }
