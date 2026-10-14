@@ -10,6 +10,7 @@ internal static class TutorialTests
         ("The Border Keep step refuses a refresh of the wrong provinces and takes the three face-up ones", BorderKeepCards),
         ("Only the first province may be attacked, and the opponent defends exactly the province you chose", AttackOnlyTheFirstProvince),
         ("The cards and numbers the lesson's text quotes are the catalogue's", QuotedNumbers),
+        ("Every action step tells the player exactly what to do and every note step has a button, so no step is a dead end", EveryStepSaysWhatToDo),
         ("The table starts paused: face-down provinces, empty hands, Crane to move second with bowed Bamboo Harvesters against Lion who has already taken a turn", StartingTable),
     ]);
 
@@ -137,6 +138,13 @@ internal static class TutorialTests
             (TutorialCards.EmbersFinalFire, CardType.Spell), (TutorialCards.RingOfFire, CardType.Ring), (TutorialCards.WillingSpirits, CardType.Event), (TutorialCards.FallowLands, CardType.Region), (TutorialCards.MegumisGuidance, CardType.Celestial) })
             Expect(CardCatalog.Get(id).Type == type, $"{CardCatalog.Get(id).Name} is a {type}");
         Expect(CardCatalog.Get(TutorialCards.TellTheTale).Text.StartsWith("Limited", StringComparison.Ordinal) && CardCatalog.Get(TutorialCards.OneKoku).Text.StartsWith("Reaction", StringComparison.Ordinal), "the Strategies are a Limited and a Reaction");
+    }
+
+    private static void EveryStepSaysWhatToDo()
+    {
+        foreach (var step in TutorialLessonOne.Steps)
+            Expect(step.IsAction ? step.Instruction is { Length: > 20 } && step.Button is null : step.Button is not null, $"{step.Id}: an action step needs an instruction and no button; a note needs a button");
+        Expect(TutorialLessonOne.Instructions.Keys.All(id => TutorialLessonOne.Steps.Any(s => s.Id == id && s.IsAction)), "no instruction is left over for a step that is not an action");
     }
 
     private static void StartingTable()

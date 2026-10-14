@@ -106,6 +106,9 @@ public sealed partial class MatchSession : IDisposable
         RefreshLocal();
     }
 
+    /// <summary>Ends the lesson wherever it is and drops its table.</summary>
+    public void LeaveTutorial() { if (_tutorial is null) return; Generation++; _tutorial = null; _engine = null; _preparedReview = false; Snapshot = null; Changed?.Invoke(); }
+
     /// <summary>The coach panel's button.</summary>
     public void TutorialContinue() { if (_tutorial?.Continue() == true) RefreshLocal(); }
 

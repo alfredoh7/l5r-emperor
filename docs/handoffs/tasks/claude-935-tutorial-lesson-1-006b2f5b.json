@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Tutorial framework and lesson 1 (cards and card types). Play -> Tutorial now starts an offline lesson against the practice bot with illegal clicks locked out. Lessons are scripts over the real engine (L5R.Core/Tutorial: fixture table, TutorialRunner, TutorialLessonOne); the runner switches off every option the step does not ask for, refuses stray commands, and plays the opponent's side. Client: MatchSession.StartTutorial, a coach column (TutorialCoachPanel), a pointer pulse on CardTile, and a lab (--tutorial-review). No rules change. Crane vs Lion, 52 steps over two turns ending with a destroyed province and the Ring of Fire reaction.",
-  "validation": "tools/check.sh passes (client included); tutorial suite 6/6 (full lesson played through the runner, locking, Border Keep and attack-province refusals, quoted card numbers checked against the catalogue, starting table); tools/check-tutorial.sh plays all 52 steps through the real table controls to 9 Honor with no ERROR lines; check-main-menu, check-table-camera, check-board-ui, check-direct-play-ui pass. Not done: a human playtest.",
-  "remaining": "Final lesson that unlocks the table for a full game, later lessons, pointing at the phase bar, polish of coach copy after a human read. Event is Willing Spirits (effect lands next turn) and 'boxable' was read as inexpensive: both to confirm.",
+  "summary": "Tutorial framework and lesson 1 (cards and card types), second pass after playtest: every action step now shows an exact TO CONTINUE instruction apart from the explanation and no Continue button; note steps show the button only while the table is at rest (no card or battle presentation running); the table menu's Concede becomes Leave tutorial (with confirmation) and works at any point. Earlier: lessons are scripts over the real engine (L5R.Core/Tutorial), runner locks illegal moves and plays the opponent, coach column and card pointer in the client, lab flags (--tutorial-review).",
+  "validation": "tutorial suite 7/7 (adds: every action step has an instruction and no button, every note a button); tools/check-tutorial.sh plays all 52 steps through the real controls to 9 Honor, then starts again and leaves mid-lesson through hamburger menu -> Leave tutorial -> confirm back to the main menu, no ERROR lines. Human playtest of the revised flow still needed.",
+  "remaining": "Final lesson that unlocks the table for a full game, later lessons, phase bar pointer, copy review. Event choice and 'boxable' reading to confirm.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/935",
   "branch": "claude/935-tutorial-lesson-1",
-  "updated": "2026-10-13T22:06:54.159801+00:00"
+  "updated": "2026-10-14T00:00:14.768491+00:00"
 }

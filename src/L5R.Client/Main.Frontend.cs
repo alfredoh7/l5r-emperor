@@ -66,6 +66,12 @@ public partial class Main
     }
     private void ShowConcede()
     {
+        if (TutorialActive)
+        {
+            // The table menu that called this is still closing; ask once it has gone so two exclusive dialogs never overlap.
+            GetTree().CreateTimer(.08).Timeout += () => Confirm("Leave the tutorial?", "Your progress in this lesson is not saved. You can start it again from Play → Tutorial.", LeaveTutorial);
+            return;
+        }
         if (_session.Snapshot is null || View.WinnerId is not null) return;
         Confirm("Concede this match?", "The other player will win the current match.", () => _ = Submit(new L5R.Core.GameCommand("concede", View.ViewerId, View.Version)));
     }

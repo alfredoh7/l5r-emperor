@@ -44,9 +44,18 @@ public partial class Main
     private void LayoutTutorialCoach()
     {
         if (_coachPanel is not { Visible: true } panel) return;
+        panel.SetReady(!PresentationBusy && !PlayShowcaseBusy && !_session.Busy);
         var height = Math.Max(300, GetViewport().GetVisibleRect().Size.Y / _root.Scale.Y - TutorialColumnTop - 196);
         panel.CustomMinimumSize = new Vector2(TutorialColumnWidth, 0); panel.Size = new Vector2(TutorialColumnWidth, height);
         panel.Position = new Vector2(16, TutorialColumnTop);
+    }
+
+    /// <summary>Leaves the lesson at any point (the table menu's Concede while a lesson is running) and returns to the menu.</summary>
+    private void LeaveTutorial()
+    {
+        _session.LeaveTutorial(); _coachPanel?.Hide();
+        _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear();
+        ShowMainMenu();
     }
 
     private void TutorialContinue()
@@ -116,6 +125,14 @@ public partial class Main
             if (tile is null) { GD.Print("TUTORIAL_UI no province tile " + arg); return; }
             SelectCard(tile.Card);
         }
+        else if (verb == "menuleave") // the table's hamburger menu, its "Leave tutorial…" entry, and the confirmation
+        {
+            ShowTableMenu(); for (var i = 0; i < 4; i++) await CoverageFrames();
+            var leave = GetTree().Root.FindChildren("*", "Button", true, false).OfType<Button>().FirstOrDefault(b => b.Text == "Leave tutorial…") ?? throw new InvalidOperationException("The table menu has no Leave tutorial entry.");
+            leave.EmitSignal(BaseButton.SignalName.Pressed); await ToSignal(GetTree().CreateTimer(.3), SceneTreeTimer.SignalName.Timeout);
+            var dialog = GetChildren().OfType<ConfirmationDialog>().FirstOrDefault(d => d.Title == "Leave the tutorial?") ?? throw new InvalidOperationException("Leaving did not ask for confirmation.");
+            dialog.EmitSignal(ConfirmationDialog.SignalName.Confirmed);
+        }
         else if (verb == "wait") await ToSignal(GetTree().CreateTimer(double.Parse(arg)), SceneTreeTimer.SignalName.Timeout);
         else if (verb == "click")
         {
@@ -170,7 +187,13 @@ public partial class Main
                     throw new InvalidOperationException($"{coach.StepId}: the step did not advance. {TutorialControls()} notice={_status.Text}");
             }
             if (_session.Tutorial is { Finished: false }) throw new InvalidOperationException("The lesson did not finish.");
-            GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {View.Players[0].Honor}");
+            var honor = View.Players[0].Honor;
+            // Leaving at any moment: start again, get part way in, and leave through the table menu.
+            StartTutorial(); for (var i = 0; i < 6; i++) await CoverageFrames();
+            await PlayTutorialTo("border-refresh");
+            await RunTutorialUiToken("menuleave"); for (var i = 0; i < 6; i++) await CoverageFrames();
+            if (_session.Tutorial is not null || !MenuVisible) throw new InvalidOperationException("Leaving the tutorial from the table menu did not return to the main menu.");
+            GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {honor}; left mid-lesson through the table menu");
             GetTree().Quit();
         }
         catch (Exception e) { GD.PushError("TUTORIAL_UI_CHECK failed: " + e.Message); GetTree().Quit(1); }

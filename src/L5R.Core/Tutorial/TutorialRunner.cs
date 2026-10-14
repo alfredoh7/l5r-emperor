@@ -1,7 +1,7 @@
 namespace L5R.Core;
 
 /// <summary>What the coach panel shows for the current step (issue #935). Highlights are card ids to point at; the panel never decides anything.</summary>
-public sealed record TutorialCoach(string StepId, string Title, string Body, string? Button, string[] HighlightCardIds, int Step, int Steps, bool Finished);
+public sealed record TutorialCoach(string StepId, string Title, string Body, string? Button, string[] HighlightCardIds, int Step, int Steps, bool Finished, string? Instruction = null);
 
 /// <summary>One beat of a lesson. A narration step has a <see cref="Button"/> and waits for it; an action step has an <see cref="Allow"/> and waits for the player to make that move.
 /// Everything else the engine would offer is shown as unavailable, so a click the lesson does not want never reaches the engine.</summary>
@@ -17,6 +17,8 @@ internal sealed class TutorialStep
     public Func<TutorialLookup, GameCommand, bool>? Allow { get; init; }
     /// <summary>Action step: the parameters the lesson requires on the command itself (the cards chosen for a province refresh, the unit equipped), checked when it is submitted.</summary>
     public Func<TutorialLookup, GameCommand, bool>? Accept { get; init; }
+    /// <summary>Action step: exactly what to do for the lesson to move on, shown apart from the explanation. There is no button until it is done.</summary>
+    public string? Instruction { get; init; }
     public string RefusalHint { get; init; } = "Follow the highlighted step first.";
     public Func<TutorialLookup, IEnumerable<string>>? Highlight { get; init; }
     /// <summary>Action step: the only cards the move may target (the three face-up provinces for the Border Keep), so the table offers just those.</summary>
@@ -64,7 +66,7 @@ public sealed class TutorialRunner
         get
         {
             if (Current is not { } step) return new("done", "Lesson complete", "", null, [], _steps.Length, _steps.Length, true);
-            return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false);
+            return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false, step.Instruction);
         }
     }
 

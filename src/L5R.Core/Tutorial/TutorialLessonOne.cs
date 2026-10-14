@@ -23,9 +23,30 @@ internal static class TutorialLessonOne
 
     private static TutorialStep Do(string id, string title, string body, Func<TutorialLookup, GameCommand, bool> allow, Func<TutorialLookup, IEnumerable<string>>? highlight = null,
         Func<TutorialLookup, GameCommand, bool>? accept = null, string? hint = null, Func<TutorialLookup, IEnumerable<string>>? targets = null, int[]? onlyProvinces = null) =>
-        new() { Id = id, Title = title, Body = body, Allow = allow, Accept = accept, Highlight = highlight, Targets = targets, OnlyProvinces = onlyProvinces, RefusalHint = hint ?? "Do the highlighted move the lesson asks for." };
+        new() { Id = id, Title = title, Body = body, Instruction = Instructions[id], Allow = allow, Accept = accept, Highlight = highlight, Targets = targets, OnlyProvinces = onlyProvinces, RefusalHint = hint ?? "Do the highlighted move the lesson asks for." };
 
     private static Func<TutorialLookup, IEnumerable<string>> Both(Func<TutorialLookup, IEnumerable<string>> first, Func<TutorialLookup, IEnumerable<string>> second) => look => first(look).Concat(second(look));
+
+    /// <summary>What to click, step by step: the whole of what is needed for the lesson to move on. A test requires one for every action step.</summary>
+    internal static readonly Dictionary<string, string> Instructions = new()
+    {
+        ["border-refresh"] = "Click your Border Keep and choose \"First-turn province refresh\". Click the three face-up province cards, then press Confirm.",
+        ["pass-action"] = "Press \"Pass action\" in the right-hand panel.",
+        ["decline-attack"] = "Press \"Decline to attack\" in the right-hand panel.",
+        ["buy-farm"] = "Click Small Farm in your provinces, then press \"Recruit Small Farm\".",
+        ["buy-uehara"] = "Click Akodo Uehara in your provinces. Click your Stronghold and your Border Keep to pay with them. Press \"Recruit\".",
+        ["end-dynasty"] = "Press \"End Dynasty Phase\" in the right-hand panel.",
+        ["tell-tale"] = "Click Tell the Tale in your hand, then press \"Confirm play\".",
+        ["equip-follower"] = "Click Veteran Skirmishers in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Bamboo Harvesters to pay. Press \"Attach\".",
+        ["equip-item"] = "Click Light Armor in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Border Keep to pay. Press \"Attach\".",
+        ["pass-turn-two"] = "Press \"Pass action\" in the right-hand panel.",
+        ["declare-attack"] = "Press \"Declare an attack\" in the right-hand panel.",
+        ["assign-attacker"] = "Click Akodo Uehara, then click your opponent's first province. Press \"Confirm assignments\".",
+        ["pick-battle"] = "Press \"Fight at province 1\" in the right-hand panel.",
+        ["battle-action"] = "Click Crushing Strength in your hand and press \"Confirm play\". Click Akodo Uehara, then press \"Play Crushing Strength\".",
+        ["pass-battle"] = "Press \"Pass battle action\" in the right-hand panel.",
+        ["ring-reaction"] = "Click Ring of Fire and choose \"Use Ring of Fire\", or press \"Skip Reaction\".",
+    };
 
     public static readonly TutorialStep[] Steps =
     [
@@ -71,7 +92,7 @@ internal static class TutorialLessonOne
             "In the Action phase the players take turns using an action or passing, and the phase ends when both pass in a row. The Border Keep has an action for this exact moment: " +
             "on your first turn it puts province cards you choose on the bottom of your Dynasty deck and refills those provinces face up.", Own(TutorialCards.BorderKeep)),
         Do("border-refresh", "Refresh your provinces",
-            "Click your Border Keep and choose \"First-turn province refresh\". Then click the three face-up province cards and press Confirm. Leave the face-down card alone.",
+            "The three face-up province cards are no use to you right now, so send them to the bottom of the deck and refill those provinces face up. Leave the face-down card alone.",
             Move("useAbility", "border-first"), Own(TutorialCards.BorderKeep),
             accept: (look, command) => command.CardIds is { Length: 3 } ids && new[] { 1, 2, 3 }.All(i => ids.Contains(look.Province(TutorialRunner.Seat, i))),
             hint: "Choose the three face-up province cards (provinces two to four) and nothing else.",
@@ -80,10 +101,10 @@ internal static class TutorialLessonOne
             "Small Farm (a free Holding), Akodo Uehara (a Personality) and Large Farm are face up now, and all three are cards you can use. Your opponent passed, so the next move is yours.",
             Provinces(1, 2, 3)),
         Do("pass-action", "Pass",
-            "You have nothing else to do in this Action phase, so press Pass action. When you and your opponent pass one after the other, the phase ends.",
+            "You have nothing else to do in this Action phase, so pass. When you and your opponent pass one after the other, the phase ends.",
             Move("pass")),
         Do("decline-attack", "The Attack phase",
-            "Next is the optional Attack phase, where your Personalities fight for your opponent's provinces. You have no Personalities yet, so press Decline to attack.",
+            "Next is the optional Attack phase, where your Personalities fight for your opponent's provinces. You have no Personalities yet, so decline.",
             Move("pass")),
 
         // ---- Dynasty phase: a Holding and a Personality -------------------------------------------------------------------------------------------------------------------------
@@ -91,7 +112,7 @@ internal static class TutorialLessonOne
             "Now you bring face-up Holdings and Personalities into play by paying their Gold cost. Gold comes from your Stronghold and your unbowed Holdings, which bow when they pay. " +
             "A source pays all at once: extra Gold from it is lost, so choose what you spend wisely.", Provinces(1, 2, 3)),
         Do("buy-farm", "Buy a Holding",
-            "Small Farm costs no Gold and will produce 1 Gold each turn. Holdings always enter play bowed, so it starts working next turn. Click Small Farm and press Recruit.",
+            "Small Farm costs no Gold and will produce 1 Gold each turn. Holdings always enter play bowed, so it starts working next turn.",
             Move("purchase", card: TutorialCards.SmallFarm), Provinces(1)),
         Say("personality-anatomy", "Anatomy of a Personality",
             "Akodo Uehara is a Personality. Force 1 is his strength in battle. Chi 3 is his resilience: a Personality with 0 Chi is destroyed. Honor Requirement 6: your Family Honor must be at least " +
@@ -100,7 +121,7 @@ internal static class TutorialLessonOne
             "Under his name are his keywords: Lion Clan, Samurai, Tactician. Then comes a trait, \"+1F while he opposes a Phoenix Clan Personality\", which is always on. " +
             "Last is an ability, \"Limited: Look at the top card of your Fate deck...\", which you choose to use. We will compare these again soon.", Provinces(2)),
         Do("buy-uehara", "Buy a Personality",
-            "Click Akodo Uehara, then click your Stronghold and your Border Keep to pay with them (4 + 2 Gold; the extra 1 is lost) and press Recruit. He is a Lion and you are Crane, so you pay the full 5. A Personality of your own Clan costs 2 less.",
+            "Paying: your Stronghold and Border Keep together give 4 + 2 Gold, and the extra 1 is lost. He is a Lion and you are Crane, so you pay the full 5. A Personality of your own Clan costs 2 less.",
             Move("purchase", card: TutorialCards.AkodoUehara), Both(Provinces(2), Own(TutorialCards.YourStronghold, TutorialCards.BorderKeep)),
             accept: (_, command) => command is { ClanDiscount: false, ClanAllegiance: false }, hint: "Buy Akodo Uehara at his full cost."),
 
@@ -146,7 +167,7 @@ internal static class TutorialLessonOne
             "A trait is printed text with no designator: it is always on, or it happens automatically when its trigger occurs. An action starts with Limited, Open, Battle or Reaction, and happens only when you choose to take it. " +
             "Followers use their own actions, while the actions of Items and Spells are taken by the Personality they are attached to."),
         Do("end-dynasty", "End your Dynasty phase",
-            "You bought what you can afford. Press End Dynasty Phase: the End phase follows, where you draw a Fate card, and then it is your opponent's turn.", Move("endDynasty")),
+            "You bought what you can afford. Ending the Dynasty phase brings the End phase, where you draw a Fate card, and then it is your opponent's turn.", Move("endDynasty")),
 
         // ---- Turn two ------------------------------------------------------------------------------------------------------------------------------------------------------------
         Say("turn-two", "Your second turn",
@@ -157,39 +178,39 @@ internal static class TutorialLessonOne
             "The phase bar along the table shows where you are: Straighten, Events, Action, Attack, Dynasty, End. You start your Action phase now, with more Gold: the Bamboo Harvesters straightened, " +
             "and Small Farm joined in."),
         Do("tell-tale", "A Limited action",
-            "Click Tell the Tale in your hand and press Confirm play. It is a Limited action: you gain 1 Honor.", Move("useAbility", "tell-the-tale-honor"), Hand(TutorialCards.TellTheTale)),
+            "Tell the Tale is a Limited action: you gain 1 Honor.", Move("useAbility", "tell-the-tale-honor"), Hand(TutorialCards.TellTheTale)),
         Say("attachments", "Attachments",
             "Next, attach your Follower and Item to Akodo Uehara. Attaching costs Gold and is a Limited action you can take any number of times a turn. A Spell would not be offered: Uehara is not a Shugenja. " +
             "A Follower takes its own actions, but an Item's or Spell's action is taken by the Personality it is attached to.", Own(TutorialCards.AkodoUehara)),
         Do("equip-follower", "Attach the Follower",
-            "Click Veteran Skirmishers in your hand and press Confirm play. Choose Akodo Uehara as the Personality, click your Bamboo Harvesters to pay its 2 Gold and press Attach.",
+            "Attaching costs the Follower's 2 Gold, paid by bowing a Gold source. Bamboo Harvesters straightened this turn, so use it.",
             Move("equip", card: TutorialCards.VeteranSkirmishers), Both(Hand(TutorialCards.VeteranSkirmishers), Own(TutorialCards.BambooHarvesters))),
         Do("equip-item", "Attach the Item",
-            "Now click Light Armor and press Confirm play, choose Akodo Uehara, pay its 2 Gold with your Border Keep and press Attach.",
+            "The Item costs 2 Gold as well. Pay with your Border Keep this time.",
             Move("equip", card: TutorialCards.LightArmor), Both(Hand(TutorialCards.LightArmor), Own(TutorialCards.BorderKeep))),
         Do("pass-turn-two", "Pass the Action phase",
-            "Uehara's unit now has 1 + 3 + 3 = 7 Force. That is enough to fight with. Press Pass action.", Move("pass")),
+            "Uehara's unit now has 1 + 3 + 3 = 7 Force. That is enough to fight with.", Move("pass")),
         Do("declare-attack", "Declare an attack",
-            "In the Attack phase you fight over your opponent's provinces. Every province becomes a battlefield; you send units to attack, then the Defender sends units to defend. Press Declare an attack.", Move("declareAttack")),
+            "In the Attack phase you fight over your opponent's provinces. Every province becomes a battlefield; you send units to attack, then the Defender sends units to defend.", Move("declareAttack")),
         Do("assign-attacker", "Send your unit",
-            "Click Akodo Uehara, then click your opponent's first province and press Confirm assignments. Your opponent has one Personality, Ikoma Shika, who will defend it.",
+            "Your opponent has one Personality, Ikoma Shika, who will defend that province.",
             (_, command) => command.Type == "attack" && AttackedProvince(command) == 0, Both(Own(TutorialCards.AkodoUehara), FoeProvinces(0)),
             hint: "Attack the opponent's first province.", onlyProvinces: [0]),
         Do("pick-battle", "Fight the battle",
-            "Your opponent defended with Ikoma Shika. Press \"Fight at province 1\" in the panel on the right.", (_, command) => command is { Type: "selectBattle", Province: 0 }, FoeProvinces(0)),
+            "Your opponent defended with Ikoma Shika. The Attacker chooses the order of battles, and there is one to fight.", (_, command) => command is { Type: "selectBattle", Province: 0 }, FoeProvinces(0)),
         Say("battle-values", "Reading a battle",
             "A battle starts with a round of Battle actions, beginning with the Defender, who passed. Then both armies' Force is added up. Your army has 9 Force: Uehara 1, Skirmishers 3, Light Armor 3, and +2 from Megumi's Guidance, " +
             "which boosts an opposed army. Shika has 2. To destroy the province you must beat the defender by more than its Province Strength, 7, and 9 beats 2 by exactly 7. It would hold."),
         Do("battle-action", "A Battle action",
-            "A Battle action can only be used during a battle. Click Crushing Strength, press Confirm play, click Akodo Uehara as the target and press Play Crushing Strength. It reads \"Target your opposed Personality: Give him +3F\".",
+            "A Battle action can only be used during a battle. Crushing Strength reads \"Target your opposed Personality: Give him +3F\".",
             Move("useAbility", "crushing-force"), Hand(TutorialCards.CrushingStrength)),
         Do("pass-battle", "End the Combat segment",
-            "Your army now has 12 Force, and your opponent has nothing to answer with. When both players pass in a row the Combat segment ends and the battle resolves. Press Pass battle action.", Move("pass")),
+            "Your army now has 12 Force, and your opponent has nothing to answer with. When both players pass in a row the Combat segment ends and the battle resolves.", Move("pass")),
         Say("resolved", "The province falls",
             "12 beats 2 by 10, which is more than 7, so your army destroyed Ikoma Shika and the province. For the rest of the game your opponent has one fewer province to draw Dynasty cards from, " +
             "and destroying all four wins the game. You also gained Honor: twice the number of enemy cards you destroyed.", null),
         Do("ring-reaction", "A Ring enters play",
-            "Your battle destroyed enemy cards, which is the condition on your Ring of Fire. Rings enter play from your hand as a Reaction. Click Ring of Fire and choose \"Use Ring of Fire\", or press Skip Reaction.",
+            "Your battle destroyed enemy cards, which is the condition on your Ring of Fire. Rings enter play from your hand as a Reaction.",
             (_, command) => command is { Type: "useAbility", AbilityId: "ring-of-fire-recruit" } or { Type: "declineReaction" }, Hand(TutorialCards.RingOfFire)),
         Say("done", "Lesson 1 complete",
             "You now know the Stronghold, Holdings, Personalities, Events, Regions, Celestials, Strategies, Followers, Items, Spells and Rings; keywords, traits and actions; and how a turn and a battle go. " +
