@@ -110,6 +110,7 @@ public static partial class TrainingOpponent
                 }
                 if (command.Assignments is { Count: > 0 }) return command; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
+            if (action.Type == "assignDefense" && CavalryDefensePlan(x, action, units) is { } cavalryDefense) return command with { Assignments = cavalryDefense }; // issue #946
             // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
             var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
             var target = action.Type == "attack"
@@ -284,7 +285,7 @@ public static partial class TrainingOpponent
             case "assignDefense":
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
-                if (enemyForce == 0) return 0;
+                if (enemyForce == 0) return CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // issue #946: nobody is assigned yet, but Cavalry is on its way
                 if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
             case "pass": return PassScore;

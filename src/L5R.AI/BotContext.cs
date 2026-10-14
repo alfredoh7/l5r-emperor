@@ -40,6 +40,9 @@ public sealed class BotContext
     /// <summary>Issue #818 (Mendon's eleven bot changes, 2026-10-10): buy-everything and discard-by-affordability in the Dynasty Phase, the catch-up recruit, the overlay limit, lobbying and defending with the Imperial Favor, the attack and attacker-pass rules, Honor attacks, equips that count Force removed, Shinden / optional bows, and never declining an optional destroy or bow. ON by default; the arena switches it off to measure it.</summary>
     public bool UseSpec818 { get; init; } = true;
 
+    /// <summary>Issue #946 (Mendon's defense guidance): when the attacker commits no infantry but has Cavalry at home, the bot weighs the attacker's possible Cavalry army against its own Force (see <see cref="DefensePlanner"/>) and commits its infantry to the most valuable provinces it can hold. ON by default; the arena switches it off to measure it.</summary>
+    public bool UseCavalryDefense { get; init; } = true;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 
