@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Tutorial: fix the Continue button doing nothing. The table's input handler (Main.Camera PointerOnTable) treated clicks on the coach card as clicks on the table, so the button never received them; the coach card is now a covered region. The UI check now clicks the coach button with real pointer events (waiting for it to appear after presentations) instead of emitting its signal, so this class of bug fails the check. Earlier passes: exact TO CONTINUE instructions, button only when ready, Leave tutorial from the table menu, lesson 1, framework.",
-  "validation": "Reproduced with a real pointer click at the welcome step (stayed on welcome), fixed (advances); tools/check-tutorial.sh plays all 52 steps clicking the coach button with real pointer events and the table's controls, then leaves mid-lesson via menu, no ERROR lines; tutorial suite 7/7. Full check.sh and the table native checks were run on the previous commit; this change only adds a hit-test exemption.",
-  "remaining": "Final unlock lesson, later lessons, phase bar pointer, copy review; event choice and 'boxable' to confirm.",
+  "summary": "Merged main into the tutorial branch; full non-client checks and the native tutorial walk pass.",
+  "validation": "tools/check.sh --skip-client passed; tools/check-tutorial.sh passed",
+  "remaining": "Final unlock-everything lesson and later lessons",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/935",
   "branch": "claude/935-tutorial-lesson-1",
-  "updated": "2026-10-14T00:20:32.158100+00:00"
+  "updated": "2026-10-14T02:54:32.179341+00:00"
 }
