@@ -145,7 +145,7 @@ public sealed partial class MatchEngine
         if (Definition(card).Type == CardType.Personality)
         {
             // Issue #888: the Pearl count scans every card, so it is taken only when a Pearl of Rage is attached (the product is 0 otherwise).
-            var pearlsOfRage = Attachments(card.Id).Count(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == PearlOfRageEffect);
+            var pearlsOfRage = StaticSpells(card).Count(a => Definition(a).Effect == PearlOfRageEffect);
             if (pearlsOfRage > 0) bonus += pearlsOfRage * PearlCount(card.OwnerId);
         }
         return bonus;
@@ -174,7 +174,7 @@ public sealed partial class MatchEngine
     private bool MountainsPowerNegates(CardInstance card, int actingPlayerId)
     {
         if (actingPlayerId == card.OwnerId || Definition(card).Type != CardType.Personality || !Keyword(card, "Earth")) return false;
-        if (!Attachments(card.Id).Any(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == MountainsPowerEffect)) return false;
+        if (!StaticSpells(card).Any(a => Definition(a).Effect == MountainsPowerEffect)) return false;
         if (!AtBattle(card) || card.OwnerId == _state.ActivePlayerId) return false; // defending: at the current battle, on the non-active player's side
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (The Mountain's Power).", card.OwnerId, card.Id);
         return true;
@@ -185,7 +185,7 @@ public sealed partial class MatchEngine
     private void StraightenWindOfTheMoonShugenja(PlayerState activePlayer)
     {
         foreach (var shugenja in _state.Cards.Values.Where(c => c.OwnerId != activePlayer.Id && InPlay(c) && c.Bowed && Definition(c).Type == CardType.Personality && Keyword(c, "Air")
-                     && Attachments(c.Id).Any(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == WindOfTheMoonEffect)).ToArray())
+                     && StaticSpells(c).Any(a => Definition(a).Effect == WindOfTheMoonEffect)).ToArray())
             Straighten(shugenja);
     }
 

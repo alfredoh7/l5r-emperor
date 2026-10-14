@@ -3,8 +3,9 @@ using L5R.Core;
 
 namespace L5R.Client;
 
-/// <summary>Persistent marker under a province that Dark Experiments has marked: the payment-flow coin carrying the Holding Gold Production change, and the stronghold's Province Strength box carrying the
-/// strength change. Each shows only while its modifier is non-zero; the board adds none for a destroyed province or one gained later. Presentation only: the values are the engine's DarkExperimentsMark.</summary>
+/// <summary>Persistent marker beside a province whose strength has been changed: the stronghold's Province Strength box carrying the net change from its printed strength (Willing Spirits, Dark Experiments, a Region,
+/// a timed bonus, ...), and, for a province Dark Experiments marked, the payment-flow coin carrying the Holding Gold Production change. Each shows only while its modifier is non-zero. Presentation only: the
+/// values are the engine's ProvinceView.StrengthModifier and DarkExperimentsMark.</summary>
 public sealed partial class ProvinceModifierMarker : Control
 {
     public const float Side = 52, Gap = 8;
@@ -13,15 +14,15 @@ public sealed partial class ProvinceModifierMarker : Control
     private const float FrameAspect = 113f / 104f;
     private readonly int _production, _strength;
 
-    public ProvinceModifierMarker(int production, int strength)
+    public ProvinceModifierMarker(int production, int strength, string[]? notes = null)
     {
         _production = production; _strength = strength;
         MouseFilter = MouseFilterEnum.Stop;
         Name = "ProvinceModifierMarker";
-        var parts = new List<string>();
-        if (production != 0) parts.Add($"a Holding that enters play from it has {Signed(production)} Gold Production");
-        if (strength != 0) parts.Add($"it has {Signed(strength)} strength");
-        TooltipText = "Dark Experiments: " + string.Join("; ", parts) + ".";
+        var lines = new List<string>();
+        if (strength != 0) lines.Add($"Province strength {Signed(strength)} from its printed strength" + (notes is { Length: > 0 } ? $" (this turn: {string.Join(", ", notes)}; the rest is permanent or ongoing)" : ""));
+        if (production != 0) lines.Add($"Dark Experiments: a Holding that enters play from it has {Signed(production)} Gold Production");
+        TooltipText = string.Join(".\n", lines) + ".";
         Size = new Vector2(Width(production, strength), Side);
         CustomMinimumSize = Size;
     }

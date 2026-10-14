@@ -274,12 +274,13 @@ public partial class Main
         }
     }
 
-    // Dark Experiments' mark, persistently shown with its province: the Gold Production coin and the strength box, each only while its modifier is non-zero. A destroyed province is skipped by the caller, and
-    // a province gained later is a new one the engine never marks. The viewer's own provinces carry it below the threshold frame (nearer the viewer); the opponent's above the province (farther away).
+    // A changed province strength, persistently shown with its province: the strength box with the engine's net change from the printed strength (every source: Willing Spirits, Regions, timed effects, ...) and, for
+    // a province Dark Experiments marked, the Gold Production coin, each only while its modifier is non-zero. A destroyed province is skipped by the caller, and a province gained later is a new one the engine never marks. The viewer's own provinces carry it below the threshold frame (nearer the viewer); the opponent's above the province (farther away).
     private void AddProvinceModifierMarker(Control area, PlayerView owner, ProvinceView province, float width)
     {
-        if (!province.DarkExperimentsMarked) return;
-        var marker = new ProvinceModifierMarker(DarkExperimentsMark.Production, DarkExperimentsMark.Strength);
+        var production = province.DarkExperimentsMarked ? DarkExperimentsMark.Production : 0;
+        if (production == 0 && province.StrengthModifier == 0) return;
+        var marker = new ProvinceModifierMarker(production, province.StrengthModifier, province.StrengthNotes);
         var y = owner.Id == View.ViewerId ? PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + 6 : -(province.Region is null ? 0 : RegionStrip) - marker.Size.Y - 6;
         Place(area, marker, (width - marker.Size.X) / 2, y, marker.Size.X, marker.Size.Y);
         marker.SetMeta("province_modifier", true);

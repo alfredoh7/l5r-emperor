@@ -33,3 +33,12 @@ Source: `VALIDATION_REPORT.md`, the audit of commit 47416de0 against the "Rules 
 ## Source-policy differences (not bugs unless ruled)
 
 Sequential versus atomic cost payment and mandatory Honor-cost prevention; voluntarily failing a search despite a legal candidate (R-011); delayed effects tracking face-up out-of-play cards (R-003); one Reaction copy per trigger and alternating response rounds (R-039, R-042); tied battles; Force caps as a limit versus a negatable penalty; Duelist replacement wording. These go to a ruling interview, not to an implementation prompt.
+
+## Follow-up rulings (Mendon, 2026-10-13)
+
+Questions raised by the agents that carried out the dispositions above.
+
+1. **Great Sacrifice** compares total unit Force, like Fortitude (supersedes the 2026-09-21 Second City reading). Implemented separately.
+2. **Spell static effects follow the printed subject.** A Spell whose static text says "This Shugenja" goes silent while its host is not a Shugenja; one that says "This Personality" does not. Implemented separately.
+3. **Stronghold Honor-loss immunity does NOT apply to a dishonorable death (official ruling applied).** "You do not lose Honor from ... cards you own" (Foothold of the Mad; Keep of the Dead, Steel Soul Dojo and The Plain of Glass for Spider Clan and Fate cards; The Castle of Order and The Otoro Estate for Ninja cards; The Shadow's Lair for Ninja and Fate cards; The False Path for Fudo cards) does not prevent the Honor loss from the death of a dishonorable Personality: that loss is a rulebook effect, not a card effect, and the rulebook is its source. This follows the official rulings on the identically worded Fields of the Dead, The Fingers of Bone and The Shadowed Dojo ("Does not prevent honor loss from death of dishonored Personalities"); The Forgotten Temple already treated the loss this way (reduced to 1, not negated). Before this ruling the engine judged the dying Personality as the source, so a matching Personality's death (any Personality under Foothold of the Mad) cost nothing.
+4. **"After dishonored" hooks fire only when the status changes.** A Personality already dishonorable on re-entry does not fire them again.

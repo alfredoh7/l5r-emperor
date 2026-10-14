@@ -10,6 +10,6 @@ public sealed partial class MatchEngine
         if (target.Zone == Zone.Attached) DestroyAttachment(target); else DestroyUnits([target], false, actingPlayerId);
     }
 
-    // Great Sacrifice: the total Force an enemy unit may have to be destroyed -- the performer's Force plus Personal Honor, plus one if he is defending.
+    // Great Sacrifice (R-084, 2026-10-13): the enemy unit's TOTAL Force (UnitTotalForce, bowed cards included, the helper Fortitude uses) may be at most this reach -- the performer's Force plus Personal Honor, plus one if he is defending.
     private int SacrificeReach(CardInstance performer) => CardForce(performer) + CardPersonalHonor(performer) + (IsDefendingUnit(performer) ? 1 : 0);
 }

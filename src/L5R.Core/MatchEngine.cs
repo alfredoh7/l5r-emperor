@@ -5,7 +5,7 @@ namespace L5R.Core;
 /// <summary>Single-threaded authoritative simulator. Execute validates on a detached state and commits atomically.</summary>
 public sealed partial class MatchEngine
 {
-    public const string ContentVersion = "emperor-lion-crane-0.4.0";
+    public const string ContentVersion = "emperor-lion-crane-0.5.0";
     /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
     /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
     /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
@@ -2297,16 +2297,16 @@ public sealed partial class MatchEngine
         // effect, so it is Effect-keyed on the ATTACHED SPELL itself (the same shape
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
-        + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell).Sum(c => Definition(c).Effect == "scouring-flood-force" || Definition(c).Effect == "wave-persists-force" && Keyword(card, "Water") ? 2 : 0)
+        + StaticSpells(card).Sum(c => Definition(c).Effect == "scouring-flood-force" || Definition(c).Effect == "wave-persists-force" && Keyword(card, "Water") ? 2 : 0)
         // The Swell of Strength (oracle-l5r-8366, issue #460 batch 5): "This Shugenja has +2F" -- Scouring Flood's own Spell-Effect-keyed static bonus shape; always applies to whoever wields it (any Shugenja may equip it; only its Focus Effect is limited to Water Shugenja).
-        + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "swell-of-strength-force") * 2
+        + StaticSpells(card).Count(c => Definition(c).Effect == "swell-of-strength-force") * 2
         // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
-        + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "tsunami-force" && Keyword(card, "Shugenja")).Sum(_ => 6)
+        + StaticSpells(card).Where(c => Definition(c).Effect == "tsunami-force" && Keyword(card, "Shugenja")).Sum(_ => 6)
         + (Definition(card).Effect == "force-with-spell" && Attachments(card.Id).Any(c => Definition(c).Type == CardType.Spell) ? 1 : 0)
         + (Definition(card).Effect == "force-with-spell-2" && Attachments(card.Id).Any(c => Definition(c).Type == CardType.Spell) ? 2 : 0)
         // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
-        + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "embers-final-fire-force" && Keyword(card, "Fire"))
-        + 2 * Attachments(card.Id).Count(c => Definition(c).Effect == "death-defeated-force")
+        + StaticSpells(card).Count(c => Definition(c).Effect == "embers-final-fire-force" && Keyword(card, "Fire"))
+        + 2 * StaticSpells(card).Count(c => Definition(c).Effect == "death-defeated-force")
         + (card.Zone == Zone.Battlefield && Keyword(card, "Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r => r.Zone == Zone.Region && r.ProvinceIndex == (card.ProvinceIndex is int shrineBattlefield ? BattlefieldProvinceIndex(shrineBattlefield) : null) && Definition(r).Effect == "stone-hewed-shrine-force") ? 1 : 0)
         + (Definition(card).Effect == "force-if-enemy-dishonorable" && _state.Cards.Values.Any(c => c.OwnerId != card.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable) ? 2 : 0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
@@ -2338,7 +2338,7 @@ public sealed partial class MatchEngine
         // itself, with no attacking/defending gate at all.
         + (Definition(card).Effect == "force-per-other-magistrate-in-army" ? OtherMagistratesInArmy(card) : 0)
         // Immolation (oracle-l5r-10127, issue #453 batch 5): "This Shugenja has +3F, or +4F while he is Fire" -- Effect-keyed on the attached Spell, like tsunami-force above.
-        + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "immolation-force" && Keyword(card, "Shugenja")).Sum(_ => Keyword(card, "Fire") ? 4 : 3)
+        + StaticSpells(card).Where(c => Definition(c).Effect == "immolation-force" && Keyword(card, "Shugenja")).Sum(_ => Keyword(card, "Fire") ? 4 : 3)
         + RemAItemForceModifiers(card) // A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
         + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card);
     // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
@@ -2476,7 +2476,7 @@ public sealed partial class MatchEngine
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card, "Elite") || Attachments(card.Id).Any(a => Definition(a).AttachGrantsEliteEffect
-        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card, wielderKeyword))
+        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card, wielderKeyword) && !(Definition(a).Type == CardType.Spell && SpellStaticSilenced(a)))
         // Incite the Phantoms (oracle-l5r-3732, issue #460 batch 5): "While this Shugenja is Earth, your Spirits contribute Force to their
         // army even while bowed" -- broader than Bo of Water's own single-card AttachGrantsEliteEffectWhileWielderHas: every Spirit the
         // controller owns, not only the Spell's own wielder (EmbersOfWarBatch5.cs, InciteThePhantomsActive).
@@ -3332,6 +3332,14 @@ public sealed partial class MatchEngine
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength, max) : strength;
     }
+    // The net change from the printed strength that the view shows (ProvinceView.StrengthModifier). A destroyed province has none; one without a recorded printed strength cannot say.
+    private int StrengthModifierOf(ProvinceState province) => province.Destroyed || province.PrintedStrength <= 0 ? 0 : EffectiveProvinceStrength(province) - province.PrintedStrength;
+    private string[]? StrengthNotesOf(ProvinceState province)
+    {
+        if (StrengthModifierOf(province) == 0) return null;
+        var notes = TimedProvinceStrengthParts(province).Where(part => part.Amount != 0).Select(part => $"{part.Source} {part.Amount:+#;-#}").ToArray();
+        return notes.Length == 0 ? null : notes;
+    }
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
@@ -3407,7 +3415,7 @@ public sealed partial class MatchEngine
     /// <summary>The reason a Dishonorable Personality's death costs its controller Honor. That loss is the rulebook's (core rules Glossary, "Dead / Destroy"), not an effect of any card or action.</summary>
     internal const string DishonorableDeathReason = "Dishonorable death";
     // True while GainHonor works out a rulebook change (a Dishonorable death's loss): the card and action in progress did not cause it, so every channel that asks "from a card's effect" /
-    // "from the action's effects" stays out of it. The stronghold Honor-loss immunity is the documented exception: it keeps judging the dying Personality as the loss's named source.
+    // "from the action's effects" stays out of it, the stronghold Honor-loss immunities included (2026-10-13 ruling).
     private bool _rulebookHonorChange;
     private void GainHonor(int playerId, int amount, string reason, CardInstance? source = null)
     {
@@ -3430,7 +3438,8 @@ public sealed partial class MatchEngine
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
         amount = ForgottenTempleHonorChange(playerId, amount, reason, source);
         if (amount == 0) return;
-        if (amount < 0 && !CurrentActionUnnegatable() && HonorLossNegated(playerId, source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
+        // A Dishonorable death's loss is the rulebook's, not a card's: "You do not lose Honor from cards you own" does not prevent it (official rulings on Fields of the Dead, The Fingers of Bone and The Shadowed Dojo; Mendon, 2026-10-13).
+        if (amount < 0 && !_rulebookHonorChange && !CurrentActionUnnegatable() && HonorLossNegated(playerId, source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
         {
             Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated.", playerId, source?.Id);
             return;
