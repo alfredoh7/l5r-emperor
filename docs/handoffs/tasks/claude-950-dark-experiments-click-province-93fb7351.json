@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Dark Experiments' province choice can be made by clicking a legal province on the table: the clicked province selects the engine-listed eventChoice option (same as its sidebar row), legal provinces are highlighted, the chosen one is marked, and Confirm choice still commits. Client-only; Core unchanged.",
+  "validation": "dotnet build src/L5R.Client: 0 warnings, 0 errors. Not playtested in the Godot client and no automated client test covers the click.",
+  "remaining": "Needs a visual/input playtest of revealing Dark Experiments (click own and opponent province, then Confirm).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/950",
+  "branch": "claude/950-dark-experiments-click-province",
+  "updated": "2026-10-14T19:18:52.473639+00:00"
+}

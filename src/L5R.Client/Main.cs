@@ -690,10 +690,11 @@ public partial class Main : Node
         foreach (var (key, button) in _provinceButtons)
         {
             var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true
-                || MovementDestination(key.Owner, key.Province) || AttackProvinceTarget(key.Owner, key.Province) || ProvinceTargetLegal(key.Owner, key.Province);
-            button.Modulate = ProvinceTargetChosen(key.Owner, key.Province) ? new Color(1.4f, 1.25f, .75f) : legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
+                || MovementDestination(key.Owner, key.Province) || AttackProvinceTarget(key.Owner, key.Province) || ProvinceTargetLegal(key.Owner, key.Province)
+                || EventProvinceOption(key.Owner, key.Province) is not null;
+            button.Modulate = ProvinceTargetChosen(key.Owner, key.Province) || EventProvinceChosen(key.Owner, key.Province) ? new Color(1.4f, 1.25f, .75f) : legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
             var provinceState = View.Players.Single(p => p.Id == key.Owner).Provinces.Single(p => p.Index == key.Province);
-            var instruction = ProvinceTargetActive || MultiProvinceActive ? "Choose this province as the target. Confirm separately.\n" : AttackTargetActive ? "Target this battlefield’s province. Confirm separately.\n" : MovementActive ? "Choose this movement destination. Nothing moves until you confirm.\n" : "Assign the selected unit here. Nothing moves until you confirm.\n";
+            var instruction = EventProvinceChoiceActive ? "Choose this province. Confirm separately.\n" : ProvinceTargetActive || MultiProvinceActive ? "Choose this province as the target. Confirm separately.\n" : AttackTargetActive ? "Target this battlefield’s province. Confirm separately.\n" : MovementActive ? "Choose this movement destination. Nothing moves until you confirm.\n" : "Assign the selected unit here. Nothing moves until you confirm.\n";
             button.TooltipText = RulesHelp.Tooltip($"Province {key.Province + 1} · {provinceState.Strength} province strength\n" + (legal ? instruction : "Inspect this province.\n") + RulesHelp.Topic("province"));
         }
         foreach (var (province, label) in _laneSummaries)
