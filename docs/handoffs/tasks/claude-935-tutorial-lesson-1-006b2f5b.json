@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Tutorial framework and lesson 1 (cards and card types), second pass after playtest: every action step now shows an exact TO CONTINUE instruction apart from the explanation and no Continue button; note steps show the button only while the table is at rest (no card or battle presentation running); the table menu's Concede becomes Leave tutorial (with confirmation) and works at any point. Earlier: lessons are scripts over the real engine (L5R.Core/Tutorial), runner locks illegal moves and plays the opponent, coach column and card pointer in the client, lab flags (--tutorial-review).",
-  "validation": "tutorial suite 7/7 (adds: every action step has an instruction and no button, every note a button); tools/check-tutorial.sh plays all 52 steps through the real controls to 9 Honor, then starts again and leaves mid-lesson through hamburger menu -> Leave tutorial -> confirm back to the main menu, no ERROR lines. Human playtest of the revised flow still needed.",
-  "remaining": "Final lesson that unlocks the table for a full game, later lessons, phase bar pointer, copy review. Event choice and 'boxable' reading to confirm.",
+  "summary": "Tutorial: fix the Continue button doing nothing. The table's input handler (Main.Camera PointerOnTable) treated clicks on the coach card as clicks on the table, so the button never received them; the coach card is now a covered region. The UI check now clicks the coach button with real pointer events (waiting for it to appear after presentations) instead of emitting its signal, so this class of bug fails the check. Earlier passes: exact TO CONTINUE instructions, button only when ready, Leave tutorial from the table menu, lesson 1, framework.",
+  "validation": "Reproduced with a real pointer click at the welcome step (stayed on welcome), fixed (advances); tools/check-tutorial.sh plays all 52 steps clicking the coach button with real pointer events and the table's controls, then leaves mid-lesson via menu, no ERROR lines; tutorial suite 7/7. Full check.sh and the table native checks were run on the previous commit; this change only adds a hit-test exemption.",
+  "remaining": "Final unlock lesson, later lessons, phase bar pointer, copy review; event choice and 'boxable' to confirm.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/935",
   "branch": "claude/935-tutorial-lesson-1",
-  "updated": "2026-10-14T00:00:14.768491+00:00"
+  "updated": "2026-10-14T00:20:32.158100+00:00"
 }

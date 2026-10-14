@@ -186,6 +186,7 @@ public partial class Main
         foreach (var child in _root.GetChildren())
             if (child is Control review && review.Name.ToString().EndsWith("ReviewControls", StringComparison.Ordinal) && review.IsVisibleInTree() && review.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_eventHandBar is { Visible: true } && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_coachPanel is { Visible: true } coach && coach.GetGlobalRect().HasPoint(viewportPoint)) return false; // the tutorial's note card floats over the table, so its button and scroll must receive their own clicks (issue #935)
         if (_proceedButton is { } proceed && IsInstanceValid(proceed) && proceed.Visible && proceed.GetGlobalRect().HasPoint(viewportPoint)) return false; // Issue #660: Proceed floats over the table
         if (_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         // The Fallen strips can overlap the projection. Check only the visible

@@ -133,6 +133,15 @@ public partial class Main
             var dialog = GetChildren().OfType<ConfirmationDialog>().FirstOrDefault(d => d.Title == "Leave the tutorial?") ?? throw new InvalidOperationException("Leaving did not ask for confirmation.");
             dialog.EmitSignal(ConfirmationDialog.SignalName.Confirmed);
         }
+        else if (verb == "mouse") // a real pointer click at the centre of the coach's button, through the GUI input path
+        {
+            var button = _coachPanel?.FindChild("TutorialContinue", true, false) as Button ?? throw new InvalidOperationException("no coach button");
+            for (var wait = 0; wait < 80 && !button.IsVisibleInTree(); wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout); // the button waits out card and battle presentations
+            var at = button.GetGlobalRect().GetCenter();
+            GetViewport().PushInput(new InputEventMouseMotion { Position = at, GlobalPosition = at });
+            foreach (var pressed in new[] { true, false })
+                GetViewport().PushInput(new InputEventMouseButton { Position = at, GlobalPosition = at, ButtonIndex = MouseButton.Left, Pressed = pressed, ButtonMask = pressed ? MouseButtonMask.Left : 0 });
+        }
         else if (verb == "wait") await ToSignal(GetTree().CreateTimer(double.Parse(arg)), SceneTreeTimer.SignalName.Timeout);
         else if (verb == "click")
         {
@@ -175,8 +184,9 @@ public partial class Main
                 var coach = lesson.Coach; seen.Add(coach.StepId);
                 if (coach.Button is not null)
                 {
-                    var button = _coachPanel?.FindChild("TutorialContinue", true, false) as Button ?? throw new InvalidOperationException($"{coach.StepId}: the coach has no button.");
-                    button.EmitSignal(BaseButton.SignalName.Pressed); await CoverageFrames(); await CoverageFrames();
+                    var before = coach.StepId;
+                    await RunTutorialUiToken("mouse:coach"); await CoverageFrames(); await CoverageFrames();
+                    if (_session.Tutorial is { Finished: false } moved && moved.Coach.StepId == before) throw new InvalidOperationException($"{before}: a real click on the coach's button did nothing.");
                     if (coach.StepId == "done") break;
                     continue;
                 }
