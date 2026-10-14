@@ -59,7 +59,21 @@ public partial class Main
             SelectCard(guidance); await EventFrames(4);
             SupportRequire(_chosen is { Type: "useAbility" } && _chosen.CardId == guidance.Id, "Clicking the Celestial did not start its ability");
 
-            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; a card with no usable ability is only selected; nothing starts out of turn.");
+            // 6. Issue #956: an ability whose performer is one of several Personalities (Bayushi Suwabe: "Target your performing Courtier") starts from the card, and the performer is chosen by clicking a highlighted Personality.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 901, 0, Zone.Home); SupportFixtureCard(s, 142, 0, Zone.Home); SupportFixtureCard(s, 142, 0, Zone.Home); });
+            var suwabe = View.Players[0].Home.Single(c => c.Definition?.Name == "Bayushi Suwabe");
+            var suwabeOptions = Actions.Where(a => a.Enabled && a.CardId == suwabe.Id && a.Type == "useAbility").ToArray();
+            SupportRequire(suwabeOptions.Select(a => a.Command!.PerformerId).Distinct().Count() == 2, "Suwabe should be performable by either Courtier: " + string.Join(" | ", Actions.Where(a => a.CardId == suwabe.Id).Select(a => $"{a.Type}/{a.Command?.PerformerId}/{a.Enabled}/{a.Reason}")));
+            SelectCard(suwabe); await EventFrames(4);
+            SupportRequire(_chosen?.Command?.AbilityId == "suwabe-force", "Clicking Suwabe did not start his ability");
+            var performers = PerformerClicks();
+            SupportRequire(performers.Count == 2, $"Both Courtiers should be clickable performers, found {performers.Count}");
+            var other = performers.Keys.Single(id => id != _chosen!.Command!.PerformerId);
+            SupportRequire(_tiles.Single(t => t.Card.Id == other).LegalTarget, "The other Courtier is not highlighted on the table");
+            await SupportClick(_tiles.Single(t => t.Card.Id == other)); await EventFrames(6);
+            SupportRequire(_chosen?.Command?.PerformerId == other, "Clicking the Courtier did not choose it as the performer");
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a card with no usable ability is only selected; nothing starts out of turn.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }

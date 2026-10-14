@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 3. An ability of a card in play whose performer is one of several of your Personalities now starts on the first click on the card, and the performer is chosen by clicking a highlighted Personality on the table (PerformerClicks is no longer limited to hand and support cards). A card with several usable abilities still lists them in the sidebar. Table-click check gains a Bayushi Suwabe step with two Courtiers. Client only.",
+  "validation": "Native: tools/check-table-click-ui.sh passes with the new step; check-direct-play-ui, check-province-target-ui, check-decision-chooser, check-multi-targets-ui, check-reaction-flow-ui, check-stabilization, check-interactions, check-card-deselection, check-attack-targets-ui, check-movement-ui, check-gold-payment pass; whitespace format verified. Previously noted failures unrelated and unchanged: action-lock-ui, battle-sequence-ui, support-cards, persistent-home. Native UI checks are not run in CI.",
+  "remaining": "Phases 4 to 10 of the table-click plan. The performer defaults to the first legal one until the player clicks another; Confirm then uses the one shown.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/956",
+  "branch": "claude/956-table-click-performers",
+  "updated": "2026-10-14T23:05:16.429131+00:00"
+}
