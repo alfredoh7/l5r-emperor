@@ -73,7 +73,24 @@ public partial class Main
             await SupportClick(_tiles.Single(t => t.Card.Id == other)); await EventFrames(6);
             SupportRequire(_chosen?.Command?.PerformerId == other, "Clicking the Courtier did not choose it as the performer");
 
-            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a card with no usable ability is only selected; nothing starts out of turn.");
+            // 7. Issue #958: while a province is being chosen, clicking the Dynasty card in a province chooses that province (Shrine to Nimuro: "Target a province").
+            await LoadDirectPlay(s =>
+            {
+                s.Phase = Phase.Action;
+                SupportFixtureCard(s, 7227, 0, Zone.Home);
+                var tactician = SupportFixtureCard(s, 10292, 0, Zone.Home);
+                tactician.GrantedKeywords.Add(new("Lion Clan", "test-fixture", GrantDuration.Permanent)); tactician.GrantedKeywords.Add(new("Tactician", "test-fixture", GrantDuration.Permanent));
+                s.Cards[s.Players[1].Provinces.First(p => !p.Destroyed && p.CardId is not null).CardId!].FaceUp = true;
+            });
+            var shrine = View.Players[0].Home.Single(c => c.Definition?.Name == "Shrine to Nimuro");
+            SelectCard(shrine); await EventFrames(4);
+            SupportRequire(ProvinceTargetActive && _chosen!.Command!.Province is null, "Clicking the Shrine did not start choosing a province");
+            var foe = View.Players.First(p => p.Id != View.ViewerId);
+            var faceUp = foe.Provinces.First(p => !p.Destroyed && p.Card is { FaceUp: true, Definition: not null });
+            SelectCard(faceUp.Card!); await EventFrames(4);
+            SupportRequire(_chosen!.Command is { Province: { } picked, TargetPlayerId: { } pickedOwner } && picked == faceUp.Index && pickedOwner == foe.Id, $"Clicking the province's card did not choose the province (got {_chosen.Command?.TargetPlayerId}/{_chosen.Command?.Province})");
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a card with no usable ability is only selected; nothing starts out of turn.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }

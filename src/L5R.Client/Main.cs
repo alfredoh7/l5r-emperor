@@ -631,6 +631,9 @@ public partial class Main : Node
         }
         if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.TryGetValue(card.Id, out var selectPerformer))
         { if (_chosen?.Command?.PerformerId != card.Id) selectPerformer(); return; }
+        // Issue #958: while a province is being chosen, the Dynasty card or Region sitting in a province stands for that province (a card that is itself a legal target or performer was taken above).
+        if ((ProvinceTargetActive || MultiProvinceActive) && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } cardProvince)
+        { SelectProvince(card.OwnerId, cardProvince); return; }
         if (_chosen is not null && card.OwnerId == View.ViewerId && HoldingPaymentMethod(card) is { } holdingMethod)
         {
             if (_chosen.Type == "chooseOpponentPayment" && QuoteFor(_chosen) is { } paymentQuote && AmountFor(_chosen, paymentQuote) == 0)
