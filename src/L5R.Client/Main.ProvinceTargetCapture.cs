@@ -82,9 +82,8 @@ public partial class Main
             var offered = Actions.Where(a => a.Command?.AbilityId == "p2-shrine-nimuro-lower").ToArray();
             SupportRequire(offered.Length > 0 && offered.All(a => a.Command!.PerformerId != decoy.Id), "A Tactician outside play was offered as the performer");
             SelectCard(FindCard(shrine.Id)!); await EventFrames(2);
-            var groupButtons = _inspector.GetChildren().Concat(_phaseActions.GetChildren()).OfType<Button>().Count(b => b.HasMeta("province_target_group"));
-            SupportRequire(groupButtons == 1, $"Expected one grouped Shrine button, found {groupButtons}");
-            Choose(offered.First(a => a.Enabled));
+            // Issue #954: the first click on the Shrine starts its one usable ability; the grouped sidebar button is only the way in when that click is ambiguous.
+            SupportRequire(ProvinceTargetActive && _chosen!.CardId == shrine.Id, "Clicking the Shrine did not start its province-target ability");
             SupportRequire(ProvinceTargetActive && _chosen!.Command!.Province is null, "The client chose a province for the player");
             SupportRequire(_paymentConfirm is { Disabled: true }, "Confirm was available before a province was picked");
 
