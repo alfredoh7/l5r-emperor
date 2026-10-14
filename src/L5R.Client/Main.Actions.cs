@@ -7,6 +7,14 @@ public partial class Main
 {
     private void RenderInspector()
     {
+        RenderInspectorBody();
+        // A hand card's other actions stay one click away from any draft of its play (targets, attack targets, slots, movement), not only from the card.
+        if (_chosen is { Type: "equip" or "playStrategy" or "useAbility", CardId: { } playedId } chosen && View.PendingChoice is null && IsOwnHandCard(playedId) && FindCard(playedId) is { } playedCard)
+            AddPlayAlternatives(_inspector, playedCard, PlayKey(chosen));
+    }
+
+    private void RenderInspectorBody()
+    {
         BeginDiscardIfPending(); // issue #791: a required discard is announced and starts as a click-to-choose selection in the hand
         if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
