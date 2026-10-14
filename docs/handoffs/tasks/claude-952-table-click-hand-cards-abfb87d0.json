@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Table clicks, phase 1 (hand cards). A hand card whose action still needs a performer, target or payment now goes straight to choosing them on the table; the 'Confirm play' prompt remains only for an action with nothing left to choose (that press is its final Confirm). The card's other actions stay one 'Play instead' row away in every draft (targets, attack targets, slots). PlayKey no longer collapses sibling plays: 'choose a player' (you / your opponent), deck position, created card, compare choice and shown card are distinct plays, so choosing 'your opponent' submits the opponent instead of silently the first listed player. A card that names 'another player' (Imprudent Misstep) decides it itself and no longer lists the disabled 'you' variant as unavailable.",
+  "validation": "Native: tools/check-direct-play-ui.sh passes with new steps (action text begins the action, other action kept as Play instead, Know Their Minds player variants distinct and the chosen player submitted, Imprudent Misstep automatic); check-card-deselection, check-multi-targets-ui, check-attack-targets-ui, check-province-target-ui pass; check.sh --client-only builds and smoke-runs; whitespace format verified. tools/check-support-cards.sh fails identically on unmodified origin/main (Projected Region inspection) so it is not caused by this change.",
+  "remaining": "Phases 2 to 10 of the table-click plan (artifacts/table-click-audit/IMPLEMENTATION_PROMPT.md). Player choice for 'choose a player' abilities is still the action rows until phase 5 (click a stronghold or plaque). No Core change.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/952",
+  "branch": "claude/952-table-click-hand-cards",
+  "updated": "2026-10-14T20:27:07.931249+00:00"
+}
