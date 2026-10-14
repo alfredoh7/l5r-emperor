@@ -22,7 +22,7 @@ internal static class CavalryDefenseTests
         Check(DefensePlanner.Plan([Foot("a", 8)], [0, 1], 10, 2) is { } two && two["a"] == 0, "two cards make exactly 1.0: defend");
         Check(DefensePlanner.Plan([Foot("a", 8, true)], [0, 1], 10, 1) is not null, "a printed Battle action on a defending unit counts like a card");
         Check(DefensePlanner.Plan([Foot("a", 10)], [0], 10, 0) is not null, "equal Force is parity");
-        Check(DefensePlanner.Plan([Horse("a", 12)], [0], 10, 0) is null, "only Cavalry at home: it can wait for the Cavalry Maneuvers Segment, so nothing is committed now");
+        Check(DefensePlanner.Plan([Horse("a", 12)], [0], 10, 0) is null, "only Cavalry at home: it is held back for the Cavalry Maneuvers Segment, so nothing is committed now");
         Check(DefensePlanner.Plan([Foot("a", 12)], [0], 0, 0) is null, "no possible Cavalry army, no defense");
 
         // Three units of 6 against 6: three sub-armies, one per province, in value order.
@@ -37,12 +37,12 @@ internal static class CavalryDefenseTests
         // The hand backs the first army only: 4 + 4 against 6 with one card each.. the first reaches 0.67+0.1*... never, the second needs 6 alone.
         var hand = DefensePlanner.Plan([Foot("a", 5), Foot("b", 4)], [0, 1], 6, 1)!;
         Check(hand.Count == 2 && hand["a"] == 0 && hand["b"] == 0, "5 + 4 fall short of a second army of 6 on their own: both defend the first province (got " + string.Join(",", hand.Select(p => p.Key + ">" + p.Value)) + ")");
-        // Infantry is committed first; Cavalry too weak to be an army of its own is the leftover that waits for the Cavalry Maneuvers Segment.
-        var mixed = DefensePlanner.Plan([Horse("h", 4), Foot("f", 6)], [0, 1], 6, 0)!;
-        Check(mixed["f"] == 0 && !mixed.ContainsKey("h"), "the infantry alone reaches 1, so the weak Cavalry stays home");
-        // Cavalry strong enough to be an army by itself is one, per the guidance.
-        var strong = DefensePlanner.Plan([Horse("h", 9), Foot("f", 6)], [0, 1], 6, 0)!;
-        Check(strong["f"] == 0 && strong["h"] == 1, "a Cavalry unit that reaches 1 alone defends the next province");
+        // Cavalry defenders are held back for the Cavalry Maneuvers Segment, however strong, but their Force counts toward parity.
+        var mixed = DefensePlanner.Plan([Horse("h", 9), Foot("f", 6)], [0, 1], 6, 0)!;
+        Check(mixed.Count == 1 && mixed["f"] == 0, "the Cavalry is not assigned now");
+        var joined = DefensePlanner.Plan([Horse("h", 6), Foot("f", 4)], [0, 1], 10, 0)!;
+        Check(joined.Count == 1 && joined["f"] == 0, "4 infantry alone are short of 10, but with the held-back Cavalry the defense is on par: the infantry holds the most valuable province");
+        Check(DefensePlanner.Plan([Horse("h", 3), Foot("f", 4)], [0, 1], 10, 0) is null, "even with the Cavalry it cannot reach parity: nobody is committed");
     }
 
     private static CardDefinition Infantry => CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force >= 4 && d.Keywords?.Contains("Cavalry") != true);

@@ -5,11 +5,13 @@ namespace L5R.AI;
 /// The attacker's total possible Cavalry army is the threat. The defender's Force divided by it is the ratio; below 1, each hand card and each printed Battle action on a defending unit
 /// adds 0.1 until it reaches 1. If it cannot, the bot does not defend. Otherwise the first army defends the most valuable province, and every further sub-army that reaches 1 by Force
 /// alone defends the next most valuable. Units that cannot form another army stay home, unless they print a Battle action, in which case they join the first army.
+/// Cavalry defenders are always held back: the attacker still has unassigned Cavalry, so they are assigned in the Cavalry Maneuvers Segment, when the real attack is visible. Their Force
+/// counts toward the ratio, because they will defend then.
 /// Pure and deterministic; only public numbers go in.
 /// </summary>
 public static class DefensePlanner
 {
-    /// <param name="Infantry">Not Cavalry: it can only be assigned in this segment, so it is committed before Cavalry (which can wait for the Cavalry Maneuvers Segment).</param>
+    /// <param name="Infantry">Not Cavalry: it can only be assigned in this segment. Cavalry is never assigned here; it waits for the Cavalry Maneuvers Segment.</param>
     public sealed record Unit(string Id, int Force, bool Infantry, bool HasBattleAction);
 
     /// <param name="threat">The attacker's total possible Cavalry army Force.</param>
@@ -22,8 +24,7 @@ public static class DefensePlanner
         var total = ready.Sum(u => u.Force);
         var cards = handCards + ready.Count(u => u.HasBattleAction);
         if (!Reaches(total, cards, threat)) return null;
-        // Infantry first (it cannot wait), then the strongest.
-        var pool = ready.OrderByDescending(u => u.Infantry).ThenByDescending(u => u.Force).ThenBy(u => u.Id, StringComparer.Ordinal).ToList();
+        var pool = ready.Where(u => u.Infantry).OrderByDescending(u => u.Force).ThenBy(u => u.Id, StringComparer.Ordinal).ToList();
         var plan = new Dictionary<string, int>(StringComparer.Ordinal);
         var armies = 0;
         while (armies < provinces.Count && pool.Count > 0)
@@ -32,11 +33,17 @@ public static class DefensePlanner
             var force = 0;
             var bonus = armies == 0 ? cards : 0; // the hand and the Battle actions back the first army only
             while (pool.Count > 0 && (army.Count == 0 || !Reaches(force, bonus, threat))) { army.Add(pool[0]); force += pool[0].Force; pool.RemoveAt(0); }
-            if (army.Count == 0 || !Reaches(force, bonus, threat)) { pool.InsertRange(0, army); break; }
+            if (army.Count == 0 || !Reaches(force, bonus, threat))
+            {
+                // All the infantry together cannot make an army; with the held-back Cavalry to join it later it still goes to the most valuable province.
+                if (armies == 0) foreach (var unit in army) plan[unit.Id] = provinces[0];
+                else pool.InsertRange(0, army);
+                break;
+            }
             foreach (var unit in army) plan[unit.Id] = provinces[armies];
             armies++;
         }
-        if (armies == 0) return null;
+        if (plan.Count == 0) return null;
         // Fractional leftovers: kept home, or committed to the first army when they have a Battle action to take.
         foreach (var unit in pool.Where(u => u.HasBattleAction)) plan[unit.Id] = provinces[0];
         return plan;
