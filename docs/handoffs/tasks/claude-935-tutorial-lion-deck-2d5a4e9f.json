@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Tutorial revised: you play Lion (Halls of Memory) against a Lion bot; Akodo Uehara is bought with the Clan discount from the Stronghold alone; Lion cards in the provinces; banned One Koku replaced by Truce, with a test that no banned card appears.",
+  "summary": "Tutorial is now Lion (you, first, Akodo Uehara) against Crane (second, Bamboo Harvesters); the opponent buys Daidoji Kenshi on its turn and defends with him; lesson 1 script and numbers updated (province strength 6, 9 vs 3, 12 vs 3).",
   "validation": "tutorial tests 7/7; tools/check-tutorial.sh passed (52 steps)",
-  "remaining": "Final unlock-everything lesson and later lessons",
+  "remaining": "Script revisions from Mendon; final unlock lesson and later lessons",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/935",
   "branch": "claude/935-tutorial-lion-deck",
-  "updated": "2026-10-14T03:38:46.566508+00:00"
+  "updated": "2026-10-14T16:54:09.217581+00:00"
 }

@@ -3,13 +3,13 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     /// <summary>The tutorial's table (issue #935): a prepared offline match against the practice opponent, never reachable from a room or a deck.
-    /// Lion (you) and Lion (the bot) on explicit, ordered decks so each lesson meets exactly the cards it teaches with. The match is built the way
+    /// Lion (you) and Crane (the bot) on explicit, ordered decks so each lesson meets exactly the cards it teaches with. The match is built the way
     /// <see cref="CreatePublished"/> builds one, but stops before the first turn: both Fate hands are empty and every province is still face down.
-    /// The opponent has already taken its first turn, so you are the second player, which is why you start with the bowed Bamboo Harvesters. Both Strongholds start at 7 Honor, a tie the opponent won, so it goes first as it would in a real match.</summary>
+    /// Lion has the higher starting Honor (7 against 6), so you go first, and the opponent (second player) starts with the bowed Bamboo Harvesters, exactly as in a real match.</summary>
     public static MatchEngine CreateTutorial()
     {
         const ulong seed = 935;
-        var state = new MatchState { Players = [new() { Id = 0, Name = "You", Clan = "Lion" }, new() { Id = 1, Name = "Opponent", Clan = "Lion" }] };
+        var state = new MatchState { Players = [new() { Id = 0, Name = "You", Clan = "Lion" }, new() { Id = 1, Name = "Opponent", Clan = "Crane" }] };
         var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
         {
@@ -23,19 +23,17 @@ public sealed partial class MatchEngine
         you.Honor = CardCatalog.Get(TutorialCards.YourStronghold).StartingHonor; foe.Honor = CardCatalog.Get(TutorialCards.FoeStronghold).StartingHonor;
         you.StrongholdId = Add(0, TutorialCards.YourStronghold, Zone.Stronghold, true).Id; foe.StrongholdId = Add(1, TutorialCards.FoeStronghold, Zone.Stronghold, true).Id;
         Add(0, TutorialCards.BorderKeep, Zone.Home, true); Add(1, TutorialCards.BorderKeep, Zone.Home, true);
-        Add(0, TutorialCards.BambooHarvesters, Zone.Home, true, true);
-        // The opponent's first turn is already behind it: one cheap Personality at home, which is the only unit that will ever defend for it in this lesson.
-        Add(1, TutorialCards.FoeDefender, Zone.Home, true); foe.TurnsTaken = 1;
+        Add(1, TutorialCards.BambooHarvesters, Zone.Home, true, true); // the second player (the opponent) starts with it, bowed
         foreach (var id in Cycle(TutorialCards.YourDynasty, TutorialCards.DynastyFiller, 40)) you.DynastyDeck.Add(Add(0, id, Zone.DynastyDeck).Id);
         foreach (var id in Cycle(TutorialCards.YourFate, TutorialCards.FateFiller, 40)) you.FateDeck.Add(Add(0, id, Zone.FateDeck).Id);
-        foreach (var id in Cycle([], TutorialCards.FoeDynasty, 40)) foe.DynastyDeck.Add(Add(1, id, Zone.DynastyDeck).Id);
+        foreach (var id in Cycle(TutorialCards.FoeDynasty, TutorialCards.FoeFiller, 40)) foe.DynastyDeck.Add(Add(1, id, Zone.DynastyDeck).Id);
         foreach (var id in Cycle([], TutorialCards.FateFiller, 40)) foe.FateDeck.Add(Add(1, id, Zone.FateDeck).Id);
         foreach (var player in state.Players)
         {
             var strength = CardCatalog.Get(state.Cards[player.StrongholdId].DefinitionId).ProvinceStrength;
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = strength, PrintedStrength = strength }).ToList();
         }
-        state.ActivePlayerId = 0; state.PriorityPlayerId = 0; state.TurnNumber = 1; // the opponent's first turn was turn 1, so your first turn is turn 2, as it would be in a real match
+        state.ActivePlayerId = 0; state.PriorityPlayerId = 0;
         OrderCardsById(state);
         var engine = new MatchEngine(state, seed, TutorialScenario);
         foreach (var player in state.Players) foreach (var province in player.Provinces) engine.Refill(player, province);

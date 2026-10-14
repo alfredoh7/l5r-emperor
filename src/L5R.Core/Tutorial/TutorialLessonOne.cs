@@ -14,6 +14,7 @@ internal static class TutorialLessonOne
     private static int? AttackedProvince(GameCommand command) => command.Assignments is { Count: 1 } assignments ? assignments.Values.Single() : command.Province;
 
     private static Func<TutorialLookup, IEnumerable<string>> Own(params string[] definitions) => look => definitions.SelectMany(d => look.Own(d));
+    private static Func<TutorialLookup, IEnumerable<string>> Foe(params string[] definitions) => look => definitions.SelectMany(d => look.Foe(d));
     private static Func<TutorialLookup, IEnumerable<string>> FoeProvinces(params int[] indices) => look => indices.Select(i => look.Province(1 - TutorialRunner.Seat, i)).OfType<string>();
     private static Func<TutorialLookup, IEnumerable<string>> Provinces(params int[] indices) => look => indices.Select(i => look.Province(TutorialRunner.Seat, i)).OfType<string>();
     private static Func<TutorialLookup, IEnumerable<string>> Hand(params string[] definitions) => look => definitions.SelectMany(d => look.Own(d, Zone.Hand));
@@ -37,8 +38,8 @@ internal static class TutorialLessonOne
         ["buy-uehara"] = "Click Akodo Uehara in your provinces. The purchase options read \"3 Gold · Clan discount\". Click your Stronghold (Halls of Memory) to pay, then press \"Recruit\".",
         ["end-dynasty"] = "Press \"End Dynasty Phase\" in the right-hand panel.",
         ["tell-tale"] = "Click Tell the Tale in your hand, then press \"Confirm play\".",
-        ["equip-follower"] = "Click Veteran Skirmishers in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Bamboo Harvesters to pay. Press \"Attach\".",
-        ["equip-item"] = "Click Light Armor in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Border Keep to pay. Press \"Attach\".",
+        ["equip-follower"] = "Click Veteran Skirmishers in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Border Keep to pay. Press \"Attach\".",
+        ["equip-item"] = "Click Light Armor in your hand and press \"Confirm play\". Click Akodo Uehara, then click your Stronghold to pay. Press \"Attach\".",
         ["pass-turn-two"] = "Press \"Pass action\" in the right-hand panel.",
         ["declare-attack"] = "Press \"Declare an attack\" in the right-hand panel.",
         ["assign-attacker"] = "Click Akodo Uehara, then click your opponent's first province. Press \"Confirm assignments\".",
@@ -52,20 +53,20 @@ internal static class TutorialLessonOne
     [
         // ---- The table before the first turn ----------------------------------------------------------------------------------------------------------------------------
         Say("welcome", "Welcome to Legend of the Five Rings",
-            "You will learn the cards by playing a short game against a practice opponent. You are the Lion Clan, and so is the opponent: a mirror match. Take your time: press Continue whenever you are ready. " +
+            "You will learn the cards by playing a short game against a practice opponent. You are the Lion Clan and your opponent is the Crane Clan, a classic matchup. Take your time: press Continue whenever you are ready. " +
             "Only the move a step asks for will work, so you cannot go wrong."),
         Say("stronghold", "Your Stronghold",
             "This is your Stronghold, Halls of Memory. It never leaves play, and the three icons on its right set your game: Gold 3 (what it produces when it bows), " +
             "Province Strength 7 (how hard each of your provinces is to destroy) and starting Family Honor 7 (your score).", Own(TutorialCards.YourStronghold)),
         Say("honor", "Family Honor",
-            "Honor is the heart of the game. Yours starts at 7 and so does your opponent's. A tie is settled by chance, and the opponent won it, so it goes first and has already taken a turn. You win by destroying all four of your opponent's " +
+            "Honor is the heart of the game. Yours starts at 7 and the Crane Stronghold starts at 6, so the player with the higher Honor, you, goes first. You win by destroying all four of your opponent's " +
             "provinces, or by starting your turn with 40 Honor. There are two more victories, which we will meet later.", Own(TutorialCards.YourStronghold)),
         Say("border-keep", "Border Keep",
             "Border Keep is a Holding, a card that makes Gold. Bow it (turn it sideways) to produce 2 Gold. Bowed cards straighten again at the start of your turn. " +
             "It also has a trick for your first turn, which you will use in a moment.", Own(TutorialCards.BorderKeep)),
-        Say("bamboo", "Bamboo Harvesters",
-            "Bamboo Harvesters is another Holding that produces 2 Gold, but it starts bowed and will not straighten before your second turn. " +
-            "The player who goes second begins the game with it.", Own(TutorialCards.BambooHarvesters)),
+        Say("bamboo", "Going second",
+            "The player who goes second starts with a bonus: Bamboo Harvesters, another Holding that produces 2 Gold. It starts bowed, so it will not straighten before that player's second turn. " +
+            "It belongs to your opponent, because you are going first.", Foe(TutorialCards.BambooHarvesters)),
         Say("provinces", "Provinces and the Dynasty deck",
             "Your four provinces sit in a row, each holding one face-down card from your Dynasty deck. Every province has the Province Strength of your Stronghold, 7. " +
             "When a province is emptied, it is refilled at once from the top of the Dynasty deck.", Provinces(0, 1, 2, 3)),
@@ -79,7 +80,7 @@ internal static class TutorialLessonOne
 
         // ---- Events phase and the Border Keep -------------------------------------------------------------------------------------------------------------------------------
         Say("events", "The Events phase",
-            "Straighten turned your bowed cards upright, apart from the Bamboo Harvesters. Then the Events phase flipped your provinces face up from left to right, and whatever appeared took effect. " +
+            "Straighten would turn your bowed cards upright, though none of yours are bowed yet. Then the Events phase flipped your provinces face up from left to right, and whatever appeared took effect. " +
             "Anything that is not a Holding or a Personality does something right now.", Provinces(0, 1, 2, 3)),
         Say("event-card", "An Event",
             "The left province held an Event, Willing Spirits. An Event resolves the moment it is revealed and is then discarded; the empty province refilled face down. Willing Spirits reads " +
@@ -172,11 +173,11 @@ internal static class TutorialLessonOne
 
         // ---- Turn two ------------------------------------------------------------------------------------------------------------------------------------------------------------
         Say("turn-two", "Your second turn",
-            "Your opponent's turn passed quietly, and your Fate draw gave you Crushing Strength. Your second Events phase has revealed a Region and a Celestial: a Region attaches to the province it was revealed in " +
+            "Your opponent's turn passed quietly: they bought Daidoji Kenshi, and your Fate draw gave you Crushing Strength. Your second Events phase has revealed a Region and a Celestial: a Region attaches to the province it was revealed in " +
             "(Fallow Lands now strengthens it), and a Celestial enters play at once (Megumi's Guidance). Willing Spirits also made each of your provinces +2 stronger.",
             Provinces(0, 1)),
         Say("phase-bar", "The turn's phases",
-            "The phase bar along the table shows where you are: Straighten, Events, Action, Attack, Dynasty, End. You start your Action phase now, with more Gold: the Bamboo Harvesters straightened, " +
+            "The phase bar along the table shows where you are: Straighten, Events, Action, Attack, Dynasty, End. You start your Action phase now, with more Gold: your Stronghold and Border Keep straightened, " +
             "and Small Farm joined in."),
         Do("tell-tale", "A Limited action",
             "Tell the Tale is a Limited action: you gain 1 Honor.", Move("useAbility", "tell-the-tale-honor"), Hand(TutorialCards.TellTheTale)),
@@ -184,31 +185,31 @@ internal static class TutorialLessonOne
             "Next, attach your Follower and Item to Akodo Uehara. Attaching costs Gold and is a Limited action you can take any number of times a turn. A Spell would not be offered: Uehara is not a Shugenja. " +
             "A Follower takes its own actions, but an Item's or Spell's action is taken by the Personality it is attached to.", Own(TutorialCards.AkodoUehara)),
         Do("equip-follower", "Attach the Follower",
-            "Attaching costs the Follower's 2 Gold, paid by bowing a Gold source. Bamboo Harvesters straightened this turn, so use it.",
-            Move("equip", card: TutorialCards.VeteranSkirmishers), Both(Hand(TutorialCards.VeteranSkirmishers), Own(TutorialCards.BambooHarvesters))),
+            "Attaching costs the Follower's 2 Gold, paid by bowing a Gold source. Pay with your Border Keep.",
+            Move("equip", card: TutorialCards.VeteranSkirmishers), Both(Hand(TutorialCards.VeteranSkirmishers), Own(TutorialCards.BorderKeep))),
         Do("equip-item", "Attach the Item",
-            "The Item costs 2 Gold as well. Pay with your Border Keep this time.",
-            Move("equip", card: TutorialCards.LightArmor), Both(Hand(TutorialCards.LightArmor), Own(TutorialCards.BorderKeep))),
+            "The Item costs 2 Gold as well. Pay with your Stronghold this time; its 3 Gold covers it and the extra 1 is lost.",
+            Move("equip", card: TutorialCards.LightArmor), Both(Hand(TutorialCards.LightArmor), Own(TutorialCards.YourStronghold))),
         Do("pass-turn-two", "Pass the Action phase",
             "Uehara's unit now has 1 + 3 + 3 = 7 Force. That is enough to fight with.", Move("pass")),
         Do("declare-attack", "Declare an attack",
             "In the Attack phase you fight over your opponent's provinces. Every province becomes a battlefield; you send units to attack, then the Defender sends units to defend.", Move("declareAttack")),
         Do("assign-attacker", "Send your unit",
-            "Your opponent has one Personality, Ikoma Shika, who will defend that province.",
+            "Your opponent has one Personality, Daidoji Kenshi, who will defend that province.",
             (_, command) => command.Type == "attack" && AttackedProvince(command) == 0, Both(Own(TutorialCards.AkodoUehara), FoeProvinces(0)),
             hint: "Attack the opponent's first province.", onlyProvinces: [0]),
         Do("pick-battle", "Fight the battle",
-            "Your opponent defended with Ikoma Shika. The Attacker chooses the order of battles, and there is one to fight.", (_, command) => command is { Type: "selectBattle", Province: 0 }, FoeProvinces(0)),
+            "Your opponent defended with Daidoji Kenshi. The Attacker chooses the order of battles, and there is one to fight.", (_, command) => command is { Type: "selectBattle", Province: 0 }, FoeProvinces(0)),
         Say("battle-values", "Reading a battle",
             "A battle starts with a round of Battle actions, beginning with the Defender, who passed. Then both armies' Force is added up. Your army has 9 Force: Uehara 1, Skirmishers 3, Light Armor 3, and +2 from Megumi's Guidance, " +
-            "which boosts an opposed army. Shika has 2. To destroy the province you must beat the defender by more than its Province Strength, 7, and 9 beats 2 by exactly 7. It would hold."),
+            "which boosts an opposed army. Kenshi has 3. To destroy the province you must beat the defender by more than its Province Strength, 6, and 9 beats 3 by exactly 6. It would hold."),
         Do("battle-action", "A Battle action",
             "A Battle action can only be used during a battle. Crushing Strength reads \"Target your opposed Personality: Give him +3F\".",
             Move("useAbility", "crushing-force"), Hand(TutorialCards.CrushingStrength)),
         Do("pass-battle", "End the Combat segment",
             "Your army now has 12 Force, and your opponent has nothing to answer with. When both players pass in a row the Combat segment ends and the battle resolves.", Move("pass")),
         Say("resolved", "The province falls",
-            "12 beats 2 by 10, which is more than 7, so your army destroyed Ikoma Shika and the province. For the rest of the game your opponent has one fewer province to draw Dynasty cards from, " +
+            "12 beats 3 by 9, which is more than 6, so your army destroyed Daidoji Kenshi and the province. For the rest of the game your opponent has one fewer province to draw Dynasty cards from, " +
             "and destroying all four wins the game. You also gained Honor: twice the number of enemy cards you destroyed.", null),
         Do("ring-reaction", "A Ring enters play",
             "Your battle destroyed enemy cards, which is the condition on your Ring of Fire. Rings enter play from your hand as a Reaction.",

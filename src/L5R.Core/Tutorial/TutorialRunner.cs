@@ -131,6 +131,7 @@ public sealed class TutorialRunner
     private ActionOption? FoeChoice(ActionOption[] options) =>
         options.FirstOrDefault(a => a.Type == "declineReaction")
         ?? options.FirstOrDefault(a => a.Type == "assignDefense" && _attackedProvince is int attacked && (a.Command!.Assignments?.Values.Contains(attacked) ?? a.Command.Province == attacked))
+        ?? options.Where(a => a.Type == "purchase" && Engine.TutorialDefinitionOf(a.CardId!) == TutorialCards.FoeDefender).OrderBy(a => a.Quote?.Cost ?? 0).FirstOrDefault() // its one purchase: the defender
         ?? options.FirstOrDefault(a => a.Type == "pass")
         ?? options.FirstOrDefault(a => a.Type == "endDynasty");
 }
