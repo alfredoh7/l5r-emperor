@@ -36,7 +36,8 @@ public partial class Main
         var clicks = new Dictionary<string, Action>();
         if (View.PendingChoice is not null || _chosen is not { CardId: { } sourceId, Command: { } command } chosen || FindCard(sourceId) is not { } source) return clicks;
         // Issue #793: a hand Strategy offered once per performing Personality (Spirit of the Monk, of the Berserker, ...) is performed by clicking a highlighted Personality, as a support card is.
-        if (IsSupportCard(source) || source.Zone == Zone.Hand && chosen.Type is "playStrategy" or "equip" or "useAbility" && chosen.AlternativeCost is null)
+        // Issue #956: so is an ability of any card in play whose performer is one of several of the player's Personalities (Bayushi Suwabe's Courtier, a Holding's performing Personality).
+        if (IsSupportCard(source) || chosen.Type is "playStrategy" or "equip" or "useAbility" && chosen.AlternativeCost is null)
         {
             var choices = Actions.Where(a => a.Enabled && a.CardId == sourceId && a.Command?.AbilityId == command.AbilityId).ToArray();
             foreach (var id in choices.Select(a => a.Command!.PerformerId).OfType<string>().Distinct())
