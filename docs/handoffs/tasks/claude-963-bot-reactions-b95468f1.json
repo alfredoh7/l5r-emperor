@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bot loop rounds 1-4, each behind a default-off BotContext flag with a unit test and a pre-registration: Seppuku policy (dev 58.5%, held-out 53.8%), informed defense (51.4% dev and held-out), bodies-first (49.8%, negative), sure reactions (50.2%, negative). Engine stall (Michi/negation) classified and filed as #967. No Core, protocol or UI change; all flags off so default behaviour is unchanged.",
+  "validation": "bash tools/check.sh --skip-client passed; unit tests for each flag pass; 1728-game dev runs and 1200-game held-out confirmations as recorded in docs/bots/experiments. Honor-margin criterion of round 1 unmet (flagged).",
+  "remaining": "Owner decision on promoting the Seppuku policy (and optionally informed defense) to default; Core fix #967.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/963",
+  "branch": "claude/963-bot-reactions",
+  "updated": "2026-10-15T05:03:03.839358+00:00"
+}
