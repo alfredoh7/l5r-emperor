@@ -40,7 +40,7 @@ internal static class InformedDefenseTests
         // Wins outright where the stronger of two armies would be beaten: attackers at 0 (Force 3) and at 1 (Force 5), defenders 4 beat only the first.
         var two = Table(4, (0, 3), (1, strength + 20));
         var picked = Choose(two, informed: true);
-        Check(picked.Type == "assignDefense" && picked.Assignments!["defender"] == 0, "defenders of 4 go where they win (the army of 3), not to the army they cannot beat: " + picked.Type + " " + string.Join(",", picked.Assignments?.Values ?? []));
+        Check(picked.Type == "assignDefense" && picked.Assignments!["defender"] == 0, "defenders of 4 go where they win (the army of 3), not to the army they cannot beat: " + picked.Type + " " + string.Join(",", picked.Assignments?.Values.Select(v => v.ToString()) ?? []));
         // Saves a Province: the attackers beat the defenders (Force 5 against 3) but not the defenders plus the Province's Strength.
         var save = Table(3, (0, strength + 2));
         Check(Choose(save, informed: true).Type == "assignDefense", "defenders of 3 against Strength+2 save the Province: it defends");
