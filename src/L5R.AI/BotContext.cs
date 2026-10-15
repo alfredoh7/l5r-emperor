@@ -55,6 +55,9 @@ public sealed class BotContext
     /// <summary>Issue #963 (bot loop, round 3): while the bot has fewer Personalities than it needs and one it could recruit is face-up in a Province, the Action phase does not spend Gold on cards from the hand (the early-economy rule, kept for the whole game).</summary>
     public bool UseBodiesFirst { get; init; } = false;
 
+    /// <summary>Issue #963 (bot loop, round 4): a Reaction that helps, penalizes, bows or destroys is always played when it is worth anything, instead of being declined by a deterministic roll (30% to 90% chance to play). Off: the roll.</summary>
+    public bool UseSureReactions { get; init; } = false;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 
