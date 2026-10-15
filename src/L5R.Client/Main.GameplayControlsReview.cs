@@ -85,6 +85,17 @@ public partial class Main
                     var quote = QuoteFor(_chosen!)!;
                     var chosen = kind == "reaction" ? quote.Sources!.Where(m => m.Kind is "bow" or "reaction").ToArray() :
                         quote.Sources!.Where(m => m.Kind == (kind == "discount" ? "discount" : "destroy")).Take(1).ToArray();
+                    if (kind == "destruction" && chosen.Length == 1)
+                    {
+                        // Issue #971: the card paid with is clicked on the table: a click chooses its method, a second click clears it.
+                        var payer = FindCard(chosen[0].CardId)!;
+                        SelectCard(payer); await EventFrames(3);
+                        GoldRequire(_sources.Contains(chosen[0].Id), "Clicking the card on the table did not choose its payment method");
+                        SelectCard(payer); await EventFrames(3);
+                        GoldRequire(!_sources.Contains(chosen[0].Id), "Clicking the card again did not clear its payment method");
+                        SelectCard(payer); await EventFrames(3);
+                        GoldRequire(_sources.Contains(chosen[0].Id) && _paymentConfirm is { Disabled: false }, "The table-chosen payment did not cover the cost");
+                    }
                     foreach (var method in chosen)
                     {
                         var control = _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(b => b.GetMeta("payment_source_id", "").AsString() == method.Id);

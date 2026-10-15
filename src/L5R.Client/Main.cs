@@ -637,11 +637,11 @@ public partial class Main : Node
         // Issue #958: while a province is being chosen, the Dynasty card or Region sitting in a province stands for that province (a card that is itself a legal target or performer was taken above).
         if ((ProvinceTargetActive || MultiProvinceActive) && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } cardProvince)
         { SelectProvince(card.OwnerId, cardProvince); return; }
-        if (_chosen is not null && card.OwnerId == View.ViewerId && HoldingPaymentMethod(card) is { } holdingMethod)
+        if (_chosen is not null && card.OwnerId == View.ViewerId && ClickablePaymentMethods(card).Length > 0)
         {
             if (_chosen.Type == "chooseOpponentPayment" && QuoteFor(_chosen) is { } paymentQuote && AmountFor(_chosen, paymentQuote) == 0)
             { SetNotice("Choose how much Gold to pay before selecting sources."); return; }
-            ToggleHoldingPayment(holdingMethod, card.Id); return;
+            CycleCardPayment(card); return;
         }
         // Clicking another card that has its own flow (a playable hand card, a purchasable province card) abandons the current review and starts that card's.
         if (_chosen is not null && (OwnFlowAction(card) is not null || Actions.Any(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled)))
