@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Fix: Michi/Takasho/Rikyou 'if opposed' moves. The condition is tested when the action is announced (unchanged: still refused when unopposed) and, when the action resolves later because a reaction window closed after the opposition left, the move now does nothing (abilityFizzled event) instead of throwing, which had left the seat's only offered action (Pass reaction) refused forever.",
+  "validation": "Core regression ConditionalMoveFizzles fails without the fix and passes with it; AI replay of real tournament seeds 1000019, 1550019, 1020034 (Crab Control vs Dragon Destruction) fails without the fix (stall turn 10) and passes with it; bash tools/check.sh --skip-client passed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/967",
+  "branch": "claude/967-michi-fizzle",
+  "updated": "2026-10-15T05:42:12.050224+00:00"
+}
