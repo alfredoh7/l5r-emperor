@@ -52,6 +52,9 @@ public sealed class BotContext
     /// <summary>Issue #963 (bot loop, round 2): assign the defense to the battlefield where it wins or saves a Province, and do not spend units where the Province holds on its own. Off: all unbowed Personalities defend the largest visible attacking army.</summary>
     public bool UseInformedDefense { get; init; } = false;
 
+    /// <summary>Issue #963 (bot loop, round 3): while the bot has fewer Personalities than it needs and one it could recruit is face-up in a Province, the Action phase does not spend Gold on cards from the hand (the early-economy rule, kept for the whole game).</summary>
+    public bool UseBodiesFirst { get; init; } = false;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 

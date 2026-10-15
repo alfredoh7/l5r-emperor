@@ -25,7 +25,8 @@ internal static class BotTournament
     {
         ["champion"] = () => new(),
         ["seppuku"] = () => new() { UseSeppukuPolicy = true }, // round 1 (docs/bots/experiments/2026-10-15-seppuku.md)
-        ["defense"] = () => new() { UseInformedDefense = true } // round 2 (docs/bots/experiments/2026-10-15-defense.md)
+        ["defense"] = () => new() { UseInformedDefense = true }, // round 2 (docs/bots/experiments/2026-10-15-defense.md)
+        ["bodies"] = () => new() { UseBodiesFirst = true } // round 3 (docs/bots/experiments/2026-10-15-bodies.md)
     };
 
     public const ulong DevSeedBase = 1_000_000UL, HoldoutSeedBase = 9_000_000UL, IndependentOffset = 500_000UL;

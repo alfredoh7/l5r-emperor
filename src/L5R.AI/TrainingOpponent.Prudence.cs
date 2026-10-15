@@ -36,6 +36,14 @@ public static partial class TrainingOpponent
         x.View.Phase == Phase.Action && x.Self.TurnsTaken <= 2 && x.Self.Home.Count(c => c.Definition?.Type == CardType.Holding) < 3
         && x.Self.Provinces.Any(p => p.Card is { Definition: not null }); // something to buy in the Dynasty phase that follows
 
+    /// <summary>
+    /// Issue #963 (bot loop round 3): the early-economy rule for the whole game. The Action phase comes before this turn's Dynasty phase, so Gold spent there on a card from the hand is Gold the
+    /// Dynasty phase cannot spend on a Personality. A bot short of Personalities (fewer than three, or fewer than its opponent) with a Personality it can pay for waiting face-up in a Province keeps its Gold.
+    /// </summary>
+    private static bool BodiesFirst(Ctx x) =>
+        x.View.Phase == Phase.Action && Personalities(x.Self) < Math.Max(3, Personalities(x.Opponent))
+        && ProvinceCards(x).Any(c => c.Definition!.Type == CardType.Personality && EffectiveCost(x, c) <= Capacity(x));
+
     /// <summary>The score once the prudence rules have been applied; unchanged when none applies.</summary>
     private static double PrudenceScore(Ctx x, ActionOption action, GameCommand command, double score)
     {
@@ -43,6 +51,8 @@ public static partial class TrainingOpponent
         var isReaction = action.Type == "useAbility" && command.AbilityId is not null && AbilityIntent.Of(command.AbilityId).IsReaction;
         // Early economy: the Gold is for the Dynasty phase that follows this Action phase.
         if (EarlyEconomy(x) && action.Type is "useAbility" or "playStrategy" or "equip" && x.View.PendingChoice is null && action.Gold is { Cost: > 0 } && !isReaction)
+            return Math.Min(score, BarredScore);
+        if (x.Memory.UseBodiesFirst && BodiesFirst(x) && action.Type is "useAbility" or "playStrategy" or "equip" && x.View.PendingChoice is null && action.Gold is { Cost: > 0 } && !isReaction)
             return Math.Min(score, BarredScore);
         if (action.Type != "useAbility" || command.AbilityId is null) return score;
         var intent = AbilityIntent.Of(command.AbilityId);
