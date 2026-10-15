@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared (rules-lane bot tooling plus docs/tools): bot loop phase 0: BotTournament (champion vs challenger round-robin, both seats, paired/independent seeds, 3 hash-selected held-out decks and seed range, JSON+markdown), loss-report tool, protocol, A/A calibration (no bias), power note, ranked hypotheses. Test/doc/tool only; no behaviour, Core, protocol or UI change. Mendon has standing cross-lane authority.",
+  "validation": "bash tools/check.sh --skip-client passed; A/A 47.6%, 49.5%, 51.4% (noise), pooled seat-0 48.4%; same-pairing A/A deterministic; 12 champion stalls all Crab Control vs Dragon Destruction.",
+  "remaining": "Phase 0 delivered; awaiting go-ahead for hypothesis 1 (stall fix) and the challenger loop.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/963",
+  "branch": "claude/963-bot-instrument",
+  "updated": "2026-10-15T01:35:14.515328+00:00"
+}
