@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared (rules fix found by bot tooling; tests in Core and AI): Michi/Takasho/Rikyou 'if opposed' moves are tested at announcement (unchanged) and do nothing, instead of throwing, when they resolve after a reaction window closes with the opposition gone. Mendon has standing cross-lane authority.",
+  "validation": "Core regression ConditionalMoveFizzles fails without the fix, passes with it; AI replay of real seeds 1000019, 1550019, 1020034 fails without (stall turn 10), passes with; bash tools/check.sh --skip-client passed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/967",
+  "branch": "claude/967-michi-fizzle",
+  "updated": "2026-10-15T05:42:22.608036+00:00"
+}
