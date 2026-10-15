@@ -15,15 +15,14 @@ public partial class Main
     private static string PlayBaseKey(ActionOption option) => option.Type + ":" + (option.Command?.AbilityId ?? option.AlternativeCost?.AbilityId ?? "");
 
     /// <summary>
-    /// One key per distinct play. Core lists a separate option for each thing a card can be played as: which player is chosen ("choose a player"), where it goes (a Fate deck's top or bottom), which card it creates or
-    /// shows, and what it compares. Those are different plays and must never collapse into the first (a player target used to resolve for "you" whichever the player meant). The performer, the cost option and a
-    /// province's owner stay variants of one play: they are chosen afterwards, on the table or in the draft.
+    /// One key per distinct play. Core lists a separate option for each thing a card can be played as: where it goes (a Fate deck's top or bottom), which card it creates or shows, and what it compares. Those are
+    /// different plays and must never collapse into the first. The performer, the cost option, a province's owner and, for "choose a player", the player stay variants of one play: they are chosen afterwards,
+    /// on the table or in the draft (NeedsPlayerPick makes the draft ask, so a player target never resolves for "you" by default).
     /// </summary>
     private static string PlayKey(ActionOption option)
     {
         var key = PlayBaseKey(option);
         if (option.Command is not { } command) return key;
-        if (command.TargetPlayerId is int player && option.Provinces is null) key += ":player" + player;
         if (command.Choice is { } choice) key += ":choice" + choice;
         if (command.CreatedCard is { } created) key += ":creates" + created;
         if (command.DeckPosition is { } position) key += ":deck" + position;
@@ -56,7 +55,7 @@ public partial class Main
         if (!IsOwnHandCard(card.Id) || card.ActionLocked || View.PendingChoice is not null || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId || _chosen is not null) return;
         if (AssumedPlay(PlayChoices(card)) is not { } choice) return;
         // An action that still needs a performer, target or payment goes straight to choosing them on the table; only an action with nothing left to choose asks to be confirmed (that press is its final Confirm).
-        if (NeedsFurtherInput(choice)) Choose(choice.Option); else _playPrompt = (card.Id, choice.Key);
+        if (NeedsFurtherInput(choice)) StartPlay(choice); else _playPrompt = (card.Id, choice.Key);
     }
 
     /// <summary>
@@ -69,7 +68,7 @@ public partial class Main
         if (View.PendingChoice is not null || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId || _session.Busy || PresentationBusy) return false;
         var choices = PlayChoices(card).Where(c => c.Option.Type == "useAbility").ToArray();
         if (choices.Length != 1) return false; // several performers are fine: the Personalities are highlighted on the table and clicked (PerformerClicks)
-        SelectReactionSource(choices[0].Option); Choose(choices[0].Option);
+        StartPlay(choices[0]);
         return _chosen is not null;
     }
 
@@ -77,7 +76,7 @@ public partial class Main
     {
         if (option.CardId is null || _session.Busy || PresentationBusy) return;
         if (FindCard(option.CardId) is { } card && PlayChoices(card).FirstOrDefault(c => c.Key == PlayKey(option)) is { } choice && NeedsFurtherInput(choice))
-        { _playPrompt = null; Choose(choice.Option); return; }
+        { _playPrompt = null; StartPlay(choice); return; }
         _playPrompt = (option.CardId, PlayKey(option));
         RenderInspector(); RenderPhaseActions(); Highlight();
     }
@@ -89,7 +88,7 @@ public partial class Main
     private bool NeedsFurtherInput(PlayChoice choice)
     {
         var option = choice.Option;
-        return NeedsTargetPick(option) || option.TargetIds is { Length: > 0 } || option.Slots is not null || IsProvinceTarget(option) || option.Movement is not null
+        return NeedsPlayerPick(choice) || NeedsTargetPick(option) || option.TargetIds is { Length: > 0 } || option.Slots is not null || IsProvinceTarget(option) || option.Movement is not null
             || HasAttackTargets(option) || option.Attack is not null || option.AlternativeCost is not null || option.Gold is { Cost: > 0 } || option.Gold is { Kind: GoldCostKind.Variable }
             || option.TargetGold is not null || choice.Variants.Select(v => v.Command?.PerformerId).Distinct().Count() > 1 || option.Command?.CardIds is not null;
     }
@@ -139,7 +138,7 @@ public partial class Main
         if (PromptedChoice() is not { } choice) { _playPrompt = null; RenderInspector(); return; }
         _playPrompt = null;
         if (!NeedsFurtherInput(choice) && choice.Option.Command is { } command) { _ = Submit(command); return; }
-        Choose(choice.Option);
+        StartPlay(choice);
     }
 
     /// <summary>A card with several legal actions lists each as a highlightable, clickable block under its printed text; a click begins that action.</summary>

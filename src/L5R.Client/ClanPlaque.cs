@@ -16,6 +16,9 @@ public partial class ClanPlaque : Control
     public string HandText { get; }
     public string HandHelp { get; }
     public Button HandRegion { get; }
+    /// <summary>The emblem button: opens the Dead cards, and chooses the player while a "choose a player" action is being drafted (issue #960).</summary>
+    public Button Hit { get; private set; } = null!;
+    public string HitTooltip { get; private set; } = "";
     private readonly Control _design;
     private static FontFile? _bodyFace, _headingFace;
     private static FontFile CrispFace(string path)
@@ -98,7 +101,7 @@ public partial class ClanPlaque : Control
         };
         foreach (var state in new[] { "normal", "pressed", "hover", "focus" })
             hit.AddThemeStyleboxOverride(state, Palette.Box(Colors.Transparent, state is "hover" or "focus" ? Palette.Gold : null, 0, 40));
-        hit.Pressed += inspect; _design.AddChild(hit);
+        hit.Pressed += inspect; _design.AddChild(hit); Hit = hit; HitTooltip = hit.TooltipText;
         if (favor)
         {
             var mark = Text("◆", 10, Palette.Gold, new Rect2(290, 15, 12, 15));
