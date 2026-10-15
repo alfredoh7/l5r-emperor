@@ -187,6 +187,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal)) { ProcessDirectPlayCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-table-click", StringComparison.Ordinal)) { ProcessTableClickCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-card-motion", StringComparison.Ordinal)) { ProcessCardMotionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
@@ -611,13 +612,19 @@ public partial class Main : Node
         if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
         if (SelectDiscardCard(card)) return;
+        if (SelectReactionSourceCard(card)) return; // issue #962: a reaction's card is clicked on the table
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
         if (MovementActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } destination)
         { ChooseMovementProvince(card.OwnerId, destination); return; }
         if (_chosen is { Type: "attack" or "assignDefense" } assignment)
         {
-            if (assignment.TargetIds?.Contains(card.Id) == true) { _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
+            if (assignment.TargetIds?.Contains(card.Id) == true)
+            {
+                // Issue #973: the unit being placed, clicked again while it already has a battlefield, goes back home (selecting another unit first and then its battlefield still reassigns).
+                if (_assignmentUnit == card.Id && _assignments.Remove(card.Id)) { _selected = card; RenderBoard(); RenderInspector(); Highlight(); return; }
+                _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return;
+            }
             if (card.Zone == Zone.Province && card.OwnerId == 1 - View.ActivePlayerId && card.ProvinceIndex is int province) { SelectProvince(card.OwnerId, province); return; }
             SetNotice("Choose one of your highlighted units, then a highlighted province. Cancel to inspect other cards."); return;
         }
@@ -630,11 +637,19 @@ public partial class Main : Node
         }
         if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.TryGetValue(card.Id, out var selectPerformer))
         { if (_chosen?.Command?.PerformerId != card.Id) selectPerformer(); return; }
-        if (_chosen is not null && card.OwnerId == View.ViewerId && HoldingPaymentMethod(card) is { } holdingMethod)
+        // Issue #973: an Attack that may be made with no target takes that choice from a click on the card that performs it, or on the card it belongs to.
+        if (AttackTargetActive && _chosen!.NoTarget && (card.Id == _chosen.Command!.PerformerId || card.Id == (_chosen.CardId ?? _chosen.Command.CardId)))
+        { ChooseAttackTarget(AttackChoice.NoTarget); return; }
+        // Issue #960: while a player is being chosen, either player's stronghold stands for that player (the clan plaque does the same).
+        if (StrongholdOwner(card) is int strongholdPlayer && ChoosePlayerTarget(strongholdPlayer)) return;
+        // Issue #958: while a province is being chosen, the Dynasty card or Region sitting in a province stands for that province (a card that is itself a legal target or performer was taken above).
+        if ((ProvinceTargetActive || MultiProvinceActive) && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } cardProvince)
+        { SelectProvince(card.OwnerId, cardProvince); return; }
+        if (_chosen is not null && card.OwnerId == View.ViewerId && ClickablePaymentMethods(card).Length > 0)
         {
             if (_chosen.Type == "chooseOpponentPayment" && QuoteFor(_chosen) is { } paymentQuote && AmountFor(_chosen, paymentQuote) == 0)
             { SetNotice("Choose how much Gold to pay before selecting sources."); return; }
-            ToggleHoldingPayment(holdingMethod, card.Id); return;
+            CycleCardPayment(card); return;
         }
         // Clicking another card that has its own flow (a playable hand card, a purchasable province card) abandons the current review and starts that card's.
         if (_chosen is not null && (OwnFlowAction(card) is not null || Actions.Any(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled)))
@@ -649,7 +664,9 @@ public partial class Main : Node
         var purchase = Actions.FirstOrDefault(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled);
         var multiSlot = card.ProvinceIndex is int index && card.Zone == Zone.Province &&
             ProvincePresentation.Slots(View.Players.Single(p => p.Id == card.OwnerId).Provinces.Single(p => p.Index == index)).Length > 1;
-        if (purchase is not null && !multiSlot) Choose(purchase); else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
+        if (purchase is not null && !multiSlot) Choose(purchase);
+        else if (StartInPlayAbility(card)) { } // issue #954: the first click on a card in play with one usable ability starts it; hovering inspects
+        else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
     }
 
     private void Highlight()
@@ -663,7 +680,7 @@ public partial class Main : Node
             selectedProvince = $"province:{eventCard.OwnerId}:{eventProvince}";
         _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
         var supportTargets = SupportDraftChoices().SelectMany(a => a.TargetIds ?? []).ToHashSet();
-        var performerClicks = PerformerClicks();
+        var performerClicks = PerformerClicks(); var reactionSources = ReactionSourceCardIds();
         var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
@@ -680,13 +697,15 @@ public partial class Main : Node
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;
             tile.DecisionSelected |= GenericDecisionActive && (tile.Card.Id == _decisionSelection?.Command?.TargetId || _decisionSelection?.DecisionCandidateIds?.Contains(tile.Card.Id) == true);
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
-            tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id);
+            tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id) || reactionSources.Contains(tile.Card.Id);
             tile.LegalTarget |= AlternativeCostCards().Contains(tile.Card.Id); // a hand card a discard way to pay may spend (Akodo Kamina)
             tile.DecisionSelected |= _reviewingAlternativeCost && _decisionSelection?.Command?.CardIds?.Contains(tile.Card.Id) == true;
-            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
-            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
+            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id)) || MultiTargetActive && MultiOpenCardSlots(tile.Card.Id).Any(); // issue #969: every open group's candidates
+            if (StrongholdOwner(tile.Card) is int strongholdOwner) tile.LegalTarget |= PlayerTargetLegal(strongholdOwner);
+            tile.ChosenTarget = StrongholdOwner(tile.Card) is int chosenPlayer && PlayerTargetChosen(chosenPlayer) || _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id) || _sources.Any(id => id.StartsWith(tile.Card.Id + "#", StringComparison.Ordinal)); tile.QueueRedraw(); // a payment token ("<card>#reaction") marks its card
         }
+        HighlightPlayers(); HighlightPiles();
         foreach (var (key, button) in _provinceButtons)
         {
             var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true

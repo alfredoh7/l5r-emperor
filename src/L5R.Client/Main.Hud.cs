@@ -5,9 +5,11 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    private readonly Dictionary<int, ClanPlaque> _clanPlaques = [];
+
     private void RenderClanHud()
     {
-        Palette.Clear(_clanHud);
+        Palette.Clear(_clanHud); _clanPlaques.Clear();
         foreach (var player in View.Players)
         {
             var production = player.Home.Concat(player.Army).Append(player.Stronghold).Where(c => !c.Bowed).Sum(c => Production(c, player));
@@ -17,10 +19,11 @@ public partial class Main
                 (View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId) == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
             var action = own ? player.Name : player.Name == player.Clan ? "Opponent" : player.Name;
             var plaqueY = own ? 950 - FallenCounter.DesignHeight - 4 : 14;
-            Place(_clanHud, new ClanPlaque(player.Clan, player.Honor, production, View.FavorPlayerId == player.Id, () => ShowFallenGallery(player.Id),
+            var plaque = new ClanPlaque(player.Clan, player.Honor, production, View.FavorPlayerId == player.Id, () => { if (!ChoosePlayerTarget(player.Id)) ShowFallenGallery(player.Id); }, // issue #960: choosing a player
                 action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && (View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId) == player.Id,
                 player.HandCount, player.HandLimit)
-            { ReducedMotion = _reducedMotion }, 16, plaqueY, ClanPlaque.DesignWidth, ClanPlaque.DesignHeight);
+            { ReducedMotion = _reducedMotion };
+            Place(_clanHud, plaque, 16, plaqueY, ClanPlaque.DesignWidth, ClanPlaque.DesignHeight); _clanPlaques[player.Id] = plaque;
             var fallen = new FallenCounter { Player = player };
             fallen.Pressed += () => ShowFallenGallery(player.Id);
             Place(_clanHud, fallen, 16, plaqueY + ClanPlaque.DesignHeight + 4, ClanPlaque.DesignWidth, FallenCounter.DesignHeight);
@@ -82,7 +85,7 @@ public partial class Main
         var player = View.Players.Single(p => p.Id == owner);
         var deck = zone is Zone.FateDeck or Zone.DynastyDeck;
         var name = zone switch { Zone.FateDeck => "Fate deck", Zone.DynastyDeck => "Dynasty deck", Zone.FateDiscard => "Fate discard", Zone.DynastyDiscard => "Dynasty discard", _ => "Dead cards" };
-        var (_, body) = Dialog(player.Clan + " · " + name, 880, 720);
+        var (pileDialog, body) = Dialog(player.Clan + " · " + name, 880, 720);
         body.AddChild(Palette.Text(player.Clan + " · " + name, 27, Palette.Gold, true));
         if (deck)
         {
@@ -91,14 +94,16 @@ public partial class Main
             return;
         }
         var cards = player.Discard.Where(c => c.Zone == zone).ToArray();
-        body.AddChild(Palette.Text(cards.Length == 0 ? "No cards in this pile." : $"{cards.Length} cards · hover to read", 16, Palette.PaperDim));
+        var actionable = PileActionableIds(); // issue #965: cards here that may be clicked now
+        body.AddChild(Palette.Text(cards.Length == 0 ? "No cards in this pile." : cards.Any(c => actionable.Contains(c.Id)) ? $"{cards.Length} cards · click a highlighted card to choose it" : $"{cards.Length} cards · hover to read", 16, Palette.PaperDim));
         var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
         body.AddChild(scroll);
         var grid = new GridContainer { Columns = 4, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
         grid.AddThemeConstantOverride("h_separation", 12); grid.AddThemeConstantOverride("v_separation", 15); scroll.AddChild(grid);
         foreach (var card in cards)
         {
-            var tile = new CardTile(card, true, _ => { }, _ => { }) { CustomMinimumSize = new Vector2(185, 257), FaceHeight = 245, ReducedMotion = true, ContextHelp = player.Clan + " · " + name };
+            var legal = actionable.Contains(card.Id);
+            var tile = new CardTile(card, true, picked => { if (!legal) return; pileDialog.QueueFree(); SelectCard(picked); }, _ => { }) { CustomMinimumSize = new Vector2(185, 257), FaceHeight = 245, ReducedMotion = true, ContextHelp = player.Clan + " · " + name, LegalTarget = legal };
             grid.AddChild(tile);
         }
     }

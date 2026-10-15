@@ -36,14 +36,16 @@ public partial class Main
         var clicks = new Dictionary<string, Action>();
         if (View.PendingChoice is not null || _chosen is not { CardId: { } sourceId, Command: { } command } chosen || FindCard(sourceId) is not { } source) return clicks;
         // Issue #793: a hand Strategy offered once per performing Personality (Spirit of the Monk, of the Berserker, ...) is performed by clicking a highlighted Personality, as a support card is.
-        if (IsSupportCard(source) || source.Zone == Zone.Hand && chosen.Type is "playStrategy" or "equip" or "useAbility" && chosen.AlternativeCost is null)
+        // Issue #956: so is an ability of any card in play whose performer is one of several of the player's Personalities (Bayushi Suwabe's Courtier, a Holding's performing Personality).
+        if (IsSupportCard(source) || chosen.Type is "playStrategy" or "equip" or "useAbility" && chosen.AlternativeCost is null)
         {
             var choices = Actions.Where(a => a.Enabled && a.CardId == sourceId && a.Command?.AbilityId == command.AbilityId).ToArray();
             foreach (var id in choices.Select(a => a.Command!.PerformerId).OfType<string>().Distinct())
             {
                 if (choices.Select(a => a.Command!.PerformerId).Distinct().Count() < 2) break;
                 var next = choices.FirstOrDefault(a => a.Command!.PerformerId == id && command.TargetId is { } t && a.TargetIds?.Contains(t) == true) ?? choices.First(a => a.Command!.PerformerId == id);
-                clicks[id] = () => Choose(next with { Command = next.Command! with { TargetId = command.TargetId is { } t && next.TargetIds?.Contains(t) == true ? t : next.Command.TargetId } });
+                // Issue #960: a chosen (or not yet chosen) player stays as it is when the performer changes.
+                clicks[id] = () => Choose(next with { Command = next.Command! with { TargetId = command.TargetId is { } t && next.TargetIds?.Contains(t) == true ? t : next.Command.TargetId, TargetPlayerId = IsPlayerTarget(next) ? command.TargetPlayerId : next.Command.TargetPlayerId } });
             }
         }
         else if (chosen.AlternativeCost is { } cost && !_alternativeCostConfirmed && !_reviewingAlternativeCost)

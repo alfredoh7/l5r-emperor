@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 6 (reactions). In a reaction window the card a reaction belongs to is highlighted and clicked on the table: a click prepares the reaction (the Play Reaction press commits it, as decided), and in the announce and order steps of a window both players hold a Reaction for, a click announces, retracts or orders the card's one choice. A card with more than one reaction or choice in the window keeps the list on the right. Pass, decline and Done announcing stay as buttons. Client only.",
+  "validation": "Native: check-reaction-flow-ui passes in all four modes with the new click-the-card step (highlight, prepare without submitting, Play Reaction waits for a target); check-table-click-ui passes with a new announce and retract step on a real two-player window; check-direct-play-ui, check-interactions, check-multi-targets-ui, check-province-target-ui, check-decision-chooser, check-stabilization, check-attack-targets-ui, check-board-ui pass. The order step (reactionOrder) uses the same click path but has no dedicated native step. Previously noted failures unchanged. Native UI checks are not run in CI.",
+  "remaining": "Phases 7 to 10 of the table-click plan. Reaction windows that need the player's choice of a Gold payment still use the existing payment controls.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/962",
+  "branch": "claude/962-table-click-reactions",
+  "updated": "2026-10-15T01:11:27.557528+00:00"
+}
