@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 9 (Gold payment). Clicking a card toggles any understood payment method of that card (produce, reaction, destroy, discount, reduce), not only bowing a holding; a card that can pay two ways cycles none, first, second, none. A hand card with its own flow keeps its click. The amount stepper and the Suggested/Alternative dropdown stay in the sidebar, and an alternative-cost choice between two verbs on the same card (bow or destroy an Ancestor) also stays there because both options name one card; discarding a hand card by click already worked. Client only.",
+  "validation": "Native: check-gold-payment, check-opponent-payment-ui, check-stabilization, check-decision-chooser, check-reaction-flow-ui, check-direct-play-ui, check-table-click-ui, check-province-target-ui, check-interactions, check-board-ui pass. check-gameplay-controls gains a destruction-payment step (a click on the card chooses its method, a second click clears it, a third restores it and Confirm is enabled) that passes; the check then stops at the same later decision-chooser step that already fails identically on main. Previously noted failures unchanged. Native UI checks are not run in CI.",
+  "remaining": "Phase 10 (attack No target by clicking the performer again; unassign an attacker or defender by clicking the unit again).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/971",
+  "branch": "claude/971-table-click-payment",
+  "updated": "2026-10-15T03:20:10.744730+00:00"
+}
