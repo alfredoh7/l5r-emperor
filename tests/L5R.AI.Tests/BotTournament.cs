@@ -22,7 +22,8 @@ internal static class BotTournament
 {
     /// <summary>The bot arms. "champion" is the bot on main. A candidate branch registers its challenger here, with the BotContext flag that turns its change on.</summary>
     public static readonly Dictionary<string, Func<BotContext>> Arms = new() { ["champion"] = () => new(),
-        ["seppuku"] = () => new() { UseSeppukuPolicy = true } // round 1 (docs/bots/experiments/2026-10-15-seppuku.md)
+        ["seppuku"] = () => new() { UseSeppukuPolicy = true }, // round 1 (docs/bots/experiments/2026-10-15-seppuku.md)
+        ["defense"] = () => new() { UseInformedDefense = true } // round 2 (docs/bots/experiments/2026-10-15-defense.md)
     };
 
     public const ulong DevSeedBase = 1_000_000UL, HoldoutSeedBase = 9_000_000UL, IndependentOffset = 500_000UL;
