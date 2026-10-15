@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Published the private self-contained Windows playtest windows-main-20261015-c98ea77a-r1 from exact main c98ea77a, for issue 981. Two immutable checksum-verified extract-together ZIP assets include a first-launch assembly/play bootstrap, full game, bundled .NET runtime and pinned artwork. Shared delivery documentation and receipt only; no game source, rules, content or UI changes.",
+  "validation": "Strict Windows export/client compilation passed (zero warnings/errors); real exported bundled-runtime startup passed; native menu, menu-play and menu-flow passed on RTX 3060/OpenGL, including custom Practice start/pause/resume/settings. Both ZIP SHA-256/CRC, real multipart assembly, extracted export hash comparison, assembled runtime startup, inner CMD and outer bootstrap routing under spaces/ampersand/exclamation passed. GitHub uploaded asset sizes and SHA-256 match local validated bytes; prerelease publication succeeded. GitHub Mac check passed; hosted Windows/nightly jobs never started because billing/spending blocked runners. One ObjectDB warning on automated menu-flow exit. No complete hand-played match or external multiplayer acceptance.",
+  "remaining": "None for package delivery. Human full-match and external multiplayer acceptance remain separate. Hosted CI billing block is unresolved; no merge performed or requested.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/981",
+  "branch": "codex/981-windows-release",
+  "updated": "2026-10-15T21:04:02.676490+00:00"
+}

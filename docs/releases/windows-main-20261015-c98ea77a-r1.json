@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "tag": "windows-main-20261015-c98ea77a-r1",
+  "source_commit": "c98ea77a9e00eca1445d1304dad41933e64aa407",
+  "folder": "L5R Emperor Windows c98ea77a",
+  "complete_archive": {
+    "bytes": 2615042528,
+    "sha256": "b5a2c917a3ceb71ed5d3df208dd6b29fb81b839c6b9e4be22aa74642e76ec9b7"
+  },
+  "assets": [
+    {
+      "asset": "L5R-Emperor-Windows-c98ea77a-Part1.zip",
+      "bytes": 1468013369,
+      "sha256": "58ece441dfa49c9b1354d9dc7d9b59888ac9a53e0385fefa827af1e3f7ccaff3"
+    },
+    {
+      "asset": "L5R-Emperor-Windows-c98ea77a-Part2.zip",
+      "bytes": 1147036328,
+      "sha256": "d0faa2442324b14941d8b4a454d01eea2d478068abad078d69ee451828b79231"
+    }
+  ]
+}
