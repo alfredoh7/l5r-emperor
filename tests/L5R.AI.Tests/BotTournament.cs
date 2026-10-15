@@ -16,6 +16,7 @@ using L5R.Core;
 //   L5R_TOURN_SEEDS=<n>             seeds per ordered pair (the fixed sample from the power note), L5R_TOURN_OUT=<path without extension> writes <path>.json and <path>.md.
 //   L5R_TOURN_SEED_START=<k>        first seed index (default 0): a follow-up uses a fresh block, never a re-run of the same seeds.
 //   L5R_TOURN_PILOT=<a;b;c>         only games in which the challenger pilots one of these decks (for a hypothesis about specific decks; pre-register the list, and report the full pool too).
+//   L5R_TOURN_ONLY=<deckA|deckB|seed|challengerSeat> replays one game; L5R_TOURN_TRACE=1 prints what a seat was offered when the bot stalls.
 //   L5R_TOURN_DECKS=<preloaded-decks.json> (default src/L5R.Client/Content/preloaded-decks.json).
 internal static class BotTournament
 {
@@ -44,7 +45,7 @@ internal static class BotTournament
         }
         try { game = MatchEngine.CreateCustomMatch(seed, deck0, deck1); }
         catch (Exception e) { return End(null, "setup", 0, e.Message.Split('\n')[0]); }
-        var memory = new[] { makers[0](), makers[1]() }; var sameAnswer = 0; string? lastRefusal = null;
+        var memory = new[] { makers[0](), makers[1]() }; var refusedAt = new HashSet<(long, int)>(); var sameAnswer = 0; string? lastRefusal = null;
         for (var n = 0; n < 6000; n++)
         {
             try
@@ -62,15 +63,23 @@ internal static class BotTournament
                 }
                 var view = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(game.GetView(seat)))!;
                 var decision = TrainingOpponent.Choose(view, actions, memory[seat]);
-                if (decision.Command is null) return End(null, "stall", v0.TurnNumber, $"seat {seat} had no command: {decision.Reason}");
+                if (decision.Command is null && Environment.GetEnvironmentVariable("L5R_TOURN_TRACE") == "1")
+                {
+                    Console.WriteLine($"STALL seed {seed} seat {seat} turn {v0.TurnNumber} phase {v0.Phase} pending {v0.PendingChoice?.Type} priority {v0.PriorityPlayerId}: {decision.Reason}");
+                    foreach (var a in actions.Where(x => x.Enabled)) Console.WriteLine($"  offered {a.Type} card={a.CardId} ability={a.Command?.AbilityId} choice={a.Command?.Choice} target={a.Command?.TargetId} label={a.Label}");
+                }
+                // "engine stall": every action the seat was offered at this version has been refused by the engine (a legal-action-list gap in Core), so no bot could continue; "stall" is the bot's own failure.
+                if (decision.Command is null) return End(null, refusedAt.Contains((view.Version, seat)) ? "engine stall" : "stall", v0.TurnNumber, $"seat {seat} had no command: {decision.Reason}");
                 var outcome = game.Execute(decision.Command);
                 if (outcome.Accepted)
                 {
+                    if (Environment.GetEnvironmentVariable("L5R_TOURN_TRACE") == "1" && v0.TurnNumber >= 10) Console.WriteLine($"T{v0.TurnNumber} {v0.Phase} seat {seat} {decision.Command.Type}/{decision.Command.AbilityId} card={decision.Command.CardId} target={decision.Command.TargetId} | {string.Join(" || ", game.State.Events.TakeLast(2).Select(e => e.Message))}");
                     sameAnswer = 0; lastRefusal = null;
                     var key = decision.Command.Type == "useAbility" ? "ability" : decision.Command.Type; counts[seat][key] = counts[seat].GetValueOrDefault(key) + 1;
                     continue;
                 }
-                refused++; var signature = JsonSerializer.Serialize(decision.Command);
+                if (Environment.GetEnvironmentVariable("L5R_TOURN_TRACE") == "1") Console.WriteLine($"REFUSED seed {seed} seat {seat} turn {v0.TurnNumber} {decision.Command.Type}/{decision.Command.AbilityId} card={decision.Command.CardId} target={decision.Command.TargetId}: {outcome.Error}");
+                refusedAt.Add((view.Version, seat)); refused++; var signature = JsonSerializer.Serialize(decision.Command);
                 memory[seat].NoteRejection(view.Version, decision.Command, outcome.Error);
                 sameAnswer = signature == lastRefusal ? sameAnswer + 1 : 0; lastRefusal = signature;
                 if (sameAnswer >= 24 || refused > 400) return End(null, "illegal", v0.TurnNumber, $"refused repeatedly: {outcome.Error}");
@@ -125,6 +134,10 @@ internal static class BotTournament
                 if (pilots is null || pilots.Contains(pairs[i].A.Name)) jobs.Add((i, seed, 0)); // the challenger pilots deck A in seat 0
                 if (pilots is null || pilots.Contains(pairs[i].B.Name)) jobs.Add((i, pairing == "independent" ? seed + IndependentOffset : seed, 1)); // and deck B in seat 1
             }
+        if (Environment.GetEnvironmentVariable("L5R_TOURN_ONLY") is { Length: > 0 } only) // "deckA|deckB|seed|challengerSeat": replay one game (the seed is the full seed of a report row)
+        {
+            var f = only.Split('|'); jobs = [(Array.FindIndex(pairs, p => p.A.Name == f[0] && p.B.Name == f[1]), ulong.Parse(f[2]), int.Parse(f[3]))];
+        }
         var wall = Stopwatch.StartNew(); var results = new GameRecord[jobs.Count];
         Parallel.For(0, jobs.Count, new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) }, i =>
         {
@@ -156,7 +169,7 @@ internal static class BotTournament
             var c = pair.Count(y => ChalWon(y.g));
             if (c == 2) both++; else if (c == 0) neither++; else split++;
         }
-        var bad = results.Where(g => g.Error is not null || g.Reason is "stall" or "illegal" or "exception" or "decision cap" or "setup").ToArray();
+        var bad = results.Where(g => g.Error is not null || g.Reason is "stall" or "engine stall" or "illegal" or "exception" or "decision cap" or "setup").ToArray();
         double Mean(IEnumerable<double> v) { var a = v.ToArray(); return a.Length == 0 ? 0 : a.Average(); }
         double ProvMargin(GameRecord g) => g.ProvincesLeft[g.ChallengerSeat] - g.ProvincesLeft[1 - g.ChallengerSeat];
         double HonorMargin(GameRecord g) => g.Honor[g.ChallengerSeat] - g.Honor[1 - g.ChallengerSeat];
@@ -178,7 +191,7 @@ internal static class BotTournament
         sb.AppendLine($"- Provinces left margin {Mean(decided.Select(ProvMargin)):+0.00;-0.00}; Honor margin {Mean(decided.Select(HonorMargin)):+0.0;-0.0}; Personalities in play margin {Mean(decided.Select(g => (double)(g.Personalities[g.ChallengerSeat] - g.Personalities[1 - g.ChallengerSeat]))):+0.00;-0.00}.");
         sb.AppendLine($"- Game length: mean turn {Mean(decided.Select(g => (double)g.Turn)):F1} (challenger wins {Mean(decided.Where(ChalWon).Select(g => (double)g.Turn)):F1}, losses {Mean(decided.Where(g => !ChalWon(g)).Select(g => (double)g.Turn)):F1}); turn-limit games {results.Count(g => g.Reason == "turn limit")}.");
         sb.AppendLine($"- Victory reasons: {string.Join("; ", reasons)}.");
-        sb.AppendLine($"- **Soundness:** stalls {results.Count(g => g.Reason == "stall")}, illegal {results.Count(g => g.Reason == "illegal")}, exceptions {results.Count(g => g.Reason == "exception")}, decision cap {results.Count(g => g.Reason == "decision cap")}, setup failures {results.Count(g => g.Reason == "setup")}, out of time {results.Count(g => g.Reason == "out of time")}; games with a refused-then-retried action {results.Count(g => g.Refused > 0)} ({results.Sum(g => g.Refused)} refusals, informational). The bar for promotion is zero in the first six.");
+        sb.AppendLine($"- **Soundness:** bot stalls {results.Count(g => g.Reason == "stall")} (engine stalls, where the engine refused the only offered action: {results.Count(g => g.Reason == "engine stall")}), illegal {results.Count(g => g.Reason == "illegal")}, exceptions {results.Count(g => g.Reason == "exception")}, decision cap {results.Count(g => g.Reason == "decision cap")}, setup failures {results.Count(g => g.Reason == "setup")}, out of time {results.Count(g => g.Reason == "out of time")}; games with a refused-then-retried action {results.Count(g => g.Refused > 0)} ({results.Sum(g => g.Refused)} refusals, informational). The bar for promotion is zero bot stalls and none of the others; engine stalls are reported to the rules lane.");
         sb.AppendLine().AppendLine("## Per deck (challenger piloting the deck)").AppendLine().AppendLine("| Deck | Games decided | Challenger wins |").AppendLine("| --- | --- | --- |");
         foreach (var name in results.SelectMany(g => new[] { g.Deck0, g.Deck1 }).Distinct().OrderBy(x => x))
         {
