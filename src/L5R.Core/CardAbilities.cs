@@ -7323,6 +7323,27 @@ public sealed partial class MatchEngine
         return null;
     }
 
+    /// <summary>
+    /// "If opposed" moves (Michi, Takasho, Rikyou) may only be announced where an enemy unit stands at the battlefield. The same test is made again when the action resolves, but there it must not
+    /// refuse anything: resolution can run when a reaction window closes (the opponent's reaction may have removed the opposition in between), and a refused command there leaves the player's only
+    /// offered action, passing the window, refused for good (issue #967). So at resolution the move simply does nothing.
+    /// </summary>
+    private void RequireOpposedForConditionalMove(GameCommand command)
+    {
+        var message = command.AbilityId switch
+        {
+            "michi-move" => "Michi may only reinforce a battlefield where he would be opposed.",
+            "takasho-move" => "Takasho may only reinforce a battlefield with enemy units present.",
+            "rikyou-move" => "Rikyou may only reinforce a battlefield with enemy units present.",
+            _ => null
+        };
+        if (message is null || _state.CurrentBattleProvince is not int province) return;
+        Require(Army(1 - command.PlayerId, province).Any(), message);
+    }
+
+    private void FizzleMove(PlayerState player, CardInstance source) =>
+        Emit("abilityFizzled", $"{Definition(source).Name}'s move does nothing: there are no enemy units at the current battlefield.", player.Id, source.Id);
+
     private void UseAbility(GameCommand command)
     {
         // A multi-target action's first card target also rides in TargetId (issue #336), so everything written for a single target sees it.
@@ -7330,6 +7351,7 @@ public sealed partial class MatchEngine
         command = NormalizeSlotCommand(command);
         Require(command.CardId is null || !_state.Cards.TryGetValue(command.CardId, out var announcing) || !IsResolving(announcing), "This card is already being resolved.");
         ValidateAbility(command);
+        RequireOpposedForConditionalMove(command); // issue #967: the "if opposed" test is made when the action is announced
         EnterResolutionArea(command); // issue #917 (ResolutionArea.cs): a Strategy or Ring from the hand leaves the hand for the resolution area as it is announced
         ControlReturnsOnAnnouncement(command); // issue #501 (EmperorMechB.cs): Shadow Dragon's "return control of him ... after the next time this game this ability is announced".
         NoteP1Announcement(command); // Issue #503 (EmperorP1.cs): Osote, Bakishi, Sanetomo.
@@ -8066,7 +8088,7 @@ public sealed partial class MatchEngine
                 if (!HasAttachments(target!) && ControlsKeyword(player.Id, "Courtier")) DestroyUnits([target!], false, player.Id);
                 break;
             case "takasho-move":
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Takasho may only reinforce a battlefield with enemy units present.");
+                if (!Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) { FizzleMove(player, source!); break; } // "if opposed": with no enemy unit left the action does nothing (issue #967)
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 GrantAdditionalAction(player.Id, [source!.Id]);
                 break;
@@ -9450,7 +9472,7 @@ public sealed partial class MatchEngine
                 break;
             case "kouzei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "michi-move":
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Michi may only reinforce a battlefield where he would be opposed.");
+                if (!Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) { FizzleMove(player, source!); break; } // "if opposed": with no enemy unit left the action does nothing (issue #967)
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 StraightenUnit(source!);
                 break;
@@ -9516,7 +9538,7 @@ public sealed partial class MatchEngine
                 break;
             case "obote-boost": ApplyModifier(source!, source!.Id, id, "Force", FocusValueOf(target!)); break;
             case "rikyou-move":
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Rikyou may only reinforce a battlefield with enemy units present.");
+                if (!Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) { FizzleMove(player, source!); break; } // "if opposed": with no enemy unit left the action does nothing (issue #967)
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 StraightenUnit(source!);
                 break;

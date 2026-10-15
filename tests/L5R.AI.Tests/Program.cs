@@ -280,6 +280,7 @@ runner.Run("sure-reactions", SureReactionsTests.Tests); // issue #963: bot loop 
 runner.Run("bodies-first", BodiesFirstTests.Tests); // issue #963: bot loop round 3
 runner.Run("informed-defense", InformedDefenseTests.Tests); // issue #963: bot loop round 2
 runner.Run("seppuku", SeppukuTests.Tests); // issue #963: bot loop round 1
+runner.Run("michi-stall", MichiStallReplayTests.Tests); // issue #967
 runner.Run("prudence", PrudenceTests.Tests); // issue #902: Mendon's bot notes
 runner.Run("cavalry-defense", CavalryDefenseTests.Tests); // issue #946: defending against the attacker's possible Cavalry
 runner.Run("bot-profile", BatchProfile.Tests); // issue #888: opt-in timing of seeded bot-vs-bot matches
