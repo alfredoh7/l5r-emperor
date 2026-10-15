@@ -46,6 +46,18 @@ public sealed class BotContext
     /// <summary>Issue #946 (Mendon): attacking, the bot holds its Cavalry units back in the Infantry Maneuvers Segment and assigns them in the Cavalry Maneuvers Segment, planning the whole army against the defense it can then see. ON by default; the arena switches it off to measure it.</summary>
     public bool UseCavalryAttack { get; init; } = true;
 
+    /// <summary>Issue #963 (bot loop, round 1): order Seppuku only for a Dishonorable Personality, only when the family Honor is low enough for its dishonorable death to threaten the game, and only when it cannot be rehonored by winning a battle this turn. Promoted to ON by default (Mendon, 2026-10-15) after dev 58.5% and held-out 53.8% (docs/bots/experiments). Off: the bot orders it whenever it is offered.</summary>
+    public bool UseSeppukuPolicy { get; init; } = true;
+
+    /// <summary>Issue #963 (bot loop, round 2): assign the defense to the battlefield where it wins or saves a Province, and do not spend units where the Province holds on its own. Promoted to ON by default (Mendon, 2026-10-15) after dev 51.4% and held-out 51.4% (docs/bots/experiments). Off: all unbowed Personalities defend the largest visible attacking army.</summary>
+    public bool UseInformedDefense { get; init; } = true;
+
+    /// <summary>Issue #963 (bot loop, round 3): while the bot has fewer Personalities than it needs and one it could recruit is face-up in a Province, the Action phase does not spend Gold on cards from the hand (the early-economy rule, kept for the whole game).</summary>
+    public bool UseBodiesFirst { get; init; } = false;
+
+    /// <summary>Issue #963 (bot loop, round 4): a Reaction that helps, penalizes, bows or destroys is always played when it is worth anything, instead of being declined by a deterministic roll (30% to 90% chance to play). Off: the roll.</summary>
+    public bool UseSureReactions { get; init; } = false;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 

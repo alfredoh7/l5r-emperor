@@ -51,7 +51,7 @@ for k, _ in kinds.most_common(14):
 
 print("\n## Soundness findings and refusals\n")
 for g in games:
-    if g["Reason"] in ("stall", "illegal", "exception", "decision cap", "setup", "out of time"):
+    if g["Reason"] in ("stall", "engine stall", "illegal", "exception", "decision cap", "setup", "out of time"):
         print(f"- {g['Reason']}: {g['Deck0']} vs {g['Deck1']} seed {g['Seed']} turn {g['Turn']}: {g['Error']}")
 ref = collections.Counter()
 for g in games:
