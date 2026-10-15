@@ -68,11 +68,19 @@ public partial class Main
         { _multiActiveSlot = next.Slot; _multiExpanded.Add(next.Slot); _multiExpanded.Remove(slotId); }
         RefreshMultiTargets(slotId + "/" + id);
     }
+    /// <summary>The card groups that can take this card now: it is a candidate and the group has room, or it is already chosen there and a click would remove it.</summary>
+    private IEnumerable<TargetSlotOption> MultiOpenCardSlots(string cardId) => MultiUpFront.Where(s => s.Kind == TargetSlotKinds.Card && s.CardIds.Contains(cardId)
+        && (_multiCards.GetValueOrDefault(s.Slot)?.Contains(cardId) == true || (_multiCards.GetValueOrDefault(s.Slot)?.Count ?? 0) < s.Max));
+
     private bool SelectMultiCard(CardView card)
     {
         if (!MultiTargetActive) return false;
         var slot = MultiUpFront.FirstOrDefault(s => s.Slot == _multiActiveSlot && s.Kind == TargetSlotKinds.Card);
         if (slot?.CardIds.Contains(card.Id) == true) { ToggleMultiCard(slot.Slot, card.Id); return true; }
+        // Issue #969: a card that only another open group accepts switches to that group (a card both groups accept stays a choice for the player).
+        var others = MultiOpenCardSlots(card.Id).Where(s => s.Slot != _multiActiveSlot).ToArray();
+        if (others.Length == 1) { ToggleMultiCard(others[0].Slot, card.Id); return true; }
+        if (others.Length > 1) { SetNotice("This card fits more than one group. Open the group you want in the sidebar, then click it."); return true; }
         // A Gold source can still be chosen through the existing payment panel. A board click during target
         // selection always belongs to the active group, including when the candidate is itself a Holding.
         SetNotice("Choose a gold-outlined card for the active group, or open another group in the sidebar."); return true;
