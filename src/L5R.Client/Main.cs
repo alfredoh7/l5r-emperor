@@ -44,6 +44,28 @@ public partial class Main : Node
     private bool _fullscreenResumeSubmitted;
     private bool _pileHoverSent;
     private string? _hoverProbeCard;
+    // Issue #975: the probe aims at the card only once it has stopped moving (a card still settling made the pointer land beside it) and keeps the pointer on it until the preview opens, within a limit.
+    private Vector2 _hoverProbeLastPoint; private int _hoverProbeStillFrames, _hoverProbeAttempts, _hoverProbeWaitedForFocus;
+    private bool HoverProbeFinished => _hoverProbeCard is not null && (CardTile.LastPreviewCardId == _hoverProbeCard || _hoverProbeAttempts >= 240);
+    private void DriveHoverProbe()
+    {
+        var tile = _tiles.FirstOrDefault(t => t.Card.Id == (_hoverProbeCard ?? _selected?.Id));
+        if (tile is null) return;
+        // A tooltip, which carries the card preview, is shown only to a window that has focus: take it and wait for it, as the other native input probes do.
+        if (!GetWindow().HasFocus()) { GetWindow().GrabFocus(); _hoverProbeStillFrames = 0; _hoverProbeWaitedForFocus++; return; }
+        var point = ScreenCenter(tile);
+        if (_hoverProbeCard is null)
+        {
+            _hoverProbeStillFrames = point.DistanceTo(_hoverProbeLastPoint) < .5f ? _hoverProbeStillFrames + 1 : 0; _hoverProbeLastPoint = point;
+            if (_hoverProbeStillFrames < 12) return; // twelve consecutive frames at the same place
+            _hoverProbeCard = tile.Card.Id; _hoverProbeVersion = View.Version; _hoverProbeCommand = _chosen?.Command;
+            CardTile.LastPreviewCardId = null;
+        }
+        _hoverProbeAttempts++;
+        GetViewport().WarpMouse(point);
+        GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
+        if (_hoverProbeAttempts == 1) GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
+    }
     private long _hoverProbeVersion;
     private GameCommand? _hoverProbeCommand;
     private Button? _paymentConfirm;
@@ -329,19 +351,11 @@ public partial class Main : Node
                 _filmFrames++;
             }
 
-            if (_capturePrepared && _captureClock > .6 && _hoverProbeCard is null && _captureMode.EndsWith("hover", StringComparison.Ordinal))
-            {
-                var tile = _tiles.First(t => t.Card.Id == _selected?.Id);
-                _hoverProbeCard = tile.Card.Id; _hoverProbeVersion = View.Version; _hoverProbeCommand = _chosen?.Command;
-                CardTile.LastPreviewCardId = null;
-                var point = ScreenCenter(tile);
-                GetViewport().WarpMouse(point);
-                GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
-                GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
-            }
+            if (_capturePrepared && _captureClock > .6 && _captureMode.EndsWith("hover", StringComparison.Ordinal) && !HoverProbeFinished)
+                DriveHoverProbe();
             // These fixtures review settled menus, after the startup turn announcement clears.
             if ((_captureMode.StartsWith("published-lacquer-", StringComparison.Ordinal) || _captureMode.StartsWith("published-home", StringComparison.Ordinal) || _captureMode == "published-rules" || _captureMode.StartsWith("published-grants", StringComparison.Ordinal)) && _turnBloom.Playing) return;
-            if (_capturePrepared && (!_captureMode.StartsWith("published-fallen", StringComparison.Ordinal) || _fallenProbeDone) && (!_captureMode.StartsWith("published-grants", StringComparison.Ordinal) || _grantProbeDone) && (!_captureMode.Contains("courts", StringComparison.Ordinal) || _battleProbeDone) && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            if (_capturePrepared && (!_captureMode.EndsWith("hover", StringComparison.Ordinal) || HoverProbeFinished) && (!_captureMode.StartsWith("published-fallen", StringComparison.Ordinal) || _fallenProbeDone) && (!_captureMode.StartsWith("published-grants", StringComparison.Ordinal) || _grantProbeDone) && (!_captureMode.Contains("courts", StringComparison.Ordinal) || _battleProbeDone) && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
