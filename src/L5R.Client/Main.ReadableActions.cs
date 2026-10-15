@@ -44,7 +44,8 @@ public partial class Main
             {
                 if (choices.Select(a => a.Command!.PerformerId).Distinct().Count() < 2) break;
                 var next = choices.FirstOrDefault(a => a.Command!.PerformerId == id && command.TargetId is { } t && a.TargetIds?.Contains(t) == true) ?? choices.First(a => a.Command!.PerformerId == id);
-                clicks[id] = () => Choose(next with { Command = next.Command! with { TargetId = command.TargetId is { } t && next.TargetIds?.Contains(t) == true ? t : next.Command.TargetId } });
+                // Issue #960: a chosen (or not yet chosen) player stays as it is when the performer changes.
+                clicks[id] = () => Choose(next with { Command = next.Command! with { TargetId = command.TargetId is { } t && next.TargetIds?.Contains(t) == true ? t : next.Command.TargetId, TargetPlayerId = IsPlayerTarget(next) ? command.TargetPlayerId : next.Command.TargetPlayerId } });
             }
         }
         else if (chosen.AlternativeCost is { } cost && !_alternativeCostConfirmed && !_reviewingAlternativeCost)

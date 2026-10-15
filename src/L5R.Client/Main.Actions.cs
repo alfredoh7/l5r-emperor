@@ -411,6 +411,8 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
         if (!ReactionFlowOwnsControls && PerformerClicks().Count > 0) _inspector.AddChild(Palette.Wrapped("Choose the performing Personality: click a highlighted Personality on the table.", 15, Palette.Gold)); // issue #793
         if (IsProvinceTarget(action)) RenderProvincePicker(action);
+        var needsPlayer = PlayerTargetActive && !PlayerPicked; // issue #960: "choose a player" is the player's decision, never a default
+        if (PlayerTargetActive) RenderPlayerPicker(action);
         if (targets.Length > 0)
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
@@ -440,7 +442,7 @@ public partial class Main
             AddConfirm(CommitButtonLabel(action), 0, false, () => command, "Cancel action", false); return;
         }
         var (required, ready) = RenderGoldPanel(action);
-        AddConfirm(CommitButtonLabel(action), required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince);
+        AddConfirm(CommitButtonLabel(action), required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince && !needsPlayer);
     }
 
     // Back to "Choose a target…": the action keeps its legal targets but none is selected.

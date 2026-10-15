@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow and how a play's player is chosen). Table clicks, phase 5. 'Choose a player' abilities (Target player) are decided by clicking either player's stronghold or clan plaque; the draft starts with no player picked, holds Confirm until one is, highlights both strongholds and plaques, and keeps the two sidebar rows as an alternative. The players are variants of one play (PlayKey no longer splits them), and NeedsPlayerPick makes the draft ask, so a player target never resolves for 'you' by default (phase 1's split into two plays is replaced). An ability whose text names 'another player' has one legal option and is used without asking. Performer clicks keep the chosen player. Player slots of multi-target abilities take the same clicks. Client only.",
+  "validation": "Native: check-direct-play-ui passes with the Know Their Minds step (draft begins with no player, Confirm waits, opponent stronghold, own stronghold and opponent clan plaque each choose) and the Imprudent Misstep automatic step; check-table-click-ui, check-multi-targets-ui, check-province-target-ui, check-interactions, check-reaction-flow-ui, check-stabilization, check-decision-chooser, check-board-ui, check-clan-placard, check-player-clarity pass. check-gameplay-controls fails identically on main without this change (a decision-chooser scenario), so it is pre-existing. Previously noted failures unchanged. Native UI checks are not run in CI. Multi-target player slots compile and reuse the same path but have no dedicated native step.",
+  "remaining": "Phases 6 to 10 of the table-click plan. Reactions that choose a player (Horume, Demiyah) start from the reaction list until phase 6.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/960",
+  "branch": "claude/960-table-click-player-target",
+  "updated": "2026-10-15T00:23:36.532642+00:00"
+}
