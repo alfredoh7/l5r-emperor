@@ -189,8 +189,25 @@ internal static class BotTournament
         sb.AppendLine($"Independent games, exact binomial, two-sided alpha .05, 80% power: detect 55% needs about **{GamesNeeded(.55)}** decided games; 60% needs about **{GamesNeeded(.60)}**; 52% needs about {GamesNeeded(.52)}. At this run's throughput ({gamesPerSecond:F2} games/s, {decidedShare:P0} decided) that is {Eta(GamesNeeded(.55))} and {Eta(GamesNeeded(.60))} of wall clock. `same` pairing removes deck, seat and shuffle noise, so it needs fewer games when the bots differ; the A/A with `independent` pairing is the honest noise floor.");
         if (unplayable.Count > 0) sb.AppendLine().AppendLine($"{unplayable.Count} deck(s) were not playable.");
         foreach (var g in bad.Take(20)) sb.AppendLine($"- FINDING {g.Deck0} vs {g.Deck1}, seed {g.Seed}, challenger seat {g.ChallengerSeat}: {g.Reason} turn {g.Turn} {g.Error}");
-        var summary = new { challenger, pairing, mode, seeds, pairs = pairCount, games = results.Length, decided = decided.Length, challengerWins = won, championWins = lost, seat0Wins = seat0, both, neither, split,
-            soundnessFindings = bad.Length, wallSeconds = wall.TotalSeconds, gamesPerSecond };
+        var summary = new
+        {
+            challenger,
+            pairing,
+            mode,
+            seeds,
+            pairs = pairCount,
+            games = results.Length,
+            decided = decided.Length,
+            challengerWins = won,
+            championWins = lost,
+            seat0Wins = seat0,
+            both,
+            neither,
+            split,
+            soundnessFindings = bad.Length,
+            wallSeconds = wall.TotalSeconds,
+            gamesPerSecond
+        };
         return (sb.ToString(), summary);
     }
 }
