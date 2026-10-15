@@ -65,7 +65,7 @@ public partial class Main
             if (selected) button.AddThemeStyleboxOverride("normal", SidebarSkin.Surface(true, tint: new Color(1.4f, 1.25f, .85f)));
             _inspector.AddChild(button);
         }
-        if (action.NoTarget) AddOption("AttackNoTarget", "No target\nNothing will be hit. Costs still apply.", AttackChoice.NoTarget);
+        if (action.NoTarget) AddOption("AttackNoTarget", "No target\nNothing will be hit. Costs still apply. (Click the attacking card on the table for the same.)", AttackChoice.NoTarget);
         foreach (var province in action.Provinces ?? [])
             AddOption("AttackProvince" + province, $"This battlefield’s province\nProvince {province + 1}", AttackChoice.Province, province);
         var targets = (action.TargetIds ?? []).Select(FindCard).OfType<CardView>().Where(c => c.Definition is not null).ToArray();

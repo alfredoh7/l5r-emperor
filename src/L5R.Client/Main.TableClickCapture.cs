@@ -137,7 +137,27 @@ public partial class Main
             SelectCard(View.Players.First(p => p.Id != View.ViewerId).Stronghold); await EventFrames(4);
             SupportRequire(_chosen?.Command?.TargetPlayerId == 1, "The player was not chosen by clicking the stronghold");
 
-            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a target in a discard pile and an action played from it are chosen from the pile; a card with no usable ability is only selected; nothing starts out of turn.");
+            // 11. Issue #973: a unit assigned to a battlefield goes home when it is clicked again.
+            {
+                var state = MatchEngine.CreatePublishedTestMatch(42).State;
+                foreach (var p in state.Players) { foreach (var id in p.Hand) state.Cards.Remove(id); p.Hand.Clear(); p.TurnsTaken = 2; }
+                state.ActivePlayerId = state.PriorityPlayerId = 0; state.PendingChoice = null; state.Phase = Phase.AttackDeclaration;
+                SupportFixtureCard(state, 229, 0, Zone.Home);
+                var engine = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.Invoke(null, [state])!;
+                SupportRequire(engine.Execute(new GameCommand("declareAttack", 0, engine.Version)).Accepted, "Could not declare the attack");
+                await LoadSupportFixture(engine, 0);
+                var attacker = View.Players[0].Home.Single(c => c.Definition?.Type == CardType.Personality);
+                var battlefield = Actions.First(a => a.Enabled && a.Type == "attack").Provinces![0];
+                SelectCard(attacker); await EventFrames(4);
+                SelectProvince(1, battlefield); await EventFrames(4);
+                SupportRequire(_assignments.TryGetValue(attacker.Id, out var sentTo) && sentTo == battlefield, "The unit was not assigned to the battlefield");
+                SelectCard(attacker); await EventFrames(4);
+                SupportRequire(!_assignments.ContainsKey(attacker.Id), "Clicking the assigned unit again did not send it home");
+                SelectProvince(1, battlefield); await EventFrames(4);
+                SupportRequire(_assignments.TryGetValue(attacker.Id, out sentTo) && sentTo == battlefield, "The unit could not be assigned again after going home");
+            }
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a target in a discard pile and an action played from it are chosen from the pile; an assigned unit goes home when clicked again; a card with no usable ability is only selected; nothing starts out of turn.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
