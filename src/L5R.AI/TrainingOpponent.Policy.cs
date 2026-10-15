@@ -46,7 +46,7 @@ public static partial class TrainingOpponent
             // never a gamble: the bot always takes it, unless it would only cost the bot Honor.
             if (id is not null && AbilityCatalog.All.TryGetValue(id, out var printed) && printed.Trigger == "own-enters-play" && !intent.HonorLoss) return 160 + RankBonus(intent.Rank);
             var roll = BotContext.Roll(x.View.Version, id, command.CardId);
-            var weight = 0.3 + 0.15 * (int)intent.Rank;
+            var weight = x.Memory.UseSureReactions && intent.Rank >= EffectRank.Help ? 1.0 : 0.3 + 0.15 * (int)intent.Rank; // issue #963 round 4: a Reaction that does something is not declined by chance
             return roll < weight ? 150 + RankBonus(intent.Rank) : 50;
         }
         // Hand-tuned values for the abilities the bot understood before issue #642 (they score the chosen target).

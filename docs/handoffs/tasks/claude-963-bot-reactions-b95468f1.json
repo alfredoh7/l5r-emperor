@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bot loop rounds 1-4. Per Mendon's approval (2026-10-15) the Seppuku policy (UseSeppukuPolicy) and informed defense (UseInformedDefense) are now ON by default; bodies-first and sure-reactions stay off (negative results). Each has a unit test and a pre-registration with results in docs/bots/experiments; BOT_LOGIC.md updated. No Core, protocol or UI change.",
+  "validation": "bash tools/check.sh --skip-client passed with the promoted defaults. Evidence: Seppuku dev 58.5% / held-out 53.8%; defense dev 51.4% / held-out 51.4%; bodies 49.8%; reactions 50.2%.",
+  "remaining": "Re-baseline A/A after merge; Core fix for the Michi stall is in PR #978.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/963",
+  "branch": "claude/963-bot-reactions",
+  "updated": "2026-10-15T05:55:56.295234+00:00"
+}

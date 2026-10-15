@@ -116,7 +116,7 @@ public static partial class TrainingOpponent
             var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
-                : lastStand ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
+                : lastStand ?? (x.Memory.UseInformedDefense ? InformedDefenseProvince(x, units, provinces) : null) ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
             return command with { Assignments = action.Type == "attack" ? HoldCavalry(x, units.ToDictionary(c => c.Id, _ => target)) : units.ToDictionary(c => c.Id, _ => target) };
         }
         if (action.Type == "discardHand")
@@ -284,11 +284,13 @@ public static partial class TrainingOpponent
                 if (armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0) return 80;
                 return armies.Length == 1 && TradeOf(x, assignments.Keys) is { } traded ? TradeScore(traded) : 0;
             case "assignDefense":
+                if (x.Memory.UseInformedDefense && InformedDefenseScore(x, command) is { } informed) return informed;
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
                 if (enemyForce == 0) return CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // issue #946: nobody is assigned yet, but Cavalry is on its way
                 if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
+            case "orderSeppuku": return x.Memory.UseSeppukuPolicy ? SeppukuScore(x, command) : PassScore + 1;
             case "pass": return PassScore;
             // A convenience for a human who wants to skip every remaining battle in one go; the bot simply passes when its turn comes (and it is refused while a window is open).
             case "passAllBattles": return -100;

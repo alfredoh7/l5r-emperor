@@ -73,4 +73,46 @@ public static partial class TrainingOpponent
         var (units, provinces) = AttackInputs(x, action);
         return PlanAttack(x, units, provinces) is { } whole && HoldCavalry(x, whole) is var part && part.Count == assignments.Count && part.All(p => assignments.TryGetValue(p.Key, out var sent) && sent == p.Value) ? whole : assignments;
     }
+
+    // ---- Defending: where the defense changes the result (issue #963, bot loop round 2) ----------------------------------------------------------------------------------------
+    // Rules (core rules, battle resolution, as the engine applies them): the army with more Force wins and the loser's whole army is destroyed; a Province falls only when the attackers' Force
+    // exceeds the defenders' Force plus the Province's Strength. So a defense is worth sending only where it wins (the attackers are destroyed and nothing is lost) or where it is the difference
+    // between a Province standing and falling. Everywhere else the defenders are risked or exposed for nothing. Only the public view is read; nothing names a card or a deck.
+
+    private static int AttackersAt(Ctx x, int province) => ArmyForce(x.Opponent.Army.Where(c => c.ProvinceIndex == province));
+
+    private static int DefendersForce(Ctx x, IEnumerable<string> unitIds)
+    {
+        var ids = unitIds.ToHashSet(StringComparer.Ordinal);
+        return ArmyForce(x.Self.Home.Where(c => ids.Contains(c.Id) || c.AttachedTo is not null && ids.Contains(c.AttachedTo)));
+    }
+
+    /// <summary>The battlefield to send every offered defender to: where they win outright (attackers destroyed), else where they save a Province that would fall, else null (the old rule decides).</summary>
+    private static int? InformedDefenseProvince(Ctx x, CardView[] units, int[] offered)
+    {
+        var defenders = DefendersForce(x, units.Select(u => u.Id));
+        var contested = x.Self.Provinces.Where(p => !p.Destroyed && offered.Contains(p.Index) && AttackersAt(x, p.Index) > 0).ToArray();
+        if (contested.Length == 0 || defenders == 0) return null;
+        var wins = contested.Where(p => defenders > AttackersAt(x, p.Index)).ToArray();
+        // Winning kills the biggest army available, and a Province that would otherwise fall counts for more than one that would stand.
+        if (wins.Length > 0) return wins.OrderByDescending(p => AttackersAt(x, p.Index) > p.Strength ? 1 : 0).ThenByDescending(p => AttackersAt(x, p.Index)).ThenBy(p => p.Index).First().Index;
+        var saves = contested.Where(p => AttackersAt(x, p.Index) > p.Strength && AttackersAt(x, p.Index) <= p.Strength + defenders).ToArray();
+        return saves.Length > 0 ? saves.OrderByDescending(p => p.Strength).ThenBy(p => p.Index).First().Index : null;
+    }
+
+    /// <summary>The score of a defense assignment under the informed rule, or null to leave it to the old scores (nothing assigned, or the Cavalry and last-stand rules apply).</summary>
+    private static double? InformedDefenseScore(Ctx x, GameCommand command)
+    {
+        if (command.Assignments is not { Count: > 0 } || x.Opponent.Army.Length == 0) return null;
+        if (LastStandProvince(x, x.Self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return null; // the last Provinces will fall: the old rule defends and fights
+        var province = command.Assignments.Values.First();
+        var target = x.Self.Provinces.FirstOrDefault(p => p.Index == province);
+        if (target is null) return null;
+        var attackers = AttackersAt(x, province);
+        var defenders = DefendersForce(x, command.Assignments.Keys);
+        if (attackers == 0) return 0; // nobody is there: sending the defense is pointless
+        if (defenders > attackers) return 95; // wins: the attackers are destroyed
+        if (attackers > target.Strength && attackers <= target.Strength + defenders) return 70; // loses the battle but the Province stands
+        return 0; // would lose the defenders without saving the Province, or the Province stands anyway: keep them home
+    }
 }
