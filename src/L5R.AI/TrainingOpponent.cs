@@ -289,6 +289,7 @@ public static partial class TrainingOpponent
                 if (enemyForce == 0) return CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // issue #946: nobody is assigned yet, but Cavalry is on its way
                 if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
+            case "orderSeppuku": return x.Memory.UseSeppukuPolicy ? SeppukuScore(x, command) : PassScore + 1;
             case "pass": return PassScore;
             // A convenience for a human who wants to skip every remaining battle in one go; the bot simply passes when its turn comes (and it is refused while a window is open).
             case "passAllBattles": return -100;
