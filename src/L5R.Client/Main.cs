@@ -692,7 +692,7 @@ public partial class Main : Node
             tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id) || reactionSources.Contains(tile.Card.Id);
             tile.LegalTarget |= AlternativeCostCards().Contains(tile.Card.Id); // a hand card a discard way to pay may spend (Akodo Kamina)
             tile.DecisionSelected |= _reviewingAlternativeCost && _decisionSelection?.Command?.CardIds?.Contains(tile.Card.Id) == true;
-            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
+            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id)) || MultiTargetActive && MultiOpenCardSlots(tile.Card.Id).Any(); // issue #969: every open group's candidates
             if (StrongholdOwner(tile.Card) is int strongholdOwner) tile.LegalTarget |= PlayerTargetLegal(strongholdOwner);
             tile.ChosenTarget = StrongholdOwner(tile.Card) is int chosenPlayer && PlayerTargetChosen(chosenPlayer) || _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id) || _sources.Any(id => id.StartsWith(tile.Card.Id + "#", StringComparison.Ordinal)); tile.QueueRedraw(); // a payment token ("<card>#reaction") marks its card
