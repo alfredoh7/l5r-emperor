@@ -22,7 +22,7 @@ public partial class Main
             Unresizable = true,
             WrapControls = false
         };
-        var gallery = new FallenGallery(View.Players, owner);
+        var gallery = new FallenGallery(View.Players, owner) { Actionable = id => PileActionableIds().Contains(id) };
         _fallenWindow = window; _fallenGallery = gallery; AddChild(window); window.AddChild(gallery);
         gallery.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         void Close()
@@ -32,6 +32,7 @@ public partial class Main
             _clanHud.GetChildren().OfType<FallenCounter>().FirstOrDefault(c => c.Player.Id == id)?.GrabFocus();
         }
         gallery.Close += Close; window.CloseRequested += Close;
+        gallery.Chosen += id => { Close(); if (FindCard(id) is { } picked) SelectCard(picked); }; // issue #965: a dead card that is a legal choice
         PresentDialog(window, 1480, 811); gallery.BackButton.GrabFocus();
     }
 }
