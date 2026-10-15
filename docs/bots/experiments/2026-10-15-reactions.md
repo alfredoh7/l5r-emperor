@@ -15,3 +15,7 @@
 - **Decision rule:** promote-candidate only if dev and confirmation both pass; otherwise recorded as negative or inconclusive and the flag stays off.
 
 ## Result (fill in after the single run; the plan above is not edited)
+
+- Command: `L5R_TOURN_CHAL=reactions ... L5R_TOURN_SEED_START=48 L5R_TOURN_SEEDS=12` (1,728 games, 33 min).
+- **Dev:** challenger 862, champion 854 = **50.2%** (CI 47.9-52.6%); pairs won both 19, lost both 15 (two-sided p = 0.61). 0 bot stalls (12 engine stalls). Margins about zero.
+- **Outcome: negative (no effect).** Only 34 of 864 pairs differed at all, so the roll rarely decides a game; the flag stays off. Removing the random decline is not worth the loss of variety.
