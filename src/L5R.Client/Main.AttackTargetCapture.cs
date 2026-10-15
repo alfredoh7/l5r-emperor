@@ -154,6 +154,11 @@ public partial class Main
             CheckAttackConfirmation(); SupportRequire(_attackChoice == AttackChoice.NoTarget && View.Version == 0 && !IntentArrows().Any(), "Keyboard No target changed authority or left an arrow"); await SupportCapture("-no-target");
             await SupportClick(AttackCardFace(_attackCard)); CheckAttackConfirmation();
             SupportRequire(_chosen!.Command!.TargetId == _attackCard && _chosen.Command.Province is null && IntentArrows().Count() == 1 && View.Version == 0, "Card face did not produce a local card-target draft"); await SupportCapture("-card");
+            // Issue #973: the attacking card, clicked on the table, is the "No target" choice; the card target is restored for the checks that follow.
+            SelectCard(FindCard(_attackSource)!); await EventFrames(4);
+            SupportRequire(_attackChoice == AttackChoice.NoTarget && _chosen!.Command is { TargetId: null, Province: null }, "Clicking the attacking card did not choose No target");
+            ChooseAttackTarget(AttackChoice.Card, _attackCard); await EventFrames(4);
+            SupportRequire(_attackChoice == AttackChoice.Card && _chosen!.Command!.TargetId == _attackCard, "The card target was not restored");
             var savedZoom = _cameraZoom; var savedCenter = _cameraCenter;
             ZoomTable(1.7f, _tableViewport.GetGlobalTransform().AffineInverse() * ScreenCenter(_tiles.Single(t => t.Card.Id == _attackSource)));
             await EventFrames(20); CheckAttackTab("Ranged", _attackSource); await SupportCapture("-tab-close");

@@ -41,7 +41,9 @@ public partial class Main
                 var assignments = new Dictionary<string, int>(_assignments);
                 var card = FindCard(draft.TargetIds!.First())!;
                 SelectCard(card); SelectCard(card);
-                if (_chosen != draft || !assignments.OrderBy(x => x.Key).SequenceEqual(_assignments.OrderBy(x => x.Key)))
+                // Issue #973: a second click on an assigned unit sends that unit home, so only the clicked unit's own assignment may change; the draft and every other assignment stay.
+                var others = assignments.Where(x => x.Key != card.Id).OrderBy(x => x.Key);
+                if (_chosen != draft || !others.SequenceEqual(_assignments.Where(x => x.Key != card.Id).OrderBy(x => x.Key)))
                     throw new Exception("Repeated assignment selection discarded the active draft.");
                 CancelChoice();
             }
