@@ -52,7 +52,7 @@ public partial class Main
     private void BeginDirectPlay(CardView card)
     {
         _playPrompt = null;
-        if (!IsOwnHandCard(card.Id) || card.ActionLocked || View.PendingChoice is not null || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId || _chosen is not null) return;
+        if (!IsOwnPlayableCard(card.Id) || card.ActionLocked || View.PendingChoice is not null || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId || _chosen is not null) return;
         if (AssumedPlay(PlayChoices(card)) is not { } choice) return;
         // An action that still needs a performer, target or payment goes straight to choosing them on the table; only an action with nothing left to choose asks to be confirmed (that press is its final Confirm).
         if (NeedsFurtherInput(choice)) StartPlay(choice); else _playPrompt = (card.Id, choice.Key);
@@ -82,7 +82,7 @@ public partial class Main
     }
 
     private PlayChoice? PromptedChoice() =>
-        _playPrompt is { } prompt && FindCard(prompt.CardId) is { } card && IsOwnHandCard(card.Id) ? PlayChoices(card).FirstOrDefault(c => c.Key == prompt.Key) : null;
+        _playPrompt is { } prompt && FindCard(prompt.CardId) is { } card && IsOwnPlayableCard(card.Id) ? PlayChoices(card).FirstOrDefault(c => c.Key == prompt.Key) : null;
 
     /// <summary>True when playing the action needs a performer, target, province, movement, cost payment or alternative cost. Otherwise confirming plays it outright.</summary>
     private bool NeedsFurtherInput(PlayChoice choice)

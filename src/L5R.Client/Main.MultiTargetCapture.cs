@@ -129,6 +129,15 @@ public partial class Main
                 SupportRequire(_multiFixture.State.Players[0].Honor == honor + 2 && View.PendingChoice is null, "Honor follow-up result wrong");
             }
             await PrepareMultiReview("mixed"); var selections = MultiUpFront.ToArray();
+            // Issue #969: a card that only another open group accepts switches to that group when it is clicked on the table, and a second click removes it again.
+            var cardSlots = selections.Where(s => s.Kind == TargetSlotKinds.Card).ToArray();
+            var firstGroup = cardSlots[0]; var secondGroup = cardSlots[1];
+            var onlySecond = secondGroup.CardIds.Except(firstGroup.CardIds).First();
+            SupportRequire(_multiActiveSlot == firstGroup.Slot && _tiles.Where(t => t.Card.Id == onlySecond).All(t => t.LegalTarget), "Every open group's candidates should be highlighted on the table");
+            SelectCard(FindCard(onlySecond)!); await EventFrames(4);
+            SupportRequire(_multiActiveSlot == secondGroup.Slot && _multiCards[secondGroup.Slot].Contains(onlySecond), "Clicking a card for another group did not switch to it and select the card");
+            SelectCard(FindCard(onlySecond)!); await EventFrames(4);
+            SupportRequire(!_multiCards[secondGroup.Slot].Contains(onlySecond), "Clicking the chosen card again did not remove it");
             foreach (var s in selections.Where(s => s.Kind == TargetSlotKinds.Card)) { await OpenMultiGroup(s.Slot); await SupportClick(MultiFace(s.Slot, s.CardIds.Last())); }
             SupportRequire(_paymentConfirm!.Disabled, "Required player defaulted"); await OpenMultiGroup("player");
             await SupportClick(StabilizationButtons(_inspector).Single(b => b.HasMeta("player") && b.GetMeta("player").AsInt32() == 1));

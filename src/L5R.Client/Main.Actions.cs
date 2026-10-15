@@ -365,7 +365,7 @@ public partial class Main
         var reviewedVersion = action.Command?.ExpectedVersion ?? View.Version;
         _inspector.AddChild(Palette.Text("ASSIGN YOUR UNITS", 12, Palette.Gold));
         if (_assignmentUnit is string selected && FindCard(selected) is { } unit)
-            _inspector.AddChild(Palette.Wrapped("Selected: " + ShortName(unit) + "", 16, Palette.Crane));
+            _inspector.AddChild(Palette.Wrapped("Selected: " + ShortName(unit) + (_assignments.ContainsKey(selected) ? " · click the unit again to send it home" : ""), 16, Palette.Crane));
         foreach (var id in action.TargetIds ?? [])
         {
             var card = FindCard(id)!;

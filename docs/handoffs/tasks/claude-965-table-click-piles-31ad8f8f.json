@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 7 (piles). Cards in a discard or dead pile can be the target, candidate, performer or source of an action: the pile on the table is tinted while it holds such a card, opening it (or the Dead-cards gallery) marks those cards, and a click closes the pile and selects the card as a click on a card in play would. An action played from the discard pile (Scandalous Gossip, Discipline) starts from its card in the pile. Client only.",
+  "validation": "Native: check-table-click-ui passes with two new steps (A Yojimbo's Duty recruits a discarded Agasha Kodo chosen from the Dynasty discard pile after the pile is tinted and the target marked; Scandalous Gossip starts from the Fate discard pile and its player is then chosen by clicking a stronghold); check-fallen, check-board-ui, check-direct-play-ui, check-multi-targets-ui, check-interactions, check-reaction-flow-ui, check-decision-chooser, check-stabilization, check-province-target-ui pass. The Dead-cards gallery rows use the same actionable test and a new Chosen event but have no dedicated native step. Previously noted failures unchanged. Native UI checks are not run in CI.",
+  "remaining": "Phases 8 to 10 of the table-click plan. Removed-from-game cards are not shown in a pile on the table and are not covered.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/965",
+  "branch": "claude/965-table-click-piles",
+  "updated": "2026-10-15T01:58:57.397610+00:00"
+}

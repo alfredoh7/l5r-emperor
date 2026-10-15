@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 10. An Attack that may be made with no target takes that choice from a click on the card that performs it or the card it belongs to (the No target button remains and names the click). A unit that is assigned to a battlefield goes back home when it is clicked again (selecting another unit first and then its battlefield still reassigns; Stay at home and Keep selected unit home remain). Client only.",
+  "validation": "Native: check-table-click-ui passes with a new step on a real declared attack (assign a unit, click it again, it is home, assign it again); check-attack-targets-ui passes with a new step (clicking the attacking card chooses No target, then the card target is restored); check-card-deselection expectation updated to the new meaning of a second click on an assigned unit (only that unit's own assignment may change, the draft and the other assignments stay) and passes; check-board-ui, check-battle-presentation, check-movement-ui, check-direct-play-ui, check-interactions, check-province-target-ui pass. Previously noted failures unchanged. Native UI checks are not run in CI.",
+  "remaining": "None for the table-click plan except the deferred pending-decision province choices that wait for #951 (EventProvinceChoice) to merge, and eitherOr card options, which need a structured card id in Core.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/973",
+  "branch": "claude/973-table-click-attack-and-assign",
+  "updated": "2026-10-15T04:01:29.550886+00:00"
+}

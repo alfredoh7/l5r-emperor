@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 8 (multi-target slots). In a multi-target ability, a click on a card that is legal only for another open group switches to that group and selects the card (today: a notice), clicking a chosen card again removes it, and the candidates of every open card group are highlighted on the table. A card that fits two open groups keeps a notice so the player decides. Client only.",
+  "validation": "Native: check-multi-targets-ui passes in both modes with a new step (every open group's candidates highlighted; clicking a card for the second group switches and selects it; a second click removes it) on the mixed Holding and enemy-Personality fixture; check-table-click-ui, check-province-target-ui, check-direct-play-ui, check-interactions, check-reaction-flow-ui, check-decision-chooser, check-attack-targets-ui pass. check-board-ui failed once on a real-mouse hover step and passed on rerun with no change (flaky). Previously noted failures unchanged. Native UI checks are not run in CI.",
+  "remaining": "Phases 9 and 10 of the table-click plan.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/969",
+  "branch": "claude/969-table-click-slot-switch",
+  "updated": "2026-10-15T02:40:10.098438+00:00"
+}
