@@ -315,6 +315,16 @@ public partial class Main
                 !receipt.Contains("resolved", StringComparison.OrdinalIgnoreCase), "Accepted reaction has no permitted played receipt or claims every nested effect has resolved");
             await SupportCapture("-auto-closed");
 
+            // Issue #962: the reacting card is clicked on the table; the click prepares the reaction and the Play Reaction press commits it.
+            fixture = ReactionCaptureBow(seat); await PrepareReactionCapture(fixture, seat);
+            var versionBeforeClick = View.Version; var sourceTile = _tiles.Single(t => t.Card.Id == fixture.Source);
+            SupportRequire(sourceTile.LegalTarget, "The card holding the reaction is not highlighted on the table");
+            await ReactionNativeClick(sourceTile);
+            SupportRequire(_chosen?.Command is { AbilityId: "ruya-bow", TargetId: null } && View.Version == versionBeforeClick, "Clicking the reacting card did not prepare its reaction (or it submitted at once)");
+            SupportRequire(ReactionControl<Button>("CommitAction") is { Disabled: true, Text: "Play Reaction" }, "The prepared reaction may be committed before a target is chosen");
+            await ReactionNativeClick(_tiles.Single(t => t.Card.Id == fixture.Target));
+            SupportRequire(_chosen?.Command?.TargetId == fixture.Target && !ReactionControl<Button>("CommitAction").Disabled && View.Version == versionBeforeClick, "Clicking the target did not complete the prepared reaction");
+
             // One gesture must never activate the next, still-meaningful response.
             fixture = ReactionCaptureBow(seat, followup: true); await PrepareReactionCapture(fixture, seat); await DraftRuya(fixture);
             before = View.Version; var commitPoint = ReactionControl<Button>("CommitAction").GetGlobalRect().GetCenter();

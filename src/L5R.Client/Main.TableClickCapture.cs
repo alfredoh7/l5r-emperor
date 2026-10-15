@@ -90,7 +90,27 @@ public partial class Main
             SelectCard(faceUp.Card!); await EventFrames(4);
             SupportRequire(_chosen!.Command is { Province: { } picked, TargetPlayerId: { } pickedOwner } && picked == faceUp.Index && pickedOwner == foe.Id, $"Clicking the province's card did not choose the province (got {_chosen.Command?.TargetPlayerId}/{_chosen.Command?.Province})");
 
-            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a card with no usable ability is only selected; nothing starts out of turn.");
+            // 8. Issue #962: in the announce step of a window both players hold a Reaction for, clicking the card announces its Reaction and clicking it again retracts it.
+            {
+                var state = MatchEngine.CreateEconomyScenario().State;
+                foreach (var p in state.Players) { state.Cards[p.StrongholdId].DefinitionId = "oracle-l5r-1218"; foreach (var id in p.Hand.ToArray()) state.Cards.Remove(id); p.Hand.Clear(); }
+                state.Phase = Phase.BattleSelection; state.ActivePlayerId = state.PriorityPlayerId = 0; state.CurrentBattleProvince = null; state.UnresolvedBattlefields = [0];
+                var mine = SupportFixtureCard(state, "training-crane-samurai", 0, Zone.Battlefield, 0); SupportFixtureCard(state, "training-lion-samurai", 1, Zone.Battlefield, 0);
+                var heldA = SupportFixtureCard(state, "training-engage-honor-strategy", 0, Zone.Hand); state.Players[0].Hand.Add(heldA.Id);
+                var heldB = SupportFixtureCard(state, "training-engage-honor-strategy", 0, Zone.Hand); state.Players[0].Hand.Add(heldB.Id);
+                var theirs = SupportFixtureCard(state, "training-engage-honor-strategy", 1, Zone.Hand); state.Players[1].Hand.Add(theirs.Id);
+                var engine = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.Invoke(null, [state])!;
+                SupportRequire(engine.Execute(new GameCommand("selectBattle", 0, engine.Version, Province: 0)).Accepted, "Could not open the battle");
+                await LoadSupportFixture(engine, 0);
+                SupportRequire(View.ReactionOrder is { Stage: "Announce" }, "The announce step did not open: " + View.PendingChoice?.Type);
+                SupportRequire(_tiles.Where(t => t.Card.Id == heldA.Id).All(t => t.LegalTarget), "The Reaction's card is not highlighted on the table");
+                SelectCard(FindCard(heldA.Id)!); await EventFrames(6);
+                SupportRequire(View.ReactionOrder?.Announced.Any(a => a.CardId == heldA.Id) == true, "Clicking the card did not announce its Reaction");
+                SelectCard(FindCard(heldA.Id)!); await EventFrames(6);
+                SupportRequire(View.ReactionOrder?.Announced.All(a => a.CardId != heldA.Id) == true, "Clicking an announced card did not retract it");
+            }
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a card with no usable ability is only selected; nothing starts out of turn.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
