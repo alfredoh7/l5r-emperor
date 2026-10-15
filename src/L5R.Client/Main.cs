@@ -612,6 +612,7 @@ public partial class Main : Node
         if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
         if (SelectDiscardCard(card)) return;
+        if (SelectReactionSourceCard(card)) return; // issue #962: a reaction's card is clicked on the table
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
         if (MovementActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } destination)
@@ -671,7 +672,7 @@ public partial class Main : Node
             selectedProvince = $"province:{eventCard.OwnerId}:{eventProvince}";
         _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
         var supportTargets = SupportDraftChoices().SelectMany(a => a.TargetIds ?? []).ToHashSet();
-        var performerClicks = PerformerClicks();
+        var performerClicks = PerformerClicks(); var reactionSources = ReactionSourceCardIds();
         var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
@@ -688,7 +689,7 @@ public partial class Main : Node
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;
             tile.DecisionSelected |= GenericDecisionActive && (tile.Card.Id == _decisionSelection?.Command?.TargetId || _decisionSelection?.DecisionCandidateIds?.Contains(tile.Card.Id) == true);
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
-            tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id);
+            tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id) || reactionSources.Contains(tile.Card.Id);
             tile.LegalTarget |= AlternativeCostCards().Contains(tile.Card.Id); // a hand card a discard way to pay may spend (Akodo Kamina)
             tile.DecisionSelected |= _reviewingAlternativeCost && _decisionSelection?.Command?.CardIds?.Contains(tile.Card.Id) == true;
             tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
