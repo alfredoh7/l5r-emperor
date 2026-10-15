@@ -85,7 +85,7 @@ public partial class Main
         var player = View.Players.Single(p => p.Id == owner);
         var deck = zone is Zone.FateDeck or Zone.DynastyDeck;
         var name = zone switch { Zone.FateDeck => "Fate deck", Zone.DynastyDeck => "Dynasty deck", Zone.FateDiscard => "Fate discard", Zone.DynastyDiscard => "Dynasty discard", _ => "Dead cards" };
-        var (_, body) = Dialog(player.Clan + " · " + name, 880, 720);
+        var (pileDialog, body) = Dialog(player.Clan + " · " + name, 880, 720);
         body.AddChild(Palette.Text(player.Clan + " · " + name, 27, Palette.Gold, true));
         if (deck)
         {
@@ -94,14 +94,16 @@ public partial class Main
             return;
         }
         var cards = player.Discard.Where(c => c.Zone == zone).ToArray();
-        body.AddChild(Palette.Text(cards.Length == 0 ? "No cards in this pile." : $"{cards.Length} cards · hover to read", 16, Palette.PaperDim));
+        var actionable = PileActionableIds(); // issue #965: cards here that may be clicked now
+        body.AddChild(Palette.Text(cards.Length == 0 ? "No cards in this pile." : cards.Any(c => actionable.Contains(c.Id)) ? $"{cards.Length} cards · click a highlighted card to choose it" : $"{cards.Length} cards · hover to read", 16, Palette.PaperDim));
         var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
         body.AddChild(scroll);
         var grid = new GridContainer { Columns = 4, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
         grid.AddThemeConstantOverride("h_separation", 12); grid.AddThemeConstantOverride("v_separation", 15); scroll.AddChild(grid);
         foreach (var card in cards)
         {
-            var tile = new CardTile(card, true, _ => { }, _ => { }) { CustomMinimumSize = new Vector2(185, 257), FaceHeight = 245, ReducedMotion = true, ContextHelp = player.Clan + " · " + name };
+            var legal = actionable.Contains(card.Id);
+            var tile = new CardTile(card, true, picked => { if (!legal) return; pileDialog.QueueFree(); SelectCard(picked); }, _ => { }) { CustomMinimumSize = new Vector2(185, 257), FaceHeight = 245, ReducedMotion = true, ContextHelp = player.Clan + " · " + name, LegalTarget = legal };
             grid.AddChild(tile);
         }
     }

@@ -697,7 +697,7 @@ public partial class Main : Node
             tile.ChosenTarget = StrongholdOwner(tile.Card) is int chosenPlayer && PlayerTargetChosen(chosenPlayer) || _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id) || _sources.Any(id => id.StartsWith(tile.Card.Id + "#", StringComparison.Ordinal)); tile.QueueRedraw(); // a payment token ("<card>#reaction") marks its card
         }
-        HighlightPlayers();
+        HighlightPlayers(); HighlightPiles();
         foreach (var (key, button) in _provinceButtons)
         {
             var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true

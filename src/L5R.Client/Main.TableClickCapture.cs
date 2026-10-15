@@ -110,7 +110,34 @@ public partial class Main
                 SupportRequire(View.ReactionOrder?.Announced.All(a => a.CardId != heldA.Id) == true, "Clicking an announced card did not retract it");
             }
 
-            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a card with no usable ability is only selected; nothing starts out of turn.");
+            // 9. Issue #965: a target in a discard pile is chosen from the pile. A Yojimbo's Duty recruits a discarded Courtier or Shugenja (Agasha Kodo) by destroying a performing Yojimbo (Bayushi Suwabe).
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 901, 0, Zone.Home); SupportFixtureCard(s, 142, 0, Zone.DynastyDiscard); SupportFixtureCard(s, 101, 0, Zone.Hand); });
+            var duty = View.Players[0].Hand.Single();
+            var kodoInPile = View.Players[0].Discard.Single(c => c.Definition?.Name == "Agasha Kodo");
+            SelectCard(duty); await EventFrames(4);
+            if (_chosen is null) { await SupportClick(ActionTextBlocks().Single(b => b.Text.Contains("Recruit", StringComparison.Ordinal))); await EventFrames(4); } // two usable actions: the player picks the one that recruits
+            SupportRequire(_chosen?.Command?.AbilityId == "yojimbos-duty-recruit" && _chosen.TargetIds?.Contains(kodoInPile.Id) == true, $"A Yojimbo's Duty did not begin with the discarded Courtier as a legal target (chosen {_chosen?.Command?.AbilityId}; targets {string.Join(",", Actions.Where(a => a.Enabled && a.CardId == duty.Id).SelectMany(a => a.TargetIds ?? []))}; kodo {kodoInPile.Id}; prompt {_playPrompt is not null}; choices {PlayChoices(duty).Length}; locked {duty.ActionLocked}; selected {_selected?.Id}; duty {duty.Id}; pending {View.PendingChoice?.Type}; priority {View.PriorityPlayerId}; blocks {ActionTextBlocks().Count()})");
+            var dynastyPile = _pileHud.GetChildren().OfType<TablePile>().Single(pl => pl.OwnerId == 0 && pl.PileZone == Zone.DynastyDiscard);
+            SupportRequire(dynastyPile.Modulate.R > 1.05f, "The Dynasty discard pile is not tinted although it holds the legal target");
+            ShowPile(0, Zone.DynastyDiscard); await EventFrames(6);
+            var pileTile = GetTree().Root.FindChildren("*", "Button", true, false).OfType<CardTile>().Single(t => t.Card.Id == kodoInPile.Id && !_tiles.Contains(t));
+            SupportRequire(pileTile.LegalTarget, "The legal target is not marked inside the pile");
+            pileTile.EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(6);
+            SupportRequire(_chosen?.Command?.TargetId == kodoInPile.Id, "Clicking the card in the pile did not choose it as the target");
+
+            // 10. Issue #965: an action played from the discard pile starts from the pile (Scandalous Gossip), and its player is then chosen on the table.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 10391, 0, Zone.FateDiscard); SupportFixtureCard(s, 229, 1, Zone.Home); });
+            var gossip = View.Players[0].Discard.Single(c => c.Definition?.Name == "Scandalous Gossip");
+            SupportRequire(Actions.Any(a => a.Enabled && a.CardId == gossip.Id), "Scandalous Gossip is not playable from the discard pile: " + string.Join(" | ", Actions.Where(a => a.CardId == gossip.Id).Select(a => $"{a.Type}/{a.Enabled}/{a.Reason}")));
+            ShowPile(0, Zone.FateDiscard); await EventFrames(6);
+            var gossipTile = GetTree().Root.FindChildren("*", "Button", true, false).OfType<CardTile>().Single(t => t.Card.Id == gossip.Id && !_tiles.Contains(t));
+            SupportRequire(gossipTile.LegalTarget, "The playable card is not marked inside the pile");
+            gossipTile.EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(6);
+            SupportRequire(_chosen?.Command?.AbilityId == "wl-scandalous-gossip" && !PlayerPicked, "Clicking the card in the discard pile did not start its action");
+            SelectCard(View.Players.First(p => p.Id != View.ViewerId).Stronghold); await EventFrames(4);
+            SupportRequire(_chosen?.Command?.TargetPlayerId == 1, "The player was not chosen by clicking the stronghold");
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a target in a discard pile and an action played from it are chosen from the pile; a card with no usable ability is only selected; nothing starts out of turn.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
