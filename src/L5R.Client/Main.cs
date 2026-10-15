@@ -609,6 +609,8 @@ public partial class Main : Node
     {
         if (_shownOpen) ToggleShownCards(false);
         if (_session.Busy || PresentationBusy || _playHeld) return;
+        // Issues #950 and #958: Dark Experiments' province decision is a generic decision, which would take every card click. The card sitting in a province stands for that province, as it does for every other province choice.
+        if (EventProvinceChoiceActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } eventProvince) { SelectProvince(card.OwnerId, eventProvince); return; }
         if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
         if (SelectDiscardCard(card)) return;

@@ -157,7 +157,40 @@ public partial class Main
                 SupportRequire(_assignments.TryGetValue(attacker.Id, out sentTo) && sentTo == battlefield, "The unit could not be assigned again after going home");
             }
 
-            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a target in a discard pile and an action played from it are chosen from the pile; an assigned unit goes home when clicked again; a card with no usable ability is only selected; nothing starts out of turn.");
+            // 12. Issues #950 and #958: Dark Experiments ("Choose a province") is answered by clicking a province or the card in it, like every other province choice. The event is revealed for real: the engine is stepped to its owner's Dynasty phase.
+            {
+                var state = MatchEngine.CreatePublishedTestMatch(42).State;
+                foreach (var p in state.Players) { foreach (var id in p.Hand) state.Cards.Remove(id); p.Hand.Clear(); p.TurnsTaken = 2; }
+                state.ActivePlayerId = state.PriorityPlayerId = 0; state.PendingChoice = null; state.Phase = Phase.Action;
+                foreach (var rival in state.Cards.Values.Where(c => c.OwnerId == 1 && c.Zone == Zone.Province)) rival.DefinitionId = "training-marketplace";
+                var darkProvince = state.Players[1].Provinces[3];
+                if (darkProvince.CardId is { } replaced) state.Cards.Remove(replaced);
+                var dark = SupportFixtureCard(state, 10029, 1, Zone.Province, 3); dark.FaceUp = false; darkProvince.CardId = dark.Id;
+                var engine = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.Invoke(null, [state])!;
+                for (var n = 0; n < 800 && engine.GetView(0).PendingChoice is not { Type: "eventChoice" }; n++)
+                {
+                    var view0 = engine.GetView(0); var seat = view0.PendingChoice?.PlayerId ?? view0.PriorityPlayerId;
+                    var actions = engine.QueryActions(seat).Where(a => a.Enabled && a.Command is not null).ToArray();
+                    var step = actions.FirstOrDefault(a => a.Type is "pass" or "endDynasty" or "declineReaction" or "reactionAnnounceDone") ?? actions.First(a => a.Type != "concede");
+                    SupportRequire(engine.Execute(step.Command!).Accepted, "Could not step the engine toward Dark Experiments");
+                }
+                SupportRequire(engine.GetView(0).PendingChoice is { Type: "eventChoice" } decision, "Dark Experiments never asked for a province");
+                var decider = engine.GetView(0).PendingChoice!.PlayerId;
+                await LoadSupportFixture(engine, decider);
+                var pick = Actions.First(a => a.Enabled && a.Type == "eventChoice" && a.Provinces is { Length: 1 } && a.Command?.Choice is { } c && c.StartsWith(View.Players.First(p => p.Id != View.ViewerId).Id + ":", StringComparison.Ordinal));
+                var pickOwner = int.Parse(pick.Command!.Choice!.Split(':')[0]); var pickIndex = pick.Provinces![0];
+                SupportRequire(EventProvinceChoiceActive && _provinceButtons.ContainsKey((pickOwner, pickIndex)), "The province decision is not active on the table");
+                var pickCard = _tiles.FirstOrDefault(t => t.Card.Zone == Zone.Province && t.Card.OwnerId == pickOwner && t.Card.ProvinceIndex == pickIndex)?.Card;
+                SupportRequire(pickCard is not null, "No card tile in the province to click");
+                SelectCard(pickCard!); await EventFrames(4);
+                SupportRequire(EventProvinceChosen(pickOwner, pickIndex), "Clicking the card in the province did not choose the province");
+                var otherIndex = Actions.First(a => a.Enabled && a.Type == "eventChoice" && a.Provinces is { Length: 1 } && a.Command?.Choice != pick.Command.Choice).Provinces![0];
+                var otherOwner = int.Parse(Actions.First(a => a.Enabled && a.Type == "eventChoice" && a.Provinces is { Length: 1 } && a.Provinces[0] == otherIndex && a.Command?.Choice != pick.Command.Choice).Command!.Choice!.Split(':')[0]);
+                SelectProvince(otherOwner, otherIndex); await EventFrames(4);
+                SupportRequire(EventProvinceChosen(otherOwner, otherIndex) && !EventProvinceChosen(pickOwner, pickIndex), "Clicking another province did not move the choice");
+            }
+
+            GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a target in a discard pile and an action played from it are chosen from the pile; an assigned unit goes home when clicked again; Dark Experiments' province is chosen by clicking the province or its card; a card with no usable ability is only selected; nothing starts out of turn.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }

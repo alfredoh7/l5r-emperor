@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Dark Experiments' province choice can be made by clicking a legal province on the table: the clicked province selects the engine-listed eventChoice option (same as its sidebar row), legal provinces are highlighted, the chosen one is marked, and Confirm choice still commits. Client-only; Core unchanged.",
-  "validation": "dotnet build src/L5R.Client: 0 warnings, 0 errors. Not playtested in the Godot client and no automated client test covers the click.",
-  "remaining": "Needs a visual/input playtest of revealing Dark Experiments (click own and opponent province, then Confirm).",
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Dark Experiments' province choice is answered on the table like every other province choice: clicking a legal province, or the card or Region sitting in it, selects the engine-listed eventChoice option (the same as its sidebar row); legal provinces are highlighted, the chosen one is marked, and Confirm choice still commits. The card click is handled ahead of the generic-decision handler, which otherwise takes every card click during the decision. Client only; Core unchanged.",
+  "validation": "Native: check-table-click-ui passes with a new step that reveals a real Dark Experiments (the engine is stepped to its owner's Dynasty phase), finds the decision active on the table, chooses a province by clicking the card in it, then moves the choice by clicking another province; check-event-decisions, check-decision-chooser, check-province-target-ui, check-either-or-ui, check-direct-play-ui, check-interactions, check-reaction-flow-ui, check-multi-targets-ui pass. The branch was merged with current main (clean). Native UI checks are not run in CI.",
+  "remaining": "None for this change. The other province pending choices (Tested Land, Your Clan Needs You, search-region province) still answer from the sidebar and can reuse EventProvinceChoice once their option shapes are read.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/950",
   "branch": "claude/950-dark-experiments-click-province",
-  "updated": "2026-10-14T19:18:52.473639+00:00"
+  "updated": "2026-10-15T05:59:36.215273+00:00"
 }
