@@ -23,7 +23,8 @@ internal static class BotTournament
     /// <summary>The bot arms. "champion" is the bot on main. A candidate branch registers its challenger here, with the BotContext flag that turns its change on.</summary>
     public static readonly Dictionary<string, Func<BotContext>> Arms = new()
     {
-        ["champion"] = () => new(),
+        ["champion"] = () => new(), // the bot on main: since the 2026-10-15 promotion this includes the Seppuku policy and informed defense
+        ["pre-promotion"] = () => new() { UseSeppukuPolicy = false, UseInformedDefense = false }, // the champion before them (rounds 1-2 baseline)
         ["seppuku"] = () => new() { UseSeppukuPolicy = true }, // round 1 (docs/bots/experiments/2026-10-15-seppuku.md)
         ["defense"] = () => new() { UseInformedDefense = true }, // round 2 (docs/bots/experiments/2026-10-15-defense.md)
         ["bodies"] = () => new() { UseBodiesFirst = true }, // round 3 (docs/bots/experiments/2026-10-15-bodies.md)

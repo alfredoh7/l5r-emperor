@@ -28,7 +28,7 @@ internal static class SeppukuTests
     private static void Decision()
     {
         var on = new BotContext { UseSeppukuPolicy = true };
-        var off = new BotContext();
+        var off = new BotContext { UseSeppukuPolicy = false };
         ActionOption Seppuku(MatchView v) => new("orderSeppuku", "Order Seppuku", true, null, new("orderSeppuku", 0, v.Version, CardId: "dishonored"), "dishonored");
         string? Choose(MatchView v, BotContext c) => TrainingOpponent.Choose(v, [BattlePolicyTests.Pass(v), Seppuku(v)], c).Command?.Type;
         var healthy = Table(honor: 8, force: 2, personalHonor: 3);

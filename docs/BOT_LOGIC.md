@@ -84,7 +84,8 @@ The bot never keys on a card's name. It reads the printed ability label and targ
   - If the attackers can destroy **every** remaining province, it defends (200) at the battlefield where its defence is likeliest to save one (largest Strength + its Force - their Force).
   - **Cavalry in reserve (`UseCavalryDefense`, issue #946, Mendon's guidance):** in the Infantry Maneuvers defense, when the attacker assigned nobody but has unbowed Cavalry units at home, the bot's infantry must be committed now (Cavalry can wait for the Cavalry Maneuvers Segment). It takes the attacker's **total possible Cavalry army** (each unbowed Cavalry unit with its attachments; a unit is Cavalry only if the Personality and every Follower are) as the threat, and the ratio **its unbowed Force / that threat**. Below 1, each card in its hand and each defending card with a printed Battle action adds 0.1; if the ratio still cannot reach 1 it does not defend (95 when it can, else 0). The first army, infantry first and strongest first, defends the most valuable province: face-up Personalities by Gold cost (most expensive first), then provinces holding a face-down card, then the rest. Each further sub-army that reaches 1 on Force alone (the hand backs the first army only) defends the next most valuable province. Units that cannot form another army stay home, unless they print a Battle action, in which case they join the first army. **Cavalry defenders are always held back** for the Cavalry Maneuvers Segment, when the real attack is visible (their Force still counts toward the ratio); if the infantry alone cannot make an army, it still holds the most valuable province.
   - With attackers already assigned, the rules below apply unchanged.
-  - Otherwise: attackers' Force 0 means no need (0); its Force >= theirs 95; its Force plus the threatened province's Strength >= theirs 60; only one province left 50; else 0. (The no-attackers check comes first.)
+  - **Informed defence (`UseInformedDefense`, ACTIVE since 2026-10-15, issue #963 round 2, Mendon):** the defenders go where they **win** (their Force beats the attackers' there: the attackers are destroyed; 95), preferring the battlefield that destroys the biggest army and one where the Province would otherwise fall; else where they **save a Province** (attackers' Force exceeds its Strength but not Strength plus the defenders' Force; 70); else they stay home (0). Measured: 51.4% on the development decks (884-836; paired 39 vs 15) and 51.4% on the held-out decks (617-583; paired 32 vs 15).
+  - With the flag off, or when nothing above applies: attackers' Force 0 means no need (0); its Force >= theirs 95; its Force plus the threatened province's Strength >= theirs 60; only one province left 50; else 0. (The no-attackers check comes first.)
 
 ## 7. Reactions (ACTIVE)
 
@@ -140,6 +141,11 @@ When switched on:
 
 ### Trade attacks (PARKED, off by default, `UseTradeAttacks`)
 When it cannot raze a province, it still attacks if it would beat every possible defender (destroying the whole defending army at no cost) or tie favourably on Gold. A unit's worth is its Gold plus attachments, +2 for a Personality. The arena found this lost slightly more than it won.
+
+### Order Seppuku (ACTIVE, `UseSeppukuPolicy`, issue #963 round 1, Mendon's spec)
+- Before 2026-10-15 the bot had no rule for it and ordered it whenever it was offered (a "no rule" action scores just above a pass): 2,290 orders in 1,728 games, throwing its own Personalities away.
+- Now: only for a **Dishonored** Personality, only when family Honor is **-5 or lower**, only when its dishonorable death would leave Honor at **-12 or lower** (within reach of the -20 loss), and **not** when it is part of the attack the bot plans this turn (winning a battle rehonors every Dishonorable Personality in the winning army). Then weighed: `10 + 8 x Personal Honor + 3 x (-12 - Honor after its death) - 6 x Force` must beat a pass. Seppuku only saves the Personal Honor lost when a Dishonored Personality dies, and costs the Personality.
+- Measured: 58.5% on the development decks (1002-711; paired 151 vs 6; Seppuku orders 2,290 -> 193) and 53.8% on the held-out decks (645-555; paired 48 vs 3).
 
 ## 9. Discarding and small choices (ACTIVE)
 

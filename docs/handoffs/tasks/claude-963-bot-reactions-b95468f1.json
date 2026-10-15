@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Bot loop rounds 1-4, each behind a default-off BotContext flag with a unit test and a pre-registration: Seppuku policy (dev 58.5%, held-out 53.8%), informed defense (51.4% dev and held-out), bodies-first (49.8%, negative), sure reactions (50.2%, negative). Engine stall (Michi/negation) classified and filed as #967. No Core, protocol or UI change; all flags off so default behaviour is unchanged.",
-  "validation": "bash tools/check.sh --skip-client passed; unit tests for each flag pass; 1728-game dev runs and 1200-game held-out confirmations as recorded in docs/bots/experiments. Honor-margin criterion of round 1 unmet (flagged).",
-  "remaining": "Owner decision on promoting the Seppuku policy (and optionally informed defense) to default; Core fix #967.",
+  "summary": "Bot loop rounds 1-4. Per Mendon's approval (2026-10-15) the Seppuku policy (UseSeppukuPolicy) and informed defense (UseInformedDefense) are now ON by default; bodies-first and sure-reactions stay off (negative results). Each has a unit test and a pre-registration with results in docs/bots/experiments; BOT_LOGIC.md updated. No Core, protocol or UI change.",
+  "validation": "bash tools/check.sh --skip-client passed with the promoted defaults. Evidence: Seppuku dev 58.5% / held-out 53.8%; defense dev 51.4% / held-out 51.4%; bodies 49.8%; reactions 50.2%.",
+  "remaining": "Re-baseline A/A after merge; Core fix for the Michi stall is in PR #978.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/963",
   "branch": "claude/963-bot-reactions",
-  "updated": "2026-10-15T05:03:03.839358+00:00"
+  "updated": "2026-10-15T05:55:56.295234+00:00"
 }
