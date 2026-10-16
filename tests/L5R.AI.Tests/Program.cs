@@ -278,6 +278,7 @@ runner.Run("honor-aware", HonorAwareTests.Tests); // issue #870: the Honor an ab
 runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
 runner.Run("sure-reactions", SureReactionsTests.Tests); // issue #963: bot loop round 4
 runner.Run("deck-archetype", DeckArchetypeTests.Tests); // issue #963: bot loop S0
+runner.Run("archetype-play", ArchetypePlayTests.Tests); // issue #963: archetype flags, split defense
 runner.Run("bodies-first", BodiesFirstTests.Tests); // issue #963: bot loop round 3
 runner.Run("informed-defense", InformedDefenseTests.Tests); // issue #963: bot loop round 2
 runner.Run("seppuku", SeppukuTests.Tests); // issue #963: bot loop round 1

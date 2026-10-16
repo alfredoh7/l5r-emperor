@@ -114,6 +114,7 @@ public static partial class TrainingOpponent
             if (action.Type == "assignDefense" && CavalryDefensePlan(x, action, units) is { } cavalryDefense) return command with { Assignments = cavalryDefense }; // issue #946
             // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
             var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
+            if (action.Type == "assignDefense" && x.Memory.UseInformedDefense && x.Memory.UseSplitDefense && lastStand is null && SplitDefense(x, units, provinces) is { } split) return command with { Assignments = split };
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
                 : lastStand ?? (x.Memory.UseInformedDefense ? InformedDefenseProvince(x, units, provinces) : null) ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();

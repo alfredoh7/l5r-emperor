@@ -34,7 +34,7 @@ public static partial class TrainingOpponent
 
     private static int ChoosePlayer(Ctx x, AbilityIntent intent)
     {
-        if (intent.HonorGain && intent.HonorLoss) return x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor) ? x.Self.Id : x.Opponent.Id;
+        if (intent.HonorGain && intent.HonorLoss) return WantsOwnGain(x) ? x.Self.Id : x.Opponent.Id;
         if (intent.HonorGain) return x.Self.Id;
         if (intent.HonorLoss || intent.Side == TargetSide.Enemy || intent.Rank >= EffectRank.Penalize) return x.Opponent.Id;
         return x.Self.Id;

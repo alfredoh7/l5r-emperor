@@ -33,6 +33,7 @@ internal static class DeckArchetypeTests
         Check(kinds["Unicorn Maidens"].Primary == WinRoute.Honor, "Unicorn Maidens is an honor sprinter: " + kinds["Unicorn Maidens"]);
         foreach (var military in new[] { "Dragon Destruction", "Mantis Manipulation", "Scorpion Lethargy", "Spider Conquer" })
             Check(kinds[military] is { Primary: WinRoute.Military, Secondary: null }, military + " has no honor or dishonor engine: " + kinds[military]);
+        Check(kinds["Phoenix Talons"] is { Primary: WinRoute.Military, Secondary: WinRoute.Honor }, "Phoenix gains its Honor by fighting: " + kinds["Phoenix Talons"]);
         Check(kinds["Spider Conquer"].HonorCost > 30, "Spider pays Honor for its cards: " + kinds["Spider Conquer"]);
     }
 

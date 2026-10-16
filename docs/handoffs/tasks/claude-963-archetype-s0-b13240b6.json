@@ -1,9 +1,9 @@
 {
   "lane": "rules",
-  "summary": "Bot loop S0: DeckArchetype classifier (reads the bot's own decklist only, not wired into any decision) plus validation against the user's win-route labels and 1,224 recorded games",
-  "validation": "bash tools/check.sh --skip-client passed; deck-archetype tests pass; python and C# feature numbers match on all 12 pool decks",
-  "remaining": "S1+ (acting on the archetype) not started; Crane Dominance and Phoenix order disputes await Mendon",
+  "summary": "Bot loop: archetype classifier (Phoenix reclassified) plus default-off archetype arms S1-S4, split defence and military trades; all seven tested locally and null, flags stay off",
+  "validation": "bash tools/check.sh --skip-client passed locally; archetype-play and deck-archetype tests pass; 7 arms x 1,728 games no effect, 0 stalls; GitHub Actions unavailable (billing), see issue 980",
+  "remaining": "Flags stay off; next leads in docs/bots/phase1/archetype-results.md",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/963",
   "branch": "claude/963-archetype-s0",
-  "updated": "2026-10-15T07:54:03.639154+00:00"
+  "updated": "2026-10-16T13:43:56.493823+00:00"
 }

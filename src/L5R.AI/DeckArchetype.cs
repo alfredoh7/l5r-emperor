@@ -14,12 +14,16 @@ public enum WinRoute { Military, Honor, Dishonor }
 public sealed record DeckArchetype(WinRoute Primary, WinRoute? Secondary, double HonorGain, double OpponentHonorLoss, double HonorCost)
 {
     /// <summary>An engine this dense wins games on its own.</summary>
-    public const double PrimaryDensity = 15, SecondaryDensity = 6;
+    public const double PrimaryDensity = 15, SecondaryDensity = 5;
+
+    /// <summary>Honor gained as a rider on a Battle action is earned by fighting, so it counts for half: Phoenix's spells ("Bow him ... gain 2 Honor") make it a military deck with an honor side, not an honor sprinter.</summary>
+    public const double BattleRiderWeight = .5;
 
     private static readonly Regex Gain = new(@"\bgain (\d+|one|two|three|four|X) honor", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex GainEqual = new(@"gain honor equal", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex Lose = new(@"(controller|opponent|enemy player|target player|that player|player)\W{0,3}\s*(who )?(loses|gains or loses) (\d+|one|two|three|X) honor", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex Either = new(@"gains or loses (\d+|one|two|three|X) honor", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex BattleLine = new(@"^\s*(Political |Fear |Iaijutsu |Limited[: ,]*)*(Battle|Reaction: After (the|an) (battle|engage|attack))|^.{0,20}Battle/", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex OwnCost = new(@"(?:^|[.:]\s)Lose (\d+|one|two|X) Honor", RegexOptions.Compiled | RegexOptions.Multiline);
 
     private static int Amount(string s) => s.ToLowerInvariant() switch { "one" => 1, "two" => 2, "three" => 3, "four" => 4, "x" => 2, var d when int.TryParse(d, out var v) => v, _ => 2 };
@@ -33,8 +37,11 @@ public sealed record DeckArchetype(WinRoute Primary, WinRoute? Secondary, double
             var setup = card.Type == CardType.Stronghold || card.Name == "Bamboo Harvesters" || card.Name.StartsWith("Border Keep", StringComparison.Ordinal);
             if (!setup) deckCards += count;
             var text = card.Text ?? "";
-            foreach (Match m in Gain.Matches(text)) gain += count * Amount(m.Groups[1].Value);
-            gain += count * 2 * GainEqual.Matches(text).Count;
+            foreach (var line in text.Split('\n'))
+            {
+                var amount = Gain.Matches(line).Sum(m => Amount(m.Groups[1].Value)) + 2 * GainEqual.Matches(line).Count;
+                gain += count * amount * (BattleLine.IsMatch(line) ? BattleRiderWeight : 1);
+            }
             foreach (Match m in Lose.Matches(text)) lose += count * Amount(m.Groups[4].Value);
             foreach (Match m in Either.Matches(text)) { gain += count * Amount(m.Groups[1].Value) * .5; lose += count * Amount(m.Groups[1].Value) * .5; }
             foreach (Match m in OwnCost.Matches(text)) cost += count * Amount(m.Groups[1].Value);
