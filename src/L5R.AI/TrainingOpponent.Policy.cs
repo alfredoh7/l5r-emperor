@@ -74,8 +74,14 @@ public static partial class TrainingOpponent
             score += 12 * Math.Max(0, gap);
         }
         // A deck that wants Honor for itself prefers abilities that give it Honor; one that wants to hurt the opponent prefers abilities that take it away.
-        var gain = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
-        if (intent.HonorGain && gain) score += 25;
+        var gain = WantsOwnGain(x);
+        var military = x.Memory.UseArchetypeMilitary && x.Memory.Archetype is { Primary: WinRoute.Military, Secondary: null };
+        if (intent.HonorGain && gain && !military) score += 25;
+        if (x.Memory.UseArchetypeAbilities && x.Memory.Archetype is { } a)
+        {
+            if (a.Primary == WinRoute.Honor && intent.HonorGain) score += ArchetypeEngineBonus;
+            if (a.Primary == WinRoute.Dishonor && intent.HonorLoss && !intent.SelfHonorLoss) score += ArchetypeEngineBonus;
+        }
         if (intent.HonorGain && x.Memory.UseHonorAware && x.Profile.Tier == HonorTier.High) score += HighHonorGainBonus; // issue #870: a high-Honor deck wants Honor above all (abilities with a fixed score are untouched)
         if (intent.HonorLoss && !gain && !(x.Memory.UseHonorAware && intent.SelfHonorLoss)) score += 25; // issue #870: Honor the user loses himself is not "taking the opponent's"
         return score;
@@ -138,7 +144,7 @@ public static partial class TrainingOpponent
         if (command.Choice == "sit-decline") return 20;
         if (command.Choice is { } destroy && destroy.StartsWith("sit-destroy:", StringComparison.Ordinal))
             return x.Card(destroy["sit-destroy:".Length..]) is { AttachedTo: not null } attachment && attachment.OwnerId != x.Self.Id ? 125 : -100;
-        var gain = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
+        var gain = WantsOwnGain(x);
         return command.Choice switch
         {
             "self-gain" => gain ? 130 : 70,
@@ -147,6 +153,29 @@ public static partial class TrainingOpponent
             "opponent-gain" or "self-lose" => -100,
             _ => 100
         };
+    }
+
+    /// <summary>Extra score for an ability that is the deck's own engine (archetype S2).</summary>
+    internal const double ArchetypeEngineBonus = 30;
+
+    /// <summary>A dishonor deck declares an attack only with this much more Force than the defenders (archetype S1).</summary>
+    internal const int DishonorAttackMargin = 4;
+
+    /// <summary>Whether the bot would rather gain Honor than make the opponent lose it: the Honor tier's answer, unless the archetype switch reads the race (S4).</summary>
+    private static bool WantsOwnGain(Ctx x)
+    {
+        var tier = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
+        if (!x.Memory.UseArchetypeSwitch || x.Memory.Archetype is not { } a) return tier;
+        var honorRoute = a.Primary == WinRoute.Honor || a.Secondary == WinRoute.Honor;
+        if (honorRoute && x.Self.Honor >= 28) return true; // within sight of 40: gain it
+        if (a.Primary == WinRoute.Dishonor) return x.Opponent.Honor > -8 && x.Self.Honor < 0; // press the opponent unless the bot itself is in danger
+        return tier;
+    }
+
+    public static bool WantsOwnGainForTest(MatchView view, BotContext memory)
+    {
+        var self = view.Players.Single(p => p.Id == view.ViewerId); var opponent = view.Players.Single(p => p.Id != view.ViewerId);
+        return WantsOwnGain(new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view)));
     }
 
     private static double DeclareScore(Ctx x)
@@ -158,6 +187,7 @@ public static partial class TrainingOpponent
         if (plan is null) return units.Length == 0 ? -100 : TradeFor(x, units) is { } trade ? TradeScore(trade) : 0;
         if (HonorRace(x)) return 200; // the opponent wins on Honor next turn: always attack
         var force = ArmyForce(x.Self.Home.Where(c => plan.ContainsKey(c.Id) || c.AttachedTo is not null && plan.ContainsKey(c.AttachedTo)));
+        if (x.Memory.UseArchetypeAttack && x.Memory.Archetype is { Primary: WinRoute.Dishonor } && force - ArmyForce(x.Opponent.Home) < DishonorAttackMargin) return 0; // the engine wins this game, not a marginal attack
         return 90 + force - ArmyForce(x.Opponent.Home);
     }
 

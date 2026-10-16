@@ -100,11 +100,63 @@ public static partial class TrainingOpponent
         return saves.Length > 0 ? saves.OrderByDescending(p => p.Strength).ThenBy(p => p.Index).First().Index : null;
     }
 
+    /// <summary>
+    /// Hypothesis A: when attackers sit at several Provinces, the assignment of defenders to battlefields (or home) with the best outcome: an attacking army destroyed counts, a Province saved counts more,
+    /// and defenders sent to a battle they lose or that did not need them cost something. Null unless the best assignment uses two or more battlefields.
+    /// </summary>
+    private static Dictionary<string, int>? SplitDefense(Ctx x, CardView[] units, int[] offered)
+    {
+        var contested = x.Self.Provinces.Where(p => !p.Destroyed && offered.Contains(p.Index) && AttackersAt(x, p.Index) > 0).ToArray();
+        if (contested.Length < 2 || units.Length < 2 || units.Length > 7) return null;
+        var forces = units.Select(u => ArmyForce(x.Self.Home.Where(h => h.Id == u.Id || h.AttachedTo == u.Id))).ToArray();
+        var options = contested.Length + 1; // each unit goes to one contested battlefield or stays home
+        var total = (int)Math.Pow(options, units.Length);
+        double bestValue = double.MinValue; int[]? best = null;
+        var choice = new int[units.Length];
+        for (var code = 0; code < total; code++)
+        {
+            var c = code; for (var i = 0; i < units.Length; i++) { choice[i] = c % options; c /= options; }
+            double value = 0; var used = 0;
+            for (var p = 0; p < contested.Length; p++)
+            {
+                int defenders = 0, count = 0;
+                for (var i = 0; i < units.Length; i++) if (choice[i] == p + 1) { defenders += forces[i]; count++; }
+                if (count == 0) continue;
+                used++;
+                var attackers = AttackersAt(x, contested[p].Index); var strength = contested[p].Strength;
+                if (defenders > attackers) value += attackers > strength ? 3 : 1;
+                else if (attackers > strength && attackers <= strength + defenders) value += 2 - .25 * count;
+                else value -= .5 * count;
+            }
+            value -= .01 * choice.Count(v => v != 0);
+            if (value > bestValue) { bestValue = value; best = (int[])choice.Clone(); }
+        }
+        if (best is null || bestValue <= 0 || best.Where(v => v != 0).Distinct().Count() < 2) return null;
+        var plan = new Dictionary<string, int>(StringComparer.Ordinal);
+        for (var i = 0; i < units.Length; i++) if (best[i] != 0) plan[units[i].Id] = contested[best[i] - 1].Index;
+        return plan;
+    }
+
+    /// <summary>The score of a split defense: 95 when any group wins its battle, 70 when it only saves Provinces, 0 otherwise.</summary>
+    private static double SplitDefenseScore(Ctx x, GameCommand command)
+    {
+        double best = 0;
+        foreach (var group in command.Assignments!.GroupBy(p => p.Value))
+        {
+            var target = x.Self.Provinces.FirstOrDefault(p => p.Index == group.Key); if (target is null) continue;
+            var attackers = AttackersAt(x, group.Key); var defenders = DefendersForce(x, group.Select(p => p.Key));
+            if (attackers > 0 && defenders > attackers) best = 95;
+            else if (attackers > target.Strength && attackers <= target.Strength + defenders) best = Math.Max(best, 70);
+        }
+        return best;
+    }
+
     /// <summary>The score of a defense assignment under the informed rule, or null to leave it to the old scores (nothing assigned, or the Cavalry and last-stand rules apply).</summary>
     private static double? InformedDefenseScore(Ctx x, GameCommand command)
     {
         if (command.Assignments is not { Count: > 0 } || x.Opponent.Army.Length == 0) return null;
         if (LastStandProvince(x, x.Self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return null; // the last Provinces will fall: the old rule defends and fights
+        if (x.Memory.UseSplitDefense && command.Assignments.Values.Distinct().Count() > 1) return SplitDefenseScore(x, command);
         var province = command.Assignments.Values.First();
         var target = x.Self.Provinces.FirstOrDefault(p => p.Index == province);
         if (target is null) return null;

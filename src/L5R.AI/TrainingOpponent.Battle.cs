@@ -176,12 +176,15 @@ public static partial class TrainingOpponent
     /// <summary>The ordering of Mendon's rule 5: destroy, bow, move, penalize, everything else, with a buff for the bot's own army on top when it lifts a unit past an enemy Attack.</summary>
     /// <summary>Issue #788 (Mendon): the attack that cannot raze a Province but destroys the defending army, or trades well in a tie. Null when the rule is off or no such attack exists.</summary>
     private static BattlePolicy.Trade? TradeFor(Ctx x, CardView[] units) =>
-        x.Memory.UseBattlePolicy && x.Memory.UseTradeAttacks && !HonorRace(x) ? BattlePolicy.PlanTrade(units, x.Self.Home, x.Opponent.Home) : null;
+        TradesOn(x) && !HonorRace(x) ? BattlePolicy.PlanTrade(units, x.Self.Home, x.Opponent.Home) : null;
+
+    /// <summary>Trade attacks are on for everyone (Mendon's flag) or, with hypothesis B, for a deck whose only route is the battlefield.</summary>
+    private static bool TradesOn(Ctx x) => x.Memory.UseBattlePolicy && x.Memory.UseTradeAttacks || x.Memory.UseMilitaryTrades && x.Memory.Archetype is { Primary: WinRoute.Military, Secondary: null };
 
     /// <summary>The trade the already-chosen assignment makes, so a plan the engine or the planner supplied is scored by the same rule.</summary>
     private static BattlePolicy.Trade? TradeOf(Ctx x, IEnumerable<string> sentIds)
     {
-        if (!x.Memory.UseBattlePolicy || !x.Memory.UseTradeAttacks || HonorRace(x)) return null;
+        if (!TradesOn(x) || HonorRace(x)) return null;
         var sent = x.Self.Home.Where(c => sentIds.Contains(c.Id)).ToArray();
         var defenders = x.Opponent.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).ToArray();
         return BattlePolicy.Evaluate(sent, x.Self.Home, BattlePolicy.Force(x.Opponent.Home), defenders.Sum(d => BattlePolicy.UnitValue(d, x.Opponent.Home)));

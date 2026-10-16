@@ -215,6 +215,11 @@ internal static class BotSoak
             if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the battle-policy arena"); return; }
             BotArena.RunPolicy(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, int.TryParse(Env("L5R_ARENA_SEEDS"), out var seeds) ? seeds : 1, Env("L5R_ARENA_REPORT"));
         }),
+        ("bot-archetype-dump: write each pool deck's printed card data for the archetype classifier (issue #963, opt-in, set L5R_ARCH_DUMP to the output path)", () =>
+        {
+            if (Env("L5R_ARCH_DUMP") is not { } outPath) { Console.WriteLine("  SKIP: set L5R_ARCH_DUMP to an output path"); return; }
+            DeckArchetypeDump.Run(Env("L5R_TOURN_DECKS") ?? "src/L5R.Client/Content/preloaded-decks.json", outPath);
+        }),
         ("bot-tournament: champion versus a challenger arm over the preloaded decks plus the Lion and Crane presets (issue #963, opt-in, see BotTournament.cs and docs/bots/README.md)", () =>
         {
             var decks = Env("L5R_TOURN_DECKS") ?? "src/L5R.Client/Content/preloaded-decks.json";

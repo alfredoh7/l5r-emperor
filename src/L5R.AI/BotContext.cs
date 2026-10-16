@@ -58,6 +58,27 @@ public sealed class BotContext
     /// <summary>Issue #963 (bot loop, round 4): a Reaction that helps, penalizes, bows or destroys is always played when it is worth anything, instead of being declined by a deterministic roll (30% to 90% chance to play). Off: the roll.</summary>
     public bool UseSureReactions { get; init; } = false;
 
+    /// <summary>The route(s) to victory the bot's own decklist supports (<see cref="DeckArchetype"/>); the caller supplies it, as with <see cref="DeckAveragePersonalHonor"/>. Null: no archetype rule applies.</summary>
+    public DeckArchetype? Archetype { get; set; }
+
+    /// <summary>Issue #963 (archetype S1): a deck whose route is dishonor declares an attack only when its army beats the defenders by a clear margin; its engine, not its army, wins the game.</summary>
+    public bool UseArchetypeAttack { get; init; } = false;
+
+    /// <summary>Issue #963 (archetype S2): abilities that are the deck's engine (Honor for itself in an honor deck, Honor taken from the opponent in a dishonor deck) are worth more.</summary>
+    public bool UseArchetypeAbilities { get; init; } = false;
+
+    /// <summary>Issue #963 (archetype S3): a deck with no honor or dishonor engine does not chase Honor gain; it wins on the battlefield.</summary>
+    public bool UseArchetypeMilitary { get; init; } = false;
+
+    /// <summary>Issue #963 (archetype S4): a deck with an honor route sprints when its own Honor is high, a dishonor deck presses when the opponent's is low, instead of the fixed Honor-tier preference.</summary>
+    public bool UseArchetypeSwitch { get; init; } = false;
+
+    /// <summary>Issue #963 (hypothesis A): when the attackers are at several of the bot's Provinces, the defenders are split among them where each group wins or saves a Province, instead of all going to one battlefield. Needs <see cref="UseInformedDefense"/>.</summary>
+    public bool UseSplitDefense { get; init; } = false;
+
+    /// <summary>Issue #963 (hypothesis B): a deck whose only route is the battlefield (archetype military, no honor secondary) takes the trade attacks <see cref="UseTradeAttacks"/> describes, which the pooled test found to lose; its units exist to fight.</summary>
+    public bool UseMilitaryTrades { get; init; } = false;
+
     /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
     public double? DeckAveragePersonalHonor { get; init; }
 
