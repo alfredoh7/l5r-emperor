@@ -63,8 +63,9 @@ public static partial class TrainingOpponent
 
     /// <summary>
     /// Issue #997: nobody opposes the bot at this battlefield (the other side has no Personality there, bowed or not). On defense there is nothing to defend against, so every action is
-    /// barred and the bot passes, keeping its cards for a battle that is contested. On offense it acts only to add the Force the Province still needs (a Force bonus, an attachment
-    /// that carries Force); once its Force already destroys the Province it stops, unless an Honor play really resolves. Reactions and negations are left to their own rules.
+    /// barred and the bot passes, keeping its cards for a battle that is contested. On offense it acts only to get the Province destroyed (a Force bonus or an attachment that carries Force,
+    /// a cut to the Province's strength, a move of its own Personalities to this battle); once its Force already destroys the Province it stops. Issue #1003 also allows, in either case, an
+    /// Honor play that really resolves and a move that changes the outcome of another battle (see <see cref="UnopposedAdjust"/>). Reactions and negations are left to their own rules.
     /// Null leaves the ordinary score (the battle is opposed, or the action is the Force the attacker still lacks).
     /// </summary>
     private static double? UnopposedAdjust(Ctx x, ActionOption action, GameCommand command, AbilityIntent intent, double score)
@@ -73,12 +74,15 @@ public static partial class TrainingOpponent
         if (!x.Memory.UseUnopposedGate || odds is null || intent.Negates || intent.IsReaction) return null;
         if (EnemyArmyAt(x).Any(c => c.Definition?.Type == CardType.Personality)) return null;
         if (!odds.IsAttacker) return BarredScore;
+        // Issue #1003: what an unopposed attacker may still usefully do. Honor for itself or taken from the opponent (when it really happens) is worth playing short of the Province or not;
+        // a move of its own Personalities that changes the outcome of another battle is too. Short of the Province it may also add Force, lower the Province's strength or move
+        // Personalities to this battle. Everything else (an Attack, an optional bow or destroy) is barred: there is nothing to hit.
+        var gainsHonor = intent.HonorGain && intent.Side != TargetSide.Enemy || intent.HonorLoss && intent.Side != TargetSide.Own;
+        var honor = gainsHonor && HonorResolves(x, action, command, odds);
         if (odds.Satisfied)
-        {
-            var gainsHonor = intent.HonorGain && intent.Side != TargetSide.Enemy || intent.HonorLoss && intent.Side != TargetSide.Own;
-            return gainsHonor && HonorResolves(x, action, command, odds) ? Math.Max(score, 130) : BarredScore;
-        }
-        return AddsForce(x, action, command, intent) ? null : BarredScore;
+            return honor ? Math.Max(score, 130) : MovesToChangeAnotherBattle(x, action, command, odds) ? null : BarredScore;
+        return honor || AddsForce(x, action, command, intent) || LowersAttackedProvince(x, action, command) || MovesToThisBattle(x, action, command) || MovesToChangeAnotherBattle(x, action, command, odds)
+            ? null : BarredScore;
     }
 
     /// <summary>The action adds Force to the bot's own army this battle: an attachment that carries Force, a "+N F" ability or Strategy for its own side, or a card it creates with Force.</summary>
