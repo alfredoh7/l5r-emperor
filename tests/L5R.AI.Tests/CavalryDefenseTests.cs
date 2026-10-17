@@ -84,6 +84,18 @@ internal static class CavalryDefenseTests
         var none = Table(8, 0, 0);
         Check(TrainingOpponent.Choose(none, [Pass(none), Defend(none)]).Command?.Type == "pass", "no Cavalry at home and nobody attacking: nothing to defend against");
         Check(TrainingOpponent.Choose(even, [Pass(even), Defend(even)], new BotContext { UseCavalryDefense = false }).Command?.Type == "pass", "switched off, it plays as before");
+
+        // Mendon, 2026-10-17: with its last Province left and the attacker's Cavalry able to destroy it, it defends with everything even when it cannot reach parity.
+        MatchView LastProvince(int ownForce, int horses, int horseForce, int strength) => Table(ownForce, horses, horseForce) with
+        {
+            Players = [Table(ownForce, horses, horseForce).Players[0] with { Provinces = [new(0, 5, true, null, null), new(1, strength, false, null, null)] }, Table(ownForce, horses, horseForce).Players[1]]
+        };
+        var last = LastProvince(2, 2, 4, 5);
+        var stand = TrainingOpponent.Choose(last, [Pass(last), Defend(last)]);
+        Check(stand.Command?.Type == "assignDefense" && stand.Command.Assignments?.Count == 1 && stand.Command.Assignments.Values.Single() == 1, "2 against a possible 8 at its last Province (strength 5): it still defends with everything (got " + stand.Command?.Type + ")");
+        var safe = LastProvince(2, 1, 4, 5);
+        Check(TrainingOpponent.Choose(safe, [Pass(safe), Defend(safe)]).Command?.Type == "pass", "the Cavalry (4) cannot destroy a strength-5 Province, so the last-stand rule does not apply");
+        Check(TrainingOpponent.Choose(last, [Pass(last), Defend(last)], new BotContext { UseCavalryDefense = false }).Command?.Type == "pass", "switched off, the last stand is off too");
     }
 
     private static void CavalryWaits()
