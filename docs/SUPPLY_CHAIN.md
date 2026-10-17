@@ -1,6 +1,6 @@
 # Supply-chain and workflow checks
 
-Rung 8 of [#509](https://github.com/alfredoh7/l5r-emperor/issues/509) adds dependency update proposals and workflow auditing. It changes no game rules, content or runtime dependency versions. Task PR: [#537](https://github.com/alfredoh7/l5r-emperor/pull/537).
+Rung 8 of [#509](https://github.com/l5r-emperor-dev/l5r-emperor/issues/509) adds dependency update proposals and workflow auditing. It changes no game rules, content or runtime dependency versions. Task PR: [#537](https://github.com/l5r-emperor-dev/l5r-emperor/pull/537).
 
 ## Dependency proposals
 
@@ -41,4 +41,4 @@ References: [Dependabot configuration](https://docs.github.com/en/code-security/
 
 ## Rung 8 validation
 
-The implementation commit `e07fc471` passed the [hosted workflow security/ownership job](https://github.com/alfredoh7/l5r-emperor/actions/runs/36552946645). Nine local and hosted regressions passed, including a real unpinned-action fixture that exits unsuccessfully. The local pedantic audit passed with the single documented routing exception. GitHub's CODEOWNERS errors API on the task branch returned an empty errors array. The first real Dependabot run/update proposals remain post-merge acceptance; no bot PR or CodeQL scan is claimed here.
+The implementation commit `e07fc471` passed the [hosted workflow security/ownership job](https://github.com/l5r-emperor-dev/l5r-emperor/actions/runs/36552946645). Nine local and hosted regressions passed, including a real unpinned-action fixture that exits unsuccessfully. The local pedantic audit passed with the single documented routing exception. GitHub's CODEOWNERS errors API on the task branch returned an empty errors array. The first real Dependabot run/update proposals remain post-merge acceptance; no bot PR or CodeQL scan is claimed here.

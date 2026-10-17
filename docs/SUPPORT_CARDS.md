@@ -1,6 +1,6 @@
 # Regions and Celestials — approved A + B + C implementation
 
-Issue [#291](https://github.com/alfredoh7/l5r-emperor/issues/291), PR [#292](https://github.com/alfredoh7/l5r-emperor/pull/292). Alfredo selected this combination on 2026-09-18. The native implementation retains the existing game/HUD and the complete original card scans.
+Issue [#291](https://github.com/l5r-emperor-dev/l5r-emperor/issues/291), PR [#292](https://github.com/l5r-emperor-dev/l5r-emperor/pull/292). Alfredo selected this combination on 2026-09-18. The native implementation retains the existing game/HUD and the complete original card scans.
 
 ## What players see
 
@@ -33,7 +33,7 @@ Low Market already validated its discounted attachment payment in Core, but its 
 
 Other shared work: the branch preserves the stabilized UI stack and integrates current main through Nikutai fix #290 and Strategy wave 14 #294. The test-list merge retains the new Strategy regression and existing UI regressions, without duplicating the already-registered Battle/Open case. Shared presentation and the Gold metadata require mdornbrook review. The PR remains based on stabilization PR #275 until the existing UI stack lands.
 
-The development launcher exposed stale catalogue-art coverage after integrating the newer published cards. The verified WebP85 pack was rebuilt to 2,812 scans and published as private [catalogue-art-webp-v9-20260918](https://github.com/alfredoh7/l5r-emperor/releases/tag/catalogue-art-webp-v9-20260918). The pinned receipt/manifest and local installation are updated; originals and printings are unchanged.
+The development launcher exposed stale catalogue-art coverage after integrating the newer published cards. The verified WebP85 pack was rebuilt to 2,812 scans and published as private [catalogue-art-webp-v9-20260918](https://github.com/l5r-emperor-dev/l5r-emperor/releases/tag/catalogue-art-webp-v9-20260918). The pinned receipt/manifest and local installation are updated; originals and printings are unchanged.
 
 ## Reproduction and evidence
 

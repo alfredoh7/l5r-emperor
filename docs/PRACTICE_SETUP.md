@@ -1,6 +1,6 @@
 # Custom Practice setup
 
-Issue [#69](https://github.com/alfredoh7/l5r-emperor/issues/69), PR [#262](https://github.com/alfredoh7/l5r-emperor/pull/262). Stacked on the approved Fallen UI PR #261, preserving the consolidated lacquer UI. The separate Duel Demo #220 is excluded.
+Issue [#69](https://github.com/l5r-emperor-dev/l5r-emperor/issues/69), PR [#262](https://github.com/l5r-emperor-dev/l5r-emperor/pull/262). Stacked on the approved Fallen UI PR #261, preserving the consolidated lacquer UI. The separate Duel Demo #220 is excluded.
 
 Open **Play → Practice**, or **Practice** in the table menu. Choose a saved deck or built-in preset for either player. The browser keeps both selections visible. Search and import use local deck text files; **Edit deck** opens the existing builder. Saving and returning selects the saved result. Incomplete drafts remain saveable, and their start issues are shown inline. Starting re-reads selected files, validates both decks in Core, then replaces the current match only after the existing-match confirmation. Clicking Stronghold art opens its full original face.
 

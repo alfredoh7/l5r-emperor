@@ -2,7 +2,7 @@
 
 Part of issue #499; draft PR #544. Alfredo approved A's shared horizontal layout with C's temporary ordering cues. The contract is in [the decision](decisions/2026-09-29-two-dynasty-province.md).
 
-Open **Review Two Dynasty Cards.command**, or the locally generated **L5R Two Dynasty Cards - Review.app**. This launches the exact checkout with no branch switching or fetching. The [versioned Windows review](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr544-b313804419-r2-windows) supplies Start Review.cmd. Its release title and PR checks distinguish a validation candidate from a ready review.
+Open **Review Two Dynasty Cards.command**, or the locally generated **L5R Two Dynasty Cards - Review.app**. This launches the exact checkout with no branch switching or fetching. The [versioned Windows review](https://github.com/l5r-emperor-dev/l5r-emperor/releases/tag/preview-pr544-b313804419-r2-windows) supplies Start Review.cmd. Its release title and PR checks distinguish a validation candidate from a ready review.
 
 The scenario selector provides two visible cards, a concealed second slot, reveal order, refill order, an empty second slot and a crowded row. Other seat switches between independently prepared views. Selecting a card inspects its complete scan; the province perimeter and number are shared. In the order tray select A or B first, then confirm. The tray disappears and the preview reports the chosen order without executing a game effect.
 

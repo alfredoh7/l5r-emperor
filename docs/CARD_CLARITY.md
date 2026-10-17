@@ -1,6 +1,6 @@
 # Turn and card interaction clarity
 
-Related: [issue #11](https://github.com/alfredoh7/l5r-emperor/issues/11), [PR #33](https://github.com/alfredoh7/l5r-emperor/pull/33).
+Related: [issue #11](https://github.com/l5r-emperor-dev/l5r-emperor/issues/11), [PR #33](https://github.com/l5r-emperor-dev/l5r-emperor/pull/33).
 
 ## Behavior
 

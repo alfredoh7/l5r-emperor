@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Configured GitHub for the public repo: secret scanning, push protection, Dependabot security updates, auto-delete branches, all-outside-contributor workflow approval, and a Protect Main ruleset (no delete/force-push, PR required with 0 approvals, always-run checks, admin bypass). Docs updated to match.",
+  "validation": "Settings applied via gh api and read back; rules/branches/main lists deletion, non_fast_forward, pull_request, required_status_checks. collab tests run on prior PR; this is doc-only.",
+  "remaining": "Owner to review admins Tr3kkR and valar12; CodeQL not enabled; desktop verify not required.",
+  "issue": "none",
+  "branch": "claude/docs-ruleset-configured",
+  "updated": "2026-10-17T12:42:56.961619+00:00"
+}
