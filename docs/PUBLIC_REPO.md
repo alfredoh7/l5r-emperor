@@ -1,5 +1,7 @@
 # Working in a public repository
 
+The repo also moved to `l5r-emperor-dev/l5r-emperor`; use the [copy-paste migration prompt for AI coding assistants](REPO_MOVED.md#prompt-for-ai-coding-assistants) to update any AI tool that worked on an older clone.
+
 `l5r-emperor-dev/l5r-emperor` is public. Everything pushed is world-readable and effectively permanent: git history, branches, PRs, issues, comments, handoffs, Actions logs and **Releases, including their ZIP assets**. Releases are not private here.
 
 - **Before pushing or publishing**, check the diff, handoff text, logs and release assets for secrets, seat tokens, room storage, personal paths/emails and anything not meant for the public. A leaked secret must be rotated; deleting it is not enough.

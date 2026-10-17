@@ -16,6 +16,11 @@ on the same PR/ref. Fork PRs do not execute the desktop workflow on this Mac.
 - The runner runs as Alfredo, without sudo. This separates checkouts, not OS permissions:
   trusted repository workflow code has the account’s file access. Do not enable this
   runner for public/untrusted contributions. Checkout does not retain its GitHub token.
+  **The repository is now public (and moved to `l5r-emperor-dev/l5r-emperor`).** The fork guard in
+  `check.yml` keeps fork PRs off this Mac, but any user with write access can still push a branch
+  whose workflow runs here as Alfredo. Keep write access to people trusted with that account, keep
+  fork-PR approval on "all outside contributors", never run `pull_request_target` PR code here, and
+  prefer switching the macOS row to a hosted runner (see Recovery) if that trust cannot be kept.
 - A per-user launchd service starts after Alfredo logs in and restarts the runner if it exits.
   After reboot/FileVault unlock, log in before expecting jobs. Logging out, shutting down,
   or manually sleeping the Mac makes jobs wait until it returns.
@@ -42,6 +47,20 @@ cd /Users/alfredo/.local/share/l5r-actions-runner
 Check GitHub Settings → Actions → Runners for Online/Idle/Active status.
 Logs are in `_diag` and the service log paths in the launchd plist.
 Do not share raw diagnostics without checking for sensitive information.
+
+## After the repository move
+
+The runner is repository-scoped and showed Online/Active after the move to `l5r-emperor-dev/l5r-emperor` (checked 2026-10-17), because GitHub redirects the old URL. Its local `.runner` file still holds the old URL, so re-register it rather than rely on the redirect. On the Mac, in the runner directory:
+
+```sh
+./svc.sh stop && ./svc.sh uninstall
+./config.sh remove --token <REMOVE_TOKEN>
+./config.sh --url https://github.com/l5r-emperor-dev/l5r-emperor --token <NEW_TOKEN> \
+  --name alfredo-mac-studio --labels l5r-mac-studio --unattended
+./svc.sh install && ./svc.sh start
+```
+
+Get tokens from repository Settings > Actions > Runners (New self-hosted runner, or the runner's Remove action). They expire in about an hour; do not paste them into issues or logs. Confirm Online/Idle and that the `l5r-mac-studio` label is still listed before the next PR; without it the macOS row queues forever.
 
 ## Recovery
 
