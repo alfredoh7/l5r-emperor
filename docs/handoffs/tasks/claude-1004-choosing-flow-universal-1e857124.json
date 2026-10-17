@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Choosing flow extended universally (client UI; Mendon's standing cross-lane authority): the multi-target Slots panel now opens one group at a time, advances when a group is full, summarises and has Back; the attack-target panel and support-card draft ask the performer first and add summary/Back. Builds on #1006.",
+  "validation": "Client builds 0 err. Native UI checks pass: direct-play, table-click, province-target, movement, multi-targets (extended: summary, Back), reaction-flow, attack-targets (Tensin now picks its performer first). Not human-playtested.",
+  "remaining": "Reaction-window flow (RenderReactionFlow) and engine-side conditional choices (e.g. Captured Convict gain/lose after the move) keep their existing panels. Needs Mendon playtest.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1004",
+  "branch": "claude/1004-choosing-flow-universal",
+  "updated": "2026-10-17T21:28:17.963219+00:00"
+}
