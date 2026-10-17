@@ -111,7 +111,7 @@ public static partial class TrainingOpponent
                 }
                 if (command.Assignments is { Count: > 0 }) return command with { Assignments = HoldCavalry(x, command.Assignments) }; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
-            if (action.Type == "assignDefense" && CavalryDefensePlan(x, action, units) is { } cavalryDefense) return command with { Assignments = cavalryDefense }; // issue #946
+            if (action.Type == "assignDefense" && (CavalryLastStandPlan(x, action, units) ?? CavalryDefensePlan(x, action, units)) is { } cavalryDefense) return command with { Assignments = cavalryDefense }; // issue #946
             // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
             var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
             if (action.Type == "assignDefense" && x.Memory.UseInformedDefense && x.Memory.UseSplitDefense && lastStand is null && SplitDefense(x, units, provinces) is { } split) return command with { Assignments = split };
@@ -288,7 +288,7 @@ public static partial class TrainingOpponent
                 if (x.Memory.UseInformedDefense && InformedDefenseScore(x, command) is { } informed) return informed;
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
-                if (enemyForce == 0) return CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // issue #946: nobody is assigned yet, but Cavalry is on its way
+                if (enemyForce == 0) return CavalryLastStandPlan(x, action, null) is not null ? 200 : CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // the last Province would fall to the Cavalry: defend with everything // issue #946: nobody is assigned yet, but Cavalry is on its way
                 if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
             case "orderSeppuku": return x.Memory.UseSeppukuPolicy ? SeppukuScore(x, command) : PassScore + 1;
