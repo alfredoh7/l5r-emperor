@@ -62,6 +62,12 @@ public partial class Main
         string Fill(string line) => line.Replace("{P}", Name(command.PerformerId)).Replace("{T}", Name(command.TargetId));
         var known = command.AbilityId is { } id && FlowEffects.TryGetValue(id, out var effects) ? effects : null;
         var lines = known is not null ? known.Select(Fill).ToList() : [Placard(action)];
+        if (known is not null && !known.Any(l => l.Contains("{T}")))
+        {
+            if (command.TargetId is not null) lines.Add("Target: " + Name(command.TargetId));
+            else if (command.Province is { } province && _attackChoice == AttackChoice.Province) lines.Add($"Target: Province {province + 1}");
+            else if (_attackChoice == AttackChoice.NoTarget) lines.Add("No target");
+        }
         if (known is null)
         {
             if (command.PerformerId is not null) lines.Add("Performer: " + Name(command.PerformerId));
