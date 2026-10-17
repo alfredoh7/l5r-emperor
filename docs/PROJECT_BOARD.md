@@ -1,6 +1,6 @@
 # L5R Project Board
 
-The separate private application lives in [alfredoh7/l5r-board](https://github.com/alfredoh7/l5r-board). Production URL: https://l5r-project-board.netlify.app. The Netlify database and dedicated GitHub App are connected; Alfredo’s sign-in and webhook synchronization have been verified. Each person should verify their own sign-in and core workflow before adoption.
+After the repository moved to `l5r-emperor-dev/l5r-emperor` (see [REPO_MOVED.md](REPO_MOVED.md)), the board's GitHub App installation, webhook target and any repository setting in the Netlify environment must name the new repository. On 2026-10-17 the production URL returned HTTP 503 and this could not be verified. The separate private application lives in [alfredoh7/l5r-board](https://github.com/alfredoh7/l5r-board). Production URL: https://l5r-project-board.netlify.app. The Netlify database and dedicated GitHub App are connected; Alfredo’s sign-in and webhook synchronization have been verified. Each person should verify their own sign-in and core workflow before adoption.
 
 GitHub owns issue descriptions, assignees, PRs, checks, and code. The board owns workflow stage, executor claims, scope snapshots, dependency links, and human acceptance. Repository policy remains authoritative for review requirements. Mendon's cross-area authority remains unchanged.
 

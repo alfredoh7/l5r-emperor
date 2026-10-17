@@ -1,6 +1,6 @@
 # Contributing and rules review
 
-This public repository coordinates the owner, invited rules reviewers, Codex and Claude Code. It does not make separate AI conversations share memory. GitHub issues, branches, PRs and checked-in status are the durable record.
+This public repository (moved to `l5r-emperor-dev/l5r-emperor`; see docs/REPO_MOVED.md if your clone predates that) coordinates the owner, invited rules reviewers, Codex and Claude Code. It does not make separate AI conversations share memory. GitHub issues, branches, PRs and checked-in status are the durable record.
 
 For playing and reporting mechanics, begin with `docs/RULES_REVIEW.md`. For development, read `AI_HANDOFF.md` and `docs/PROJECT_STATUS.md`.
 
