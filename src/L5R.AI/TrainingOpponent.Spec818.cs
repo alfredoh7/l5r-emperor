@@ -144,7 +144,7 @@ public static partial class TrainingOpponent
         var odds = x.Odds;
         if (!Spec(x) || odds is null || intent.Negates || intent.IsReaction) return null;
         var gainsHonor = intent.HonorGain && intent.Side != TargetSide.Enemy || intent.HonorLoss && intent.Side != TargetSide.Own;
-        if (odds.IsAttacker && odds.Satisfied && !EnemyArmyAt(x).Any(c => c.Definition?.Type == CardType.Personality))
+        if (odds.IsAttacker && odds.Satisfied && !x.Memory.UseUnopposedGate && !EnemyArmyAt(x).Any(c => c.Definition?.Type == CardType.Personality)) // issue #1003: UnopposedAdjust decides this case when its gate is on
             return gainsHonor && HonorResolves(x, action, command, odds) ? Math.Max(score, 130) : BarredScore;
         if (odds.Satisfied && gainsHonor && x.Self.HandCount >= x.MaxHand && HonorResolves(x, action, command, odds)) return Math.Max(score, 105);
         return null;

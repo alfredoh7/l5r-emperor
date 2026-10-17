@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "An unopposed attacker may now also lower the attacked Province's strength (the bot aims the ability at that Province), move its own Personalities to this battle, move its own Personalities to another battlefield when their Force changes that battle's outcome (also once the Province falls), gain Honor for itself and take Honor from the opponent, in addition to Force modifiers. Melee/Ranged Attacks and optional bows/destroys stay barred. The older unopposed branch in AttackerAdjust now stands down when UseUnopposedGate is on.",
+  "validation": "dotnet run --project tests/L5R.AI.Tests: 186/186 cases passed (new unopposed tests cover province-strength cut and its targeting, move to this battle, move to another battle that does/does not change its outcome, own/opponent Honor, bows and Attacks barred; bot-soak 7/7). dotnet format whitespace clean. Not done: arena win-rate measurement.",
+  "remaining": "Not measured in the bot arena. A move to another battlefield counts only the moved Force against that battle's current Force and strength (Odds.Tier); removing enemy Force there is not counted.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1003",
+  "branch": "claude/1003-bot-unopposed-useful-actions",
+  "updated": "2026-10-17T19:18:54.827560+00:00"
+}
