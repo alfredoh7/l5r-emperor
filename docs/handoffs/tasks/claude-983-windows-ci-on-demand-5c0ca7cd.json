@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Draft: pull requests run the free Mac job only; the Windows matrix moves to check-windows.yml (main, on demand, or a PR labeled windows-ci) to cut Actions cost",
+  "validation": "tools/security check_policy and unit tests pass, zizmor pedantic has no findings; NOT run on GitHub (Actions unavailable, issue 980)",
+  "remaining": "Needs Alfredo's agreement and a first real run once Actions works; create the windows-ci label",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/983",
+  "branch": "claude/983-windows-ci-on-demand",
+  "updated": "2026-10-17T13:12:02.470031+00:00"
+}

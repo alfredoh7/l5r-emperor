@@ -1,5 +1,7 @@
 name: Desktop foundation checks
 
+# Issue #983: pull requests run the Mac job only (free, runs every check). The Windows jobs are check-windows.yml: main, on demand, or a PR labeled windows-ci.
+
 on:
   push:
     branches: [main]
@@ -41,93 +43,6 @@ jobs:
             args: ''
             timeout: 25
             sparse: ''
-          - os: windows-2022-quick
-            runner: [windows-2022]
-            args: --part quick
-            timeout: 15
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
-              !/assets/ui/
-              !/src/L5R.Client/Art/
-              !*.import
-              !*.uid
-          - os: windows-2022-registration
-            runner: [windows-2022]
-            args: --part registration
-            timeout: 15
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
-              !/assets/ui/
-              !/src/L5R.Client/Art/
-              !*.import
-              !*.uid
-          - os: windows-2022-core-1
-            runner: [windows-2022]
-            args: --part core --shard 1/2
-            timeout: 20
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
-              !/assets/ui/
-              !/src/L5R.Client/Art/
-              !*.import
-              !*.uid
-          - os: windows-2022-core-2
-            runner: [windows-2022]
-            args: --part core --shard 2/2
-            timeout: 20
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
-              !/assets/ui/
-              !/src/L5R.Client/Art/
-              !*.import
-              !*.uid
-          - os: windows-2022-ai-1
-            runner: [windows-2022]
-            args: --part ai --shard 1/2
-            timeout: 20
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
-              !/assets/ui/
-              !/src/L5R.Client/Art/
-              !*.import
-              !*.uid
-          - os: windows-2022-ai-2
-            runner: [windows-2022]
-            args: --part ai --shard 2/2
-            timeout: 20
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
-              !/assets/ui/
-              !/src/L5R.Client/Art/
-              !*.import
-              !*.uid
-          - os: windows-2022-client
-            runner: [windows-2022]
-            args: --client-only
-            timeout: 30
-            sparse: |
-              /*
-              !/docs/screenshots/
-              !/docs/videos/
-              !/assets/table/
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.timeout }}
     env:
