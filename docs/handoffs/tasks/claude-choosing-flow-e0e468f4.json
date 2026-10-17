@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Choosing flow in the draft sidebar: performer, province, player, target are asked one at a time (one click advances), Back undoes the last answer, and a bullet summary (short effect lines for Sound of Thunder, Paragon's Strength, Captured Convict) shows before Confirm. Derived from engine-offered options only; no engine change.",
-  "validation": "Client builds 0 warn/0 err. check-direct-play-ui (extended: performer step, Back, Sound of Thunder performer->target->summary->Back), table-click, province-target, movement, multi-targets, reaction-flow, attack-targets native UI checks pass. Not human-playtested.",
-  "remaining": "Needs Mendon playtest. Paragon's Strength Ranged Attack uses the separate attack-target panel (not converted). Captured Convict's player/gain-or-lose choice is an engine conditional choice after the move resolves (target-dependent), so it still appears after confirming. Follow-up: slot cards (#345/#342/#343).",
+  "lane": "shared",
+  "summary": "Choosing flow in the draft sidebar (client UI; Mendon's standing cross-lane authority, so no Alfredo approval needed): performer, province, player, target asked one at a time with Back and a bullet summary. Touches Main.cs/Main.Actions.cs (shared draft flow) and the direct-play UI check. Engine untouched; steps come only from engine-offered options.",
+  "validation": "Client builds 0 warn/0 err. Native UI checks pass: direct-play (extended), table-click, province-target, movement, multi-targets, reaction-flow, attack-targets. Not human-playtested.",
+  "remaining": "Needs Mendon playtest. Paragon Ranged Attack panel and Captured Convict's post-move gain/lose choice not converted; slot cards (#345/#342/#343) are a follow-up.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1004",
   "branch": "claude/choosing-flow",
-  "updated": "2026-10-17T19:28:07.178998+00:00"
+  "updated": "2026-10-17T19:28:25.760775+00:00"
 }
