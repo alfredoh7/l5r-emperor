@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Bot: with its last Province left and an opponent whose Cavalry at home could destroy it, the bot now defends in the Infantry Maneuvers Segment with every offered unit, even when the #946 parity arithmetic says it cannot win (previously it passed). Applies only when exactly one Province remains and possible Cavalry Force exceeds its Strength.",
-  "validation": "L5R.AI.Tests: new BotDefends cases fail without the change (got pass) and pass with it; full suite 186/186 pass. Built to a separate OutDir because an unrelated bot-tournament process held the default DLLs.",
+  "lane": "shared",
+  "summary": "Bot (AI and rules lane files; Mendon's standing cross-lane authority): with its last Province left and an opponent whose Cavalry at home could destroy it, the bot defends in the Infantry Maneuvers Segment with every offered unit even when the #946 parity arithmetic says it cannot win. Only when exactly one Province remains and possible Cavalry Force exceeds its Strength.",
+  "validation": "L5R.AI.Tests: new BotDefends cases fail without the change and pass with it; full suite 186/186.",
   "remaining": "None; ready for review. Multiple remaining Provinces keep the #946 parity rule.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1008",
   "branch": "claude/1008-bot-defend-vs-cavalry",
-  "updated": "2026-10-17T20:51:00.396295+00:00"
+  "updated": "2026-10-17T20:51:21.605448+00:00"
 }
