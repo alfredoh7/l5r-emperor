@@ -99,8 +99,14 @@ public partial class Main
         var height = 110f; var width = source is null || source.Size.Y < 1 ? 100f : height * source.Size.X / source.Size.Y;
         _dragGhost = new CardTile(_dragCard!, true, _ => { }, _ => { })
         {
-            Size = new Vector2(width, height), FaceHeight = height, ShowTokenRail = false, ReducedMotion = true, Material = CardPaper.FixedTable,
-            MouseFilter = Control.MouseFilterEnum.Ignore, Modulate = new Color(1, 1, 1, .85f), Name = "DragGhost"
+            Size = new Vector2(width, height),
+            FaceHeight = height,
+            ShowTokenRail = false,
+            ReducedMotion = true,
+            Material = CardPaper.FixedTable,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Modulate = new Color(1, 1, 1, .85f),
+            Name = "DragGhost"
         };
         _dragLayer = new CanvasLayer { Layer = 60 }; AddChild(_dragLayer); _dragLayer.AddChild(_dragGhost);
         Input.SetDefaultCursorShape(Input.CursorShape.Drag);
