@@ -636,8 +636,8 @@ public partial class Main : Node
         {
             ChooseTarget(card.Id); return;
         }
-        if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.TryGetValue(card.Id, out var selectPerformer))
-        { if (_chosen?.Command?.PerformerId != card.Id) selectPerformer(); return; }
+        if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.ContainsKey(card.Id))
+        { PickPerformer(card.Id); return; }
         // Issue #973: an Attack that may be made with no target takes that choice from a click on the card that performs it, or on the card it belongs to.
         if (AttackTargetActive && _chosen!.NoTarget && (card.Id == _chosen.Command!.PerformerId || card.Id == (_chosen.CardId ?? _chosen.Command.CardId)))
         { ChooseAttackTarget(AttackChoice.NoTarget); return; }
