@@ -1,6 +1,6 @@
 # Contributing and rules review
 
-This public repository (moved to `l5r-emperor-dev/l5r-emperor`; see docs/REPO_MOVED.md if your clone predates that) coordinates the owner, invited rules reviewers, Codex and Claude Code. It does not make separate AI conversations share memory. GitHub issues, branches, PRs and checked-in status are the durable record.
+This public repository (moved to `l5r-emperor-dev/l5r-emperor`; see the [copy-paste migration prompt for AI coding assistants](docs/REPO_MOVED.md#prompt-for-ai-coding-assistants) if your clone predates that) coordinates the owner, invited rules reviewers, Codex and Claude Code. It does not make separate AI conversations share memory. GitHub issues, branches, PRs and checked-in status are the durable record.
 
 For playing and reporting mechanics, begin with `docs/RULES_REVIEW.md`. For development, read `AI_HANDOFF.md` and `docs/PROJECT_STATUS.md`.
 
@@ -8,7 +8,7 @@ For playing and reporting mechanics, begin with `docs/RULES_REVIEW.md`. For deve
 
 Alfredo leads UI/QoL; mdornbrook leads mechanics/rules. Codex and Claude Code load the shared `AGENTS.md` policy and handle context refresh, task branches, handoffs and PRs for you. See [the operating guide](docs/COLLABORATION.md). You should normally just describe the improvement.
 
-Agents run `python3 tools/collab.py context` before implementation, write a per-task handoff with `handoff`, and run `audit --working` before the final commit. Use `python` on Windows if needed. Mendon may develop in any game area and merge his own PRs after tests/CI without Alfredo approval; other authors follow lane review routing; per-task handoffs avoid everyone editing one global memory file. GitHub labels/reviewer requests are automatic; protected-branch enforcement is unavailable on the current private plan.
+Agents run `python3 tools/collab.py context` before implementation, write a per-task handoff with `handoff`, and run `audit --working` before the final commit. Use `python` on Windows if needed. Mendon may develop in any game area and merge his own PRs after tests/CI without Alfredo approval; other authors follow lane review routing; per-task handoffs avoid everyone editing one global memory file. GitHub labels/reviewer requests are automatic; the configured `Protect Main` ruleset and its enforcement limits are described in [PUBLIC_REPO.md](docs/PUBLIC_REPO.md).
 
 ## A shared task workflow
 

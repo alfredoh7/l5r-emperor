@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Added docs/REPO_MOVED.md with a prompt for AI tools working on pre-move private clones, documented runner re-registration and the public-repo runner risk, and flagged the board for repository-name updates.",
-  "validation": "Doc-only. Runner verified online via API; board URL returned HTTP 503; board token and Alfredo's Mac not accessible, so runner re-registration and board config are NOT done.",
-  "remaining": "Alfredo to re-register the runner on his Mac and check the board GitHub App/webhook/Netlify env; board 503 to investigate.",
+  "summary": "Migration prompt in REPO_MOVED.md with direct copy-paste-section links from PUBLIC_REPO.md and CONTRIBUTING.md; corrected stale private-plan enforcement wording.",
+  "validation": "Verified fenced prompt, heading targets and both relative links; git diff --check passes. Documentation-only change.",
+  "remaining": "Runner host re-registration and board configuration remain unverified and outside this documentation change.",
   "issue": "none",
   "branch": "claude/repo-moved-prompt",
-  "updated": "2026-10-17T13:11:01.961425+00:00"
+  "updated": "2026-10-17T13:27:47.612415+00:00"
 }
