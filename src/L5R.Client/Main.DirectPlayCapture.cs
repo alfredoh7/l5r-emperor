@@ -112,6 +112,17 @@ public partial class Main
             FlowBack(); await EventFrames(4);
             SupportRequire(_chosen!.Command!.TargetId is null && !StabilizationText(_inspector).Contains("SUMMARY") && StabilizationText(_inspector).Contains("CHOOSE A TARGET"), "Back returns to the target question");
 
+            // 4c. Issue #1004: A Paragon's Strength end to end -- the action, the performing Paragon, then the Ranged Attack's target -- one question at a time, with a summary and Back.
+            await LoadDirectPlay(s => { BattleSetup(s); SupportFixtureCard(s, 3636, 0, Zone.Battlefield, 0).GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent)); SupportFixtureCard(s, 61, 0, Zone.Hand); });
+            var strength = View.Players[0].Hand.Single();
+            SelectCard(strength); await EventFrames(4); await SupportCapture("-paragon-1-action");
+            await SupportClick(ActionTextBlocks().First(b => b.Text.Contains("Ranged", StringComparison.Ordinal))); await EventFrames(6); await SupportCapture("-paragon-2-performer");
+            SupportRequire(PerformerStepActive, "A Paragon's Strength Ranged Attack should ask for the performer first: " + StabilizationText(_inspector));
+            StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row")).EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(6); await SupportCapture("-paragon-3-target");
+            SupportRequire(AttackTargetActive && _attackChoice == AttackChoice.Unselected, "Then the Attack target is asked");
+            ChooseAttackTarget(AttackChoice.Card, _chosen!.TargetIds![0]); await EventFrames(6); await SupportCapture("-paragon-4-summary");
+            SupportRequire(StabilizationText(_inspector).Contains("SUMMARY") && StabilizationText(_inspector).Contains("Lose 4 Honor"), "The summary lists the Attack and the Honor loss: " + StabilizationText(_inspector));
+
             // 5. Issue #793: the Declare Attack button is a blood-red lacquer, not black.
             await LoadDirectPlay(s => { s.Phase = Phase.AttackDeclaration; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 3636, 1, Zone.Home); });
             var declare = StabilizationButtons(_phaseActions).FirstOrDefault(b => b.Text.Contains("Declare an attack", StringComparison.Ordinal));

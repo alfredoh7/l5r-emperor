@@ -58,6 +58,7 @@ public partial class Main
         }
         if (command.PerformerId is { } performer && FindCard(performer) is { } performing)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(performing), 16, Palette.PaperDim));
+        if (_attackChoice != AttackChoice.Unselected) RenderFlowSummary(action); // choosing flow (issue #1004): the answers sit at the top, never below the target list
         void AddOption(string name, string label, AttackChoice kind, int? province = null)
         {
             var selected = _attackChoice == kind && (kind != AttackChoice.Province || command.Province == province);
@@ -96,7 +97,6 @@ public partial class Main
             var inspect = SidebarSkin.Button("Inspect selected card", () => InspectAttackCard(selectedCard));
             inspect.CustomMinimumSize = new(0, 40); inspect.AddThemeFontSizeOverride("font_size", 16); _decisionActions.AddChild(inspect);
         }
-        if (_attackChoice != AttackChoice.Unselected) RenderFlowSummary(action);
         if (_attackChoice != AttackChoice.Unselected || _performerPicked && PerformerClicks().Count > 0)
         {
             var back = SidebarSkin.Button("← Back", () =>
