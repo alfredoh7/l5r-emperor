@@ -119,6 +119,6 @@ Suggested prompt for the next AI:
 
 Full human Lion/Crane matches, native Windows/external private multiplayer acceptance and the later tutorial remain tracked in `docs/NEXT_PHASE.md`. Catalogue, deck-building and custom Practice implementations already exist; do not recreate them from that older sequence. Use current issues and the task audit above for bounded remaining work. UI/QoL work continues in Alfredo’s lane while mechanics development and review proceed in parallel.
 
-## Project board
+## GitHub coordination; project board retired
 
-The private project board and authenticated agent client are documented in `docs/PROJECT_BOARD.md`. GitHub remains authoritative for issues and PRs; the board adds scope snapshots, executor claims, dependencies, and human acceptance. `collab.py context` includes it when a token is configured. Production readiness is recorded in the board repository, not inferred from these instructions.
+Alfredo retired the separate project board on 2026-10-17. Coordinate directly through GitHub issues, assignments, ownership notes, PRs, checks and the normal repository handoffs. `collab.py context` does not contact the board, even if an old board token remains configured. Do not create board tokens or require board claims. Human acceptance must still be recorded explicitly and is not inferred from a merge or a successful build. [PROJECT_BOARD.md](docs/PROJECT_BOARD.md) records the retirement and preserved history.
