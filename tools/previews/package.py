@@ -10,7 +10,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-REPO = "alfredoh7/l5r-emperor"
+REPO = "l5r-emperor-dev/l5r-emperor"
 ROOT = Path(__file__).resolve().parents[2]
 RELEASE_LIMIT = 2 * 1024**3 - 1
 

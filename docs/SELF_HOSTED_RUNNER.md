@@ -1,6 +1,6 @@
 # Local macOS Actions runner
 
-Issue: https://github.com/alfredoh7/l5r-emperor/issues/100
+Issue: https://github.com/l5r-emperor-dev/l5r-emperor/issues/100
 
 The macOS row of Desktop foundation checks uses the repository-scoped runner
 `alfredo-mac-studio`, labelled `self-hosted`, `macOS`, `ARM64`, `l5r-mac-studio`.

@@ -1,6 +1,6 @@
 # Repository skills
 
-Rung 5 of [the PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/alfredoh7/l5r-emperor/issues/509), provides four project recipes; Rung 9 adds governance-lite. Open a session in this repository; invoke by name or ask for the described workflow. Repository skills add procedure, not permissions or rulings, and AGENTS.md remains the shared policy.
+Rung 5 of [the PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/l5r-emperor-dev/l5r-emperor/issues/509), provides four project recipes; Rung 9 adds governance-lite. Open a session in this repository; invoke by name or ask for the described workflow. Repository skills add procedure, not permissions or rulings, and AGENTS.md remains the shared policy.
 
 | Skill | Claude | Codex | Purpose |
 |---|---|---|---|

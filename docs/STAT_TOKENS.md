@@ -1,6 +1,6 @@
 # Automatic Personality stat tokens
 
-Implemented for the approved Force/Chi concept, related to [issue #18](https://github.com/alfredoh7/l5r-emperor/issues/18) and [PR #32](https://github.com/alfredoh7/l5r-emperor/pull/32).
+Implemented for the approved Force/Chi concept, related to [issue #18](https://github.com/l5r-emperor-dev/l5r-emperor/issues/18) and [PR #32](https://github.com/l5r-emperor-dev/l5r-emperor/pull/32).
 
 ## Behavior and appearance
 

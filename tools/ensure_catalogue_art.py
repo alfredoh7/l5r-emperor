@@ -40,7 +40,7 @@ def validate_coverage(root):
 def install(root, archive=None, verify_only=False):
     receipt=json.loads((root/'content/catalogue-art-pack.json').read_text())
     if (receipt.get('schema_version')!=1 or receipt.get('quality')!=85
-        or receipt.get('repository')!='alfredoh7/l5r-emperor'
+        or receipt.get('repository') not in ('l5r-emperor-dev/l5r-emperor','alfredoh7/l5r-emperor')
         or receipt.get('asset')!='L5R-Catalogue-WebP85.zip'
         or len(receipt.get('sha256',''))!=64
         or any(c not in '0123456789abcdef' for c in receipt['sha256'])):

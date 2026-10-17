@@ -1,6 +1,6 @@
 # Working in a public repository
 
-`alfredoh7/l5r-emperor` is public. Everything pushed is world-readable and effectively permanent: git history, branches, PRs, issues, comments, handoffs, Actions logs and **Releases, including their ZIP assets**. Releases are not private here.
+`l5r-emperor-dev/l5r-emperor` is public. Everything pushed is world-readable and effectively permanent: git history, branches, PRs, issues, comments, handoffs, Actions logs and **Releases, including their ZIP assets**. Releases are not private here.
 
 - **Before pushing or publishing**, check the diff, handoff text, logs and release assets for secrets, seat tokens, room storage, personal paths/emails and anything not meant for the public. A leaked secret must be rotated; deleting it is not enough.
 - **Card scans, scraped reference images, imagegen art packs and bulk research collections** are third-party or unreleased material. Do not commit them, and do not attach new ones to a public Release (or to the PR/issue that links it) unless the owner has decided to publish them. Otherwise keep them local or in non-public storage the owner designates, and say so in the handoff.

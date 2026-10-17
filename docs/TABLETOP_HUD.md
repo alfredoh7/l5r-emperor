@@ -1,6 +1,6 @@
 # Tabletop HUD refinement
 
-Task: [#34](https://github.com/alfredoh7/l5r-emperor/issues/34). Follow-up PR: [#35](https://github.com/alfredoh7/l5r-emperor/pull/35).
+Task: [#34](https://github.com/l5r-emperor-dev/l5r-emperor/issues/34). Follow-up PR: [#35](https://github.com/l5r-emperor-dev/l5r-emperor/pull/35).
 
 ## Behavior
 
