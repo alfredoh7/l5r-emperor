@@ -14,6 +14,7 @@ public static partial class TrainingOpponent
     {
         score = HonorAwareScore(x, action, command, score); // issue #870 (TrainingOpponent.Honor.cs): the Honor an ability costs or gains, and an Attack that cannot destroy its target
         score = PrudenceScore(x, action, command, score); // issue #902 (TrainingOpponent.Prudence.cs): mutual effects, early economy, the first-action claim
+        if (action.Type is "useAbility" or "playStrategy" or "equip" && UnopposedAdjust(x, action, command, action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId)), score) is { } unopposed) return unopposed; // issue #997
         if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy || x.Memory.UseSpec818) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (AttackerAdjust(x, action, command, intent, score) is { } attacker) return attacker; // issue #818 items 6 and 7
@@ -57,6 +58,40 @@ public static partial class TrainingOpponent
         // spending cards from its hand.
         if (!BattlePolicy.Unthreatened(EnemyArmyAt(x), x.Opponent.HandCount)) return score;
         return inPlay ? score + 25 : Math.Max(PassScore, score - 25);
+    }
+
+    /// <summary>
+    /// Issue #997: nobody opposes the bot at this battlefield (the other side has no Personality there, bowed or not). On defense there is nothing to defend against, so every action is
+    /// barred and the bot passes, keeping its cards for a battle that is contested. On offense it acts only to add the Force the Province still needs (a Force bonus, an attachment
+    /// that carries Force); once its Force already destroys the Province it stops, unless an Honor play really resolves. Reactions and negations are left to their own rules.
+    /// Null leaves the ordinary score (the battle is opposed, or the action is the Force the attacker still lacks).
+    /// </summary>
+    private static double? UnopposedAdjust(Ctx x, ActionOption action, GameCommand command, AbilityIntent intent, double score)
+    {
+        var odds = x.Odds;
+        if (!x.Memory.UseUnopposedGate || odds is null || intent.Negates || intent.IsReaction) return null;
+        if (EnemyArmyAt(x).Any(c => c.Definition?.Type == CardType.Personality)) return null;
+        if (!odds.IsAttacker) return BarredScore;
+        if (odds.Satisfied)
+        {
+            var gainsHonor = intent.HonorGain && intent.Side != TargetSide.Enemy || intent.HonorLoss && intent.Side != TargetSide.Own;
+            return gainsHonor && HonorResolves(x, action, command, odds) ? Math.Max(score, 130) : BarredScore;
+        }
+        return AddsForce(x, action, command, intent) ? null : BarredScore;
+    }
+
+    /// <summary>The action adds Force to the bot's own army this battle: an attachment that carries Force, a "+N F" ability or Strategy for its own side, or a card it creates with Force.</summary>
+    private static bool AddsForce(Ctx x, ActionOption action, GameCommand command, AbilityIntent intent)
+    {
+        if (IsEquip(action, command)) return EquipForce(Attachment(x, action, command)) > 0;
+        if (intent.Side == TargetSide.Enemy) return false;
+        if (x.Card(command.CardId) is { Definition.Effect: "force-three" }) return true;
+        foreach (var ability in BattleAbilitiesOf(x, action, command))
+        {
+            var created = CreatedForce.Match(AbilityIntent.EffectText(ability.Label ?? ""));
+            if (ForceBonus(ability) > 0 || created.Success && int.Parse(created.Groups[1].Value) > 0) return true;
+        }
+        return false;
     }
 
     /// <summary>Above every ordinary score: Mendon's "always use the additional action" for an attachment the bot has just equipped.</summary>
