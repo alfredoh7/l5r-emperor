@@ -20,7 +20,7 @@ concurrency:
 jobs:
   verify:
     name: verify (${{ matrix.os }})
-    # Only this private repository’s branches may execute on the personal Mac.
+    # Only this repository’s own branches (never a fork’s) may execute on the personal Mac.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     strategy:
       fail-fast: false
@@ -152,7 +152,7 @@ jobs:
         # shallow/sparse for slow, fresh-disk Windows runners, and full history
         # for all branches would undo that. tools/lint_comment_swallow.py only
         # needs origin/main to exist locally to compute its diff. The checkout
-        # above uses persist-credentials: false (this is a private repo), so
+        # above uses persist-credentials: false (the repo is public), so
         # this one fetch authenticates itself with the ephemeral job token
         # instead of turning credential persistence back on repo-wide.
         env:

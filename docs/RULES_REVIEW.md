@@ -4,7 +4,7 @@ The purpose of this playtest is to find discrepancies in the **gameplay loop, ti
 
 ## Start playing
 
-Accept the private repository invitation. Open **Releases** and download the Mac or Windows game ZIP from the current development checkpoint. Extract the ZIP completely. On Windows, keep the executable, `.pck` and .NET directory together. On Mac, launch the extracted app. These are private development packages; the Mac package is locally signed and not notarized, and the Windows build is not publisher-signed. Report a launch failure as an issue rather than assuming the package ran successfully.
+Open the repository's **Releases** page (the repository is public) and download the Mac or Windows game ZIP from the current development checkpoint. Extract the ZIP completely. On Windows, keep the executable, `.pck` and .NET directory together. On Mac, launch the extracted app. These are development packages; the Mac package is locally signed and not notarized, and the Windows build is not publisher-signed. Report a launch failure as an issue rather than assuming the package ran successfully.
 
 Choose **Practice**, select the published Lion or Crane deck, and try both Clans. You can use the practice opponent or the pass-device flow. A separate SDK/editor installation is unnecessary for these downloads. To build from source, use `AI_HANDOFF.md`.
 
@@ -32,7 +32,7 @@ Open an issue using **Rules / gameplay discrepancy**. Include:
 3. The actions taken, costs paid, targets chosen and any pending choice.
 4. What happened versus what Emperor rules should do.
 5. Rulebook page/section, card scan or historical erratum supporting the expectation. If uncertain, label it an interpretation question.
-6. A screenshot, short clip, or exported replay if available. Do not include seat tokens or room storage. A replay can contain private cards, so share it only within this private review group.
+6. A screenshot, short clip, or exported replay if available. Do not include seat tokens or room storage. A replay can contain private cards, so share it only with the review group, and never post it in a public issue or PR.
 
 One interaction per issue is easiest to reproduce and verify. Balance opinions and historical legality questions should be distinguished from a rules-engine defect.
 
@@ -43,4 +43,4 @@ One interaction per issue is easiest to reproduce and verify. Balance opinions a
 3. A second-person match with both players checking priority and hidden information.
 4. On Windows, explicitly record launch, card readability, input and full-game behavior. An export or CI result does not establish this.
 
-The repository does not host an online match server. Local testing instructions are in the top-level README; an external private Mac/Windows session needs the separately planned server deployment.
+The repository does not host an online match server. Local testing instructions are in the top-level README; an external Mac/Windows session needs the separately planned server deployment.

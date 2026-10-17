@@ -5,7 +5,7 @@ Rung 5 of [the PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/al
 | Skill | Claude | Codex | Purpose |
 |---|---|---|---|
 | wire-card-wave | `/wire-card-wave` | `$wire-card-wave` | Verified printing/packager, feature-owned mechanics, manifest, tests, artwork and inventory |
-| art-pack-release | `/art-pack-release` | `$art-pack-release` | Complete verified WebP pack and, when requested, versioned private release |
+| art-pack-release | `/art-pack-release` | `$art-pack-release` | Complete verified WebP pack and, when requested, versioned release (public on this repo; needs an owner decision) |
 | card-pass-report | `/card-pass-report` | `$card-pass-report` | Reconciled coverage/blockers, confirmed readings, client contracts and evidence |
 | ruling-interview | `/ruling-interview` | `$ruling-interview` | Focused questions and counterexamples leading to a recorded owner ruling |
 | governance-lite | `/governance-lite` | `$governance-lite` | Four focused review roles and a diff-based client-contract ledger; see [governance guide](GOVERNANCE_LITE.md) |
