@@ -1,9 +1,9 @@
 {
   "lane": "rules",
-  "summary": "Bot guidance for Battle/Open cards: never use an ability that does nothing (bow on a bowed card, plain straighten on a straight card, conditional Honor loss without a dishonorable target, a Combat-Segment-only bow outside one), and hold combat-only effects (Combat-Segment-only bow, Force change) with no outside payoff for the Combat Segment instead of spending them in the Open phase. Soshi House Guard is the worked example. Flag BotContext.UsePhaseChoice (default on). docs/BOT_PHASE_GUIDANCE.md has the inventory of the ~123 BattleOrOpen abilities, the general guidance and the proposals not done.",
+  "summary": "Bot guidance for Battle/Open cards: never use an ability that does nothing (bow on a bowed card, plain straighten on a straight card, conditional Honor loss without a dishonorable target, a Combat-Segment-only bow outside one), and hold combat-only effects (Combat-Segment-only bow, Force change) with no outside payoff for the Combat Segment instead of spending them in the Open phase. Soshi House Guard is the worked example. Flag BotContext.UsePhaseChoice (default on). docs/rules/BOT_PHASE_GUIDANCE.md has the inventory of the ~123 BattleOrOpen abilities, the general guidance and the proposals not done.",
   "validation": "dotnet run --project tests/L5R.AI.Tests: 184/184 cases passed (new phase-choice tests 4/4 on real catalogue abilities: Soshi in Open/Battle, straighten, Force boost, Honor-gaining card, flag off; bot-soak 7/7). dotnet format whitespace clean. Not done: arena/win-rate measurement.",
-  "remaining": "Not measured in the bot arena. Once-per-turn budgeting (a held use is lost if no battle happens), Strategies that declare timing only in code, and richer conditional-effect wording are proposed in docs/BOT_PHASE_GUIDANCE.md, not implemented.",
+  "remaining": "Not measured in the bot arena. Once-per-turn budgeting (a held use is lost if no battle happens), Strategies that declare timing only in code, and richer conditional-effect wording are proposed in docs/rules/BOT_PHASE_GUIDANCE.md, not implemented.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/998",
   "branch": "claude/998-bot-battle-open-phase",
-  "updated": "2026-10-17T18:12:32.634890+00:00"
+  "updated": "2026-10-17T18:22:56.400924+00:00"
 }
