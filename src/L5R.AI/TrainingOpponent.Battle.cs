@@ -14,6 +14,7 @@ public static partial class TrainingOpponent
     {
         score = HonorAwareScore(x, action, command, score); // issue #870 (TrainingOpponent.Honor.cs): the Honor an ability costs or gains, and an Attack that cannot destroy its target
         score = PrudenceScore(x, action, command, score); // issue #902 (TrainingOpponent.Prudence.cs): mutual effects, early economy, the first-action claim
+        if (action.Type is "useAbility" or "playStrategy" && PhaseUseAdjust(x, action, command, action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId)), score) is { } phase) return phase; // issue #998
         if (action.Type is "useAbility" or "playStrategy" or "equip" && UnopposedAdjust(x, action, command, action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId)), score) is { } unopposed) return unopposed; // issue #997
         if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy || x.Memory.UseSpec818) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
