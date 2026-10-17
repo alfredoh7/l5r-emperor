@@ -26,7 +26,7 @@ The metadata-only router continues to label every PR `lane:ui`, `lane:rules` or 
 
 `context` exposes the trusted configured autonomous identities and the authenticated user's approval policy. The router reads author identity from GitHub, not a PR title/branch/handoff. No auto-merger is installed; the working agent handles finishing and merging after checks.
 
-The repository is public, so rulesets, branch protection and secret scanning are available on the free plan, but none is configured yet and the agent identity lacks administrator permission to set them. Therefore **passing checks and the configured review policy are team rules, not an enforced merge lock**. The automation cannot prevent a collaborator from directly pushing main or ignoring a failed check. It never merges. Once the owner enables protection, require the collaboration and desktop checks and block force pushes through repository settings.
+The repository is public. A `Protect Main` ruleset (see [PUBLIC_REPO.md](PUBLIC_REPO.md)) blocks force-push, deletion and direct pushes and requires a PR plus the always-run checks; admins can bypass. It does not require the desktop `verify` jobs or reviews, so **desktop checks, the nightly pause and the review policy remain team rules, not an enforced merge lock**. The automation cannot stop an admin bypassing the ruleset or merging past a failed desktop check. It never merges.
 
 ## Recovery is the agent's responsibility
 
