@@ -28,6 +28,7 @@ internal static class MoveDestinationTests
             ("Adjacency between battlefields follows the DEFENDER's province line on every call site -- Predator's destinations, 'a Personality at an adjacent battlefield' (Battle, target) and Moto Gunso's boost -- whichever player owns the card or takes the action, with the two players' lines made to differ", AdjacencyIsTheDefendersLine),
             ("The option's Provinces (the destinations to draw) and its command's Province (the choice) survive JSON, and every offered destination validates and resolves on a fresh engine", OfferedDestinationsValidate),
         ];
+        runner.Run("move-destination-moveto", [("The destination rule of each move ability reaches the client (and survives JSON), so a drag can be offered without reading card text; actions that do not move cards report none", MoveToReported)]);
         runner.Run("move-destination", tests);
         runner.Run("move-destination-preview", [("Hawado exposes all destinations and only herself as mover; province Attacks are distinct", HawadoPreview)]);
     }
@@ -363,6 +364,22 @@ internal static class MoveDestinationTests
         Accept(e, e.QueryActions(1).First(a => a.Type == "selectBattle" && a.Command!.Province == 0).Command!);
         Pass(); Pass();
         Check(e.State.Events.Any(x => x.Type == "battleResolved" && x.Message == "Province 1: attacking Force 8, defending Force 5."), "Predator's 6 and the target's 3, with their Items (+1 each), count where they arrived: " + string.Join(" | ", e.State.Events.Where(x => x.Type == "battleResolved").Select(x => x.Message)));
+    }
+
+    private static void MoveToReported()
+    {
+        var s = Table(); s.PriorityPlayerId = 1; s.CurrentBattleProvince = 1; s.UnresolvedBattlefields = [0, 1, 3];
+        var source = Add(s, "training-move-source", 1, Zone.Battlefield, province: 1); Add(s, "training-crane-samurai", 1, Zone.Home); Add(s, "training-battle-bower", 0, Zone.Battlefield, province: 1);
+        var e = MatchEngine.FromTestState(s);
+        Eq(Enabled(e, 1, "training-move-current", source.Id).MoveTo, MoveSpec.CurrentBattlefield);
+        Eq(Enabled(e, 1, "training-move-both-home", source.Id).MoveTo, MoveSpec.Home);
+        Eq(Enabled(e, 1, "training-move-anywhere", source.Id).MoveTo, MoveSpec.AnyUnresolved);
+        Eq(Enabled(e, 1, "training-move-source-adjacent", source.Id).MoveTo, MoveSpec.AdjacentUnresolved);
+        var offered = Enabled(e, 1, "training-move-current", source.Id);
+        Eq(JsonSerializer.Deserialize<ActionOption>(JsonSerializer.Serialize(offered))!.MoveTo, MoveSpec.CurrentBattlefield);
+        var actions = e.QueryActions(1);
+        Check(actions.Where(a => a.Type != "useAbility").All(a => a.MoveTo is null), "an action that is not an ability reports no destination");
+        Check(actions.Any(a => a.Type != "useAbility"), "the fixture offers actions that are not abilities (so the check above is not vacuous)");
     }
 
     private static void EveryRuleAndMover()
