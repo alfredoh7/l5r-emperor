@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Ran the bot arena (pre-registered, committed before the run) on the unopposed gate (#997/#1003) and Battle/Open phase choice (#998): old bot vs champion, dev pool, same pairing, 1,728 games. New bot 50.3% (48.0-52.7%), paired 39 vs 32 pairs, no soundness findings, no deck collapse; verdict no harm. Adds the pre-gates arm, the experiment note and the report.",
+  "lane": "shared",
+  "summary": "Ran the bot arena (pre-registered, committed before the run) on the unopposed gate (#997/#1003) and Battle/Open phase choice (#998): old bot vs champion, dev pool, same pairing, 1,728 games. New bot 50.3% (48.0-52.7%), paired 39 vs 32 pairs, no soundness findings, no deck collapse; verdict no harm. Shared lane only because docs/bots/ (the experiment note and report) is outside the rules paths; the code change is one tournament arm in the AI tests.",
   "validation": "dotnet run --project tests/L5R.AI.Tests with L5R_TOURN_CHAL=pre-gates ... 1728 games, 1:20:33 wall clock; report in docs/bots/experiments/2026-10-17-gates-report.md. 10 no-winner games at the wall budget, all Crab Control matchups, informational.",
   "remaining": "None; ready for review. A holdout run is not planned for a non-inferiority result.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1007",
   "branch": "claude/1007-bot-arena-gates",
-  "updated": "2026-10-17T21:53:00.561884+00:00"
+  "updated": "2026-10-17T22:03:17.226404+00:00"
 }
