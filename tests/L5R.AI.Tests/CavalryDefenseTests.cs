@@ -8,6 +8,7 @@ internal static class CavalryDefenseTests
     [
         ("DefensePlanner: parity needs Force / threat + 0.1 per hand card and Battle action to reach 1; one army per sub-army that reaches 1 alone; leftovers stay home unless they print a Battle action", Planner),
         ("Bot: with no infantry assigned against it, it commits its infantry to the most valuable province when it can match the attacker's possible Cavalry, and passes when it cannot or there is none", BotDefends),
+        ("Bot: when its attacker's Cavalry (with any army already assigned) can destroy every Province it has left, it defends with everything where that stops it, else at its strongest Province; not when the Cavalry cannot take them all", AllProvincesThreatened),
         ("Bot attack: the Infantry Maneuvers Segment assigns only infantry; the Cavalry waits and is assigned in the Cavalry Maneuvers Segment to join the infantry already sent", CavalryWaits),
     ];
 
@@ -96,6 +97,41 @@ internal static class CavalryDefenseTests
         var safe = LastProvince(2, 1, 4, 5);
         Check(TrainingOpponent.Choose(safe, [Pass(safe), Defend(safe)]).Command?.Type == "pass", "the Cavalry (4) cannot destroy a strength-5 Province, so the last-stand rule does not apply");
         Check(TrainingOpponent.Choose(last, [Pass(last), Defend(last)], new BotContext { UseCavalryDefense = false }).Command?.Type == "pass", "switched off, the last stand is off too");
+    }
+
+    private static void AllProvincesThreatened()
+    {
+        var view = MatchEngine.CreateStarterMatch().GetView(0);
+        var cavalry = CardCatalog.Get("training-cavalry");
+        MatchView Table(int ownForce, int[] horses, int[] strengths, CardView[]? attackers = null) => view with
+        {
+            Phase = Phase.DefenseAssignment,
+            ActivePlayerId = 1,
+            PriorityPlayerId = 0,
+            PendingChoice = null,
+            Players = [view.Players[0] with { Home = [Unit("own-1", 0, ownForce, Infantry)], Army = [], HandCount = 0, Hand = [], Provinces = strengths.Select((st, i) => new ProvinceView(i, st, false, null, null)).ToArray() },
+                view.Players[1] with { Home = horses.Select((f, i) => Unit("h-" + i, 1, f, cavalry)).ToArray(), Army = attackers ?? [] }]
+        };
+        ActionOption Pass(MatchView v) => new("pass", "Pass", true, null, new("pass", 0, v.Version));
+        ActionOption Defend(int provinces) => new("assignDefense", "Defend", true, null, null, TargetIds: ["own-1"], Provinces: Enumerable.Range(0, provinces).ToArray());
+
+        // Two Provinces of 3, two horses of 4: each horse takes one. 4 defenders on a Province need both horses (8 > 7), so only one Province can fall.
+        var two = Table(4, [4, 4], [3, 3]);
+        var blocked = TrainingOpponent.Choose(two, [Pass(two), Defend(2)]);
+        Check(blocked.Command?.Type == "assignDefense" && blocked.Command.Assignments?.Count == 1, "two horses threaten both Provinces: it defends (got " + blocked.Command?.Type + ")");
+        // One horse cannot take two Provinces.
+        var one = Table(1, [4], [3, 3]);
+        Check(TrainingOpponent.Choose(one, [Pass(one), Defend(2)]).Command?.Type == "pass", "a single horse cannot destroy both Provinces: no last stand");
+        // Too weak to stop it: everything goes to the strongest Province.
+        var hopeless = Table(1, [20, 20], [3, 5]);
+        var strongest = TrainingOpponent.Choose(hopeless, [Pass(hopeless), Defend(2)]);
+        Check(strongest.Command?.Type == "assignDefense" && strongest.Command.Assignments?["own-1"] == 1, "it cannot stop two huge horses, and defends the strongest Province anyway");
+        // An infantry army already at Province 0 (5 > 3) falls anyway; the one horse then takes Province 1, so the defense goes to Province 1.
+        var sent = Unit("a-foot", 1, 5, Infantry) with { Zone = Zone.Battlefield, ProvinceIndex = 0 };
+        var mixed = Table(4, [4], [3, 3], [sent]);
+        var covered = TrainingOpponent.Choose(mixed, [Pass(mixed), Defend(2)]);
+        Check(covered.Command?.Type == "assignDefense" && covered.Command.Assignments?["own-1"] == 1, "with its infantry already at Province 0 the horse would take Province 1: it defends there (got " + covered.Command?.Type + ")");
+        Check(TrainingOpponent.Choose(two, [Pass(two), Defend(2)], new BotContext { UseCavalryDefense = false }).Command?.Type == "pass", "switched off, it plays as before");
     }
 
     private static void CavalryWaits()
