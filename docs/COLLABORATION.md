@@ -44,9 +44,9 @@ The review router runs for PRs targeting `main` on `pull_request_target` using *
 
 Official behavior references: [Codex project instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude project memory and AGENTS import](https://code.claude.com/docs/en/memory). See `docs/COLLABORATION_VALIDATION.md` for the actual tested scenarios and remaining limits.
 
-## Optional authenticated board integration
+## GitHub coordination
 
-See [PROJECT_BOARD.md](PROJECT_BOARD.md) for the separate Netlify application and `tools/board.py`. The helper reads live board context when configured, without changing the local-only behavior of `collab.py handoff`. Explicit board claim and handoff commands coordinate executor ownership. Preserve existing GitHub coordination when the service is unavailable. No autonomous developer permission is removed.
+The optional project board was retired on 2026-10-17; see [PROJECT_BOARD.md](PROJECT_BOARD.md). GitHub issues own scope, assignments, dependencies and ownership notes. PRs own implementation, validation and review. The normal `collab.py context`, local `handoff`, audit and publication workflow continues without a board token or Netlify dependency. Record scope changes and interruptions on the matching issue/PR, preserving other contributors' work. Keep human acceptance distinct from automated checks and merge status. Mendon's standing development authority is unchanged.
 
 ## Focused governance review
 
