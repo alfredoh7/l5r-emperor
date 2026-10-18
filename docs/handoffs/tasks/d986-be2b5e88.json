@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dependabot: bump actions/upload-artifact 7.0.1 to 7.0.2 (hash-pinned workflow action update, no game change)",
+  "validation": "Workflow security and ownership policy and the other PR checks pass on the PR; no source change",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/pull/986",
+  "branch": "dependabot/github_actions/actions/upload-artifact-7.0.2",
+  "updated": "2026-10-18T08:45:39.729821+00:00"
+}

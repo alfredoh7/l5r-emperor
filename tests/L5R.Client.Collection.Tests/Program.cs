@@ -44,6 +44,59 @@ try
     Check(blocked.Count("a") == 0, "write failure leaves in-memory ownership unchanged");
     Throws<FormatException>(() => s.Set("a", -1), "manual negative count rejected");
     Throws<FormatException>(() => s.Preview(new string('x', 1_000_001), cards), "oversized import rejected");
+    // ---- the per-printing file (issue #807): Set, Card Name, Card Type, Rarity, Edition Code, Count ----
+    var root = new DirectoryInfo(AppContext.BaseDirectory); while (root is not null && !File.Exists(Path.Combine(root.FullName, "AGENTS.md"))) root = root.Parent;
+    var printings = CollectionPrintings.Parse(CollectionPrintings.Decode(File.ReadAllBytes(Path.Combine(root!.FullName, "src/L5R.Client/Content/collection-printings.txt"))));
+    Check(printings.Length == 2007 && printings.Select(p => p.Edition).Distinct().Count() == 13 && !printings.Any(p => p.Edition == "EOW"), "the shipped list has every printing of the template, one spelling per edition code");
+    Check(printings.Count(p => p.NotCollectible) == 34 && printings.Where(p => p.NotCollectible).All(p => p.Type == "Token"), "rows counted - are Tokens that cannot be collected");
+    Check(new[] { ("Itoku (Exp)", "itoku - exp"), ("Kaiu Esumi (Exp.)", "kaiu esumi - exp"), ("Shadow Dragon (Exp2)", "shadow dragon - exp2"), ("Bayushi Nitoshi (Inexp)", "bayushi nitoshi - inexperienced"), ("Daigotsu Hotako (Exp. 3)", "daigotsu hotako - exp3"),
+        ("Daigotsu Takayasu (Exp) Personality", "daigotsu takayasu - exp"), ("Akodo Tsudoken Experienced 2", "akodo tsudoken - exp2"), ("Doji Hoturi Inexperienced", "doji hoturi - inexperienced"), ("Bayushi Kachiko Experienced CoM", "bayushi kachiko - exp"),
+        ("A Forefather’s Vengeance", "a forefather's vengeance"), ("Plain Name", "plain name") }.All(t => CollectionPrintings.Key(t.Item1) == t.Item2), "the file's (Exp), (Exp.), (Exp2), (Inexp), Experienced N and curly-quote spellings map onto the catalogue's names");
+    Check(CollectionPrintings.Decode(new byte[] { 0x41, 0x92, 0x73 }) == "A’s" && CollectionPrintings.Decode([0xEF, 0xBB, 0xBF, 0x41]).TrimStart('﻿') == "A", "a Windows-1252 file (curly apostrophes) and a UTF-8 file both decode");
+    CollectionIdentity[] shelf = [new("t", "Itoku", "Itoku"), new("x", "Itoku", "Itoku - exp"), new("k", "Kyuden", "Kyuden"), new("g", "Bishamon's Tower", "Bishamon's Tower")];
+    CollectionPrinting[] list = [new("Embers of War", "Itoku", "Personality", "Rare", "EoW"), new("Embers of War", "Itoku (Exp)", "Personality", "Rare", "EoW"), new("Before the Dawn", "Itoku", "Personality", "Common", "BtD"),
+        new("Embers of War", "Assassin", "Token", "Common", "EoW", true), new("The Shadow's Embrace", "Bishamon’s Tower", "Stronghold", "Decks", "TSE"), new("The Shadow's Embrace", "Bishamon’s Tower", "Stronghold", "Fixed", "TSE")];
+    var ps = new MyCollectionStore(Path.Combine(dir, "printings.json"));
+    var csv = "Set,Card Name,Card Type,Rarity,Edition Code,Count\r\nEmbers of War,Itoku,Personality,Rare,EoW,2\r\nEmbers of War,Itoku (Exp),Personality,Rare,EoW,1\r\nBefore the Dawn,Itoku,Personality,Common,BtD,3\r\n"
+        + "Embers of War,Assassin,Token,Common,EoW,-\r\nThe Shadow's Embrace,Bishamon’s Tower,Stronghold,Decks,TSE,1\r\nThe Shadow's Embrace,Bishamon’s Tower,Stronghold,Fixed,TSE,2\r\n";
+    var plan = ps.Preview(csv, shelf, list);
+    Check(plan.CanApply && plan.Rows.Length == 5 && plan.Skipped == 1, "a per-printing file reads: the - row is skipped, curly apostrophes and (Exp) resolve, a card printed twice in one set at two rarities is two rows");
+    Check(plan.Rows[0].Id == "t" && plan.Rows[1].Id == "x" && plan.Rows[0].Bucket == "t@EoW@Rare" && plan.Rows[2].Bucket == "t@BtD@Common", "each row names the exact version and printing bucket");
+    ps.Apply(plan, CollectionImportMode.UpdateListed);
+    Check(ps.Count("t") == 5 && ps.Count("x") == 1 && ps.Count("g") == 3 && ps.CountOf("g@TSE@Fixed") == 2, "printings add up to the card's total, so ownership checks elsewhere see one figure");
+    var exported = ps.Export(shelf, list);
+    Check(exported.StartsWith("Set,Card Name,Card Type,Rarity,Edition Code,Count\r\n") && exported.Contains("\"Embers of War\",\"Assassin\",\"Token\",\"Common\",\"EoW\",\"-\"") && exported.Contains("\"Itoku (Exp)\",\"Personality\",\"Rare\",\"EoW\",\"1\""), "export writes the template's rows and names with the owned counts, - kept");
+    var again = ps.Preview(exported, shelf, list); var before = ps.Buckets.OrderBy(p => p.Key).ToArray();
+    ps.Apply(again, CollectionImportMode.Replace); Check(ps.Buckets.OrderBy(p => p.Key).SequenceEqual(before), "the exported file imports back to exactly the same counts, printing by printing");
+    ps.Set("k", 4); Check(ps.Count("k") == 4 && ps.CountOf("k") == 4, "copies edited as a total are recorded against no printing");
+    var withUnassigned = ps.Export(shelf, list); Check(withUnassigned.Contains("\"\",\"Kyuden\",\"\",\"\",\"\",\"4\""), "copies of no recorded printing are exported on a row of their own");
+    var round = ps.Preview(withUnassigned, shelf, list); ps.Apply(round, CollectionImportMode.Replace); Check(ps.CountOf("k") == 4 && ps.Count("t") == 5, "and import back as the same unassigned copies");
+    ps.Set("t", 2); Check(ps.Count("t") == 2 && ps.CountOf("t@EoW@Rare") == 0 && ps.CountOf("t@BtD@Common") == 2, "removing copies comes off unassigned copies first, then printings from the last bucket name backwards");
+    var template = MyCollectionStore.Template(list); Check(template.Contains("\"Assassin\",\"Token\",\"Common\",\"EoW\",\"-\"") && template.Contains("\"Itoku\",\"Personality\",\"Rare\",\"EoW\",\"0\""), "the template lists every printing with 0 owned");
+    var badRows = ps.Preview("Set,Card Name,Card Type,Rarity,Edition Code,Count\nx,Nobody,Personality,Rare,EoW,1\nx,Itoku,Personality,Rare,ZZZ,1\nx,Itoku,Personality,Rare,EoW,many\n", shelf, list);
+    Check(!badRows.CanApply && badRows.Rows[0].Error == "Unknown card name." && badRows.Rows[1].Error.Contains("ZZZ") && badRows.Rows[2].Error.Contains("Count"), "unknown names, editions and counts are reported row by row");
+    var dup = ps.Preview("Set,Card Name,Card Type,Rarity,Edition Code,Count\nx,Itoku,Personality,Rare,EoW,1\nx,Itoku,Personality,Rare,EoW,2\n", shelf, list); Check(!dup.CanApply, "the same printing twice needs one row excluded");
+    var legacy = ps.Preview("card_id,owned_count\nt,9\n", shelf); ps.Apply(legacy, CollectionImportMode.UpdateListed); Check(ps.Count("t") == 9 && ps.CountOf("t") == 9, "the older card_id file still sets a card's total, replacing its printings");
+    // The real catalogue: how much of the template resolves without review.
+    var library = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(root.FullName, "src/L5R.Client/Content/library.json"))).RootElement.GetProperty("cards");
+    var real = library.EnumerateArray().Select(c => { var name = c.GetProperty("name").GetString()!; var at = name.IndexOf(" - ", StringComparison.Ordinal); var baseTitle = at < 0 ? name : name[..at]; return new CollectionIdentity(c.GetProperty("id").GetString()!, baseTitle, name); }).ToArray();
+    var resolved = new MyCollectionStore(Path.Combine(dir, "real.json")).Preview(MyCollectionStore.Template(printings).Replace("\"0\"", "\"1\""), real, printings);
+    var unresolved = resolved.Rows.Count(r => r.Id is null);
+    Console.WriteLine($"  template against the catalogue: {resolved.Rows.Length - unresolved} of {resolved.Rows.Length} rows resolve without review");
+    Check(resolved.Rows.Length == 1973 && unresolved < 80, "all but a few of the template's rows resolve to a catalogue card without review");
+    // ---- the closest-name guess (issue #807): the deck troubleshooter's scoring, for names the catalogue spells differently ----
+    CollectionIdentity[] spelled = [new("w", "Advance Warning", "Advance Warning"), new("m", "Modifications", "Modifications"), new("i", "Itoku", "Itoku"), new("a", "Kaiu Esumi", "Kaiu Esumi"), new("b", "Kaiu Esumi", "Kaiu Esumi - exp")];
+    var guessed = new MyCollectionStore(Path.Combine(dir, "guess.json")).Preview("Set,Card Name,Card Type,Rarity,Edition Code,Count\nx,Advanced Warning,Strategy,Common,BtD,2\nx,Modifcations,Strategy,Common,BtD,1\nx,Itoku (Exp),Personality,Rare,EoW,1\nx,Kaiu Esumi (Exp.),Personality,Rare,EoW,1\nx,Zzzz Qqqq,Strategy,Common,BtD,1\nx,Zzzz Qqqq,Strategy,Common,BtD,0\n", spelled, list);
+    Check(guessed.Rows[0].Id == "w" && guessed.Rows[0].Guess.Contains("Advance Warning") && guessed.Rows[1].Id == "m", "a name one letter off the catalogue's is matched to it and shown for checking");
+    Check(guessed.Rows[2].Id is null && guessed.Rows[2].Candidates.Any(c => c.Id == "i") && guessed.Rows[2].Error.Length == 0, "an Experienced row whose version is not in the catalogue is offered the base card, never silently assigned it");
+    Check(guessed.Rows[3].Id is null && guessed.Rows[3].Candidates.Length >= 2 || guessed.Rows[3].Id == "b", "an (Exp.) row for a title with both versions never lands on the wrong one");
+    Check(guessed.Rows[4].Error == "Unknown card name." && guessed.Rows.Length == 5, "a name nothing resembles is an error, and its zero-count twin is skipped");
+    Check(!guessed.CanApply && guessed.HasUnresolved, "unresolved rows block apply until decided");
+    guessed.ExcludeUnresolved(); Check(guessed.CanApply && !guessed.HasUnresolved && guessed.Rows.Count(r => !r.Excluded) >= 2, "Exclude unresolved leaves the matched rows ready to apply");
+    var wholeFile = new MyCollectionStore(Path.Combine(dir, "whole.json")).Preview(MyCollectionStore.Template(printings).Replace("\"0\"", "\"1\""), real, printings);
+    Console.WriteLine($"  template against the catalogue: {wholeFile.Rows.Count(r => r.Id is not null)} ready ({wholeFile.Rows.Count(r => r.Guess.Length > 0)} by closest name), {wholeFile.Rows.Count(r => r.Id is null)} to choose or exclude");
+    foreach (var g in wholeFile.Rows.Where(r => r.Guess.Length > 0).GroupBy(r => r.Name)) Console.WriteLine("  guess: " + g.Key + " -> " + g.First().Guess);
+    wholeFile.ExcludeUnresolved(); Check(wholeFile.CanApply, "the whole template can be applied once its unresolved rows are excluded: " + string.Join(" | ", wholeFile.Problems.Take(8)));
     string[] Printed(string text) => CatalogueActions.Printings(text);
     Check(Printed("Battle/Open: Target your bowed Personality: Straighten him.").SequenceEqual(["Battle/Open"]), "Battle/Open is its own printed action");
     Check(Printed("Battle/Open: Straighten.\nLimited, :g1:: Draw a card.").SequenceEqual(["Battle/Open", "Limited"]), "a card may print several actions");

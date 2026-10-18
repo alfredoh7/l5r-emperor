@@ -9,9 +9,9 @@ The latest user request takes precedence. These instructions apply to every impl
 3. Check open PRs and assigned issues for overlapping files/tasks. Reuse the matching issue; create one for a new implementation task and record who is taking it. A draft PR on the task branch makes ownership visible early. Assign only yourself unless the user requests another assignee. Coordination records are not locks; check again before editing a shared file.
 4. Start from current `origin/main` on a short task branch (`codex/<issue>-<topic>` or `claude/<issue>-<topic>`). Resume an existing branch only when it belongs to this task. Separate simultaneous sessions into separate clones/worktrees. Never switch/reset/stash someone else's dirty work automatically; use a separate worktree for unrelated work. For a dirty task-owned branch, preserve and continue it.
 
-## Project board coordination
+## GitHub coordination
 
-Read `docs/PROJECT_BOARD.md` for the private board and agent client. When `L5R_BOARD_TOKEN` is configured, context includes live board state. Claim Ready work with `tools/board.py` before editing; use the exact executor/branch to resume, record scope revisions instead of silently expanding the task, and explicitly hand off after publishing the existing repository handoff. Do not claim success on authentication/network failure. Preserve current work and use explicit GitHub coordination for new work during an outage. Human acceptance is distinct from merge permission and cannot be provided by an agent token.
+The separate project board was retired at Alfredo's request on 2026-10-17. Use GitHub issues for scope, assignees, dependencies and explicit ownership notes; use PRs for implementation, checks and review. Check concurrent work before editing, record scope changes on the matching issue, and publish the normal repository handoff. Do not require board claims, board tokens or a working Netlify service. Existing GitHub assignments and open tasks remain authoritative; historical board claims do not automatically reassign work or imply acceptance. Record actual human acceptance separately from automated validation and merge status. See `docs/PROJECT_BOARD.md` for the retirement record.
 
 ## Standing development authority
 

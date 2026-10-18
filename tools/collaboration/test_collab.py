@@ -1,11 +1,15 @@
 """Adversarial checks plus UI/rules rehearsals against real temporary Git repos."""
+import contextlib
 import importlib.util
+import io
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -234,9 +238,35 @@ class GitRehearsals(unittest.TestCase):
         self.git('switch','codex/ui-task');self.write('src/L5R.Client/CardTile.cs','my unsaved change')
         before=self.git('status','--porcelain')
         result=c.audit(self.root,'origin/main',working=True)
-        self.assertTrue(any('behind' in e for e in result['errors']))
+        self.assertFalse(result['errors'])  # behind but merges cleanly: a warning, not an error
+        self.assertTrue(any('behind' in w for w in result['warnings']))
         self.assertEqual(self.git('status','--porcelain'),before)
         self.assertEqual((self.root/'src/L5R.Client/CardTile.cs').read_text(),'my unsaved change')
+
+    def test_stale_base_that_conflicts_is_an_error(self):
+        self.git('switch','-c','codex/rules-task');self.write('src/L5R.Core/CardAbilities.cs','my rules');self.record('rules');self.save('my rules')
+        self.git('switch','main');self.write('src/L5R.Core/CardAbilities.cs','their rules');self.save('friend rules')
+        self.git('update-ref','refs/remotes/origin/main','HEAD')
+        self.git('switch','codex/rules-task')
+        result=c.audit(self.root,'origin/main')
+        self.assertTrue(any('behind' in e and 'conflicts' in e for e in result['errors']))
+
+    def test_dependabot_branch_with_only_workflow_pins_needs_no_handoff(self):
+        self.git('switch','-c','dependabot/github_actions/actions/x-1.2');self.write('.github/workflows/check.yml','pinned: v2');self.save('bump x')
+        self.assertFalse(c.audit(self.root,'origin/main',name='dependabot/github_actions/actions/x-1.2')['errors'])
+        self.git('switch','-c','dependabot/evil');self.write('src/L5R.Core/CardAbilities.cs','not a pin');self.save('code')
+        self.assertTrue(any('Missing' in e for e in c.audit(self.root,'origin/main',name='dependabot/evil')['errors']))
+        self.assertTrue(any('Missing' in e for e in c.audit(self.root,'origin/main',name='codex/x')['errors']))
+
+    def test_handoff_command_turns_a_cross_lane_task_into_shared(self):
+        self.git('switch','-c','codex/both');self.write('src/L5R.Client/CardTile.cs','ui change');self.write('src/L5R.Core/CardAbilities.cs','rules change')
+        out=io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code=c.main(['--root',str(self.root),'handoff','--lane','rules','--summary','Both lanes change','--validation','Fixture test passed','--remaining','None; ready for review.'])
+        self.assertEqual(code,0)
+        data=json.loads(out.getvalue())
+        self.assertIn("'shared'",data['note'])
+        self.assertEqual(json.loads((self.root/data['handoff']).read_text())['lane'],'shared')
 
     def test_stale_base_skips_default_branch_and_no_base_ref(self):
         self.assertIsNone(c.stale_base_error(self.root, 'main'))
@@ -354,6 +384,26 @@ class GitRehearsals(unittest.TestCase):
             report=c.context(self.root)
         self.assertEqual(report['overlapping_prs'][0]['number'],7)
         self.assertEqual(report['overlapping_prs'][0]['files'],['src/L5R.Client/CardTile.cs'])
+
+    def test_stale_board_token_cannot_trigger_board_access(self):
+        self.git('remote','add','origin',f'https://github.com/{CFG["repository"]}.git')
+        real_git = c.git
+        def fake_git(root, *args):
+            return '' if args[:2] == ('fetch', 'origin') else real_git(root, *args)
+        def fake_gh(args, root):
+            return 'alfredoh7' if args[:2] == ['api', 'user'] else '[]'
+        def forbidden_board():
+            self.fail('Retired board must never be contacted, even with a stale token')
+        env = {'L5R_BOARD_TOKEN': 'retired-secret', 'L5R_BOARD_URL': 'https://untrusted.invalid'}
+        with patch.dict(os.environ, env), \
+                patch.dict(sys.modules, {'board': SimpleNamespace(context=forbidden_board)}), \
+                patch.object(c, 'git', side_effect=fake_git), patch.object(c, 'gh', side_effect=fake_gh):
+            for offline in (False, True):
+                report = c.context(self.root, offline=offline)
+                self.assertEqual(report['coordination'], {'system': 'github', 'repository': CFG['repository']})
+                self.assertNotIn('board', report)
+                self.assertNotIn('retired-secret', json.dumps(report))
+        self.assertEqual(self.git('status', '--porcelain'), '')
 
     def test_two_lanes_push_independently_and_combine_cleanly(self):
         origin=Path(self.tmp.name)/'origin.git'

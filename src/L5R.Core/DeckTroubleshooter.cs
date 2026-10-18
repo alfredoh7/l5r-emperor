@@ -59,7 +59,8 @@ public static class DeckTroubleshooter
         return string.Join(' ', clean.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries));
     }
 
-    private static (string Title, int Level) SplitExperience(string name)
+    /// <summary>A name split into its title and the Experience level its own "- exp", "- exp2", "Experienced" notation names (0 when it names none).</summary>
+    public static (string Title, int Level) SplitExperience(string name)
     {
         var m = ExperienceNote.Match(name);
         if (!m.Success || m.Index == 0) return (name.Trim(), 0);
@@ -93,6 +94,25 @@ public static class DeckTroubleshooter
         // A query that is a whole-word part of the title (a surname, "Kanpeki") is a real clue, but weaker than a full match.
         var contained = (" " + candidate + " ").Contains(" " + query + " ") ? 0.6 + 0.3 * query.Length / candidate.Length : 0;
         return Math.Max(Math.Max(edit, dice), contained);
+    }
+
+    /// <summary>The pool's items ranked by how likely each is the card <paramref name="entry"/> was meant to name (score 0..1, at least <see cref="MinimumScore"/>), best first. The same
+    /// scoring the deck troubleshooter uses; the entry's own experience marker only breaks ties between versions of one title. Shared with the collection importer (issue #807).</summary>
+    public static (T Item, double Score)[] Rank<T>(string entry, IEnumerable<T> pool, Func<T, string> name, Func<T, string> deckName, Func<T, int> level, int take = MaxSuggestions)
+    {
+        var (title, hint) = SplitExperience(entry);
+        var normal = Normalise(title); var full = Normalise(entry);
+        var ranked = new List<(T Item, double Score)>();
+        foreach (var card in pool)
+        {
+            var score = Math.Max(Similarity(normal, Normalise(Experienced.BaseTitle(name(card)))), Similarity(full, Normalise(deckName(card))));
+            var cardLevel = level(card);
+            if (hint > 0 && cardLevel == hint) score += 0.04;
+            else if (hint > 0 && cardLevel > 0) score += 0.02;
+            else if (hint == 0 && cardLevel == 0) score += 0.02;
+            if (score >= MinimumScore) ranked.Add((card, Math.Round(Math.Min(1.0, score), 3)));
+        }
+        return ranked.OrderByDescending(r => r.Score).ThenBy(r => deckName(r.Item), StringComparer.OrdinalIgnoreCase).Take(take).ToArray();
     }
 
     internal static DeckSuggestion[] Suggest(string entry, IEnumerable<DeckCardInfo> pool)

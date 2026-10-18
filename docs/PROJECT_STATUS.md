@@ -48,6 +48,6 @@ No internet match server has been deployed. The broader catalogue is not executa
 
 Open issues own tasks and review findings; PRs own implementation and validation; this file owns shared milestone status. Update it when those facts change. Before starting, inspect the issue, recent PRs, branch and working tree. Before yielding, record what changed, evidence, remaining work and the branch/commit. Do not treat a previous AI chat as shared context.
 
-## Project coordination board
+## Project coordination
 
-The private [L5R Project Board](https://l5r-project-board.netlify.app) is deployed with GitHub sign-in and issue/PR synchronization. [PROJECT_BOARD.md](PROJECT_BOARD.md) describes agent claims, scope agreements and the outage fallback. The current product focus remains dependable Lion–Crane matches: #71 (complete matches), #72 (native Windows), and #73 (external Mac–Windows multiplayer) track acceptance without implying those tests have passed. The migration adds scoped UI and deck-setup children; merged implementation and human acceptance remain separate.
+As of 2026-10-17, coordination uses GitHub issues, assignments, ownership notes, PRs, checks and repository handoffs directly. Alfredo retired the separate project board; [PROJECT_BOARD.md](PROJECT_BOARD.md) records the decision and preserved history. Board availability and tokens are no longer prerequisites. The current product focus remains dependable Lion–Crane matches: #71 (complete matches), #72 (native Windows), and #73 (external Mac–Windows multiplayer) track acceptance without implying those tests have passed. Existing tasks and assignments remain intact; merged implementation and human acceptance remain separate.

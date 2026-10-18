@@ -1,6 +1,6 @@
 # My Collection and catalogue workspace fidelity
 
-Accepted design; implementation pending Alfredo's visual acceptance and Mendon/Nathan review. Issues #549, #556 (roadmap), #577 (implementation); PR #576.
+Accepted design (the CSV file and printing buckets are superseded by [2026-10-09-collection-printings.md](2026-10-09-collection-printings.md)); implementation pending Alfredo's visual acceptance and Mendon/Nathan review. Issues #549, #556 (roadmap), #577 (implementation); PR #576.
 
 Alfredo approved the My Collection gallery on October 1: A's shared browsing filter and read-only Owned counts; B's focused editor with full faces and direct quantity editing; C's review-before-apply CSV flow; D's deck shortages kept separate from deck legality. He also requested fidelity corrections to the already approved unified workspace, then explicitly requested returning to the **previous mat**. The existing Deck Builder work-mat and Card Library gallery-cloth are preserved. The discarded blue clean-plate experiment is not a runtime asset.
 

@@ -50,17 +50,41 @@ Do not share raw diagnostics without checking for sensitive information.
 
 ## After the repository move
 
-The runner is repository-scoped and showed Online/Active after the move to `l5r-emperor-dev/l5r-emperor` (checked 2026-10-17), because GitHub redirects the old URL. Its local `.runner` file still holds the old URL, so re-register it rather than rely on the redirect. On the Mac, in the runner directory:
+The existing registration works after the move to `l5r-emperor-dev/l5r-emperor`.
+On 2026-10-17, runner **21**, `alfredo-mac-studio`, appeared Online/Idle under the
+new repository with all four expected labels. Its [successful main-branch Mac
+job](https://github.com/l5r-emperor-dev/l5r-emperor/actions/runs/39035241626/job/117403616962)
+ran after the transfer. The launchd service remained active with `KeepAlive`,
+`RunAtLoad`, `caffeinate -i` and nice 10. **Leave a healthy registration and service
+alone.** A repository transfer by itself is not evidence that re-registration
+is necessary.
 
-```sh
-./svc.sh stop && ./svc.sh uninstall
-./config.sh remove --token <REMOVE_TOKEN>
-./config.sh --url https://github.com/l5r-emperor-dev/l5r-emperor --token <NEW_TOKEN> \
-  --name alfredo-mac-studio --labels l5r-mac-studio --unattended
-./svc.sh install && ./svc.sh start
-```
+The local `.runner` file still records the old repository URL, and the existing
+service label also contains the old owner name. These retained identifiers do
+not mean jobs are running against a different repository. Do not manually edit
+registration or credential files, rename the service for appearance, or print
+credentials, tokens, environment secrets or raw diagnostic logs during checks.
+For `.runner`, report only the repository URL, runner name and ID.
 
-Get tokens from repository Settings > Actions > Runners (New self-hosted runner, or the runner's Remove action). They expire in about an hour; do not paste them into issues or logs. Confirm Online/Idle and that the `l5r-mac-studio` label is still listed before the next PR; without it the macOS row queues forever.
+GitHub's current [runner configuration implementation](https://github.com/actions/runner/blob/main/src/Runner.Listener/Configuration/ConfigurationManager.cs)
+rejects configuring an already configured runner; it requires removal before
+reconfiguration. There is no supported in-place URL change in that command.
+Consider re-registration only when an actual registration fault remains after
+checking service status and network access. If it is needed:
+
+1. Wait for the runner to be idle and confirm that no job will be interrupted.
+2. Record its labels, work directory and launchd configuration, including the
+   `caffeinate -i` wrapper, nice 10, `KeepAlive` and `RunAtLoad`. Preserve the runner
+   directory, workspaces and caches.
+3. Follow the current removal and registration instructions in the **new**
+   repository's Settings → Actions → Runners. Keep short-lived tokens local;
+   never paste them into shared files, issues, shell history or logs.
+4. Keep the name `alfredo-mac-studio` and custom label `l5r-mac-studio`. Restore
+   the recorded custom service behavior before starting it: a plain service
+   reinstall must not silently discard the sleep-prevention or priority settings.
+5. Verify Online/Idle and all four labels, then run the trusted desktop workflow
+   on `main` and verify that its Mac job succeeds on this runner. Record any new
+   runner ID. Do not use fork code as a test.
 
 ## Recovery
 

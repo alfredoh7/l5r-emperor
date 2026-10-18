@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Verified the transferred Mac runner and replaced unconditional re-registration instructions with evidence-first recovery that preserves the custom launchd service. Corrected the board production repository environment setting.",
+  "validation": "Runner 21 Online/Idle with self-hosted/macOS/ARM64/l5r-mac-studio labels; launchd active with KeepAlive, RunAtLoad, caffeinate -i and nice 10. Main Mac job 117403616962 succeeded after transfer. Ownership/routing policy passed; nine existing policy regressions passed after correcting the local tool PATH. Fork guard and hosted trusted-base pull_request_target routing verified; no stale URL in active runner shell scripts or service configuration. Netlify repository setting read back as l5r-emperor-dev/l5r-emperor.",
+  "remaining": "Documentation PR needs CI and shared review. Board remains HTTP 503 usage_exceeded; the updated environment setting requires a deployment after hosting resumes. No GitHub App is installed on the transferred repository. App reconnection, successful webhook delivery, sign-in, synchronization and authenticated board context remain unverified until the service is restored. No billing or repository permission changes.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/991",
+  "branch": "codex/991-runner-transfer",
+  "updated": "2026-10-17T15:38:12.527756+00:00"
+}
