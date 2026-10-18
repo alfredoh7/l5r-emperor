@@ -44,7 +44,9 @@ public sealed partial class MatchSession : IDisposable
         Generation++; Disconnect();
         // A fixed seed shuffled every deck identically, game after game — Practice looked unshuffled
         // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
-        var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        // Issue #975: L5R_PRACTICE_SEED fixes the match (the native checks play real matches and print the seed they used, so a failure can be replayed exactly).
+        var seed = ulong.TryParse(System.Environment.GetEnvironmentVariable("L5R_PRACTICE_SEED"), out var fixedSeed) ? fixedSeed : BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        if (System.Environment.GetEnvironmentVariable("L5R_PRACTICE_SEED") is not null || System.Environment.GetCommandLineArgs().Any(a => a.StartsWith("--capture", StringComparison.Ordinal))) Console.WriteLine($"PRACTICE_SEED: {seed}");
         _engine = published ? MatchEngine.CreatePublishedMatch(seed) : economy ? MatchEngine.CreateEconomyScenario(seed) : MatchEngine.CreateStarterMatch(seed);
         _preparedReview = false;
         MatchKey = Guid.NewGuid().ToString("N");

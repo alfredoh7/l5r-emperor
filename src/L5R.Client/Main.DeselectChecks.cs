@@ -51,7 +51,8 @@ public partial class Main
             await SettleInspection();
             var originalHeader = _sidebarHeader.GetChildren().OfType<BattleTracker>().Single().GetGlobalRect();
             var version = View.Version;
-            var hand = Self.Hand.First(c => c.Definition?.Type == CardType.Strategy);
+            // The hand is dealt from a random seed. A hand card that needs a target starts its play on the first click (issue #952), which this probe is not about, so it uses one that does not.
+            var hand = Self.Hand.Where(c => c.Definition?.Type == CardType.Strategy).OrderBy(c => PlayChoices(c) is { Length: 1 } only && NeedsFurtherInput(only[0]) ? 1 : 0).First();
             await ClickInspectionCard(hand);
             if (_selected?.Id != hand.Id) throw new Exception("Native hand click did not inspect the card.");
             var headerRect = _sidebarHeader.GetGlobalRect();
