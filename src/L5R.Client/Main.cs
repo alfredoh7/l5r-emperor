@@ -213,6 +213,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-drag", StringComparison.Ordinal)) { ProcessDragCapture(delta); return; } // issue #993
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-card-motion", StringComparison.Ordinal)) { ProcessCardMotionCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-attach-order", StringComparison.Ordinal)) { ProcessAttachOrderCapture(delta); return; } // issue #1014
         if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search", StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal)) { ProcessCreatedCopyCapture(delta); return; }

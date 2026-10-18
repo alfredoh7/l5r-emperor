@@ -35,8 +35,9 @@ public partial class Main
     /// <summary>Flip: the face-down card is turned over where it lies on the table (Cover covers it until its turn). Holdable: Paused Animation may stop on it (the flip of a card that merely stays in its province never does).</summary>
     private sealed record PlayBeat(CardView Card, string Caption, bool Discarded, CardFlip? Cover = null, bool Holdable = true);
 
+    // An attachment ("equipped") is not showcased: the large card would cover the very Personality it attaches to. It slides out from under that Personality on the table instead (Main.Motion.cs).
     // What an opponent playing a card looks like in the public log: a strategy or ability, a card brought into play (a purchase or "put into play"), an attachment, a Terrain, a Kata, an overlay.
-    private static readonly HashSet<string> CardPlayEvents = ["strategyPlayed", "abilityUsed", "cardEnteredPlay", "equipped", "terrainPlayed", "strategyEnteredPlay", "kataEnteredPlay", "personalityOverlayed"];
+    private static readonly HashSet<string> CardPlayEvents = ["strategyPlayed", "abilityUsed", "cardEnteredPlay", "terrainPlayed", "strategyEnteredPlay", "kataEnteredPlay", "personalityOverlayed"];
     // How an Event, Region or Celestial enters play: revealed in a province in the Events Phase, then resolved, attached or put in play. Shown for either player, since neither chose it.
     private static readonly HashSet<string> EntersPlayEvents = ["provinceRevealed", "eventEnteredPlay", "eventResolved", "regionAttached", "regionDiscarded", "celestialEnteredPlay"];
 
