@@ -126,9 +126,24 @@ public sealed class TutorialRunner
         }
     }
 
-    private ActionOption? FoeChoice(ActionOption[] options) =>
-        options.FirstOrDefault(a => a.Type == "declineReaction")
-        ?? options.FirstOrDefault(a => a.Type == "assignDefense" && _attackedProvince is int attacked && (a.Command!.Assignments?.Values.Contains(attacked) ?? a.Command.Province == attacked))
-        ?? options.FirstOrDefault(a => a.Type == "pass")
-        ?? options.FirstOrDefault(a => a.Type == "endDynasty");
+    /// <summary>The practice opponent's script: it declines reactions, defends the province you attacked, recruits Doji Atsumichi, bows your Personality with him and
+    /// destroys your Follower with Never Afraid, and otherwise passes (or ends its Dynasty phase). It never does anything else, so the lesson meets exactly these plays.</summary>
+    private ActionOption? FoeChoice(ActionOption[] options)
+    {
+        bool Plays(ActionOption a, string ability) => a.Type == "useAbility" && a.Command!.AbilityId == ability;
+        ActionOption? Targeting(string ability, string definition)
+        {
+            var option = options.FirstOrDefault(a => Plays(a, ability));
+            if (option?.TargetIds is not { Length: > 0 } targets) return null;
+            var target = targets.FirstOrDefault(id => _lookup.DefinitionOf(id) == definition);
+            return target is null ? null : option with { Command = option.Command! with { TargetId = target } };
+        }
+        return options.FirstOrDefault(a => a.Type == "declineReaction")
+            ?? options.FirstOrDefault(a => a.Type == "assignDefense" && _attackedProvince is int attacked && (a.Command!.Assignments?.Values.Contains(attacked) ?? a.Command.Province == attacked))
+            ?? options.FirstOrDefault(a => a.Type == "purchase" && a.Command!.ClanDiscount && _lookup.Is(a.Command.CardId, TutorialCards.DojiAtsumichi))
+            ?? Targeting("atsumichi-bow", TutorialCards.AkodoUehara)
+            ?? Targeting("never-afraid", TutorialCards.VeteranSkirmishers)
+            ?? options.FirstOrDefault(a => a.Type == "pass")
+            ?? options.FirstOrDefault(a => a.Type == "endDynasty");
+    }
 }

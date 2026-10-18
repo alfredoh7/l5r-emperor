@@ -710,3 +710,12 @@ A Spell attached to a Personality who is not currently a Shugenja provides no ac
 - **Cards/primitives:** the 26 Spells in `ShugenjaSubjectStaticSpells` (CardCopy.cs); Scouring Flood, Tempest of Flame and The Thunderer's Protection are "This Personality" and unchanged; full audit table in the [decision](../decisions/2026-10-13-spell-static-subject.md).
 - **Date:** 2026-10-13
 - **Source:** Mendon, following the validation report. Issue #936.
+
+## Printings and card text
+
+### R-086 — Ring of Fire reads as the Promotional–Emperor text on the Emperor Edition scan
+Oracle of the Void's current text for Ring of Fire is the Twenty Festivals reading, which does not match the Emperor Edition scan. The card uses printing 18's text ("After the resolution of a battle at a province, if you destroyed one or more provinces or enemy cards in that resolution: You may put this card into play from your hand. Battle: Bow this card or discard it from your hand, destroy your performing Personality, and target an enemy Personality with equal or lower Chi: Destroy him.") with printing 1's scan, everywhere.
+
+- **Cards/primitives:** Ring of Fire (oracle-l5r-6335); `ring-of-fire-recruit`, `ring-of-fire-destroy`; `content/oracle/printing-readings.json`, `tools/content/apply_printing_readings.py`.
+- **Date:** 2026-10-18
+- **Source:** Mendon — [decision](../decisions/2026-10-18-tutorial-lion-crane-rulings.md). Issue #935.

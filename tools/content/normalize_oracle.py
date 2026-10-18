@@ -52,6 +52,14 @@ def name_corrections(root: Path | None = None) -> dict[str, str]:
     return {item["card_id"]: item["canonical_name"] for item in json.loads(path.read_text(encoding="utf-8"))["corrections"]}
 
 
+def printing_readings(root: Path | None = None) -> dict[str, dict]:
+    """Card id -> the owner's ruling that its current text is another printing's text (content/oracle/printing-readings.json; Ring of Fire, issue #935)."""
+    path = (root or Path(__file__).resolve().parents[2]) / "content/oracle/printing-readings.json"
+    if not path.exists():
+        return {}
+    return {item["card_id"]: item for item in json.loads(path.read_text(encoding="utf-8"))["readings"]}
+
+
 def normalize_card(raw: dict, require_membership: bool = True) -> dict:
     if require_membership and EMPEROR_LABEL not in values(raw, "legality"):
         raise ValueError(f"Card {raw.get('cardid')} lacks requested Emperor membership")
@@ -81,11 +89,16 @@ def normalize_card(raw: dict, require_membership: bool = True) -> dict:
             "cost", "force", "chi", "honor", "ph", "personalhonor", "focus", "strength", "production", "startinghonor"
         ) if field in printing}
         printings.append(item)
+    current_text = "\n".join(values(raw, "text"))
+    reading = printing_readings().get(f"oracle-l5r-{oracle_id}")
+    if reading:  # the card reads as the named printing's text (its scan is another printing's)
+        reading_printing = next(p for p in printings if p["id"] == reading["text_printing_id"])
+        current_text = reading_printing["text_override"].replace(" \n", "\n").strip()
     return {
         "id": f"oracle-l5r-{oracle_id}", "oracle_id": oracle_id, "name": display, "titles": titles,
         "experience": experience, "version_notation": notation, "types": values(raw, "type"),
         "deck_types": values(raw, "deck"), "clans": values(raw, "clan"), "keywords": keywords,
-        "stats": stats, "current_oracle_text": "\n".join(values(raw, "text")),
+        "stats": stats, "current_oracle_text": current_text,
         "printings": printings, "current_primary_printing_id": str(raw.get("printingprimary", "")),
         "source_url": f"https://oracleofthevoid.com/#cardid={oracle_id}",
         "source_membership": EMPEROR_LABEL, "historical_text_status": "needs_era_review",
