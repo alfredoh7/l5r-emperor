@@ -47,6 +47,16 @@ run is already inside this ZIP.
 Choose either Clan (Lion or Crane) from Practice to play solo against the
 built-in opponent, or use Private Match to play online with a friend.
 
+STARTER DECKS AND YOUR OWN DECKS
+Ready-made decks (Crab Control, Crane Dominance, Dragon Destruction, Lion Legacy,
+Mantis Manipulation, Phoenix Talons, Scorpion Lethargy, Scottish Lion Deck, Spider
+Conquer, Unicorn Maidens and Allan Lion MCA) are added to your deck list the first time
+you open a version that has them. Choose them in Practice, or open them in the Deck Builder.
+Decks you build or edit are saved in your user profile, not in this folder:
+  %APPDATA%\\Godot\\app_userdata\\L5R · Emperor\\decks
+Deleting this folder and extracting a newer version keeps all of your decks.
+A starter deck you delete or change stays that way; it is never restored.
+
 If something goes wrong, "game.log" appears next to this launcher after you
 try to run it; include it if you report a problem.
 '''

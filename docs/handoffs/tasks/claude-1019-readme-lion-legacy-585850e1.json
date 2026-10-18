@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Carries over the useful parts of the closed #787: the share README says where player decks are saved and that they survive re-extracting a newer version; Lion Legacy joins the preloaded decks (existing installs get it once). Bot tournament pool is now 13 decks, held-out set unchanged (noted in docs/bots/README.md).",
+  "validation": "bash tools/check.sh --skip-client passed (the preloaded-decks read-cleanly test now expects eleven); README text checked in tools/package-share-build.py",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1021",
+  "branch": "claude/1019-readme-lion-legacy",
+  "updated": "2026-10-18T10:13:39.515584+00:00"
+}
