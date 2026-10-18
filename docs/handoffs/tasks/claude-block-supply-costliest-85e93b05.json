@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "When the bot sends one of its own units home to save it (Block Supply Lines), it now saves the unit with the highest printed Gold cost, Personality plus attachments.",
+  "validation": "AI suite 188/188; new SupplyLinesSavesCostliest test fails without the change (picked the bare unit) and passes with it; format clean.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1019",
+  "branch": "claude/block-supply-costliest",
+  "updated": "2026-10-18T10:09:07.485526+00:00"
+}

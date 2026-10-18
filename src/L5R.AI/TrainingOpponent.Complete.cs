@@ -34,6 +34,17 @@ public static partial class TrainingOpponent
         return command;
     }
 
+    /// <summary>
+    /// Mendon's rule (2026-10-18, Block Supply Lines): when an ability sends one of the bot's own units home to save it, the unit saved is the one whose printed Gold cost, the Personality plus everything attached,
+    /// is highest. <paramref name="chosen"/> stays the pick on a tie and when no other own Personality is offered.
+    /// </summary>
+    private static CardView CostliestOwnUnit(Ctx x, string[] legal, CardView chosen)
+    {
+        var all = x.Cards.Values.ToArray();
+        var units = legal.Select(x.Card).OfType<CardView>().Where(c => c.OwnerId == x.Self.Id && c.Definition?.Type == CardType.Personality).ToArray();
+        return units.Length == 0 ? chosen : units.OrderByDescending(c => BattlePolicy.UnitGold(c, all)).ThenBy(c => c.Id == chosen.Id ? 0 : 1).ThenBy(c => c.Id, StringComparer.Ordinal).First();
+    }
+
     private static int ChoosePlayer(Ctx x, AbilityIntent intent)
     {
         if (intent.HonorGain && intent.HonorLoss) return WantsOwnGain(x) ? x.Self.Id : x.Opponent.Id;
