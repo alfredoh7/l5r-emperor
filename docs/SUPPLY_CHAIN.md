@@ -33,9 +33,9 @@ Pedantic findings were resolved with hash pins, environment variables for shell 
 
 After changing the canonical collaboration map, run `python tools/security/check_policy.py --write-codeowners`. CI rejects drift. The checker must not become a second independent ownership policy.
 
-## Conditional CodeQL
+## CodeQL
 
-CodeQL C# was requested. This is a public, personally owned repository, so code scanning is available at no cost, but it was not enabled when this was written. The authenticated agent has push/triage but no administrator permission; the code-scanning default-setup API returns HTTP 403 with "Code scanning is not enabled for this repository." The repository API does not expose security entitlement details to this identity. No CodeQL/SARIF workflow has been added. The owner can enable code scanning default setup now that the repository is public. This is not a claim that C# vulnerability analysis ran.
+CodeQL code scanning default setup was enabled on 2026-10-17 (Mendon, repository settings via API) for `actions`, `csharp` and `python` with the default query suite and the remote threat model. It runs on GitHub's standard runners, so no CodeQL workflow file lives in the repository. C# uses GitHub's no-build extraction, so results cover source analysis, not a Godot build. The first scans of `main` completed with 0 alerts for all three languages. Results appear under Security > Code scanning. It is not a required check in the `Protect Main` ruleset.
 
 References: [Dependabot configuration](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference), [zizmor integration and exit behavior](https://docs.zizmor.sh/integrations/), [private CodeQL requirements](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/private-repository-enablement), [CODEOWNERS precedence](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
 
