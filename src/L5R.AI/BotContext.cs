@@ -31,6 +31,9 @@ public sealed class BotContext
     /// <summary>Issue #902 (Mendon's bot notes): general prudence. An effect that hits both sides is played only when the opponent loses clearly more; a bow is aimed at an unbowed card or not played; a claim on the first action of a battle is made only by an Attacker with units on both sides; and in the first turns, while it is still building its economy, Gold is kept for the Dynasty phase instead of spent on cards from the hand. False plays the bot as it was before.</summary>
     public bool UsePrudence { get; init; } = true;
 
+    /// <summary>Issues #1008 and #1015 (Mendon's playtest note): when the attacker's Cavalry could destroy every Province the bot has left, it defends in the Infantry Maneuvers Segment with everything it is offered. Needs <see cref="UseCavalryDefense"/>. False plays the bot as it was before.</summary>
+    public bool UseCavalryLastStand { get; init; } = true;
+
     /// <summary>Issue #998 (Mendon's playtest note): a Battle/Open card is never used when it would do nothing, and is held for the Combat Segment when its effect matters only in a combat (a Combat-Segment-only bow, a Force change). False plays the bot as it was before.</summary>
     public bool UsePhaseChoice { get; init; } = true;
 

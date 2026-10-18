@@ -70,7 +70,7 @@ public static partial class TrainingOpponent
     /// </summary>
     private static Dictionary<string, int>? CavalryLastStandPlan(Ctx x, ActionOption action, CardView[]? offeredUnits)
     {
-        if (!x.Memory.UseCavalryDefense || x.View.Phase != Phase.DefenseAssignment) return null;
+        if (!x.Memory.UseCavalryDefense || !x.Memory.UseCavalryLastStand || x.View.Phase != Phase.DefenseAssignment) return null;
         var remaining = x.Self.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).ToArray();
         if (remaining.Length == 0) return null;
         var cavalry = x.Opponent.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed && IsCavalryUnit(x.Opponent, c))

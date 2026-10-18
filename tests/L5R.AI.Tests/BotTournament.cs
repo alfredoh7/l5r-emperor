@@ -26,6 +26,7 @@ internal static class BotTournament
         ["champion"] = () => new(), // the bot on main: since the 2026-10-15 promotion this includes the Seppuku policy and informed defense
         ["pre-promotion"] = () => new() { UseSeppukuPolicy = false, UseInformedDefense = false }, // the champion before them (rounds 1-2 baseline)
         ["pre-gates"] = () => new() { UseUnopposedGate = false, UsePhaseChoice = false }, // the champion before #997/#1003 (unopposed gate) and #998 (Battle/Open phase choice); run as the challenger against the champion that has them
+        ["pre-laststand"] = () => new() { UseCavalryLastStand = false }, // the champion before #1008/#1015 (Cavalry last-stand defence); run as the challenger against the champion that has it
         ["seppuku"] = () => new() { UseSeppukuPolicy = true }, // round 1 (docs/bots/experiments/2026-10-15-seppuku.md)
         ["defense"] = () => new() { UseInformedDefense = true }, // round 2 (docs/bots/experiments/2026-10-15-defense.md)
         ["bodies"] = () => new() { UseBodiesFirst = true }, // round 3 (docs/bots/experiments/2026-10-15-bodies.md)
