@@ -4,6 +4,6 @@
   "validation": "dotnet build clean; tools/check-catalogue.sh native probe all PASS including native clan filter combines with support, native additive multi-clan filter, select all/deselect all assertions, plus all existing Type/Keyword scoping and ordering assertions; tools/check-deck-builder.sh unaffected/still PASS; dotnet format whitespace --verify-no-changes clean",
   "remaining": "None; ready for review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/562",
-  "branch": "dependabot/github_actions/actions/upload-artifact-7.0.2",
+  "branch": "claude/562-clan-icon-row",
   "updated": "2026-09-30T12:31:14.730468+00:00"
 }
