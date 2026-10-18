@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "An attached card now slides out from under its Personality; an attachment ('equipped') is no longer showcased large over the table, which covered the Personality it attached to. New native probe tools/check-attach-order-ui.sh compares the Personality's on-screen pixels with and without the attachment in every frame after attaching (plain, bowed, second attachment, reduced motion, opponent's equip).",
+  "validation": "check-attach-order-ui, check-card-motion-ui, check-board-ui pass natively; bash tools/check.sh (with client) passed; the probe's showcase assertion fails on the old behaviour (large card seen over the table)",
+  "remaining": "None; ready for review. Not checked: attachment from a discard pile, a Region/Follower variant on the battlefield.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1014",
+  "branch": "claude/attachment-under-personality",
+  "updated": "2026-10-18T09:41:31.473829+00:00"
+}
