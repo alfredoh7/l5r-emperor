@@ -366,6 +366,18 @@ internal static class EmperorRemainingGTests
         var eo = MatchEngine.FromTestState(own);
         Accept(eo, Offer(eo, 0, "training-penalty-force-own", ownSource.Id, ownWearer.Id));
         Check(eo.State.PendingChoice is null, "an action of his own player's targeting the wearer offers no Reaction");
+        // Playing the Armor itself (the Equip command, by its own controller, before it is in play) opens no window for it, whoever holds priority.
+        foreach (var phase in new[] { Phase.Action })
+        {
+            var q = Table(phase, 0); q.PriorityPlayerId = 0;
+            var host = Add(q, "training-crane-samurai", 0, Zone.Home); Add(q, "training-lion-samurai", 1, Zone.Home);
+            var armor = Add(q, Armor, 0, Zone.Hand); Gold(q, 0, 4);
+            var eq = MatchEngine.FromTestState(q);
+            Accept(eq, new GameCommand("equip", 0, eq.Version, CardId: armor.Id, SourceIds: eq.PaymentOptions(0, 4).First().SourceIds, TargetId: host.Id));
+            Check(eq.State.Cards[armor.Id].Zone == Zone.Attached, $"the Armor is equipped in the {phase} phase");
+            Check(eq.State.PendingChoice is null, $"equipping the Armor in the {phase} phase opens no Armor of the Heavens window");
+            Check(!eq.QueryActions(0).Any(o => o.Command?.AbilityId is "armor-heavens-gain" or "armor-heavens-lose" && o.Enabled), $"and offers no Armor reaction afterwards ({phase})");
+        }
     }
     private static void BladeOfPerfection()
     {

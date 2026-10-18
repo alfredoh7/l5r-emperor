@@ -15,6 +15,7 @@ public partial class Main
 
     private void RenderInspectorBody()
     {
+        if (_chosen is null) _performerPicked = false; // the choosing flow starts afresh with each drafted action
         BeginDiscardIfPending(); // issue #791: a required discard is announced and starts as a click-to-choose selection in the hand
         if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
@@ -404,16 +405,20 @@ public partial class Main
         var target = command.TargetId; // issue #581: no default; Confirm waits for the player's pick when the action names legal targets
         var needsTarget = targets.Length > 0 && target is null;
         var needsProvince = IsProvinceTarget(action) && command.Province is null; // the player picks the province
+        if (PerformerStepActive) { RenderPerformerStep(); return; } // choosing flow (issue #1004): the performer is the first, explicit choice
         _inspector.AddChild(Palette.Wrapped(Placard(action, IsProvinceTarget(action) ? WithoutProvinceOwner(action.Label) : null), 17, Palette.Gold));
         if (needsTarget) _inspector.AddChild(Palette.Wrapped("Next: choose a target. Pick a highlighted card on the table or in your hand, or a row in the list below.", 17, Palette.Gold));
         else if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table or below. Review the arrow, then use the action button.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
         if (!ReactionFlowOwnsControls && PerformerClicks().Count > 0) _inspector.AddChild(Palette.Wrapped("Choose the performing Personality: click a highlighted Personality on the table.", 15, Palette.Gold)); // issue #793
-        if (IsProvinceTarget(action)) RenderProvincePicker(action);
+        // Choosing flow (issue #1004): only the first unanswered question is asked; answered ones leave the sidebar and appear in the summary.
         var needsPlayer = PlayerTargetActive && !PlayerPicked; // issue #960: "choose a player" is the player's decision, never a default
-        if (PlayerTargetActive) RenderPlayerPicker(action);
-        if (targets.Length > 0)
+        var askProvince = needsProvince; var askPlayer = !askProvince && needsPlayer; var askTarget = !askProvince && !askPlayer && needsTarget;
+        var answeredAll = !needsProvince && !needsPlayer && !needsTarget;
+        if (IsProvinceTarget(action) && (askProvince || answeredAll)) RenderProvincePicker(action);
+        if (PlayerTargetActive && (askPlayer || answeredAll)) RenderPlayerPicker(action);
+        if (targets.Length > 0 && (askTarget || answeredAll))
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
             var picker = NewChoiceList(); // issue #635: every legal card is a visible row that lights its Personality on the table and is lit by it
@@ -430,6 +435,8 @@ public partial class Main
             if (needsTarget) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 13, Palette.Error));
             if (needsTarget) ScrollInspectorTo(picker); // the list can sit below a long card text; bring the choice into view
         }
+        if (answeredAll) RenderFlowSummary(action);
+        AddFlowBack(action);
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {
             var review = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);

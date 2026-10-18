@@ -1,7 +1,7 @@
 # Focused non-duel stabilization
 
-Issue: https://github.com/alfredoh7/l5r-emperor/issues/274
-PR: https://github.com/alfredoh7/l5r-emperor/pull/275
+Issue: https://github.com/l5r-emperor-dev/l5r-emperor/issues/274
+PR: https://github.com/l5r-emperor-dev/l5r-emperor/pull/275
 
 ## Scope and results
 

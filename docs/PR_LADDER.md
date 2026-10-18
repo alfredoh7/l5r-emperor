@@ -3,7 +3,7 @@
 A sequence of process and CI improvements, one PR per rung, merged in order. A rung starts only
 when the one it depends on is on `main`. Sizes: S about a day, M a few days, L a week or more.
 
-Tracked in the epic issue: [PR ladder: adopting process and CI practices (epic) — #509](https://github.com/alfredoh7/l5r-emperor/issues/509).
+Tracked in the epic issue: [PR ladder: adopting process and CI practices (epic) — #509](https://github.com/l5r-emperor-dev/l5r-emperor/issues/509).
 
 ## Overview
 

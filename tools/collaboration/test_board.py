@@ -1,7 +1,12 @@
+"""Legacy board commands must fail locally after retirement."""
+import contextlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
+import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -10,47 +15,49 @@ board = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(board)
 
 
-class BoardClientTests(unittest.TestCase):
-    def test_requires_token_and_https(self):
-        for env in ({}, {'L5R_BOARD_TOKEN': 'test', 'L5R_BOARD_URL': 'http://evil.test'},
-                    {'L5R_BOARD_TOKEN': 'test', 'L5R_BOARD_URL': 'https://user:secret@example.test'}):
-            with patch.dict(os.environ, env, clear=True):
-                with self.assertRaises(board.BoardError):
-                    board.request('board')
+class RetiredBoardTests(unittest.TestCase):
+    def test_old_configuration_never_sends_credentials_or_requests(self):
+        env = {'L5R_BOARD_TOKEN': 'retired-secret', 'L5R_BOARD_URL': 'https://untrusted.invalid'}
+        with patch.dict(os.environ, env), patch('urllib.request.build_opener') as opener, \
+                patch('urllib.request.urlopen') as urlopen:
+            for action in (lambda: board.request('board'),
+                           lambda: board.task_for_issue(62),
+                           lambda: board.mutate(62, 'claim', {'executor': 'old-agent'})):
+                with self.assertRaises(board.BoardError) as caught:
+                    action()
+                self.assertIn('retired', str(caught.exception))
+                self.assertNotIn('retired-secret', str(caught.exception))
+            opener.assert_not_called()
+            urlopen.assert_not_called()
 
-    def test_refuses_redirect_without_forwarding_credentials(self):
-        with self.assertRaises(board.BoardError):
-            board.NoRedirect().redirect_request(None, None, 302, '', {}, 'https://other.test')
+    def test_old_imported_context_is_a_notice_not_live_or_empty_claims(self):
+        result = board.context()
+        self.assertTrue(result['retired'])
+        self.assertEqual(result['repository'], 'https://github.com/l5r-emperor-dev/l5r-emperor')
+        self.assertNotIn('tasks', result)
+        self.assertNotIn('user', result)
 
-    def test_mutation_uses_current_version(self):
-        with patch.object(board, 'task_for_issue', return_value={'id': 'abc', 'version': 8}), patch.object(board, 'request') as send:
-            board.mutate(10, 'claim', {'executor': 'codex', 'branch': 'codex/10'})
-            send.assert_called_once_with('tasks/abc', {'version': 8, 'action': 'claim', 'data': {'executor': 'codex', 'branch': 'codex/10'}})
+    def test_every_legacy_command_fails_without_echoing_private_arguments(self):
+        for command in ('context', 'claim', 'resume', 'handoff', 'evidence', 'link-pr', 'unknown'):
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                status = board.main([command, '--summary', 'private-note'])
+            self.assertNotEqual(status, 0)
+            result = json.loads(output.getvalue())
+            self.assertTrue(result['retired'])
+            self.assertIn('GitHub', result['error'])
+            self.assertNotIn('private-note', output.getvalue())
 
-    def test_unknown_issue_does_not_create_or_claim(self):
-        with patch.object(board, 'request', return_value={'tasks': []}):
-            with self.assertRaises(board.BoardError):
-                board.task_for_issue(99)
-
-    def test_compact_context_preserves_claims_and_excludes_archived(self):
-        tasks = [{'id': 'a', 'number': 1, 'stage': 'In progress', 'claim': {'executor': 'other'}},
-                 {'id': 'b', 'stage': 'Done'}, {'id': 'c', 'stage': 'Ready', 'archived': 'duplicate'}]
-        with patch.object(board, 'request', return_value={'user': {'login': 'mdornbrook'}, 'tasks': tasks}):
-            result = board.context()
-            self.assertEqual(result['user'], 'mdornbrook')
-            self.assertEqual(len(result['tasks']), 1)
-            self.assertEqual(result['tasks'][0]['claim'], {'executor': 'other'})
-
-    def test_network_failure_does_not_expose_token(self):
-        import urllib.error
-        class Opener:
-            def open(self, *args, **kwargs):
-                raise urllib.error.URLError('sensitive upstream error')
-        with patch.dict(os.environ, {'L5R_BOARD_TOKEN': 'do-not-print'}, clear=True), patch('urllib.request.build_opener', return_value=Opener()):
-            with self.assertRaises(board.BoardError) as raised:
-                board.request('board')
-            self.assertNotIn('do-not-print', str(raised.exception))
-            self.assertNotIn('sensitive', str(raised.exception))
+    def test_real_cli_cannot_report_a_successful_claim(self):
+        env = dict(os.environ, L5R_BOARD_TOKEN='retired-secret',
+                   L5R_BOARD_URL='https://untrusted.invalid')
+        result = subprocess.run([sys.executable, str(Path(board.__file__)), 'claim',
+                                 '--issue', '62', '--executor', 'old-agent', '--branch', 'old-branch'],
+                                env=env, text=True, capture_output=True, timeout=10)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(json.loads(result.stdout)['retired'])
+        self.assertNotIn('retired-secret', result.stdout + result.stderr)
+        self.assertNotIn('untrusted.invalid', result.stdout + result.stderr)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Retire the optional project board and use GitHub-only coordination. Remove automatic board context calls, block legacy board commands locally, update active agent guidance, and preserve the former guide and accepted decision. Reversibly disable the Netlify board project and archive its private source with Actions disabled.",
+  "validation": "All 82 collaboration regressions passed, including stale-token isolation and real legacy CLI refusal. Live context reports fresh Git/GitHub and GitHub-only coordination even with dummy stale board settings. Netlify disable endpoint returned 204 and the site reads disabled=true. Private board repository reads archived=true, Actions disabled, original main commit and issue count retained. No game task claims or acceptance were changed; unrelated Netlify projects and account billing were preserved.",
+  "remaining": "PR needs CI and shared review. The board GitHub App registration webhook settings require Alfredo to complete GitHub email verification; the hosting is disabled and the App is not installed on the game repository. Legacy Netlify build-stop settings are not applicable to its manual deployment project; its source Actions are disabled.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/994",
+  "branch": "codex/994-sunset-board",
+  "updated": "2026-10-17T15:55:21.922300+00:00"
+}

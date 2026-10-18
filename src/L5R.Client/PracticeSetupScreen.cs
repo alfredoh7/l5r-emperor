@@ -9,6 +9,8 @@ public partial class PracticeSetupScreen : Control
     public event Action? Closed;
     public Action<Deck, Deck> StartMatch = (_, _) => { };
     public string? StorageDirectory;
+    /// <summary>The player profile the remembered deck choices belong to (captures use a throwaway one).</summary>
+    public string Profile = "default";
     public string Page { get; private set; } = "setup";
     public int ActiveSlot { get; private set; }
     public PracticeChoice[] Choices { get; private set; } = [];
@@ -27,6 +29,7 @@ public partial class PracticeSetupScreen : Control
         Theme = SidebarSkin.Theme(); MouseFilter = MouseFilterEnum.Stop;
         _store = new DeckFileStore(StorageDirectory ?? ProjectSettings.GlobalizePath("user://decks")); if (StorageDirectory is null) PreloadedDecks.Seed(_store);
         Choices = [Preset("Crane"), Preset("Lion")];
+        RestoreSelection();
         var black = new ColorRect { Color = new Color("05090d"), MouseFilter = MouseFilterEnum.Ignore }; AddChild(black); black.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(Canvas); Canvas.AddChild(new TextureRect { Texture = PracticeArt.Background, Size = Canvas.Size, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, MouseFilter = MouseFilterEnum.Ignore }); Canvas.AddChild(_page); _page.Size = Canvas.Size;
         Resized += Fit; TreeExiting += _scans.Close; ReloadFiles(); ShowSetup(); Fit();
@@ -77,7 +80,27 @@ public partial class PracticeSetupScreen : Control
         else Text("Select a Stronghold", x, y, w, h, 23, color: Palette.Gold, align: HorizontalAlignment.Center, parent: parent);
     }
     private static string Status(PracticeChoice c) => c.Review.Ready ? "Ready to play" : c.Review.Issues.FirstOrDefault() ?? "Needs attention";
-    public void Select(PracticeChoice choice) { Choices[ActiveSlot] = choice; _notice = ""; if (Page == "browser") BuildBrowser(); else ShowSetup(); }
+    // The last deck chosen for each side is kept from session to session: a built-in preset by its clan, a saved deck by its file. A slot whose deck is gone or unreadable falls back to its default.
+    private string SelectionFile => StorageDirectory is null ? $"user://practice-selection-{Profile}.cfg" : System.IO.Path.TrimEndingDirectorySeparator(StorageDirectory) + ".selection.cfg";
+    private string Remembered(PracticeChoice choice) => choice.Path is { } path ? "path:" + path : "preset:" + choice.Name.Split(' ')[0];
+    private void SaveSelection()
+    {
+        var config = new ConfigFile();
+        for (var i = 0; i < Choices.Length; i++) config.SetValue("practice", "slot" + i, Remembered(Choices[i]));
+        config.Save(SelectionFile);
+    }
+    private void RestoreSelection()
+    {
+        var config = new ConfigFile();
+        if (config.Load(SelectionFile) != Error.Ok) return;
+        for (var i = 0; i < Choices.Length; i++)
+        {
+            var value = config.GetValue("practice", "slot" + i, "").AsString();
+            if (value.StartsWith("preset:", StringComparison.Ordinal) && value[7..] is "Crane" or "Lion") Choices[i] = Preset(value[7..]);
+            else if (value.StartsWith("path:", StringComparison.Ordinal) && System.IO.File.Exists(value[5..]) && Read(value[5..]) is { Deck: not null } restored) Choices[i] = restored;
+        }
+    }
+    public void Select(PracticeChoice choice) { Choices[ActiveSlot] = choice; SaveSelection(); _notice = ""; if (Page == "browser") BuildBrowser(); else ShowSetup(); }
     public void ShowSetup()
     {
         Page = "setup"; Palette.Clear(_page); Header();
@@ -172,7 +195,7 @@ public partial class PracticeSetupScreen : Control
         var editor = new DeckBuilderScreen { StorageDirectory = _store.DirectoryPath }; layer.AddChild(editor); editor.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         if (choice?.Path is { } path && choice.Deck is not null) editor.OpenFile(path);
         else if (choice?.Deck is { } deck) editor.OpenPracticeDeck(deck, choice.Name + " copy");
-        editor.Closed += () => { var savedPath = editor.SavedPath; layer.QueueFree(); _editing = false; ReloadFiles(); if (savedPath is not null) Choices[editSlot] = Read(savedPath); ShowSetup(); };
+        editor.Closed += () => { var savedPath = editor.SavedPath; layer.QueueFree(); _editing = false; ReloadFiles(); if (savedPath is not null) { Choices[editSlot] = Read(savedPath); SaveSelection(); } ShowSetup(); };
     }
     private void Start()
     {

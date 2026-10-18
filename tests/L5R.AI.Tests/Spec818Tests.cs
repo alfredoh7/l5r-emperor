@@ -188,7 +188,9 @@ internal static class Spec818Tests
         // Not yet enough Force: it plays on as usual.
         var short7 = BattlePolicyTests.Battle(6, 0, 7);
         short7 = short7 with { Players = [short7.Players[0], short7.Players[1] with { Army = [] }] };
-        Check(TrainingOpponent.Choose(short7, [BattlePolicyTests.Pass(short7), BattlePolicyTests.Use(short7, other)], new BotContext()).Command?.AbilityId == other, "short of the Province: it plays actions to get there");
+        // Issue #997: unopposed and short of the Province it plays only the Force it lacks ("+2F"), not an action that adds none.
+        Check(TrainingOpponent.Choose(short7, [BattlePolicyTests.Pass(short7), BattlePolicyTests.Use(short7, other)], new BotContext()).Command?.AbilityId is not { } played || played != other, "short of the Province, an action that adds no Force is not played against nothing");
+        Check(TrainingOpponent.Choose(short7, [BattlePolicyTests.Pass(short7), BattlePolicyTests.Use(short7, "kunji-boost")], new BotContext()).Command?.AbilityId == "kunji-boost", "short of the Province: it plays the Force it lacks");
         _ = generic;
     }
 

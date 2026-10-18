@@ -31,6 +31,34 @@ public partial class Main
         if (_multiActiveSlot is not null) _multiExpanded.Add(_multiActiveSlot);
         _chosen = _chosen! with { Command = _chosen!.Command! with { Selections = [], TargetId = null } };
     }
+    // The choosing flow (issue #1004): one group is open at a time. A group that is full hands the board to the next group that still has room (a province after its cards, a player after a target); when
+    // every group is full none is open and the summary is shown. Opening a group by its header closes the others.
+    private void OpenMultiSlot(string slotId) { _multiActiveSlot = slotId; _multiExpanded.Clear(); _multiExpanded.Add(slotId); }
+    private void MultiAdvance(string slotId)
+    {
+        var slots = MultiUpFront.ToList(); var at = slots.FindIndex(s => s.Slot == slotId);
+        if (at < 0 || MultiCount(slots[at]) < slots[at].Max) return;
+        var next = slots.Skip(at + 1).Concat(slots.Take(at)).FirstOrDefault(s => MultiCount(s) < s.Max);
+        if (next is not null) OpenMultiSlot(next.Slot); // the last group stays open so a choice can still be swapped
+    }
+    private bool MultiAllFull => MultiUpFront.All(s => MultiCount(s) >= s.Max);
+    /// <summary>Back: reopen the most recently answered group (the last one with a selection, before the open one when a group is open) and clear its answer.</summary>
+    private void MultiBack()
+    {
+        var slots = MultiUpFront.ToList(); var open = slots.FindIndex(s => s.Slot == _multiActiveSlot && _multiExpanded.Contains(s.Slot));
+        var from = open < 0 ? slots.Count : open + (MultiCount(slots[open]) > 0 ? 1 : 0); // an open group that already has an answer is the one Back undoes
+        var previous = slots.Take(from).LastOrDefault(s => MultiCount(s) > 0) ?? slots.Take(from).LastOrDefault();
+        if (previous is null) return;
+        _multiCards.GetValueOrDefault(previous.Slot)?.Clear(); _multiPlayers.Remove(previous.Slot); _multiProvinces.Remove(previous.Slot);
+        OpenMultiSlot(previous.Slot); RefreshMultiTargets();
+    }
+    private string MultiSelectionText(TargetSlotOption slot)
+    {
+        string Name(string id) => FindCard(id) is { } c ? ShortName(c) : "?";
+        return slot.Kind == TargetSlotKinds.Card ? string.Join(", ", (_multiCards.GetValueOrDefault(slot.Slot) ?? []).Select(Name))
+            : slot.Kind == TargetSlotKinds.Province ? _multiProvinces.TryGetValue(slot.Slot, out var pr) ? ProvinceLabel(pr.Owner, pr.Index) : ""
+            : _multiPlayers.TryGetValue(slot.Slot, out var pl) ? (pl == View.ViewerId ? "You" : "Your opponent") : "";
+    }
     private int MultiCount(TargetSlotOption slot) => slot.Kind == TargetSlotKinds.Card ? _multiCards.GetValueOrDefault(slot.Slot)?.Count ?? 0
         : slot.Kind == TargetSlotKinds.Province ? _multiProvinces.ContainsKey(slot.Slot) ? 1 : 0 : _multiPlayers.ContainsKey(slot.Slot) ? 1 : 0;
     private bool MultiReady => MultiUpFront.All(s => MultiCount(s) >= s.Min && MultiCount(s) <= s.Max);
@@ -63,9 +91,7 @@ public partial class Main
             selected.Add(id);
         }
         _multiActiveSlot = slotId; _multiExpanded.Add(slotId);
-        // A full card group hands the board to a province slot that follows it (Benediction): the next click is the province.
-        if (selected.Count >= slot.Max && MultiUpFront.SkipWhile(s => s.Slot != slotId).Skip(1).FirstOrDefault() is { Kind: TargetSlotKinds.Province } next && !_multiProvinces.ContainsKey(next.Slot))
-        { _multiActiveSlot = next.Slot; _multiExpanded.Add(next.Slot); _multiExpanded.Remove(slotId); }
+        MultiAdvance(slotId);
         RefreshMultiTargets(slotId + "/" + id);
     }
     /// <summary>The card groups that can take this card now: it is a candidate and the group has room, or it is already chosen there and a click would remove it.</summary>
@@ -97,7 +123,7 @@ public partial class Main
         if (slotId is not null && MultiTargetActive && MultiUpFront.Any(s => s.Slot == slotId && s.Kind == TargetSlotKinds.Province)) _multiActiveSlot = slotId; // a row names its own slot
         if (!DecisionCanSubmit || _multiDraftKey != MultiKey || MultiProvinceSlot is not { } slot || !MultiProvinceLegal(owner, index)) return;
         if (!_multiProvinces.Remove(slot.Slot, out var old) || old != (owner, index)) _multiProvinces[slot.Slot] = (owner, index);
-        RefreshMultiTargets();
+        MultiAdvance(slot.Slot); RefreshMultiTargets();
     }
     private void RenderMultiProvinceRows(TargetSlotOption slot)
     {
@@ -153,8 +179,7 @@ public partial class Main
             var header = SidebarSkin.Button((open ? "▾ " : "▸ ") + slot.Label + $"\n{count} selected · Choose {(slot.Min == slot.Max ? slot.Min.ToString() : $"{slot.Min}–{slot.Max}")}", () =>
             {
                 if (!DecisionCanSubmit || key != _multiDraftKey) return;
-                _multiActiveSlot = slot.Slot;
-                if (!_multiExpanded.Remove(slot.Slot)) _multiExpanded.Add(slot.Slot);
+                OpenMultiSlot(slot.Slot);
                 RenderInspector(); Highlight();
             });
             header.Name = "MultiGroup_" + slot.Slot; header.CustomMinimumSize = new(0, 78); header.AddThemeFontSizeOverride("font_size", 18);
@@ -170,7 +195,7 @@ public partial class Main
                     {
                         if (!DecisionCanSubmit || key != _multiDraftKey) return;
                         if (!_multiPlayers.Remove(slot.Slot, out var old) || old != playerId) _multiPlayers[slot.Slot] = playerId;
-                        RefreshMultiTargets();
+                        MultiAdvance(slot.Slot); RefreshMultiTargets();
                     });
                     button.SetMeta("slot", slot.Slot); button.SetMeta("player", playerId); button.Disabled = !DecisionCanSubmit; _inspector.AddChild(button);
                 }
@@ -204,7 +229,21 @@ public partial class Main
             note.TooltipText = string.Join("\n", followup.OptionLabels ?? []); _inspector.AddChild(note);
             _inspector.AddChild(Palette.Wrapped("The game will ask this only if the condition is met.", 15, Palette.PaperDim));
         }
+        if (MultiAllFull && MultiUpFront.Count() > 1)
+        {
+            _inspector.AddChild(new HSeparator());
+            _inspector.AddChild(Palette.Text("SUMMARY", 11, Palette.Gold));
+            foreach (var slot in MultiUpFront) if (MultiSelectionText(slot) is { Length: > 0 } text) _inspector.AddChild(Palette.Wrapped("• " + slot.Label + ": " + text, 16, Palette.Paper));
+        }
+        else if (MultiUpFront.FirstOrDefault(s => s.Slot == _multiActiveSlot) is { } openSlot && MultiCount(openSlot) >= openSlot.Min && MultiCount(openSlot) < openSlot.Max
+            && MultiUpFront.SkipWhile(s => s.Slot != openSlot.Slot).Skip(1).Any())
+        {
+            var done = SidebarSkin.Button("Done with this group", () => { var next = MultiUpFront.SkipWhile(s => s.Slot != openSlot.Slot).Skip(1).First(); OpenMultiSlot(next.Slot); RenderInspector(); Highlight(); });
+            done.Name = "MultiNextGroup"; done.Disabled = !DecisionCanSubmit; _inspector.AddChild(done);
+        }
         var total = MultiUpFront.Sum(MultiCount);
+        if (MultiUpFront.Any(s => MultiCount(s) > 0))
+        { var back = SidebarSkin.Button("← Back", MultiBack); back.Name = "FlowBack"; back.Disabled = !DecisionCanSubmit; _decisionActions.AddChild(back); }
         _decisionActions.AddChild(Palette.Wrapped($"{total} selected" + (MultiReady ? " · Cards resolve in selection order." : " · Complete each required group."), 17, MultiReady ? Palette.Gold : Palette.PaperDim));
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {

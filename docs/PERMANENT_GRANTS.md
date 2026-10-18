@@ -1,6 +1,6 @@
 # Permanent keyword and ability presentation
 
-Issue [#213](https://github.com/alfredoh7/l5r-emperor/issues/213), implementation [#256](https://github.com/alfredoh7/l5r-emperor/pull/256). Built on the approved UI consolidation in [#248](https://github.com/alfredoh7/l5r-emperor/pull/248); the separate Duel Demo #220 is excluded.
+Issue [#213](https://github.com/l5r-emperor-dev/l5r-emperor/issues/213), implementation [#256](https://github.com/l5r-emperor-dev/l5r-emperor/pull/256). Built on the approved UI consolidation in [#248](https://github.com/l5r-emperor-dev/l5r-emperor/pull/248); the separate Duel Demo #220 is excluded.
 
 ## Player behavior
 

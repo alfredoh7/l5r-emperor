@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Validated Armor of the Heavens: equipping it (Equip command by its own controller, before it is in play) opens no targeted-by-action window and offers no Armor reaction. Added a regression for that. No engine change; the existing guard (another player's action, Attached zone) already holds, so no all-reactions retest was warranted.",
+  "validation": "L5R.Core.Tests filter 'Armor of the Heavens': 3/3 pass (probe verified to run: Equip succeeded and armor attached before the assertions). Full check.sh not run locally; CI decides.",
+  "remaining": "Could not reproduce the reported self-trigger in Core; if it recurs, capture the scenario (who held priority, phase, any opponent action in flight) - may be client presentation.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1000",
+  "branch": "claude/1000-armor-heavens-self-trigger",
+  "updated": "2026-10-17T18:05:40.015171+00:00"
+}

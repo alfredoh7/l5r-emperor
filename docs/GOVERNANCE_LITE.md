@@ -33,7 +33,7 @@ The normal collaboration Python test discovery exercises extraction and temporar
 
 ## #504 acceptance
 
-The hand-written comparison source is [#504](https://github.com/alfredoh7/l5r-emperor/pull/504) and its [mechanics-batch client-lane section](decisions/2026-09-25-mechanics-batch.md#client-lane-alfredo). `tools/collaboration/fixtures/pr504-contract.json` records the expected named contract independently of the ledger and preserves its semantic supplement. The seven client-facing copy/payment additions are the five CardView copy fields and the two quote Sources fields. The additional EntryCostOption and PaymentSource members are supporting payload structure verified against the historical source.
+The hand-written comparison source is [#504](https://github.com/l5r-emperor-dev/l5r-emperor/pull/504) and its [mechanics-batch client-lane section](decisions/2026-09-25-mechanics-batch.md#client-lane-alfredo). `tools/collaboration/fixtures/pr504-contract.json` records the expected named contract independently of the ledger and preserves its semantic supplement. The seven client-facing copy/payment additions are the five CardView copy fields and the two quote Sources fields. The additional EntryCostOption and PaymentSource members are supporting payload structure verified against the historical source.
 
 Fetch the historical PR only when needed and authorized, then reproduce the read-only comparison:
 

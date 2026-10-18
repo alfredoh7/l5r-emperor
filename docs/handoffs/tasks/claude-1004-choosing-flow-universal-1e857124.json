@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Choosing flow universal (client UI; Mendon's standing cross-lane authority): multi-target, attack-target (incl. A Paragon's Strength Ranged Attack: performer, target, summary at top, Back) and support-card drafts; routing audit test plus docs/audits/choosing-flow-audit.md. Also remembers the last Practice deck choices per profile (preset by clan, saved deck by file; a missing deck falls back to the default).",
+  "validation": "Native UI checks all pass: direct-play (A Paragon's Strength walkthrough, Sound of Thunder, performer Back), table-click, province-target, movement, multi-targets, reaction-flow, attack-targets, practice-setup (new: choices persist across sessions, deleted deck falls back). Core choosing-flow-audit routing test passes. Formatting applied to touched files. Not human-playtested.",
+  "remaining": "Reaction-window panel and post-resolution engine choices (Captured Convict gain/lose) are not converted; look-and-feel needs Mendon's playtest.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1004",
+  "branch": "claude/1004-choosing-flow-universal",
+  "updated": "2026-10-17T22:24:35.560171+00:00"
+}

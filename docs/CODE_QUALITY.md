@@ -1,6 +1,6 @@
 # Changed-file formatting and nullable baseline
 
-Rung 6 of the [PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/alfredoh7/l5r-emperor/issues/509), adds a forward-looking whitespace check. It does not reformat existing source or add a new analyzer package.
+Rung 6 of the [PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/l5r-emperor-dev/l5r-emperor/issues/509), adds a forward-looking whitespace check. It does not reformat existing source or add a new analyzer package.
 
 ## Formatting
 

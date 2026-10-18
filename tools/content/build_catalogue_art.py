@@ -113,7 +113,7 @@ def extend_from_verified_archive(root, base_archive, cache, output, cwebp, tag):
     temporary.replace(output)
     manifest = dict(schema_version=1, quality=85, scans=dict(sorted(scans.items())), resources=dict(sorted(resources.items())))
     (root/'src/L5R.Client/Content/catalogue-art.json').write_text(json.dumps(manifest, separators=(',', ':'), sort_keys=True)+'\n')
-    descriptor = dict(schema_version=1, repository='alfredoh7/l5r-emperor', tag=tag,
+    descriptor = dict(schema_version=1, repository='l5r-emperor-dev/l5r-emperor', tag=tag,
                       asset='L5R-Catalogue-WebP85.zip', sha256=digest(output.read_bytes()),
                       bytes=output.stat().st_size, images=len(scans), quality=85)
     (root/'content/catalogue-art-pack.json').write_text(json.dumps(descriptor, indent=2)+'\n')
@@ -189,7 +189,7 @@ def build(root, cache, output, cwebp, source_roots=(), tag="catalogue-art-webp-v
             z.writestr(info,(cache/'webp'/receipt['file']).read_bytes())
     temporary.replace(output)
     (root/'src/L5R.Client/Content/catalogue-art.json').write_text(json.dumps(manifest,separators=(',',':'),sort_keys=True)+'\n')
-    descriptor=dict(schema_version=1,repository='alfredoh7/l5r-emperor',tag=tag,asset='L5R-Catalogue-WebP85.zip',sha256=digest(output.read_bytes()),bytes=output.stat().st_size,images=len(scans),quality=85)
+    descriptor=dict(schema_version=1,repository='l5r-emperor-dev/l5r-emperor',tag=tag,asset='L5R-Catalogue-WebP85.zip',sha256=digest(output.read_bytes()),bytes=output.stat().st_size,images=len(scans),quality=85)
     (root/'content/catalogue-art-pack.json').write_text(json.dumps(descriptor,indent=2)+'\n')
     print(json.dumps({**descriptor,'source_bytes':sum(s['source_bytes'] for s in scans.values()),'webp_bytes':sum(s['bytes'] for s in scans.values())},indent=2))
 

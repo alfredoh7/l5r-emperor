@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Enabled CodeQL default setup (actions, csharp, python) and corrected docs that said it was off.",
+  "validation": "Default-setup API reports configured with 3 languages; CodeQL Setup run succeeded; analyses for actions, csharp, python completed with 0 results. Docs-only diff.",
+  "remaining": "None; ready for review. C# is no-build extraction.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/509",
+  "branch": "claude/codeql-enabled",
+  "updated": "2026-10-17T15:16:50.895613+00:00"
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Bot no longer wastes actions in battles nobody opposes: an unopposed defender passes; an unopposed attacker plays only actions that add the Force the Province still needs (+N F abilities/Strategies, Force-carrying attachments) and stops once its Force destroys the Province, except an Honor play that really resolves. Flag BotContext.UseUnopposedGate (default on). Opposed means any enemy Personality at the battlefield, bowed or not.",
+  "validation": "dotnet run --project tests/L5R.AI.Tests: 180/180 cases passed (new unopposed tests 3/3; bot-soak 7/7). Updated one spec-818 test that expected any action to be played when unopposed and short. dotnet format whitespace clean on changed files. Not done: arena/win-rate measurement of the change.",
+  "remaining": "Win-rate effect not measured in the bot arena; the gate only treats Force-adding actions as useful when short (moving units in, or removing enemy Force, are not counted).",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/997",
+  "branch": "claude/997-bot-unopposed-battle",
+  "updated": "2026-10-17T17:48:39.495379+00:00"
+}

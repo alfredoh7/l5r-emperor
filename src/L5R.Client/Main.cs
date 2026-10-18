@@ -188,6 +188,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal)) { ProcessDirectPlayCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-table-click", StringComparison.Ordinal)) { ProcessTableClickCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-drag", StringComparison.Ordinal)) { ProcessDragCapture(delta); return; } // issue #993
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-card-motion", StringComparison.Ordinal)) { ProcessCardMotionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
@@ -608,7 +609,7 @@ public partial class Main : Node
     private void SelectCard(CardView card)
     {
         if (_shownOpen) ToggleShownCards(false);
-        if (_session.Busy || PresentationBusy || _playHeld) return;
+        if (_session.Busy || PresentationBusy || _playHeld || _endingDragPress) return;
         if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
         if (SelectDiscardCard(card)) return;
@@ -635,8 +636,8 @@ public partial class Main : Node
         {
             ChooseTarget(card.Id); return;
         }
-        if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.TryGetValue(card.Id, out var selectPerformer))
-        { if (_chosen?.Command?.PerformerId != card.Id) selectPerformer(); return; }
+        if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.ContainsKey(card.Id))
+        { PickPerformer(card.Id); return; }
         // Issue #973: an Attack that may be made with no target takes that choice from a click on the card that performs it, or on the card it belongs to.
         if (AttackTargetActive && _chosen!.NoTarget && (card.Id == _chosen.Command!.PerformerId || card.Id == (_chosen.CardId ?? _chosen.Command.CardId)))
         { ChooseAttackTarget(AttackChoice.NoTarget); return; }
