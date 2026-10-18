@@ -35,10 +35,12 @@ public partial class Main
                     + View.Players.Single(p => p.Id != View.ActivePlayerId).Provinces.Single(p => p.Index == active).Strength;
             var attachmentReady = !_captureMode.Contains("ink", StringComparison.Ordinal) ||
                 View.Players.Any(p => p.Home.Concat(p.Army).Any(c => c.AttachedTo is not null));
+            // Issue #975: the expanded-stack probe needs an army unit that carries an attachment; a random practice match without one at its battle is skipped for a fresh match (the bounded retry below), not asserted on.
+            var expandedReady = !_captureMode.Contains("expanded", StringComparison.Ordinal) || View.Players.SelectMany(p => p.Army).Any(c => c.AttachedTo is not null);
             var casualtyReady = !casualtyMode || View.Phase == Phase.Battle && BattleCasualtyAction() is not null;
             var defeatReady = !_captureMode.Contains("deaths", StringComparison.Ordinal) || View.CurrentBattleProvince is int bp && View.Players.All(p => p.Army.Any(c => c.AttachedTo is null && c.ProvinceIndex == bp)) && View.Players.SelectMany(p => p.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == bp)).Sum(c => c.UnitForce ?? 0) > 0;
             var compactReady = View.Phase == Phase.Dynasty && View.TurnNumber >= 3 && View.Players.All(p => p.Home.Any(c => c.Definition?.Type == CardType.Personality));
-            if (compactMode ? compactReady : ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady && casualtyReady && defeatReady)) break;
+            if (compactMode ? compactReady : ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && expandedReady && fallReady && casualtyReady && defeatReady)) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();
@@ -299,7 +301,7 @@ public partial class Main
         }
         if (_hoverProbeCard is not null)
         {
-            if (CardTile.LastPreviewCardId != _hoverProbeCard) throw new InvalidOperationException("Real mouse hover did not open the expected card preview.");
+            if (CardTile.LastPreviewCardId != _hoverProbeCard) throw new InvalidOperationException($"Real mouse hover did not open the expected card preview (previewed {CardTile.LastPreviewCardId ?? "none"}, wanted {_hoverProbeCard}; attempts {_hoverProbeAttempts}; waited for focus {_hoverProbeWaitedForFocus} frames; focus {GetWindow().HasFocus()}; hovered {GetViewport().GuiGetHoveredControl()?.GetPath()}; mouse {GetViewport().GetMousePosition()}).");
             var previewScale = GetViewport().GetVisibleRect().Size.Y / 1080f;
             if (CardTile.LastPreviewControl is not { } preview || !IsInstanceValid(preview) || preview.Size.X > 770 * previewScale || preview.Size.Y > 590 * previewScale) throw new InvalidOperationException("Hover preview exceeded its bounded layout.");
             if (View.Version != _hoverProbeVersion || _chosen?.Command != _hoverProbeCommand) throw new InvalidOperationException("Hover changed the match or selected action.");
