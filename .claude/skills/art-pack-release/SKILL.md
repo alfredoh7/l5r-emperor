@@ -1,6 +1,6 @@
 ---
 name: art-pack-release
-description: Build, verify, and when requested publish a versioned private L5R catalogue artwork pack with matching manifests, release receipts, coverage, and client installation checks.
+description: Build, verify, and when requested publish a versioned L5R catalogue artwork pack with matching manifests, release receipts, coverage, and client installation checks.
 ---
 
 # Release a catalogue art pack
@@ -27,4 +27,4 @@ Check the target tag/release first with gh release view; an existing release mus
 
 Publish the verified draft, then use the generated receipt to test a clean cached/download installation. If content subsequently changes, build a new version rather than changing the bytes under this tag. A publication request needs this verified usable release, not just a local ZIP. If publication was not requested, deliver the verified local candidate and state that it remains unpublished; do not solicit redundant approval for already authorized release work.
 
-Finish the shared handoff/PR flow with old/new tag, source commit, image count, byte count, SHA-256, private release link, coverage/install/build results and any outstanding native review. Commit receipt/manifest changes, not the archive or credentials. Do not message another person unless the task or explicitly invoked project workflow authorizes it.
+Finish the shared handoff/PR flow with old/new tag, source commit, image count, byte count, SHA-256, release link, coverage/install/build results and any outstanding native review. Commit receipt/manifest changes, not the archive or credentials. Do not message another person unless the task or explicitly invoked project workflow authorizes it.

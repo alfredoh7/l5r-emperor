@@ -1406,7 +1406,9 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
     MoveDestinationView? Movement = null, AttackCueView? Attack = null,
     // Engine-selected preview cards for a complete pending answer; private candidates are only offered to the decider.
-    string[]? DecisionCandidateIds = null, string? DecisionLabel = null);
+    string[]? DecisionCandidateIds = null, string? DecisionLabel = null,
+    // The destination rule of an ability that moves cards (MoveSpec.Home / CurrentBattlefield, or a rule that needs a chosen battlefield); null for every other action. Lets a client offer a drag without reading card text.
+    string? MoveTo = null);
 /// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
 /// it identifies the card to mark, not a new legality or damage calculation.</summary>
 public sealed record AttackCueView(string Kind, string SourceId);

@@ -135,13 +135,20 @@ public partial class Main
             var onlySecond = secondGroup.CardIds.Except(firstGroup.CardIds).First();
             SupportRequire(_multiActiveSlot == firstGroup.Slot && _tiles.Where(t => t.Card.Id == onlySecond).All(t => t.LegalTarget), "Every open group's candidates should be highlighted on the table");
             SelectCard(FindCard(onlySecond)!); await EventFrames(4);
-            SupportRequire(_multiActiveSlot == secondGroup.Slot && _multiCards[secondGroup.Slot].Contains(onlySecond), "Clicking a card for another group did not switch to it and select the card");
+            SupportRequire(_multiCards[secondGroup.Slot].Contains(onlySecond), "Clicking a card for another group did not select it there"); // issue #1004: a full group then hands over to the next one, so the open group is not asserted
             SelectCard(FindCard(onlySecond)!); await EventFrames(4);
             SupportRequire(!_multiCards[secondGroup.Slot].Contains(onlySecond), "Clicking the chosen card again did not remove it");
             foreach (var s in selections.Where(s => s.Kind == TargetSlotKinds.Card)) { await OpenMultiGroup(s.Slot); await SupportClick(MultiFace(s.Slot, s.CardIds.Last())); }
             SupportRequire(_paymentConfirm!.Disabled, "Required player defaulted"); await OpenMultiGroup("player");
             await SupportClick(StabilizationButtons(_inspector).Single(b => b.HasMeta("player") && b.GetMeta("player").AsInt32() == 1));
             SupportRequire(MultiReady && MultiCommand().Selections!.Length == 3, "Independent groups missing"); await SupportCapture("-groups");
+            // Issue #1004: with every group answered the summary lists each answer, and Back reopens the last one with its answer cleared.
+            SupportRequire(StabilizationText(_inspector).Contains("SUMMARY") && StabilizationButtons(_decisionActions).Any(b => b.Text.Contains("Back")), "The answered groups should show a summary and a Back button");
+            var answered = MultiUpFront.Count(s => MultiCount(s) > 0); MultiBack(); await EventFrames(4);
+            SupportRequire(MultiUpFront.Count(s => MultiCount(s) > 0) == answered - 1 && _multiExpanded.Count == 1 && !MultiReady && !StabilizationText(_inspector).Contains("SUMMARY"), "Back should clear the last answer and reopen that group");
+            await OpenMultiGroup("player");
+            await SupportClick(StabilizationButtons(_inspector).Single(b => b.HasMeta("player") && b.GetMeta("player").AsInt32() == 1));
+            SupportRequire(MultiReady, "The group answered again after Back");
             var targets = MultiSelectedIds.ToArray(); var opponentHonor = _multiFixture.State.Players[1].Honor; await ConfirmMulti();
             SupportRequire(targets.All(id => _multiFixture.State.Cards[id].Bowed) && _multiFixture.State.Players[1].Honor == opponentHonor + 1, "Mixed group engine result wrong");
             await PrepareMultiReview("optional"); SupportRequire(!_paymentConfirm!.Disabled && !MultiSelectedIds.Any(), "Optional zero refused"); await ConfirmMulti();

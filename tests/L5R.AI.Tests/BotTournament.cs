@@ -25,10 +25,18 @@ internal static class BotTournament
     {
         ["champion"] = () => new(), // the bot on main: since the 2026-10-15 promotion this includes the Seppuku policy and informed defense
         ["pre-promotion"] = () => new() { UseSeppukuPolicy = false, UseInformedDefense = false }, // the champion before them (rounds 1-2 baseline)
+        ["pre-gates"] = () => new() { UseUnopposedGate = false, UsePhaseChoice = false }, // the champion before #997/#1003 (unopposed gate) and #998 (Battle/Open phase choice); run as the challenger against the champion that has them
         ["seppuku"] = () => new() { UseSeppukuPolicy = true }, // round 1 (docs/bots/experiments/2026-10-15-seppuku.md)
         ["defense"] = () => new() { UseInformedDefense = true }, // round 2 (docs/bots/experiments/2026-10-15-defense.md)
         ["bodies"] = () => new() { UseBodiesFirst = true }, // round 3 (docs/bots/experiments/2026-10-15-bodies.md)
-        ["reactions"] = () => new() { UseSureReactions = true } // round 4 (docs/bots/experiments/2026-10-15-reactions.md)
+        ["reactions"] = () => new() { UseSureReactions = true }, // round 4 (docs/bots/experiments/2026-10-15-reactions.md)
+        ["arch-attack"] = () => new() { UseArchetypeAttack = true }, // archetype S1 (docs/bots/experiments/2026-10-15-archetype.md)
+        ["arch-abilities"] = () => new() { UseArchetypeAbilities = true }, // S2
+        ["arch-military"] = () => new() { UseArchetypeMilitary = true }, // S3
+        ["arch-switch"] = () => new() { UseArchetypeSwitch = true }, // S4
+        ["split-defense"] = () => new() { UseSplitDefense = true }, // hypothesis A
+        ["military-trades"] = () => new() { UseMilitaryTrades = true }, // hypothesis B
+        ["arch-all"] = () => new() { UseArchetypeAttack = true, UseArchetypeAbilities = true, UseArchetypeMilitary = true, UseArchetypeSwitch = true }
     };
 
     public const ulong DevSeedBase = 1_000_000UL, HoldoutSeedBase = 9_000_000UL, IndependentOffset = 500_000UL;
@@ -53,7 +61,7 @@ internal static class BotTournament
         }
         try { game = MatchEngine.CreateCustomMatch(seed, deck0, deck1); }
         catch (Exception e) { return End(null, "setup", 0, e.Message.Split('\n')[0]); }
-        var memory = new[] { makers[0](), makers[1]() }; var refusedAt = new HashSet<(long, int)>(); var sameAnswer = 0; string? lastRefusal = null;
+        var memory = new[] { makers[0](), makers[1]() }; memory[0].Archetype = DeckArchetypeTests.Of(deck0); memory[1].Archetype = DeckArchetypeTests.Of(deck1); var refusedAt = new HashSet<(long, int)>(); var sameAnswer = 0; string? lastRefusal = null;
         for (var n = 0; n < 6000; n++)
         {
             try

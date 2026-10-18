@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Migration prompt in REPO_MOVED.md with direct copy-paste-section links from PUBLIC_REPO.md and CONTRIBUTING.md; corrected stale private-plan enforcement wording.",
+  "validation": "Verified fenced prompt, heading targets and both relative links; git diff --check passes. Documentation-only change.",
+  "remaining": "Runner host re-registration and board configuration remain unverified and outside this documentation change.",
+  "issue": "none",
+  "branch": "claude/repo-moved-prompt",
+  "updated": "2026-10-17T13:27:47.612415+00:00"
+}

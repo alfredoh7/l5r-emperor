@@ -26,7 +26,7 @@ The metadata-only router continues to label every PR `lane:ui`, `lane:rules` or 
 
 `context` exposes the trusted configured autonomous identities and the authenticated user's approval policy. The router reads author identity from GitHub, not a PR title/branch/handoff. No auto-merger is installed; the working agent handles finishing and merging after checks.
 
-The current GitHub account returned HTTP 403 for private repository rulesets and requires an upgrade for that feature. Therefore **passing checks and the configured review policy are team rules, not an enforced merge lock**. The repository stays private. The automation cannot prevent a collaborator from directly pushing main or ignoring a failed check. It never merges or upgrades the account. If protection becomes available later, require the collaboration and desktop checks and block force pushes through repository settings.
+The repository is public. A `Protect Main` ruleset (see [PUBLIC_REPO.md](PUBLIC_REPO.md)) blocks force-push, deletion and direct pushes and requires a PR plus the always-run checks; admins can bypass. It does not require the desktop `verify` jobs or reviews, so **desktop checks, the nightly pause and the review policy remain team rules, not an enforced merge lock**. The automation cannot stop an admin bypassing the ruleset or merging past a failed desktop check. It never merges.
 
 ## Recovery is the agent's responsibility
 
@@ -44,9 +44,9 @@ The review router runs for PRs targeting `main` on `pull_request_target` using *
 
 Official behavior references: [Codex project instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude project memory and AGENTS import](https://code.claude.com/docs/en/memory). See `docs/COLLABORATION_VALIDATION.md` for the actual tested scenarios and remaining limits.
 
-## Optional authenticated board integration
+## GitHub coordination
 
-See [PROJECT_BOARD.md](PROJECT_BOARD.md) for the separate Netlify application and `tools/board.py`. The helper reads live board context when configured, without changing the local-only behavior of `collab.py handoff`. Explicit board claim and handoff commands coordinate executor ownership. Preserve existing GitHub coordination when the service is unavailable. No autonomous developer permission is removed.
+The optional project board was retired on 2026-10-17; see [PROJECT_BOARD.md](PROJECT_BOARD.md). GitHub issues own scope, assignments, dependencies and ownership notes. PRs own implementation, validation and review. The normal `collab.py context`, local `handoff`, audit and publication workflow continues without a board token or Netlify dependency. Record scope changes and interruptions on the matching issue/PR, preserving other contributors' work. Keep human acceptance distinct from automated checks and merge status. Mendon's standing development authority is unchanged.
 
 ## Focused governance review
 

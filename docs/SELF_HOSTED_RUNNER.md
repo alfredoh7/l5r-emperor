@@ -1,6 +1,6 @@
 # Local macOS Actions runner
 
-Issue: https://github.com/alfredoh7/l5r-emperor/issues/100
+Issue: https://github.com/l5r-emperor-dev/l5r-emperor/issues/100
 
 The macOS row of Desktop foundation checks uses the repository-scoped runner
 `alfredo-mac-studio`, labelled `self-hosted`, `macOS`, `ARM64`, `l5r-mac-studio`.
@@ -16,6 +16,11 @@ on the same PR/ref. Fork PRs do not execute the desktop workflow on this Mac.
 - The runner runs as Alfredo, without sudo. This separates checkouts, not OS permissions:
   trusted repository workflow code has the account’s file access. Do not enable this
   runner for public/untrusted contributions. Checkout does not retain its GitHub token.
+  **The repository is now public (and moved to `l5r-emperor-dev/l5r-emperor`).** The fork guard in
+  `check.yml` keeps fork PRs off this Mac, but any user with write access can still push a branch
+  whose workflow runs here as Alfredo. Keep write access to people trusted with that account, keep
+  fork-PR approval on "all outside contributors", never run `pull_request_target` PR code here, and
+  prefer switching the macOS row to a hosted runner (see Recovery) if that trust cannot be kept.
 - A per-user launchd service starts after Alfredo logs in and restarts the runner if it exits.
   After reboot/FileVault unlock, log in before expecting jobs. Logging out, shutting down,
   or manually sleeping the Mac makes jobs wait until it returns.
@@ -42,6 +47,44 @@ cd /Users/alfredo/.local/share/l5r-actions-runner
 Check GitHub Settings → Actions → Runners for Online/Idle/Active status.
 Logs are in `_diag` and the service log paths in the launchd plist.
 Do not share raw diagnostics without checking for sensitive information.
+
+## After the repository move
+
+The existing registration works after the move to `l5r-emperor-dev/l5r-emperor`.
+On 2026-10-17, runner **21**, `alfredo-mac-studio`, appeared Online/Idle under the
+new repository with all four expected labels. Its [successful main-branch Mac
+job](https://github.com/l5r-emperor-dev/l5r-emperor/actions/runs/39035241626/job/117403616962)
+ran after the transfer. The launchd service remained active with `KeepAlive`,
+`RunAtLoad`, `caffeinate -i` and nice 10. **Leave a healthy registration and service
+alone.** A repository transfer by itself is not evidence that re-registration
+is necessary.
+
+The local `.runner` file still records the old repository URL, and the existing
+service label also contains the old owner name. These retained identifiers do
+not mean jobs are running against a different repository. Do not manually edit
+registration or credential files, rename the service for appearance, or print
+credentials, tokens, environment secrets or raw diagnostic logs during checks.
+For `.runner`, report only the repository URL, runner name and ID.
+
+GitHub's current [runner configuration implementation](https://github.com/actions/runner/blob/main/src/Runner.Listener/Configuration/ConfigurationManager.cs)
+rejects configuring an already configured runner; it requires removal before
+reconfiguration. There is no supported in-place URL change in that command.
+Consider re-registration only when an actual registration fault remains after
+checking service status and network access. If it is needed:
+
+1. Wait for the runner to be idle and confirm that no job will be interrupted.
+2. Record its labels, work directory and launchd configuration, including the
+   `caffeinate -i` wrapper, nice 10, `KeepAlive` and `RunAtLoad`. Preserve the runner
+   directory, workspaces and caches.
+3. Follow the current removal and registration instructions in the **new**
+   repository's Settings → Actions → Runners. Keep short-lived tokens local;
+   never paste them into shared files, issues, shell history or logs.
+4. Keep the name `alfredo-mac-studio` and custom label `l5r-mac-studio`. Restore
+   the recorded custom service behavior before starting it: a plain service
+   reinstall must not silently discard the sleep-prevention or priority settings.
+5. Verify Online/Idle and all four labels, then run the trusted desktop workflow
+   on `main` and verify that its Mac job succeeds on this runner. Record any new
+   runner ID. Do not use fork code as a test.
 
 ## Recovery
 

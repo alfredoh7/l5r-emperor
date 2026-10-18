@@ -46,6 +46,7 @@ public partial class Main
     {
         if (!AttackTargetActive || PresentationBusy) return false;
         var action = _chosen!; var command = action.Command!; _guide.Visible = false;
+        if (PerformerStepActive) { RenderPerformerStep(); return true; } // choosing flow (issue #1004): the performer is asked first
         var heading = Palette.Text("CHOOSE AN ATTACK TARGET", 19, title: true);
         heading.AutowrapMode = TextServer.AutowrapMode.WordSmart; heading.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; _sidebarHeader.AddChild(heading);
         var actionLabel = command.PerformerId is { } performerId ? action.Label.Replace($" ({performerId})", "", StringComparison.Ordinal) : action.Label;
@@ -57,6 +58,7 @@ public partial class Main
         }
         if (command.PerformerId is { } performer && FindCard(performer) is { } performing)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(performing), 16, Palette.PaperDim));
+        if (_attackChoice != AttackChoice.Unselected) RenderFlowSummary(action); // choosing flow (issue #1004): the answers sit at the top, never below the target list
         void AddOption(string name, string label, AttackChoice kind, int? province = null)
         {
             var selected = _attackChoice == kind && (kind != AttackChoice.Province || command.Province == province);
@@ -94,6 +96,15 @@ public partial class Main
         {
             var inspect = SidebarSkin.Button("Inspect selected card", () => InspectAttackCard(selectedCard));
             inspect.CustomMinimumSize = new(0, 40); inspect.AddThemeFontSizeOverride("font_size", 16); _decisionActions.AddChild(inspect);
+        }
+        if (_attackChoice != AttackChoice.Unselected || _performerPicked && PerformerClicks().Count > 0)
+        {
+            var back = SidebarSkin.Button("← Back", () =>
+            {
+                if (_attackChoice != AttackChoice.Unselected) { _attackChoice = AttackChoice.Unselected; _chosen = action with { Command = command with { TargetId = null, Province = null } }; RenderInspector(); Highlight(); }
+                else { _performerPicked = false; RenderInspector(); Highlight(); }
+            });
+            back.Name = "FlowBack"; back.Disabled = !DecisionCanSubmit; _decisionActions.AddChild(back);
         }
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {

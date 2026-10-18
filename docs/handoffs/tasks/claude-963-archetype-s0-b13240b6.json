@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Bot loop: archetype classifier (Phoenix reclassified) plus default-off archetype arms S1-S4, split defence and military trades; all seven tested locally and null, flags stay off",
+  "validation": "bash tools/check.sh --skip-client passed locally; archetype-play and deck-archetype tests pass; 7 arms x 1,728 games no effect, 0 stalls; GitHub Actions unavailable (billing), see issue 980",
+  "remaining": "Flags stay off; next leads in docs/bots/phase1/archetype-results.md",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/963",
+  "branch": "claude/963-archetype-s0",
+  "updated": "2026-10-16T13:43:56.493823+00:00"
+}

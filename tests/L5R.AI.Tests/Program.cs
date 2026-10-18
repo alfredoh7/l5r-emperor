@@ -274,9 +274,13 @@ runner.Run("ai", tests);
 runner.Run("bot-policy", BotPolicyTests.Tests); // issue #642: the policies Mendon specified
 runner.Run("spec-818", Spec818Tests.Tests); // issue #818: Mendon's eleven bot changes
 runner.Run("battle-policy", BattlePolicyTests.Tests); // issue #788: the six battle changes to the practice bot
+runner.Run("unopposed", UnopposedTests.Tests); // issue #997: no wasted actions in a battle nobody opposes
+runner.Run("phase-choice", PhaseChoiceTests.Tests); // issue #998: Battle/Open cards in the right phase, never a do-nothing use
 runner.Run("honor-aware", HonorAwareTests.Tests); // issue #870: the Honor an ability costs or gains, and an Attack that cannot destroy
 runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
 runner.Run("sure-reactions", SureReactionsTests.Tests); // issue #963: bot loop round 4
+runner.Run("deck-archetype", DeckArchetypeTests.Tests); // issue #963: bot loop S0
+runner.Run("archetype-play", ArchetypePlayTests.Tests); // issue #963: archetype flags, split defense
 runner.Run("bodies-first", BodiesFirstTests.Tests); // issue #963: bot loop round 3
 runner.Run("informed-defense", InformedDefenseTests.Tests); // issue #963: bot loop round 2
 runner.Run("seppuku", SeppukuTests.Tests); // issue #963: bot loop round 1

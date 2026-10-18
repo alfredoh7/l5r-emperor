@@ -11645,7 +11645,7 @@ public sealed partial class MatchEngine
                                             // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
                                             NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
                                             AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label + (costOption.Verb == CostVerbs.Discard && shownChoice is not null ? ": " + Definition(Card(shownChoice)).Name : ""), ability.Label),
-                                            Movement: MovementPreview(id, ability, source, performer),
+                                            Movement: MovementPreview(id, ability, source, performer), MoveTo: ability.Move?.Destination,
                                             Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
                                     }
                                 }

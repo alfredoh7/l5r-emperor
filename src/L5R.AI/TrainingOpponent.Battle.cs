@@ -14,6 +14,8 @@ public static partial class TrainingOpponent
     {
         score = HonorAwareScore(x, action, command, score); // issue #870 (TrainingOpponent.Honor.cs): the Honor an ability costs or gains, and an Attack that cannot destroy its target
         score = PrudenceScore(x, action, command, score); // issue #902 (TrainingOpponent.Prudence.cs): mutual effects, early economy, the first-action claim
+        if (action.Type is "useAbility" or "playStrategy" && PhaseUseAdjust(x, action, command, action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId)), score) is { } phase) return phase; // issue #998
+        if (action.Type is "useAbility" or "playStrategy" or "equip" && UnopposedAdjust(x, action, command, action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId)), score) is { } unopposed) return unopposed; // issue #997
         if (!(x.Memory.UseBattlePolicy || x.Memory.UseEquipPolicy || x.Memory.UseSpec818) || action.Type is not ("useAbility" or "playStrategy" or "equip")) return score;
         var intent = action.Type == "useAbility" ? AbilityIntent.Of(command.AbilityId) : StrategyIntent(x.Card(command.CardId));
         if (AttackerAdjust(x, action, command, intent, score) is { } attacker) return attacker; // issue #818 items 6 and 7
@@ -57,6 +59,44 @@ public static partial class TrainingOpponent
         // spending cards from its hand.
         if (!BattlePolicy.Unthreatened(EnemyArmyAt(x), x.Opponent.HandCount)) return score;
         return inPlay ? score + 25 : Math.Max(PassScore, score - 25);
+    }
+
+    /// <summary>
+    /// Issue #997: nobody opposes the bot at this battlefield (the other side has no Personality there, bowed or not). On defense there is nothing to defend against, so every action is
+    /// barred and the bot passes, keeping its cards for a battle that is contested. On offense it acts only to get the Province destroyed (a Force bonus or an attachment that carries Force,
+    /// a cut to the Province's strength, a move of its own Personalities to this battle); once its Force already destroys the Province it stops. Issue #1003 also allows, in either case, an
+    /// Honor play that really resolves and a move that changes the outcome of another battle (see <see cref="UnopposedAdjust"/>). Reactions and negations are left to their own rules.
+    /// Null leaves the ordinary score (the battle is opposed, or the action is the Force the attacker still lacks).
+    /// </summary>
+    private static double? UnopposedAdjust(Ctx x, ActionOption action, GameCommand command, AbilityIntent intent, double score)
+    {
+        var odds = x.Odds;
+        if (!x.Memory.UseUnopposedGate || odds is null || intent.Negates || intent.IsReaction) return null;
+        if (EnemyArmyAt(x).Any(c => c.Definition?.Type == CardType.Personality)) return null;
+        if (!odds.IsAttacker) return BarredScore;
+        // Issue #1003: what an unopposed attacker may still usefully do. Honor for itself or taken from the opponent (when it really happens) is worth playing short of the Province or not;
+        // a move of its own Personalities that changes the outcome of another battle is too. Short of the Province it may also add Force, lower the Province's strength or move
+        // Personalities to this battle. Everything else (an Attack, an optional bow or destroy) is barred: there is nothing to hit.
+        var gainsHonor = intent.HonorGain && intent.Side != TargetSide.Enemy || intent.HonorLoss && intent.Side != TargetSide.Own;
+        var honor = gainsHonor && HonorResolves(x, action, command, odds);
+        if (odds.Satisfied)
+            return honor ? Math.Max(score, 130) : MovesToChangeAnotherBattle(x, action, command, odds) ? null : BarredScore;
+        return honor || AddsForce(x, action, command, intent) || LowersAttackedProvince(x, action, command) || MovesToThisBattle(x, action, command) || MovesToChangeAnotherBattle(x, action, command, odds)
+            ? null : BarredScore;
+    }
+
+    /// <summary>The action adds Force to the bot's own army this battle: an attachment that carries Force, a "+N F" ability or Strategy for its own side, or a card it creates with Force.</summary>
+    private static bool AddsForce(Ctx x, ActionOption action, GameCommand command, AbilityIntent intent)
+    {
+        if (IsEquip(action, command)) return EquipForce(Attachment(x, action, command)) > 0;
+        if (intent.Side == TargetSide.Enemy) return false;
+        if (x.Card(command.CardId) is { Definition.Effect: "force-three" }) return true;
+        foreach (var ability in BattleAbilitiesOf(x, action, command))
+        {
+            var created = CreatedForce.Match(AbilityIntent.EffectText(ability.Label ?? ""));
+            if (ForceBonus(ability) > 0 || created.Success && int.Parse(created.Groups[1].Value) > 0) return true;
+        }
+        return false;
     }
 
     /// <summary>Above every ordinary score: Mendon's "always use the additional action" for an attachment the bot has just equipped.</summary>
@@ -176,12 +216,15 @@ public static partial class TrainingOpponent
     /// <summary>The ordering of Mendon's rule 5: destroy, bow, move, penalize, everything else, with a buff for the bot's own army on top when it lifts a unit past an enemy Attack.</summary>
     /// <summary>Issue #788 (Mendon): the attack that cannot raze a Province but destroys the defending army, or trades well in a tie. Null when the rule is off or no such attack exists.</summary>
     private static BattlePolicy.Trade? TradeFor(Ctx x, CardView[] units) =>
-        x.Memory.UseBattlePolicy && x.Memory.UseTradeAttacks && !HonorRace(x) ? BattlePolicy.PlanTrade(units, x.Self.Home, x.Opponent.Home) : null;
+        TradesOn(x) && !HonorRace(x) ? BattlePolicy.PlanTrade(units, x.Self.Home, x.Opponent.Home) : null;
+
+    /// <summary>Trade attacks are on for everyone (Mendon's flag) or, with hypothesis B, for a deck whose only route is the battlefield.</summary>
+    private static bool TradesOn(Ctx x) => x.Memory.UseBattlePolicy && x.Memory.UseTradeAttacks || x.Memory.UseMilitaryTrades && x.Memory.Archetype is { Primary: WinRoute.Military, Secondary: null };
 
     /// <summary>The trade the already-chosen assignment makes, so a plan the engine or the planner supplied is scored by the same rule.</summary>
     private static BattlePolicy.Trade? TradeOf(Ctx x, IEnumerable<string> sentIds)
     {
-        if (!x.Memory.UseBattlePolicy || !x.Memory.UseTradeAttacks || HonorRace(x)) return null;
+        if (!TradesOn(x) || HonorRace(x)) return null;
         var sent = x.Self.Home.Where(c => sentIds.Contains(c.Id)).ToArray();
         var defenders = x.Opponent.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).ToArray();
         return BattlePolicy.Evaluate(sent, x.Self.Home, BattlePolicy.Force(x.Opponent.Home), defenders.Sum(d => BattlePolicy.UnitValue(d, x.Opponent.Home)));

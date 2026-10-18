@@ -222,6 +222,9 @@ public partial class Main
                 var offered = Actions.Where(a => a.Enabled && a.CardId == _attackSource && a.Command?.AbilityId == "tensin-follower-attack").ToArray();
                 SupportRequire(offered.Length == 2 && offered.All(a => a.NoTarget && a.AlternativeCost is null), "Tensin fixture must expose both performing Followers with a fixed bow cost");
                 var firstPerformer = offered[0].Command!.PerformerId; Choose(offered[1]); await EventFrames(12);
+                // Issue #1004: with two performers the performer is asked first, alone; one click on its row moves on to the target.
+                SupportRequire(PerformerStepActive && !StabilizationButtons(_inspector).Any(b => b.Name == "AttackNoTarget"), "The performer should be asked before the attack target");
+                await SupportClick(StabilizationButtons(_inspector).Single(b => b.HasMeta("performer_row") && b.GetMeta("performer_row").AsString() == offered[1].Command!.PerformerId)); await EventFrames(8);
                 performer = _chosen!.Command!.PerformerId!;
                 await ToSignal(GetTree().CreateTimer(.75), SceneTreeTimer.SignalName.Timeout);
                 CheckAttackTab("Ranged", performer);
