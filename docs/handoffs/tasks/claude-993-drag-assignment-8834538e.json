@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Click-and-drag in addition to clicking: drag a unit onto a battlefield box/province to assign it (Infantry and Cavalry Maneuvers), re-drag to change the draft or drop off every battlefield to send it home; drag the mover/target of a started move onto a legal battlefield; drag the target of a move home outside the battlefield (or onto the current battlefield for a move there). Drags only draft; Esc/refused drops change nothing; a press that does not travel is a click. Core: ActionOption.MoveTo exposes a move ability's destination rule.",
+  "validation": "bash tools/check.sh --skip-client passed; new Core regression move-destination-moveto (14/14 move-destination cases); native checks with real tagged pointer events passed: check-drag-ui (DRAG_PASS), check-table-click-ui, check-movement-ui, check-attack-targets-ui, check-table-camera, check-card-deselection. Not done: human playtest of the drag feel/cue; Windows CI is not graphical playtesting.",
+  "remaining": "Mendon to playtest the feel of the drag, ghost size and lit-destination cue. Abilities that move cards through custom effects without a MoveSpec (e.g. Hakige move home) report no MoveTo, so the move-home drag does not apply to them. A move ability must be chosen first; dragging does not start one. Performer-chosen moves (e.g. Help from the Shadows) are not yet draggable.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/993",
+  "branch": "claude/993-drag-assignment",
+  "updated": "2026-10-17T16:20:48.383802+00:00"
+}

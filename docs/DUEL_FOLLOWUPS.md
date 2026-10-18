@@ -1,6 +1,6 @@
 # Live duel follow-ups — review candidate
 
-Issue [#448](https://github.com/alfredoh7/l5r-emperor/issues/448), PR [#466](https://github.com/alfredoh7/l5r-emperor/pull/466). Alfredo approved 1A for concession and the 2B/2A/2C combination for paused Focus Effect choices. This is an unmerged review candidate.
+Issue [#448](https://github.com/l5r-emperor-dev/l5r-emperor/issues/448), PR [#466](https://github.com/l5r-emperor-dev/l5r-emperor/pull/466). Alfredo approved 1A for concession and the 2B/2A/2C combination for paused Focus Effect choices. This is an unmerged review candidate.
 
 ## Implemented behavior
 

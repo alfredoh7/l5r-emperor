@@ -6,7 +6,7 @@ A new Godot/.NET implementation of an automated Legend of the Five Rings tableto
 
 ## Start here: review or continue development
 
-- **Play and review rules:** [Reviewer guide](docs/RULES_REVIEW.md), then download a Mac or Windows package from this private repository's Releases.
+- **Play and review rules:** [Reviewer guide](docs/RULES_REVIEW.md), then download a Mac or Windows package from this repository's Releases (public).
 - **Continue with Codex or Claude Code:** [AI handoff](AI_HANDOFF.md) and [current project status](docs/PROJECT_STATUS.md).
 - **Coordinate changes:** [Contribution workflow](CONTRIBUTING.md). Use issues for findings and branches/PRs for changes; separate AI sessions use separate worktrees.
 

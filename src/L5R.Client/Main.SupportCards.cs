@@ -76,9 +76,12 @@ public partial class Main
     private void RenderSupportDraft(CardView card, ActionOption action)
     {
         var command = action.Command!;
+        if (PerformerStepActive) { RenderPerformerStep(); return; } // choosing flow (issue #1004): with several performers, that is the first and only question
         var choices = Actions.Where(a => a.Enabled && a.CardId == card.Id && a.Command?.AbilityId == command.AbilityId).ToArray();
         var performers = choices.Select(a => a.Command!.PerformerId).Distinct().Where(id => id is not null).ToArray();
-        if (performers.Length > 0)
+        if (performers.Length > 1 && _performerPicked && FindCard(command.PerformerId ?? "") is { } chosenPerformer)
+            _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(chosenPerformer), 16, Palette.Crane));
+        else if (performers.Length > 0)
         {
             _inspector.AddChild(Palette.Text("PERFORMER", 12, Palette.Gold));
             if (performers.Length > 1) _inspector.AddChild(Palette.Wrapped("Click a highlighted card on the table, or choose below.", 13, Palette.PaperDim));
@@ -113,6 +116,8 @@ public partial class Main
             _inspector.AddChild(picker);
         }
         AddSupportCost(card, command.AbilityId, _inspector);
+        if (targets.Length > 0 || performers.Length > 1) RenderFlowSummary(action);
+        AddFlowBack(action);
         var (cost, ready) = RenderGoldPanel(action);
         var confirm = SidebarSkin.Button(cost > 0 ? $"Confirm action · {cost} Gold" : "Confirm action", () => _ = Submit(command with { SourceIds = _sources.ToArray() }), true);
         confirm.Disabled = !action.Enabled || _session.Busy || !ready;

@@ -41,7 +41,7 @@ DEFAULT_CACHE_DIR = ROOT / ".cache/webp-art"
 RELEASE = "catalogue-art-webp-v1"
 RELEASE_ASSET = "L5R-Catalogue-WebP85.zip"
 RELEASE_ASSET_SHA256 = "18b23719d646c68f13c1f7a0a164d1c8e28e99fa443ec822c8695a914bfd8df4"
-RELEASE_REPO = "alfredoh7/l5r-emperor"
+RELEASE_REPO = "l5r-emperor-dev/l5r-emperor"
 
 
 def sha256(data: bytes) -> str:

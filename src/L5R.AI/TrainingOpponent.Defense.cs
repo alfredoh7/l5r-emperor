@@ -41,6 +41,22 @@ public static partial class TrainingOpponent
         return DefensePlanner.Plan(units, provinces, threat, x.Self.HandCount);
     }
 
+    /// <summary>
+    /// Mendon's rule (playtest 2026-10-17): with one Province left and an opponent whose Cavalry at home could destroy it, the bot defends in the Infantry Maneuvers Segment with every unit it is offered, even when the
+    /// parity arithmetic of CavalryDefensePlan says it cannot win. Losing the last Province loses the game, so nothing is held back. Null when the rule does not apply.
+    /// </summary>
+    private static Dictionary<string, int>? CavalryLastStandPlan(Ctx x, ActionOption action, CardView[]? offeredUnits)
+    {
+        if (!x.Memory.UseCavalryDefense || x.View.Phase != Phase.DefenseAssignment || x.Opponent.Army.Length > 0) return null;
+        var remaining = x.Self.Provinces.Where(p => !p.Destroyed).ToArray();
+        if (remaining.Length != 1 || PossibleCavalryForce(x.Opponent) <= remaining[0].Strength) return null;
+        var legal = action.TargetIds?.ToHashSet(StringComparer.Ordinal);
+        var units = offeredUnits ?? x.Self.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed && (legal is null || legal.Contains(c.Id))).ToArray();
+        var offered = action.Provinces ?? [remaining[0].Index];
+        if (units.Length == 0 || !offered.Contains(remaining[0].Index)) return null;
+        return units.ToDictionary(c => c.Id, _ => remaining[0].Index, StringComparer.Ordinal);
+    }
+
     private static bool HasBattleAction(CardView card) => !card.Bowed && !card.ActionLocked && BattlePolicy.Printed(card).Any(p => p.Ability.Timing is "Battle" or "BattleOrOpen");
 
     // ---- Attacking: Cavalry waits for its own segment (issue #946) --------------------------------------------------------------------------------------------------------

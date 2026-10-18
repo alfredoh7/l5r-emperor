@@ -29,6 +29,8 @@ public static partial class TrainingOpponent
         if (a.Type == "useAbility" && a.Provinces is { Length: > 0 } provinces && command.Province is null)
             // Issue #788: units are only moved into a battlefield the enemy holds (the weakest opposition first); any other destination is a last resort.
             command = command with { Province = a.Movement is null || !x.Memory.UseBattlePolicy ? provinces[0] : provinces.OrderBy(p => EnemyForceAt(x, p) == 0).ThenBy(p => EnemyForceAt(x, p)).ThenBy(p => p).First() };
+        // Issue #1003: a cut to a Province's strength goes to the Province under attack, whoever's it would otherwise be offered first.
+        if (x.Odds is { IsAttacker: true } && AttackedProvince(x) is int attacked && LowersAttackedProvince(x, a, command)) command = command with { Province = attacked, TargetPlayerId = x.Opponent.Id };
         return command;
     }
 

@@ -2,7 +2,7 @@
 
 Historical moonlit-garden direction. The approved Crimson Standoff concept supersedes this plan; see [CRIMSON_DUEL_PHASES.md](CRIMSON_DUEL_PHASES.md) for current implementation and evidence.
 
-Task: [#205](https://github.com/alfredoh7/l5r-emperor/issues/205), draft [PR #220](https://github.com/alfredoh7/l5r-emperor/pull/220). Direction authorized by Alfredo on 2026-09-15: proceed in phases and subphases, compare actual in-game screenshots with `assets/ui/duel-arena/approved-generation-3.png`, and iterate. The complete central pine supersedes the reference's paired side trees. Preserve its full silhouette and the supplied mat/lantern assets. Live duel integration remains a separate stage.
+Task: [#205](https://github.com/l5r-emperor-dev/l5r-emperor/issues/205), draft [PR #220](https://github.com/l5r-emperor-dev/l5r-emperor/pull/220). Direction authorized by Alfredo on 2026-09-15: proceed in phases and subphases, compare actual in-game screenshots with `assets/ui/duel-arena/approved-generation-3.png`, and iterate. The complete central pine supersedes the reference's paired side trees. Preserve its full silhouette and the supplied mat/lantern assets. Live duel integration remains a separate stage.
 
 ## Phase 1 — garden
 

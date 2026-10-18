@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "AGENTS.md now treats the repo as public: Releases/history are world-readable, art/scans need an owner publish decision, fork PRs are untrusted and stay off the self-hosted runner, branch protection is unenforced.",
+  "validation": "Doc-only change; confirmed visibility PUBLIC via gh, no branch protection (404), check.yml fork guard present.",
+  "remaining": "Owner decision on existing art-pack/preview Releases; CONTRIBUTING.md, docs/COLLABORATION.md, docs/RULES_REVIEW.md and check.yml comments still say private.",
+  "issue": "none",
+  "branch": "claude/public-repo-agents-md",
+  "updated": "2026-10-17T10:46:51.190372+00:00"
+}

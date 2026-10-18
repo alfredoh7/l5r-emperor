@@ -52,7 +52,7 @@ public partial class Main
         {
             if (!PlayerTargetLegal(player)) { SetNotice("Choose one of the highlighted players."); return true; }
             if (!_multiPlayers.Remove(activeSlot, out var old) || old != player) _multiPlayers[activeSlot] = player;
-            RefreshMultiTargets(); return true;
+            MultiAdvance(activeSlot); RefreshMultiTargets(); return true;
         }
         if (!PlayerTargetActive) return false;
         if (PlayerSiblings(_chosen!).FirstOrDefault(s => s.Command!.TargetPlayerId == player) is not { } sibling) { SetNotice("Choose one of the highlighted players."); return true; }

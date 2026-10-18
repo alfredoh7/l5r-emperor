@@ -17,7 +17,7 @@ public partial class Main
         if (PracticeVisible) return;
         HideTableTooltip(); ReleaseTableFocus(); _cameraDragging = false;
         _practiceLayer = new CanvasLayer { Layer = 90 }; AddChild(_practiceLayer);
-        var screen = new PracticeSetupScreen(); _practiceLayer.AddChild(screen);
+        var screen = new PracticeSetupScreen { Profile = _preferencesProfile }; _practiceLayer.AddChild(screen);
         screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         screen.Closed += ClosePracticeSetup;
         screen.StartMatch = (your, opponent) =>

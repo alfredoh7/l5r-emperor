@@ -85,6 +85,43 @@ public partial class Main
             SupportRequire(performerTile.LegalTarget, "The other performing Personality is not highlighted on the table");
             await SupportClick(performerTile); await EventFrames(6);
             SupportRequire(_chosen?.Command?.PerformerId == otherPerformer, "Clicking the Personality did not choose it as the performer");
+            // Issue #1004, the choosing flow: the performer is asked first and alone, the click moves on, and Back returns to the question.
+            SupportRequire(!PerformerStepActive && FlowCanGoBack(_chosen!), "After the performer is chosen the performer step is over and Back is offered");
+            FlowBack(); await EventFrames(4);
+            SupportRequire(PerformerStepActive && StabilizationText(_inspector).Contains("CHOOSE A PERFORMER") && StabilizationButtons(_inspector).Count(b => b.HasMeta("performer_row")) == 2, "Back should return to the performer question listing both performers");
+            StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row")).EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(4);
+            SupportRequire(!PerformerStepActive, "One click on a performer row moves on");
+
+            // 4b. Issue #1004, the choosing flow end to end with The Sound of Thunder: performer, then target, one question at a time; the summary appears once both are answered; Back undoes the last answer.
+            CardInstance foe = null!;
+            await LoadDirectPlay(s =>
+            {
+                BattleSetup(s);
+                foreach (var home in new[] { 229, 3636 }) SupportFixtureCard(s, home, 0, Zone.Home).GrantedKeywords.Add(new("Battle Maiden", "test-fixture", GrantDuration.Permanent));
+                foe = SupportFixtureCard(s, 3636, 1, Zone.Battlefield, 0); SupportFixtureCard(s, 8347, 0, Zone.Hand);
+            });
+            var thunder = View.Players[0].Hand.Single();
+            SelectCard(thunder); await EventFrames(4);
+            SupportRequire(PerformerStepActive && !StabilizationText(_inspector).Contains("CHOOSE A TARGET"), "Step one asks only for the performer");
+            var maidenRow = StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row"));
+            maidenRow.EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(4);
+            SupportRequire(!PerformerStepActive && StabilizationText(_inspector).Contains("CHOOSE A TARGET") && !StabilizationText(_inspector).Contains("SUMMARY"), "Step two asks only for the target");
+            ChooseTarget(foe.Id); await EventFrames(4);
+            var summary = StabilizationText(_inspector);
+            SupportRequire(summary.Contains("SUMMARY") && summary.Contains("Move and Straighten (") && summary.Contains("Give (") && summary.Contains("-3F"), "The summary lists the effects: " + summary);
+            FlowBack(); await EventFrames(4);
+            SupportRequire(_chosen!.Command!.TargetId is null && !StabilizationText(_inspector).Contains("SUMMARY") && StabilizationText(_inspector).Contains("CHOOSE A TARGET"), "Back returns to the target question");
+
+            // 4c. Issue #1004: A Paragon's Strength end to end -- the action, the performing Paragon, then the Ranged Attack's target -- one question at a time, with a summary and Back.
+            await LoadDirectPlay(s => { BattleSetup(s); SupportFixtureCard(s, 3636, 0, Zone.Battlefield, 0).GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent)); SupportFixtureCard(s, 61, 0, Zone.Hand); });
+            var strength = View.Players[0].Hand.Single();
+            SelectCard(strength); await EventFrames(4); await SupportCapture("-paragon-1-action");
+            await SupportClick(ActionTextBlocks().First(b => b.Text.Contains("Ranged", StringComparison.Ordinal))); await EventFrames(6); await SupportCapture("-paragon-2-performer");
+            SupportRequire(PerformerStepActive, "A Paragon's Strength Ranged Attack should ask for the performer first: " + StabilizationText(_inspector));
+            StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row")).EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(6); await SupportCapture("-paragon-3-target");
+            SupportRequire(AttackTargetActive && _attackChoice == AttackChoice.Unselected, "Then the Attack target is asked");
+            ChooseAttackTarget(AttackChoice.Card, _chosen!.TargetIds![0]); await EventFrames(6); await SupportCapture("-paragon-4-summary");
+            SupportRequire(StabilizationText(_inspector).Contains("SUMMARY") && StabilizationText(_inspector).Contains("Lose 4 Honor"), "The summary lists the Attack and the Honor loss: " + StabilizationText(_inspector));
 
             // 5. Issue #793: the Declare Attack button is a blood-red lacquer, not black.
             await LoadDirectPlay(s => { s.Phase = Phase.AttackDeclaration; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 3636, 1, Zone.Home); });

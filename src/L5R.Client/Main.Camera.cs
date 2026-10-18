@@ -223,6 +223,7 @@ public partial class Main
         if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
         { GetViewport().SetInputAsHandled(); return; }
         if (_tableSurface is null || MenuVisible || _transitionReview || MatchDuelOpen) return;
+        if (_dragging && @event is InputEventKey { Pressed: true, Keycode: Key.Escape }) { CancelDrag(); GetViewport().SetInputAsHandled(); return; } // issue #993
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.
@@ -233,6 +234,7 @@ public partial class Main
             _tableSurface.Canvas.PushInput(released, true);
         if (@event is InputEventMouseButton mouse)
         {
+            if (!mouse.Pressed && mouse.ButtonIndex == MouseButton.Left && FinishDrag(mouse)) { GetViewport().SetInputAsHandled(); return; } // issue #993: a drag's release is a drop, never also a click
             if (!mouse.Pressed && _cameraDragging && mouse.ButtonIndex == _cameraDragButton)
             {
                 _cameraDragging = false; GetViewport().SetInputAsHandled(); return;
@@ -259,7 +261,7 @@ public partial class Main
                 _cameraGlide = false; _cameraDragging = true; _cameraDragButton = mouse.ButtonIndex;
                 ReleaseTableFocus(); HideTableTooltip(); _tableSurface.ExitMouse(); GetViewport().SetInputAsHandled();
             }
-            else { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); }
+            else { BeginDragCandidate(hovered, mouse); _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); }
         }
         else if (@event is InputEventMouseMotion motion && _cameraDragging)
         {
@@ -276,6 +278,7 @@ public partial class Main
         else if (@event is InputEventMouseMotion pointer)
         {
             _lastTableMouse = pointer.Position;
+            if (TableDragMotion(pointer)) { GetViewport().SetInputAsHandled(); return; } // issue #993
             if (PointerOnTable(pointer.Position)) { _tableSurface.ForwardMouse(pointer); GetViewport().SetInputAsHandled(); }
             else { _tableSurface.ExitMouse(); HideTableTooltip(); }
         }

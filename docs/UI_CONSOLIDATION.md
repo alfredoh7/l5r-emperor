@@ -1,18 +1,18 @@
 # Approved UI consolidation
 
-Task [#247](https://github.com/alfredoh7/l5r-emperor/issues/247), PR [#248](https://github.com/alfredoh7/l5r-emperor/pull/248). Alfredo approved the latest Home/Favor output and requested consolidation on 2026-09-16. This branch starts at current main `5f48af8` and incorporates the previously approved local preview `92e999a` with traceable source merges.
+Task [#247](https://github.com/l5r-emperor-dev/l5r-emperor/issues/247), PR [#248](https://github.com/l5r-emperor-dev/l5r-emperor/pull/248). Alfredo approved the latest Home/Favor output and requested consolidation on 2026-09-16. This branch starts at current main `5f48af8` and incorporates the previously approved local preview `92e999a` with traceable source merges.
 
 ## Included source branches
 
 | PR | Presentation | Integrated head |
 | --- | --- | --- |
-| [#124](https://github.com/alfredoh7/l5r-emperor/pull/124) | Build the approved card catalogue gallery and inspection panel | `83d685f69acb` |
-| [#165](https://github.com/alfredoh7/l5r-emperor/pull/165) | Refine right sidebar with approved worn black lacquer and Caudex | `46a260553362` |
-| [#169](https://github.com/alfredoh7/l5r-emperor/pull/169) | Extend lacquer design to in-game menus, help and hover panels | `5f438d427467` |
-| [#183](https://github.com/alfredoh7/l5r-emperor/pull/183) | Build approved battle decision sidebar and public outcome history | `32cc906526d7` |
-| [#234](https://github.com/alfredoh7/l5r-emperor/pull/234) | Build sparse fortress hall with weathered materials and side shoji | `99c85b43f7a0` |
-| [#244](https://github.com/alfredoh7/l5r-emperor/pull/244) | Show public hand limits in the approved three-stat clan placard | `f515d2504515` |
-| [#246](https://github.com/alfredoh7/l5r-emperor/pull/246) | Show Noble Crest Favor and persistent Home cards/effect reminders | `384019ada6b6` |
+| [#124](https://github.com/l5r-emperor-dev/l5r-emperor/pull/124) | Build the approved card catalogue gallery and inspection panel | `83d685f69acb` |
+| [#165](https://github.com/l5r-emperor-dev/l5r-emperor/pull/165) | Refine right sidebar with approved worn black lacquer and Caudex | `46a260553362` |
+| [#169](https://github.com/l5r-emperor-dev/l5r-emperor/pull/169) | Extend lacquer design to in-game menus, help and hover panels | `5f438d427467` |
+| [#183](https://github.com/l5r-emperor-dev/l5r-emperor/pull/183) | Build approved battle decision sidebar and public outcome history | `32cc906526d7` |
+| [#234](https://github.com/l5r-emperor-dev/l5r-emperor/pull/234) | Build sparse fortress hall with weathered materials and side shoji | `99c85b43f7a0` |
+| [#244](https://github.com/l5r-emperor-dev/l5r-emperor/pull/244) | Show public hand limits in the approved three-stat clan placard | `f515d2504515` |
+| [#246](https://github.com/l5r-emperor-dev/l5r-emperor/pull/246) | Show Noble Crest Favor and persistent Home cards/effect reminders | `384019ada6b6` |
 
 PR #183 also contains the removed-card UI from #189 (`32cc906`). Its local worktree was behind the remote, so consolidation uses the remote head. Existing deck builder, token rails, phase bar, ink transitions and table frame remain included; none are replaced with older designs.
 
