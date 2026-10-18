@@ -136,8 +136,16 @@ internal static class TutorialLessonOne
                     var m = Moves[beat.Key];
                     steps.Add(new()
                     {
-                        Id = beat.Key, Title = beat.Title, Body = beat.Pages[page], Instruction = beat.Instruction, Allow = m.Allow, Accept = m.Accept, Highlight = highlight, Targets = m.Targets,
-                        OnlyProvinces = m.OnlyProvinces, RefusalHint = m.Hint ?? "Do the highlighted move the lesson asks for.",
+                        Id = beat.Key,
+                        Title = beat.Title,
+                        Body = beat.Pages[page],
+                        Instruction = beat.Instruction,
+                        Allow = m.Allow,
+                        Accept = m.Accept,
+                        Highlight = highlight,
+                        Targets = m.Targets,
+                        OnlyProvinces = m.OnlyProvinces,
+                        RefusalHint = m.Hint ?? "Do the highlighted move the lesson asks for.",
                     });
                     continue;
                 }
