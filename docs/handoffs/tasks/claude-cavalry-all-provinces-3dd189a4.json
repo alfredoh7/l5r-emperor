@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Bot defends when the attacker's Cavalry, with any army already assigned, could form armies that destroy every remaining Province; generalizes the one-Province last stand (#1009).",
+  "validation": "AI test suite 187/187 incl. new AllProvincesThreatened case; dotnet format whitespace clean.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1015",
+  "branch": "claude/cavalry-all-provinces",
+  "updated": "2026-10-18T09:37:11.878788+00:00"
+}

@@ -41,20 +41,64 @@ public static partial class TrainingOpponent
         return DefensePlanner.Plan(units, provinces, threat, x.Self.HandCount);
     }
 
+    /// <summary>The most Provinces the attacker's unbowed Cavalry (alone or joining armies already assigned) can destroy, given each Province's Strength plus the Force defending it and the Force already attacking it.</summary>
+    private static int MaxProvincesCavalryDestroys(int[] cavalry, int[] need)
+    {
+        // need[p]: Force still missing at Province p beyond what is already attacking it (above 0 means Cavalry must supply more than that). Each Cavalry unit joins at most one Province.
+        var best = 0;
+        void Search(int province, int used, int destroyed)
+        {
+            if (province == need.Length) { best = Math.Max(best, destroyed); return; }
+            if (destroyed + (need.Length - province) <= best) return;
+            if (need[province] < 0) { Search(province + 1, used, destroyed + 1); return; } // already falls without any Cavalry
+            for (var subset = 0; subset < 1 << cavalry.Length; subset++)
+            {
+                if ((subset & used) != 0) continue;
+                var force = 0; for (var i = 0; i < cavalry.Length; i++) if ((subset >> i & 1) != 0) force += cavalry[i];
+                if (force > need[province]) Search(province + 1, used | subset, destroyed + 1);
+            }
+            Search(province + 1, used, destroyed);
+        }
+        Search(0, 0, 0);
+        return best;
+    }
+
     /// <summary>
-    /// Mendon's rule (playtest 2026-10-17): with one Province left and an opponent whose Cavalry at home could destroy it, the bot defends in the Infantry Maneuvers Segment with every unit it is offered, even when the
-    /// parity arithmetic of CavalryDefensePlan says it cannot win. Losing the last Province loses the game, so nothing is held back. Null when the rule does not apply.
+    /// Mendon's rule (playtest 2026-10-17, generalised 2026-10-18): when the attacker's Cavalry at home, on top of any armies it has already assigned, could form armies that destroy EVERY Province the bot has left,
+    /// the bot defends in the Infantry Maneuvers Segment with every unit it is offered, even when the parity arithmetic of CavalryDefensePlan says it cannot win. It sends them where the Cavalry can then no longer
+    /// destroy every Province; if no assignment manages that, to the Province with the greatest Strength. Null when the rule does not apply.
     /// </summary>
     private static Dictionary<string, int>? CavalryLastStandPlan(Ctx x, ActionOption action, CardView[]? offeredUnits)
     {
-        if (!x.Memory.UseCavalryDefense || x.View.Phase != Phase.DefenseAssignment || x.Opponent.Army.Length > 0) return null;
-        var remaining = x.Self.Provinces.Where(p => !p.Destroyed).ToArray();
-        if (remaining.Length != 1 || PossibleCavalryForce(x.Opponent) <= remaining[0].Strength) return null;
+        if (!x.Memory.UseCavalryDefense || x.View.Phase != Phase.DefenseAssignment) return null;
+        var remaining = x.Self.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).ToArray();
+        if (remaining.Length == 0) return null;
+        var cavalry = x.Opponent.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed && IsCavalryUnit(x.Opponent, c))
+            .Select(c => ArmyForce(x.Opponent.Home.Where(h => h.Id == c.Id || h.AttachedTo == c.Id))).Where(f => f > 0).ToArray();
+        if (cavalry.Length == 0 || cavalry.Length > 12) return null;
+        int Need(ProvinceView p, int defenders) => p.Strength + defenders - AttackersAt(x, p.Index);
+        if (MaxProvincesCavalryDestroys(cavalry, remaining.Select(p => Need(p, 0)).ToArray()) < remaining.Length) return null; // the Cavalry cannot take every Province: nothing to be done here
         var legal = action.TargetIds?.ToHashSet(StringComparer.Ordinal);
         var units = offeredUnits ?? x.Self.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed && (legal is null || legal.Contains(c.Id))).ToArray();
-        var offered = action.Provinces ?? [remaining[0].Index];
-        if (units.Length == 0 || !offered.Contains(remaining[0].Index)) return null;
-        return units.ToDictionary(c => c.Id, _ => remaining[0].Index, StringComparer.Ordinal);
+        var offered = remaining.Where(p => action.Provinces is null || action.Provinces.Contains(p.Index)).ToArray();
+        if (units.Length == 0 || offered.Length == 0) return null;
+        var forces = units.Select(u => ArmyForce(x.Self.Home.Where(h => h.Id == u.Id || h.AttachedTo == u.Id))).ToArray();
+        if (units.Length <= 8)
+        {
+            var choice = new int[units.Length]; int[]? best = null; var bestDestroyed = remaining.Length; var bestSlack = int.MinValue;
+            for (var total = (int)Math.Pow(offered.Length, units.Length); total-- > 0;)
+            {
+                var c = total; var defenders = new int[remaining.Length];
+                for (var i = 0; i < units.Length; i++) { choice[i] = c % offered.Length; c /= offered.Length; defenders[Array.FindIndex(remaining, p => p.Index == offered[choice[i]].Index)] += forces[i]; }
+                var destroyed = MaxProvincesCavalryDestroys(cavalry, remaining.Select((p, k) => Need(p, defenders[k])).ToArray());
+                if (destroyed >= remaining.Length) continue;
+                var slack = remaining.Select((p, k) => p.Strength + defenders[k]).Sum();
+                if (destroyed < bestDestroyed || destroyed == bestDestroyed && slack > bestSlack) { best = (int[])choice.Clone(); bestDestroyed = destroyed; bestSlack = slack; }
+            }
+            if (best is not null) return units.Select((u, i) => (u.Id, Province: offered[best[i]].Index)).ToDictionary(t => t.Id, t => t.Province, StringComparer.Ordinal);
+        }
+        var fallback = offered.OrderByDescending(p => p.Strength - AttackersAt(x, p.Index)).ThenBy(p => p.Index).First().Index; // cannot be stopped: hold the strongest Province
+        return units.ToDictionary(c => c.Id, _ => fallback, StringComparer.Ordinal);
     }
 
     private static bool HasBattleAction(CardView card) => !card.Bowed && !card.ActionLocked && BattlePolicy.Printed(card).Any(p => p.Ability.Timing is "Battle" or "BattleOrOpen");
