@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bot arena: Cavalry last-stand defence (#1008/#1015) behind default-on UseCavalryLastStand; old vs new tournament shows no harm (50.2%, 1,440 games, 0 soundness findings).",
+  "validation": "Tournament pre-laststand vs champion, same pairing, dev, seeds 200-207: 723-717, paired 4-1; build 0 warnings.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/963",
+  "branch": "claude/1023-bot-arena-laststand",
+  "updated": "2026-10-18T11:51:54.306038+00:00"
+}
