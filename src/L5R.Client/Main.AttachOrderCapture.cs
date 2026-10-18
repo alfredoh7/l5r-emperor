@@ -29,7 +29,7 @@ public partial class Main
         var corners = personality.FaceCornersOnViewport();
         var min = new Vector2(corners.Min(c => c.X), corners.Min(c => c.Y)); var max = new Vector2(corners.Max(c => c.X), corners.Max(c => c.Y));
         var inset = (max - min) * .18f; min += inset; max -= inset;
-        var window = main.GetViewport().GetVisibleRect().Size; var rect = new Rect2I(Vector2I.Zero.Max((Vector2I)min), Vector2I.Zero) ;
+        var window = main.GetViewport().GetVisibleRect().Size; var rect = new Rect2I(Vector2I.Zero.Max((Vector2I)min), Vector2I.Zero);
         rect = new Rect2I((Vector2I)min, (Vector2I)(max - min));
         if (rect.Size.X < 4 || rect.Size.Y < 4) return false;
         Image Shot() { RenderingServer.ForceDraw(); return main.GetViewport().GetTexture().GetImage().GetRegion(rect); }
