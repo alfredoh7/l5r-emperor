@@ -42,6 +42,8 @@ public static class TraitReactions
         "words-of-consecration-honor",
         // Issue #622: Band of Brothers' "After this Follower enters play, target one or two of your Personalities. Create and attach a 1F Follower to each of them." prints no designator: a trait.
         "tf-band-brothers-create",
+        // Issue #821: The Governor's Estate's "Twice per turn, after your Dynasty Phase begins: You may pay 2 Gold; ..." prints no designator: a trait.
+        "w821-governor-create",
     };
 
     /// <summary>The trait-modelled Reaction-timed abilities, for the audit.</summary>

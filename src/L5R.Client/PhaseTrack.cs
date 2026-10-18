@@ -165,11 +165,23 @@ public partial class PhaseTrack : Control
         if (ReducedMotion && !LabelsSettled) { SnapLabels(); QueueRedraw(); }
         if (ReducedMotion && _weights.Select((weight, i) => weight == (i == _activeSlot ? 1 : 0)).All(settled => settled)) return;
         _time += (float)delta;
+        // Issue #875: the glow pulse is a shader parameter; the plate's labels are only redrawn when a weight, a label position or the focused phase changes.
+        var moved = false;
         for (var i = 0; i < 6; i++)
-            _weights[i] = ReducedMotion ? (i == _activeSlot ? 1 : 0) : Mathf.MoveToward(_weights[i], i == _activeSlot ? 1 : 0, (float)delta / .45f);
-        for (var p = 0; p < 6; p++) _labelPos[p] = Mathf.MoveToward(_labelPos[p], SlotOf(p), (float)delta * LabelSlotsPerSecond);
-        UpdateArt();
+        {
+            var weight = ReducedMotion ? (i == _activeSlot ? 1 : 0) : Mathf.MoveToward(_weights[i], i == _activeSlot ? 1 : 0, (float)delta / .45f);
+            moved |= weight != _weights[i]; _weights[i] = weight;
+        }
+        for (var p = 0; p < 6; p++)
+        {
+            var position = Mathf.MoveToward(_labelPos[p], SlotOf(p), (float)delta * LabelSlotsPerSecond);
+            moved |= position != _labelPos[p]; _labelPos[p] = position;
+        }
+        var focused = _areas.FindIndex(a => a.HasFocus());
+        UpdateArt(moved || focused != _drawnFocus);
+        _drawnFocus = focused;
     }
+    private int _drawnFocus = -1;
     public void PresentLight(float time, bool animate)
     {
         _time = time;
@@ -179,7 +191,7 @@ public partial class PhaseTrack : Control
         if (ReducedMotion) { for (var i = 0; i < 6; i++) _weights[i] = i == _activeSlot ? 1 : 0; SnapLabels(); }
         UpdateArt();
     }
-    private void UpdateArt()
+    private void UpdateArt(bool redraw = true)
     {
         if (_art is null) return;
 
@@ -188,7 +200,7 @@ public partial class PhaseTrack : Control
             Mathf.SmoothStep(0, 1, _weights[2]), Mathf.SmoothStep(0, 1, _weights[3])));
         _art.SetShaderParameter("phase_tail", new Vector2(Mathf.SmoothStep(0, 1, _weights[4]), Mathf.SmoothStep(0, 1, _weights[5])));
         _art.SetShaderParameter("glow_energy", ReducedMotion ? 1 : 1 + .045f * Mathf.Sin(_time * Mathf.Tau / 5.8f));
-        QueueRedraw();
+        if (redraw) QueueRedraw();
     }
     public int ActiveSegment => _active;
     public IReadOnlyList<Button> HelpRegions => _areas;

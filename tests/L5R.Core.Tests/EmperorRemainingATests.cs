@@ -26,7 +26,7 @@ internal static partial class EmperorRemainingATests
     private static SlotSelection Pick(string slot, params string[] cards) => Batch336Support.Pick(slot, cards);
     private static CardInstance Kw(CardInstance card, params string[] keywords) { foreach (var k in keywords) card.GrantedKeywords.Add(new(k, "test-fixture", GrantDuration.Permanent)); return card; }
     private static int Honor(MatchEngine e, int player) => Batch336Support.Honor(e, player);
-    private static int ForceMod(MatchEngine e, string id) => e.State.Cards[id].Modifiers.Where(m => m.Stat == "Force").Sum(m => m.Amount);
+    private static int ForceMod(MatchEngine e, string id) => e.State.Cards[id].Modifiers.Where(m => m.Stat == "Force" && m.SuppressedTurn != e.State.TurnNumber).Sum(m => m.Amount);
     // The Reaction the engine offers for this ability (and performer), as the client would send it.
     private static class Batch336Static
     {

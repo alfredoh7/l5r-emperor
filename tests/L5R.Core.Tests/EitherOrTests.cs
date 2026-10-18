@@ -19,6 +19,7 @@ internal static class EitherOrTests
             ("Published shape: Sakuma is the printed card (Force 1, Chi 3, no Honor Requirement, Cost 8, Personal Honor 1, Mantis Courtier Bully Merchant) with the scan's '(remaining)' in his text and his two abilities, and Unfortunate Hesitation the printed Strategy (Cost 0, Focus 2, Battle/Open); the Political action tag is on every wired Political action", PublishedShape),
             ("Alternate Gold source (Sakuma's first ability): he counts as a 2 Gold producer inside any payment -- offered in the quote, validated, and bowed by being chosen -- but the engine never suggests him when printed producers cover the cost; a bowed or spent one, or an opponent's, is refused", AlternateGoldSource),
             ("Sakuma's Political Reaction, the acting player pays: the window offers it to his controller against another player's Political action targeting one of his Personalities, the ACTING player decides (public decision, private quote), pays 2 Gold through the payment path, the window is restored and the action then resolves in full", PoliticalReactionPaid),
+            ("Issue #913: the Either/Or Gold quote carries the payer's payment methods, so a published Jade Mine's second way to bow ('#alt') is offered in Sources and is accepted by the engine when it is the chosen payment", EitherOrQuoteSources),
             ("Sakuma's Political Reaction, the acting player does not pay: the action is negated -- its effects do not happen, its use is still spent -- the window is restored, and priority passes on as after any action", PoliticalReactionNegated),
             ("When the acting player cannot pay 2 Gold (or the performer is Protected) there is no decision: the negation applies at once and is announced, and the reaction finishes like any other", CannotPayAutoNegates),
             ("When Sakuma may react: only to ANOTHER player's Political action (the ability's Political tag or a Political card's own keyword) that targets one of HIS controller's Personalities; not to a non-Political action, his controller's own, a non-Personality target, or while he is bowed", WhenSakumaMayReact),
@@ -218,6 +219,25 @@ internal static class EitherOrTests
         Eq(Listed(e, 0, Charity, fixture.Id)!.Gold!.MaxAmount, 2, "a bowed Sakuma adds nothing to the ceiling");
     }
 
+    private static void EitherOrQuoteSources()
+    {
+        var r = Political();
+        BowAllGold(r.S, 1);
+        var mine = Add(r.S, "oracle-l5r-10614", 1, Zone.Home); // Jade Mine: bow for 2, or its second way for 3
+        var e = OpenWindow(r);
+        ReactWithSakuma(e, r.Sakuma);
+        var pay = Answers(e, 1).Single(a => a.Command?.Choice == "pay");
+        QuoteCarriesSources(pay.Gold!, "Either/Or action quote");
+        var view = e.GetView(1).PendingEitherOr!.Options.Single(o => o.Key == "pay").Gold!;
+        QuoteCarriesSources(view, "Either/Or view quote");
+        var methods = view.Sources!.Where(m => m.CardId == mine.Id).ToArray();
+        Eq(methods.Length, 2, "both of Jade Mine's ways are offered");
+        Check(methods.Any(m => m.Id == mine.Id + "#alt" && m.Produced == 3), "its published alternative token is listed");
+        Check(!e.State.Cards[mine.Id].Bowed, "nothing is bowed yet");
+        Accept(e, new GameCommand("chooseEitherOr", 1, e.Version, CardId: r.Sakuma.Id, Choice: "pay", SourceIds: [mine.Id + "#alt"]));
+        Check(Now(e, mine.Id).Bowed && Now(e, mine.Id).StraightenHolds.Count == 1, "the engine accepted the token and bowed Jade Mine under its hold");
+    }
+
     // ---- the Political Reaction ---------------------------------------------------------------------------------------
     private static void PoliticalReactionPaid()
     {
@@ -348,7 +368,7 @@ internal static class EitherOrTests
         Eq(option.Gold!.Cost, 2);
         var paying = option.Command!.SourceIds!;
         Accept(e, option.Command with { TargetId = r.Ally.Id });
-        Eq(Now(e, strategy.Id).Zone, Zone.Hand, "still in hand: the action is deferred whole while the window is open");
+        Eq(Now(e, strategy.Id).Zone, Zone.Resolving, "in the resolution area (issue #917), not the hand: the action is deferred whole while the window is open");
         Check(paying.All(id => !Now(e, id).Bowed), "and nothing is paid yet");
         ReactWithSakuma(e, r.Sakuma);
         Answer(e, 1, "negate");

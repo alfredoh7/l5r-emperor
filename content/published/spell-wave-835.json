@@ -1,0 +1,28 @@
+{
+  "Profile": "spell-wave-835",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #835.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10347",
+      "Name": "Blood of Isawa's Tribe",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Spell attaches, choose an element keyword (Air, Earth, Fire, Water, Void) in this Shugenja's keywords or text. While this Spell remains attached, replace all instances of that keyword on this Shugenja with a different element keyword that you choose now.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10347.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "w835-blood"
+    }
+  ],
+  "Decks": []
+}

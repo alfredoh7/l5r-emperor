@@ -43,7 +43,7 @@ internal static class Wave738Tests
     private static GameCommand UseCommand(MatchEngine e, int player, string ability, string card, string? target = null) => new("useAbility", player, e.Version, CardId: card, AbilityId: ability, TargetId: target);
 
     public static void Run(TestRunner runner) => runner.Run("wave-738", [
-        ("Published as printed: sixteen cards in six profiles with their stats, abilities and effects; Revelations and The Onyx Championship are not published", PublishedShape),
+        ("Published as printed: sixteen cards in six profiles with their stats, abilities and effects; Revelations is not published (The Onyx Championship was wired later, issue #829)", PublishedShape),
         ("Doji Tatsuki - exp: straightens after another player's turn begins, and only then", TatsukiCard),
         ("Abundant Farmlands: straightens after each player's turn begins and produces 1 Gold", FarmlandsCard),
         ("Dagger of Crystal Wind: a +1F Obsession token each of its controller's turns; destroys the Personality once he has more Obsession tokens than printed Chi", DaggerCard),
@@ -165,7 +165,8 @@ internal static class Wave738Tests
         foreach (var id in new[] { DangerousGame, Empire, OpenRecruitment, RejectedMediation })
             Check(!CardCatalog.Get(id).Text.Contains("After you reveal cards", StringComparison.Ordinal), $"{CardCatalog.Get(id).Name} prints the scan's text, without the catalogue's reveal clause");
         Check(CardCatalog.Get(Marrow).Text.Contains("after each Events Phase begins", StringComparison.Ordinal), "Suck the Marrow prints the scan's 'Events Phase'");
-        foreach (var id in new[] { Revelations, OnyxChampionship }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published");
+        foreach (var id in new[] { Revelations }) Check(CardCatalog.Cards.ContainsKey(id), $"{id} was wired afterwards (Wave835.cs, issue #835)");
+        Check(CardCatalog.Cards.ContainsKey(OnyxChampionship), "The Onyx Championship was wired by issue #829 (Mendon's ruling R-059)");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w738-", StringComparison.Ordinal)), 8, "eight w738 abilities");
         foreach (var id in new[] { DangerousGame, Empire, OpenRecruitment, RejectedMediation }) Check(!ProvinceRevealEvents.IsFlagged(CardCatalog.Get(id).Effect), "an ordinary Event: the P5 flag is not used");
     }

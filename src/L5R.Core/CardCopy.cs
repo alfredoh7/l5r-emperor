@@ -82,8 +82,35 @@ public sealed partial class MatchEngine
     // The ability ids a card has now: printed, plus granted (a permanent grant, a copy), plus a controller-wide STATIC grant (issue #458, The Towers of
     // the Yogo: "Each of your Scorpion Clan Personalities has the ability ..." -- StaticAbilityGrants.cs). The ONE place a granted ability is joined
     // to the printed ones; every scan of "the abilities this card has" goes through it.
-    private IEnumerable<string> AbilityIdsOf(CardInstance card) => RemovedAbilitiesFilter(card, P5AbilitiesRemoved(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
-                                                                                                                                // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
+    // Issue #915 (EE-STATE-036, EE-Card-types-097): a Spell may stay attached after its host stops being a Shugenja, but its actions are unavailable until he is one again. Read live from the host's
+    // keywords (printed, granted or removed), so it follows a loss, a regain and a Shugenja granted by an effect; AbilityIdsOf is the one place every listing, validation and reaction scan reads.
+    private bool SpellHostIsNotShugenja(CardInstance card) =>
+        card.Zone == Zone.Attached && Definition(card).Type == CardType.Spell
+        && !(card.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && Keyword(host, "Shugenja"));
+
+    // Mendon's ruling of 2026-10-13 (R-085, issue #936): a Spell's STATIC effect follows the printed subject. These are the published Spells whose static text names the Shugenja host ("This Shugenja has ...", "While this Shugenja is
+    // Water, he ...", "his destruction"); each goes silent while the host is not currently a Shugenja. A Spell whose static text says "This Personality" (Scouring Flood, Tempest of Flame, The Thunderer's Protection) is NOT here
+    // and keeps working on a non-Shugenja host; a static whose subject is not the host (Incite the Phantoms, Erosion, ...) is also left alone. The audit table is in the decision doc; a regression keeps this list and the audit equal.
+    internal static readonly HashSet<string> ShugenjaSubjectStaticSpells = new(StringComparer.Ordinal)
+    {
+        "oracle-l5r-10133", "oracle-l5r-1084", "oracle-l5r-10915", "oracle-l5r-10916", "oracle-l5r-10353", "oracle-l5r-1898", "oracle-l5r-10127", "oracle-l5r-10254", "oracle-l5r-7562", "oracle-l5r-18",
+        "oracle-l5r-2309", "oracle-l5r-8366", "oracle-l5r-5903", "oracle-l5r-8228", "oracle-l5r-9339", "oracle-l5r-9891", "oracle-l5r-9228", "oracle-l5r-4833", "oracle-l5r-5666", "oracle-l5r-5046",
+        "oracle-l5r-1296", "oracle-l5r-9890", "oracle-l5r-10702", "oracle-l5r-9888", "oracle-l5r-10922", "oracle-l5r-10347",
+    };
+
+    // True for an attached Spell whose static (always-on) text is about "this Shugenja" while its host is not a Shugenja right now. The one gate every static Spell path reads (the same live test as SpellHostIsNotShugenja).
+    private bool SpellStaticSilenced(CardInstance spell) => ShugenjaSubjectStaticSpells.Contains(Definition(spell).Id) && SpellHostIsNotShugenja(spell);
+
+    // The Spells attached to a Personality whose static effects currently apply (silenced ones left out). Static Force/Chi/keyword readers use this instead of Attachments(...).
+    private IEnumerable<CardInstance> StaticSpells(CardInstance host) => Attachments(host.Id).Where(c => Definition(c).Type == CardType.Spell && !SpellStaticSilenced(c));
+
+    // A keyword granted by an attached Shugenja-subject Spell (AttachGrantsKeyword) is not live while that Spell is silenced. A Spell never grants Shugenja itself, so reading Shugenja never recurses into this gate.
+    private bool GrantedKeywordLive(CardInstance card, GrantedKeyword grant) =>
+        grant.Duration != GrantDuration.Attachment || grant.Keyword == "Shugenja" || grant.Source is not { } source
+        || !(_state.Cards.TryGetValue(source, out var spell) && spell.AttachedTo == card.Id && SpellStaticSilenced(spell));
+
+    private IEnumerable<string> AbilityIdsOf(CardInstance card) => RemovedAbilitiesFilter(card, P5AbilitiesRemoved(card) || SpellHostIsNotShugenja(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
+                                                                                                                                                                // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
         (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal).Where(GrantedTraits.IsNot)); // issue #667 (AbilityRemoval.cs): permanently removed abilities are left out. P22 (issue #690): a trait is not an ability.
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
@@ -95,7 +122,7 @@ public sealed partial class MatchEngine
     /// its permanent changes: its grants and removals are read as they stand). Conditional live grants (Isawa Kojiro's Naval while
     /// he has a Spell) are effects, not keywords the card has, and are not listed.</summary>
     private string[] CurrentKeywordList(CardInstance card) =>
-        (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Where(g => GrantHolds(g.Duration, card)).Select(g => g.Keyword))
+        (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Where(g => GrantHolds(g.Duration, card) && GrantedKeywordLive(card, g)).Select(g => g.Keyword))
             .Where(keyword => !KeywordRemoved(card, keyword)).Distinct(StringComparer.Ordinal).ToArray();
 
     private IEnumerable<string> CurrentAbilityIds(CardInstance card) =>

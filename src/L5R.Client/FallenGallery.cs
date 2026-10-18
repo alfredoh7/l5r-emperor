@@ -17,6 +17,9 @@ public partial class FallenGallery : Control
     public Button CloseButton { get; private set; } = null!;
     public Button BackButton { get; private set; } = null!;
     public event Action? Close;
+    /// <summary>Cards the player may choose now (issue #965): their rows are marked and a click chooses the card instead of only showing it.</summary>
+    public Func<string, bool>? Actionable { get; set; }
+    public event Action<string>? Chosen;
     private PlayerView[] _players;
     private readonly Control _design = new() { Size = DesignSize, MouseFilter = MouseFilterEnum.Ignore };
     private readonly List<FallenRow> _rows = [];
@@ -104,7 +107,8 @@ public partial class FallenGallery : Control
         if (!cards.Any(c => c.Id == SelectedCardId)) SelectedCardId = cards.FirstOrDefault()?.Id;
         foreach (var card in cards)
         {
-            var row = new FallenRow(card, () => SelectCard(card.Id)); _rows.Add(row); _list.AddChild(row);
+            var row = new FallenRow(card, () => { if (Actionable?.Invoke(card.Id) == true) Chosen?.Invoke(card.Id); else SelectCard(card.Id); }) { Legal = Actionable?.Invoke(card.Id) == true };
+            _rows.Add(row); _list.AddChild(row);
         }
         ShowSelected();
     }
@@ -170,6 +174,7 @@ public partial class FallenRow : Button
 {
     public CardView Card { get; }
     public bool Selected { get; set; }
+    public bool Legal { get; set; }
     private readonly TextureRect _face;
     private readonly Label _name, _status;
     private readonly FallenMedallion _icon;
@@ -200,7 +205,7 @@ public partial class FallenRow : Button
     }
     public override void _Draw()
     {
-        if (!Selected && !IsHovered() && !HasFocus()) return;
+        if (!Selected && !IsHovered() && !HasFocus() && !Legal) return;
         var color = Selected && Card.Dishonorable ? FallenArt.Dishonor : Palette.Gold;
         DrawRect(new Rect2(2, 2, Size.X - 4, Size.Y - 4), color with { A = .15f }, false, 5, true);
         DrawRect(new Rect2(2, 2, Size.X - 4, Size.Y - 4), color, false, 1.2f, true);

@@ -43,7 +43,7 @@ internal static class BotSoak
         }
         catch (Exception e) { result.Findings.Add(new("setup", seed, 0, "-", "-", "deck", "Deck generation threw: " + e.Message)); return result; }
         MatchEngine game;
-        try { game = MatchEngine.CreateCustomMatch(seed, a, b); }
+        try { game = MatchEngine.CreateCustomMatch(seed, a, b); game.AllowIdleBattlePasses(); } // bots only: nobody to bluff (issue #894)
         catch (Exception e) { result.Findings.Add(new("exception", seed, 0, "-", "-", "CreateCustomMatch", "Engine threw creating a Ready match: " + e.Message)); return result; }
         var recent = new Queue<string>();
         var contexts = new[] { new BotContext(), new BotContext() }; // one memory per seat, as a client keeps
@@ -208,6 +208,29 @@ internal static class BotSoak
             var folder = Env("L5R_ARENA_DECKS");
             if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the arena"); return; }
             BotArena.Run(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, Env("L5R_ARENA_REPORT"));
+        }),
+        ("bot-arena: battle policy (issue #788), decks in L5R_ARENA_DECKS, the bot with the six battle changes versus the same bot without them (opt-in, see BotArena.RunPolicy)", () =>
+        {
+            var folder = Env("L5R_ARENA_DECKS");
+            if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the battle-policy arena"); return; }
+            BotArena.RunPolicy(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, int.TryParse(Env("L5R_ARENA_SEEDS"), out var seeds) ? seeds : 1, Env("L5R_ARENA_REPORT"));
+        }),
+        ("bot-archetype-dump: write each pool deck's printed card data for the archetype classifier (issue #963, opt-in, set L5R_ARCH_DUMP to the output path)", () =>
+        {
+            if (Env("L5R_ARCH_DUMP") is not { } outPath) { Console.WriteLine("  SKIP: set L5R_ARCH_DUMP to an output path"); return; }
+            DeckArchetypeDump.Run(Env("L5R_TOURN_DECKS") ?? "src/L5R.Client/Content/preloaded-decks.json", outPath);
+        }),
+        ("bot-tournament: champion versus a challenger arm over the preloaded decks plus the Lion and Crane presets (issue #963, opt-in, see BotTournament.cs and docs/bots/README.md)", () =>
+        {
+            var decks = Env("L5R_TOURN_DECKS") ?? "src/L5R.Client/Content/preloaded-decks.json";
+            if (Env("L5R_TOURN_SEEDS") is not { } seedText) { Console.WriteLine("  SKIP: set L5R_TOURN_SEEDS (seeds per ordered deck pair) to run the bot tournament"); return; }
+            BotTournament.Run(decks, Env("L5R_TOURN_CHAL") ?? "champion", Env("L5R_TOURN_PAIRING") ?? "same", Env("L5R_TOURN_MODE") ?? "dev", int.Parse(seedText), Env("L5R_TOURN_OUT"), int.TryParse(Env("L5R_TOURN_SEED_START"), out var start) ? start : 0);
+        }),
+        ("bot-arena: Cavalry defense (issue #946), the preloaded decks against the Unicorn deck with the defense guidance on versus off (opt-in, set L5R_ARENA_CAVALRY to the preloaded-decks.json path)", () =>
+        {
+            var decks = Env("L5R_ARENA_CAVALRY");
+            if (decks is null) { Console.WriteLine("  SKIP: set L5R_ARENA_CAVALRY to src/L5R.Client/Content/preloaded-decks.json to run the Cavalry defense arena"); return; }
+            BotArena.RunCavalry(decks, int.TryParse(Env("L5R_ARENA_GAMES"), out var games) ? games : 10, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, Env("L5R_ARENA_REPORT"));
         })
     ];
 }

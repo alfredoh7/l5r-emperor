@@ -31,10 +31,6 @@
     "category": "LOCK",
     "note": "Needs attack prohibition during movement and entry, not assignment alone."
   },
-  "oracle-l5r-10497": {
-    "category": "LOCK",
-    "note": "Needs optional remain-bowed choice, return of control when source straightens/leaves and seppuku prohibition."
-  },
   "oracle-l5r-10502": {
     "category": "LOCK",
     "note": "Not wired in #689 (a draft wiring was removed untested): the Nonhuman entry discount and \"move your target Personality at any location to Shakash's location\" (Home-capable) need their own card pass and tests."
@@ -42,14 +38,6 @@
   "oracle-l5r-10512": {
     "category": "LOCK",
     "note": "Not wired in #689 (draft wiring removed untested): Ring of Water entry waiver plus straightening one or two cards in units, performed from Home, need their own card pass and tests."
-  },
-  "oracle-l5r-10522": {
-    "category": "LOCK",
-    "note": "Needs next-controller-turn copy-removal lifecycle and straightening/attack/defend holds; historical reading remains unconfirmed."
-  },
-  "oracle-l5r-10524": {
-    "category": "LOCK",
-    "note": "Needs Spell attachment-count limit, Shugenja grant and Focus-dependent bow-cost waiver."
   },
   "oracle-l5r-10624": {
     "category": "LOCK",

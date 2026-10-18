@@ -5,9 +5,11 @@ namespace L5R.Client;
 
 public partial class Main
 {
-    private PaymentSource[] PaymentMethods(GoldQuote quote) => quote.Sources ??
-        Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => !c.Bowed && Production(c, Self) > 0)
-            .Select(c => new PaymentSource(c.Id, c.Id, "bow", $"Bow this card: {Production(c, Self)} Gold", Production(c, Self))).ToArray();
+    // Exactly the engine's methods and token ids. The client never invents a method from a card's printed production: a quote with no
+    // Sources (an older payload) offers none, so no id the engine did not name can be selected, and a published alternative such as
+    // Jade Mine's "#alt" is selectable only because the engine listed it.
+    private static readonly PaymentSource[] NoPaymentMethods = [];
+    private static PaymentSource[] PaymentMethods(GoldQuote quote) => quote.Sources ?? NoPaymentMethods;
 
     // "reduce" (issue #667, Profits: "reduce the total Gold produced by 1") is the one method that produces less than zero.
     private static bool PaymentMethodUnderstood(PaymentSource method) =>
@@ -31,20 +33,25 @@ public partial class Main
     // Gold chosen sources contribute: producers and reactions add, a "reduce" source subtracts; cost reductions are not Gold.
     private int PaidGold(GoldQuote quote) => PaymentMethods(quote).Where(m => _sources.Contains(m.Id) && m.Kind != "discount").Sum(m => m.Produced);
 
-    // The engine's payment method behind a click on this holding (null when the card is not a payment source for the open cost).
-    private string? HoldingPaymentMethod(CardView card) => _chosen is { } chosen && QuoteFor(chosen) is { } quote &&
-        (quote.Kind == GoldCostKind.Variable || chosen.Type == "chooseOpponentPayment" || AmountFor(chosen, quote) > 0)
-        ? PaymentMethods(quote).FirstOrDefault(m => m.CardId == card.Id && m.Kind == "bow" && PaymentMethodUnderstood(m))?.Id : null;
+    // The engine's payment methods behind a click on this card (empty when the card is not a payment source for the open cost). Bowing a holding was once the only one; produce, reaction, destroy, discount and
+    // reduce are clicked the same way (issue #971). A card in hand that has its own flow keeps that click.
+    private PaymentSource[] ClickablePaymentMethods(CardView card) => _chosen is { } chosen && QuoteFor(chosen) is { } quote &&
+        (quote.Kind == GoldCostKind.Variable || chosen.Type == "chooseOpponentPayment" || AmountFor(chosen, quote) > 0) && !(card.Zone == Zone.Hand && OwnFlowAction(card) is not null)
+        ? PaymentMethods(quote).Where(m => m.CardId == card.Id && PaymentMethodUnderstood(m)).ToArray() : [];
+
+    // A click chooses the card's first payment method, the next click its second (a card that can pay two ways), and the last click clears it.
+    private void CycleCardPayment(CardView card)
+    {
+        if (!DecisionCanSubmit) return;
+        var methods = ClickablePaymentMethods(card);
+        var current = Array.FindIndex(methods, m => _sources.Contains(m.Id));
+        foreach (var method in methods) _sources.Remove(method.Id);
+        if (current + 1 < methods.Length) _sources.Add(methods[current + 1].Id);
+        _previewBowFlip = card.Id; RefreshPaymentSelection();
+    }
 
     // The player chooses the holdings to bow, so a costed action opens with nothing pre-selected (the engine's suggestion stays one click away).
     private static bool PlayerPicksPayment(ActionOption option) => QuoteFor(option) is { } quote && (quote.Kind == GoldCostKind.Variable || quote.Cost > 0);
-
-    private void ToggleHoldingPayment(string methodId, string cardId)
-    {
-        if (!DecisionCanSubmit) return;
-        if (!_sources.Add(methodId)) _sources.Remove(methodId);
-        _previewBowFlip = cardId; RefreshPaymentSelection();
-    }
 
     // A cost the player chooses is exactly the Gold they contribute (within the engine's range).
     private void SyncPaymentAmount()

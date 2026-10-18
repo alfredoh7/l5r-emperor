@@ -125,8 +125,8 @@ public partial class WarRoomStage : Node3D
         _hall.PresentLight(time, animate);
         foreach (var material in _paint)
         {
-            material.SetShaderParameter("candle_phase", time);
-            material.SetShaderParameter("candle_motion", animate ? 1 : 0);
+            material.SetShaderParameter(ShaderParameters.CandlePhase, time);
+            material.SetShaderParameter(ShaderParameters.CandleMotion, animate ? 1 : 0);
         }
     }
 

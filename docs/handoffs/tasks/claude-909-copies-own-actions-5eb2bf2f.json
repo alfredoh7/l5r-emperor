@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Audit that each copy of a non-unique Strategy performs its own action (three copies, same phase): every Battle/Open/Limited action of every non-unique Strategy passes; A Paragon's Strength verified for three copies as Attacker and Defender, with an opposing Attack reactor. No engine change: the use limit is per card instance and no finding is a use-limit bar. The bar Mendon saw is NOT reproduced; waiting for the on-screen reason.",
+  "validation": "action-copies 2/2 (the audit takes about 3.5 minutes; listed as a slow case).",
+  "remaining": "Reproduce Mendon's report: need the exact reason text shown, and what the first copy did.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/909",
+  "branch": "claude/909-copies-own-actions",
+  "updated": "2026-10-13T16:52:36.698853+00:00"
+}

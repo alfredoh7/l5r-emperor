@@ -40,7 +40,6 @@ public sealed partial class MatchEngine
             // "if Hawado is at the current battlefield, target a Personality that performed it".
             case "hawado-exp-move-home":
             case "hawado-exp-move-battlefield":
-                Require(AtBattle(source!), "Shosuro Hawado must be at the current battlefield.");
                 Require(_state.BattleActionReactionPerformerId is { } performerId && _state.Cards.TryGetValue(performerId, out var performer) && InPlay(performer)
                     && Definition(performer).Type == CardType.Personality, "The Battle action had no Personality performer in play to move.");
                 break;

@@ -22,6 +22,7 @@ namespace L5R.Core;
 //   Harbingers of War         "Until the game ends, equipping Followers and Items from your hand with a base Gold Cost of 1 to 4 is a Battle/Open action for you and, after the first time each turn you do so, draw a card."   a game-long P19 timing grant narrowed to those cards; a draw after the equip
 //   Hantei's Guidance         "The rulebook's Favor Political Battle action has Absent for you, and you may target any Personality with it." / "Political Interrupt: Discard this Celestial. Negate a Political action."   a P19 Absent and any-target; w740-hantei-negate
 //
+// Issue #835: The Empire's Foe Exposed was wired afterwards in Wave835.cs, on Mendon's rulings of 2026-10-11 (docs/decisions/2026-10-11-twelve-ruled-cards.md); the "not wired" note here is the state when this wave merged.
 // Not wired, with a blocker note (tools/content/pe_wave_740_blockers.json): The Empire's Foe Exposed (an Event whose duel is issued as it is revealed: no merged path starts a duel from an Event's reveal).
 public static class Wave740Abilities
 {
@@ -172,7 +173,6 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case Wave740Abilities.KataEnter:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
                 break;
             case Wave740Abilities.MagistrateDuel:
                 Require(command.TargetId is null || command.TargetId != command.PerformerId, "Choose a Personality other than the challenger.");

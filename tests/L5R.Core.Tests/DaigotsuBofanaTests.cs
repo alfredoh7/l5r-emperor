@@ -158,7 +158,7 @@ internal static class DaigotsuBofanaTests
         Accept(e, Offer(e, 1, Bow, strategy.Id, bofana.Id));
         Eq(e.State.PendingChoice?.Type, "forcedDiscard"); Eq(e.State.PendingChoice?.PlayerId, 1, "the enemy who acted discards");
         Eq(e.State.PriorityPlayerId, 1);
-        Check(!e.State.Cards[bofana.Id].Bowed && e.State.Cards[strategy.Id].Zone == Zone.Hand, "the action has not resolved yet: the trait comes first");
+        Check(!e.State.Cards[bofana.Id].Bowed && e.State.Cards[strategy.Id].Zone == Zone.Resolving, "the action has not resolved yet: the trait comes first, and the Strategy waits in the resolution area (issue #917)");
         // The offer: one option per OTHER hand card of the enemy, never the Strategy being played.
         var offers = DiscardOffers(e, 1);
         Check(offers.Select(a => a.CardId).ToHashSet().SetEquals([keep.Id, give.Id, third.Id]), "one offer per other hand card");
@@ -166,9 +166,10 @@ internal static class DaigotsuBofanaTests
         // The controller is only told to wait: neither the offers nor the enemy's hand cross to him.
         Check(e.QueryActions(0).All(a => a.Type is "wait" or "concede"), "Bofana's controller holds no decision");
         var view = e.GetView(0);
-        Eq(view.Players[1].Hand.Length, 0, "the enemy's hand is private"); Eq(view.Players[1].HandCount, 4);
-        HiddenIdsAbsent(view, [strategy.Id, keep.Id, give.Id, third.Id]);
-        Check(e.GetView(1).Players[1].Hand.Length == 4, "the discarding player sees his own hand");
+        Eq(view.Players[1].Hand.Length, 0, "the enemy's hand is private"); Eq(view.Players[1].HandCount, 3, "the card being played is not counted in the hand (issue #917)");
+        HiddenIdsAbsent(view, [keep.Id, give.Id, third.Id]);
+        Check(view.ResolutionArea is { Length: 1 } area && area[0].Card.Id == strategy.Id, "the played Strategy is public in the resolution area from announcement");
+        Check(e.GetView(1).Players[1].Hand.Length == 3, "the discarding player sees his own hand without the card being played");
         // Only the discarding player, only a hand card, only one not used by the action.
         Reject(e, new GameCommand("forcedDiscard", 0, e.Version, TargetId: controllerHand.Id));
         Reject(e, new GameCommand("forcedDiscard", 1, e.Version, TargetId: controllerHand.Id));
@@ -235,7 +236,7 @@ internal static class DaigotsuBofanaTests
             {
                 var s = Table();
                 var bofana = Add(s, Bofana, 0, Zone.Battlefield, province: 0);
-                var wielder = Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0); // printed Force 5
+                var wielder = Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0); wielder.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915) // printed Force 5
                 Force(wielder, wielderForce - 5);
                 var attachment = Add(s, def, 1, Zone.Attached, province: 0, parent: wielder.Id);
                 Add(s, "training-farm", 1, Zone.Hand); Add(s, "training-farm", 1, Zone.Hand);

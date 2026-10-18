@@ -68,19 +68,20 @@ public sealed partial class MatchEngine
     }
 
     // The part of a province's current strength that ends with the turn.
-    private int TimedProvinceStrength(ProvinceState province)
+    private int TimedProvinceStrength(ProvinceState province) => TimedProvinceStrengthParts(province).Sum(part => part.Amount);
+
+    // Each timed effect on the province with its source's name, for the strength sum above and for the modifier the view shows beside the province.
+    private IEnumerable<(string Source, int Amount)> TimedProvinceStrengthParts(ProvinceState province)
     {
         var ownerId = _state.Players.First(p => p.Provinces.Contains(province)).Id;
-        var total = 0;
         // UntilBattle (Kaiu Hideaki, Emperor Edition Personality pass, issue #477 batch 2): a strength that lasts only until that battle's resolution begins (ExpireUntilResolutionProvinceStrength).
         foreach (var effect in _state.ProvinceStrengthEffects.Where(e => e.Turn == _state.TurnNumber && e.PlayerId == ownerId && (e.UntilBattle is null || e.UntilBattle == _state.BattleNumber)))
         {
-            if (effect.Kind == ProvinceEffectFlat) { if (effect.ProvinceIndex == province.Index) total += effect.Amount; }
+            if (effect.Kind == ProvinceEffectFlat) { if (effect.ProvinceIndex == province.Index) yield return (effect.Source, effect.Amount); }
             else if (effect.Kind == ProvinceEffectPerDishonorableAttacker)
-                total += effect.Amount * _state.Cards.Values.Count(c => c.OwnerId != ownerId && c.Zone == Zone.Battlefield && c.ProvinceIndex == province.Index
-                    && Definition(c).Type == CardType.Personality && IsAttacking(c) && MatchesTargetStatus(c, TargetStatus.IsDishonorable));
+                yield return (effect.Source, effect.Amount * _state.Cards.Values.Count(c => c.OwnerId != ownerId && c.Zone == Zone.Battlefield && c.ProvinceIndex == province.Index
+                    && Definition(c).Type == CardType.Personality && IsAttacking(c) && MatchesTargetStatus(c, TargetStatus.IsDishonorable)));
         }
-        return total;
     }
 
     // ---- Assignment watches ----
@@ -254,7 +255,7 @@ public sealed partial class MatchEngine
         player.ProclaimUsedTurn = _state.TurnNumber; player.ProclaimedCardId = card.Id;
         RecordFact(FactKinds.Proclaimed, player.Id, card.Id, null, null, negated ? "negated" : null); // P6 (AfterFacts.cs): "after you Proclaim"
         // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
-        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
+        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card) + Wave829PersonalHonor(card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;
@@ -312,7 +313,7 @@ public sealed partial class MatchEngine
 
     // "+1PH if any other player is Dragon Clan".
     private int StaticPersonalHonorBonus(CardInstance card) =>
-        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card) + IvoryPoliticalPersonalHonorBonus(card) + PromoItemsPersonalHonorBonus(card); // + Utaku Lishan (issue #503); Oriole Imperial Vanguard (issue #622); Kimono of the Turquoise Champion, The Emerald Armor (PromoEmperorItems.cs)
+        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card) + IvoryPoliticalPersonalHonorBonus(card) + PromoItemsPersonalHonorBonus(card) + Wave829PersonalHonor(card); // + Utaku Lishan (issue #503); Oriole Imperial Vanguard (issue #622); Kimono of the Turquoise Champion, The Emerald Armor (PromoEmperorItems.cs)
 
     // "The amount of Honor you need in order to win an Honor Victory is reduced by Hotaka's Personal Honor minus one" -- each copy in play.
     private int HonorVictoryThreshold(int playerId) =>
@@ -346,7 +347,7 @@ public sealed partial class MatchEngine
     // ---- Sharing Gossip ----
 
     private int SharingGossipCount(CardInstance source) =>
-        _state.Cards.Values.Count(c => c.Zone == Zone.FateDiscard && Definition(c).Name == "Sharing Gossip") + (source.Zone == Zone.Hand ? 1 : 0);
+        _state.Cards.Values.Count(c => c.Zone == Zone.FateDiscard && Definition(c).Name == "Sharing Gossip") + (PlayedFromHand(source) ? 1 : 0);
 
     // ---- Brotherhood Schism: "Rings will not enter play if their owner has already put a Ring into play this turn" ----
 

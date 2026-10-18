@@ -1437,7 +1437,7 @@ static void SecondCityRestBatch()
     // action only for an Ancestor moved by a Water-keyword Shugenja.
     {
         var s = StrongholdBattle("oracle-l5r-1218");
-        var host = Add(s, "training-crane-samurai", 0, Zone.Home); // Intervening Spirit's own wielder, not at the battlefield
+        var host = Add(s, "training-crane-samurai", 0, Zone.Home); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915) // Intervening Spirit's own wielder, not at the battlefield
         var spirit = Add(s, "oracle-l5r-3788", 0, Zone.Attached, attachedTo: host.Id);
         var mover = Add(s, "training-lion-samurai", 0, Zone.Home);
         Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); // enemy presence
@@ -1456,7 +1456,7 @@ static void SecondCityRestBatch()
         // must be at the current battlefield already (no "even if" clause of its own, so it falls back
         // to the ordinary attached-Spell-source AtBattle Require -- Scouring Flood/Earth's Hunger's
         // own precedent), which also doubles as the Defender's own presence for this Battle action.
-        var host = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+        var host = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); host.GrantedKeywords.Add(new("Shugenja", "test-fixture", GrantDuration.Permanent)); // a Spell needs a Shugenja host (issue #915)
         var flows = Add(s, "oracle-l5r-8038", 1, Zone.Attached, province: 0, attachedTo: host.Id);
         var mover = Add(s, "training-lion-samurai", 1, Zone.Home);
         Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
@@ -1683,9 +1683,8 @@ static void FollowerWave11Primitives()
         Equal(e.State.PendingChoice?.CardId, legion.Id);
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: legion.Id, AbilityId: "legion-of-bat-bow"));
         Check(e.State.Cards[michi.Id].Bowed, "Legion of the Bat bows the enemy Infantry Personality that just moved to its battlefield");
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Check(e.State.PendingChoice is null, "Two consecutive passes close the reaction window");
+        // The window now lists Legion's Reaction and its Pass like every other alternating window (issue #833), so it settles (issue #644): nothing is left to react with, it closes at once.
+        Check(e.State.PendingChoice is null, "Nobody holds another Reaction: the reaction window closed without a Pass being asked");
     }
     {
         // Negative: RecruitReserve is explicitly excluded per the card's own rule ("Recruiting a
@@ -2308,6 +2307,20 @@ static void HonorLossImmunity()
         Resolve(e);
         Equal(e.State.Cards[defender.Id].Zone, Zone.Dead);
         Equal(e.State.Players[1].Honor, honorBefore - CardCatalog.Get("training-lion-veteran").PersonalHonor, "Lion Personality Honor loss is not negated by a Spider/Fate-scoped Stronghold");
+    }
+    {
+        // 2026-10-13 ruling (official rulings on Fields of the Dead, The Fingers of Bone, The Shadowed Dojo): "You do not lose Honor from cards you own" does not prevent the Honor loss from the
+        // death of a dishonorable Personality -- the loss is the rulebook's -- even when the dying Personality matches the stronghold's Clan.
+        var s = Battle(9, 2).State;
+        s.Cards[s.Players[1].StrongholdId].DefinitionId = "training-honor-immune-stronghold";
+        var defender = s.Cards.Values.Single(c => c.OwnerId == 1 && c.Zone == Zone.Battlefield);
+        defender.DefinitionId = "training-spider-honor-loss";
+        defender.Dishonorable = true;
+        var honorBefore = s.Players[1].Honor;
+        var e = MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[defender.Id].Zone, Zone.Dead);
+        Equal(e.State.Players[1].Honor, honorBefore - CardCatalog.Get("training-spider-honor-loss").PersonalHonor, "a dishonorable Spider Personality's death still costs Honor under a Spider/Fate-immune Stronghold");
     }
 }
 static void TokenPrimitives()

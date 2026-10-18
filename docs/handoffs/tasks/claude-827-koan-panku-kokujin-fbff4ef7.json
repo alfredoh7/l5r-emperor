@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Kokujin, P'an Ku - exp, Zansho - exp, Chiyurei's Axe, Koan's Jingasa and Koan's Robes on Mendon's rulings R-049..R-053 (Ningen's Treatise left out: allies). Shared because it adds six bundled scans and the catalogue art receipt under src/L5R.Client/Content and a bot rule set under src/L5R.AI beside the Core rules; no client code changed (the three new decisions use the generic decision tray).",
+  "validation": "Core: 11 new wave-827 cases, full suite 3487/3487 after updating six pinned tests; AI suite 147/147; python content tests incl. catalogue-art coverage; inventory 2190 -> 2196 wired",
+  "remaining": "Art pack for the six scans built and installed locally as catalogue-art-issue827-20261011-r1 (4649 images), NOT published as a release; readings for Mendon in docs/decisions/2026-10-11-koan-panku-kokujin.md; native client check of the three generic decision screens",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/827",
+  "branch": "claude/827-koan-panku-kokujin",
+  "updated": "2026-10-11T15:08:19.837188+00:00"
+}

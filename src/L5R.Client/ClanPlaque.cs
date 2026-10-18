@@ -16,6 +16,9 @@ public partial class ClanPlaque : Control
     public string HandText { get; }
     public string HandHelp { get; }
     public Button HandRegion { get; }
+    /// <summary>The emblem button: opens the Dead cards, and chooses the player while a "choose a player" action is being drafted (issue #960).</summary>
+    public Button Hit { get; private set; } = null!;
+    public string HitTooltip { get; private set; } = "";
     private readonly Control _design;
     private static FontFile? _bodyFace, _headingFace;
     private static FontFile CrispFace(string path)
@@ -67,7 +70,7 @@ public partial class ClanPlaque : Control
         _design.RemoveChild(name); _design.AddChild(nameClip); nameClip.AddChild(name); name.Position = Vector2.Zero;
         AddIcon(0, new Rect2(108, 74, 28, 23));
         Text(honor.ToString(), honor is > 99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 70, 31, 28));
-        AddIcon(1, new Rect2(179, 69, 28, 28));
+        AddSprite(StrongholdCoin, new Rect2(179, 69, 28, 28)); // the Gold Production coin printed on strongholds, as in the gold flow
         var goldValue = Text(gold.ToString(), gold > 99 ? 15 : 21, new Color("17110b"), new Rect2(178, 68, 30, 29));
         goldValue.HorizontalAlignment = HorizontalAlignment.Center;
         AddIcon(2, new Rect2(225, 72, 26, 24));
@@ -98,7 +101,7 @@ public partial class ClanPlaque : Control
         };
         foreach (var state in new[] { "normal", "pressed", "hover", "focus" })
             hit.AddThemeStyleboxOverride(state, Palette.Box(Colors.Transparent, state is "hover" or "focus" ? Palette.Gold : null, 0, 40));
-        hit.Pressed += inspect; _design.AddChild(hit);
+        hit.Pressed += inspect; _design.AddChild(hit); Hit = hit; HitTooltip = hit.TooltipText;
         if (favor)
         {
             var mark = Text("◆", 10, Palette.Gold, new Rect2(290, 15, 12, 15));
@@ -131,6 +134,7 @@ public partial class ClanPlaque : Control
         var label = Palette.Text(value, size, color); label.AddThemeFontOverride("font", BodyFace);
         label.Position = rect.Position; label.Size = rect.Size; _design.AddChild(label); return label;
     }
+    private static readonly Texture2D StrongholdCoin = GD.Load<Texture2D>("res://Art/Stronghold/stronghold-coin-brass.png");
     private void AddSprite(Texture2D texture, Rect2 rect, Material? material = null)
         => _design.AddChild(new TextureRect
         {

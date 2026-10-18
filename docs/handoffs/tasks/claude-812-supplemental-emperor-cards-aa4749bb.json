@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import the seven Emperor Edition cards the Emperor legality query omits into the deck pool, client library and art pack (new pack catalogue-art-issue812-20261010-r1, 4636 images, 8 new WebP; built and validated locally, NOT published). Mendon ruled (R-040) they are playable; the tournament ban is a data note only and is never shown in game. Blocker notes for the seven are in the inventory generator; none wired.",
+  "validation": "tools/content unittest: test_catalogue_art, test_package_client, test_build_deck_pool and the new import tests pass (full suite earlier: only the art coverage test failed before the pack was rebuilt). ensure_catalogue_art --archive and --verify-only pass with the new ZIP (sha256 27828ee2..., 619303386 bytes). CatalogueProbe count 2149->2156 not run natively.",
+  "remaining": "Publish the art pack as a private release (tag catalogue-art-issue812-20261010-r1) before merge, or players cannot download it. Regenerate docs/CARD_INVENTORY.xlsx (python tools/content/build_card_inventory.py) once Excel releases it; it still carries the pre-R-040 blocker wording. Wire the seven cards.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/812",
+  "branch": "claude/812-supplemental-emperor-cards",
+  "updated": "2026-10-11T02:09:06.310351+00:00"
+}

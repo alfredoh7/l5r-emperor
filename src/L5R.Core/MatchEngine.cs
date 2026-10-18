@@ -5,12 +5,13 @@ namespace L5R.Core;
 /// <summary>Single-threaded authoritative simulator. Execute validates on a detached state and commits atomically.</summary>
 public sealed partial class MatchEngine
 {
-    public const string ContentVersion = "emperor-lion-crane-0.3.0";
+    public const string ContentVersion = "emperor-lion-crane-0.5.0";
     /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
     /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
     /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
-    /// alternative-cost metadata.</summary>
-    public const int ProtocolVersion = 3;
+    /// alternative-cost metadata.
+    /// 4: PlayerView no longer carries DynastyDeckCount/FateDeckCount, and the look/search deck views no longer carry CardsRemaining (current deck sizes are hidden information, EE-STATE-014).</summary>
+    public const int ProtocolVersion = 4;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;
@@ -32,6 +33,11 @@ public sealed partial class MatchEngine
     /// <summary>Detached diagnostic snapshot, containing hidden information. Never send to a client.</summary>
     public MatchState State => Copy(_state);
     public long Version => _state.Version;
+    // Scalar reads for per-frame callers: State is a full detached copy (issue #875), so a client that only needs these asks for them directly.
+    public int? WinnerId => _state.WinnerId;
+    public int ActivePlayerId => _state.ActivePlayerId;
+    public int PriorityPlayerId => _state.PriorityPlayerId;
+    public bool HasPendingChoice => _state.PendingChoice is not null;
     public static MatchEngine CreateStarterMatch(ulong seed = 20260906) => Create(seed, "starter");
     public static MatchEngine CreateEconomyScenario(ulong seed = 20260906) => Create(seed, "economy");
     public static MatchEngine CreatePublishedMatch(ulong seed = 20260906) => Create(seed, PublishedContent.Scenario);
@@ -78,13 +84,14 @@ public sealed partial class MatchEngine
         return clone;
     }
 
-    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray());
+    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray(), _state.IdleBattlePasses);
     public static MatchEngine Replay(ReplayRecord replay)
     {
         if (replay.ContentVersion != ContentVersion) throw new ArgumentException("Replay content version is not supported.");
         var engine = replay.Scenario == CustomPractice.Scenario
             ? replay.CustomDecks is { Length: 2 } decks ? CreateCustomMatch(replay.Seed, decks[0], decks[1]) : throw new ArgumentException("Custom replay is missing its two deck snapshots.")
             : Create(replay.Seed, replay.Scenario);
+        if (replay.IdleBattlePasses) engine.AllowIdleBattlePasses(); // match setup, before the first command (issue #894)
         foreach (var command in replay.Commands)
         {
             var result = engine.Execute(command);
@@ -199,7 +206,7 @@ public sealed partial class MatchEngine
     {
         var turnAtStart = _state.TurnNumber;
         var result = ExecuteOne(command);
-        if (result.Accepted) { SweepFortifications(); /* P15 (FortificationHoldings.cs) */ SweepZoneHistory(turnAtStart); SweepFactsAfterCommand(); } // P6 (AfterFacts.cs): facts only a comparison sees, and the drain when nothing is open // P21 (ZoneExtensions.cs): entry turns, and under-cards whose host left play
+        if (result.Accepted) foreach (var sweep in EngineHooks.SweepsAfterAccepted.Items) sweep(this, turnAtStart);
         return result.Accepted ? RunPassAllBattles(result) : result; // "Pass all battles" (issue #628, PassAllBattles.cs)
     }
 
@@ -231,6 +238,7 @@ public sealed partial class MatchEngine
             execute = decision.Command;
         }
         else _state = Copy(original);
+        RunSweeps(EngineHooks.SweepsBeforeApply); // on the working copy: a rejected command leaves the live state untouched
         var firstEvent = _state.Events.Count;
         try
         {
@@ -264,8 +272,8 @@ public sealed partial class MatchEngine
                 SpendPlansWithinPlans(execute, plansSets);
                 _paymentDiscards = [];
                 ApplyAfterCommandTraits(traitSnapshot);
-                ReturnCardsOutOfPlayToTheirOwners();
-                RemoveCreatedCardsLeftInPiles();
+                RunSweeps(EngineHooks.SweepsAfterApply);
+                ReconcileResolutionArea(); // issue #917
                 if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
                 break;
             }
@@ -498,11 +506,13 @@ public sealed partial class MatchEngine
         ApplyWlPersGates1EntryEffects(playerId, card); // Boyoh Mercenary (issue #674, WlPersGates1.cs): "After Boyoh Mercenary enters play, discard a card."
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
         ApplyCreatedProxies677EntryEffects(playerId, card); // Abdollah, Kitsune Kichi - exp, Kuni Renyu - exp2 (issue #677, CreatedProxies677.cs): "After X enters play, ... create ..." -- a trait.
+        ApplyWave827EntryEffects(playerId, card); // Kokujin (issue #827, Wave827.cs): "lose 6 Honor unless you are a Spider Clan player."
         ApplyWave734EntryEffects(playerId, card); // Bayushi Nitoshi - exp (issue #734, Wave734.cs): "After Nitoshi enters play, all players lose 3 Honor."
         ApplyWave740EntryEffects(card); // Ikoma Ayumu - exp (issue #740, Wave740.cs): "will not gain Fallen or Shadowlands".
         ApplyWave739EntryEffects(card); // Iweko Seiken (issue #739, Wave739.cs): "will not gain a Clan Alignment".
         ApplyWave737EntryEffects(playerId, card); // Iweko Shibatsu (issue #737, Wave737.cs): "After Shibatsu enters play, gain 3 Honor." and his Clan-alignment block.
         ApplyWlItemsMiscEntryEffects(playerId, card); // The Bestial Ones (issue #674, WlItemsMiscFollowers.cs): "After this Follower enters play, ... discard a card" -- a trait.
+        ApplyWave835EntryEffects(playerId, card); // Blood of Isawa's Tribe (issue #835, Wave835.cs): "After this Spell attaches, choose an element keyword" -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -793,7 +803,11 @@ public sealed partial class MatchEngine
         ResetCardState(lower);
     }
 
-    // A card that will enter play again (a dead Personality recruited, issue #373) is a new object: nothing of its earlier life follows it.
+    // The one place a card sheds its time in play (issue #850). A card that leaves play for a hand, a deck, a province or a pile, or that will enter play again (a dead Personality recruited, issue #373),
+    // is a new object: nothing of its earlier life follows it. AbilityVocabularyTests-style reflection test CardResetTests fails when a CardInstance property is neither reset here nor listed as identity/location.
+    internal static void ResetCardStateForTest(CardInstance card) => ResetCardState(card);
+    private static bool KeepsDishonorOutsidePlay(CardInstance card) =>
+        card.FaceUp && card.Zone is Zone.Dead or Zone.DynastyDiscard or Zone.FateDiscard or Zone.RemovedFromGame or Zone.Province && Definition(card).Type == CardType.Personality;
     private static void ResetCardState(CardInstance card)
     {
         card.Modifiers.Clear();
@@ -807,7 +821,11 @@ public sealed partial class MatchEngine
         card.AbilityUses.Clear();
         card.RentatsuHeld = false; card.BarrierTurn = -1; // Emperor Edition Personality pass (issue #477), batch 4.
         card.Bowed = false;
-        card.Dishonorable = false;
+        // R-082 (EE-STATE-008, Mendon 2026-10-13): a face-up dishonorable Personality stays dishonorable outside play and on re-entry, unless an effect rehonors him.
+        // "Face up" is judged by where the card is when it is reset: a public zone (a discard pile, the dead pile, removed from the game, a face-up province).
+        // A hand or a deck is hidden, so a Personality sent there (or reset before he is moved there) loses the status. A caller that resets a card still in play
+        // and then moves it to a public zone (Your Clan Needs You!, Step Through the Void) carries the status across itself.
+        card.Dishonorable = card.Dishonorable && KeepsDishonorOutsidePlay(card);
         card.StraightenBlockedTurn = -1;
         card.StraightenHolds.Clear();
         card.PrintedHoldsSeeded = false;
@@ -818,6 +836,8 @@ public sealed partial class MatchEngine
         card.ForceModifiersNegatedTurn = -1; card.TargetShieldTurn = -1; // Forgotten Legacy pass, batch 3 (issue #467)
         card.DeepRootsTurn = -1; // The Shadow's Embrace pass, batch 3 (issue #476)
         card.AssignedToAttackTurn = -1;
+        card.StraightenLockedTurn = -1; card.ForceContributionNegatedBattle = -1; card.AssignBowedTurn = -1; card.DestructionShieldTurn = -1; card.OpposedTurn = -1; card.ReturnAfterBattle = -1; // issue #850: every per-play stamp
+        card.PerformedActionFromTitles.Clear();
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
@@ -892,6 +912,7 @@ public sealed partial class MatchEngine
         Require(InPlay(card) && Definition(card).Type == CardType.Personality, "Choose your Personality in play.");
         Require(card.Dishonorable, "Only a Dishonorable Personality may perform Seppuku.");
         Require(!SeppukuBarredByPriceOfHonor(card), $"{Definition(card).Name} is not affected by the rulebook seppuku action this turn (The Price of Honor)."); // issue #503
+        Require(!SeppukuBarredByControl(card), $"{Definition(card).Name} will not commit seppuku while the Personality that took control of him stays bowed (P'an Ku)."); // issue #827
         // "May not perform actions" (issue #336, Mendon: even innate actions): Order Seppuku is the one action a Personality has of its own.
         Require(!ActionLocked(card), $"{Definition(card).Name} may not perform actions this turn.");
         Require(Keyword(card, "Samurai") || Keyword(card, "Courtier") || Keyword(card, "Shugenja"), "Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
@@ -1023,7 +1044,8 @@ public sealed partial class MatchEngine
     private PaymentOption[] PaymentOptionsExcluding(int playerId, int cost, IReadOnlySet<string>? exclude, PaymentSubject? paying = null)
     {
         // A source whose amount is the payer's own choice (Asahina Keigo, issue #477) is never suggested.
-        var sources = Producers(playerId, paying).Where(c => (exclude is null || !exclude.Contains(c.Id)) && !IsVariableGoldSource(c)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        var held = HeldActionSources(playerId);
+        var sources = Producers(playerId, paying).Where(c => (exclude is null || !exclude.Contains(c.Id)) && !held.Contains(c.Id) && !IsVariableGoldSource(c)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
         if (cost == 0) return [new([], 0, 0, 0)];
         // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
         // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
@@ -1062,6 +1084,11 @@ public sealed partial class MatchEngine
             // Issue #501: of two payments equally good, the one that bows fewer cards (a Reaction's Gold instead of the bow) is suggested first.
             .ThenBy(p => p.SourceIds.Count(id => !IsPaymentToken(id))).ThenBy(p => p.SourceIds.Length).ThenBy(p => string.Join(",", p.SourceIds), StringComparer.Ordinal).Take(24).ToArray();
     }
+
+    // Issue #825: the Gold sources the held (deferred) action of this player has already committed to. A payment SUGGESTED to a Reaction taken in its window never uses them again: they are spoken for
+    // (validation stays as it was, so the held action's own payment, and a redirect that must still fit it, are judged as before).
+    private IReadOnlySet<string> HeldActionSources(int playerId) =>
+        _state.PendingNegatableAbility is { } held && held.PlayerId == playerId && held.SourceIds is { Length: > 0 } ids ? ids.ToHashSet(StringComparer.Ordinal) : new HashSet<string>();
 
     private IEnumerable<CardInstance> Producers(int playerId, PaymentSubject? paying = null) => _state.Cards.Values.Where(c => ProducerControlledBy(c, playerId) && ProducerZone(c, Definition(c)) // issue #695 (PaymentHooks695.cs): a lent Holding, an Attached card, an in-play Strategy
         && !c.Bowed && (Definition(c).GoldProduction > 0 || MoneylenderTokens(c) > 0 || AlternateGoldSource(c, paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional, paying, c)));
@@ -1143,6 +1170,7 @@ public sealed partial class MatchEngine
             _state.ReactionOrderSkipped = null;
             if (pending.Type == "proclaim") ApplyPendingEntryEffects();
             Emit("reactionClosed", reason);
+            if (pending.Type is "bowReaction" or "moveReaction" or "nikutaiReaction" or "battleActionReaction" && OpenNextWatcherTurn(pending.Type)) return; // issue #898: the next watching card asks, the action carries on after the last
             // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
             if (pending.Type == "battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
             // The after-resolution window (issue #417, AfterResolution.cs): the resolution goes on with the winners' return home.
@@ -1181,6 +1209,9 @@ public sealed partial class MatchEngine
     private void ResolveDeferredAction(GameCommand pending)
     {
         var negated = _state.DeferredActionNegated; _state.DeferredActionNegated = false;
+        // Issue #825: a Gold source the held action named was bowed or destroyed while its window was open (the other player's Reaction). The Gold was produced when the action was announced, but this
+        // engine pays at resolution, so the payment can no longer be made: the action is aborted like one whose cost was blocked, rather than leaving a window nobody can close.
+        if (HeldPaymentBroken(pending)) { AbortActionForBlockedCost(pending, brokenPayment: true); _state.NegatedEffects.Clear(); return; }
         if (negated) ResolveNegatedAction(pending, ignoreCosts: P3CostsIgnored(pending)); else ExecuteAbilityEffects(pending); // Iron Will (issue #503): its costs ignored
         _state.NegatedEffects.Clear();
         RestoreTemporaryRemovals(TemporaryRemovals.Action);
@@ -1265,6 +1296,7 @@ public sealed partial class MatchEngine
         _state.UnresolvedBattlefields = Player(1 - command.PlayerId).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
         Emit("attackDeclared", $"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1 - command.PlayerId).Name}'s provinces.", command.PlayerId);
         PromoAttackPhaseCreated(command.PlayerId); // issue #653: Yozo's Inspiration, Diplomacy Talks
+        Wave835AttackDeclared(); // issue #835: Imperial Deployment straightens his unit
         CreateTwoFrontsBattlefields(command.PlayerId); // Two Fronts (issue #492, rulings pass R1): a second battlefield at the marked province.
         SetPhase(Phase.InfantryDeclaration, command.PlayerId);
     }
@@ -1371,6 +1403,7 @@ public sealed partial class MatchEngine
             PromoEmperorAssigned(card, cavalry); // Tsuruchi Nishima's Naval, Fudo's Charging tokens (issue #653, PromoEmperorPersonalities.cs)
             FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
             P4Assigned(card); // The Menacing Sky (issue #503, EmperorP4Watches.cs): "after the next time he assigns".
+            Wave829Assigned(card); // issue #829: Minor Blackmail's watch
             FireVeiledMenaceAssigned(card); // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn)" -- to either side.
             if (!isDefender) FireConsecrationWatches(card, assignment.Value); // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "assigns ... to an attacking army".
             // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
@@ -1546,6 +1579,8 @@ public sealed partial class MatchEngine
             case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
             // A Moving Battle (issue #741, Wave741.cs): its controller may move one of his opposed attacking Personalities to an adjacent unresolved battlefield.
             case Wave741Abilities.MovingBattle: if (BeginWave741MovingBattle(source)) return; break;
+            // Warded Premises (issue #835, Wave835.cs): mandatory, read now.
+            case Wave835Abilities.WardedNegate: Wave835WardedNegate(source); break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1658,6 +1693,7 @@ public sealed partial class MatchEngine
             if (!RehonorWinners(a)) { GainHonor(attacker, ResolutionHonor(attacker, defender, destroyedDefenders * 2), "Battle victory"); CheckEarthFlowsBonus(attacker, a); }
             var province = battleProvince;
             var destroyedProvince = province is not null && !aramasuSpares && !PerfectMomentBarsDestruction(attacker) && af > df + EffectiveProvinceStrength(province) && !RendBarsProvinceDestruction(attacker); // Rend the Soul (issue #498): "You will not destroy the province in this battle's resolution"
+            if (destroyedProvince && Wave829JizoReplacesDestruction(attacker, provinceIndex)) destroyedProvince = false;
             if (destroyedProvince) { DestroyProvince(defender, province!); NotePerfectMomentDestruction(attacker); }
             if (destroyedProvince) AfterProvinceDestroyedByResolution(attacker, defender, province!, a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow = destroyedProvince;
@@ -1909,9 +1945,9 @@ public sealed partial class MatchEngine
             // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
             // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
-            card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
-            card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed = false; card.Dishonorable = false;
-            card.StraightenBlockedTurn = -1; card.StraightenLockedTurn = -1; card.StraightenHolds.Clear(); card.PrintedHoldsSeeded = false; card.ForcePenaltiesNegatedTurn = -1; card.AssignedToAttackTurn = -1;
+            var wasDishonorable = card.Dishonorable; // R-082: he goes into a province face up, a public zone, so the status travels with him
+            ResetCardState(card);
+            card.Dishonorable = wasDishonorable;
             var owner = Player(card.OwnerId);
             if (!owner.Provinces.Any(p => !p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice = new("yourClanNeedsYouProvince", card.OwnerId, id, $"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");
@@ -2144,6 +2180,7 @@ public sealed partial class MatchEngine
     // touched them may skip ceding priority.
     private void NextAction(int playerId, bool stayWithPlayer = false)
     {
+        if (Wave835FoeDuelEnded()) return; // issue #835 (Wave835.cs): the duel The Empire's Foe Exposed opened in the Events Phase is over -- the Events Phase goes on, not an Action Phase action
         if (ActionPhaseJustEnded()) return; // P13 (RuleFlags.cs): the action ended the Action Phase itself, so priority already belongs to the phase that began
         _state.ConsecutivePasses = 0; _state.PriorityPlayerId = stayWithPlayer ? playerId : 1 - playerId; EndAttackerLeadIfCeded(playerId, stayWithPlayer);
         // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.
@@ -2233,7 +2270,9 @@ public sealed partial class MatchEngine
     // attacking-two/attacking-four Effects above.
     // A Force cap (issue #768, ForceCaps.cs) lowers the total below; it is applied here, once, so every reader of a Personality's Force sees it.
     private int PersonalityForce(CardInstance card) => ApplyForceCaps(card, PersonalityForceUncapped(card));
-    private int PersonalityForceUncapped(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
+    private int PersonalityForceUncapped(CardInstance card) => Math.Max(0, PersonalityForceRaw(card));
+    // The Force total before the floor at 0 and before any cap: what a Set measures its bonus or penalty from (core rules Glossary, "Set"), so the stated value is also right once a cap leaves or a penalty ends.
+    private int PersonalityForceRaw(CardInstance card) => Definition(card).Force + StatModifier(card, "Force") + TerrainForceAdjustment(card) + RegisteredPersonalityForce(card) + (IsAttacking(card) ? (Definition(card).Effect == "attacking-two" ? 2 : Definition(card).Effect == "attacking-four" ? 4 :
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2258,16 +2297,16 @@ public sealed partial class MatchEngine
         // effect, so it is Effect-keyed on the ATTACHED SPELL itself (the same shape
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
-        + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell).Sum(c => Definition(c).Effect == "scouring-flood-force" || Definition(c).Effect == "wave-persists-force" && Keyword(card, "Water") ? 2 : 0)
+        + StaticSpells(card).Sum(c => Definition(c).Effect == "scouring-flood-force" || Definition(c).Effect == "wave-persists-force" && Keyword(card, "Water") ? 2 : 0)
         // The Swell of Strength (oracle-l5r-8366, issue #460 batch 5): "This Shugenja has +2F" -- Scouring Flood's own Spell-Effect-keyed static bonus shape; always applies to whoever wields it (any Shugenja may equip it; only its Focus Effect is limited to Water Shugenja).
-        + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "swell-of-strength-force") * 2
+        + StaticSpells(card).Count(c => Definition(c).Effect == "swell-of-strength-force") * 2
         // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
-        + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "tsunami-force" && Keyword(card, "Shugenja")).Sum(_ => 6)
+        + StaticSpells(card).Where(c => Definition(c).Effect == "tsunami-force" && Keyword(card, "Shugenja")).Sum(_ => 6)
         + (Definition(card).Effect == "force-with-spell" && Attachments(card.Id).Any(c => Definition(c).Type == CardType.Spell) ? 1 : 0)
         + (Definition(card).Effect == "force-with-spell-2" && Attachments(card.Id).Any(c => Definition(c).Type == CardType.Spell) ? 2 : 0)
         // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
-        + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "embers-final-fire-force" && Keyword(card, "Fire"))
-        + 2 * Attachments(card.Id).Count(c => Definition(c).Effect == "death-defeated-force")
+        + StaticSpells(card).Count(c => Definition(c).Effect == "embers-final-fire-force" && Keyword(card, "Fire"))
+        + 2 * StaticSpells(card).Count(c => Definition(c).Effect == "death-defeated-force")
         + (card.Zone == Zone.Battlefield && Keyword(card, "Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r => r.Zone == Zone.Region && r.ProvinceIndex == (card.ProvinceIndex is int shrineBattlefield ? BattlefieldProvinceIndex(shrineBattlefield) : null) && Definition(r).Effect == "stone-hewed-shrine-force") ? 1 : 0)
         + (Definition(card).Effect == "force-if-enemy-dishonorable" && _state.Cards.Values.Any(c => c.OwnerId != card.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable) ? 2 : 0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
@@ -2299,9 +2338,9 @@ public sealed partial class MatchEngine
         // itself, with no attacking/defending gate at all.
         + (Definition(card).Effect == "force-per-other-magistrate-in-army" ? OtherMagistratesInArmy(card) : 0)
         // Immolation (oracle-l5r-10127, issue #453 batch 5): "This Shugenja has +3F, or +4F while he is Fire" -- Effect-keyed on the attached Spell, like tsunami-force above.
-        + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "immolation-force" && Keyword(card, "Shugenja")).Sum(_ => Keyword(card, "Fire") ? 4 : 3)
+        + StaticSpells(card).Where(c => Definition(c).Effect == "immolation-force" && Keyword(card, "Shugenja")).Sum(_ => Keyword(card, "Fire") ? 4 : 3)
         + RemAItemForceModifiers(card) // A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
-        + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card));
+        + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card);
     // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
     // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
     // "Magistrate" is a Keyword() check (printed or granted -- Justice of the Crane grants it), and the
@@ -2344,7 +2383,8 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + WlItemsMiscFollowerForce(card) /* A Fever in the Blood (issue #674) */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0, FollowerForceRaw(card));
+    private int FollowerForceRaw(CardInstance card) => Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + WlItemsMiscFollowerForce(card) /* A Fever in the Blood (issue #674) */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + RegisteredFollowerForce(card) + (Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2376,7 +2416,7 @@ public sealed partial class MatchEngine
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
     }) + UnitFollowerBoost(card) + AkioFollowerBoost(card) + AshigaruBattleBoost(card) + ArmyBattleMaidenBoost(card) + ZanshoFollowerBoost(card)
-        + XiaoFollowerBoost(card)); // Moto Xiao (Forgotten Legacy pass, issue #467 batch 2): "Followers in Xiao's army have +1F."
+        + XiaoFollowerBoost(card); // Moto Xiao (Forgotten Legacy pass, issue #467 batch 2): "Followers in Xiao's army have +1F."
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2436,7 +2476,7 @@ public sealed partial class MatchEngine
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card, "Elite") || Attachments(card.Id).Any(a => Definition(a).AttachGrantsEliteEffect
-        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card, wielderKeyword))
+        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card, wielderKeyword) && !(Definition(a).Type == CardType.Spell && SpellStaticSilenced(a)))
         // Incite the Phantoms (oracle-l5r-3732, issue #460 batch 5): "While this Shugenja is Earth, your Spirits contribute Force to their
         // army even while bowed" -- broader than Bo of Water's own single-card AttachGrantsEliteEffectWhileWielderHas: every Spirit the
         // controller owns, not only the Spell's own wielder (EmbersOfWarBatch5.cs, InciteThePhantomsActive).
@@ -2501,7 +2541,7 @@ public sealed partial class MatchEngine
             : Definition(card).Type is CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring ? Zone.FateDiscard
             : Zone.DynastyDiscard;
         card.FaceUp = true; card.Tokens.Clear();
-        if (Definition(card).Type == CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId, -Definition(card).PersonalHonor, "Dishonorable death", card);
+        if (Definition(card).Type == CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId, -Definition(card).PersonalHonor, DishonorableDeathReason, card);
         // Yasuki Tsujiken (oracle-l5r-9469): "Until Tsujiken leaves play..." -- his own watches end
         // the moment HE dies (a no-op RemoveAll for every other Personality, since TsujikenId only
         // ever matches marks placed by this exact CardInstance).
@@ -2973,7 +3013,7 @@ public sealed partial class MatchEngine
         FinishStraightening(player, []);
     }
     private string[] EligibleForOptionalStraighten(int playerId) => _state.Cards.Values.Where(c => c.OwnerId == playerId && (c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
-        && Definition(c).Effect == "choose-straighten" && c.StraightenBlockedTurn != _state.TurnNumber || RentatsuMayStayBowed(c))).Select(c => c.Id).ToArray();
+        && Definition(c).Effect == "choose-straighten" && c.StraightenBlockedTurn != _state.TurnNumber || RentatsuMayStayBowed(c) || PanKuMayStayBowedInPhase(c))).Select(c => c.Id).ToArray();
     private void ResolveDeclineStraighten(GameCommand command)
     {
         var pending = _state.PendingChoice!;
@@ -2986,6 +3026,7 @@ public sealed partial class MatchEngine
     }
     private void FinishStraightening(PlayerState player, string[] declinedIds)
     {
+        _w827StraightenPhase = true; // issue #827: the Straighten Phase's own straightening of P'an Ku was the controller's choice (declineStraighten)
         foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached))
         {
             if (declinedIds.Contains(card.Id)) Emit("straightenDeclined", $"{Definition(card).Name} was left bowed by choice.", card.OwnerId, card.Id);
@@ -3004,6 +3045,7 @@ public sealed partial class MatchEngine
         // Chi-token path) still fires immediately if this brings the host to 0 or below.
         foreach (var infiltrator in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "cultist-infiltrator").ToArray())
             CreateToken(Card(infiltrator.AttachedTo!), "Cultist", infiltrator.Id, "Chi", -1);
+        _w827StraightenPhase = false;
         EventsPhase(player);
     }
     private void EventsPhase(PlayerState player)
@@ -3230,6 +3272,7 @@ public sealed partial class MatchEngine
     {
         if (RestrictionDelaysCelestial(player, province, card)) return false; // P11 (CardRestrictions.cs): a locked province's Celestial enters when the next turn begins
         province.CardId = null; card.ProvinceIndex = null;
+        Wave829CelestialRevealed(player, card); // issue #829: Shrine to the Heavens asks only when a Celestial is revealed in a Province
         var paused = EnterCelestialPlayCore(player, card, pauseReveal);
         Refill(player, province);
         return paused;
@@ -3237,7 +3280,7 @@ public sealed partial class MatchEngine
     // The entry itself (issue #667: The Sacred Rosary of the Constrictors puts a Celestial into play with no province): it replaces the controller's other Celestials and runs the entry traits.
     // P6 (AfterFacts.cs): a registered entry decision (Natsu-Togumara's choice of a Personality, Shrine to the Heavens' choice of a Celestial to keep) is asked after the Celestial is in play; when one
     // spares a card, the discard of the other Celestials waits for the answers. Returns true when the Events Phase reveal paused on the first decision (pauseReveal).
-    private void EnterCelestialPlay(PlayerState player, CardInstance card) => EnterCelestialPlayCore(player, card, pauseReveal: false);
+    private void EnterCelestialPlay(PlayerState player, CardInstance card) { Wave829CelestialRevealed(player, null); EnterCelestialPlayCore(player, card, pauseReveal: false); }
 
     private bool EnterCelestialPlayCore(PlayerState player, CardInstance card, bool pauseReveal)
     {
@@ -3249,6 +3292,7 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Celestial;
         Emit("celestialEnteredPlay", $"{Definition(card).Name} entered play.", player.Id, card.Id);
         RecordFact(FactKinds.CelestialEntered, player.Id, card.Id); // P6 (AfterFacts.cs)
+        Wave829CelestialEntered(player, card); // issue #829 (Wave829.cs): Benten's Blessing queues its choice of Personalities
         ApplyDaigotsusGuidanceTrait(); // Daigotsu's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a Celestial enters play (including this one): Discard all Kami Celestials in play."
         if (hadRyoshun && Definition(card).Effect != RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
         return asks.Count > 0 && QueueCelestialEntryAsks(player, card, asks, pauseReveal);
@@ -3288,6 +3332,14 @@ public sealed partial class MatchEngine
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength, max) : strength;
     }
+    // The net change from the printed strength that the view shows (ProvinceView.StrengthModifier). A destroyed province has none; one without a recorded printed strength cannot say.
+    private int StrengthModifierOf(ProvinceState province) => province.Destroyed || province.PrintedStrength <= 0 ? 0 : EffectiveProvinceStrength(province) - province.PrintedStrength;
+    private string[]? StrengthNotesOf(ProvinceState province)
+    {
+        if (StrengthModifierOf(province) == 0) return null;
+        var notes = TimedProvinceStrengthParts(province).Where(part => part.Amount != 0).Select(part => $"{part.Source} {part.Amount:+#;-#}").ToArray();
+        return notes.Length == 0 ? null : notes;
+    }
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
@@ -3313,6 +3365,7 @@ public sealed partial class MatchEngine
     {
         if (player.FateDeck.Count == 0) { Emit("deckEmpty", $"{player.Name}'s Fate deck is empty; no card drawn.", player.Id); return; }
         if (P2CardIntoHandBlocked(player.Id)) return; // issue #503: The Scorpion Wall is Finished
+        if (Wave835DefersDraw(player)) return; // issue #835: the Heavens' Blessing makes a card an own Strategy draws a 2 Gold payment
         var id = player.FateDeck[0]; player.FateDeck.RemoveAt(0); player.Hand.Add(id);
         Card(id).Zone = Zone.Hand;
         NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5): "an action that put any cards into another player's hand".
@@ -3359,10 +3412,21 @@ public sealed partial class MatchEngine
         var def = Definition(source);
         return (rule.Clan is not null && HasClanAffiliation(source, rule.Clan)) || (rule.Fate && IsFateCardType(def.Type));
     }
+    /// <summary>The reason a Dishonorable Personality's death costs its controller Honor. That loss is the rulebook's (core rules Glossary, "Dead / Destroy"), not an effect of any card or action.</summary>
+    internal const string DishonorableDeathReason = "Dishonorable death";
+    // True while GainHonor works out a rulebook change (a Dishonorable death's loss): the card and action in progress did not cause it, so every channel that asks "from a card's effect" /
+    // "from the action's effects" stays out of it, the stronghold Honor-loss immunities included (2026-10-13 ruling).
+    private bool _rulebookHonorChange;
     private void GainHonor(int playerId, int amount, string reason, CardInstance? source = null)
     {
+        var outer = _rulebookHonorChange;
+        _rulebookHonorChange = reason == DishonorableDeathReason;
+        try { GainHonorCore(playerId, amount, reason, source); } finally { _rulebookHonorChange = outer; }
+    }
+    private void GainHonorCore(int playerId, int amount, string reason, CardInstance? source)
+    {
         if (amount == 0) return;
-        if (PromoEmperorHonorLossPrevented(playerId, amount, source)) return; // Den of Iniquity (issue #653, PromoEmperorHoldings.cs): "Other players will not lose Honor from your Spells."
+        if (!_rulebookHonorChange && PromoEmperorHonorLossPrevented(playerId, amount, source)) return; // Den of Iniquity (issue #653, PromoEmperorHoldings.cs): "Other players will not lose Honor from your Spells."
         (playerId, amount) = ApplyHonorChangeHooks(HonorChangeStage.Standing, playerId, amount, reason, source); // P14 (HonorModifiers.cs): standing modifiers, so the window below opens with the modified amount
         if (amount == 0) return;
         OfferHonorChangeWindow(playerId, amount, reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
@@ -3374,7 +3438,8 @@ public sealed partial class MatchEngine
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
         amount = ForgottenTempleHonorChange(playerId, amount, reason, source);
         if (amount == 0) return;
-        if (amount < 0 && !CurrentActionUnnegatable() && HonorLossNegated(playerId, source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
+        // A Dishonorable death's loss is the rulebook's, not a card's: "You do not lose Honor from cards you own" does not prevent it (official rulings on Fields of the Dead, The Fingers of Bone and The Shadowed Dojo; Mendon, 2026-10-13).
+        if (amount < 0 && !_rulebookHonorChange && !CurrentActionUnnegatable() && HonorLossNegated(playerId, source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
         {
             Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated.", playerId, source?.Id);
             return;
@@ -3383,21 +3448,21 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
-        if (amount < 0 && !CurrentActionUnnegatable() && HonorLossNegatedWithEffects(playerId))
+        if (amount < 0 && !_rulebookHonorChange && !CurrentActionUnnegatable() && HonorLossNegatedWithEffects(playerId))
         {
             Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.", playerId, source?.Id);
             return;
         }
         // Unimpeachable Name played in the window before this loss (Mendon's R4 ruling): the same reduction, for the action it was played on.
-        if (amount < 0 && playerId == _state.UnimpeachablePlayerId && _state.UnimpeachableActionKey is { } unimpeachableKey && unimpeachableKey == CurrentActionKey())
+        if (amount < 0 && !_rulebookHonorChange && playerId == _state.UnimpeachablePlayerId && _state.UnimpeachableActionKey is { } unimpeachableKey && unimpeachableKey == CurrentActionKey())
         {
             var reducedByName = Math.Min(0, amount + 3);
             Emit("honorLossReduced", $"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name{(reducedByName == 0 ? " to 0" : "")}.", playerId, source?.Id);
             amount = reducedByName;
             if (amount == 0) return;
         }
-        if (RenyuReducesLoss(playerId, amount, reason)) return; // Kuni Renyu (issue #503, EmperorP6.cs): Honor losses from an action that targeted him are reduced to 0.
-        if (amount < 0 && playerId == _state.HonorLossReductionPlayerId)
+        if (!_rulebookHonorChange && RenyuReducesLoss(playerId, amount, reason)) return; // Kuni Renyu (issue #503, EmperorP6.cs): Honor losses from an action that targeted him are reduced to 0.
+        if (amount < 0 && !_rulebookHonorChange && playerId == _state.HonorLossReductionPlayerId)
         {
             var reduced = Math.Min(0, amount + 3);
             if (reduced == 0) { Emit("honorLossReduced", $"{Player(playerId).Name}'s Honor loss from {reason} was reduced to 0 by Unimpeachable Name.", playerId, source?.Id); return; }
@@ -3412,7 +3477,7 @@ public sealed partial class MatchEngine
         if (amount == -1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId, reason)) return; // issue #501: an unnegatable action's loss is not negated
         // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
         if (amount < 0 && !CurrentActionUnnegatable() && TenThousandTemplesNegates(playerId, amount, reason)) return; // issue #501: nor by Ten Thousand Temples
-        amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
+        if (!_rulebookHonorChange) amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
         amount = TfStrategiesBHonorLoss(playerId, amount, reason, source); // Mercantile Conflict (TfStrategiesB.cs): "the next two Honor losses from your cards are increased by 1 each".
         var player = Player(playerId); player.Honor += amount;
         if (amount < 0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
@@ -3420,7 +3485,7 @@ public sealed partial class MatchEngine
         NoteBattleResolutionHonor(playerId, amount, reason); // On (The Shadow's Embrace pass, issue #476 batch 6).
         if (player.Honor <= -20) player.DishonorLossPending = true;
         Emit("honorChanged", $"{player.Name}: {amount:+#;-#;0} Honor ({reason}).", playerId, Amount: amount);
-        if (amount < 0) P4HonorLost(playerId, source); // No Time for Games (issue #503, EmperorP4More.cs): "after the next time (this turn) you lose Honor from another player's card effect".
+        if (amount < 0 && !_rulebookHonorChange) P4HonorLost(playerId, source); // No Time for Games (issue #503, EmperorP4More.cs): "after the next time (this turn) you lose Honor from another player's card effect".
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
         // single shared choke point every Honor change already funnels through here means "may be
         // negated, modified, or redirected by cards that affect honor gains" (the user's own
@@ -3470,6 +3535,7 @@ public sealed partial class MatchEngine
     private void Win(int winner, string reason) { _state.WinnerId = winner; _state.VictoryReason = reason; _state.Phase = Phase.Finished; _state.PendingChoice = null; Emit("matchFinished", $"{Player(winner).Name} wins: {reason}.", winner); }
     private void SetPhase(Phase phase, int priority)
     {
+        var phaseFrom = _state.Phase;
         if (PhaseFamily(phase) != PhaseFamily(_state.Phase)) ApplyDelayedEffectsAtPhaseEnd(_state.Phase); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the end of the phase that is ending.
         OnPhaseBoundary(_state.Phase, phase); // On (The Shadow's Embrace pass, issue #476 batch 6): the end of one phase and the start of the next.
         ResetMechDPhaseRecords(_state.Phase, phase); // Issue #501, mechanics group D (EmperorMechD.cs): the per-phase cards-into-hand records.
@@ -3501,9 +3567,11 @@ public sealed partial class MatchEngine
         if (phase == Phase.Dynasty && !DynastyBeforeAttack()) StraightenWaveMen(); // issue #667 (PhaseOrder.cs): with the Dynasty Phase first it is not the end of the Attack Phase
         NotePhaseOrder(phase); // issue #667: the phase-order marker
         _state.Phase = phase; _state.PriorityPlayerId = priority; _state.ConsecutivePasses = 0; Emit("phaseChanged", $"Phase: {phase}.");
+        FirePhaseBegins(phaseFrom, phase); // issue #816 (Wave816.cs): "after each phase begins" traits
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if (phase == Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
         if (phase == Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins, EndPhaseIsOwners); // issue #498: "YOUR End Phase" -- only the active player's delayed effects are due
+        if (phase == Phase.Dynasty) Wave821OpenDynastyWindow(); // issue #821 (Wave821.cs): the Governor's Estate's Reaction, after everything else that begins with the phase
     }
     private void Emit(string type, string message, int? playerId = null, string? cardId = null, int? Amount = null) => _state.Events.Add(new(_state.Events.Count + 1, type, message, playerId, cardId, Amount));
     private PlayerState Player(int id) => _state.Players[id];
@@ -3511,7 +3579,12 @@ public sealed partial class MatchEngine
     private static CardDefinition Definition(CardInstance card) => card.Printed ?? CardCatalog.Get(card.DefinitionId);
     private static void Require(bool condition, string message) { if (!condition) throw new RuleViolation(message); }
     private sealed class RuleViolation(string message) : Exception(message);
-    private static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
+    // Issue #863: a deep copy equal to the JSON round trip below (StateCloner.cs reproduces its semantics from the serializer's own contract), several times faster.
+    internal static T Copy<T>(T value) => ReferenceJsonCopyForTests ? CopyViaJson(value) : StateCloner.Clone(value)!;
+    /// <summary>Tests only: run this thread's engines on the original JSON copy, the reference StateClonerTests plays the fast copy against.</summary>
+    [ThreadStatic] internal static bool ReferenceJsonCopyForTests;
+    /// <summary>The original copy, kept as the reference StateClonerTests compares Copy against.</summary>
+    internal static T CopyViaJson<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
 
     // Card ids are handed out in a seeded permutation, not deck-list order: a face-down card's id (offered in a target list, an action
     // command or a view) must not reveal which deck-list entry it is. A separate generator keeps the setup shuffles' sequence unchanged.

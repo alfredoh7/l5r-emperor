@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Every hand-rolled reset on leaving play now calls ResetCardState; it covers all per-play stamps; a reflection test fails if a CardInstance property is neither reset nor listed as kept.",
+  "validation": "bash tools/check.sh --skip-client passed; mutation (dropped reset) detected",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/850",
+  "branch": "claude/850-leave-play-path",
+  "updated": "2026-10-12T02:30:49.339900+00:00"
+}

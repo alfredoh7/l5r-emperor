@@ -297,8 +297,8 @@ internal static class EmperorRulingR1Tests
         s.CurrentBattleProvince = 1; s.UnresolvedBattlefields = [0, 1, 2, 3, Extra, Extra + 1];
         var e = MatchEngine.FromTestState(s);
         Eq(string.Join(",", e.AdjacentBattlefieldsForTest(Extra)), "", "a battlefield without a province has no adjacent battlefield");
-        Eq(string.Join(",", e.AdjacentBattlefieldsForTest(1)), $"0,2,{Extra + 1}", "province 1's battlefield is adjacent to province 0's and to province 2's -- the additional battlefield at province 2 included -- but never to the one without a province");
-        Eq(string.Join(",", e.AdjacentBattlefieldsForTest(Extra + 1)), "1,3", "an additional battlefield at province 2 is adjacent to the battlefields of provinces 1 and 3, not to another battlefield at its own province");
+        Eq(string.Join(",", e.AdjacentBattlefieldsForTest(1)), "0,2", "province 1's battlefield is adjacent to province 0's and to province 2's primary (the nearer end of province 2's line), never to the one without a province (R-081)");
+        Eq(string.Join(",", e.AdjacentBattlefieldsForTest(Extra + 1)), "2,3", "an additional battlefield at province 2 is the rightmost of that province's line: adjacent to its sibling (province 2's primary) and to province 3's battlefield, not to province 1's (R-081)");
         // A destroyed province slides its neighbours together, and its own battlefield is then without a province.
         var t = Table(Phase.Battle, 1);
         t.Players[0].Provinces[1].Destroyed = true;

@@ -5,8 +5,9 @@ namespace L5R.Client;
 public partial class TitleMenu : Control
 {
     public Action PracticeSetup = () => { };
+    /// <summary>Starts the tutorial once there is one; until then the menu entry says so (the tutorial is being built).</summary>
+    public Action? Tutorial;
     public Action<int> StartMatch = _ => { };
-    public Action DuelDemo = () => { };
     public Action PrivateMatch = () => { }, Library = () => { }, DeckBuilder = () => { }, Resume = () => { }, PreferencesChanged = () => { };
     public Func<bool> CanResume = () => false;
     public Func<bool> IsOnline = () => false;
@@ -119,17 +120,16 @@ public partial class TitleMenu : Control
         Clear("play");
         if (CanResume()) Entry("Return to table", Resume, 44);
         Entry("Practice", PracticeSetup);
-        Entry("Duel Demo", BeginDuelDemo, 43);
+        Entry("Tutorial", BeginTutorial, 43);
         Entry("Back", ShowMain, 43);
         _message.Text = "Choose saved decks or presets for a match against the practice opponent.";
         FocusFirst();
     }
-    private void BeginDuelDemo()
+    private void BeginTutorial()
     {
-        if (!IsOnline()) { DuelDemo(); return; }
-        Clear("leave-for-duel");
-        Entries.AddChild(Palette.Wrapped("Leave your private table to open Duel Demo? This disconnects your seat; it does not concede.", 25));
-        Entry("Leave table and open demo", DuelDemo, 39);
+        if (Tutorial is { } start) { start(); return; }
+        Clear("tutorial");
+        Entries.AddChild(Palette.Wrapped("The tutorial is being built. It will teach the game one step at a time.", 25));
         Entry("Back", ShowPlay, 43); FocusFirst();
     }
     private void Begin(int seat)
@@ -183,6 +183,7 @@ public partial class TitleMenu : Control
         Toggle("VSync", Preferences.VSync, value => Preferences.VSync = value);
         Toggle("Reduced motion", Preferences.ReducedMotion, value => Preferences.ReducedMotion = value, "Keeps the lantern steady.");
         Toggle("Paused Animation", Preferences.PausedAnimation, value => Preferences.PausedAnimation = value, "Holds a card your opponent plays on screen until you press Proceed (or Enter).");
+        Toggle("Flip Dynasty Cards", Preferences.FlipDynastyCards, value => Preferences.FlipDynastyCards = value, "In the Events Phase, shows each Dynasty card being turned face-up, one at a time.");
         var strength = Palette.Text($"Lantern flicker · {Preferences.LanternStrength:P0}", 22); Entries.AddChild(strength);
         var slider = new HSlider { MinValue = 0, MaxValue = 1, Step = .05, Value = Preferences.LanternStrength, Modulate = Palette.Gold, CustomMinimumSize = new Vector2(0, 28), TooltipText = "Strength of the slow lantern light across the screen and room. Approved default: 85%." }; Entries.AddChild(slider);
         slider.ValueChanged += value => { Preferences.LanternStrength = (float)value; strength.Text = $"Lantern flicker · {Preferences.LanternStrength:P0}"; Changed(); };

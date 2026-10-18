@@ -253,9 +253,15 @@ public partial class InkMatSections : Control
             var maximum = new Vector2(points.Max(p => p.X), points.Max(p => p.Y));
             return new Rect2(minimum, maximum - minimum);
         }
+        // Issue #875: the hotspots only move with the camera, the targets or a section's reveal, so a still table skips the rebuild (it re-runs when animating, when the view changes, and four times a second as a safety net).
+        private Transform2D _lastTransform; private Vector2 _lastNear, _lastFar; private bool _lastVisible; private int _lastCount = -1; private double _sinceFull = 99;
         public override void _Process(double delta)
         {
             if (!IsInstanceValid(owner) || !owner.IsInsideTree()) return;
+            _sinceFull += delta;
+            var transform = GetGlobalTransform(); var near = project(Vector2.Zero); var far = project(new Vector2(640, 360)); var visible = owner.IsVisibleInTree();
+            if (_sinceFull < .25 && !owner.IsAnimating && transform == _lastTransform && near == _lastNear && far == _lastFar && visible == _lastVisible && owner.SectionCount == _lastCount) return;
+            _sinceFull = 0; _lastTransform = transform; _lastNear = near; _lastFar = far; _lastVisible = visible; _lastCount = owner.SectionCount;
             foreach (var target in owner.Targets)
             {
                 if (!_hotspots.TryGetValue(target.Id, out var hit))

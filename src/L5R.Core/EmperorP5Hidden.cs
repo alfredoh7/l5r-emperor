@@ -116,7 +116,7 @@ public sealed partial class MatchEngine
             {
                 var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, AbilityId: id, CardIds: set.Length == 0 ? null : set);
                 string? error = null;
-                try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+                error = TryValidateAbility(command);
                 yield return new("useAbility", ability.Label + (set.Length == 0 ? "" : " · " + string.Join(" and ", set.Select(DescribeHiddenProvince))), error is null, error, error is null ? command : null, source?.Id, set);
             }
             yield break;
@@ -129,7 +129,7 @@ public sealed partial class MatchEngine
             {
                 var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, TargetId: holding.Id, AbilityId: id, Choice: choice);
                 string? error = null;
-                try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+                error = TryValidateAbility(command);
                 var what = choice == "gold" ? "its Gold-producing trait" : AbilityCatalog.All[choice].Label;
                 yield return new("useAbility", $"{ability.Label} · {Definition(holding).Name}: {what}", error is null, error, error is null ? command : null, source?.Id, [holding.Id]);
             }
@@ -321,10 +321,8 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case EmperorP5HiddenAbilities.SearchingLook:
-                Require(player.Id != _state.ActivePlayerId, "Only the Defender may play this.");
                 break;
             case EmperorP5HiddenAbilities.ScoutingPass:
-                Require(player.Id == _state.ActivePlayerId, "Only the Attacker may play this.");
                 break;
             case EmperorP5HiddenAbilities.StolenAbility:
                 Require(command.TargetId is { } abilityHolding && _state.Cards.ContainsKey(abilityHolding) && command.Choice is { } copied && StolenAbilityChoices(Card(abilityHolding)).Contains(copied),

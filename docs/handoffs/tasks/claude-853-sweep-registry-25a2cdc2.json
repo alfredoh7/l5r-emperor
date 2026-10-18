@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Post-command sweeps are now three ordered OrderedHooks registries (CommandSweeps.cs) with the order pinned by a test; the pre-command spell-copy sweep runs on the working copy so a rejected command mutates nothing.",
+  "validation": "bash tools/check.sh --skip-client passed",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/853",
+  "branch": "claude/853-sweep-registry",
+  "updated": "2026-10-12T02:47:49.427197+00:00"
+}

@@ -18,6 +18,7 @@ internal static class BattleAbsentMovesTests
             ("Move-to-battle: with no unit anywhere, EITHER player may play a move-to-battle action from hand (Attacker and Defender), then the other may too; pass stays available", EitherPlayerWithoutPresence),
             ("Move-to-battle: an action that moves a Personality HOME is not one -- it keeps the ordinary presence rule, and only a unit at the battlefield enables it", HomeMoveNeedsPresence),
             ("Move-to-battle: every marked real card is offered, enabled, to a player with no unit at the battlefield (the ones the old id list missed included)", RealCardsOfferedWithoutPresence),
+            ("Conditional moves (Michi, Takasho, Rikyou): with no enemy unit at the battlefield when they resolve they do nothing instead of being refused, so closing a reaction window never fails (issue #967)", ConditionalMoveFizzles),
             ("The Earth Flows: Defender only; the Attacker is shown disabled and rejected, and the attachment's wielder need not be at the battlefield", EarthFlowsDefenderOnly),
         ];
         runner.Run("battle-absent-moves", tests);
@@ -130,6 +131,28 @@ internal static class BattleAbsentMovesTests
     }
 
     // ---- either player, no presence ---------------------------------------------------------------------------
+    private static void ConditionalMoveFizzles()
+    {
+        foreach (var ability in new[] { "michi-move", "takasho-move", "rikyou-move" })
+        {
+            var definition = CardCatalog.Cards.Values.First(c => !c.ScenarioOnly && c.Abilities?.Contains(ability) == true).Id;
+            // Announced with nobody opposing: still refused (the rule is unchanged).
+            var s = Battle(0, priority: 0);
+            var mover = Add(s, definition, 0, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: mover.Id, AbilityId: ability));
+            // Announced while opposed, and the opposition has gone by the time it resolves (what a reaction window that closes later allows): resolution must do nothing and not throw,
+            // because a refused command there would leave the player's only offered action, passing the window, refused for good.
+            s = Battle(0, priority: 0);
+            mover = Add(s, definition, 0, Zone.Home);
+            e = MatchEngine.FromTestState(s); // no enemy unit at the battlefield any more
+            var resolve = typeof(MatchEngine).GetMethod("ExecuteAbilityEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+            resolve.Invoke(e, [new GameCommand("useAbility", 0, e.Version, CardId: mover.Id, AbilityId: ability), false]);
+            Eq(e.State.Cards[mover.Id].Zone, Zone.Home, $"{ability}: nothing moved");
+            Check(e.State.Events.Any(ev => ev.Type == "abilityFizzled" && ev.CardId == mover.Id), $"{ability}: the fizzle is in the log");
+        }
+    }
+
     private static void EitherPlayerWithoutPresence()
     {
         foreach (var attacker in new[] { 0, 1 })

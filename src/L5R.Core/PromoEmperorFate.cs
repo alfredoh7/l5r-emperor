@@ -170,7 +170,7 @@ public sealed partial class MatchEngine
 
     // Might of the Sun: "This Shugenja has +4F." A static trait of the Spell while it is attached.
     private int PromoMightForce(CardInstance card) =>
-        Definition(card).Type == CardType.Personality ? 4 * Attachments(card.Id).Count(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == PromoEmperorFateAbilities.MightEffect) : 0;
+        Definition(card).Type == CardType.Personality ? 4 * StaticSpells(card).Count(a => Definition(a).Effect == PromoEmperorFateAbilities.MightEffect) : 0;
 
     // ---- Sinkhole's obstacles ------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -192,7 +192,7 @@ public sealed partial class MatchEngine
             PromoFate.PhaseReturns.Remove(due);
             if (!_state.Cards.TryGetValue(due.CardId, out var strategy) || strategy.Zone != Zone.FateDiscard) continue; // it has left the discard pile some other way
             var owner = Player(due.PlayerId);
-            strategy.Zone = Zone.Hand; strategy.FaceUp = true; owner.Hand.Add(strategy.Id); strategy.AbilityUses.Clear();
+            strategy.Zone = Zone.Hand; strategy.FaceUp = true; owner.Hand.Add(strategy.Id); ResetCardState(strategy);
             NoteCardIntoHand(owner.Id);
             Emit("returnedToHand", $"{Definition(strategy).Name} returns to {owner.Name}'s hand before the phase ends.", owner.Id, strategy.Id);
         }
@@ -252,7 +252,7 @@ public sealed partial class MatchEngine
                 return false;
             case PromoEmperorFateAbilities.Adroitness:
                 Straighten(target!);
-                if (source is not null && source.Zone is Zone.Hand or Zone.FateDiscard)
+                if (source is not null && (PlayedFromHand(source) || source.Zone == Zone.FateDiscard))
                     PromoFate.PhaseReturns.Add(new PromoPhaseReturn(source.Id, player.Id, PhaseFamily(_state.Phase)));
                 return false;
             default:

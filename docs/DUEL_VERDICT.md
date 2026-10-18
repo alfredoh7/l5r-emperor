@@ -22,7 +22,7 @@ The engine appends a defaulted `ResolutionReason` to its retained result, record
 - A separate real-time Apple M1 Max run measures **4,487 completed frames** after startup: median **8.390 ms**, P95 **13.815 ms**, P99 **14.431 ms**, max **37.358 ms**. There was **one frame above 33.34 ms during focus selection**, and none during the ending phases. Screenshot/movie encoding is excluded. This does not establish universal performance or certify AAA art quality.
 - Development launcher regenerated; strict artwork preflight, build and headless startup pass. The native suite exercises Play-menu entry. Unrelated project settings and catalogue imports are preserved and excluded.
 
-[Evidence and reports](screenshots/duel-demo/verdict/validation.json) · [Native result](screenshots/duel-demo/verdict/result.png) · [Opposite seat](screenshots/duel-demo/verdict/opposite-seat.png) · [Double loss](screenshots/duel-demo/verdict/both-lose.png) · [Performance](screenshots/duel-demo/verdict/performance.json)
+[Evidence and reports](archive/duel-demo/screenshots/verdict/validation.json) · [Native result](archive/duel-demo/screenshots/verdict/result.png) · [Opposite seat](archive/duel-demo/screenshots/verdict/opposite-seat.png) · [Double loss](archive/duel-demo/screenshots/verdict/both-lose.png) · [Performance](archive/duel-demo/screenshots/verdict/performance.json)
 
 The approved source and native image were compared at the same width. Original published scans and engine-provided text intentionally replace illustrative concept card text; the result is not claimed to be a pixel-identical render.
 

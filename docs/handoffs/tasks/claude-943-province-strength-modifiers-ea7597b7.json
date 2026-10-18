@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Every province strength change now shows on the board: Core projects ProvinceView.StrengthModifier (current minus printed strength, all sources) and StrengthNotes (named timed effects); the Dark Experiments strength marker now renders any non-zero modifier, keeping the Dark Experiments Gold Production coin for marked provinces. Fixes Willing Spirits' permanent +2 never appearing.",
+  "validation": "bash tools/check.sh --skip-client passed (extended Province strength audit case covers permanent, timed, naming, floor, both seats); bash tools/check.sh --client-only built and smoke-ran. No native graphical capture of the marker was taken.",
+  "remaining": "Native visual check of a +2 and a timed modifier on own and opponent provinces; confirm the marker does not overlap the defender strength placard during a battle.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/943",
+  "branch": "claude/943-province-strength-modifiers",
+  "updated": "2026-10-14T00:50:58.958060+00:00"
+}

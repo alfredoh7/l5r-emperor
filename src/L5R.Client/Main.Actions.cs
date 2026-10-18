@@ -7,6 +7,15 @@ public partial class Main
 {
     private void RenderInspector()
     {
+        RenderInspectorBody();
+        // A hand card's other actions stay one click away from any draft of its play (targets, attack targets, slots, movement), not only from the card.
+        if (_chosen is { Type: "equip" or "playStrategy" or "useAbility", CardId: { } playedId } chosen && View.PendingChoice is null && IsOwnHandCard(playedId) && FindCard(playedId) is { } playedCard)
+            AddPlayAlternatives(_inspector, playedCard, PlayKey(chosen));
+    }
+
+    private void RenderInspectorBody()
+    {
+        if (_chosen is null) _performerPicked = false; // the choosing flow starts afresh with each drafted action
         BeginDiscardIfPending(); // issue #791: a required discard is announced and starts as a click-to-choose selection in the hand
         if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
@@ -103,7 +112,7 @@ public partial class Main
             // Copies use ordinary engine actions; keep those controls near their result summary.
             if (_chosen is null && View.PendingChoice is null && CardChanges.Entries(_selected).Any(e => e.Copied))
             {
-                foreach (var action in Actions.Where(a => a.CardId == _selected.Id && a.Type is not "proclaim")) AddAction(details, action);
+                foreach (var action in Actions.Where(a => a.CardId == _selected.Id && a.Type is not "proclaim" && Listable(a))) AddAction(details, action);
                 cardActionsRendered = true;
             }
             var artwork = CardTile.Artwork(def);
@@ -142,13 +151,13 @@ public partial class Main
         if (View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction")
         {
             RenderReactionTarget();
-            foreach (var reaction in Actions.Where(a => a.Type == "useAbility")) AddAction(_inspector, reaction);
+            foreach (var reaction in Actions.Where(a => a.Type == "useAbility" && Listable(a))) AddAction(_inspector, reaction);
             return;
         }
         if (_selected is { } supportCard && IsSupportCard(supportCard) && View.PendingChoice is null)
         { RenderSupportActions(supportCard); return; }
         if (!cardActionsRendered)
-            foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
+            foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim" && Listable(a))) AddAction(_inspector, action);
         if (_selected is { ActionLocked: true, Definition: not null } inspected)
             _inspector.AddChild(SidebarSkin.Button("Inspect card", () => InspectLockedCard(inspected)));
         if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
@@ -156,7 +165,7 @@ public partial class Main
             var action = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
             if (action is not null) _inspector.AddChild(SidebarSkin.Button("Assign units…", () => Choose(action), true));
         }
-        foreach (var action in Actions.Where(a => a.Type is "selectBattle" or "discardHand" || a.Type == "useAbility" && a.CardId is null)) AddAction(_inspector, action);
+        foreach (var action in Actions.Where(a => a.Type is "selectBattle" or "discardHand" || a.Type == "useAbility" && a.CardId is null && Listable(a))) AddAction(_inspector, action);
         AddDecisionReviewNavigation();
     }
 
@@ -349,7 +358,7 @@ public partial class Main
 
     private int SelectedProduction() => _chosen is not null && QuoteFor(_chosen) is { Sources: { } methods }
         ? methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced)
-        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
+        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self)); // opponent-payment panel: its own card list
 
     private void RenderAssignments()
     {
@@ -357,7 +366,7 @@ public partial class Main
         var reviewedVersion = action.Command?.ExpectedVersion ?? View.Version;
         _inspector.AddChild(Palette.Text("ASSIGN YOUR UNITS", 12, Palette.Gold));
         if (_assignmentUnit is string selected && FindCard(selected) is { } unit)
-            _inspector.AddChild(Palette.Wrapped("Selected: " + ShortName(unit) + "", 16, Palette.Crane));
+            _inspector.AddChild(Palette.Wrapped("Selected: " + ShortName(unit) + (_assignments.ContainsKey(selected) ? " · click the unit again to send it home" : ""), 16, Palette.Crane));
         foreach (var id in action.TargetIds ?? [])
         {
             var card = FindCard(id)!;
@@ -396,14 +405,20 @@ public partial class Main
         var target = command.TargetId; // issue #581: no default; Confirm waits for the player's pick when the action names legal targets
         var needsTarget = targets.Length > 0 && target is null;
         var needsProvince = IsProvinceTarget(action) && command.Province is null; // the player picks the province
+        if (PerformerStepActive) { RenderPerformerStep(); return; } // choosing flow (issue #1004): the performer is the first, explicit choice
         _inspector.AddChild(Palette.Wrapped(Placard(action, IsProvinceTarget(action) ? WithoutProvinceOwner(action.Label) : null), 17, Palette.Gold));
         if (needsTarget) _inspector.AddChild(Palette.Wrapped("Next: choose a target. Pick a highlighted card on the table or in your hand, or a row in the list below.", 17, Palette.Gold));
         else if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table or below. Review the arrow, then use the action button.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
         if (!ReactionFlowOwnsControls && PerformerClicks().Count > 0) _inspector.AddChild(Palette.Wrapped("Choose the performing Personality: click a highlighted Personality on the table.", 15, Palette.Gold)); // issue #793
-        if (IsProvinceTarget(action)) RenderProvincePicker(action);
-        if (targets.Length > 0)
+        // Choosing flow (issue #1004): only the first unanswered question is asked; answered ones leave the sidebar and appear in the summary.
+        var needsPlayer = PlayerTargetActive && !PlayerPicked; // issue #960: "choose a player" is the player's decision, never a default
+        var askProvince = needsProvince; var askPlayer = !askProvince && needsPlayer; var askTarget = !askProvince && !askPlayer && needsTarget;
+        var answeredAll = !needsProvince && !needsPlayer && !needsTarget;
+        if (IsProvinceTarget(action) && (askProvince || answeredAll)) RenderProvincePicker(action);
+        if (PlayerTargetActive && (askPlayer || answeredAll)) RenderPlayerPicker(action);
+        if (targets.Length > 0 && (askTarget || answeredAll))
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
             var picker = NewChoiceList(); // issue #635: every legal card is a visible row that lights its Personality on the table and is lit by it
@@ -420,6 +435,8 @@ public partial class Main
             if (needsTarget) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 13, Palette.Error));
             if (needsTarget) ScrollInspectorTo(picker); // the list can sit below a long card text; bring the choice into view
         }
+        if (answeredAll) RenderFlowSummary(action);
+        AddFlowBack(action);
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {
             var review = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);
@@ -432,7 +449,7 @@ public partial class Main
             AddConfirm(CommitButtonLabel(action), 0, false, () => command, "Cancel action", false); return;
         }
         var (required, ready) = RenderGoldPanel(action);
-        AddConfirm(CommitButtonLabel(action), required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince);
+        AddConfirm(CommitButtonLabel(action), required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget && !needsProvince && !needsPlayer);
     }
 
     // Back to "Choose a target…": the action keeps its legal targets but none is selected.
@@ -462,6 +479,10 @@ public partial class Main
     }
 
     private void CancelChoice() { _playPrompt = null; ResetDecisionSelection(); SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
+
+    // An ability or reaction that cannot be used right now (no legal target or performer, a condition unmet, Honor too low to Lobby) is not offered at all; the engine still
+    // lists it with its reason, but a menu of things the player cannot do only hides the ones they can.
+    private static bool Listable(ActionOption option) => option.Enabled || option.Type != "useAbility";
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {

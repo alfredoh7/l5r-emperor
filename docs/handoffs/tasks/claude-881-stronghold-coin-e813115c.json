@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "One coin art everywhere: the Journey's End Keep stronghold Gold Production coin (cut from the card face, printed 5 erased, gradient-mapped to the Family Honor fan's brass) replaces the generated plain coin in the gold flow meter, the opponent payment panel and the Dark Experiments marker, and replaces the atlas disc as the available-Gold icon on the clan plaque. Numerals stay live.",
+  "validation": "Client builds clean; whitespace format clean; tools/check-opponent-payment-ui.sh passed; tools/check-gold-payment.sh passed (first run exited 1 right after the Godot import with no error, the retry passed); native province-review capture reviewed and approved by Mendon (plaque coin, marker coin). Screenshot in docs/screenshots/stronghold-coin.",
+  "remaining": "None; ready for review. Art/Payments/plain-gold-coin.png is now unused and left in place.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/882",
+  "branch": "claude/881-stronghold-coin",
+  "updated": "2026-10-12T20:55:41.353751+00:00"
+}

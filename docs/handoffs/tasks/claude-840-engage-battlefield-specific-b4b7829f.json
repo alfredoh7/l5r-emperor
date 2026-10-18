@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Engage is battlefield-specific for every card (R-064): a Personality/Follower/Item taking an Engage must be at the engaged battlefield and its targets must be there too; Home/Absent Engages and the Engage texts naming another location are exempt by ability id (EngageRules.cs). Newly enforced for Khalimpeh-jiak, Iuchi Takaki, Shosuro Takazaki, The Yari of the Shabura, New Cavalry Tactics and the Engage fixtures; The Bestial Ones moved to the general rule.",
+  "validation": "bash tools/check.sh --skip-client green; full Core suite 4463/4463 before the new tests; new engage-battlefield suite sweeps every Engage unit card away from the battlefield and checks target lists, and fails (Khalimpeh-jiak, Takaki) when the rule is reverted",
+  "remaining": "None; ready for review. Strategies/Items played from hand and Strongholds/Holdings/Regions are governed by their own printed text, unchanged.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/840",
+  "branch": "claude/840-engage-battlefield-specific",
+  "updated": "2026-10-12T00:38:21.283959+00:00"
+}

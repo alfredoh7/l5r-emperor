@@ -7,6 +7,8 @@ public partial class CardTile : Button
 {
     public CardView Card { get; private set; } = null!;
     public bool Highlighted { get; set; }
+    /// <summary>The tutorial's pointer (issue #935): a soft gold pulse around the card the lesson is talking about. Never selects or enables anything.</summary>
+    public bool Pointed { get; set; }
     public bool QuietSelection { get; set; }
     public bool LegalTarget { get; set; }
     public bool ChosenTarget { get; set; }
@@ -123,8 +125,8 @@ public partial class CardTile : Button
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
         var inspecting = (Hovered || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
-        var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
-        var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
+        var targetLift = inspecting ? Card.Zone is Zone.Hand or Zone.Resolving ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
+        var targetScale = inspecting ? Card.Zone is Zone.Hand or Zone.Resolving ? 1.22f : 1.06f : 1f;
         ZIndex = Hovered ? 70 : HasFocus() ? 20 : IsSelected ? 10 : 0;
         if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
         _bowAngle = ReducedMotion ? _bowDestination : Mathf.MoveToward(_bowAngle, _bowDestination, (float)delta * Mathf.Pi * 3);
@@ -175,7 +177,7 @@ public partial class CardTile : Button
     public override bool _HasPoint(Vector2 point)
     {
         if (Geometry2D.IsPointInPolygon(point, LocalFaceCorners(2))) return true;
-        if (!_hover || Card.Zone != Zone.Hand) return false;
+        if (!_hover || Card.Zone is not (Zone.Hand or Zone.Resolving)) return false;
         // Keep the original pick area while lifting. Otherwise a pointer on the
         // bottom edge repeatedly enters/exits as the card moves away from it.
         return ContainsRestingFace(point);
@@ -193,10 +195,11 @@ public partial class CardTile : Button
 
     private void DrawInteractionHalo()
     {
-        if (!IsSelected && !IsInspectionHover && !LegalTarget) return;
-        if (QuietSelection) return;
-        var color = DecisionSelected ? Palette.Paper : IsSelected ? SelectionColor : HoverColor;
-        var strength = IsSelected ? 1f : IsInspectionHover ? .82f : .28f;
+        var pointed = Pointed && !IsSelected;
+        if (!IsSelected && !IsInspectionHover && !LegalTarget && !pointed) return;
+        if (QuietSelection && !pointed) return;
+        var color = DecisionSelected ? Palette.Paper : IsSelected ? SelectionColor : pointed ? Palette.Gold : HoverColor;
+        var strength = IsSelected ? 1f : pointed ? (ReducedMotion ? .9f : .7f + .3f * MathF.Sin(Time.GetTicksMsec() / 260f)) : IsInspectionHover ? .82f : .28f;
         var edge = LocalFaceCorners(2);
         var closed = edge.Append(edge[0]).ToArray();
         // Broad soft light with a bright core; no solid fill over the original scan.
@@ -207,8 +210,8 @@ public partial class CardTile : Button
 
     private void DrawInteractionEdge()
     {
-        var active = IsSelected || IsInspectionHover || LegalTarget;
-        var color = DecisionSelected ? Palette.Paper : IsSelected ? QuietSelection ? Palette.Gold : SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
+        var active = IsSelected || IsInspectionHover || LegalTarget || Pointed;
+        var color = DecisionSelected ? Palette.Paper : Pointed && !IsSelected ? Palette.Gold : IsSelected ? QuietSelection ? Palette.Gold : SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
         var edge = LocalFaceCorners(active ? 1.6f : 1);
         DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, QuietSelection ? 1.5f : active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
     }

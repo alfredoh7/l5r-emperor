@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Reactions to the same moment stack: a played Reaction no longer overwrites the after-action window's record (two Chrysanthemum Blossoms both react); bow, move, Nikutai, announce and Entrenched windows ask every eligible watcher in turn; Grief's one-copy limit made explicit; new reaction-window probe (L5R_REACTION_PROBE=1). Engine change in rules code; test helper RegressionAssertions.Accept gains an env-gated probe hook (shared test file).",
+  "validation": "bash tools/check.sh --skip-client exit 0 (python, small, core-1/2/3, ai-1/2/3); full Core suite 4516/4516 before the announce/Entrenched edits and reaction-stacking 4/4 plus forgotten-legacy, multi-window-reaction, emperor-p3/p4 suites after; whole Core suite under the probe: 801 windows, 0 test failures.",
+  "remaining": "Stormless Fury's hand half asks only the first copy (documented). Probe findings reviewed by card text, not individually replayed; the order the watchers of one moment are asked in is for Mendon to confirm.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/898",
+  "branch": "claude/898-reaction-stacking",
+  "updated": "2026-10-13T06:12:57.409872+00:00"
+}

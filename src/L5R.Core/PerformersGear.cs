@@ -50,7 +50,7 @@ public sealed partial class MatchEngine
     // AbilitySourceZoneAllows' hook: the hand halves of the Blade and the Yumi are used from their player's hand. Null for every other ability.
     private bool? PerformersSourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
         ReferenceEquals(ability, AbilityCatalog.All[PerformersGearAbilities.BalashHand]) || ReferenceEquals(ability, AbilityCatalog.All[PerformersGearAbilities.YumiHand])
-            ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) : null;
+            ? SourceInHand(source, player) : null;
 
     private bool PerformersTargetAllows(string category, CardInstance? source, PlayerState player, CardInstance target)
     {

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bot (AI code and tests only; shared lane because path routing sees both): attachments valued like Strategies, the granted additional action always used, equip down to the hand limit once a battle is won, equip up to 3 cards when that lifts the outcome. The parked six battle rules and trade attacks ship but stay OFF by default (BotContext.UseBattlePolicy/UseTradeAttacks); the equip rules are ON (UseEquipPolicy). No Core, client or message change",
+  "validation": "tests/L5R.AI.Tests: 135/135 cases pass locally (6 new battle-policy cases incl. defaults); dotnet format whitespace clean; no arena run",
+  "remaining": "Enemy-Force reduction is not counted toward changing a battle outcome. No arena measurement of the equip rules. Parked rules still need an arena decision (docs/parked).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/788",
+  "branch": "claude/788-bot-battle-policy",
+  "updated": "2026-10-10T05:50:22.399822+00:00"
+}

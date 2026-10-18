@@ -304,6 +304,8 @@ target): Daidoji Takichi (1679, Predator's text word for word), Determined Chall
 performer-and-target), Paralyzing Touch's Battle half (9919), Flanking Unit (2598), Befriend the Tides (10708), Shosuro Keirei (9845), Kamalakar (4253); Dislodge the Foe (2024)
 also needs multiple performers.
 
+**Superseded (2026-10-13, issue #920).** The sibling-adjacency half of this reading is superseded by Mendon's ruling R-081 (RULINGS.md; [2026-10-13 validation-report reading](2026-10-13-validation-report-reading.md), finding EE-Areas-of-the-game-047): battlefields at adjacent provinces are adjacent, but several battlefields at one province form a line between the flanking provinces (the primary leftmost, additional ones in creation order), each next to its neighbour(s) within the province and only the end battlefields next to the flanking provinces. `AdjacentBattlefields` no longer returns "every battlefield of each neighbouring province". The defender's-line rule above (which player's province line) is unchanged.
+
 ## 5. Stat penalties (`StatPenalties.cs`)
 
 `ApplyModifier` -- where every Force/Chi/Personal Honor/Gold cost modifier is applied -- and `CreateToken` (a stat token) call `NoteStatPenalty(card, source, effect, stat,

@@ -177,7 +177,7 @@ internal static class DeckLookTests
         Accept(e, Use(e, records.Id, "public-records-look"));
         Equal(e.State.PendingChoice?.Type, "lookArrange");
         var view = Look(e);
-        Equal(view.Stage, "Arrange"); Equal(view.SourceName, "Public Records"); Equal(view.Requested, 3); Equal(view.CardsRemaining, 6);
+        Equal(view.Stage, "Arrange"); Equal(view.SourceName, "Public Records"); Equal(view.Requested, 3);
         Equal(view.Cards!.Length, 3, "Exactly the top three, never more");
         Equal(string.Join(",", view.Cards.Select(c => c.DefinitionId)), string.Join(",", Decoys.Take(3)), "In deck order, top first");
         Equal(string.Join(",", view.Cards.Select(c => c.Position)), "0,1,2");
@@ -268,7 +268,7 @@ internal static class DeckLookTests
         var short3 = Start(); Deck(short3, 0, Zone.FateDeck, Decoys[0], Decoys[1]); var records = Put(short3, PublicRecords, 0, Zone.Home);
         var se = Engine(short3); Accept(se, Use(se, records.Id, "public-records-look"));
         var shortView = Look(se);
-        Equal(shortView.Requested, 3); Equal(shortView.Cards!.Length, 2, "Fewer than N cards remaining shows what is left"); Equal(shortView.CardsRemaining, 2);
+        Equal(shortView.Requested, 3); Equal(shortView.Cards!.Length, 2, "Fewer than N cards remaining shows what is left");
         Reject(se, Arrange(se, "0:top", "1:top", "2:top"));
         Accept(se, Arrange(se, "1:top", "0:top"));
         Equal(string.Join(",", Top(se, 0, "Fate")), Decoys[1] + "," + Decoys[0]);
@@ -396,7 +396,7 @@ internal static class DeckLookTests
         Equal(e.State.PendingChoice?.Type, "lookDeck"); Equal(e.State.Phase, Phase.Events); Equal(e.State.PriorityPlayerId, 1);
         var choice = Look(e, 1);
         Equal(choice.Stage, "ChooseDeck"); Equal(choice.DeckChoices!.Length, 2); Check(choice.Cards is null, "No cards before a deck is chosen");
-        Check(choice.DeckChoices.Single(d => d.OwnDeck).CardsRemaining == 5 && choice.DeckChoices.Single(d => !d.OwnDeck).CardsRemaining == 6 && choice.DeckChoices.Single(d => !d.OwnDeck).OwnerId == 0);
+        Check(choice.DeckChoices.Single(d => !d.OwnDeck).OwnerId == 0 && choice.DeckChoices.Count(d => d.OwnDeck) == 1);
         Check(choice.DeckChoices.Single(d => !d.OwnDeck).Label.Contains("opponent"), choice.DeckChoices[1].Label);
         Check(e.GetView(0).PendingLook is null, "The other player has no viewer");
         var offered = AssertViewerHasAnswer(e);

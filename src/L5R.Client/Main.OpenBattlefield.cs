@@ -77,7 +77,7 @@ public partial class Main
     private void LayoutBattlefieldHeaders()
     {
         if (_battlefieldHeaders is null) return;
-        _battlefieldHeaders.Visible = !MenuVisible && !DuelDemoOpen && !PracticeVisible && !MatchDuelOpen;
+        _battlefieldHeaders.Visible = !MenuVisible && !PracticeVisible && !MatchDuelOpen;
         if (!_battlefieldHeaders.Visible) return;
         var scale = _root.Scale.X;
         foreach (var (index, caption) in _battlefieldCaptions)

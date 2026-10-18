@@ -238,7 +238,7 @@ public sealed partial class MatchEngine
     // ---- Tempest of Flame: the static +2F to its wielder (Registered PersonalityForce hook, mirroring Strength of the Tsunami's own tsunami-force term) -----------------
 
     private int CardWave566PersonalityForce(CardInstance card) =>
-        Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "tempest-of-flame" && Keyword(card, "Shugenja")).Sum(_ => 2);
+        Attachments(card.Id).Where(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "tempest-of-flame").Sum(_ => 2); // "This Personality has +2F" (R-085): the subject is any host, a Shugenja or not.
 
     // ---- Desperate Mediation / Shameful Rebuke / Fury of the Sea: decider hooks (DeciderChoice.cs's extension points) -------------------------------------------------
 

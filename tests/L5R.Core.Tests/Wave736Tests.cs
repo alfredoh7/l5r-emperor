@@ -46,7 +46,7 @@ internal static class Wave736Tests
     private static int Honor(MatchEngine e, int player) => e.State.Players[player].Honor;
 
     public static void Run(TestRunner runner) => runner.Run("wave-736", [
-        ("Published as printed: fourteen cards in eight profiles with their stats, abilities and effects; six of the seven cards it deferred are still not published (Asako Kaitoko - exp was wired by issue #768)", PublishedShape),
+        ("Published as printed: fourteen cards in eight profiles with their stats, abilities and effects; four of the seven cards it deferred are still not published (Isawa Ryuzo and Hida Kaiji - exp were wired by issue #821) (Asako Kaitoko - exp was wired by issue #768)", PublishedShape),
         ("Susumu Haikaro: his destruction from battle resolution is negated, nobody else's", HaikaroImmunity),
         ("The Earth's Armor: while its Shugenja is defending, other players' cards will not bow him", EarthsArmorBow),
         ("Thunder Bow: its Personality ignores other players' effects that prevent him acting; Battle/Open transfers it to your own Personality at any location", ThunderBowCard),
@@ -91,7 +91,7 @@ internal static class Wave736Tests
             Check(d.Type == want.Type && (d.Abilities ?? []).SequenceEqual(want.Abilities) && d.Effect == want.Effect && d.EntryHonorLoss == want.EntryLoss, $"{d.Name} is published as wired");
             Check(!d.CreatedOnly && !string.IsNullOrWhiteSpace(d.Text), $"{d.Name} prints its text and is playable");
         }
-        foreach (var id in new[] { CleansingBreath, Ryuzo, PanKuExp, Jingasa, Kaiji }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published"); // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
+        foreach (var id in new[] { CleansingBreath }) Check(CardCatalog.Cards.ContainsKey(id), $"{id} was wired afterwards (Wave835.cs, issue #835)"); // P'an Ku - exp and Koan's Jingasa were wired by issue #827 (Wave827.cs) // Isawa Ryuzo and Hida Kaiji - exp were wired afterwards (Wave821.cs, issue #821) // Bonds of Hospitality was wired afterwards (Wave742.cs, issue #765)
         Check(CardCatalog.Cards.ContainsKey(Kaitoko), "Asako Kaitoko - exp, deferred by this batch for want of a stat cap, was published by issue #768");
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w736-", StringComparison.Ordinal)), 11, "eleven w736 abilities");
     }
@@ -158,9 +158,9 @@ internal static class Wave736Tests
         Accept(e, Batch336Support.Offer(e, 0, Wave736Abilities.PathPeace, spell.Id, target.Id));
         var after = e.State.Cards[target.Id];
         Check(e.State.Cards[spell.Id].Bowed, "the Spell is bowed as the cost");
-        Check(!after.Modifiers.Any(m => m.Stat == "Force" && m.Amount < 0) && after.Modifiers.Any(m => m.Stat == "Force" && m.Amount == 1), "the penalty is removed and the bonus stays");
+        Check(!after.Modifiers.Any(m => m.Stat == "Force" && m.Amount < 0 && m.SuppressedTurn != e.State.TurnNumber) && after.Modifiers.Any(m => m.Stat == "Force" && m.Amount == 1 && m.SuppressedTurn != e.State.TurnNumber), "the penalty is set aside and the bonus stays");
         Call(e, "ApplyModifier", e.State.Cards[target.Id], "test-source", "test-effect", "Force", -3);
-        Check(!e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Force" && m.Amount < 0), "a new penalty is not applied this turn");
+        Check(!e.State.Cards[target.Id].Modifiers.Any(m => m.Stat == "Force" && m.Amount == -3), "a new penalty is not applied this turn");
         Check(e.IsImmune(e.State.Cards[target.Id], ImmunityKind.Prevention, 0), "effects of a player other than his controller that prevent him acting are negated");
         Check(!e.IsImmune(e.State.Cards[target.Id], ImmunityKind.Prevention, 1), "his own controller's are not");
     }

@@ -386,3 +386,327 @@ When both players hold a Reaction in an alternating Reaction window (Engage, ent
 - **Cards/primitives:** `PendingReactionOrder` (ReactionOrdering.cs); the bot orders its own Reactions first, then the other player's in the order announced.
 - **Date:** 2026-10-09
 - **Source:** Mendon's gameplay QoL list, items 3 and 4 (issue #803).
+
+### R-040 — The seven Emperor Edition cards Oracle lists as banned are playable
+Kalani's Landing, One Koku, Caught Unawares, Cross-Clan Wedding, The Duty of the Crab and Well-Tended Farm (which Oracle records as banned from Emperor Edition tournaments, December 2012 or September 2013) and The Governor's Estate (Legacy-only) are playable like any other Emperor Edition card once wired. The tournament ban is kept only as a data note on each card (`source_ban_notes` in `content/oracle/emperor-supplemental-catalogue.json`, and the inventory's blocker notes); the game does not display it, restrict deck building because of it, or treat it as a rule.
+
+- **Cards/primitives:** content/oracle/emperor-supplemental-catalogue.json; the library carries no ban field.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #812).
+
+### R-041 — Kalani's Landing: targeting a card in play and reducing its Gold Cost
+Kalani's Landing's Reaction ("After an action is announced, target a card (in play): Give it -2 Gold Cost") targets a card in play with a non-zero Gold Cost. A card is in play when it is in a player's home (holdings, Personalities, Rings and other permanent-effect cards) and not explicitly out of play, or at a battlefield; a card with no printed Gold Cost has a Gold Cost of 0 and cannot be targeted. The Reaction can happen after any action; once it has been used, its window is not opened for that player again until the next turn. The target's current Gold Cost is reduced by 2 until the end of the turn.
+
+- **Cards/primitives:** Kalani's Landing (oracle-l5r-4252); the Gold Cost modifier (`ApplyModifier` with "GoldCost", read by `CardGoldCost`), the announce window for either player's action (`Wave816AnnounceWatcher`) and `EngineHooks.PhaseBegins`; docs/decisions/2026-10-10-kalanis-landing.md.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #816).
+
+### R-042 — The Governor's Estate creates a Holding instead of putting a face-down card into play
+Where the Governor's Estate says to turn a card in your province face-down and put it into play bowed, read it as *creating* a card that is a Holding: the card in the province is removed from the game (shown in the removed-from-the-game pile only if it had been revealed before; a face-down card stays hidden) and a bowed Holding is created in the player's home. The Holding is the supplied "Imperial Estate" scan: Gold Cost 0, "Bow this card: Produce 2 Gold." The Reaction is used after the owner's Dynasty Phase begins, twice a turn, for 2 Gold each.
+
+- **Cards/primitives:** The Governor's Estate (oracle-l5r-8106), the Imperial Estate (user-scan-imperial-estate); `Wave821GovernorCreate`, the `dynastyBeginReaction` window; docs/decisions/2026-10-10-six-ruled-cards.md.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-043 — Hida Kaiji is never assigned into an army that holds another Personality of his side
+He cannot be assigned so that he joins a battlefield with other units on his side, and other units cannot be assigned into his army; the opposing army is never considered. Other units may still be moved there during the engage or battle action segment. The rule is a count of the units of his side at a battlefield (`SideUnitCount`).
+
+- **Cards/primitives:** Hida Kaiji - exp (oracle-l5r-10831); `RestrictionKind.SoleUnit`, `SideUnitsAt` (ArmyRestrictions.cs).
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-044 — Chuda Kaito's +3GC while the effects of his Spell action resolve
+Kaito's +3GC adds 3 to his Gold Cost while the effects of a Spell action he performed are resolving. A Spell or Reaction that checks a Shugenja's Gold Cost reads it: for Damning Ceremony he is considered to have a Gold Cost of 5.
+
+- **Cards/primitives:** Chuda Kaito (oracle-l5r-10320), Damning Ceremony; `Wave821BeginKaito`, the +3 term of `CardGoldCost`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-045 — The gift step: Ikoma Satoru and Naoharu's Gift use one mechanism
+Showing a hand card to another player, who may put it in his hand, is one mechanism; only the outcome differs. Naoharu's Gift: Honor equal to the card's Focus Value, or discard it and draw cards. Ikoma Satoru: draw two cards, or discard it and Melee Attack with strength equal to its Focus Value targeting a Follower or a Personality without Followers in his home. (Sadahako's Artistry is wired on the same step: reading 9 of the decision, to be confirmed.)
+
+- **Cards/primitives:** Ikoma Satoru (oracle-l5r-10291), Naoharu's Gift, Sadahako's Artistry (oracle-l5r-10186); `BeginGift`, `TransferGift` (GiftOffer.cs), `AttackTargetScope.EnemyHome`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-046 — Isawa Ryuzo's pairs will not attack or defend in the same army, and stack
+The two targeted Personalities (each with more Madness tokens than printed Personal Honor) are never assigned into one army. Ryuzo is not Unique, so there can be three pairs; a Personality can be a member of up to three pairs and so be unable to assign with three others, and a pair touches no other pair.
+
+- **Cards/primitives:** Isawa Ryuzo (oracle-l5r-10476); `RestrictionKind.NoSameArmy`, `AddSameArmyPair`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-047 — Home Reactions and Home Engage behave like Home Battle
+A Reaction with Home, and an Engage action with Home, behave as Home does on a Battle action: its unit may be at home as well as at the current battlefield. They are taken at their own timing: the Reaction's trigger, or the Engage window.
+
+- **Cards/primitives:** Isawa Tsumaro (oracle-l5r-10863); `Wave821Validate` (the Home flag on a Reaction), `HomeWaivesSourceLocation`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-048 — Tsumaro's Illusion lends Home to the target's Spell actions only while it stands at that battlefield
+While the Illusion is at the battlefield, the original Shugenja's Spell actions have Home. Destroyed, sent home or moved to a different battle, the Spells lose it; returned to the battlefield they regain it. When the battle resolves they lose it, so moving the Illusion to a new battlefield does not carry Home there.
+
+- **Cards/primitives:** Isawa Tsumaro (oracle-l5r-10863), Tsumaro's Illusion (oracle-l5r-11346); `IllusionLink`, `Wave821GrantsHome`.
+- **Date:** 2026-10-10
+- **Source:** Mendon (issue #821).
+
+### R-049 — Kokujin: when he wins his duel, his controller is asked whether to destroy a Personality to take control of the loser
+Kokujin's Battle duel destroys the loser. When Kokujin wins, a question opens before the outcome applies: "Destroy a personality to take control of the loser?" It lists every Personality his controller controls (bowed or unbowed, at any location, Kokujin himself included). Choosing one destroys it and takes control of the loser, who joins Kokujin's army; declining destroys the loser. The question is the engine's own step, not a Reaction window: it cannot be negated or reacted to. It is presented as a list of the legal cards, each selectable by clicking the card on the table or the entry in the list, and hovering one highlights the other.
+
+- **Cards/primitives:** Kokujin - inexperienced (oracle-l5r-10486); `w827KokujinChoice` pending decision (Wave827.cs), asked from `ResolveDuel` once per duel like Awed Witness's question.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-050 — P'an Ku may remain bowed whenever he would straighten, and the Personality he takes stays controlled until he does
+"P'an Ku may remain bowed" makes every straightening of him, the Straighten Phase's or another card's effect, the controller's choice (straighten him or leave him bowed), unless that straightening may not be negated. The Personality he takes control of stays under his controller's control until P'an Ku straightens (or leaves play) or that Personality is destroyed, and its controller cannot give it the Order Seppuku action meanwhile.
+
+- **Cards/primitives:** P'an Ku - exp (oracle-l5r-10497); `ControlReturn.RemainBowed` and `ControlReturn.NoSeppuku` (EmperorMechB.cs), the `declineStraighten` choice, `w827PanKuStraighten`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-051 — Zansho - exp bows his own attached Follower
+Zansho's Battle action bows an unbowed Follower attached to Zansho himself, as its cost; the Ranged Attack's strength is that Follower's Force, plus 2 if the Attack targets Daigotsu Arakan.
+
+- **Cards/primitives:** Zansho - exp (oracle-l5r-10505); `w827-zansho-ranged`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-052 — Chiyurei's Axe: Melee Attacks compare the lower of the target's current and printed Force, automatically
+There is no choice. A Melee Attack Hida Chiyurei performs (printed on him, or from an attached Item, Spell or action that names him as performer) is compared against the lower of the target's current Force and its printed (base) Force.
+
+- **Cards/primitives:** Chiyurei's Axe (oracle-l5r-10340); `AttackComparedValue` (Wave827AxeComparedValue).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827).
+
+### R-053 — Koan cards: the Spell limit, the bow cost and the Robes
+A Shugenja may normally have any number of Spells attached; Koan's Jingasa limits him to as many as the number of attached cards with the Koan keyword. When he has more, his controller discards Spells down to that count. A Spell attached to him that requires him to bow is paid by the Jingasa: he does not bow to perform it. Koan's Robes add a Force bonus equal to the number of Koan cards in his unit, counting the Robes themselves and every other Koan-keyword card of the unit, and the first destruction each turn of any card in his unit by another player's card is negated: the Personality and everything attached, Spells, Followers and Items, created cards included, tokens not.
+
+- **Cards/primitives:** Koan's Jingasa (oracle-l5r-10524), Koan's Robes (oracle-l5r-10525); `WatchScope.Unit`, `Wave827KoanExcess`, the P24 `SpellFocusParityWaives` cost waiver.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #827). Ningen's 'Treatise on the Nezumi' is not wired: allies are out of scope.
+
+### R-054 — Cross-Clan Wedding is two separate resolvable effects
+The Event's first effect: the Event's owner targets a Personality he controls and gives it to the opponent. Its second effect: if the opponent now controls that Personality, the opponent targets a Personality he controls that is not the one he just received and gives control of it to the Event's owner.
+
+- **Cards/primitives:** Cross-Clan Wedding (oracle-l5r-1576); a P5 province-reveal Event, `w829WeddingGive` (Wave829.cs).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-055 — Caught Unawares: five primitives
+Open: a "you control no Personalities" condition; one or two target Personalities; a straightening negation that lasts THIS TURN (not the "next straightening" of Bow Before My Will and Quagmire); a draw when it is not your turn. Battle: a target filter "an enemy card with no unbowed attachments" (the existing filter is "no attachments at all").
+
+- **Cards/primitives:** Caught Unawares (oracle-l5r-1239); `LockStraightening` (the per-turn lock), a 1-to-2 slot, `Wave829TargetAllows`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-056 — Stone of Remembrance counts as zero cards, reacts to any action that destroys one of its controller's cards, and is torn in half
+It counts as zero cards when counted toward the minimum deck size. It may react to any action that would destroy a card of its controller. When it is played, an animation shows it torn in half before it is removed from the game.
+
+- **Cards/primitives:** Stone of Remembrance (oracle-l5r-7501); `DeckWorkshop.CountsTowardMinimumOf`, the `cardTorn` event, the client's `CardTear`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-057 — Shrine to the Heavens: each Shrine protects one Celestial per Celestial revealed, and the check is made only at the reveal
+When a Celestial is revealed in a player's Province, the trait lets the player select a Celestial in play and stop it from being discarded. It is a trait, so it repeats: each Shrine a player has in play protects one Celestial for each Celestial revealed in a Province (three Shrines protect up to three). Celestials not so protected are discarded when another Celestial enters play. The check is made only when a Celestial is revealed, so a Shrine that is destroyed does not cause a Celestial to be discarded.
+
+- **Cards/primitives:** Shrine to the Heavens (oracle-l5r-7229); the P6 `CelestialEntryRegistry` hooks `Wave829Shrine1..3`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-058 — Minor Blackmail: an untimed watch on performing and on assignment
+The watch is not timed. It triggers when the chosen Personality is the performer of an action (an ability on his own card, a Spell, an Item, or named as the performer by another card); it does not trigger when he is a target. It also triggers when he is assigned to a battlefield, on either side.
+
+- **Cards/primitives:** Minor Blackmail (oracle-l5r-5061); `BlackmailWatch`, fired from the after-action traits and the two assignment sites.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-059 — The Onyx Championship: the granted ability is a usual recruit action, from the discard pile
+The ability the Event grants lets its controller perform a recruit action on an Oni from the discard pile, dead Oni included. It is an ordinary recruit action; the only difference is that the Personality comes from the discard pile.
+
+- **Cards/primitives:** The Onyx Championship (oracle-l5r-8242); `w829-onyx-maho` (recruit cost through `GoldCostRule.TargetRecruit`, an Oni in any of the player's discard piles).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-060 — Benten's Blessing: a multi-pick over Personalities in or out of play, and the +1 PH persists and counts in a Proclaim
+Create a multi-pick choice. "Out of play" Personalities include those in the discard pile (the dead included) and those revealed in Provinces, but not those in a deck or face down in a Province. As usual, cards are selected by clicking them or from a pick list, with highlighting both ways. The +1 PH persists as long as Benten's Blessing is in play; if the Personality is proclaimed, the player gains the +1 PH as well.
+
+- **Cards/primitives:** Benten's Blessing (oracle-l5r-959); `w829BentenChoice` (Sleep's multi-select actions), `Wave829PersonalHonor`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-061 — Jizo's Mercy: the second Battle is the attacker's, and 4 Honor replace the Province's destruction
+After the second Battle action is used, only an attacking player may play it. Instead of destroying the Province in the resolution, the player gains 4 Honor. Every other effect of the resolution still happens as normal (losers destroyed, Honor gained or lost, resolution effects, the attacker's bow); only the Province is not destroyed.
+
+- **Cards/primitives:** Jizo's Mercy (oracle-l5r-10563); `JizoMark`, `Wave829JizoReplacesDestruction` (called from `ContinueResolveBattle`).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829).
+
+### R-062 — The Duty of the Crab: recruit at a battlefield from a province or the discard pile
+The Battle half is a recruit at a battlefield: its source is a province or the discard pile. Whether one action can offer both sources was to be checked; it can, with the Crab Clan Personality as the action's target. Nothing remains unwired.
+
+- **Cards/primitives:** The Duty of the Crab (oracle-l5r-8036); `w829-duty-battle` (`BringProvincePersonalityIntoPlay` / `BringDeadPersonalityIntoPlay`), `w829-duty-focus` (a delay Focus Effect).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #829). Well-Tended Farm and One Koku needed no ruling.
+
+### R-063 — Mastering the Elements loses what it copied when it leaves play; it may then copy a different Spell
+Mastering the Elements' permanent copy lasts only while the card stays in play. If it is discarded, destroyed, or returned to a hand or deck it loses the copied keywords, trait and abilities; entering play again it may copy a different Spell (the copies do not accumulate). "Once per game" means once per time in play. (Supersedes the 2026-09-21 reading that the copy persisted and added to itself.)
+
+- **Cards/primitives:** Mastering the Elements (oracle-l5r-4874); `CardInstance.CopiedSpellRules`, `SweepSpellCopies` (PermanentCopy.cs).
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+
+### R-064 — Engage is a battlefield-specific reaction, for every card
+An Engage is not a home action. A Personality, Follower or Item taking an Engage must itself be at the battlefield being engaged, and an Engage reaches only cards present at that battlefield. Exempt: a Home Engage, an Absent Engage, and an Engage Reaction whose text names another location it may be performed from (listed by ability id in `EngageRules.cs`: Isawa Tsumaro, Recovering What Was Lost, Shinjo Hayan, The Wave Persists, Rokku, Winter Sled, False Ring of the Void). A Strategy or Item played from a hand, and a Stronghold, Holding or Region, are not unit cards in play: their own text names the battlefield they act on. First applied to The Bestial Ones (#838), then to all cards (#840).
+
+- **Cards/primitives:** every `after-engaging` / `after-engaging-at-own-battlefield` Reaction; `EngageSourceMustBeAtBattlefield` / `EngageTargetMustBeAtBattlefield` (EngageRules.cs). Changed for Khalimpeh-jiak, Iuchi Takaki, Shosuro Takazaki, The Yari of the Shabura, The Bestial Ones and the Engage fixtures; Takaki's and New Cavalry Tactics' targets.
+- **Date:** 2026-10-11
+- **Source:** Mendon, issues #838 and #840.
+
+### R-065 — A Region is present at a battlefield when its province has one; that never gives its controller presence
+Regions with Battle actions, or Reactions that respond to Battle actions, may only be used while the Region is present at the battlefield. A Region is present when the province it is attached to has a battlefield created for it. A Region's presence does not satisfy the presence requirement of its controller: only a Personality can. Fallow Lands (own province under attack, its controller the Defender with presence there) is confirmed as implemented.
+
+- **Cards/primitives:** Fallow Lands (oracle-l5r-9865); `fallow-lands-reaction`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+
+### R-066 — Soul's Sacrifice gives Shadowlands and Undead to the performing Samurai; Rata's corpse line is flavor text
+"Permanently give your Samurai Shadowlands and Undead" means the performer. Rata's "sacrifices his victim's corpse" is flavor text with no rules effect: only "Draw a card" is wired.
+
+- **Cards/primitives:** Soul's Sacrifice (oracle-l5r-7385), Rata (oracle-l5r-6165).
+- **Date:** 2026-10-11
+- **Source:** Mendon, answering the #833 audit's rules questions (issue #838).
+
+### R-067 — The Egg of P'an Ku: the Egg's controller controls the copy, and the copied Personality is held back whoever's it is
+The player who controls the Egg of P'an Ku controls the copy. The copy enters play in the Egg's controller's home and may perform its printed abilities, attack, be assigned, and so on. The target that was copied (the second target) is subject to the bowing, attacking and defending constraints regardless of who it belongs to. Costs and restrictions such as Unique are ignored. A copied Personality with the Sensei trait still discards the controller's other Sensei Personalities: that is an effect of entering play, not an entrance restriction.
+
+- **Cards/primitives:** The Egg of P'an Ku - exp (oracle-l5r-10522); `w835-egg`, `CreatedCardSpec.CopyOfTarget` with `CreatedRemoval.NextTurnBegins`, a straighten hold (`StraightenPhaseEnds`, as Aramasu's Legacy), `RestrictionUntil.OwnersNextTurnBegins`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-068 — Blood of Isawa's Tribe: two choices, a confirmation for the same keyword, no Reaction window and no pass
+The Spell first queries the element keywords on the Shugenja it attached to and the player chooses one of them. The player then chooses which of the five elements replaces it. Choosing the same element asks whether they are sure they want to replace the keyword with the same keyword; they may cancel and go back to the second choice. The selection opens no Reaction window and offers no "pass reaction": the player always travels through the confirm path, even if replacing a keyword with itself changes nothing.
+
+- **Cards/primitives:** Blood of Isawa's Tribe (oracle-l5r-10347); `w835-blood` (a mandatory entry trait), `w835Blood` (the pending decision), `ReplaceElementKeyword`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-069 — A Cleansing Breath: "He centers himself." is flavor text
+The sentence has no rules effect and is ignored. The rest of the card is as printed: other players' cards' effects that prevent him assigning, moving, or performing actions are negated, and a Kensai's unit straightens.
+
+- **Cards/primitives:** A Cleansing Breath (oracle-l5r-10358); `w835-cleansing-breath` (a Prevention immunity for the turn, which also frees a stored "may not attack/defend" another player's action made).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-070 — Duty Over All Things: the Yojimbo is discarded (not dead), enters at the battlefield, and an enemy Personality must be there
+The performer must be discarded (in the discard pile, not dead). The performer enters play at the battlefield where Duty Over All Things is played, and the card may not be played unless an opposing (enemy) Personality is present at the battle when it is played.
+
+- **Cards/primitives:** Duty Over All Things (oracle-l5r-10370); `w835-duty-discount` / `w835-duty-full` (the printed "paying 3 less Gold if you control a Courtier or Shugenja" as two prices of one action), `BringDeadPersonalityIntoPlay`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-071 — Imperial Deployment: assigning only, and a mandatory straightening when an attack is declared
+It negates only the effects that block the Personality from assigning; he may still be barred from moving (assigning is not moving). It also carries a mandatory trigger that straightens his unit if an attack is declared in the turn it is played. That straightening can be stopped only by an effect that prevents the next straightening or says the Personality will not straighten.
+
+- **Cards/primitives:** Imperial Deployment (oracle-l5r-10378); `ImmunityKind.AssignPrevention` (movement locks of kind Assign and a stored NoAttack/NoDefend), `DeploymentWatch` fired by the attack declaration.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-072 — Too Close to Home bars movement, not assignment; The Perfect Moment does not touch Imperial Deployment's target
+Too Close to Home does not bar assignment to battlefields. It bars movement between battlefields, from a player's home to a battle, and from a battle to a player's home. It does not affect Imperial Deployment's negation. The Perfect Moment restricts only the Personalities of the player who played it, so it is not "another player's cards' effect" on the target of Imperial Deployment.
+
+- **Cards/primitives:** Too Close to Home (the global movement lock `P4GlobalMovementLock`: Home and ToBattlefield kinds only), The Perfect Moment (`PerfectMomentLocks`: its own player's Personalities only). The existing behaviour already followed this reading; Wave835Tests proves it.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-073 — Merchant Patronage: a Reaction in the Honor-change window
+After a player performs an action of a Holding that causes an Honor gain or loss, Merchant Patronage may be played to redirect the gain or loss to another player. If the player who played it controls one or more Courtiers, they may bow one to increase the gain or loss by 1 in addition to the redirect. The window may sit anywhere in the existing flow as long as it occurs before the gain or loss is realized.
+
+- **Cards/primitives:** Merchant Patronage (oracle-l5r-10720); `w835-patronage` / `w835-patronage-bow` in the existing before-Honor-change window (`HonorChangeReactions.Trigger`, EmperorRulingR4Honor.cs), `PatronageMark` applied by an `EngineHooks.HonorChange` registrant.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-074 — Pierce the Tapestry: the name is Tapestry, up to seven copies, a per-battle count and an additional action
+Oracle of the Void misspells the card "Pierce the Tapestery". Spell it correctly locally and add a note reconciling it with Oracle's spelling. A deck may hold up to seven copies. A counter of the Pierce the Tapestry played at a battlefield is kept so the destruction applies. Its additional actions may be negated by cards that negate additional actions.
+
+- **Cards/primitives:** Pierce the Tapestry (oracle-l5r-10388); `w835-pierce`, `DeckCopyLimit` 7, `AddPeriodCount` (Period.Battle, per player), `GrantAdditionalAction` scoped to the ability; `content/oracle/name-aliases.json` maps Oracle's spelling to this card.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-075 — The Heavens' Blessing: each card an own Strategy draws costs 2 Gold on its own
+It looks only at card draw arising from the effects of the player's own Strategy during an Action Phase and adds a 2 Gold cost to it. Draws by other cards (Traveling Peddler) are not affected. The Courtesy of the Crane costs 2 Gold to draw each card it grants to the player who plays it. Each card is its own instance, so several cards are several payments, each satisfied individually: a Gold source that produces 4 cannot be split to pay two costs.
+
+- **Cards/primitives:** The Heavens' Blessing (oracle-l5r-10558); `w835-heavens-draw`, `w835-heavens-honor` (P14 no-gain modifier, Action Phases, this turn), the `w835HeavensPay` window and `w835-heavens-pay` (a player ability).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-076 — Unbearable Weight: a card drawn into a hand is controlled by the player who holds it
+A Strategy that goes into a player's hand is controlled by them and may be played as though they owned it; when it leaves play and is discarded it goes to its owner's discard pile as usual. Discarding the top card of a Fate deck reuses the existing top-card discard (`DiscardTopOfFateDeck`) rather than a new primitive.
+
+- **Cards/primitives:** Unbearable Weight (oracle-l5r-10550); `w835-unbearable` (a Fate-deck slot and an optional target), `WeightReturn`, `OriginalOwnerId`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-077 — Warded Premises negates only the bonuses actions give
+Permanent bonuses, bonuses from attachments, and bonuses from tokens are not negated. Only bonuses from actions are negated. Bonuses from cards or tokens attached by actions are not negated.
+
+- **Cards/primitives:** Warded Premises (oracle-l5r-10404); `w835-warded-negate` (a before-resolution trait removing positive, non-permanent Force Modifiers of action abilities from cards at its battlefield), `w835-warded-play`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-078 — Revelations: the owner shows, the other player discards, the owner arranges, the Province refills face up
+Revelations shows the top five cards of the owner's Dynasty deck. After a discard of the opponent's choice, the owner decides the order of the remaining four, and then the Event's final step replaces its empty Province face up. A viewing pane lets the opponent select the card to discard; the owner then reorders the rest.
+
+- **Cards/primitives:** Revelations (oracle-l5r-10262); a P5 reveal Event, `w835-revelations-shown` (the shown-choice panel), `w835-revelations-order` (the look panel), `FaceUpRefill`.
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+### R-079 — The Empire's Foe Exposed: a duel opened while the Events Phase resolves
+The Event opens a duel during the event resolution stage of the Events Phase. It does not resolve if both players do not have a Unique Personality in play; it is discarded without effect. A player with exactly one Unique Personality is not asked. If both have exactly one, they are placed into the duel at once. Otherwise each player who has a choice gets a selection panel listing only the Unique Personalities in play they control, selectable by clicking a card or from the list, with the matching cards highlighted.
+
+- **Cards/primitives:** The Empire's Foe Exposed (oracle-l5r-10423); `w835-foe` (an Event), `w835Foe` (the selection), `w835-foe-duel` (`IssueChallenge`; the loser is destroyed).
+- **Date:** 2026-10-11
+- **Source:** Mendon, card wiring list (issue #835).
+
+## Bowing and performers
+
+### R-080 — A bowed Personality may use the abilities of his unbowed attachments
+"Abilities on a bowed card can not be used" refers to the card carrying the ability. An Item or Spell's ability is blocked only when that attachment is bowed; the host Personality, who performs it, may be bowed (unless the text says "unbowed", R-035). "Even if this card is bowed" lets a bowed attachment use the ability.
+
+- **Cards/primitives:** every Item and Spell action; Nightingale Blade (oracle-l5r-5556) with a bowed Bayushi Utoro (oracle-l5r-10249) is the case that raised it; Celestial Sword of the Crab - exp, Fubatsu Plate, Mantle of the Jade Champion - exp2 and Strength of the Tsunami print the attachment-bowed permission. The engine behaved this way in the Utoro case; no change.
+- **Date:** 2026-10-12
+- **Source:** Mendon, from the Comprehensive Rules clarification (Bowed and unbowed, 2013-06-05) — [decision](../decisions/2026-10-12-bowed-host-attachment-abilities.md); text in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md).
+
+### R-081 — Battlefield adjacency: battlefields sharing a province form a line between the flanking provinces
+Battlefields at adjacent provinces are adjacent (destroyed provinces slide together; "left" and "right" follow the Defender's province line). A battlefield with no province is adjacent to nothing. When several battlefields are associated with one province (Two Fronts and the like) they are arranged in a line between the flanking provinces: the leftmost is adjacent to the province on the left, the rightmost to the province on the right, and each is adjacent to its neighbour(s) within that province, so siblings are adjacent to each other and a flanking province touches only the nearer end of the line. Order within a province: the province's primary battlefield is leftmost, and additional battlefields follow in creation order (the last created is rightmost).
+
+- **Cards/primitives:** Sea Troll Predator (oracle-l5r-6522), Moto Gunso (oracle-l5r-5320), `personality-at-adjacent-battlefield`, every "adjacent unresolved battlefield" move; `AdjacentBattlefields` (EmperorRulingR1.cs); supersedes the "every battlefield of each neighbouring province" reading of [R1 and the predator pass](../decisions/2026-09-19-hotako-yoshitada-predator-liuxeung.md).
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation report EE-Areas-of-the-game-047 — [decision](../decisions/2026-10-13-validation-report-reading.md); Comprehensive Rules, Battlefields (text in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md)). Issue #920.
+
+### R-082 — A face-up dishonorable Personality stays dishonorable outside play and on re-entry
+A Personality who is dishonorable and face up keeps the Dishonorable status when he leaves play (the dead pile, a discard pile, removed from the game, a face-up province) and when he enters play again, unless an effect rehonors him. A hand or a deck is hidden and a face-down card has no public status, so a Personality sent there loses it. Dishonorable death's Honor loss, "dishonorably dead" checks (`IsDishonorablyDead`, Ivory Political) and Seppuku read the same flag and are unchanged. Supersedes the At Any Cost line of the 2026-09-20 gold-payment rulings (he used to return honorable).
+
+- **Cards/primitives:** `MatchEngine.ResetCardState` / `KeepsDishonorOutsidePlay`; At Any Cost (oracle-l5r-639), Akodo Kobi, Essence of Undeath, I Give You My Name, Shinjo's Guidance and other dead-pile recruits; Your Clan Needs You!; Step Through the Void; Sensei discarded from play.
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation report EE-STATE-008 (item 13) — [decision](../decisions/2026-10-13-validation-report-reading.md); supersedes [2026-09-20](../decisions/2026-09-20-gold-payment-rulings.md).
+
+### R-083 — Stronghold Honor-loss immunity does not prevent a dishonorable death's Honor loss
+"You do not lose Honor from ... cards you own" (Foothold of the Mad, Keep of the Dead, Steel Soul Dojo, The Plain of Glass, The Castle of Order, The Otoro Estate, The Shadow's Lair, The False Path) does not prevent the Honor loss from the death of a dishonorable Personality. That loss is a rulebook effect and comes from the rulebook, not from the dying Personality or any card (Comprehensive Rules, "From"; the Honor loss after a dishonorable death). The Forgotten Temple already treats it this way (reduced to 1, not negated).
+
+- **Cards/primitives:** the eight strongholds above; `MatchEngine.GainHonorCore` (the immunity check is skipped while `_rulebookHonorChange`); `HonorLossImmunity`, `FootholdNegatesLoss`, `HonorLossNegatedByKeyword`.
+- **Date:** 2026-10-13
+- **Source:** Mendon, validation work follow-up — [decision](../decisions/2026-10-13-validation-report-reading.md); the official rulings on Fields of the Dead, The Fingers of Bone and The Shadowed Dojo in [COMPREHENSIVE_RULES.md](COMPREHENSIVE_RULES.md) ("Does not prevent honor loss from death of dishonored Personalities").
+
+### R-084 — Great Sacrifice compares the enemy unit's total Force
+Great Sacrifice's target is an enemy unit whose total Force (the Personality and all his Followers, bowed or not) is equal to or lower than the performer's Force, plus Personal Honor, plus one if he is defending. It is the same unit total Fortitude uses, not the unit's current battle contribution. Supersedes item 11 of the [2026-09-21 second-city pass](../decisions/2026-09-21-second-city-pass.md) for the unit total.
+
+- **Cards/primitives:** Great Sacrifice (oracle-l5r-2900); `enemy-unit-within-performer-sacrifice`, `UnitTotalForce`, `SacrificeReach`.
+- **Date:** 2026-10-13
+- **Source:** Mendon, following the validation report — [decision](../decisions/2026-10-13-spell-static-subject.md). Issue #936.
+
+### R-085 — A Spell's static effect follows its printed subject
+A Spell attached to a Personality who is not currently a Shugenja provides no actions (#928) and, when its printed static text names the Shugenja host as the subject ("This Shugenja has +3F", "While this Shugenja is Water, he ...", his destruction or bowing), no static effect either. When the text says "This Personality" the effect works on any host. The Spell stays attached and the effect returns when the host is a Shugenja again, by printing or a granted keyword. A static whose subject is not the host is unchanged and listed for a later ruling (Incite the Phantoms, Channel the Moon, Erosion, Drawing on the Mountain, The Tapestry Perceived, Conflagration, the unit and battle-order sentences of Thunder's Stamina, Hitomi's Devotion and Warded Paths).
+
+- **Cards/primitives:** the 26 Spells in `ShugenjaSubjectStaticSpells` (CardCopy.cs); Scouring Flood, Tempest of Flame and The Thunderer's Protection are "This Personality" and unchanged; full audit table in the [decision](../decisions/2026-10-13-spell-static-subject.md).
+- **Date:** 2026-10-13
+- **Source:** Mendon, following the validation report. Issue #936.

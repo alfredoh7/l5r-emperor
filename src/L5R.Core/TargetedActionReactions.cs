@@ -109,7 +109,7 @@ public sealed partial class MatchEngine
     /// Honor loss the action inflicts on that card's controller (GainHonor). Whole-action negation is NegateHeldAction.</summary>
     private void NegateEffects(CardInstance card, params string[] kinds)
     {
-        foreach (var kind in kinds) _state.NegatedEffects.Add(new(kind, card.Id));
+        foreach (var kind in kinds) { _state.NegatedEffects.Add(new(kind, card.Id)); _reactionNegationSink?.Add(new(kind, card.Id)); }
         Emit("effectsNegated", $"{Definition(card).Name}: the action's {(kinds.Contains("all") ? "effects" : string.Join(" and ", kinds.Select(k => k switch { "bow" => "bowing", "destroy" => "destruction", "move" => "movement", "straighten" => "straightening", _ => k })))} on it {(kinds.Length > 1 && !kinds.Contains("all") ? "are" : "is")} negated.", card.OwnerId, card.Id);
     }
 
@@ -159,13 +159,17 @@ public sealed partial class MatchEngine
 
     // The action is negated because paying one of its costs was blocked: taken (its use is spent, a Strategy played from a hand is discarded, priority passes) but
     // nothing is paid and nothing happens -- no Gold, no Honor-loss cost, no discard, no effect (ActionNegation.cs, CompleteNegatedAction).
-    private void AbortActionForBlockedCost(GameCommand command, bool consumedGrant = false)
+    /// <summary>The deferred action's own Gold sources, each now bowed or out of play (a payment token is not a card and cannot lapse this way).</summary>
+    private bool HeldPaymentBroken(GameCommand command) =>
+        command.SourceIds is { Length: > 0 } ids && ids.Where(id => !IsPaymentToken(id)).Any(id => !_state.Cards.TryGetValue(id, out var source) || source.Bowed || !InPlay(source));
+
+    private void AbortActionForBlockedCost(GameCommand command, bool consumedGrant = false, bool brokenPayment = false)
     {
         var ability = AbilityCatalog.All[command.AbilityId!];
         var player = Player(command.PlayerId);
         var source = command.CardId is null ? null : Card(command.CardId);
         var playedFromDiscard = PlayedFromDiscard(ability, source);
-        Emit("actionNegated", $"{player.Name}'s {ability.Label} is negated: paying one of its costs (bowing or destroying a card as its cost) was negated, so nothing is paid and nothing resolves.", player.Id, source?.Id);
+        Emit("actionNegated", $"{player.Name}'s {ability.Label} is negated: {(brokenPayment ? "a Gold source it was to be paid with was bowed or destroyed first" : "paying one of its costs (bowing or destroying a card as its cost) was negated")}, so nothing is paid and nothing resolves.", player.Id, source?.Id);
         CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);
     }
 

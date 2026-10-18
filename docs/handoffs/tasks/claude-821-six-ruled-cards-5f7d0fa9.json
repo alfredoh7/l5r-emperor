@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Governor's Estate (creates an Imperial Estate Holding), Hida Kaiji and Isawa Ryuzo (same-side army assignment primitive), Chuda Kaito (+3 Gold Cost while his Spell resolves), Ikoma Satoru and Sadahako's Artistry (shared gift step), Isawa Tsumaro (Home Engage and Illusion grant) per Mendon's rulings R-042..R-048; clear their blockers; extend the catalogue art pack (7 new scans). Shared files touched are small hooks, each commented with the issue; six existing tests that pinned 'not wired' or 'once per turn' were updated.",
+  "validation": "bash tools/check.sh --skip-client: EXIT 0 (Core 1159+1159+1157 cases, AI 49+48+48, lint, python tests). 14/14 new Wave821 tests (wave-821, wave-821-cards). ensure_catalogue_art --archive and --verify-only pass on the rebuilt 4643-image pack (sha256 ac49bc89..., 620247526 bytes). Not graphically tested: the client's presentation of the dynastyBeginReaction window and of a hidden removed card.",
+  "remaining": "Publish release catalogue-art-issue821-20261010-r1 (private) before merge; CI. Untested path: Satoru's Attack when the other player can react to it. Readings for Mendon to confirm are in docs/decisions/2026-10-10-six-ruled-cards.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/821",
+  "branch": "claude/821-six-ruled-cards",
+  "updated": "2026-10-11T06:44:00.132929+00:00"
+}

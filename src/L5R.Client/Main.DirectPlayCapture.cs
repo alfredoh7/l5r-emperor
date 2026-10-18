@@ -50,22 +50,21 @@ public partial class Main
             await SupportClick(StabilizationButtons(_decisionActions).Single(b => b.Text == "Confirm play")); await WaitDecisionPresentation(); await EventFrames(6);
             SupportRequire(View.Players[0].Honor == honor + 1 && _chosen is null, "Confirming Tell the Tale did not gain 1 Honor directly");
 
-            // 2. Two legal actions: the card lists both as clickable action text; a click asks to confirm, then continues to targets.
+            // 2. Two legal actions: the card lists both as clickable action text; a click goes straight to choosing that action's targets, and the other action stays one click away.
             await LoadDirectPlay(s => { BattleSetup(s); SupportFixtureCard(s, 61, 0, Zone.Hand); });
             var paragon = View.Players[0].Hand.Single();
             SelectCard(paragon); await EventFrames(4);
             var blocks = ActionTextBlocks().ToArray();
-            SupportRequire(_playPrompt is null && blocks.Length == 2, $"Two legal actions should be offered as selectable text, found {blocks.Length}: " + string.Join(" | ", Actions.Where(x => x.CardId == paragon.Id).Select(x => $"{x.Type}/{x.Command?.AbilityId}/{x.Enabled}/{x.Reason}")));
+            SupportRequire(_playPrompt is null && _chosen is null && blocks.Length == 2, $"Two legal actions should be offered as selectable text, found {blocks.Length}: " + string.Join(" | ", Actions.Where(x => x.CardId == paragon.Id).Select(x => $"{x.Type}/{x.Command?.AbilityId}/{x.Enabled}/{x.Reason}")));
             await SupportClick(blocks[0]); await EventFrames(2);
-            SupportRequire(_playPrompt is not null && _chosen is null, "Choosing an action's text should ask to confirm that action");
-            var first = PromptedChoice()!.Key;
-            StabilizationButtons(_decisionActions).Single(b => b.Text == "Cancel").EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(2);
+            SupportRequire(_playPrompt is null && _chosen is { Type: "useAbility" }, "Choosing an action's text should begin that action without a confirm press");
+            var first = _chosen!.Command!.AbilityId;
+            SupportRequire(StabilizationButtons(_inspector).Any(b => b.Text.StartsWith("Play instead:", StringComparison.Ordinal)), "The draft should keep the card's other action one click away; buttons: " + string.Join(" | ", StabilizationButtons(_inspector).Select(b => b.Text)) + " ;; choices " + PlayChoices(paragon).Length + " ;; multi " + MultiTargetActive + " ;; text: " + StabilizationText(_inspector));
+            CancelChoice(); await EventFrames(2);
             SupportRequire(_playPrompt is null && _chosen is null, "Cancel returns to the card");
             SelectCard(paragon); await EventFrames(2);
             ActionTextBlocks().ElementAt(1).EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(2);
-            SupportRequire(_playPrompt is not null && PromptedChoice()!.Key != first, "The second action's text should select the second action");
-            await SupportClick(StabilizationButtons(_decisionActions).Single(b => b.Text == "Confirm play")); await EventFrames(4);
-            SupportRequire(_chosen is { Type: "useAbility" } && _playPrompt is null, "Confirming a targeted action continues into performer/target selection");
+            SupportRequire(_chosen is { Type: "useAbility" } && _chosen.Command!.AbilityId != first, "The second action's text should begin the second action");
 
             // 3. Only one of the card's two actions is legal (no unbowed Kensai): assume it, no choice of action.
             await LoadDirectPlay(s => { BattleSetup(s); SupportFixtureCard(s, 5112, 0, Zone.Battlefield, 0, bowed: true); SupportFixtureCard(s, 5423, 0, Zone.Hand); });
@@ -73,12 +72,11 @@ public partial class Main
             var legal = Actions.Where(a => a.Enabled && a.CardId == moving.Id).Select(a => a.Command?.AbilityId).Distinct().ToArray();
             SelectCard(moving); await EventFrames(4);
             SupportRequire(legal.Length == 1 && _playPrompt is not null && ActionTextBlocks().Count() == 0, $"With one legal action ({legal.Length}) it should be assumed");
-            SupportRequire(PromptedChoice()!.Option.Command!.AbilityId == "moving-unmoving-approach", "The legal first action should be the one assumed");
+            SupportRequire(PromptedChoice()!.Option.Command!.AbilityId == "moving-unmoving-approach", "The legal first action should be the one assumed (nothing else to choose, so the prompt is its final Confirm)");
             // 4. Issue #793: a Strategy that any of several Personalities may perform (Spirit of the Berserker) is performed by clicking a highlighted Personality on the table.
             await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 3636, 0, Zone.Home); SupportFixtureCard(s, 7420, 0, Zone.Hand); });
             var spirit = View.Players[0].Hand.Single();
             SelectCard(spirit); await EventFrames(4);
-            await SupportClick(StabilizationButtons(_decisionActions).Single(b => b.Text == "Confirm play")); await EventFrames(4);
             SupportRequire(_chosen is not null && StabilizationText(_inspector).Contains("click a highlighted Personality on the table"), "The performer choice is not explained");
             var performerClicks = PerformerClicks();
             SupportRequire(performerClicks.Count == 2, $"Both Personalities should be clickable performers, found {performerClicks.Count}");
@@ -87,6 +85,43 @@ public partial class Main
             SupportRequire(performerTile.LegalTarget, "The other performing Personality is not highlighted on the table");
             await SupportClick(performerTile); await EventFrames(6);
             SupportRequire(_chosen?.Command?.PerformerId == otherPerformer, "Clicking the Personality did not choose it as the performer");
+            // Issue #1004, the choosing flow: the performer is asked first and alone, the click moves on, and Back returns to the question.
+            SupportRequire(!PerformerStepActive && FlowCanGoBack(_chosen!), "After the performer is chosen the performer step is over and Back is offered");
+            FlowBack(); await EventFrames(4);
+            SupportRequire(PerformerStepActive && StabilizationText(_inspector).Contains("CHOOSE A PERFORMER") && StabilizationButtons(_inspector).Count(b => b.HasMeta("performer_row")) == 2, "Back should return to the performer question listing both performers");
+            StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row")).EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(4);
+            SupportRequire(!PerformerStepActive, "One click on a performer row moves on");
+
+            // 4b. Issue #1004, the choosing flow end to end with The Sound of Thunder: performer, then target, one question at a time; the summary appears once both are answered; Back undoes the last answer.
+            CardInstance foe = null!;
+            await LoadDirectPlay(s =>
+            {
+                BattleSetup(s);
+                foreach (var home in new[] { 229, 3636 }) SupportFixtureCard(s, home, 0, Zone.Home).GrantedKeywords.Add(new("Battle Maiden", "test-fixture", GrantDuration.Permanent));
+                foe = SupportFixtureCard(s, 3636, 1, Zone.Battlefield, 0); SupportFixtureCard(s, 8347, 0, Zone.Hand);
+            });
+            var thunder = View.Players[0].Hand.Single();
+            SelectCard(thunder); await EventFrames(4);
+            SupportRequire(PerformerStepActive && !StabilizationText(_inspector).Contains("CHOOSE A TARGET"), "Step one asks only for the performer");
+            var maidenRow = StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row"));
+            maidenRow.EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(4);
+            SupportRequire(!PerformerStepActive && StabilizationText(_inspector).Contains("CHOOSE A TARGET") && !StabilizationText(_inspector).Contains("SUMMARY"), "Step two asks only for the target");
+            ChooseTarget(foe.Id); await EventFrames(4);
+            var summary = StabilizationText(_inspector);
+            SupportRequire(summary.Contains("SUMMARY") && summary.Contains("Move and Straighten (") && summary.Contains("Give (") && summary.Contains("-3F"), "The summary lists the effects: " + summary);
+            FlowBack(); await EventFrames(4);
+            SupportRequire(_chosen!.Command!.TargetId is null && !StabilizationText(_inspector).Contains("SUMMARY") && StabilizationText(_inspector).Contains("CHOOSE A TARGET"), "Back returns to the target question");
+
+            // 4c. Issue #1004: A Paragon's Strength end to end -- the action, the performing Paragon, then the Ranged Attack's target -- one question at a time, with a summary and Back.
+            await LoadDirectPlay(s => { BattleSetup(s); SupportFixtureCard(s, 3636, 0, Zone.Battlefield, 0).GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent)); SupportFixtureCard(s, 61, 0, Zone.Hand); });
+            var strength = View.Players[0].Hand.Single();
+            SelectCard(strength); await EventFrames(4); await SupportCapture("-paragon-1-action");
+            await SupportClick(ActionTextBlocks().First(b => b.Text.Contains("Ranged", StringComparison.Ordinal))); await EventFrames(6); await SupportCapture("-paragon-2-performer");
+            SupportRequire(PerformerStepActive, "A Paragon's Strength Ranged Attack should ask for the performer first: " + StabilizationText(_inspector));
+            StabilizationButtons(_inspector).First(b => b.HasMeta("performer_row")).EmitSignal(BaseButton.SignalName.Pressed); await EventFrames(6); await SupportCapture("-paragon-3-target");
+            SupportRequire(AttackTargetActive && _attackChoice == AttackChoice.Unselected, "Then the Attack target is asked");
+            ChooseAttackTarget(AttackChoice.Card, _chosen!.TargetIds![0]); await EventFrames(6); await SupportCapture("-paragon-4-summary");
+            SupportRequire(StabilizationText(_inspector).Contains("SUMMARY") && StabilizationText(_inspector).Contains("Lose 4 Honor"), "The summary lists the Attack and the Honor loss: " + StabilizationText(_inspector));
 
             // 5. Issue #793: the Declare Attack button is a blood-red lacquer, not black.
             await LoadDirectPlay(s => { s.Phase = Phase.AttackDeclaration; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 3636, 1, Zone.Home); });
@@ -98,7 +133,29 @@ public partial class Main
             await LoadDirectPlay(s => { s.WinnerId = 0; s.VictoryReason = "Test victory"; SupportFixtureCard(s, 229, 0, Zone.Home); });
             var labels = StabilizationButtons(_inspector).Select(b => b.Text).ToArray();
             SupportRequire(labels.Contains("Return to main menu") && labels.Contains("Start another practice"), "The end of a match does not offer the main menu: " + string.Join(" | ", labels));
-            GD.Print("DIRECT_PLAY_PASS: confirm-first for an automatic action, two-action text selection with cancel, assumed single legal action, click-to-choose performer, blood-red Declare Attack, end-of-match main menu.");
+            // 7. Issues #952 and #960: "choose a player" is one play whose draft asks for the player and is answered on the table; it never resolves for "you" by default. A card that names "another player" decides it itself.
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; SupportFixtureCard(s, 229, 0, Zone.Home); SupportFixtureCard(s, 4487, 0, Zone.Hand); });
+            var minds = View.Players[0].Hand.Single();
+            var enabledPlayers = Actions.Where(a => a.Enabled && a.CardId == minds.Id && a.Command?.TargetPlayerId is not null).Select(a => a.Command!.TargetPlayerId!.Value).Distinct().Order().ToArray();
+            SupportRequire(enabledPlayers.Length == 2, "Know Their Minds should be playable on either player: " + string.Join(" | ", Actions.Where(x => x.CardId == minds.Id).Select(x => $"{x.Type}/{x.Command?.AbilityId}/{x.Command?.TargetPlayerId}/{x.Enabled}/{x.Reason}")));
+            SelectCard(minds); await EventFrames(4);
+            SupportRequire(_chosen is { Type: "useAbility" } && PlayChoices(minds).Length == 1 && ActionTextBlocks().Count() == 0, "Choose a player is one play, begun at once");
+            SupportRequire(!PlayerPicked && _paymentConfirm is { Disabled: true }, "No player may be picked for the player, and Confirm must wait");
+            var foeHold = View.Players.First(p => p.Id != View.ViewerId).Stronghold;
+            SupportRequire(_tiles.Single(t => t.Card.Id == foeHold.Id).LegalTarget, "The opponent's stronghold is not highlighted as a choice");
+            SelectCard(foeHold); await EventFrames(3);
+            SupportRequire(_chosen?.Command?.TargetPlayerId == 1 && _paymentConfirm is { Disabled: false }, $"Clicking the opponent's stronghold must choose the opponent (got {_chosen?.Command?.TargetPlayerId})");
+            SelectCard(View.Players[0].Stronghold); await EventFrames(3);
+            SupportRequire(_chosen?.Command?.TargetPlayerId == 0, "Clicking your own stronghold must choose you");
+            await SupportClick(_clanPlaques[1].Hit); await EventFrames(3);
+            SupportRequire(_chosen?.Command?.TargetPlayerId == 1, $"Clicking the opponent's clan plaque must choose the opponent (got {_chosen?.Command?.TargetPlayerId})");
+            await LoadDirectPlay(s => { s.Phase = Phase.Action; s.Players[1].Honor = 30; SupportFixtureCard(s, 10380, 0, Zone.Hand); });
+            var misstep = View.Players[0].Hand.Single();
+            SelectCard(misstep); await EventFrames(4);
+            SupportRequire(ActionTextBlocks().Count() == 0 && (_playPrompt is not null || _chosen is not null) && PlayChoices(misstep).Length == 1, "Imprudent Misstep names another player, so there is nothing to choose");
+            SupportRequire(PlayChoices(misstep).Single().Option.Command!.TargetPlayerId == 1 && !StabilizationText(_inspector).Contains("Not available now", StringComparison.Ordinal), "It should play on the opponent without listing the you-variant as unavailable: " + string.Join("/", StabilizationText(_inspector).Split((char)10)));
+
+            GD.Print("DIRECT_PLAY_PASS: confirm-first for an automatic action only, two-action text selection that begins the action, assumed single legal action begun at once, click-to-choose performer, a player chosen by clicking a stronghold or plaque and a card that names the player, blood-red Declare Attack, end-of-match main menu.");
             GetTree().Quit(0);
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }

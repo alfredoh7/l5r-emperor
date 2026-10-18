@@ -251,9 +251,43 @@ foreach (var scenario in DuelDemoScenarios.All)
             Check(e.GetView(0).LastDuel!.Complete, "Bot stalled");
             Check(JsonSerializer.Serialize(e.State) == JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State), "Replay mismatch");
         });
+Run("issue #917: with the held action's source in the resolution area the bot indexes it, decides, and never mistakes it for a card in play", () =>
+{
+    var s = MatchEngine.CreateEconomyScenario().State;
+    foreach (var p in s.Players) { foreach (var id in p.Hand.ToArray()) s.Cards.Remove(id); p.Hand.Clear(); }
+    s.Phase = Phase.Battle; s.ActivePlayerId = 0; s.PriorityPlayerId = 0; s.CurrentBattleProvince = 0; s.UnresolvedBattlefields = [0];
+    CardInstance Add(string def, int owner, Zone zone, int? province = null) { var c = new CardInstance { Id = $"ra-{s.Cards.Count}", DefinitionId = def, OwnerId = owner, Zone = zone, FaceUp = zone != Zone.Hand, ProvinceIndex = province }; s.Cards.Add(c.Id, c); if (zone == Zone.Hand) s.Players[owner].Hand.Add(c.Id); return c; }
+    var strike = Add("oracle-l5r-7525", 0, Zone.Hand); Add("oracle-l5r-5599", 0, Zone.Hand);
+    var scout = Add("training-scout-samurai", 0, Zone.Battlefield, 0); var enemy = Add("training-lion-samurai", 1, Zone.Battlefield, 0);
+    var game = MatchEngine.FromTestState(s);
+    var announce = game.QueryActions(0).First(a => a.Enabled && a.Command?.AbilityId == "strategic-strike-attack" && a.CardId == strike.Id && (a.TargetIds?.Contains(enemy.Id) ?? false)).Command! with { TargetId = enemy.Id };
+    Check(game.Execute(announce).Accepted, "announcement refused");
+    Check(game.GetView(0).PendingChoice?.Type == "announceReaction", "the announce window is open");
+    var view = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(game.GetView(0)))!;
+    Check(view.ResolutionArea is { Length: 1 } && view.ResolutionArea[0].Card.Id == strike.Id && view.Players[0].Hand.All(c => c.Id != strike.Id), "the Strike is in the area of the view, not the hand");
+    var memory = new BotContext(); memory.Observe(view);
+    var decision = TrainingOpponent.Choose(view, game.QueryActions(0), memory);
+    Check(decision.Command is not null, "the bot made no decision with a card being resolved");
+    Check(game.Execute(decision.Command!).Accepted, "the bot's command was illegal");
+});
 runner.Run("ai", tests);
 runner.Run("bot-policy", BotPolicyTests.Tests); // issue #642: the policies Mendon specified
+runner.Run("spec-818", Spec818Tests.Tests); // issue #818: Mendon's eleven bot changes
+runner.Run("battle-policy", BattlePolicyTests.Tests); // issue #788: the six battle changes to the practice bot
+runner.Run("unopposed", UnopposedTests.Tests); // issue #997: no wasted actions in a battle nobody opposes
+runner.Run("phase-choice", PhaseChoiceTests.Tests); // issue #998: Battle/Open cards in the right phase, never a do-nothing use
+runner.Run("honor-aware", HonorAwareTests.Tests); // issue #870: the Honor an ability costs or gains, and an Attack that cannot destroy
 runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
+runner.Run("sure-reactions", SureReactionsTests.Tests); // issue #963: bot loop round 4
+runner.Run("deck-archetype", DeckArchetypeTests.Tests); // issue #963: bot loop S0
+runner.Run("archetype-play", ArchetypePlayTests.Tests); // issue #963: archetype flags, split defense
+runner.Run("bodies-first", BodiesFirstTests.Tests); // issue #963: bot loop round 3
+runner.Run("informed-defense", InformedDefenseTests.Tests); // issue #963: bot loop round 2
+runner.Run("seppuku", SeppukuTests.Tests); // issue #963: bot loop round 1
+runner.Run("michi-stall", MichiStallReplayTests.Tests); // issue #967
+runner.Run("prudence", PrudenceTests.Tests); // issue #902: Mendon's bot notes
+runner.Run("cavalry-defense", CavalryDefenseTests.Tests); // issue #946: defending against the attacker's possible Cavalry
+runner.Run("bot-profile", BatchProfile.Tests); // issue #888: opt-in timing of seeded bot-vs-bot matches
 return runner.Finish();
 
 void Run(string name, Action run) => tests.Add((name, run));

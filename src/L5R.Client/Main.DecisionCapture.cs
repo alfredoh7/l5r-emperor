@@ -163,8 +163,9 @@ public partial class Main
             else
             {
                 var grouped = StabilizationButtons(_inspector).Where(b => b.HasMeta("alternative_cost_group")).ToArray();
-                DecisionRequire(grouped.Length == 1, "Cost variants were not grouped");
-                await SupportClick(grouped[0]); await EventFrames(5);
+                // Issue #954: clicking the Personality starts its one usable ability; the grouped sidebar button is only the way in when that click is ambiguous.
+                DecisionRequire(grouped.Length == 1 || _chosen is { AlternativeCost: not null }, "Cost variants were not grouped and the click did not start the action");
+                if (grouped.Length == 1) { await SupportClick(grouped[0]); await EventFrames(5); }
                 DecisionRequire(DecisionButton("Review cost choices").Disabled, "Cost review opened before a target was chosen");
                 ChooseTarget(Actions.First(a => a.Enabled && a.AlternativeCost is not null && a.TargetIds is { Length: > 0 }).TargetIds![0]); await EventFrames(5);
                 await SupportClick(DecisionButton("Review cost choices")); await EventFrames(5);

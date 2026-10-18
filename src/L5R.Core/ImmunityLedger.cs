@@ -30,13 +30,15 @@ namespace L5R.Core;
 //   DestroyInResolution TfResolutionDestroyable (the one filter the battle resolution's three destroy sites share).
 //   MoveNegation        MovementNegationBarred (the predicate every movement negation already asks: Winter Sled's, PerformersSled.cs) and the two sled-only guards beside it.
 //   Prevention          HasActionLock (action locks) and MovementLocked (movement locks, which also refuse assigning): the lock is ignored when it is another player's.
+//   AssignPrevention    MovementLocked asked about assigning (Assign, AssignAttack) and RestrictionBarsAssignment (a stored "may not attack/defend"): Imperial Deployment (issue #835) negates only the
+//                       effects that prevent assigning; the same Personality can still be barred from moving.
 //   ForcePenalty        ApplyModifier.
 //   ProvinceStrength    the player's provinces: GiveProvinceStrengthThisTurn / GiveProvinceStrengthUntilResolution (the writers) and ProvinceSourceBonuses / StaticProvinceBonus (the readers).
 //   TerrainDestroy      DiscardTerrain.
 //   MovementAtBattlefield MoveHome, MovementToBattlefieldNegated and the location switch: a movement by an effect from or to the battlefield.
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum ImmunityKind { Bow, Destroy, DestroyInResolution, MoveNegation, Prevention, ForcePenalty, ProvinceStrength, TerrainDestroy, MovementAtBattlefield }
+public enum ImmunityKind { Bow, Destroy, DestroyInResolution, MoveNegation, Prevention, ForcePenalty, ProvinceStrength, TerrainDestroy, MovementAtBattlefield, AssignPrevention }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ImmunitySource
@@ -249,7 +251,7 @@ public sealed partial class MatchEngine
         foreach (var rule in rules)
         {
             if (rule.Kind != kind) continue;
-            foreach (var carrier in _state.Cards.Values.Where(c => (InPlay(c) || rule.EventCarrier && c.Zone == Zone.EventInPlay) && rule.OwnerIs(Definition(c))))
+            foreach (var carrier in _state.Cards.Values.Where(c => (InPlay(c) || rule.EventCarrier && c.Zone == Zone.EventInPlay) && rule.OwnerIs(Definition(c)) && !SpellStaticSilenced(c)))
             {
                 if (!StandingImmunityCovers(rule, carrier, card, playerId, battlefield)) continue;
                 if (!ImmunitySourceMatches(rule.Source, kind, controller ?? carrier.OwnerId, card, sourcePlayerId, sourceCard)) continue;

@@ -10,7 +10,7 @@ namespace L5R.Core;
 // StrategyCopyRule / BattleStrategy (Emperor Edition Stronghold pass, issue #486 batch 1, Eternal Victory Dojo: "Your deck may include four copies each of one or two non-Unique Strategies with Battle
 // abilities"): a Stronghold carrying that deck-construction text, and a Strategy that has a Battle ability; both read from the card's definition (DeckWorkshop.StrategyCopyRuleOf / BattleStrategyOf).
 public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null, int FateMinimumReduction = 0,
-    bool StrategyCopyRule = false, bool BattleStrategy = false)
+    bool StrategyCopyRule = false, bool BattleStrategy = false, bool CountsTowardMinimum = true)
 {
     public int ExperienceLevel => Experienced.Level(Keywords);
     public string DeckName => Experienced.DeckName(Name, Keywords);
@@ -31,6 +31,8 @@ public sealed class DeckWorkshop
     public static readonly string[] SetupSlots = ["Stronghold", "Border Keep", "Bamboo Harvesters"];
     /// <summary>Hato-gurama (issue #453 batch 5): the Fate-minimum reduction a card's printed trait gives, for a DeckCardInfo built from its definition.</summary>
     public static int FateMinimumReductionOf(CardDefinition definition) => definition.Effect == "hato-gurama" ? 1 : 0;
+    /// <summary>Stone of Remembrance (issue #829): "This Holding does not count towards your minimum deck size" -- it counts as zero cards toward the 40-card minimum (it is still a card of the deck).</summary>
+    public static bool CountsTowardMinimumOf(CardDefinition definition) => definition.Effect != Wave829Abilities.StoneEffect;
     /// <summary>Eternal Victory Dojo (issue #486 batch 1): the Stronghold's printed deck-construction text lets the deck hold four copies each of one or two non-Unique Strategies with Battle abilities.</summary>
     public static bool StrategyCopyRuleOf(CardDefinition definition) => definition.Effect == "eternal-victory-dojo";
     /// <summary>A Strategy that has a Battle ability (a Battle or Battle/Open ability among its own abilities).</summary>
@@ -111,7 +113,7 @@ public sealed class DeckWorkshop
         var warnings = new List<string>();
         foreach (var slot in SetupSlots)
             if (Cards.Where(c => c.SetupSlot == slot).Sum(c => Count(c.Id)) != 1) warnings.Add($"Select exactly one {slot} version.");
-        int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family)).Sum(c => Count(c.Id));
+        int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family) && c.CountsTowardMinimum).Sum(c => Count(c.Id));
         var dynasty = Total("Dynasty"); var fate = Total("Fate");
         if (dynasty < 40) warnings.Add($"Dynasty needs {40 - dynasty} more cards (40 minimum).");
         // Hato-gurama (issue #453 batch 5): each copy in the deck lowers the Fate minimum by one.
@@ -147,6 +149,32 @@ public sealed class DeckFileStore(string directory)
         if (new[] { "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9" }.Contains(clean, StringComparer.OrdinalIgnoreCase))
             throw new ArgumentException("Choose another deck name; this one is reserved by Windows.");
         return Path.Combine(DirectoryPath, clean + ".txt");
+    }
+    /// <summary>Puts the decks that ship with the game into this folder. The marker file lists the shipped decks already offered, so a deck added in a later version is written once on the next open,
+    /// a deck of the same name is never replaced, and a deck the player deletes does not come back. A marker from the first version (no list) means <paramref name="originallyShipped"/> were offered.
+    /// Returns how many were written.</summary>
+    public int Preload(IEnumerable<(string Name, string Text)> decks, string markerPath, IEnumerable<string>? originallyShipped = null)
+    {
+        const string Header = "shipped decks offered:";
+        var offered = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (File.Exists(markerPath))
+        {
+            var lines = File.ReadAllLines(markerPath);
+            if (lines.Length > 0 && lines[0] == Header) foreach (var line in lines.Skip(1)) offered.Add(line);
+            else foreach (var name in originallyShipped ?? decks.Select(d => d.Name)) offered.Add(name);
+        }
+        Directory.CreateDirectory(DirectoryPath);
+        var written = 0;
+        foreach (var (name, text) in decks)
+        {
+            if (!offered.Add(name)) continue;
+            var target = PathFor(name);
+            if (File.Exists(target)) continue;
+            File.WriteAllText(target, text); written++;
+        }
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(markerPath))!);
+        File.WriteAllLines(markerPath, new[] { Header }.Concat(offered.Order(StringComparer.OrdinalIgnoreCase)));
+        return written;
     }
     public static string Read(string path)
     {

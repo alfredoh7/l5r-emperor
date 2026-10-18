@@ -1,6 +1,6 @@
 # Art production with Meshy
 
-Accepted by Alfredo on 2026-09-14 after reviewing the supplied Meshy lantern. Expanded by Alfredo on 2026-09-16 to every new 3D asset (see ART_IMPLEMENTATION.md). This is the default production route, beginning with the duel arena in [#205](https://github.com/alfredoh7/l5r-emperor/issues/205). It supersedes the temporary manual-lantern experiment. Mechanics remain with Mendon.
+Accepted by Alfredo on 2026-09-14 after reviewing the supplied Meshy lantern. Expanded by Alfredo on 2026-09-16 to every new 3D asset (see ART_IMPLEMENTATION.md). This is the default production route, beginning with the duel arena in [#205](https://github.com/l5r-emperor-dev/l5r-emperor/issues/205). It supersedes the temporary manual-lantern experiment. Mechanics remain with Mendon.
 
 **External ChatGPT image generation → Alfredo's image approval → Blender layout → quick Godot camera check → Meshy props → Blender cleanup and assembly → Godot presentation → compare and iterate.**
 

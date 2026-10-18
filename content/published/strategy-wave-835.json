@@ -1,0 +1,210 @@
+{
+  "Profile": "strategy-wave-835",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #835.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10358",
+      "Name": "A Cleansing Breath",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target your Personality at any location. He centers himself. Negate other players' cards' effects that prevent him assigning, moving, or performing actions. If he is a Kensai, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10358.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "w835-cleansing-breath"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10378",
+      "Name": "Imperial Deployment",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Personality: The Empress dispatches him to the Colonies. Negate other players' cards' effects that prevent him assigning. After the next time this turn an attack is declared, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10378.jpg",
+      "Keywords": [
+        "Imperial"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w835-imperial-deployment"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10404",
+      "Name": "Warded Premises",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle's resolution: Negate all Force bonuses from actions to cards at this battlefield.\nBattle: Even if you control no units at the current battlefield, if there is no Terrain in play there: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10404.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "w835-warded-negate",
+        "w835-warded-play"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10370",
+      "Name": "Duty Over All Things",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :gstar:: If he would be opposed, Recruit your target performing discarded Yojimbo, paying 3 less Gold if you control a Courtier or Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10370.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "w835-duty-discount",
+        "w835-duty-full"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10388",
+      "Name": "Pierce the Tapestry",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may include up to seven copies of this card in your deck.\nBattle: Choose your performing unbowed Monk and target an enemy Personality or Follower: Give it -3F. If it has no attachments and you have played two or more other Pierce the Tapestry this battle, destroy it. If this did not destroy it, you may take an additional Battle action to play a Pierce the Tapestry.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10388.jpg",
+      "Keywords": [
+        "Kiho",
+        "Void"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w835-pierce"
+      ],
+      "Effect": "none",
+      "DeckCopyLimit": 7
+    },
+    {
+      "Id": "oracle-l5r-10558",
+      "Name": "The Heavens' Blessing",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nOpen: Until the game ends, a player must pay 2 Gold to draw a card from effects of his own Strategies during an Action Phase.\nOpen: No player can gain Honor in Action Phases (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10558.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w835-heavens-draw",
+        "w835-heavens-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10550",
+      "Name": "Unbearable Weight",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited, :g4:: Discard the top card of a Fate deck. You may target a Personality and give him a Chi penalty equal to the card's Focus Value. If this destroyed the target, his controller puts this Strategy in his hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10550.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "w835-unbearable"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10720",
+      "Name": "Merchant Patronage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card from your hand to draw a card.)\nPolitical Interrupt: If the action is on another player's Holding, you choose who gains or loses any Honor from it. If you control a Courtier, you may bow him to increase the gain or loss by 1.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10720.jpg",
+      "Keywords": [
+        "Kharmic",
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "w835-patronage",
+        "w835-patronage-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

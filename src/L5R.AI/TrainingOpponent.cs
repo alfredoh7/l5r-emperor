@@ -25,7 +25,7 @@ public static partial class TrainingOpponent
         memory.Observe(view);
         var self = view.Players.Single(p => p.Id == view.ViewerId);
         var opponent = view.Players.Single(p => p.Id != view.ViewerId);
-        var x = new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view));
+        var x = new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view)) { Actions = actions, Odds = BattlePolicy.Assess(view) };
         var candidates = actions.Where(a => a.Enabled && a.Type is not ("concede" or "wait"))
             .Select(a => (Action: a, Command: Prepare(x, a)))
             .Where(p => p.Command is not null && !memory.IsRejected(view.Version, p.Command))
@@ -42,6 +42,10 @@ public static partial class TrainingOpponent
     /// <summary>Everything one decision reads, built once from the permitted view.</summary>
     private sealed record Ctx(MatchView View, PlayerView Self, PlayerView Opponent, BotProfile Profile, BotContext Memory, Dictionary<string, CardView> Cards)
     {
+        /// <summary>Every action offered at this decision (issue #788: a rule may need to know whether a better one exists).</summary>
+        public ActionOption[] Actions { get; init; } = [];
+        /// <summary>The Force picture of the battle in progress, or null outside one.</summary>
+        public BattlePolicy.Odds? Odds { get; init; }
         public int MaxHand => Self.HandLimit?.Maximum ?? 8;
         public CardView? Card(string? id) => id is not null && Cards.TryGetValue(id, out var c) ? c : null;
     }
@@ -53,6 +57,7 @@ public static partial class TrainingOpponent
             foreach (var c in p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.Celestials ?? []).Concat(p.EventsInPlay ?? [])
                 .Concat(p.Underneath ?? []).Concat(p.Provinces.Select(q => q.Card).OfType<CardView>()).Append(p.Stronghold))
                 map.TryAdd(c.Id, c);
+        foreach (var entry in view.ResolutionArea ?? []) map.TryAdd(entry.Card.Id, entry.Card); // issue #917: the held action's source sits in the resolution area, not in a hand
         return map;
     }
 
@@ -95,16 +100,25 @@ public static partial class TrainingOpponent
             if (action.Type == "attack")
             {
                 // Mendon's spec (issue #642): as many sub-armies as can each beat their province plus every unit that could defend it.
-                var plan = PlanAttack(x, units, provinces);
+                var assigned = AlreadyAssigned(x);
+                var plan = PlanAttack(x, units, provinces, assigned) is { } whole ? HoldCavalry(x, OfferedOnly(whole, units)) : null;
+                if (HonorAttackOf(x, units, provinces) is { } honorAttack) return command with { Assignments = HoldCavalry(x, honorAttack.Assignments) }; // issue #818 item 8
                 if (plan is not null) return command with { Assignments = plan };
-                if (command.Assignments is { Count: > 0 }) return command; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
+                if (TradeFor(x, units) is { } trade)
+                {
+                    var weakest = opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index;
+                    return command with { Assignments = HoldCavalry(x, trade.UnitIds.ToDictionary(id => id, _ => weakest, StringComparer.Ordinal)) };
+                }
+                if (command.Assignments is { Count: > 0 }) return command with { Assignments = HoldCavalry(x, command.Assignments) }; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
+            if (action.Type == "assignDefense" && (CavalryLastStandPlan(x, action, units) ?? CavalryDefensePlan(x, action, units)) is { } cavalryDefense) return command with { Assignments = cavalryDefense }; // issue #946
             // Mendon's rule (playtest 2026-10): when every province it has left will fall to the attack, the bot always defends, at the one battlefield it is likeliest to hold.
             var lastStand = action.Type == "assignDefense" ? LastStandProvince(x, provinces) : null;
+            if (action.Type == "assignDefense" && x.Memory.UseInformedDefense && x.Memory.UseSplitDefense && lastStand is null && SplitDefense(x, units, provinces) is { } split) return command with { Assignments = split };
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
-                : lastStand ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
-            return command with { Assignments = units.ToDictionary(c => c.Id, _ => target) };
+                : lastStand ?? (x.Memory.UseInformedDefense ? InformedDefenseProvince(x, units, provinces) : null) ?? provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
+            return command with { Assignments = action.Type == "attack" ? HoldCavalry(x, units.ToDictionary(c => c.Id, _ => target)) : units.ToDictionary(c => c.Id, _ => target) };
         }
         if (action.Type == "discardHand")
         {
@@ -114,6 +128,12 @@ public static partial class TrainingOpponent
         }
         if (action.Type == "useAbility")
         {
+            // Issue #788 (rule 6): with 22 or more Gold and most provinces holding holdings or unseen cards, the once-per-game refresh cycles exactly those.
+            if (command.AbilityId == "border-game" && BorderRefreshWanted(x) && BorderRefreshCards(x, action.TargetIds ?? []) is { Length: > 0 } cycled)
+            {
+                x.Memory.NoteBorderRefresh(view.TurnNumber);
+                return command with { CardIds = cycled };
+            }
             if (command.AbilityId is "border-first" or "border-game")
             {
                 var ready = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
@@ -130,15 +150,21 @@ public static partial class TrainingOpponent
                 var offered = selectable.Where(id => !id.StartsWith("hidden-", StringComparison.Ordinal)).ToArray();
                 command = command with { CardIds = [(offered.Length > 0 ? offered : selectable)[0]] };
             }
-            else if (command.CardIds is null && action.TargetIds is { Length: > 0 } && command.TargetId is null)
+            // Issue #902: the engine's default command already names the first legal target (found while tracing a bot that bowed a bowed Personality), so the bot chooses by what the ability does instead of keeping it.
+            else if (command.CardIds is null && action.TargetIds is { Length: > 0 } && (command.TargetId is null || x.Memory.UsePrudence))
             {
                 var intent = AbilityIntent.Of(command.AbilityId);
                 var refused = x.Memory.RejectedTargets(view.Version, command.AbilityId, command.CardId, "useAbility");
                 var legal = action.TargetIds.Where(id => !refused.Contains(id)).ToArray();
+                // Issue #902: a bow is aimed at a card that is not already bowed; when every target is, the action is kept, not spent.
+                if (x.Memory.UsePrudence) legal = legal.Where(id => !BowWasted(intent, x.Card(id))).ToArray();
                 if (legal.Length == 0) return null;
-                var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view)))
+                var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view, x)))
                     .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
-                var target = known.Card ?? PickCard(x, legal, intent, action.Label);
+                // Issue #788: an Attack takes the highest-Force target it can destroy, and a bow takes the unit with the most attachments (or the most dangerous printed ability).
+                var ruled = !(x.Memory.UseBattlePolicy || x.Memory.UseHonorAware && intent.IsAttack) ? null : intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
+                    : intent.Rank == EffectRank.Bow && intent.Side == TargetSide.Enemy ? PickBowTarget(x, legal, command.AbilityId) : null;
+                var target = ruled ?? known.Card ?? PickCard(x, legal, intent, action.Label);
                 if (target is not null) command = WithTarget(command, action, target.Id);
                 else if (command.TargetId is null) command = WithTarget(command, action, legal[0]);
                 if (command is null) return null;
@@ -149,8 +175,11 @@ public static partial class TrainingOpponent
             var refusedTargets = x.Memory.RejectedTargets(view.Version, command.AbilityId, command.CardId, action.Type);
             var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id) && !refusedTargets.Contains(c.Id)).ToArray();
             if (targetCards.Length == 0) return refusedTargets.Count > 0 ? null : Complete(x, action, command);
+            // Issue #902: a Strategy that bows takes an unbowed target; with none, it is not played.
+            if (x.Memory.UsePrudence && action.Type == "playStrategy" && StrategyIntent(x.Card(command.CardId)) is { Rank: EffectRank.Bow } bowing && bowing.Side != TargetSide.Own && targetCards.All(c => c.Bowed)) return null;
             var ordered = targetCards.OrderBy(c => c.Bowed).ThenByDescending(c => c.Force);
-            var withTarget = WithTarget(command, action, ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
+            var bowStrategy = x.Memory.UseBattlePolicy && action.Type == "playStrategy" && x.Card(command.CardId)?.Definition?.Effect == "bow-small" ? PickBowTarget(x, targetCards.Select(c => c.Id).ToArray(), null) : null;
+            var withTarget = WithTarget(command, action, bowStrategy?.Id ?? ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
             return withTarget is null ? null : Complete(x, action, withTarget);
         }
         return Complete(x, action, command);
@@ -167,7 +196,9 @@ public static partial class TrainingOpponent
         return command;
     }
 
-    private static double Score(Ctx x, ActionOption action, GameCommand command)
+    private static double Score(Ctx x, ActionOption action, GameCommand command) => Adjust(x, action, command, ScoreCore(x, action, command));
+
+    private static double ScoreCore(Ctx x, ActionOption action, GameCommand command)
     {
         var view = x.View; var self = x.Self; var opponent = x.Opponent;
         var card = self.Provinces.Select(p => p.Card).Concat(self.Hand).FirstOrDefault(c => c?.Id == command.CardId);
@@ -182,7 +213,7 @@ public static partial class TrainingOpponent
             case "overconfidentDraw": return command.Choice == "draw" ? 150 : 100;
             case "chooseShinden":
                 // Never give the opponent Honor (Mendon's rule, issue #642): bowing is always the answer; allowing the Honor gain is only chosen if bowing were not offered.
-                return command.Choice == "honor" ? -100 : 100;
+                return Spec(x) ? ShindenScore(x, command) : command.Choice == "honor" ? -100 : 100; // issue #818 item 10
             case "useAbility":
                 // A Reaction it announced and ordered is played: skipping it is never better than the announcement it made (issue #803).
                 return AbilityScore(x, action, command) + (view.ReactionOrder is { Stage: "Resolve" } ? 1000 : 0);
@@ -204,8 +235,9 @@ public static partial class TrainingOpponent
                 if (def is null) return -100;
                 var holdings = self.Home.Count(c => c.Definition?.Type == CardType.Holding);
                 if (def.Type == CardType.Holding)
-                    return holdings < 5 ? 160 - holdings * 10 : holdings < 8 ? 70 - holdings : 5;
-                var baseScore = 110 + def.Force * 2 + def.PersonalHonor * 2;
+                    return HoldingPurchaseScore(x, holdings); // issue #818 item 1
+                double baseScore = 110 + def.Force * 2 + def.PersonalHonor * 2 + (x.Memory.BorderRefreshedRecently(view.TurnNumber) ? 30 : 0); // issue #788: recruit Personalities from a refresh
+                if (def.Type == CardType.Personality) baseScore += CatchUpRecruitBonus(x); // issue #818 item 2
                 var cost = action.Quote?.Cost ?? def.GoldCost;
                 var ready = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
                 var stance = x.Profile.StanceFor(self.Honor, opponent.Honor, ready - cost >= 2);
@@ -215,8 +247,8 @@ public static partial class TrainingOpponent
                 if (command.ClanDiscount && !self.ProclaimUsedThisTurn) baseScore += stance switch { ProclaimStance.Prioritize => -25, ProclaimStance.Neutral => -15, _ => 15 };
                 return baseScore - cost;
             case "overlay":
-                return card?.Definition is null ? -100 : 180 + card.Definition.Force * 2;
-            case "discardProvince": return card?.Definition?.Type == CardType.Holding && self.Home.Count(c => c.Definition?.Type == CardType.Holding) >= 8 ? 40 : 20;
+                return OverlayScore(x, card); // issue #818 item 4
+            case "discardProvince": return DiscardProvinceScore(x, card); // issue #818 items 1 and 3
             case "endDynasty": return 0;
             case "equip":
                 var totalProduction = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
@@ -232,20 +264,34 @@ public static partial class TrainingOpponent
                 return DeclareScore(x);
             case "attack":
                 if (command.Assignments is not { Count: > 0 }) return -100;
-                var attacking = self.Home.Where(c => command.Assignments.ContainsKey(c.Id) || c.AttachedTo is not null && command.Assignments.ContainsKey(c.AttachedTo));
+                var assignments = WholeAttack(x, action, command.Assignments);
+                if (Spec(x)) // issue #818 item 8: the unit sent only to gain Honor is not part of the attack that must destroy a Province
+                {
+                    var (honorUnits, honorProvinces) = AttackInputs(x, action);
+                    if (HonorAttackOf(x, honorUnits, honorProvinces) is { } honorPlan && honorPlan.Assignments.Count == assignments.Count && honorPlan.Assignments.All(p => assignments.TryGetValue(p.Key, out var sent) && sent == p.Value))
+                    {
+                        assignments = assignments.Where(p => p.Key != honorPlan.UnitId).ToDictionary(p => p.Key, p => p.Value);
+                        if (assignments.Count == 0) return 85;
+                    }
+                }
+                var attacking = self.Home.Concat(x.Memory.UseCavalryAttack ? self.Army : []).Where(c => assignments.ContainsKey(c.Id) || c.AttachedTo is not null && assignments.ContainsKey(c.AttachedTo));
                 var force = ArmyForce(attacking);
                 var homeDefense = ArmyForce(opponent.Home);
                 // Every army in the assignment must beat its own province plus every unit that could defend it.
-                var armies = command.Assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
+                var armies = assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Concat(x.Memory.UseCavalryAttack ? self.Army : []).Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
                 if (HonorRace(x) && armies.Length > 0) return 150 + armies.Length; // the opponent wins on Honor at the start of its turn: destroy every Province the army can
-                var weakestArmyMargin = armies.Length == 0 ? int.MinValue : armies.Min(a => a.Force - (opponent.Provinces.FirstOrDefault(p => p.Index == a.Province)?.Strength ?? int.MaxValue / 2) - homeDefense);
-                return weakestArmyMargin > 0 ? 90 + force - homeDefense : armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0 ? 80 : 0;
+                var weakestArmyMargin = armies.Length == 0 ? int.MinValue : WeakestArmyMargin(x, armies.Select(a => (a.Province, a.Force)).ToArray(), homeDefense);
+                if (weakestArmyMargin > 0) return 90 + force - homeDefense;
+                if (armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0) return 80;
+                return armies.Length == 1 && TradeOf(x, assignments.Keys) is { } traded ? TradeScore(traded) : 0;
             case "assignDefense":
+                if (x.Memory.UseInformedDefense && InformedDefenseScore(x, command) is { } informed) return informed;
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
-                if (enemyForce == 0) return 0;
+                if (enemyForce == 0) return CavalryLastStandPlan(x, action, null) is not null ? 200 : CavalryDefensePlan(x, action, null) is not null ? 95 : 0; // the last Province would fall to the Cavalry: defend with everything // issue #946: nobody is assigned yet, but Cavalry is on its way
                 if (LastStandProvince(x, self.Provinces.Where(p => !p.Destroyed).Select(p => p.Index).ToArray()) is not null) return 200; // the last Provinces will fall: defend and fight
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
+            case "orderSeppuku": return x.Memory.UseSeppukuPolicy ? SeppukuScore(x, command) : PassScore + 1;
             case "pass": return PassScore;
             // A convenience for a human who wants to skip every remaining battle in one go; the bot simply passes when its turn comes (and it is refused while a window is open).
             case "passAllBattles": return -100;
@@ -257,7 +303,7 @@ public static partial class TrainingOpponent
             case "selectSearchCards": case "chooseSearchAttachTarget": return 100; // P20 (SearchExtensions.cs): the engine's default legal selection; the first Personality it can be attached to
             // "Put it into play or your hand" (issue #498): a modest bot puts the found Ring into play; the Attack target selection step: any offered target over none.
             case "chooseSearchDestination": return command.Choice == "play" ? 100 : 90;
-            case "chooseAttackTarget": return command.TargetId is null ? 50 : 100;
+            case "chooseAttackTarget": return AttackTargetChoiceScore(x, command);
             // Goju Asuka / Only a Shadow (issue #501): the Personality kept bowed is the engine's first listed candidate (every answer is legal and one is owed).
             case "chooseInfiltratorStraighten": return 100;
             // Look at the top N cards (issue #322): a modest bot answers a look with the first arrangement the engine offers -- the
@@ -270,7 +316,7 @@ public static partial class TrainingOpponent
             // The opposing player's Either/Or choice (issue #338): pay when the engine offers a payable Gold option (a modest bot keeps its action), then bow the
             // threatened Personality, then lose Honor, and only then take the consequence. Copying a keyword or ability
             // (Fukuzo): the first candidate the engine lists.
-            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => -100, /* "Lose 2 Honor": the bot never loses Honor by choice */ "done" => 61, /* P25: a multi-pick Either/Or takes the fewest options it must (Done is offered only once Min are picked) */ _ => 60 };
+            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => Spec(x) && !BowAcceptable(x, x.Card(view.PendingEitherOr?.AffectedCardId)) ? 59 : 90, "honor" => -100, /* "Lose 2 Honor": the bot never loses Honor by choice */ "done" => 61, /* P25: a multi-pick Either/Or takes the fewest options it must (Done is offered only once Min are picked) */ _ => 60 };
             case "chooseCopyKeyword": case "chooseCopyAbility": return 100;
             // The opposing player's variable payment (issue #373, Virtuous Charity): a modest bot answers with the engine's default, paying nothing.
             case "chooseOpponentPayment": return 100;
@@ -297,10 +343,26 @@ public static partial class TrainingOpponent
                 return command.Choice == "use" ? 60 + (optionalTarget?.Force ?? 0) : 20;
             // Sleep's budgeted multi-select (issue #667): the bot bows enemy unbowed Personalities the budget allows (strongest first), never its own or an already bowed one, never clears, then confirms.
             case "budgetSelectAdd":
+                if (x.View.PendingChoice?.Type == Wave829Abilities.BentenType) return Wave829BentenScore(x, action); // Benten's Blessing (issue #829) shares the three actions
                 var sleepTarget = opponent.Army.Concat(opponent.Home).FirstOrDefault(c => c.Id == command.TargetId);
                 return sleepTarget is { Bowed: false } ? 120 + sleepTarget.Force : -50;
             case "budgetSelectConfirm": return 100;
             case "budgetSelectClear": return -100;
+            // Kokujin's question after a won duel (issue #827): give up one of its own Personalities only for a loser worth clearly more than it; P'an Ku stays bowed to keep the Personality he took; the Spell the Jingasa makes it drop is the first listed.
+            case "w827KokujinChoose": return Wave827KokujinScore(x, command);
+            case "w827PanKuStraightenChoose": return command.Choice == "remain" ? 105 : 100;
+            case "w827KoanDiscardChoose": return 100;
+            // Cross-Clan Wedding (issue #829): the Personality it gives away is the least valuable it has, whether it is the first gift or the one given back; Minor Blackmail names the other player's strongest.
+            // Blood of Isawa's Tribe (issue #835): the bot takes a keyword to replace, always replaces it with a different element (the same one only asks for a confirmation), and never backs out.
+            case Wave835Abilities.BloodFrom: return 100;
+            case Wave835Abilities.BloodTo: return action.Label.Contains("the same keyword", StringComparison.Ordinal) ? 40 : 100;
+            case Wave835Abilities.BloodConfirm: return 100;
+            case Wave835Abilities.BloodCancel: case Wave835Abilities.BloodBack: return 10;
+            // The Heavens' Blessing (issue #835): the bot declines to pay 2 Gold for a card it would only draw, and a Foe duel names its first Unique Personality.
+            case Wave835Abilities.HeavensDeclineAll: return PassScore + 2;
+            case Wave835Abilities.FoePick: return 100 + (x.Card(command.TargetId)?.Force ?? 0);
+            case "w829WeddingGiveChoose": return 100 - Wave829Worth(x.Card(command.TargetId));
+            case "eventChoice": return Wave829EventChoiceScore(x, action, command);
             // Fusako's pre-accept bow (issue #667): the bot never bows its own Personality to refuse; it accepts the duel.
             case "bowToRefuseDuel": return -100;
             // Any other decision the engine offers is answered rather than ignored (issue #642): a modest bot takes the first complete option, just above passing,
@@ -309,7 +371,7 @@ public static partial class TrainingOpponent
         }
     }
 
-    private static double AbilityValue(string? ability, CardView target, PlayerView self, PlayerView opponent, MatchView view)
+    private static double AbilityValue(string? ability, CardView target, PlayerView self, PlayerView opponent, MatchView view, Ctx? x = null)
     {
         var own = target.OwnerId == self.Id;
         return ability switch
@@ -322,8 +384,11 @@ public static partial class TrainingOpponent
             "defensive-stance" => own && target.Bowed && !target.StraightenBlocked ? 95 + target.Force : -20,
             "crushing-force" => own && !target.Bowed ? 70 + target.Force : -20,
             "crushing-destroy" or "never-afraid" => !own ? 90 + target.Force : -20,
+            "favor-battle" when x is not null && Spec(x) => !own ? 300 + UnitForceOf(x, target) : -20, // issue #818 item 5: defending, always send home the largest unit
             "incapacitated" or "block-supply" or "favor-battle" => !own ? 100 + target.Force : -20,
-            "lobby" => view.FavorPlayerId == self.Id ? -20 : 60 - target.Force - (target.Definition?.Abilities?.Contains("shunya-honor") == true ? 25 : 0),
+            // Issue #818 item 5: lobbying bows the lowest-Force Personality, then the one with the fewest attachments, then the fewest printed abilities.
+            "lobby" => view.FavorPlayerId == self.Id ? -20 : 60 - target.Force - (target.Definition?.Abilities?.Contains("shunya-honor") == true ? 25 : 0)
+                - (x is not null && Spec(x) ? 0.01 * x.Cards.Values.Count(a => a.AttachedTo == target.Id) + 0.0001 * (target.Definition?.Abilities?.Length ?? 0) : 0),
             "favor-cycle" => self.HandCount >= 6 && !self.Home.Any(c => !c.Bowed && c.Definition?.Abilities?.Contains("shunya-honor") == true) ? 25 - HandValue(target) : -20,
             _ => -20
         };

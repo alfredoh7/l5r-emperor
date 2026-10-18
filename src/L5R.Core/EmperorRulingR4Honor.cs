@@ -76,7 +76,7 @@ public sealed partial class MatchEngine
     private void OfferHonorChangeWindow(int playerId, int amount, string reason)
     {
         _p3LastHonorChange = null;
-        if (_payingActionCost || _state.PendingHonorChange is not null || _state.PendingChoice is { Type: "honorChangeReaction" }) return;
+        if (_payingActionCost || _rulebookHonorChange || _state.PendingHonorChange is not null || _state.PendingChoice is { Type: "honorChangeReaction" }) return;
         if (!CurrentActionFacts(out var key, out var actorId) && !P3NonActionHonorChange(playerId, amount, out key, out actorId)) return; // Destructive Priorities (issue #503): a gain no action made
         var occurrence = _honorChangeOccurrence++;
         _p3LastHonorChange = (key, occurrence);
@@ -110,6 +110,7 @@ public sealed partial class MatchEngine
         if (WlPersTornHonorChangeApplies(card, abilityId, change) is { } wlPersTorn) return wlPersTorn; // Shosuro Makiko - exp (issue #674, WlPersTorn.cs)
         if (PromoItemsHonorChangeApplies(card, abilityId, change) is { } promo) return promo; // Kimono of the Turquoise Champion (PromoEmperorItems.cs)
         if (WlHonorChangeApplies(card, abilityId) is { } wlApplies) return wlApplies; // False Ring of Fire (issue #674, WlSpellsRings.cs)
+        if (Wave835HonorChangeApplies(card, abilityId, change) is { } w835Applies) return w835Applies; // Merchant Patronage (issue #835, Wave835.cs)
         switch (abilityId)
         {
             // "Before a player gains or loses Honor from an action's effects, bow your performing Courtier": any change, and an unbowed Courtier to bow.

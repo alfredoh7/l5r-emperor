@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Audited every multi-window card (797 Battle/Open/Limited/Battle-Open abilities on 439 cards, 175 Reaction abilities on 129 cards): generic four-window probe in CI plus hand-built scenarios for each precondition-heavy ability and Reaction. Fixed All Within the World (Ring target refused in Battle), Strength of the Divine/Visage of the Orochi and Strong Defenses (performer never listed), Shosuro Hawado exp (Reaction listed enabled then refused). Inventory in docs/audits/multi-window-inventory.md.",
+  "validation": "bash tools/check.sh --skip-client green (all Core/AI shards, bot-soak); new suites multi-window-audit, -audit-1..6, -reaction-1..4 all pass",
+  "remaining": "None; no blockers, so docs/CARD_INVENTORY.xlsx is unchanged. Caveats: some Ring recruit grants and a few payment-source Reactions are tested via injected grants/payment APIs; training fixtures stand in for a few generic units.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/830",
+  "branch": "claude/830-multi-window-audit",
+  "updated": "2026-10-11T21:49:40.978240+00:00"
+}

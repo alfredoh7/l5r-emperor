@@ -49,12 +49,12 @@ public sealed partial class MatchEngine
                     p.RegionId is null ? null : ViewCard(Card(p.RegionId)), ProvinceStrengthMax(p), HoldsNoDynasty(p), p.DarkExperimentsMarked)
                 // Plains of Otosan Uchi (issue #554): DynastySlots is authoritative only once a second slot has ever existed; every
                 // other province leaves it null, keeping the legacy Card field as the whole story (the PR #544 view contract).
-                { FortificationIds = FortificationsOf(player.Id, p.Index), DynastySlots = p.CardId2 is null ? null : [new(0, p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp)), new(1, ViewCard(Card(p.CardId2), Card(p.CardId2).FaceUp))] }).ToArray(), // issue #503
+                { FortificationIds = FortificationsOf(player.Id, p.Index), StrengthModifier = StrengthModifierOf(p), StrengthNotes = StrengthNotesOf(p), DynastySlots = p.CardId2 is null ? null : [new(0, p.CardId is null ? null : ViewCard(Card(p.CardId), Card(p.CardId).FaceUp)), new(1, ViewCard(Card(p.CardId2), Card(p.CardId2).FaceUp))] }).ToArray(), // issue #503
                 player.Id == playerId ? player.Hand.Select(id => ViewCard(Card(id))).ToArray() : [], player.Hand.Count,
-                player.DynastyDeck.Count, player.FateDeck.Count,
+                // Current Dynasty/Fate deck sizes are hidden information (EE-STATE-014): no seat's projection carries them, not even the deck owner's.
                 owned.Where(c => c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c => ViewCard(c)).ToArray(),
                 player.ProclaimUsedTurn == _state.TurnNumber, player.DishonorLossPending,
-                owned.Where(c => c.Zone == Zone.RemovedFromGame).Select(c => ViewCard(c)).ToArray(),
+                owned.Where(c => c.Zone == Zone.RemovedFromGame).Select((c, i) => c.FaceUp || c.OwnerId == playerId ? ViewCard(c) : HiddenRemovedView(c, i)).ToArray(), // issue #821: a face-down card removed from the game stays hidden from the other player
                 DeadCount(player.Id),
                 // Counts are public; identities are private unless already publicly focused from
                 // discard or revealed by Strike. Anonymous backs need no stable hidden card IDs.
@@ -74,7 +74,7 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId), BuildShownCards(), BuildLookView(playerId), BuildCopyView(playerId), BuildEitherOrView(playerId), BuildOpponentPaymentView(playerId),
             _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildPendingAttackCue(), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
-        { ReactionPresentation = BuildReactionPresentation(), ReactionOrder = BuildReactionOrderView(), PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
+        { ReactionPresentation = BuildReactionPresentation(), ReactionOrder = BuildReactionOrderView(), PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null, ResolutionArea = BuildResolutionAreaView() }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
     }
 
     // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
@@ -102,6 +102,10 @@ public sealed partial class MatchEngine
         return new($"provinceOrder-{province.Index}", pending.PlayerId, owner.Id, province.Index, pending.Prompt, options);
     }
 
+    // A card removed from the game face-down (the Governor's Estate): its owner sees it, the other player sees only that it is there.
+    private CardView HiddenRemovedView(CardInstance card, int index) =>
+        new($"hidden-p{card.OwnerId}-removed{index}", null, card.OwnerId, card.Zone, false, false, null, null, 0);
+
     private CardView ViewCard(CardInstance card, bool visible = true)
     {
         if (!visible)
@@ -119,7 +123,9 @@ public sealed partial class MatchEngine
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
-    public ActionOption[] QueryActions(int playerId)
+    public ActionOption[] QueryActions(int playerId) => QueryActionsScoped(playerId); // QueryScope.cs
+
+    private ActionOption[] QueryActionsUnscoped(int playerId)
     {
         if (playerId is < 0 or > 1) return [];
         if (_state.WinnerId is not null) return [];
@@ -214,7 +220,7 @@ public sealed partial class MatchEngine
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
         // (SeppukuTiming.cs), so an offered Seppuku is never one the engine would refuse for its timing.
         if (SeppukuTimingReason(playerId) is null)
-            foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && c.Dishonorable && Definition(c).Type == CardType.Personality && !SeppukuBarredByPriceOfHonor(c) /* issue #503 */ &&
+            foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && c.Dishonorable && Definition(c).Type == CardType.Personality && !SeppukuBarredByPriceOfHonor(c) /* issue #503 */ && !SeppukuBarredByControl(c) /* issue #827 */ &&
                 (Keyword(c, "Samurai") || Keyword(c, "Courtier") || Keyword(c, "Shugenja"))))
                 Add("orderSeppuku", $"Order Seppuku · {Definition(card).Name}", OwesForcedPass(playerId) ? null : Command("orderSeppuku", card.Id),
                     OwesForcedPass(playerId) ? ForcedPassReason : ActionLocked(card) ? $"{Definition(card).Name} may not perform actions this turn." : null, card.Id);
@@ -265,7 +271,7 @@ public sealed partial class MatchEngine
                         result.Add(used ? slotOption with { Enabled = false, Reason = "This reaction has already been used." } : slotOption);
                         continue;
                     }
-                    if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
+                    if (AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null, validate: true); // validated like a submitted command (issue #833: Suikihime listed enabled while The Forgotten Temple refused it)
                     else AddTargetedReaction(enteringCard, reactionId, used ? "This reaction has already been used." : null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
@@ -355,7 +361,7 @@ public sealed partial class MatchEngine
             {
                 var card = Card(battleActionPending.CardId!);
                 foreach (var reactionId in AbilityIdsOf(card).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "after-battle-action-resolves"))
-                    AddReaction(card, reactionId);
+                    AddReaction(card, reactionId, validate: card.Zone != Zone.Hand); // issue #830: an in-play watcher with a printed condition (Shosuro Hawado - exp: "if Hawado is at the current battlefield") is listed disabled, with ValidateAbility's reason, instead of as a button that is refused
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));
         }
@@ -376,6 +382,10 @@ public sealed partial class MatchEngine
                         AddReaction(card, reactionId, label: $"{announceReaction.Label} · {Definition(performer).Name}", validate: true, performerId: performer.Id);
                 }
             }
+            // Kalani's Landing (issue #816): the Reaction of the window's card, one option carrying every card in play it may target.
+            if (announcePending.PlayerId == playerId && announcePending.CardId is { } kalaniWatcherId)
+                foreach (var kalaniReaction in AbilityIdsOf(Card(kalaniWatcherId)).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == Wave816Abilities.AnnounceAnyAction))
+                    AddTargetedReaction(Card(kalaniWatcherId), kalaniReaction, null);
             // No Hiding Place (issue #498): the announcing player's copies in hand, whichever card the window was opened for.
             foreach (var (noHidingPlace, noHidingId) in NoHidingPlaceOptions(playerId)) AddReaction(noHidingPlace, noHidingId);
             // Ikoma Ayumu, Utaku Lishan (issue #503): the watcher's own P3 Reactions, one option per target.
@@ -406,6 +416,35 @@ public sealed partial class MatchEngine
                     else if (AbilityCatalog.All[reactionId].Target is not ("none" or "player"))
                         AddTargetedReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
                     else AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
+                }
+            }
+            Add("declineReaction", "Pass reaction", Command("declineReaction"));
+        }
+        else if (_state.PendingChoice is { Type: "moveReaction" } movePending)
+        {
+            // After an action moved an enemy Infantry Personality to the battlefield of Legion of the Bat (issue #279): the one watching card's own Reaction, then the pass. Before issue #833 the window
+            // listed neither, so a client offered only the engine's options could never play (or pass) the Reaction.
+            if (movePending.PlayerId == playerId && movePending.CardId is not null)
+            {
+                var watcher = Card(movePending.CardId);
+                foreach (var reactionId in AbilityIdsOf(watcher).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield"))
+                {
+                    var used = AbilityUseSpent(watcher.AbilityUses, AbilityCatalog.All[reactionId], AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
+                    AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
+                }
+            }
+            Add("declineReaction", "Pass reaction", Command("declineReaction"));
+        }
+        else if (_state.PendingChoice is { Type: "nikutaiReaction" } nikutaiPending)
+        {
+            // After a Follower in Nikutai's unit bowed (issue #279): the one watching card's own Reaction, then the pass; like moveReaction above, the window used to list neither (issue #833).
+            if (nikutaiPending.PlayerId == playerId && nikutaiPending.CardId is not null)
+            {
+                var watcher = Card(nikutaiPending.CardId);
+                foreach (var reactionId in AbilityIdsOf(watcher).Where(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "sibling-follower-bowed"))
+                {
+                    var used = AbilityUseSpent(watcher.AbilityUses, AbilityCatalog.All[reactionId], AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
+                    AddReaction(watcher, reactionId, used ? "This reaction has already been used." : null);
                 }
             }
             Add("declineReaction", "Pass reaction", Command("declineReaction"));
@@ -772,9 +811,15 @@ public sealed partial class MatchEngine
                     // Issue #627: a player with no Cavalry unit to assign is not offered the (empty) Cavalry assignment at all.
                     else if (!(cavalrySegment && units.Length == 0))
                         foreach (var province in provinces)
-                            Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} · {units.Length} {(cavalrySegment ? "Cavalry" : "Infantry")} units",
-                                Command(actionType, assignments: units.ToDictionary(id => id, _ => province)), units.Length == 0 ? $"No unbowed {(cavalrySegment ? "Cavalry" : "Infantry")} Personalities at home." : null,
-                                targets: units, provinces: provinces);
+                        {
+                            var armyUnits = ArmyAssignmentTemplate(units, playerId, province); // issue #821 (ArmyRestrictions.cs): the "assign everyone" command never names units that will not share an army
+                            Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} · {armyUnits.Length} {(cavalrySegment ? "Cavalry" : "Infantry")} units",
+                                Command(actionType, assignments: armyUnits.ToDictionary(id => id, _ => province)), units.Length == 0 ? $"No unbowed {(cavalrySegment ? "Cavalry" : "Infantry")} Personalities at home." : null,
+                                targets: armyUnits, provinces: provinces);
+                            foreach (var solo in ArmyAssignmentSoloUnits(units, armyUnits, playerId, province))
+                                Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} with {Definition(Card(solo)).Name} alone", Command(actionType, assignments: new Dictionary<string, int> { [solo] = province }),
+                                    null, targets: [solo], provinces: [province]);
+                        }
                     // Spiritual Manipulation (issue #476 batch 4): assigning no attackers is refused while a forced target can be assigned in this segment.
                     Add("pass", attack ? (cavalrySegment ? "Assign no Cavalry attackers" : "Assign no Infantry attackers") : (cavalrySegment ? "Assign no Cavalry defenders" : "Assign no defenders"), Command("pass"),
                         attack ? ForcedAssignmentRefusal(playerId, null, cavalrySegment) : null);

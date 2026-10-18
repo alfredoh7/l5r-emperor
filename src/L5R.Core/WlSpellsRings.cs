@@ -187,13 +187,13 @@ public sealed partial class MatchEngine
                 break;
             // False Ring of Fire: put into play from the hand, if the player's maximum hand size is 10 or more.
             case WlSpellsRingsAbilities.FalseFireRecruit:
-                Require(source is { Zone: Zone.Hand } && player.Hand.Contains(source.Id), "A Ring is put into play from your hand.");
+                Require(source is not null && SourceInHand(source, player), "A Ring is put into play from your hand.");
                 Require(MaxHandSize(player.Id) >= 10, "Your maximum hand size must be 10 or more.");
                 RequireWlRingMayEnterPlay(player);
                 break;
             // False Ring of the Void: put into play from the hand, as the recruit granted after a battle where its player destroyed a Province.
             case WlSpellsRingsAbilities.FalseVoidRecruit:
-                Require(source is { Zone: Zone.Hand } && player.Hand.Contains(source.Id), "A Ring is put into play from your hand.");
+                Require(source is not null && SourceInHand(source, player), "A Ring is put into play from your hand.");
                 Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && GrantUsableNow(g) && g.ScopeCardIds is { Length: 1 } ids && ids[0] == source!.Id), "This Ring's recruitment condition has not been granted at this battle.");
                 RequireWlRingMayEnterPlay(player);
                 break;

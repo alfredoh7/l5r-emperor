@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Added the listing/validation consistency invariant (stability step 1): for every Battle/Open/Limited ability of every card in four windows, anything the validator accepts (source, performer, target) must be an enabled option in QueryActions, and every target an enabled option offers must validate. 5,921 validator-accepted combinations examined, 0 disagreements on current main. Verified the test detects a reintroduced listing gap (Strong Defenses).",
+  "validation": "bash tools/check.sh --skip-client green; listing-consistency passes (55s, registered in slow-cases.txt); mutation check: renaming Strong Defenses' listing case makes it fail",
+  "remaining": "Not covered: Reaction windows (window-specific), multi-slot abilities, and payment suitability per target (excluded as not a target-legality question). Next stability steps: single LeavePlay path, post-command sweep registry, typed category/trigger enums.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/842",
+  "branch": "claude/842-listing-validation-consistency",
+  "updated": "2026-10-12T01:10:54.294288+00:00"
+}

@@ -115,7 +115,7 @@ internal static class Wave737Tests
         }
         Eq(CardCatalog.Get(Stipend).GoldProduction, 2, "Magistrate's Stipend produces its printed 2 Gold");
         Eq(CardCatalog.Get(Shibatsu).HonorRequirementWaiverClan, "Spider", "Shibatsu's Honor Requirement waiver names the Spider Clan");
-        foreach (var id in new[] { KoanRobes, ImperialDeployment }) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is deferred, not published");
+        foreach (var id in new[] { ImperialDeployment }) Check(CardCatalog.Cards.ContainsKey(id), $"{id} was wired afterwards (Wave835.cs, issue #835)"); // Koan's Robes was wired by issue #827 (Wave827.cs)
         Eq(AbilityCatalog.All.Keys.Count(k => k.StartsWith("w737-", StringComparison.Ordinal)), 11, "eleven w737 abilities");
     }
 

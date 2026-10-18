@@ -30,7 +30,15 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
                 || (record.Seats.Length == 2 && record.Seats[1].PlayerId != 1)
                 || record.Seats.Any(s => s.TokenHash.Length != 64 || !s.TokenHash.All(Uri.IsHexDigit)))
                 throw new InvalidDataException($"Room {record.RoomCode} has invalid seat credentials.");
-            if (!rooms.TryAdd(record.RoomCode, new Room(record, MatchEngine.Replay(record.Replay))))
+            MatchEngine engine;
+            try { engine = MatchEngine.Replay(record.Replay); }
+            catch (ArgumentException e)
+            {
+                // Saved commands the rules no longer accept in the same order (a decision the engine now makes itself, issue #894, for example): leave the file on disk and keep the server starting.
+                logger.LogWarning("Skipping room {RoomCode}: its saved commands no longer replay on this build ({Reason}).", record.RoomCode, e.Message);
+                continue;
+            }
+            if (!rooms.TryAdd(record.RoomCode, new Room(record, engine)))
                 throw new InvalidDataException($"Duplicate room: {record.RoomCode}");
         }
         logger.LogInformation("Recovered {RoomCount} private rooms", rooms.Count);

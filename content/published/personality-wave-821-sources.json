@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-10831",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10831",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10831-printing-1-image-1.webp",
+    "image_sha256": "3836585e257d172ea8aeabbebb4697bcd425bbcf1a794de19ce2da98cc2efe81"
+  },
+  {
+    "card_id": "oracle-l5r-10476",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10476",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10476-printing-1-image-1.webp",
+    "image_sha256": "e6bd9b6bc1825fa79cd6dc716e0063c35e8caed479dc651779be8209ddf2eb8f"
+  },
+  {
+    "card_id": "oracle-l5r-10320",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10320",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10320-printing-1-image-1.webp",
+    "image_sha256": "06574a5b100d809b9186e40b25024477f3572603fe2ef8ee5b09fee60869b975"
+  },
+  {
+    "card_id": "oracle-l5r-10291",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10291",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10291-printing-1-image-1.webp",
+    "image_sha256": "f6af78f3449d176c4ae91f70a990dae21398ffde6f261b1b56c008d61fdf67ca"
+  },
+  {
+    "card_id": "oracle-l5r-10863",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10863",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10863-printing-1-image-1.webp",
+    "image_sha256": "0e7b0bfca0cb2251f8d7e1aa459bad2e480589ff81700f81281bc2f34e057794"
+  }
+]

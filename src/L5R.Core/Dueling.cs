@@ -337,6 +337,7 @@ public sealed partial class MatchEngine
         (winnerId, loserIds, resolutionReason) = DuelRulesAutoLoseOutcome(duel, winnerId, loserIds, resolutionReason); // P18 (DuelRules.cs): a registered "loses any duel against ..."
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
+        if (Wave827BeginKokujinDecision(duel, winnerId)) return; // Kokujin (issue #827, Wave827.cs): the winner's controller may destroy a Personality to take control of the loser -- asked once, then the duel resolves again
         if (TfBeginWitnessDecision(duel, winnerId)) return; // Awed Witness (issue #622, TfStrategiesA.cs): the winner's controller may create Witness -- asked once, then the duel resolves again
         if (BeginTfStrategiesBDuelDecisions(duel, loserIds)) return; // Preserving Forces (issue #622, TfStrategiesB2.cs): "before your Personality is destroyed for losing it".
         var resultStart = _state.Events.Count;
@@ -519,6 +520,8 @@ public sealed partial class MatchEngine
     {
         switch (abilityId)
         {
+            case Wave827Abilities.KokujinDuel: Wave827KokujinOutcome(winnerId, loserIds, challengerPlayerId); break; // issue #827
+            case Wave835Abilities.FoeDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break; // issue #835: The Empire's Foe Exposed, "Destroy the duel's loser"
             case Wave734Abilities.HoturiDuel or Wave734Abilities.TsukeDuel: Wave734DuelOutcome(abilityId, loserIds, challengerPlayerId); break; // issue #734
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;

@@ -1,0 +1,80 @@
+{
+  "Profile": "holding-wave-829",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #829.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9292",
+      "Name": "Well-Tended Farm",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 1,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 1 Gold.\nLimited, Bow this card: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9292.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w829-farm-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7501",
+      "Name": "Stone of Remembrance",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Holding does not count towards your minimum deck size.\nReaction: After another player's action targets one of your cards, remove this card from the game and then tear it in half to negate the target's destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7501.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "w829-stone-negate"
+      ],
+      "Effect": "w829-stone"
+    },
+    {
+      "Id": "oracle-l5r-7229",
+      "Name": "Shrine to the Heavens",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nAfter one of your Celestials is revealed in a Province, you may choose one of your Celestials in play. If you do, it is not discarded because of the other Celestial entering play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7229.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w829-shrine"
+    }
+  ],
+  "Decks": []
+}

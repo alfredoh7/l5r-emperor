@@ -171,7 +171,7 @@ public sealed partial class MatchEngine
         if (Definition(card).Type != CardType.Personality) return 0;
         var force = 0;
         // Warded Paths: "While this Shugenja is defending, he has +3F." (One for each Spell carrying it.)
-        if (card.Zone == Zone.Battlefield && IsDefendingUnit(card)) force += 3 * AttachedWithEffect(card, WardedPathsEffect).Count();
+        if (card.Zone == Zone.Battlefield && IsDefendingUnit(card)) force += 3 * StaticAttachedWithEffect(card, WardedPathsEffect).Count();
         // Shinjo's Guidance: "Unicorn Clan Personalities have +1F while they have an attachment." (Either player's, one for each Celestial.)
         if (HasClanAffiliation(card, "Unicorn") && HasAttachments(card)) force += CelestialsInPlay(ShinjosGuidanceEffect);
         return force;
@@ -356,7 +356,7 @@ public sealed partial class MatchEngine
         {
             var command = new GameCommand("useAbility", playerId, _state.Version, source?.Id, AbilityId: id, Provinces: set.Length == 0 ? null : set, Province: set.Length == 0 ? null : set[0]);
             string? error = null;
-            try { ValidateAbility(command); } catch (RuleViolation e) { error = e.Message; }
+            error = TryValidateAbility(command);
             var label = ability.Label + (set.Length == 0 ? "" : $" · province{(set.Length == 1 ? "" : "s")} {string.Join(" and ", set.Select(p => p + 1))}");
             yield return new("useAbility", label, error is null, error, error is null ? command : null, source?.Id, null, set.Length == 0 ? null : set);
         }

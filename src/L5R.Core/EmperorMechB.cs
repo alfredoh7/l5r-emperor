@@ -60,6 +60,10 @@ public sealed class ControlReturn
     public bool Blocked { get; set; }
     /// <summary>SourceStraightens only (issue #690): the source has been seen bowed since the return was registered, so the next time it is unbowed it has straightened.</summary>
     public bool SourceSeenBowed { get; set; }
+    /// <summary>SourceStraightens only (issue #827, P'an Ku): while this return is owed the source may remain bowed -- every straightening of it is its controller's choice.</summary>
+    public bool RemainBowed { get; set; }
+    /// <summary>SourceStraightens only (issue #827, P'an Ku): the taken Personality's controller may not order Seppuku for him while this return is owed.</summary>
+    public bool NoSeppuku { get; set; }
 }
 
 /// <summary>A permanent grant of the infiltrator straighten trait: "Choose your bowed non-<see cref="ExcludedKeyword"/> Personality. Negate his straightening this phase."</summary>

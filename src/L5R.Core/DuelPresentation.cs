@@ -149,14 +149,12 @@ public sealed partial class MatchEngine
                     {
                         foreach (var (substituteCommand, substituteLabel) in HesMineDuelOptions(card, playerId))
                         {
-                            try { ValidateAbility(substituteCommand); Add(substituteCommand, substituteLabel); }
-                            catch (RuleViolation) { }
+                            if (TryValidateAbility(substituteCommand) is null) Add(substituteCommand, substituteLabel);
                         }
                         continue;
                     }
                     var command = new GameCommand("useAbility", playerId, _state.Version, CardId: card.Id, AbilityId: id);
-                    try { ValidateAbility(command); Add(command, def.Label); }
-                    catch (RuleViolation) { }
+                    if (TryValidateAbility(command) is null) Add(command, def.Label);
                 }
             Add(Command("declineReaction"), "Pass reaction");
         }
@@ -180,7 +178,7 @@ public sealed partial class MatchEngine
                             foreach (var c in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard))
                                 Add(Command("focus", c.Id, choice: "discard"), $"Focus from discard · {Definition(c).Name}");
                     }
-                    if (DuelFocusSlotOpen(duel, playerId))
+                    if (focused.Count + P2FocusSubstitutions(playerId) < 4 && DuelFocusSlotOpen(duel, playerId)) // a substitution is a focus opportunity: none left at the cap
                         foreach (var weapon in ReserveWeaponsFor(playerId, duel))
                             Add(Command("focus", weapon.Id, choice: "reserve"), $"Reserve Weapon · +3 duel stat instead of focusing ({Definition(weapon).Name})");
                     if (DuelStrikeRefusal(duel, playerId) is null) Add(Command("strike"), "Strike"); // P18: a Strike waits for the duel's required focus counts

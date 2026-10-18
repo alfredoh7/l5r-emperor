@@ -269,9 +269,9 @@ public sealed record ShownCard(int Sequence, int PlayerId, string DefinitionId, 
 public sealed record ShownCardView(int Sequence, int ShownByPlayerId, CardDefinition Definition, string? SourceCardId,
     string SourceName, string Deck, string Context, int TurnNumber, long EventSequence);
 
-/// <summary>One deck a Shizuka-style card lets the searcher pick. CardsRemaining is already public (the deck count);
+/// <summary>One deck a Shizuka-style card lets the searcher pick. The deck size is hidden information and is never sent;
 /// no contents are revealed until a deck is chosen.</summary>
-public sealed record SearchDeckChoiceView(string Deck, string Label, int CardsRemaining, string Criteria);
+public sealed record SearchDeckChoiceView(string Deck, string Label, string Criteria);
 
 /// <summary>One line of the searcher's deck viewer: a distinct card, how many copies remain, and whether it may be
 /// chosen (with a short reason when it may not). Grouped, sorted by type then name -- never deck order.</summary>
@@ -281,7 +281,7 @@ public sealed record SearchEntryView(string DefinitionId, CardDefinition Definit
 /// ChooseDeck (DeckChoices), Select (Entries; CanPass is true only when nothing qualifies, or the search is
 /// Optional), ChooseProvince / ChooseDiscard (Selected is the shown card; the choices are ordinary actions).</summary>
 public sealed record SearchView(string Stage, string SourceCardId, string SourceName, string Label, string Prompt,
-    string? Deck, string? Criteria, int CardsRemaining, SearchDeckChoiceView[]? DeckChoices, SearchEntryView[]? Entries,
+    string? Deck, string? Criteria, SearchDeckChoiceView[]? DeckChoices, SearchEntryView[]? Entries,
     bool Optional, bool CanPass, CardDefinition? Selected,
     // P20 (SearchExtensions.cs): how many cards the searcher takes (a selection of several), whether their titles must differ, and the name of a place that is not a deck. Omitted from the view for a classic search.
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? MinSelect = null,
@@ -701,15 +701,14 @@ public sealed partial class MatchEngine
         var spec = SearchSpecOf(search); var player = Player(search.PlayerId); var source = Card(search.SourceCardId);
         var sourceName = Definition(source).Name;
         if (search.Stage == SearchStage.ChooseDeck)
-            return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, null, null, 0,
-                spec.Decks.Select(d => new SearchDeckChoiceView(d.Deck, $"Search your {SearchPlace(d.Deck)}", SearchDeckList(player, d.Deck).Count, d.Criteria.Noun)).ToArray(), null, spec.Optional, false, null);
+            return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, null, null,
+                spec.Decks.Select(d => new SearchDeckChoiceView(d.Deck, $"Search your {SearchPlace(d.Deck)}", d.Criteria.Noun)).ToArray(), null, spec.Optional, false, null);
         var option = SearchOptionOf(search);
-        var remaining = SearchDeckList(player, search.Deck!).Count;
         var selected = search.SelectedCardId is null ? null : Copy(Definition(Card(search.SelectedCardId)));
         if (search.Stage != SearchStage.Select)
-            return SearchExtView(spec, option, new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null, null, spec.Optional, false, selected));
+            return SearchExtView(spec, option, new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, null, null, spec.Optional, false, selected));
         var groups = SearchGroups(search);
-        return SearchExtView(spec, option, new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null,
+        return SearchExtView(spec, option, new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, null,
             groups.Select(g => new SearchEntryView(g.DefinitionId, Copy(Definition(g.Card)), g.Count, g.Eligible, g.Reason)).ToArray(),
             spec.Optional || SearchMayTakeNone(spec), spec.Optional || SearchMayTakeNone(spec) || groups.All(g => !g.Eligible), null));
     }

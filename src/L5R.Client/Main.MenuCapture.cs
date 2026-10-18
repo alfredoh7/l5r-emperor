@@ -10,7 +10,6 @@ public partial class Main
     private static void Click(Button button) => button.EmitSignal(BaseButton.SignalName.Pressed);
     private void ProcessMenuCapture(double delta)
     {
-        if (_captureMode.StartsWith("menu-duel", StringComparison.Ordinal)) { ProcessDuelDemoCapture(delta); return; }
         _captureClock += delta;
         if (_captureClock < .7) return;
         var menu = _titleMenu!;
@@ -119,6 +118,12 @@ public partial class Main
                 var pausedLoaded = new MenuPreferences(_preferencesProfile); pausedLoaded.Load(); MenuAssert(pausedLoaded.PausedAnimation, "Paused Animation persists through a fresh settings instance");
                 paused.ButtonPressed = false;
                 pausedLoaded.Load(); MenuAssert(!pausedLoaded.PausedAnimation, "Paused Animation Off persists");
+                var flip = menu.Entries.GetChildren().OfType<CheckBox>().First(c => c.Text.StartsWith("Flip Dynasty Cards", StringComparison.Ordinal));
+                MenuAssert(!_preferences.FlipDynastyCards && flip.Text == "Flip Dynasty Cards · Off", "Flip Dynasty Cards defaults to Off");
+                flip.ButtonPressed = true;
+                pausedLoaded.Load(); MenuAssert(_preferences.FlipDynastyCards && pausedLoaded.FlipDynastyCards, "Flip Dynasty Cards toggles On and persists");
+                flip.ButtonPressed = false;
+                pausedLoaded.Load(); MenuAssert(!pausedLoaded.FlipDynastyCards, "Flip Dynasty Cards Off persists");
                 MenuAssert(_reducedMotion && _preferences.ReducedMotion, "reduced motion applies to game and menu");
                 var loaded = new MenuPreferences(_preferencesProfile); loaded.Load(); MenuAssert(loaded.ReducedMotion, "options persist through a fresh settings instance");
                 var slider = menu.Entries.GetChildren().OfType<HSlider>().Single(); slider.Value = .4;

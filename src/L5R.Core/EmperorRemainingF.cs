@@ -202,8 +202,7 @@ public sealed partial class MatchEngine
         _state.Cards.Values.Where(c => InPlay(c)).Any(c => (Definition(c).Abilities ?? []).Any(id =>
         {
             if (!AbilityCatalog.All.TryGetValue(id, out var ability) || ability.Timing != "Reaction" || ability.Trigger != "before-focus-effects") return false;
-            try { ValidateAbility(new GameCommand("useAbility", c.OwnerId, _state.Version, CardId: c.Id, AbilityId: id)); return true; }
-            catch (RuleViolation) { return false; }
+            return TryValidateAbility(new GameCommand("useAbility", c.OwnerId, _state.Version, CardId: c.Id, AbilityId: id)) is null;
         }));
 
     // Test seam: the Gold a recruit of the card would cost the player now.
@@ -231,7 +230,6 @@ public sealed partial class MatchEngine
         if (ability.Timing == "Reaction") Require(!BarredByCherryBlossom(id), "Cherry Blossom Festival: no players may take Reactions.");
         RequireDisgraceAllowsTargets(ability, command, player);
         // Blighted Region: "If you are the Defender" (a condition on taking the action at all).
-        if (id == "blighted-region-move") Require(player.Id != _state.ActivePlayerId, "Blighted Region: only the Defender may use this.");
         // Falling Rain Dojo: "if your Duelist has a lower duel stat than the Personality facing him".
         if (id == "falling-rain-boost") Require(FallingRainDuelist(player.Id) is not null, "Your Duelist in the duel must have a lower duel stat than the Personality facing him.");
         // Rugashi Bazaar's Revenge: the condition before the colon.

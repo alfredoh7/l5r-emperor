@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$ReceiptPath)
 $ErrorActionPreference = 'Stop'
 $receipt = Get-Content -Raw -LiteralPath $ReceiptPath | ConvertFrom-Json
-if ($receipt.repository -ne 'alfredoh7/l5r-emperor') { throw 'Unexpected repository' }
+if ($receipt.repository -notin @('l5r-emperor-dev/l5r-emperor','alfredoh7/l5r-emperor')) { throw 'Unexpected repository' }
 if ($receipt.sha256 -notmatch '^[a-f0-9]{64}$') { throw 'Invalid checksum' }
 $scratch = Join-Path $env:RUNNER_TEMP ('L5R review space & bang! ' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $scratch | Out-Null

@@ -6663,6 +6663,25 @@
       "deckTypes": [
         "Fate"
       ],
+      "id": "oracle-l5r-1239",
+      "keywords": [],
+      "name": "Caught Unawares",
+      "playable": false,
+      "stats": {
+        "cost": "0",
+        "focus": "3"
+      },
+      "supplemental": true,
+      "text": "Open: If you control no Personalities, target one or two Personalities: Bow them. Negate their straightening (this turn). If it is not your turn, draw a card.\nBattle: Target an enemy card with no unbowed attachments: Bow it.",
+      "types": [
+        "Strategy"
+      ]
+    },
+    {
+      "clans": [],
+      "deckTypes": [
+        "Fate"
+      ],
       "id": "oracle-l5r-1238",
       "keywords": [],
       "name": "Caught in the Act",
@@ -8189,6 +8208,24 @@
       "text": "As a Focus Effect: After this duel ends, choose a player who loses 2 Honor.\nReaction: After one of your Personalities is destroyed: Create a Maimed • Retainer Holding with the ability, \"Battle/Open: Destroy this card and target a Personality: Straighten him. Rehonor him.\"",
       "types": [
         "Strategy"
+      ]
+    },
+    {
+      "clans": [],
+      "deckTypes": [
+        "Dynasty"
+      ],
+      "id": "oracle-l5r-1576",
+      "keywords": [
+        "Unique"
+      ],
+      "name": "Cross-Clan Wedding",
+      "playable": false,
+      "stats": {},
+      "supplemental": true,
+      "text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, choose a Personality you control and another player. The player takes control of the Personality. If he now controls the Personality, he chooses another Personality he controls; take control of him.",
+      "types": [
+        "Event"
       ]
     },
     {
@@ -10996,7 +11033,7 @@
         "Soul of Doji Tadanori"
       ],
       "name": "Doji Atsumichi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "8",
@@ -17711,7 +17748,7 @@
         "Soul of Ikoma Otemi"
       ],
       "name": "Ikoma Natsu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "5",
@@ -21398,6 +21435,30 @@
       "text": "You may take the Proclaim Reaction to Yusugi entering play even if you have already used the Proclaim ability once this turn.",
       "types": [
         "Personality"
+      ]
+    },
+    {
+      "clans": [
+        "Mantis"
+      ],
+      "deckTypes": [
+        "Pre-Game"
+      ],
+      "id": "oracle-l5r-4252",
+      "keywords": [
+        "Port"
+      ],
+      "name": "Kalani's Landing",
+      "playable": false,
+      "stats": {
+        "production": "4",
+        "startinghonor": "2",
+        "strength": "7"
+      },
+      "supplemental": true,
+      "text": "This card will not produce Gold when paying for an attachment.\nAfter each phase begins: Straighten this card.\nReaction: After an action is announced, target a card (in play): Give it -2 Gold Cost.",
+      "types": [
+        "Stronghold"
       ]
     },
     {
@@ -29401,6 +29462,25 @@
       "deckTypes": [
         "Fate"
       ],
+      "id": "oracle-l5r-5709",
+      "keywords": [],
+      "name": "One Koku",
+      "playable": false,
+      "stats": {
+        "cost": "0",
+        "focus": "1"
+      },
+      "supplemental": true,
+      "text": "Reaction: When paying a Gold cost: Produce one Gold.",
+      "types": [
+        "Strategy"
+      ]
+    },
+    {
+      "clans": [],
+      "deckTypes": [
+        "Fate"
+      ],
       "id": "oracle-l5r-9917",
       "keywords": [],
       "name": "One Shout",
@@ -30241,7 +30321,7 @@
         "Kiho",
         "Void"
       ],
-      "name": "Pierce the Tapestery",
+      "name": "Pierce the Tapestry",
       "playable": false,
       "stats": {
         "cost": "0",
@@ -40571,6 +40651,25 @@
       "deckTypes": [
         "Fate"
       ],
+      "id": "oracle-l5r-8036",
+      "keywords": [],
+      "name": "The Duty of the Crab",
+      "playable": false,
+      "stats": {
+        "cost": "0",
+        "focus": "2"
+      },
+      "supplemental": true,
+      "text": "As a Focus Effect: You may choose (now) to delay the effects of losing this duel until after the next Dynasty Phase begins.\nBattle: If you control any units at the current battlefield, choose your performing Crab Clan Personality who is face-up in your provinces or discarded (not dead): Bring him into play there, paying all costs.",
+      "types": [
+        "Strategy"
+      ]
+    },
+    {
+      "clans": [],
+      "deckTypes": [
+        "Fate"
+      ],
       "id": "oracle-l5r-8038",
       "keywords": [
         "Earth"
@@ -40957,6 +41056,26 @@
         "strength": "7"
       },
       "text": "Recon Reaction: After engaging: You have Reconnaissance at the current battlefield. Create a Terrain Strategy with the ability, \"Battle: If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it.\" Put it into play there.",
+      "types": [
+        "Stronghold"
+      ]
+    },
+    {
+      "clans": [],
+      "deckTypes": [
+        "Pre-Game"
+      ],
+      "id": "oracle-l5r-8106",
+      "keywords": [],
+      "name": "The Governor's Estate",
+      "playable": false,
+      "stats": {
+        "production": "4",
+        "startinghonor": "8",
+        "strength": "7"
+      },
+      "supplemental": true,
+      "text": "Your face-down Dynasty cards in play are Holdings with the trait, \":bow:: Produce 2 Gold.\" \nTwice per turn, after your Dynasty Phase begins, you may pay 2 Gold to turn a card in your Province face-down (if needed) and put it into play bowed.\nLimited: Gain 2 Honor. You may not declare an attack.\nTireless Battle: Discard a card to give a target Personality +2F or -2F.",
       "types": [
         "Stronghold"
       ]
@@ -47369,6 +47488,26 @@
       "deckTypes": [
         "Dynasty"
       ],
+      "id": "oracle-l5r-9292",
+      "keywords": [
+        "Farm"
+      ],
+      "name": "Well-Tended Farm",
+      "playable": false,
+      "stats": {
+        "cost": "1"
+      },
+      "supplemental": true,
+      "text": ":bow:: Produce 1 Gold.\nLimited, :bow:: Gain 1 Honor.",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "clans": [],
+      "deckTypes": [
+        "Dynasty"
+      ],
       "id": "oracle-l5r-9802",
       "keywords": [],
       "name": "Whispering Archive",
@@ -49694,7 +49833,7 @@
       ]
     }
   ],
-  "count": 2143,
+  "count": 2150,
   "schemaVersion": 1,
   "sourceArc": "Age of Conquest (Emperor)"
 }

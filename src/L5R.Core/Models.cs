@@ -43,7 +43,8 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDecla
 // only in passing -- entering play immediately discards every OTHER Celestial that same player
 // controls, so at most one survives at rest.
 // Underneath (issue #503, The New Foundries): a card set face-up under a Stronghold -- public, not in play (EmperorP5Zones.cs).
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath }
+// Resolving (issue #917, ResolutionArea.cs): the temporary resolution area of rules step A -- a Strategy or Ring from the hand sits here, face up and out of play, from announcement until its action ends. Appended last: the enum serializes by name.
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath, Resolving }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -125,8 +126,11 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total. Permanent: "permanently give him +2F" (Spirit of the Berserker) -- kept when the
-/// turn ends (FinishTurn), unlike every other modifier, and reset with the card when it goes back to a hand or a deck.</summary>
-public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount, bool Permanent = false);
+/// turn ends (FinishTurn), unlike every other modifier, and reset with the card when it goes back to a hand or a deck. SuppressedTurn: the turn a temporary prevention ("negate all current and new Force
+/// penalties on him", Tireless Efforts; Creating Order) hides the modifier for (it lasts that turn; it does not end the modifier) -- it keeps its source, amount and Permanent state, counts for nothing
+/// (StatModifier) during SuppressedTurn, and applies again from the next turn on, unless its own duration ended first (FinishTurn sweeps a turn's modifier whether or not it is hidden).</summary>
+public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount, bool Permanent = false,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? SuppressedTurn = null);
 
 /// <summary>One negation a "before an action resolves" reaction has set on a card for the deferred command:
 /// Kind is "destroy", "move", "straighten", "bow" (each consumed by its first match) or "all" (Champion of
@@ -156,6 +160,10 @@ public sealed class SuspendedWindow
     // The window's own target and the targets still to come (issue #336, TargetWindows.cs): a Reaction that opens a window of its own must not clobber them.
     public string? ReactionWindowTargetId { get; set; }
     public List<string> ReactionWindowRemaining { get; set; } = [];
+    // The record of the action an after-action window is about (issue #898): a Reaction played in the window records its own resolution, and the window's Reactions still read the action's.
+    public ResolvedActionFacts? LastResolvedAction { get; set; }
+    // The watchers of this single-card window still to be asked after it (ReactionWatcherQueue.cs).
+    public List<WatcherTurn> WatcherQueue { get; set; } = [];
 }
 
 /// <summary>A keyword granted by another card rather than printed. Duration is "Attachment"
@@ -252,6 +260,9 @@ public sealed class CardInstance
     public bool Bowed { get => _bowed; set => _bowed = value && !IsTerrain(); }
     private bool IsTerrain() => (Printed ?? (CardCatalog.Cards.TryGetValue(DefinitionId, out var printed) ? printed : null)) is { Type: CardType.Strategy, Keywords: { } keywords } && keywords.Contains("Terrain");
     public string? AttachedTo { get; set; }
+    // Mastering the Elements (issue #838, rules lead): the keywords, trait and abilities it copied last only while it stays in play; set when it copies, cleared (with Printed) by SweepSpellCopies once it has left play.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool CopiedSpellRules { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
     // Abilities gained from another card's effect (Fukuzo's copied ability; a permanent grant). Usable exactly like a printed
@@ -995,6 +1006,8 @@ public sealed partial class MatchState
     // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility
     // already uses for beforeActionReaction.
     public GameCommand? PendingAnnouncedAction { get; set; }
+    // Issue #917 (ResolutionArea.cs): the cards in the resolution area, oldest first (a Reaction played in response sits above the action it answers).
+    public List<ResolutionEntry> ResolutionArea { get; set; } = [];
     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): set by its Reaction inside an "announceReaction" window; the announced action then resolves negated
     // (ResolveNegatedAction: taken, its costs paid, no effects) when the window closes. Cleared as it is read.
     public bool AnnouncedActionNegated { get; set; }
@@ -1312,6 +1325,8 @@ public sealed class ResolvedActionFacts
     public List<int> FavorDiscarders { get; set; } = [];
     // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
     public bool WordsHaveStrengthPlayed { get; set; }
+    // Issue #898: Reactions printed "You may only play one copy of X in reaction to any one resolution" (Grief), recorded when a copy is played so another cannot answer the same resolution.
+    public List<string> OneCopyPlayed { get; set; } = [];
     // P6 (issue #705, AfterFacts.cs): the fact this record stands for when AbilityId is a fact sentinel (FactTriggers.Sentinel); null for an action's record.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public FactRecord? Fact { get; set; }
@@ -1391,7 +1406,9 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
     MoveDestinationView? Movement = null, AttackCueView? Attack = null,
     // Engine-selected preview cards for a complete pending answer; private candidates are only offered to the decider.
-    string[]? DecisionCandidateIds = null, string? DecisionLabel = null);
+    string[]? DecisionCandidateIds = null, string? DecisionLabel = null,
+    // The destination rule of an ability that moves cards (MoveSpec.Home / CurrentBattlefield, or a rule that needs a chosen battlefield); null for every other action. Lets a client offer a drag without reading card text.
+    string? MoveTo = null);
 /// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
 /// it identifies the card to mark, not a new legality or damage calculation.</summary>
 public sealed record AttackCueView(string Kind, string SourceId);
@@ -1424,6 +1441,12 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     int UnitNumber = 0,
     // P21 (issue #697): the card a Zone.Underneath card sits under (null for the cards under the Stronghold and for any other card). A face-down under-card is redacted for the other seat.
     string? UnderHostId = null);
+/// <summary>What Dark Experiments does to the province it marks (permanent) and to each Holding that enters play from it; the board marker shows these values.</summary>
+public static class DarkExperimentsMark
+{
+    public const int Strength = -2, Production = -1;
+}
+
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
@@ -1441,6 +1464,11 @@ public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardV
     public ProvinceCardSlotView[]? DynastySlots { get; init; }
     /// <summary>P15 (issue #719): the ids of the Fortification Holdings that guard this Province (public: a Holding in play is face up). Null when none.</summary>
     public string[]? FortificationIds { get; init; }
+    /// <summary>What every change to this province's strength currently adds to its printed strength (permanent and timed effects, Regions, Terrain, static bonuses, minus caps), as Strength - printed.
+    /// Zero when unchanged or when the printed strength is not recorded (prepared fixtures). The board shows it beside the province whenever it is not zero.</summary>
+    public int StrengthModifier { get; init; }
+    /// <summary>The named timed effects inside StrengthModifier ("Ring of Earth +3"); the remainder is permanent or ongoing. Null when there are none.</summary>
+    public string[]? StrengthNotes { get; init; }
 }
 public sealed record ProvinceCardSlotView(int Index, CardView? Card);
 /// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,
@@ -1455,7 +1483,7 @@ public sealed record ProvinceOrderOption(string Id, string Label, int[] Slots, G
 // a UI can show it directly and a future card can read it without re-deriving its own filter.
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
-    CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
+    CardView[] Hand, int HandCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
     int DeadCount, CardView[]? Focused = null,
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
@@ -1525,6 +1553,10 @@ public sealed record BeforeResolutionEffectView(string Id, string Kind, int Play
 /// Status describes the triggering moment, never a receipt claiming that the player's latest Reaction fully resolved.</summary>
 public sealed record ReactionPresentationView(string Title, string Context, string Status, string DeclineLabel,
     string DeclineConsequence, string? ParentContext = null, bool IsNested = false);
+/// <summary>Issue #917: one card in the resolution area -- the card, who played it, and the ability being resolved.</summary>
+public sealed record ResolutionEntry(string CardId, int OwnerId, string AbilityId);
+/// <summary>Issue #917: PUBLIC to both seats. Depth 0 is the oldest (the action the later ones answer).</summary>
+public sealed record ResolutionEntryView(CardView Card, int OwnerId, string AbilityId, string AbilityLabel, int Depth);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
@@ -1568,9 +1600,12 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     public int? ActionPhaseTurnPlayerId { get; init; }
     // Issue #667 (PhaseOrder.cs): the six printed phases by name in the order this turn is running in, PUBLIC and identical for both seats; null while the usual order (Straighten, Events, Action, Attack, Dynasty, End) runs.
     public string[]? PhaseOrder { get; init; }
+    // Issue #917 (ResolutionArea.cs): the resolution area, oldest first, PUBLIC and identical for both seats; null when empty so a payload outside an open action is unchanged. Declared last.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ResolutionEntryView[]? ResolutionArea { get; init; }
 }
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
 public sealed record ProvinceSightView(int OwnerId, int Province, string DefinitionId, CardDefinition Definition);
-public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);
+public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null, bool IdleBattlePasses = false);

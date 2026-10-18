@@ -36,9 +36,12 @@ public sealed partial class MatchEngine
     private static string DescribeKinds(MovementKinds kinds) =>
         kinds == MovementKinds.AssignAttack ? "assignment to attack" : kinds == MovementKinds.Assign ? "assignment to battlefields" : kinds.HasFlag(MovementKinds.Assign) ? "assignment and movement to battlefields" : kinds.HasFlag(MovementKinds.Home) ? "movement" : "movement to battlefields";
 
+    /// <summary>A query about assigning only (Imperial Deployment, issue #835, negates the effects that prevent assigning and nothing else).</summary>
+    private static bool IsAssignKind(MovementKinds kind) => kind != MovementKinds.None && (kind & ~(MovementKinds.Assign | MovementKinds.AssignAttack)) == 0;
+
     private bool MovementLocked(CardInstance card, MovementKinds kind) =>
         // Too Close to Home (issue #503); Fudo's Charging tokens (issue #653)
-        card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l) && !IsImmune(card, ImmunityKind.Prevention, l.ByPlayer)) || PerfectMomentLocks(card) || P4GlobalMovementLock(kind) || SuikihimeMovementLocked(card, kind) || PromoMovementLocked(card, kind);
+        card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l) && !IsImmune(card, ImmunityKind.Prevention, l.ByPlayer) && !(IsAssignKind(kind) && IsImmune(card, ImmunityKind.AssignPrevention, l.ByPlayer))) || PerfectMomentLocks(card) || P4GlobalMovementLock(kind) || SuikihimeMovementLocked(card, kind) || PromoMovementLocked(card, kind);
 
     // A card whose movement of this kind is locked stays where it is; the effect that moved it goes on with whatever else it does.
     private bool MovementLockNegates(CardInstance card, MovementKinds kind)

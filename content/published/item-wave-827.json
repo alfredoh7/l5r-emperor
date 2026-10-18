@@ -1,0 +1,80 @@
+{
+  "Profile": "item-wave-827",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #827.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10340",
+      "Name": "Chiyurei's Axe",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to Hida Chiyurei paying 2 less Gold.\nMelee Attacks this Personality performs may be compared against the target's base Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10340.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "w827-chiyurei-axe",
+      "AttachRequiresName": "Hida Chiyurei"
+    },
+    {
+      "Id": "oracle-l5r-10524",
+      "Name": "Koan's Jingasa",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Shugenja, may not have more Spells than Koan cards attached, and he need not bow for his Spells with an odd Focus Value (0 is even).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10524.jpg",
+      "Keywords": [
+        "Unique",
+        "Koan"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "w827-koan-jingasa",
+      "AttachGrantsKeyword": "Shugenja"
+    },
+    {
+      "Id": "oracle-l5r-10525",
+      "Name": "Koan's Robes",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has a Force bonus equal to the number of other Koan cards in this unit.\nThis Personality need not bow for his Spells with an even Focus Value (0 is even).\nNegate the first destruction each turn of cards in this unit from another player's card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10525.jpg",
+      "Keywords": [
+        "Unique",
+        "Koan"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "w827-koan-robes"
+    }
+  ],
+  "Decks": []
+}

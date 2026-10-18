@@ -45,6 +45,8 @@ public enum WatchScope
     OwnersCards,
     /// <summary>The Followers attached to the carrier.</summary>
     AttachedFollowers,
+    /// <summary>The Personality the carrier is attached to and every card attached to him, the carrier included (Koan's Robes: "cards in this unit"). Created cards count; tokens are not cards.</summary>
+    Unit,
     /// <summary>The controller himself: only a Political action no card is named by (the player-level "negate the first Political action each turn").</summary>
     Player,
 }
@@ -257,6 +259,7 @@ public sealed partial class MatchEngine
         WatchScope.Self => target is not null && target.Id == owner.Id,
         WatchScope.OwnersCards => target is not null && target.OwnerId == owner.OwnerId && InPlay(target)
             && (rule.TargetKeyword is null || Keyword(target, rule.TargetKeyword)) && (rule.TargetType is null || Definition(target).Type == rule.TargetType),
+        WatchScope.Unit => target is not null && owner.AttachedTo is { } unitHost && (target.Id == unitHost || target.AttachedTo == unitHost) && InPlay(target),
         WatchScope.AttachedFollowers => target is not null && target.Zone == Zone.Attached && target.AttachedTo == owner.Id && Definition(target).Type == CardType.Follower,
         _ => target is null // WatchScope.Player: a Political action that names no card
     };

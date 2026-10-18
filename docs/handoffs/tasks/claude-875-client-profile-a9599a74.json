@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Client profiling harness (--perf scenarios) and lossless per-frame fixes: the practice loop no longer deep-copies the match state 5 times a frame (scalar reads on MatchEngine), and the table tooltip walk, mat icon hotspots, hall light parameters and phase-track redraw are throttled or cached. Idle table allocation 68 to 1 MB/s, p95 frame 15.5 to about 10 ms. Findings and held items in docs/audits/client-profile-2026-10.md. Crosses lanes (Core accessors, client).",
+  "validation": "check.sh --skip-client passed before the added engine-scalars test (that test passes alone); check.sh --client-only passed (build, import, smoke); native checks check-battle-presentation, check-interactions, check-main-menu, check-six-phase-track passed; check-board-ui, check-ink-mat, check-perspective-table, check-province-ui fail in this session on real-mouse hover or window focus (board-ui hover also fails with all changes removed; the other three were not compared against unmodified main).",
+  "remaining": "Not done, needs sign-off or more work: BC7 War Room textures (held branch claude/875-vram-textures-held), lazy hall load, hall mesh merging, shadow cost, 2D draw calls, testing on old GPU hardware.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/875",
+  "branch": "claude/875-client-profile",
+  "updated": "2026-10-12T08:28:49.156533+00:00"
+}

@@ -1165,7 +1165,7 @@ public static class AbilityCatalog
         // local catalogue's own text paraphrase suggested), the same as Wrathful Ancestor's below.
         ["bow-before-my-will"] = new("Battle", "Choose your performing unbowed Paragon and target an enemy card: Bow it. Negate its next straightening (this turn) if your Paragon is Shadowlands. Lose 2 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"]),
         // No "unbowed" qualifier printed on the Performer -- same shape as Again!'s own precedent.
-        ["surety-of-purpose"] = new("Battle", "Choose your performing Paragon and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor", "lower-or-equal-honor-than-performer", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Paragon"]),
+        ["surety-of-purpose"] = new("Battle", "Choose your performing Paragon and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor", "enemy-personality-honor-lte-performer", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Paragon"]),
         ["unexpected-support"] = new("Battle", "Choose your performing unbowed Commander and target an enemy card with as many or fewer Followers than the performer: Bow it. Negate its next straightening (this turn)", "enemy-fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Commander"]),
         // "This movement will not be negated": deliberately NOT added to MoveOrStraightenKind below,
         // so Tamori Tamoko's own curated negation interrupt (which only ever recognizes ability ids
@@ -3937,6 +3937,13 @@ public sealed partial class MatchEngine
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
+    private bool HasPrintedOrGrantedKeyword(CardInstance card, string keyword)
+    {
+        if (Definition(card).Keywords is { } printed) foreach (var word in printed) if (string.Equals(word, keyword, StringComparison.Ordinal)) return true;
+        foreach (var grant in card.GrantedKeywords) if (string.Equals(grant.Keyword, keyword, StringComparison.Ordinal) && GrantedKeywordLive(card, grant)) return true;
+        return false;
+    }
+
     private bool Keyword(CardInstance card, string keyword)
     {
         if (KeywordRemoved(card, keyword)) return false;
@@ -3946,7 +3953,7 @@ public sealed partial class MatchEngine
         if (keyword == "Experienced") return ExperienceLevel(card) > 0;
         if (keyword == "Unaligned" && Definition(card).Type == CardType.Personality && ClanAlignments(card).Length == 0)
             return true;
-        var printedOrGranted = (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+        var printedOrGranted = HasPrintedOrGrantedKeyword(card, keyword); // issue #888: a plain loop (this runs for every keyword test of every card in every view and query)
         // Kitsuki Minori (issue #223): "does not have Overconfident (in and out of play) if any
         // other player is Lion Clan" -- a SUBTRACTIVE conditional, the opposite of Tamori Yayu's own
         // additive one below. A live check, not a one-time flag: Stronghold Clan never changes
@@ -4250,6 +4257,7 @@ public sealed partial class MatchEngine
         "takichi-move" or "abodan-move" => "move",
         // The Shadow's Embrace pass (issue #476), batch 1: Chiisai sends his target home.
         "chiisai-charge" => "move",
+        Wave829Abilities.JizoHome => "move", // issue #829: Jizo's Mercy moves a target attacking Personality home
         // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda moves himself and his (optional) target to the current battlefield.
         "shinoda-move" => "move",
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
@@ -5072,7 +5080,7 @@ public sealed partial class MatchEngine
             // AttackComparedForce is the one decision point for WHICH Force a Personality's Attack
             // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
             // that needs no Follower exception.
-            if (InPlay(target) && (AtBattle(target) || AttackMayHitInDefendersHome(playerId, target) || AttackSpecReaches(abilityId, target)) && AttackComparedValue(abilityId, target) <= strength) // No Hiding Place (issue #498): a target in the Defender's home
+            if (InPlay(target) && (AtBattle(target) || AttackMayHitInDefendersHome(playerId, target) || AttackSpecReaches(abilityId, target)) && AttackComparedValue(abilityId, target, sourceId) <= strength) // No Hiding Place (issue #498): a target in the Defender's home
             {
                 DestroyAttackTarget(target, playerId);
             }
@@ -5199,7 +5207,7 @@ public sealed partial class MatchEngine
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
     // Tokens contribute here too: unlike Modifiers (cleared every FinishTurn), a token's stat bonus
     // persists until the token itself is destroyed or its host leaves play (core rules Glossary — Token).
-    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount)
+    private int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat && m.SuppressedTurn != _state.TurnNumber).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount)
         + card.Tokens.Where(t => t.Stat2 == stat).Sum(t => t.Amount2) // issue #503: a two-stat token (Shosuro Keirei's Poison)
         + card.Tokens.Where(t => t.Stat3 == stat).Sum(t => t.Amount3); // issue #690 (P24, EffectPrimitivesTokens.cs): a three-stat token
     // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
@@ -5302,7 +5310,7 @@ public sealed partial class MatchEngine
     };
     private int PersonalityChi(CardInstance card) => Definition(card).Chi + StatModifier(card, "Chi") + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi)
         // A Dragon's Favor: "While this Shugenja is Thunder, he has +1C."
-        + Attachments(card.Id).Count(c => Definition(c).Type == CardType.Spell && Definition(c).Effect == "dragons-favor-chi" && Keyword(card, "Thunder"))
+        + StaticSpells(card).Count(c => Definition(c).Effect == "dragons-favor-chi" && Keyword(card, "Thunder"))
         + RyoshunChiBonus(card) // Ryoshun's Guidance (Forgotten Legacy pass, issue #467).
         + EmperorP6ChiBonus(card) + RemAItemChiModifiers(card) + RegisteredPersonalityChi(card); // Illusory Defense (issue #503, EmperorP6.cs). A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
 
@@ -5328,20 +5336,21 @@ public sealed partial class MatchEngine
         ability.Costs?.Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !c.UnlessInHand) == true;
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
+        IsResolving(source) ? true // issue #917: the card whose announced action is being re-validated (a redirect, a held window) is in the resolution area; UseAbility itself refuses a second announcement
+        : ProvinceSourceAllows(ability, source, player) is bool provinceZone ? provinceZone // issue #697 (ZoneExtensions.cs): a FromProvince action (Masaya's Open action) from its face-up province card
         : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
         : Wave739SourceZoneAllows(ability, source, player) is bool w739Zone ? w739Zone // issue #739 (Wave739.cs): Paneki's Mask is used from its player's hand
         : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)
-        : ability.Attach?.Card == AttachSource.Self ? (ability.FromDiscard ? source.Zone == Zone.FateDiscard && source.OwnerId == player.Id : source.Zone == Zone.Hand && player.Hand.Contains(source.Id)) // Blade of Perfection (issue #492): attached from the discard pile
+        : ability.Attach?.Card == AttachSource.Self ? (ability.FromDiscard ? source.Zone == Zone.FateDiscard && source.OwnerId == player.Id : SourceInHand(source, player)) // Blade of Perfection (issue #492): attached from the discard pile
             : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
-            : ability.Trigger == "before-proclaim-resolves" ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) // Turning the Story (issue #453, batch 2)
-            : ability.Trigger == EntrenchedTrigger ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
+            : ability.Trigger == "before-proclaim-resolves" ? SourceInHand(source, player) // Turning the Story (issue #453, batch 2)
+            : ability.Trigger == EntrenchedTrigger ? SourceInHand(source, player) // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
             : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
             // A Reaction that returns its own card from a discard pile (Never Safe) is taken from there; any other after-resolution Reaction from a hand or from play.
             : ability.FromDiscard ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
-            : ability.Trigger == AfterResolutionTrigger ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source)
+            : ability.Trigger == AfterResolutionTrigger ? SourceInHand(source, player) || InPlay(source)
             // A Ring (issue #194) may use its printed action from hand too -- "you may discard
             // this Ring from your hand to use its ability without cost" -- in addition to the
             // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
@@ -5349,20 +5358,65 @@ public sealed partial class MatchEngine
             // A card in a discard pile is a legal source only as a Discipline play, or as the Battle action a granted additional
             // action names (Daigotsu Bofana - exp): PlayableFromDiscard. A non-Strategy, non-Ring card (a Personality, Item, Follower) is
             // not usable from hand at all, only in play or by those two ways.
-            : Definition(source).Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id)
+            : Definition(source).Type is CardType.Strategy or CardType.Ring ? SourceInHand(source, player) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id)
             : InPlay(source) || PlayableFromDiscard(ability, source, player.Id);
 
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.
     // slotAbility (issue #336): set only by ValidateSlotCard, which judges ONE candidate of one slot of a multi-target ability by running this
     // very method for a copy of the ability whose Target is that slot's category -- so every category keeps its one definition here.
+    // Reactions that print "choose your performing X at the current battlefield" (Grateful Reward): a Reaction is not a Battle action, so the generic performer category would let an X
+    // at home perform it, although the text names the location (issue #833). Watchers in the Dark names it too but uses its own explicit-at-battle category.
+    private static bool PerformerMustBeAtCurrentBattlefield(string abilityId) => abilityId == "grateful-reward-create";
+
+    // Issue #890: the validator returns the first reason it refuses (null when the command is legal) so the action listing, which asks about hundreds of commands per
+    // decision and finds most of them illegal, does not pay for an exception each time. Checks still inside a try body or a helper that throws are caught below, so the
+    // message is the same either way. ValidateAbility keeps the throwing shape every command path expects.
     private void ValidateAbility(GameCommand command, AbilityDefinition? slotAbility = null)
     {
+        if (ValidateAbilityResult(command, slotAbility) is { } why) throw new RuleViolation(why);
+    }
+
+    /// <summary>The first reason ValidateAbility would refuse the command, or null when it would accept it.</summary>
+    private string? TryValidateAbility(GameCommand command, AbilityDefinition? slotAbility = null)
+    {
+        try { return ValidateAbilityResult(command, slotAbility); }
+        catch (RuleViolation e) { return e.Message; }
+    }
+
+    /// <summary>The one refusal for a request that names a card its requester may not see (EE-Areas-of-the-game-072). It is the same text and version whatever the hidden card is or can do, and
+    /// whether or not it exists, so a rejection can never confirm that a hidden card carries an ability. It is checked before any definition-specific rule.</summary>
+    internal const string HiddenCardRefusal = "That card is not available to you.";
+
+    /// <summary>May <paramref name="viewerId"/> know this card's identity right now? It mirrors what GetView projects: decks are never visible; a hand is its owner's (or sighted); a face-down
+    /// province card only when it is face up or the viewer looked at it this turn; a face-down focused / removed / under card is its owner's; everything else is public.</summary>
+    private bool CardIdentityVisibleTo(CardInstance card, int viewerId) => card.Zone switch
+    {
+        Zone.DynastyDeck or Zone.FateDeck => false,
+        Zone.Hand => card.OwnerId == viewerId || P5.HandSights.Any(s => s.ViewerId == viewerId && s.CardId == card.Id && s.Turn == _state.TurnNumber),
+        Zone.Province => card.FaceUp || _state.ProvinceSights.Any(s => s.ViewerId == viewerId && s.CardId == card.Id && s.Turn == _state.TurnNumber),
+        Zone.Focused or Zone.Underneath or Zone.RemovedFromGame => card.FaceUp || card.OwnerId == viewerId,
+        _ => true
+    };
+
+    /// <summary>The generic refusal when the command's source card is unknown or hidden from its requester, or any other card it names is in a deck (which no one may name); otherwise null.</summary>
+    private string? HiddenCardNamed(GameCommand command)
+    {
+        if (command.CardId is { } sourceId && (!_state.Cards.TryGetValue(sourceId, out var source) || !CardIdentityVisibleTo(source, command.PlayerId))) return HiddenCardRefusal;
+        foreach (var id in new[] { command.TargetId, command.PerformerId }.Concat(command.CardIds ?? []))
+            if (id is not null && _state.Cards.TryGetValue(id, out var named) && named.Zone is Zone.DynastyDeck or Zone.FateDeck) return HiddenCardRefusal;
+        return null;
+    }
+
+    private string? ValidateAbilityResult(GameCommand command, AbilityDefinition? slotAbility = null)
+    {
+        if (HiddenCardNamed(command) is { } hidden) return hidden;
         var id = command.AbilityId ?? "";
-        Require(AbilityCatalog.All.TryGetValue(id, out var ability), "Unknown ability.");
+        var __valid0 = AbilityCatalog.All.TryGetValue(id, out var ability);
+        if (!__valid0) return "Unknown ability.";
         if (slotAbility is not null) ability = slotAbility;
         ability = RulebookAbility(ability!, id, command); // P19 (issue #717, RulebookModifiers.cs): a rulebook action's timing / Absent as the performer's modifiers leave them
         RequireNotBarredFromTargeting(command, ability!);
-        Require(ability!.Timing switch
+        var __valid1 = ability!.Timing switch
         {
             "Limited" => _state.Phase == Phase.Action && (command.PlayerId == _state.ActivePlayerId || LimitedInsteadOfOpen(command.PlayerId) || TurnRuleLimitedAsOpen(command.PlayerId, command.CardId))
                 || MechAActsAsBattle(command.PlayerId, ability, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var limitedSource) ? limitedSource : null), // Beyond the Line (issue #501)
@@ -5486,18 +5540,24 @@ public sealed partial class MatchEngine
                 EmperorP3PriorityAbilities.OwnTacticalAnnounced or EmperorP3PriorityAbilities.OwnBattleAnnounced => P3AnnounceWindowOpen(ability.Trigger!, command),
                 // P6 (issue #705, AfterFacts.cs): "after you announce an action" taken by a registered watcher with a performer filter.
                 AnnounceTriggers.WithPerformer => AnnounceWithPerformerOpen(id, command),
+                // Kalani's Landing (issue #816, Wave816.cs): the announce window of any player's announced action, open to this card's controller.
+                Wave816Abilities.AnnounceAnyAction => Wave816AnnounceWindowOpen(command),
+                // The Governor's Estate (issue #821, Wave821.cs): the window after its owner's Dynasty Phase begins.
+                Wave821Abilities.DynastyBegins => Wave821DynastyWindowOpen(command),
+                // The Heavens' Blessing (issue #835, Wave835.cs): the window of the cards its player owes Gold for.
+                Wave835Abilities.HeavensTrigger => Wave835WindowOpen(command),
                 // P6: a Reaction that names a fact, in the window that fact opened.
                 { } factTrigger when FactTriggers.IsFact(factTrigger) => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var factSource)
                     && _state.LastResolvedAction is { } factFacts && FactApplies(factSource, id, command.PlayerId, factFacts) == true,
                 _ => false
             },
             _ => false
-        }, $"{ability.Timing} timing is unavailable now.");
+        };
+        if (!__valid1) return $"{ability.Timing} timing is unavailable now.";
         // Battle Phase timing (issue #310): the Phase is already Battle while the Engage window is open, but no Battle
         // action may be taken until it closes (spec 4.2 precedes 4.5) -- only the Engage/"after engaging" Reactions are legal.
-        Require(_state.PendingChoice?.Type != "engageReaction" || ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield",
-            "Until the Engage window closes, only Engage actions and \"After engaging\" Reactions may be played.");
-        Require(!IsEngageAction(ability) || !EngageActionBarred(command.PlayerId), "The Attacker may not take Engage actions at this battlefield."); // P13 (RuleFlags.cs)
+        if (!(_state.PendingChoice?.Type != "engageReaction" || ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield")) return "Until the Engage window closes, only Engage actions and \"After engaging\" Reactions may be played.";
+        if (!(!IsEngageAction(ability) || !EngageActionBarred(command.PlayerId))) return "The Attacker may not take Engage actions at this battlefield."; // P13 (RuleFlags.cs)
         // ...and a one-shot limit on the first-action holder's FIRST Battle action.
         ValidateFirstActionRestriction(command);
         var player = Player(command.PlayerId);
@@ -5505,21 +5565,21 @@ public sealed partial class MatchEngine
         Dictionary<string, int> uses;
         if (ability.PlayerAbility)
         {
-            Require(command.CardId is null, "A player ability does not use a source card.");
-            Require(!Definition(Card(player.StrongholdId)).ScenarioOnly, "Player abilities are enabled in the published deck profile.");
+            if (!(command.CardId is null)) return "A player ability does not use a source card.";
+            if (!(!Definition(Card(player.StrongholdId)).ScenarioOnly)) return "Player abilities are enabled in the published deck profile.";
             uses = player.AbilityUses;
         }
         else
         {
             source = Card(command.CardId);
             var def = Definition(source);
-            Require(source.OwnerId == player.Id && AbilityIdsOf(source).Contains(id), "This card does not provide that ability to you.");
-            Require(AbilitySourceZoneAllows(ability, source, player), "The ability's source is not in the required zone.");
+            if (!(source.OwnerId == player.Id && AbilityIdsOf(source).Contains(id))) return "This card does not provide that ability to you.";
+            if (!(AbilitySourceZoneAllows(ability, source, player))) return "The ability's source is not in the required zone.";
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
             // Dragon Clan review (issue #207) adds three more real "even if bowed" cards. Nikutai
             // (issue #279) adds a fourth: "Even if this card is bowed, after a Follower in this unit
             // bows: Straighten it."
-            Require(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten"
+            if (!(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten"
                 or "houken-exp-straighten" or "michi-move" or "rikyou-move" or "fubatsu-plate-straighten" or "fubatsu-plate-move" or "nikutai-straighten"
                 // Shosuro Hawado (issue #301): "Battle: Even if Hawado is bowed, ..." -- both destination halves.
                 or "hawado-move-home" or "hawado-move-battlefield"
@@ -5571,15 +5631,16 @@ public sealed partial class MatchEngine
                 // issue #672 (P16): the printed Tireless keyword, as data (TirelessHome.cs)
                 || ability.Tireless
                 || id == PromoEmperorEventAbilities.EmeraldStraighten // issue #653: The Emerald Championship, "Even if this Personality is bowed"
-                || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
+                || TirelessStronghold(source) || UnsafePassageWaives(command, source))) return "Abilities on bowed cards cannot be used.";
             uses = source.AbilityUses;
         }
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): "You may not take Political actions." (ForgottenLegacyBatch2.cs)
-        Require(!ForgottenTempleForbidsPolitical(id, ability, source, player), "The Forgotten Temple: you may not take Political actions.");
+        if (!(!ForgottenTempleForbidsPolitical(id, ability, source, player))) return "The Forgotten Temple: you may not take Political actions.";
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
-        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey) || UnsafePassageWaives(command, source), "This ability has already been used within its limit."); // Unsafe Passage (issue #622)
-        if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
+        if (!(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey) || UnsafePassageWaives(command, source))) return "This ability has already been used within its limit."; // Unsafe Passage (issue #622)
+        RequireAbilityGates(id, player, source);
+        if (id == "border-first") { if (!(player.TurnsTaken == 1)) return "This Border Keep ability is only available on your first turn."; }
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
         // battlefield-presence requirement at all when used as its OPEN half (performed from Home,
         // core rules) -- but the SAME ability, used during the Battle phase, is a genuine Battle
@@ -5607,9 +5668,9 @@ public sealed partial class MatchEngine
             // effect cases so an ability that moves a Personality to a battlefield cannot be added without it. Munefusa's move-home keeps its old
             // no-presence clause as an explicit Absent.
             var reinforcesFromElsewhere = ability.Absent || ability.MovesToBattle || DojiWaivesFavorPresence(id, player); // Doji's Guidance (Emperor Edition remaining-cards pass, issue #492, group E).
-            if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any() || Wave735WaivesPresence(player.Id) /* issue #735: Doji Tatsuzo */, "You need a unit at the current battlefield.");
+            if (!reinforcesFromElsewhere) { if (!(Army(player.Id, _state.CurrentBattleProvince!.Value).Any() || Wave735WaivesPresence(player.Id))) return "You need a unit at the current battlefield."; }
             if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is not null && Definition(source).Type == CardType.Personality)
-                Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
+            { if (!(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"))) return "The performing card must be at this battlefield."; }
             // The check above only ever applies to a Personality-type source -- a Spell/Item's own
             // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
             // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
@@ -5617,51 +5678,48 @@ public sealed partial class MatchEngine
             // An action on an attachment is performed by its wielder (core rules), so any attached card's Battle ability needs him at the battle.
             if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && !HomeWaivesSourceLocation(ability, source) /* issue #672 (P16): Home */ && source is { Zone: Zone.Attached }
                 || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
-                Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
-            if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");
+            { if (!(AtBattle(source!))) return "This attachment's own wielder must be at the current battlefield."; }
             // Overgrown Grove (issue #264): a Region sits in Zone.Region, never AtBattle-eligible at
             // all (its own Zone check always fails) -- needs its own province-index comparison instead.
             if (id == "overgrown-grove-move")
-                Require(source!.ProvinceIndex is not null && source.ProvinceIndex == CurrentProvinceIndex(), "Overgrown Grove only affects a battle at its own province.");
+            { if (!(source!.ProvinceIndex is not null && source.ProvinceIndex == CurrentProvinceIndex())) return "Overgrown Grove only affects a battle at its own province."; }
             // Trusting Instinct (oracle-l5r-10402, issue #289): "Move him to a battlefield where he
             // would be opposed" -- this engine resolves one battle at a time, so "a battlefield" is
             // always the current one (Houken, Experienced's own "if he would be opposed there" shape);
             // the destination must actually have enemy presence for the move to be legal at all.
             if (id == "trusting-instinct-move")
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
-                    "Trusting Instinct only moves your Personality to a battlefield where he would be opposed.");
+            { if (!(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())) return "Trusting Instinct only moves your Personality to a battlefield where he would be opposed."; }
             // Your Clan Needs You! (issue #295): "If any enemy units are at the current battlefield" --
             // its own printed entry condition, checked here alongside every other id-specific presence
             // Require in this same actingAsBattle block.
             if (id == "your-clan-needs-you")
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
-                    "Your Clan Needs You! requires enemy units at the current battlefield.");
+            { if (!(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())) return "Your Clan Needs You! requires enemy units at the current battlefield."; }
             // Moving and Unmoving (oracle-l5r-5423, issue #460): "If any enemy units are at the current battlefield" -- its own printed entry condition.
             if (id == "moving-unmoving-approach")
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
-                    "Moving and Unmoving requires enemy units at the current battlefield.");
+            { if (!(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())) return "Moving and Unmoving requires enemy units at the current battlefield."; }
             // Broken Alliance (oracle-l5r-1150, Forgotten Legacy pass issue #467 batch 3): "If there are enemy units at the current battlefield" -- its own printed entry condition.
             if (id == "broken-alliance-move")
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
-                    "Broken Alliance requires enemy units at the current battlefield.");
+            { if (!(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())) return "Broken Alliance requires enemy units at the current battlefield."; }
             // Shosuro Hawado (issue #301): "Move Hawado ... to a battlefield with one or more enemy
             // units" -- the destination is a per-command choice (command.Province, the same field
             // enemy-province/any-province targets already use): any battlefield not yet resolved this
             // Battle phase (the current one included) where the enemy actually has a unit. "Home" names
             // no battlefield at all.
             if (id == "hawado-move-battlefield")
-                Require(command.Province is int hawadoDestination && _state.UnresolvedBattlefields.Contains(hawadoDestination) && Army(1 - player.Id, hawadoDestination).Any(),
-                    "Choose a battlefield with one or more enemy units.");
-            else if (id == "hawado-move-home")
-                Require(command.Province is null, "Moving home names no battlefield.");
+            { var __valid2 = command.Province is int hawadoDestination && _state.UnresolvedBattlefields.Contains(hawadoDestination) && Army(1 - player.Id, hawadoDestination).Any(); if (!__valid2) return "Choose a battlefield with one or more enemy units."; }
+            else
+            {
+                if (id == "hawado-move-home")
+                { if (!(command.Province is null)) return "Moving home names no battlefield."; }
+            }
             // Bayushi Irezu (issue #458): "Home Battle: If Irezu is at home..." -- his own printed condition on taking the action at all.
-            if (id == "irezu-move") Require(source!.Zone == Zone.Home, "Irezu must be at home.");
             // Yoritomo Kanaye (oracle-l5r-9579, Embers of War pass, issue #460 batch 2): "you may pay Gold equal to its Gold Cost" -- a
             // binary choice (zero, or exactly the target's own Gold Cost), narrower than Variable's own open range.
             if (id == "kanaye-bow")
-                Require(PaidGoldAmount(command) is var kanayePaid && (kanayePaid == 0
-                        || command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var kanayeTarget) && kanayePaid == CardGoldCost(kanayeTarget)),
-                    "Pay either nothing, or exactly the target's Gold Cost.");
+            {
+                var __valid3 = PaidGoldAmount(command) is var kanayePaid && (kanayePaid == 0
+                    || command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var kanayeTarget) && kanayePaid == CardGoldCost(kanayeTarget)); if (!__valid3) return "Pay either nothing, or exactly the target's Gold Cost.";
+            }
         }
         // Return to Action (oracle-l5r-10953, issue #331): "If you are the Defender" is a condition on taking the
         // action at all (it sits before the effects colon), so it is checked here where every offer and every
@@ -5669,64 +5727,57 @@ public sealed partial class MatchEngine
         // him to.
         // A Ring is PUT INTO PLAY from the hand (never from play, and never from a discard pile): every "...-recruit" ability, real or False, needs its Ring in
         // the hand (issue #370: a Ring already in play could otherwise "put itself into play" again -- a False Ring paying its 2 Honor each time).
-        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "ring-of-void-recruit"
-            or "false-ring-of-air-recruit" or "false-ring-of-earth-recruit" or "false-ring-of-water-recruit")
-            Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Ring is put into play from your hand.");
         // Kata (issue #420): a Kata is put into play from the hand, and its Water Battle action is taken from play, at a battlefield where the enemy has units.
-        if (id == "skipping-the-puddle-enter") Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
         if (id == "skipping-the-puddle-move")
         {
-            Require(source!.Zone == Zone.Home, "This Kata must be in play.");
-            Require(_state.CurrentBattleProvince is int puddleBattle && Army(1 - player.Id, puddleBattle).Any(), "There are no enemy units at the current battlefield.");
+            var __valid4 = _state.CurrentBattleProvince is int puddleBattle && Army(1 - player.Id, puddleBattle).Any();
+            if (!__valid4) return "There are no enemy units at the current battlefield.";
         }
         if (id == "return-to-action-move")
         {
-            Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
-            Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
+            if (!(_state.CurrentBattleProvince is not null)) return "There is no current battlefield to move him to.";
         }
         // Emperor Edition Stronghold pass (issue #486), batch 1: Kyuden Otomo - exp lets a Favor token be discarded instead (EmperorStrongholdBatch1.cs); every Favor-discard action shares this.
-        if (IsFavorDiscardAbility(id)) RequireFavorDiscard(command, player);
+        if (IsFavorDiscardAbility(id) && FavorDiscardRejection(command, player) is { } favorRefusal) return favorRefusal;
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
-        if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
-        if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3, "Discarding three Fate cards is a required cost.");
-        if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1, "Discarding a Fate card is a required cost.");
+        if (id == "bonds-of-coin-draw") { if (!(!Card(player.StrongholdId).Bowed)) return "Your Stronghold is already bowed."; }
+        if (id == "overgrown-grove-move") { if (!(player.FateDeck.Count >= 3)) return "Discarding three Fate cards is a required cost."; }
+        if (id == "improved-defenses-strength") { if (!(player.FateDeck.Count >= 1)) return "Discarding a Fate card is a required cost."; }
         // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "When a Lobby action checks Family Honor, your Honor is treated as 20 points higher."
-        if (id is "lobby" or "dainagon-lobby") Require(player.Honor + LobbyHonorBonus(player) > Player(1 - player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        if (id is "lobby" or "dainagon-lobby") { if (!(player.Honor + LobbyHonorBonus(player) > Player(1 - player.Id).Honor)) return "Lobby requires strictly higher Family Honor than your opponent."; }
         // Saibankan's Justice: "Other players may not lobby."
-        if (id is "lobby" or "dainagon-lobby") Require(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"), "Another player's Saibankan's Justice forbids you to lobby.");
-        if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
+        if (id is "lobby" or "dainagon-lobby") { if (!(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"))) return "Another player's Saibankan's Justice forbids you to lobby."; }
+        if (id == "dainagon-lobby") { if (!(CardPersonalHonor(source!) >= 1)) return "Lobby needs a Personality with at least 1 Personal Honor."; }
         RegisteredValidateEarly(new ValidationHookContext(id, ability!, command, player, source));
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
-        if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
-        if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
+        if (id == "barred-passage-bow") { if (!(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1)) return "The performing Hero must be the only Personality in his army."; }
+        if (id is "tamoko-open" or "virtuous-charity-open") { if (!(_state.ActivePlayerId != player.Id)) return "Only usable when it is not your own turn."; }
         RegisteredValidateMiddle(new ValidationHookContext(id, ability!, command, player, source));
         // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
         // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
-        if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
-            "You must have fewer Provinces than your opponent, or exactly one Province.");
+        if (id == "surveillance-outpost-conqueror") { var __valid5 = player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1); if (!__valid5) return "You must have fewer Provinces than your opponent, or exactly one Province."; }
         // Haruki's Deer (oracle-l5r-9999): "If another player has higher Family Honor than you."
-        if (id == "haruki-deer-honor") Require(Player(1 - player.Id).Honor > player.Honor, "Another player must have higher Family Honor than you.");
+        if (id == "haruki-deer-honor") { if (!(Player(1 - player.Id).Honor > player.Honor)) return "Another player must have higher Family Honor than you."; }
         // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed
         // since your last turn ended" -- a printed condition on USING the action, checked here rather
         // than only when it resolves (MatchState.ProvinceDestroyedSinceTurnEnd).
         if (id == "ohsuki-sparrow-honor")
-            Require(!_state.ProvinceDestroyedSinceTurnEnd[player.Id], "One of your provinces was destroyed since your last turn ended.");
+        { if (!(!_state.ProvinceDestroyedSinceTurnEnd[player.Id])) return "One of your provinces was destroyed since your last turn ended."; }
         // Kaiu Tojikana (oracle-l5r-4145, Embers of War pass, issue #460): "If none of your provinces have been destroyed since your last turn began, or you are
         // a Scorpion Clan player" -- Ohsuki's Sparrow's own conditional-Honor-gain shape (a Require, not a branch inside the effect), OR'd with the player's Clan.
         if (id == "tojikana-honor")
-            Require(!_state.ProvinceDestroyedSinceTurnEnd[player.Id] || Player(player.Id).Clan == "Scorpion",
-                "One of your provinces was destroyed since your last turn began, and you are not a Scorpion Clan player.");
+        { if (!(!_state.ProvinceDestroyedSinceTurnEnd[player.Id] || Player(player.Id).Clan == "Scorpion")) return "One of your provinces was destroyed since your last turn began, and you are not a Scorpion Clan player."; }
         // Gempukku pass (issue #461): the Market Holdings' Clan-and-hand-size condition, Madoka's attached-from-hand condition and Kunji's Clan split.
         if (id.StartsWith("market-draw-", StringComparison.Ordinal))
         {
             var marketClan = char.ToUpperInvariant(id["market-draw-".Length]) + id["market-draw-".Length..][1..];
-            Require(player.Hand.Count <= 4, "You must have four or fewer cards in your hand.");
-            Require(string.Equals(player.Clan, marketClan, StringComparison.Ordinal), $"You must be a {marketClan} Clan player.");
+            if (!(player.Hand.Count <= 4)) return "You must have four or fewer cards in your hand.";
+            if (!(string.Equals(player.Clan, marketClan, StringComparison.Ordinal))) return $"You must be a {marketClan} Clan player.";
         }
-        if (id == "madoka-draw") Require(player.AttachedFromHandThisTurn, "You have not attached a card from your hand this turn.");
-        if (id == "kunji-exp-return-free") Require(player.Clan == "Phoenix", "Only a Phoenix Clan player brings Kunji into play ignoring costs.");
-        if (id == "kunji-exp-return-paid") Require(player.Clan != "Phoenix", "A Phoenix Clan player brings Kunji into play ignoring costs instead.");
-        if (id == "shosei-honor") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Keyword(c, "Temple")), "You must control a Temple.");
+        if (id == "madoka-draw") { if (!(player.AttachedFromHandThisTurn)) return "You have not attached a card from your hand this turn."; }
+        if (id == "kunji-exp-return-free") { if (!(player.Clan == "Phoenix")) return "Only a Phoenix Clan player brings Kunji into play ignoring costs."; }
+        if (id == "kunji-exp-return-paid") { if (!(player.Clan != "Phoenix")) return "A Phoenix Clan player brings Kunji into play ignoring costs instead."; }
+        if (id == "shosei-honor") { if (!(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Keyword(c, "Temple")))) return "You must control a Temple."; }
         // Ring recruitment (issue #194): each of these three is only ever playable as the specific
         // Additional Battle Action already granted for it (GrantRingRecruit) -- never as an ordinary
         // ability -- since the underlying historical condition (Favor actions this turn, a Terrain
@@ -5734,86 +5785,80 @@ public sealed partial class MatchEngine
         // re-checked here. This also naturally makes the grant, not a separate flag, the single
         // source of truth for "was this satisfied."
         if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "false-ring-of-earth-recruit")
-            Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && GrantUsableNow(g) && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
-                "This Ring's recruitment condition has not been granted at this battle.");
+        { if (!(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && GrantUsableNow(g) && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id))) return "This Ring's recruitment condition has not been granted at this battle."; }
         // Ring of the Void's own entry condition (issue #194): a Limited ability (not a granted
         // Additional Action), gated only by how many Rings this player already controls.
         if (id == "ring-of-void-recruit")
-            Require(_state.Cards.Values.Count(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring) <= 2,
-                "You may only play this Ring with two or fewer Rings in play.");
+        { if (!(_state.Cards.Values.Count(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring) <= 2)) return "You may only play this Ring with two or fewer Rings in play."; }
         // False Ring of Water's own entry condition (issue #194): a standing check, not a Reaction --
         // usable any time it holds, like an ordinary Battle ability. The current battlefield's own
         // province always belongs to the Defender.
         if (id == "false-ring-of-water-recruit")
-            Require(CurrentProvinceStrength() >= 11,
-                "The current battlefield's Province Strength must be 11 or greater.");
-        if (id == "kano-destroy-token") Require(source!.Tokens.Any(t => t.Type == "Master"), "Akodo Kano needs a Master token.");
-        if (id == "dairuko-rally") Require(AtBattle(source!), "Akodo Dairuko must be at the battlefield.");
+        { if (!(CurrentProvinceStrength() >= 11)) return "The current battlefield's Province Strength must be 11 or greater."; }
+        if (id == "kano-destroy-token") { if (!(source!.Tokens.Any(t => t.Type == "Master"))) return "Akodo Kano needs a Master token."; }
         if (id == "wave-persists-move")
-            Require(source!.Zone == Zone.Attached && source.AttachedTo is string waveHostId && _state.CurrentBattleProvince is not null && !AtBattle(Card(waveHostId)), "This Shugenja must be attached and not at the current battlefield.");
+        { var __valid6 = source!.Zone == Zone.Attached && source.AttachedTo is string waveHostId && _state.CurrentBattleProvince is not null && !AtBattle(Card(waveHostId)); if (!__valid6) return "This Shugenja must be attached and not at the current battlefield."; }
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
         // check above already requires the source itself (a Personality) to be at this battlefield.
-        if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
-        if (id == "moto-ming-gwok-attack") Require(DeadCount(0) > 0 || DeadCount(1) > 0, "Moto Ming-Gwok needs a dead Personality in some player's discard pile to attack.");
-        if (id == "necessary-evil-lock") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Personality), "You must control a Personality.");
-        if (id == "archery-range-reaction") Require(_state.PendingAttack!.Kind == "Ranged", "Archery Range only boosts a Ranged Attack.");
+        if (id == "torazu-fire-attack") { if (!(HasToken(source!, "Fire"))) return "Torazu needs a Fire token of his own to attack."; }
+        if (id == "moto-ming-gwok-attack") { if (!(DeadCount(0) > 0 || DeadCount(1) > 0)) return "Moto Ming-Gwok needs a dead Personality in some player's discard pile to attack."; }
+        if (id == "necessary-evil-lock") { if (!(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Personality))) return "You must control a Personality."; }
+        if (id == "archery-range-reaction") { if (!(_state.PendingAttack!.Kind == "Ranged")) return "Archery Range only boosts a Ranged Attack."; }
         if (id == "saibankan-dishonor" && command.Selections is { } saibankanSelections)
-            Require(saibankanSelections.SelectMany(x => x.CardIds ?? []).Select(x => Card(x).OwnerId).Distinct().Count() <= 1, "The Personalities must be controlled by the same player.");
+        { if (!(saibankanSelections.SelectMany(x => x.CardIds ?? []).Select(x => Card(x).OwnerId).Distinct().Count() <= 1)) return "The Personalities must be controlled by the same player."; }
         if (id is "stockpiled-attach" or "spirit-magistrate-bow")
-            Require(id == "spirit-magistrate-bow" ? _state.ActivePlayerId != player.Id : !Keyword(Card(command.PerformerId!), "Commander"), id == "spirit-magistrate-bow" ? "Only usable when it is not your own turn." : "A Commander pays 4 less: use the discounted attach.");
+        { if (!(id == "spirit-magistrate-bow" ? _state.ActivePlayerId != player.Id : !Keyword(Card(command.PerformerId!), "Commander"))) return id == "spirit-magistrate-bow" ? "Only usable when it is not your own turn." : "A Commander pays 4 less: use the discounted attach."; }
         if (id is "hailung-attach" or "hailung-attach-discount")
         {
             var hailungDiscount = IsDefendingUnit(source!) || player.Clan == "Crab";
-            Require(id == "hailung-attach-discount" ? hailungDiscount : !hailungDiscount, id == "hailung-attach-discount" ? "The discount applies only while he is defending or you are a Crab Clan player." : "The discounted attach applies now: he is defending or you are a Crab Clan player.");
+            if (!(id == "hailung-attach-discount" ? hailungDiscount : !hailungDiscount)) return id == "hailung-attach-discount" ? "The discount applies only while he is defending or you are a Crab Clan player." : "The discounted attach applies now: he is defending or you are a Crab Clan player.";
         }
-        if (id is "kaname-attack-boost" or "umiko-attack-boost" or "umiko-attack-reduce") Require(_state.PendingAttack!.Kind == "Ranged", "This only reacts to a Ranged Attack.");
+        if (id is "kaname-attack-boost" or "umiko-attack-boost" or "umiko-attack-reduce") { if (!(_state.PendingAttack!.Kind == "Ranged")) return "This only reacts to a Ranged Attack."; }
         if (id == "umiko-attack-reduce")
-            Require(!_state.RangedAttackStrengthReductionImmune, "This Ranged Attack is immune to strength reduction for the remainder of its resolution.");
+        { if (!(!_state.RangedAttackStrengthReductionImmune)) return "This Ranged Attack is immune to strength reduction for the remainder of its resolution."; }
         if (id == "flesh-cutter-arrows-reaction")
-            Require(_state.PendingAttack!.Kind == "Ranged" && _state.PendingAttack.SourceId == Card(source!.AttachedTo!).Id
-                && !Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")), "Flesh Cutter Arrows needs a Ranged Attack from its own wielder, targeting a card without an attached Armor.");
-        if (id == "slanderer-dishonor") Require(ControlsKeyword(player.Id, "Courtier") || ControlsKeyword(player.Id, "Magistrate"), "Slanderer needs a Courtier or Magistrate in play.");
+        {
+            if (!(_state.PendingAttack!.Kind == "Ranged" && _state.PendingAttack.SourceId == Card(source!.AttachedTo!).Id
+            && !Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")))) return "Flesh Cutter Arrows needs a Ranged Attack from its own wielder, targeting a card without an attached Armor.";
+        }
+        if (id == "slanderer-dishonor") { if (!(ControlsKeyword(player.Id, "Courtier") || ControlsKeyword(player.Id, "Magistrate"))) return "Slanderer needs a Courtier or Magistrate in play."; }
         if (id is "horibe-bow" or "horibe-straighten")
-            Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Horibe must be opposed to use this ability.");
-        if (id is "heavy-chargers-boost") Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Heavy Chargers must be opposed to use this ability.");
+        { if (!(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())) return "Horibe must be opposed to use this ability."; }
+        if (id is "heavy-chargers-boost") { if (!(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())) return "Heavy Chargers must be opposed to use this ability."; }
         // Khol Regulars: "If this card is at the current battlefield, after a Ranged Attack is
         // targeted" -- both narrow the generic before-attack-resolves Reaction window this card shares
         // with every other attack-boosting Reaction.
-        if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
+        if (id == "khol-regulars-reaction") { if (!(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged")) return "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack."; }
         // Akodo Kakihara (issue #305): "After another player's action targets Kakihara" -- narrows each of his
         // two windows to the deferred action/Attack that actually names HIM as its target and was issued by
         // someone other than his own controller. The Reaction is only ever worth using while his CURRENT
         // Personal Honor is above 0 (0 while dishonorable -- the card owner's own ruling: no bonus).
         if (id == "kakihara-force-bonus")
-            Require(_state.PendingNegatableAbility is { } kakiharaAction && ReactionAffectedId(kakiharaAction) == source!.Id && kakiharaAction.PlayerId != source.OwnerId,
-                "Akodo Kakihara only reacts to another player's action that targets him.");
+        { var __valid7 = _state.PendingNegatableAbility is { } kakiharaAction && ReactionAffectedId(kakiharaAction) == source!.Id && kakiharaAction.PlayerId != source.OwnerId; if (!__valid7) return "Akodo Kakihara only reacts to another player's action that targets him."; }
         if (id == "kakihara-attack-force-bonus")
-            Require(_state.PendingAttack is { } kakiharaAttack && kakiharaAttack.TargetId == source!.Id && kakiharaAttack.PlayerId != source.OwnerId,
-                "Akodo Kakihara only reacts to another player's Attack that targets him.");
+        { var __valid8 = _state.PendingAttack is { } kakiharaAttack && kakiharaAttack.TargetId == source!.Id && kakiharaAttack.PlayerId != source.OwnerId; if (!__valid8) return "Akodo Kakihara only reacts to another player's Attack that targets him."; }
         if (id is "kakihara-force-bonus" or "kakihara-attack-force-bonus")
-            Require(CardPersonalHonor(source!) > 0, "Akodo Kakihara has no Personal Honor to convert into a Force bonus.");
+        { if (!(CardPersonalHonor(source!) > 0)) return "Akodo Kakihara has no Personal Honor to convert into a Force bonus."; }
         // A Close Call: "after a Personality with an Armor is targeted by a Melee or Ranged Attack" --
         // both the Kind restriction and the Armor-attached restriction narrow the shared
         // before-attack-resolves Reaction window (the same shape khol-regulars-reaction/flesh-cutter-
         // arrows-reaction above already use), checked before the reaction is even allowed to fire.
         if (id == "a-close-call-negate")
-            Require(_state.PendingAttack!.Kind is "Ranged" or "Melee" && Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")),
-                "A Close Call needs a Ranged or Melee Attack targeting a Personality with an Armor attached.");
+        { if (!(_state.PendingAttack!.Kind is "Ranged" or "Melee" && Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")))) return "A Close Call needs a Ranged or Melee Attack targeting a Personality with an Armor attached."; }
         // Strong Defenses / Trusting Instinct (issue #289): "After a Ranged or Melee Attack is
         // targeted" -- A Close Call's own Kind restriction again, minus its Armor-attached gate (no
         // such restriction printed on either of these), each played straight from hand like A Close
         // Call itself (AnyAttackReactionAvailable's own out-of-play discovery already covers a Strategy
         // card's Reaction, per its own doc comment).
         if (id is "strong-defenses-reaction" or "trusting-instinct-reaction")
-            Require(_state.PendingAttack!.Kind is "Ranged" or "Melee", "This only reacts to a Ranged or Melee Attack.");
+        { if (!(_state.PendingAttack!.Kind is "Ranged" or "Melee")) return "This only reacts to a Ranged or Melee Attack."; }
         // Tsuruchi Yakusho (issue #276 follow-up): every existing Attack-strength-reducing Reaction is
         // blocked outright while her own immunity flag is set for this specific (Ranged) Attack's own
         // resolution -- covers both current reduction sites (Fallow Lands' -2, Training's own full
         // negate) generically, so a future reducing card only needs to be added to this same id list.
         // Strong Defenses' -3 and Trusting Instinct's -2 (issue #289) are exactly that future case.
         if (id is "fallow-lands-reaction" or "training-attack-negate" or "strong-defenses-reaction" or "trusting-instinct-reaction")
-            Require(!(_state.PendingAttack!.Kind == "Ranged" && _state.RangedAttackStrengthReductionImmune),
-                "This Ranged Attack is immune to strength reduction for the remainder of its resolution.");
+        { if (!(!(_state.PendingAttack!.Kind == "Ranged" && _state.RangedAttackStrengthReductionImmune))) return "This Ranged Attack is immune to strength reduction for the remainder of its resolution."; }
         // Fallow Lands: unlike an ordinary Zone.Battlefield/Attached Reaction card, AtBattle() does not
         // apply -- it never moves, it just sits at its own home province forever. "The province to which
         // it is attached" is under attack only when the CURRENT active player is someone else (their own
@@ -5822,11 +5867,11 @@ public sealed partial class MatchEngine
         // check are needed. "The controlling player has presence" reuses Army() (a Region itself never
         // satisfies presence, since it never sits in Zone.Battlefield).
         if (id == "fallow-lands-reaction")
-            Require(_state.CurrentBattleProvince is not null && _state.ActivePlayerId != source!.OwnerId && _state.CurrentBattleProvince == source.ProvinceIndex
-                && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
-                "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
-        if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
-        if (id == "hiruma-sniper-attack") Require(HasReconnaissanceAtCurrentBattlefield(player.Id), "This action requires Reconnaissance at the current battlefield.");
+        {
+            if (!(_state.CurrentBattleProvince is not null && _state.ActivePlayerId != source!.OwnerId && _state.CurrentBattleProvince == source.ProvinceIndex
+            && Army(source.OwnerId, source.ProvinceIndex!.Value).Any())) return "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.";
+        }
+        if (id == "hiruma-sniper-attack") { if (!(HasReconnaissanceAtCurrentBattlefield(player.Id))) return "This action requires Reconnaissance at the current battlefield."; }
         // Stormless Fury's own first Reaction: "choose your performing Thunder Shugenja" -- the just-
         // resolved action's own performer (BattleActionReactionPerformerId) must be a Thunder Shugenja
         // belonging to the SAME player who holds this card in hand; the card itself must still
@@ -5835,41 +5880,37 @@ public sealed partial class MatchEngine
         if (id == "stormless-fury-attach")
         {
             var performer = Card(_state.BattleActionReactionPerformerId!);
-            Require(source!.Zone == Zone.Hand, "Stormless Fury may only attach itself from your hand.");
-            Require(performer.OwnerId == player.Id && Keyword(performer, "Thunder") && Keyword(performer, "Shugenja"),
-                "Stormless Fury only attaches to your own performing Thunder Shugenja.");
+            if (!(source!.Zone == Zone.Hand)) return "Stormless Fury may only attach itself from your hand.";
+            if (!(performer.OwnerId == player.Id && Keyword(performer, "Thunder") && Keyword(performer, "Shugenja"))) return "Stormless Fury only attaches to your own performing Thunder Shugenja.";
         }
         // Stormless Fury's own second Reaction: must be attached and at the current battlefield, and
         // -- the card owner's own errata ruling -- may not trigger against the same action instance
         // that triggered this copy's own stormless-fury-attach half.
         if (id == "stormless-fury-bow")
-            Require(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id),
-                "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it.");
-        if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
+        { if (!(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id))) return "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it."; }
+        // Rokku (issue #833): "if any enemy units are at the current battlefield" is a printed condition, not a silent no-op of the effect.
+        if (id == "rokku-move") { if (!(RokkuEnemyPresentAtEngagedBattlefield(player.Id))) return "Rokku: no enemy units are at the current battlefield."; }
         // Battle Phase timing (issue #310): the Engage window's own per-trigger and per-card conditions.
         // "After engaging at X's battlefield": X's own battlefield is the one it is assigned to.
         // Dragon's Breath Castle: "after engaging at a battlefield at one of your provinces" -- the battlefield is at the Defender's province, so its controller is the Defender.
-        if (id == "dbc-attacker-bow") Require(command.PlayerId == 1 - _state.ActivePlayerId, "Dragon's Breath Castle reacts to a battle at one of its controller's provinces.");
+        if (id == "dbc-attacker-bow") { if (!(command.PlayerId == 1 - _state.ActivePlayerId)) return "Dragon's Breath Castle reacts to a battle at one of its controller's provinces."; }
         // Seeds of Decay pass (issue #453), batch 1 (SeedsOfDecayBatch1.cs).
-        if (id == "castle-of-order-redirect") Require(!CastleOfOrderUsedThisBattle(source!), "The Castle of Order's redirect may be used once per battle.");
-        if (id == "sound-the-retreat-enter") Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
-        if (id == "sound-the-retreat-move") Require(source!.Zone == Zone.Home, "This Kata must be in play.");
-        if (id == "advanced-intelligence-draw") Require(!AdvancedIntelligencePlayedThisBattle(player), "You may only play one copy of Advanced Intelligence per battle.");
-        if (id is "grappling-snake-negate" or "grappling-snake-bow") Require(source!.GrantedAbilities.Any(g => g.AbilityId == id && GrantHolds(g.Duration, source)), "Grappling the Snake's choice is no longer open.");
-        if (ability.Trigger == "after-engaging-at-own-battlefield")
-            Require(AtBattle(source!), "This card must be assigned to the battlefield being engaged.");
+        if (id == "castle-of-order-redirect") { if (!(!CastleOfOrderUsedThisBattle(source!))) return "The Castle of Order's redirect may be used once per battle."; }
+        if (id == "advanced-intelligence-draw") { if (!(!AdvancedIntelligencePlayedThisBattle(player))) return "You may only play one copy of Advanced Intelligence per battle."; }
+        if (id is "grappling-snake-negate" or "grappling-snake-bow") { if (!(source!.GrantedAbilities.Any(g => g.AbilityId == id && GrantHolds(g.Duration, source)))) return "Grappling the Snake's choice is no longer open."; }
+        if (ability.Trigger == "after-engaging-at-own-battlefield" || source is not null && EngageSourceMustBeAtBattlefield(id, ability, source))
+        { if (!(AtBattle(source!))) return "This card must be assigned to the battlefield being engaged."; } // issue #840: Engage is battlefield-specific
         // Daidoji Yuki: "if all your Personalities there are Scouts" sits BEFORE the effects colon, so it is a
         // requirement to take the action (core rules, constraints block), not a condition on part of the effect.
         if (id == "yuki-engage-recon")
-            Require(Army(player.Id, _state.PendingEngage!.ProvinceIndex).All(c => Keyword(c, "Scout")), "All your Personalities at this battlefield must be Scouts.");
+        { if (!(Army(player.Id, _state.PendingEngage!.ProvinceIndex).All(c => Keyword(c, "Scout")))) return "All your Personalities at this battlefield must be Scouts."; }
         // Naval Invasion: "if you are the Attacker and your current army has more Naval cards than the side opposing it".
         if (id == "naval-invasion")
         {
             var engage = _state.PendingEngage!;
-            Require(player.Id == engage.Attacker, "Only the Attacker may use Naval Invasion.");
-            Require(!engage.NavalInvasionUsed, "Naval Invasion may be used once per battle.");
-            Require(NavalCardCount(engage.Attacker, engage.ProvinceIndex) > NavalCardCount(engage.Defender, engage.ProvinceIndex),
-                "Your current army must have more Naval cards than the side opposing it.");
+            if (!(player.Id == engage.Attacker)) return "Only the Attacker may use Naval Invasion.";
+            if (!(!engage.NavalInvasionUsed)) return "Naval Invasion may be used once per battle.";
+            if (!(NavalCardCount(engage.Attacker, engage.ProvinceIndex) > NavalCardCount(engage.Defender, engage.ProvinceIndex))) return "Your current army must have more Naval cards than the side opposing it.";
         }
         // Singh Remnants' shape: attach to the just-entered Personality (the entryReaction's own
         // CardId), following the same restrictions Equip() enforces -- Honor Requirement included.
@@ -5877,11 +5918,11 @@ public sealed partial class MatchEngine
         {
             var enteredPersonality = Card(_state.PendingChoice!.CardId!);
             var attachDef = Definition(source!);
-            Require(attachDef.AttachRequiresKeyword is null || KeywordOrHuman(enteredPersonality, attachDef.AttachRequiresKeyword), $"Will only attach to a {attachDef.AttachRequiresKeyword} Personality.");
-            Require(attachDef.AttachExcludesKeyword is null || !KeywordOrHuman(enteredPersonality, attachDef.AttachExcludesKeyword), $"Will not attach to a {attachDef.AttachExcludesKeyword} Personality.");
-            Require(attachDef.AttachRequiresName is null || Definition(enteredPersonality).Name == attachDef.AttachRequiresName, $"Only attaches to {attachDef.AttachRequiresName}.");
-            Require(attachDef.HonorRequirement is null || IgnoresFollowerHonorRequirement(enteredPersonality) || CardPersonalHonor(enteredPersonality) >= attachDef.HonorRequirement || RoninIgnoresHonorRequirement(source!, command.PlayerId), "The Personality does not meet this Follower's Personal Honor Requirement.");
-            Require(AttachmentAllowed(source!, enteredPersonality), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
+            if (!(attachDef.AttachRequiresKeyword is null || KeywordOrHuman(enteredPersonality, attachDef.AttachRequiresKeyword))) return $"Will only attach to a {attachDef.AttachRequiresKeyword} Personality.";
+            if (!(attachDef.AttachExcludesKeyword is null || !KeywordOrHuman(enteredPersonality, attachDef.AttachExcludesKeyword))) return $"Will not attach to a {attachDef.AttachExcludesKeyword} Personality.";
+            if (!(attachDef.AttachRequiresName is null || Definition(enteredPersonality).Name == attachDef.AttachRequiresName)) return $"Only attaches to {attachDef.AttachRequiresName}.";
+            if (!(attachDef.HonorRequirement is null || IgnoresFollowerHonorRequirement(enteredPersonality) || CardPersonalHonor(enteredPersonality) >= attachDef.HonorRequirement || RoninIgnoresHonorRequirement(source!, command.PlayerId))) return "The Personality does not meet this Follower's Personal Honor Requirement.";
+            if (!(AttachmentAllowed(source!, enteredPersonality))) return "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.";
             // Gold cost (attachDef.GoldCost) is validated once, generically, in the shared cost
             // computation below -- not duplicated here.
         }
@@ -5889,23 +5930,24 @@ public sealed partial class MatchEngine
         RequireRingMayEnterPlay(id, player); // Brotherhood Schism
         if (id == "sentinel-spirit-watch")
         {
-            Require(_state.ActivePlayerId != player.Id, "Sentinel Spirit is only usable when it is not your turn.");
-            Require(_state.Cards.Values.Any(c => c.OwnerId == _state.ActivePlayerId && InPlay(c) && Definition(c).Type == CardType.Personality), "The active player controls no Personality.");
+            if (!(_state.ActivePlayerId != player.Id)) return "Sentinel Spirit is only usable when it is not your turn.";
+            if (!(_state.Cards.Values.Any(c => c.OwnerId == _state.ActivePlayerId && InPlay(c) && Definition(c).Type == CardType.Personality))) return "The active player controls no Personality.";
         }
-        if (id == "ugimori-proclaim-lock") Require(_state.LastProvinceEntryCardId == source!.Id, "Ugimori did not enter play from a province.");
+        if (id == "ugimori-proclaim-lock") { if (!(_state.LastProvinceEntryCardId == source!.Id)) return "Ugimori did not enter play from a province."; }
         if (id == "dragon-tattoo-exp-imbue" && command.PerformerId is not null)
-            Require(!Card(command.PerformerId).PerformedActionFromTitles.Contains("Dragon Tattoo"), "He has already performed an action from a Dragon Tattoo this game.");
+        { if (!(!Card(command.PerformerId).PerformedActionFromTitles.Contains("Dragon Tattoo"))) return "He has already performed an action from a Dragon Tattoo this game."; }
         if (id.StartsWith("manipulate-energies-", StringComparison.Ordinal) && command.TargetId is not null)
         {
             var energiesKeyword = id.EndsWith("-cavalry", StringComparison.Ordinal) ? "Cavalry" : id.EndsWith("-naval", StringComparison.Ordinal) ? "Naval" : "Tactician";
             var energiesGives = id.Contains("-give-", StringComparison.Ordinal);
-            Require(Keyword(Card(command.TargetId), energiesKeyword) != energiesGives, energiesGives ? $"He already has {energiesKeyword}." : $"He does not have {energiesKeyword}.");
+            if (!(Keyword(Card(command.TargetId), energiesKeyword) != energiesGives)) return energiesGives ? $"He already has {energiesKeyword}." : $"He does not have {energiesKeyword}.";
         }
         if (ability.Performer is not null)
         {
-            var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
-            Require(performer.OwnerId == player.Id && (InPlay(performer) || ability.Performer == "own-dead-personality-with-keyword" && performer.Zone == Zone.Dead), "Choose your own card to perform."); // Oyo's Second Lesson (issue #492): a dead Henshin performs it
-            Require(WithActWhileBowed(performer, ability, () => ability.Performer switch // P11 (CardRestrictions.cs): a card that may act while bowed is judged unbowed here; bow COSTS are still paid against the real state
+            if (command.PerformerId is null) return "Choose a performing card.";
+            var performer = Card(command.PerformerId);
+            if (!(performer.OwnerId == player.Id && (InPlay(performer) || ability.Performer == "own-dead-personality-with-keyword" && performer.Zone == Zone.Dead))) return "Choose your own card to perform."; // Oyo's Second Lesson (issue #492): a dead Henshin performs it
+            if (!(WithActWhileBowed(performer, ability, () => ability.Performer switch // P11 (CardRestrictions.cs): a card that may act while bowed is judged unbowed here; bow COSTS are still paid against the real state
             {
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
@@ -5926,7 +5968,7 @@ public sealed partial class MatchEngine
                 // every existing "Battle"-only card this is unconditionally identical to the old
                 // AtBattle(performer) check, since actingAsBattle is always true when Timing=="Battle".
                 "own-unbowed-personality-at-battle-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
-                    HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
+                    HasKeywords(performer, ability.RequiredKeywords) && (!(actingAsBattle || PerformerMustBeAtCurrentBattlefield(id)) || AtBattle(performer)),
                 // "At any location" (issue #267, Improved Defenses): a printed exemption from the
                 // ordinary at-THIS-battlefield requirement, broadened instead of removed -- see
                 // AtAnyLocation's own doc comment (Home, the current battlefield, or another
@@ -6113,9 +6155,9 @@ public sealed partial class MatchEngine
                 "own-unbowed-personality-with-any-keyword-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)) && (!actingAsBattle || AtBattle(performer)),
                 _ => RegisteredPerformerAllows(ability, performer, actingAsBattle)
-            }), "That card does not meet this ability's performer requirement.");
+            }))) return "That card does not meet this ability's performer requirement.";
         }
-        else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
+        else { if (!(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby")) return "Unexpected performing card."; }
         // "May not perform actions" (issue #336): the performer of this action -- whoever it is -- must be free to act.
         RequireCanPerform(command, ability, source);
         // "Hotaka may not perform Dark Virtue actions" (issue #453, batch 2): a performer-side ban on an action keyword.
@@ -6123,959 +6165,1128 @@ public sealed partial class MatchEngine
         // Alternative cost (issue #337): the way the acting player pays the non-Gold cost is part of the command, and payable.
         ValidateCostOption(ability, command, source);
         ValidateWielderCosts(ability, command, source);
-        Require(command.Choice is null || command.AbilityId is not null && (AttackCompareOptions(command.AbilityId) is not null || MechEChoiceOptions(command.AbilityId) is not null || P2ChoiceOptions(command.AbilityId) is not null || P5AllowsChoice(command.AbilityId) || Wave9601ChoiceOptions(command.AbilityId, command.PlayerId) is not null), "Choices are resolved by a separate decision command."); // issue #503: Isawa Mina's attachment or token // issue #492, ruling R5: the "may compare" choice rides on the command; issue #501: Greasing the Wheels' pay-or-straighten
+        if (!(command.Choice is null || command.AbilityId is not null && (AttackCompareOptions(command.AbilityId) is not null || MechEChoiceOptions(command.AbilityId) is not null || P2ChoiceOptions(command.AbilityId) is not null || P5AllowsChoice(command.AbilityId) || Wave9601ChoiceOptions(command.AbilityId, command.PlayerId) is not null))) return "Choices are resolved by a separate decision command."; // issue #503: Isawa Mina's attachment or token // issue #492, ruling R5: the "may compare" choice rides on the command; issue #501: Greasing the Wheels' pay-or-straighten
         // Goju House Guard (issue #192): the only current DeckPosition consumer, so this stays a
         // per-id check rather than a generic AbilityDefinition flag until a second card needs it.
-        Require(id == "goju-house-guard-return" ? command.DeckPosition is "Top" or "Bottom" : command.DeckPosition is null,
-            id == "goju-house-guard-return" ? "Choose Top or Bottom for your Fate deck." : "Unexpected deck position.");
+        if (!(id == "goju-house-guard-return" ? command.DeckPosition is "Top" or "Bottom" : command.DeckPosition is null)) return id == "goju-house-guard-return" ? "Choose Top or Bottom for your Fate deck." : "Unexpected deck position.";
         // Multi-target actions (issue #336): the whole selection, slot by slot, each candidate judged by this method again for its own category.
         if (ability.Slots is not null) ValidateSlots(command, ability);
-        else if (ability.Target == "own-army-personalities")
-        {
-            Require(command.TargetId is null || command.CardIds is null or { Length: 0 }, "Name one Personality as the target, or several together, not both.");
-            var ids = ArmyPersonalityChoice(command);
-            Require(ids.Length is >= 1 and <= 3 && ids.Distinct().Count() == ids.Length, "Choose one to three different Personalities.");
-            Require(_state.CurrentBattleProvince is int armyProvince && ids.All(id => _state.Cards.TryGetValue(id, out var member) && member.OwnerId == player.Id && Army(player.Id, armyProvince).Contains(member)),
-                "Choose Personalities in your current army.");
-        }
-        else if (ability.Target == "provinces")
-        {
-            Require(command.TargetId is null, "Select province cards together.");
-            var ids = OwnProvinceCardIds(player, command.CardIds ?? []); // a face-down card is named by its place, "hidden-p{owner}-province{n}" (issue #586)
-            Require(ids.Length is >= 1 and <= 4 && ids.Distinct().Count() == ids.Length, "Choose one or more different province cards.");
-            Require(ids.All(id => _state.Cards.TryGetValue(id, out var c) && c.OwnerId == player.Id && c.Zone == Zone.Province &&
-                player.Provinces.Any(p => !p.Destroyed && p.CardId == id)), "Choose cards in your provinces.");
-        }
-        // Reconnaissance is granted at a specific province, not a card -- selected by index
-        // (GameCommand.Province, already used by selectBattle) rather than TargetId/CardIds.
-        else if (ability.Target == "enemy-province")
-        {
-            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
-            Require(command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed,
-                "Choose one of the enemy's provinces.");
-        }
-        // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): "Target one or two provinces" -- the Defender's, the provinces a battlefield will sit at.
-        else if (ability.Target == EmperorStrongholdBatch1Abilities.HiddenFallsTarget) ValidateHiddenFallsTargets(command);
-        else if (ability.Target == EmperorP5HiddenAbilities.FaceDownProvinceCards) ValidatePettyTargets(command); // issue #503: Petty Squabbles (EmperorP5Hidden.cs)
-        // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "one or two of your provinces".
-        else if (ability.Target == EmperorRemainingEAbilities.OwnProvincesTarget) ValidateOwnProvinceSet(command, player);
-        // Ring of Earth (issue #194): "give A province +3 or -3 strength" -- either side's own,
-        // unlike enemy-province above -- so which player's province, not just which index, must be
-        // named. TargetPlayerId already exists for "choose a player" (issue #210); reused here purely
-        // as "whose province," alongside Province as the index.
-        else if (ability.Target == "any-province")
-        {
-            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
-            Require(command.TargetPlayerId is 0 or 1 && command.Province is int anyIdx && anyIdx is >= 0 and <= 3 && anyIdx < Player(command.TargetPlayerId.Value).Provinces.Count && !Player(command.TargetPlayerId.Value).Provinces[anyIdx].Destroyed,
-                "Choose a province (yours or the enemy's).");
-        }
-        // "Choose a player" (issue #210): a player, not a card, is the target -- either player is
-        // always a legal choice (no restriction printed), so validation is just "is this a real
-        // player id at all."
-        else if (ability.Target == "player")
-        {
-            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a player, not a card.");
-            Require(command.TargetPlayerId is 0 or 1, "Choose a player.");
-        }
         else
         {
-            // Togashi Mitsu, Inexperienced (issue #207 follow-up): "destroy zero or more Fire tokens
-            // on Mitsu. Ranged Attack with strength equal to the number of tokens destroyed" -- the
-            // one Attack whose own strength is a per-COMMAND variable (which/how many Fire tokens the
-            // player chooses to destroy right now), not a static per-ability-id/target/source formula
-            // AttackStrength's own switch can express. CardIds carries the chosen token ids here
-            // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
-            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power" or "ishibashi-attack"
-                || MechCCarriesCostCard(id) // Emperor Edition mechanics group C (issue #501): the card an optional cost spends.
-                || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
-                || SearchPlayCarriesCostCard(id)
-                || WlCarriesCostCard(id)
-                // Akodo Kamina: the hand card a discard cost option spends.
-                || AlternativeDiscard.CarriesCostCard(id)
-                || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
-            // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
-            // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
-            // core rules an Attack's targeting is its own step, "not required up front"): TargetId is the
-            // -4F target (a required enemy Personality, validated by the ordinary category switch below),
-            // CardIds carries the optional Attack target -- the established optional-second-selection
-            // idiom (Scorn the Weak, Strength in Terror). It is validated as any Attack target, including
-            // Kahoku's own static Follower-immunity exception (AttackTargeting.cs), and MAY be the very
-            // Personality the -4F just weakened, so the strength check sees that Force already reduced.
-            if (id == "kahoku-exp-attack")
+            if (ability.Target == "own-army-personalities")
             {
-                var ids = command.CardIds ?? [];
-                Require(ids.Length is 0 or 1, "Kahoku's Ranged Attack may target at most one card.");
-                if (ids.Length == 1) RequireLegalAttackTarget(id, ability, command, player, source, Card(ids[0]), command.TargetId, 4);
-            }
-            // Knowledge and Power (issue #353): "Destroy one or two of a target Personality's tokens" -- CardIds names which (token ids, on the TARGET),
-            // one or two different ones; none named means his first token, so the ability is always offered with a legal command.
-            if (id == "knowledge-and-power")
-            {
-                var kpTarget = command.TargetId is null ? throw new RuleViolation("Choose a target Personality.") : Card(command.TargetId);
-                var chosenTokens = command.CardIds ?? [];
-                Require(chosenTokens.Length <= 2 && chosenTokens.Distinct().Count() == chosenTokens.Length && chosenTokens.All(tid => kpTarget.Tokens.Any(t => t.Id == tid)),
-                    "Choose one or two different tokens on the target Personality to destroy.");
-            }
-            if (id == "mitsu-fire-attack")
-            {
-                var tokenIds = command.CardIds ?? [];
-                Require(tokenIds.Distinct().Count() == tokenIds.Length && tokenIds.All(tid => source!.Tokens.Any(t => t.Id == tid && t.Type == "Fire")),
-                    "Choose zero or more of Mitsu's own Fire tokens to destroy.");
-            }
-            // Scorn the Weak (oracle-l5r-9925, issue #287): "If his Force is now 0, ... you may
-            // target and dishonor a Personality" -- CardIds carries this optional second target (any
-            // Personality, either side, no further restriction printed), the same "not required to
-            // exist" idiom optional-dishonorable-personality already establishes for a single
-            // TargetId, just carried on CardIds since this ability already has a required primary
-            // TargetId. Only offered when the primary target's Force would actually reach 0 from
-            // this ability's own flat -5F (CardForce already floors at 0, so "now 0" reduces to a
-            // pre-effect Force of 5 or less).
-            if (id == "scorn-the-weak")
-            {
-                var ids = command.CardIds ?? [];
-                Require(ids.Length is 0 or 1, "Scorn the Weak may target at most one additional Personality to dishonor.");
-                if (ids.Length == 1)
-                {
-                    Require(CardForce(Card(command.TargetId!)) <= 5,
-                        "You may only target and dishonor a Personality when the enemy Personality's Force would reach 0.");
-                    Require(Definition(Card(ids[0])).Type == CardType.Personality, "Target a Personality to dishonor.");
-                }
-            }
-            // Strength in Terror (oracle-l5r-7538, issue #287): "You may target and destroy one of
-            // the Personality's attachments" -- CardIds' own second-selection reuse again, restricted
-            // to one of the primary target's own attachments.
-            if (id == "strength-in-terror")
-            {
-                var ids = command.CardIds ?? [];
-                Require(ids.Length is 0 or 1, "Strength in Terror may target at most one attachment to destroy.");
-                if (ids.Length == 1)
-                {
-                    var attachmentToDestroy = Card(ids[0]);
-                    Require(attachmentToDestroy.Zone == Zone.Attached && attachmentToDestroy.AttachedTo == command.TargetId,
-                        "Target one of the Personality's own attachments.");
-                }
-            }
-            // Unexpected (oracle-l5r-9940, issue #287): "You may bow your Personality; if you did,
-            // draw a card" -- CardIds' own third reuse this wave: the performer's own id, when
-            // supplied, opts into the self-bow-for-a-draw.
-            if (id == "unexpected")
-            {
-                var ids = command.CardIds ?? [];
-                Require(ids.Length is 0 or 1 && (ids.Length == 0 || ids[0] == command.PerformerId),
-                    "You may only bow your own performing Personality.");
-            }
-            // Visage of the Orochi (oracle-l5r-9168, issue #289): "You may target and bow an enemy
-            // card with lower Force and no attachments" -- CardIds' own established optional-second-
-            // selection idiom again, inlined here (rather than a new Target category) because the
-            // comparison is against the Performer's own POST-"Raise to 6" Force, not its live Force at
-            // validation time (the Set-Force effect itself has not executed yet) -- Math.Max(6,
-            // CardForce(performer)) predicts that outcome without needing to actually apply it early.
-            if (id == "visage-of-the-orochi")
-            {
-                var ids = command.CardIds ?? [];
-                Require(ids.Length is 0 or 1, "Visage of the Orochi may target at most one enemy card to bow.");
-                if (ids.Length == 1)
-                {
-                    var bowTarget = Card(ids[0]);
-                    var raisedPerformerForce = Math.Max(6, CardForce(Card(command.PerformerId!)));
-                    Require(bowTarget.OwnerId != player.Id && Definition(bowTarget).Type is CardType.Personality or CardType.Follower
-                        && CardForce(bowTarget) < raisedPerformerForce && !HasAttachments(bowTarget),
-                        "You may only target and bow an enemy card with lower Force than your Thunder Personality (after being raised to 6) and no attachments.");
-                }
-            }
-            if (ability.Target == "none") Require(command.TargetId is null, "This action has no target.");
-            // Ranged/Melee Attack: unlike every other ability target, this one is not required to
-            // exist for the action to be legal -- a null TargetId always validates. When a TargetId
-            // is supplied, it must be a Follower or a Personality without Followers in the current
-            // enemy army with Force at or below the attack's (possibly conditional) strength.
-            else if (ability.Target == "attack")
-            {
-                // The legality rules (Follower-immunity and its explicit exceptions, per-kind immunity,
-                // strength) live in RequireLegalAttackTarget (AttackTargeting.cs), shared with abilities that
-                // carry their Attack target on CardIds instead of TargetId (Bayushi Kahoku - exp).
-                // An Attack needs no target: none at all, a card, or -- where the ability says so -- the current battlefield's province.
-                if (command.Province is not null)
-                {
-                    Require(ability.AttackTargetsProvince, "This Attack cannot target a province.");
-                    Require(command.TargetId is null, "An Attack targets a card or a province, not both.");
-                    Require(command.Province == _state.CurrentBattleProvince, "An Attack may only target the current battlefield's province.");
-                }
-                else if (command.TargetId is not null) RequireLegalAttackTarget(id, ability, command, player, source, Card(command.TargetId));
-            }
-            // Unimpeachable Name (oracle-l5r-8989): "You MAY target and rehonor a dishonorable
-            // Personality" -- an optional target, the same "not required to exist" shape as "attack"
-            // above (a null TargetId always validates; a supplied one must be a real Dishonorable
-            // Personality, either side, no ownership restriction printed).
-            else if (ability.Target == "optional-dishonorable-personality")
-            {
-                if (command.TargetId is not null)
-                {
-                    var target = Card(command.TargetId);
-                    Require(Definition(target).Type == CardType.Personality && target.Dishonorable, "Target a dishonorable Personality, or none.");
-                }
-            }
-            // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): "a Dynasty card in a province", or none when no province holds one.
-            else if (ability.Target == EmperorRemainingAAbilities.ProvinceCardOrNone) ValidateRemAProvinceCardOrNone(command);
-            // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
-            // in play -- it sits in a discard pile without yet being marked dead.
-            else if (ability.Target == "discarded-personality")
-            {
-                var target = Card(command.TargetId);
-                Require(Definition(target).Type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.FateDiscard,
-                    "Target a discarded Personality.");
-                if (id == "shunsuke-make-dead") Require(target.OwnerId != player.Id, "Target another player's discarded Personality.");
+                if (!(command.TargetId is null || command.CardIds is null or { Length: 0 })) return "Name one Personality as the target, or several together, not both.";
+                var ids = ArmyPersonalityChoice(command);
+                if (!(ids.Length is >= 1 and <= 3 && ids.Distinct().Count() == ids.Length)) return "Choose one to three different Personalities.";
+                var __valid9 = _state.CurrentBattleProvince is int armyProvince && ids.All(id => _state.Cards.TryGetValue(id, out var member) && member.OwnerId == player.Id && Army(player.Id, armyProvince).Contains(member));
+                if (!__valid9) return "Choose Personalities in your current army.";
             }
             else
             {
-                var target = Card(command.TargetId); var type = Definition(target).Type;
-                if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && target.Id != command.CardId, "Discard a card from your hand."); // a card being played is not in the hand it discards from (issue #653)
-                // Hato-gurama (oracle-l5r-10115, issue #453 batch 5): "You may not choose this card to be discarded as a cost or effect of your actions if you have other cards in your hand."
-                if (ability.Target == "hand") Require(Definition(target).Effect != "hato-gurama" || player.Hand.Count == 1, "Hato-gurama may not be chosen to be discarded while you have other cards in your hand.");
-                // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): "show a Strategy in your hand" -- another Strategy of the acting player's hand (the played card is not in it).
-                else if (ability.Target == "own-other-strategy-in-hand")
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && type == CardType.Strategy && target.Id != command.CardId, "Show another Strategy from your hand.");
-                else if (ability.Target == "spell-or-reserve-in-hand")
+                if (ability.Target == "provinces")
                 {
-                    Require(target.OwnerId == player.Id && (target.Zone == Zone.Hand || RulebookDiscardSource(id, player.Id, command.PerformerId, target)) && (type == CardType.Spell || Keyword(target, "Reserve")), "Choose a Spell, or a Reserve Fate card, from your hand."); // P19: or from the discard pile when a modifier allows it
-                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Shugenja.");
-                    Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
-                    // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
-                    // needed this check.
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
-                        $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
+                    if (!(command.TargetId is null)) return "Select province cards together.";
+                    var ids = OwnProvinceCardIds(player, command.CardIds ?? []); // a face-down card is named by its place, "hidden-p{owner}-province{n}" (issue #586)
+                    if (!(ids.Length is >= 1 and <= 4 && ids.Distinct().Count() == ids.Length)) return "Choose one or more different province cards.";
+                    if (!(ids.All(id => _state.Cards.TryGetValue(id, out var c) && c.OwnerId == player.Id && c.Zone == Zone.Province &&
+                        player.Provinces.Any(p => !p.Destroyed && p.CardId == id)))) return "Choose cards in your provinces.";
                 }
-                // Low Market's own Target category: broader than "spell-or-reserve-in-hand" above (any
-                // Item/Follower/Spell, matching the ordinary Equip() command's own type filter), reusing
-                // the same shared attach-legality helpers Equip() itself uses (AttachmentLegalTarget
-                // already folds in AttachRequiresKeyword/Excludes/Name AND a Follower's Honor
-                // Requirement; AttachmentAllowed is the Armor/Weapon-cap check).
-                else if (ability.Target == "attachment-in-hand")
-                {
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type is CardType.Item or CardType.Follower or CardType.Spell,
-                        "Choose an Item, Follower, or Spell from your hand.");
-                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Personality.");
-                    Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
-                        $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
-                }
-                // Moto Jun-Ni / Foothills Keep (issue #337): a card in a discard pile the ability's AttachSpec names (whose pile, which kinds).
-                // Everything else about attaching it is ValidateAttach, below.
-                else if (ability.Target == "attachment-in-discard")
-                {
-                    var attachError = AttachTargetError(ability.Attach!, player.Id, target, source?.Id);
-                    Require(attachError is null, attachError ?? "");
-                }
-                // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
-                // Fate card in hand or a face-up Dynasty card in one of their own provinces -- neither
-                // zone is "in play", so this needs its own branch, same shape as "hand" above. Face-up
-                // matches DiscardProvince's own existing rule for discarding a province card at all.
-                else if (ability.Target == "own-kharmic-card")
-                    Require(target.OwnerId == player.Id && Keyword(target, "Kharmic")
-                        && (target.Zone == Zone.Hand || target.Zone == Zone.Province && target.FaceUp),
-                        "Discard a Kharmic card you control, from your hand or a face-up province.");
-                // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
-                // player's own Fate discard pile -- not in play, so this needs its own branch just like
-                // "own-kharmic-card" above.
-                // Kunji - exp (Gempukku pass, issue #461): the source card itself, in the dead pile.
-                else if (ability.Target == "source-if-dead")
-                    Require(source is not null && target.Id == source.Id && target.Zone == Zone.Dead, "Kunji must be in your dead pile.");
-                // Daigotsu Aya (Emperor Edition Personality pass, issue #477): "a Dark Virtue from your discard pile" -- any Dark Virtue Strategy in the player's own Fate discard pile.
-                else if (ability.Target == "own-dark-virtue-card-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard, "Choose a Dark Virtue from your Fate discard pile.");
-                // Shosuro Hawado - exp 2: "a card in a province" -- either player's, face-down or face-up.
-                else if (ability.Target == "card-in-province")
-                    Require(target.Zone == Zone.Province, "Choose a card in a province.");
-                // Nishimura (Emperor Edition Personality pass, issue #477 batch 6): "a Kiho or Weapon from your hand" -- a Kiho Strategy or a Weapon Item in the acting player's own hand.
-                else if (ability.Target == "own-terrain-in-hand") // Plain of Gold (Emperor Edition Stronghold pass, issue #486 batch 2)
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && type == CardType.Strategy && Keyword(target, "Terrain"), "Choose a Terrain in your hand.");
-                else if (ability.Target == "own-hand-kiho-or-weapon")
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && (Keyword(target, "Kiho") || Keyword(target, "Weapon")), "Choose a Kiho or a Weapon in your hand.");
-                // Essence of Undeath: "your dead Personality".
-                else if (ability.Target == "own-dead-personality")
-                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Dead, "Choose one of your own dead Personalities.");
-                // Goju Plot: "a Ninja Personality in your discard pile" -- dead, or merely discarded from a province (the two zones of one physical pile).
-                else if (ability.Target == "own-ninja-personality-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Personality && Keyword(target, "Ninja") && target.Zone is Zone.Dead or Zone.DynastyDiscard, "Choose a Ninja Personality in your discard pile.");
-                // Jurojin's Blessing: "a non-Unique Strategy in your Fate discard pile".
-                else if (ability.Target == "own-nonunique-strategy-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard,
-                        "Choose a non-Unique Strategy card from your Fate discard pile.");
-                // Seeking the Truth (issue #467, batch 4): "a non-Unique Battle Strategy in your discard pile" -- a Strategy with a Battle (or Battle/Open) action.
-                else if (ability.Target == "own-nonunique-battle-strategy-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard && IsBattleStrategy(target),
-                        "Choose a non-Unique Battle Strategy from your Fate discard pile.");
-                // The Shadow's Embrace pass (issue #476), batch 4 -- Void Tattoo: "a Tattoo Strategy in your discard pile".
-                else if (ability.Target == "own-tattoo-strategy-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Tattoo") && target.Zone == Zone.FateDiscard,
-                        "Choose a Tattoo Strategy card from your Fate discard pile.");
-                else if (ability.Target == "own-kiho-strategy-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
-                        "Choose a Kiho Strategy card from your Fate discard pile.");
-                // Daigotsu Bofana - exp (issue #333): "a Dark Virtue in your discard pile" -- a Strategy carrying the
-                // keyword, in the player's own Fate discard pile, that has a Battle action still playable this turn (a card with
-                // none would only waste the grant).
-                else if (ability.Target == "own-dark-virtue-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasUnspentAction(target, "Battle"),
-                        "Choose a Dark Virtue with a Battle action from your Fate discard pile.");
-                // Akodo Tezuka (oracle-l5r-298, issue #449): "a Bushido Virtue in your discard pile" -- the same shape as Bofana's own Dark Virtue
-                // above, generalized to admit any of the card's Battle, Limited or Open actions (not Battle only), matching what her own grant
-                // (AdditionalActionGrant.AnyDiscardTiming) then makes playable.
-                else if (ability.Target == "own-bushido-virtue-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Bushido Virtue") && target.Zone == Zone.FateDiscard && HasUnspentAction(target, "Battle", "Limited", "Open", "BattleOrOpen"),
-                        "Choose a Bushido Virtue with a Battle, Limited or Open action from your Fate discard pile.");
-                // Scholarly Hermit's own ability (issue #194): a Ring in the player's own Fate
-                // discard pile -- not in play, so this needs its own branch too.
-                else if (ability.Target == "own-ring-in-discard")
-                    Require(target.OwnerId == player.Id && Definition(target).Type == CardType.Ring && target.Zone == Zone.FateDiscard,
-                        "Choose a Ring from your Fate discard pile.");
-                // Tranquil Garden (issue #264): the first Target spanning both an ordinary in-play
-                // card (either side, matching "a Ring in play" with no "your own" qualifier) and one
-                // sitting in the player's own Fate discard pile at once.
-                else if (ability.Target == "ring-in-play-or-own-discard")
-                    Require(Definition(target).Type == CardType.Ring && (InPlay(target) || target.OwnerId == player.Id && target.Zone == Zone.FateDiscard),
-                        "Choose a Ring in play or in your own Fate discard pile.");
-                // Consuming Weakness (issue #295): "a target dead Personality in any discard pile" --
-                // Zone.Dead (this engine's own "discard pile" for a Personality specifically -- Zone.
-                // FateDiscard/DynastyDiscard are for Fate/Dynasty cards of every OTHER type), any owner,
-                // not in play, so this needs its own branch too.
-                else if (ability.Target == "dead-personality-any-discard")
-                    Require(type == CardType.Personality && target.Zone == Zone.Dead, "Choose a dead Personality in any discard pile.");
-                // Scavenging Party (issue #420): "your discarded Personality" -- a dead Personality is a discarded one too (Mendon).
-                else if (ability.Target == "own-discarded-personality")
-                    Require(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target), "Choose one of your own discarded Personalities.");
-                // The Forgotten Temple (issue #467 batch 2): "your discarded Nonhuman Personality" -- the same pile, narrowed by RequiredKeywords.
-                else if (ability.Target == "own-discarded-personality-with-keyword")
-                    Require(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target) && HasKeywords(target, ability.RequiredKeywords),
-                        "Choose one of your own discarded Personalities with the required keyword.");
-                // Kakita Yasunori (issue #431): "a card in your Fate discard pile".
-                else if (ability.Target == "own-fate-discard-card")
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.FateDiscard, "Choose a card in your own Fate discard pile.");
-                else if (ability.Target == "own-dead-samurai")
-                    Require(type == CardType.Personality && target.OwnerId == player.Id && target.Zone == Zone.Dead && Keyword(target, "Samurai"), "Choose one of your own dead Samurai.");
-                // A Yojimbo's Duty (Forgotten Legacy pass, issue #467 batch 3): "your target discarded Courtier or Shugenja" -- a Personality of the acting player's in his discard
-                // pile (dead, or merely discarded: Scavenging Party's own IsDiscardedPersonality) carrying either keyword.
-                else if (ability.Target == "own-discarded-courtier-or-shugenja")
-                    Require(target.OwnerId == player.Id && IsDiscardedPersonality(target) && (Keyword(target, "Courtier") || Keyword(target, "Shugenja")), "Choose your own discarded Courtier or Shugenja.");
-                // Your Clan Needs You! (issue #295): "your performing Personality in one of your
-                // provinces" -- a province card is never InPlay, so this needs its own branch too, the
-                // same shape own-kharmic-card/own-kiho-strategy-in-discard already use for a target
-                // outside the ordinary in-play zones.
-                else if (ability.Target == "own-personality-in-province")
-                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp,
-                        "Choose your own face-up Personality in a province.");
-                // Shosuro Hawado (issue #301): "a Dynasty card in any discard pile" -- a Dynasty-deck card
-                // type (Personality, Holding, Event, Region, Celestial) sitting in EITHER player's Dynasty
-                // discard pile. Zone.Dead is this engine's own "discard pile" for a Personality once it has
-                // died (Zone.DynastyDiscard holds every other Dynasty type, plus a Personality merely
-                // discarded from a province, not yet dead); both are that same physical pile. Not in
-                // play, so it needs its own branch -- Consuming Weakness's dead-personality-any-discard
-                // (Zone.Dead only, Personalities only) is the narrower sibling.
-                else if (ability.Target == "dynasty-card-in-any-discard")
-                    Require(IsDynastyCardType(type) && target.Zone is Zone.DynastyDiscard or Zone.Dead, "Choose a Dynasty card in any discard pile.");
-                // Fukuzo (issue #338): "a target Personality in any player's discard pile" -- a Personality merely discarded
-                // (Zone.DynastyDiscard) or dead (Zone.Dead), either player's: the same physical pile, and the same two zones the sibling
-                // categories above name. Not in play, so it needs its own branch.
-                else if (ability.Target == "personality-in-any-discard")
-                    Require(type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.Dead, "Choose a Personality in any discard pile.");
-                // Record of Failure (issue #622, IvoryPolitical.cs): "a dishonorably dead Personality" -- in a dead pile, dishonorable when he died.
-                else if (ability.Target == IvoryPoliticalAbilities.DishonorablyDeadPersonality)
-                    Require(type == CardType.Personality && IsDishonorablyDead(target), "Choose a dishonorably dead Personality.");
-                // Soshi Neiru (issue #301): "Air Spells" from the player's own hand -- equip-battle's
-                // own spell-or-reserve-in-hand shape, narrowed by RequiredKeywords instead of hardcoding a
-                // keyword, with the wielder fixed to the source card itself (no separate Performer).
-                else if (ability.Target == "spell-in-hand-with-keyword")
-                {
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell && HasKeywords(target, ability.RequiredKeywords),
-                        "Choose a Spell with the required keyword from your hand.");
-                    Require(AttachmentLegalTarget(Definition(target), source!), "This Spell will not attach to that Shugenja.");
-                    Require(AttachmentAllowed(target, source!), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
-                    Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)),
-                        $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
-                }
-                // Seeds of Decay pass (issue #453), batch 1. Requesting Reinforcements: "a face-up Scout Personality in your province" -- Your Clan Needs You!'s own
-                // province-card shape, narrowed by RequiredKeywords.
-                else if (ability.Target == "own-personality-in-province-with-keyword")
-                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp && HasKeywords(target, ability.RequiredKeywords),
-                        "Choose your own face-up Personality with the required keyword in a province.");
-                // Courting Trouble (issue #453, batch 2): "another player's face-up Personality in or out of play" -- in play, face up in a province, or in a discard pile (face up by nature).
-                else if (ability.Target == "enemy-face-up-personality-anywhere")
-                    Require(target.OwnerId != player.Id && type == CardType.Personality && (InPlay(target) || target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard),
-                        "Choose another player's face-up Personality.");
-                // Brotherhood Schism (issue #453, batch 2): "an Event in another player's discard pile".
-                else if (ability.Target == "event-in-enemy-discard")
-                    Require(target.OwnerId != player.Id && type == CardType.Event && target.Zone == Zone.DynastyDiscard, "Choose an Event in another player's discard pile.");
-                // The Shadow's Embrace pass (issue #476), batch 6. The Moon's Imperative: "face-up Personalities in provinces" (either player's); The Sun's Aspiration: "cards in
-                // your discard piles" (the Fate and the Dynasty pile, a dead Personality included).
-                else if (ability.Target == "face-up-personality-in-province")
-                    Require(type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp, "Choose a face-up Personality in a province.");
-                else if (ability.Target == "own-card-in-discard")
-                    Require(target.OwnerId == player.Id && target.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead, "Choose a card in your own discard piles.");
-                // Forgotten Legacy pass (issue #467), batch 5. Wind of the Moon: "a face-up Personality out of play" -- face up in a province, or in a discard pile (face up by nature); either player's.
-                else if (ability.Target == "face-up-personality-out-of-play")
-                    Require(type == CardType.Personality && (target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard), "Choose a face-up Personality out of play.");
-                // The Shadow's Embrace pass (issue #476), batch 5. Celestial Sword of the Phoenix: "your honorably dead Phoenix Clan Personality" -- the Clan named by RequiredKeywords.
-                else if (ability.Target == "own-honorably-dead-clan-personality")
-                    Require(IsOwnHonorablyDeadClanPersonality(target, player.Id, ability), "Choose one of your own honorably dead Personalities of that Clan.");
-                // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's Follower in a discard pile or in hand (ShadowsEmbraceBatch2.cs).
-                else if (IsShadowsEmbraceBatch2OutOfPlayTarget(ability.Target))
-                    ValidateShadowsEmbraceBatch2OutOfPlayTarget(ability.Target, player, target);
-                // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address's "your non-Unique Personality with your Clan alignment in your discard pile".
-                else if (IsEmperorRemainingCOutOfPlayTarget(ability.Target))
-                    Require(EmperorRemainingCOutOfPlayTargetAllows(ability.Target, player, target), "Choose a non-Unique Personality with your Clan alignment in your discard pile.");
-                // Emperor Edition remaining-cards pass (issue #492), group E: the discard-pile and hand categories of the Guidance Celestials.
-                else if (IsWlHoldingsOutOfPlayTarget(ability.Target)) // issue #674 (WlHoldings.cs): a Terrain in your discard pile; a face-down card in a province
-                    ValidateWlHoldingsOutOfPlayTarget(ability.Target, player, target);
-                else if (IsP5ZoneOutOfPlayTarget(ability.Target)) // issue #503: The New Foundries' Spell in the hand
-                    ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
-                else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
-                    ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
-                else if (ability.Target == Wave735Abilities.SanctionTarget) Require(Wave735SanctionTargetAllows(target), "Choose a non-Loyal, face-up Personality in or out of play."); // issue #735: Suikihime's Sanction
-                else if (ability.Target == Wave742Abilities.BondsCard) Require(Wave742BondsTargetAllows(target), "Choose a Bonds of Hospitality in play."); // issue #765: the granted discard names a Strategy kept in play
-                else if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
-                // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
-                else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
-                    Require(WlItemsMiscOutOfPlayTargetAllows(player, target), "Choose a Battle Strategy from your discard pile.");
+                // Reconnaissance is granted at a specific province, not a card -- selected by index
+                // (GameCommand.Province, already used by selectBattle) rather than TargetId/CardIds.
                 else
                 {
-                    Require(InPlay(target), "Target a card in play.");
-                    // Deliberate exceptions to "every Battle-timing target must be at the current
-                    // battlefield": "personality-at-adjacent-battlefield" (Moto Gunso's shape -- the
-                    // whole point is a target away from the current battlefield) and "own-unbowed-farm"
-                    // (Ashigaru Elite's cost-target, a Farm to bow, lives in Zone.Home) are exempt by
-                    // their own dedicated Target category. Intervening Spirit / The Earth Flows (issue
-                    // #264) reuse the ordinary "own-personality"/"personality" categories -- reused
-                    // elsewhere with the normal AtBattle expectation (e.g. Ring of Water's own
-                    // "move your target Personality home") -- so they are exempted by ability id
-                    // instead: their whole point is reinforcing a Personality who is NOT there yet.
-                    // actingAsBattle (issue #267): the same generalization as the blanket block above --
-                    // a BattleOrOpen ability's Open half has no battlefield to validate a target
-                    // against at all, so this Require applies only while genuinely acting as Battle.
-                    // Brawl (issue #304): "a Region (at any province)" -- a Region sits in Zone.Region and is
-                    // never AtBattle-eligible; a Terrain in play is always at the current battlefield anyway
-                    // (it is discarded when its battle resolves), so exempting the whole category is exact.
-                    // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
-                    // -- own-personality-at-home is exempt for the same reason.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or TfGearAbilities.SpellForCopy /* issue #622: The Thunder Resounds names a Thunder Spell at any location */ or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
-                        or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner" or EmperorRulingR1Abilities.EnemyPersonalityAtBattleOrHome
-                        or "own-unbowed-ring" or WlStratGatesAbilities.OwnUnbowedAnyLocation /* issue #674: Boiling Point */) && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
-                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
-                            or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move" or "shinoda-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
-                    var personality = type == CardType.Personality;
-                    var own = target.OwnerId == player.Id;
-                    // TargetMustBe (P2): a target-status legality condition layered onto whichever category
-                    // follows, exactly like RequireNoAttachments -- "target an enemy dishonorable Personality".
-                    Require(ability.TargetMustBe is null || MatchesTargetStatus(target, ability.TargetMustBe),
-                        $"The target must be {ability.TargetMustBe?.Describe()}.");
-                    Require(!StraightensOnly(id) || !StraightenRefused(target), $"{Definition(target).Name} cannot be straightened {(target.StraightenLockedTurn == _state.TurnNumber ? "this turn" : "until its hold is released")}.");
-                    Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch
+                    if (ability.Target == "enemy-province")
                     {
-                        "shinden" => personality && !own && !target.Bowed,
-                        "air" => personality && Keyword(target, "Air"),
-                        "personality" => personality,
-                        // Ashigaru Elite's cost-target: an unbowed Farm-keyword Holding the performer
-                        // controls. Bowing it (in the execution switch) pays the cost; the effect
-                        // itself is a counter increment, not applied to this target at all.
-                        "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
-                        // Yasuki Tsujiken (oracle-l5r-9469): "target a Holding" -- no ownership or
-                        // bowed-state restriction on either of his own two abilities.
-                        "any-holding" => type == CardType.Holding,
-                        "own-holding" => type == CardType.Holding && own,
-                        "holding-or-stronghold" => type is CardType.Holding or CardType.Stronghold,
-                        // Blade of Champions: one of the reactor's own cards (the Blade included, judged bowed) that the held action accepts.
-                        "redirect-target-own-card" => own && OpenReactionSubject() is { } redirectedAction
-                            && target.Id != redirectedAction.TargetId && RedirectTargetAccepted(redirectedAction, target.Id, source!),
-                        // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another of the reactor's own Personalities than the one the held action targets.
-                        "own-personality-other-than-held-target" => own && personality && OpenReactionSubject() is { TargetId: { } heldHenshinId } && target.Id != heldHenshinId,
-                        // Hida Mochitoko: a Follower the held action would bow or destroy, as its target or as a cost it pays.
-                        "held-action-follower" => OpenReactionSubject() is { } followerAction && MochitokoFollowers(source!, followerAction).Any(f => f.Id == target.Id),
-                        // Asahina Munefusa (issue #301): "your Temple Holding" -- an own Holding carrying
-                        // every RequiredKeywords entry (any bow state: straightening is the whole point).
-                        // own-unbowed-farm above is the hardcoded Farm-only sibling.
-                        "own-holding-with-keyword" => type == CardType.Holding && own && HasKeywords(target, ability.RequiredKeywords),
-                        // Isawa Mitsuko (issue #301): "an Air Shugenja or a Holding" -- either side's. A
-                        // Personality must carry BOTH Air and Shugenja (the existing "air" category is only
-                        // the Air half).
-                        "air-shugenja-or-holding" => type == CardType.Holding || personality && Keyword(target, "Air") && Keyword(target, "Shugenja"),
-                        // Shosuro Rin (issue #301): "an honorable Personality" -- the plain negation of
-                        // dishonorable-personality below, either side.
-                        "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
-                        "own-personality" => personality && own,
-                        // Embers of War batch 6 (issue #460): Splintered Weapon's and Flanking Unit's Focus Effect transfer ("another of your Personalities") --
-                        // own-earth-shugenja-other-than-wielder's shape (Communion with Earth) without the Shugenja/Earth restriction.
-                        "own-personality-other-than-wielder" => personality && own && target.Id != source!.AttachedTo,
-                        // Embers of War batch 6: Temple to the Elements ("your target Monk or Shugenja").
-                        "own-monk-or-shugenja" => personality && own && (Keyword(target, "Monk") || Keyword(target, "Shugenja")),
-                        // Embers of War batch 6: The Ancestral Sword of Hantei - exp ("target a card in a unit") reuses the existing any-unit-card category (Shiba
-                        // Tsukimi, Honor and Treachery pass) unchanged -- see its own case below.
-                        // Embers of War batch 6: Flanking Unit ("a target Personality at the current battlefield") -- either side's.
-                        "personality-at-current-battlefield" => personality && AtBattle(target),
-                        // A Fugitive Apprehended: an enemy card with no attachments whose Gold Cost is lower than the performing Personality's.
-                        "enemy-bare-card-lower-gold-than-performer" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
-                            && !HasAttachments(target) && CardGoldCost(target) < CardGoldCost(Card(command.PerformerId!)),
-                        // ...and the Magistrate's optional second target: any enemy card, but only when the performer is a Magistrate.
-                        "enemy-card-for-magistrate" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
-                            && command.PerformerId is not null && Keyword(Card(command.PerformerId), "Magistrate"),
-                        // Dislodge the Foe: one of your Tacticians at a battlefield other than the current one (all of them at one; ValidatePerformersTogether).
-                        "own-tactician-away-from-battle" => personality && own && Keyword(target, "Tactician") && target.Zone == Zone.Battlefield && target.ProvinceIndex != _state.CurrentBattleProvince,
-                        // Dislodge the Foe: the enemy Personality who opposes the chosen Tacticians -- at the battlefield they stand at (any enemy Personality until one is chosen, so the default offer is judged from the first).
-                        "enemy-personality-where-performers-stand" => personality && !own && (SlotCards(command, "tacticians").FirstOrDefault() is not { } standing
-                            || target.Zone == Zone.Battlefield && target.ProvinceIndex == standing.ProvinceIndex),
-                        // Kyuden Kitsune: "your target Forest" -- an unbowed card of the acting player's with the keyword.
-                        "own-unbowed-card-with-keyword" => own && !target.Bowed && HasKeywords(target, ability.RequiredKeywords),
-                        // The Shadow's Embrace pass (issue #476), batch 1: Chuda Hitaka's "a non-Stronghold Jade card" -- any player's card in play with the required keywords
-                        // other than a Stronghold (a Region is never one: no Region of the reference catalogue carries Jade, and a Region's own discard is its province's).
-                        "non-stronghold-card-with-keyword" => type is not (CardType.Stronghold or CardType.Region) && HasKeywords(target, ability.RequiredKeywords),
-                        // Great Sacrifice: "an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending".
-                        "enemy-unit-within-performer-sacrifice" => personality && !own && BattleForce(target) <= SacrificeReach(Card(command.PerformerId!)),
-                        // Rage of the Spirits: an enemy Personality or Follower with Force lower than or equal to the performing Spirit's.
-                        "enemy-force-lte-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(Card(command.PerformerId!)),
-                        // Interference: "a target Stronghold" -- either player's.
-                        "stronghold" => type == CardType.Stronghold,
-                        // Taming the Beast: "your Nonhuman" -- a Personality or a Follower of the acting player's carrying the required keywords (any bow state: straightening it is the point).
-                        "own-unit-card-with-keyword" => own && (personality || type == CardType.Follower) && HasKeywords(target, ability.RequiredKeywords),
-                        // Gates of Chikushudo (issue #398): "your created Spirit Personality" -- a created card (a CreatedOnly scan or a created copy) in play, with the required keywords.
-                        "own-created-personality" => personality && own && IsCreatedCard(target) && (ability.RequiredKeywords is null || HasKeywords(target, ability.RequiredKeywords)),
-                        // The Tale of the Disgraced (issue #369): "your target unbowed Personality".
-                        "own-unbowed-personality" => personality && own && !target.Bowed,
-                        // The Wave Persists (issue #364): "target your Personality there" -- a Reaction has no Battle-timing location Require of its own.
-                        "own-personality-at-battle" => personality && own && AtBattle(target),
-                        // Stand as the Mountain (oracle-l5r-7459, issue #460 batch 4): "one or two of your performing Personalities with 7 or
-                        // higher base Force" -- own-personality-at-battle narrowed by a printed-Force floor (the same "Force >= N" comparison
-                        // Charge into Danger's own Slots-free bonus already reads, Definition(performer).Force >= 7).
-                        "own-personality-at-battle-force-7-plus" => personality && own && AtBattle(target) && Definition(target).Force >= 7,
-                        // Quick Recovery (issue #364): "a bowed card in his unit (which may be him)" -- the chosen performer or one of his attachments.
-                        "bowed-card-in-performer-unit" => target.Bowed && UnitHostId(target) == command.PerformerId,
-                        // Return to Action (issue #331): "target your Personality at home" -- own, in Zone.Home (a
-                        // Personality out of play, at a battlefield or dead never qualifies), bowed or not: the card
-                        // straightens him afterward, so a bowed one is a legal (and the best) target.
-                        "own-personality-at-home" => personality && own && target.Zone == Zone.Home,
-                        // Knowledge and Power (issue #353): "a target Personality's tokens" -- either side's, any Personality that has at least one token.
-                        "personality-with-token" => personality && target.Tokens.Count > 0,
-                        // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
-                        // Personality controlled by the active player" -- "if it is not your turn" is
-                        // checked separately below (a per-id Require, not part of this Target shape).
-                        "unbowed-personality-controlled-by-active-player" => personality && !target.Bowed && target.OwnerId == _state.ActivePlayerId,
-                        // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "a Personality controlled by the active player", any bow state.
-                        "personality-controlled-by-active-player" => personality && target.OwnerId == _state.ActivePlayerId,
-                        // Ritual Preparation (issue #192): "your target card in a unit" -- either
-                        // half of a unit (the Personality herself, or an attached Follower), own,
-                        // in play. Items/Spells are never described as "in a unit" (core rules:
-                        // that phrase is reserved for Personality/Follower combat participants).
-                        "own-unit-card" => own && (personality || type == CardType.Follower),
-                        // Ring of Air (issue #194): "your target Personality or attachment" -- own
-                        // only, either half of a unit (unlike own-unit-card elsewhere, this also
-                        // includes Spells, since a Spell is straightenable just like any attachment).
-                        "personality-or-attachment" => own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
-                        // Generic "Choose your performing/target [Keyword(s)] Personality" -- for a
-                        // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
-                        // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeywords.
-                        "own-personality-with-keyword" => personality && own && HasKeywords(target, ability.RequiredKeywords),
-                        // Sanctuary of the Waves (issue #295): "target this Shugenja, or, if this
-                        // Shugenja is Water, you may target another of your Personalities" -- the
-                        // Target-side mirror of own-wielder-or-source-with-wielder-keyword's own
-                        // Performer-side cost choice: the default candidate is always the wielder
-                        // himself; a DIFFERENT own Personality only qualifies once the wielder's own
-                        // keyword condition holds.
-                        "own-wielder-or-personality-with-wielder-keyword" => own && personality &&
-                            (target.Id == Card(source!.AttachedTo!).Id || HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords)),
-                        "enemy-personality" => personality && !own,
-                        // Embers of War pass (issue #460, batch 4): an enemy-only sibling of personality-at-any-location (Tsuruchi Nobukatsu, issue #453 batch 4) -- the
-                        // Target-side half of the AtAnyLocation gap oracle-l5r-5941/6727 were blocked on: every existing keyword-Performer "at any location" category
-                        // (own-unbowed-personality-with-keyword-at-any-location) already exists, but no TARGET category let the chosen enemy Personality itself stand
-                        // anywhere but the current battlefield while acting as Battle. Sheathing the Sword (oracle-l5r-6727) and Tactical Trap (oracle-l5r-7717) are its
-                        // first two consumers.
-                        "enemy-personality-at-any-location" => personality && !own && (!actingAsBattle || AtAnyLocation(target)),
-                        // Forgotten Legacy pass (issue #467), batch 4. Intimidation: "another player's Personality not at the current battlefield" -- at home or at another
-                        // unresolved battlefield (AtAnyLocation), never the current one (exempt from the AtBattle Require above, since that is the point).
-                        "enemy-personality-not-at-battle" => personality && !own && AtAnyLocation(target) && !AtBattle(target),
-                        // Steadfast Defense: "a Personality or Follower" (either side's; at the current battlefield while acting as Battle, the ordinary check above).
-                        "personality-or-follower" => personality || type == CardType.Follower && target.Zone == Zone.Attached,
-                        // Sundering Strike: "one of his attachments" -- attached to the card chosen for the ability's "target" slot (Hiruma Sawai's slot-relative shape).
-                        "attachment-of-slot-target" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
-                            && SlotCards(command, "target").FirstOrDefault() is { } attachmentHost && target.AttachedTo == attachmentHost.Id,
-                        // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs). Sudden Movement: "two Personalities controlled by the same player at
-                        // different locations" -- the first has such a partner (personality-with-switch-partner); the second is the first one's partner: the same controller, at a
-                        // location of its own (both exempt from the AtBattle Require above, since the point is a Personality elsewhere).
-                        "personality-with-switch-partner" => personality && HasSwitchPartner(target),
-                        "personality-same-controller-as-first-elsewhere" => personality && SwitchPartnerAllowed(command, target),
-                        // Theological Indecision: "a Personality with 3 or higher Chi" (current Chi, the reading of every Chi-comparing category).
-                        "personality-chi-3-plus" => personality && PersonalityChi(target) >= 3,
-                        // Thuggish Techniques: "a Personality without attachments and with lower Force [than the performer], or a Follower".
-                        "bare-personality-lower-force-than-performer-or-follower" => type == CardType.Follower && target.Zone == Zone.Attached
-                            || personality && !HasAttachments(target) && command.PerformerId is not null && CardForce(target) < CardForce(Card(command.PerformerId)),
-                        // Watchers in the Dark: "a card in a unit there" on a Reaction (never acting as Battle, so the location is checked explicitly), either side's.
-                        "unit-card-explicitly-at-battle" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && AtBattle(target),
-                        // Thick Marsh (oracle-l5r-8445, issue #460 batch 4): its "bow an enemy card at the current battlefield" is a Reaction (Trigger
-                        // own-enters-play), not a Battle-timed ability, so the generic actingAsBattle AtBattle enforcement below never applies to it --
-                        // an explicit AtBattle check is required here instead (distinct from the plain "enemy-card" category, which several Battle-timed
-                        // abilities rely on that generic enforcement for).
-                        "enemy-card-explicitly-at-battle" => !own && AtBattle(target),
-                        // Stuck in Rokugan (oracle-l5r-7593, issue #460 batch 4): "a Celestial" (either player's) currently in play -- Zone.Celestial,
-                        // the same zone ResolveCelestial's own self-replacement discards from.
-                        "in-play-celestial" => type == CardType.Celestial && target.Zone == Zone.Celestial,
-                        // Forgotten Legacy pass (issue #467), batch 5. Ageless Shrine: "a Nonhuman or Samurai" (either player's), and "one of his attachments if he is
-                        // Nonhuman" -- an attachment of the card chosen for the "target" slot.
-                        "nonhuman-or-samurai-personality" => personality && (Keyword(target, "Nonhuman") || Keyword(target, "Samurai")),
-                        "attachment-of-nonhuman-slot-target" => target.Zone == Zone.Attached && SlotCards(command, "target").FirstOrDefault() is { } agelessHost
-                            && target.AttachedTo == agelessHost.Id && Keyword(agelessHost, "Nonhuman"),
-                        // Ryoshun's Guidance: another of the reactor's own non-Stronghold cards at the targeted card's location, that the held action accepts.
-                        "redirect-target-own-non-stronghold-at-affected-location" => own && type != CardType.Stronghold && OpenReactionSubject() is { TargetId: { } ryoshunAffectedId } ryoshunAction
-                            && target.Id != ryoshunAffectedId && LocationOf(target) is { } ryoshunLocation && ryoshunLocation == LocationOf(Card(ryoshunAffectedId)) && ActionAcceptsTarget(ryoshunAction, target.Id),
-                        // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs). Kuon's Legacy: "a card at his location" (his performer's: the same battlefield, or his
-                        // controller's home). Grief: "a Personality controlled by the same player" whose Personality the last resolved action destroyed. I Cast Two Shadows: "your Personality
-                        // in a Ninja unit" the last resolved action moved home from a battlefield.
-                        "card-at-performer-location" => command.PerformerId is not null && ShadowsEmbraceLocation(target) is { } kuonLocation && kuonLocation == ShadowsEmbraceLocation(Card(command.PerformerId)),
-                        "personality-of-player-last-action-destroyed" => personality && LastActionDestroyedPersonalityOf(target.OwnerId),
-                        "own-personality-moved-home-in-ninja-unit" => personality && own && target.Zone == Zone.Home && LastActionMovedHomeFrom(target) is not null && InNinjaUnit(target),
-                        "enemy-personality-without-armor" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Armor")),
-                        "own-bowed" => personality && own && target.Bowed,
-                        "own-opposed" => personality && own && Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
-                        "enemy-force" => !own && type is CardType.Personality or CardType.Follower,
-                        "enemy-follower" => !own && type == CardType.Follower,
-                        // Never Safe: "an enemy Personality or Follower".
-                        "enemy-personality-or-follower" => !own && type is CardType.Personality or CardType.Follower,
-                        "any-card" => true,
-                        "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
-                        "defending" => personality && target.OwnerId != _state.ActivePlayerId,
-                        "enemy-attacking" => personality && (!own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)) || FavorMempoAllowsAnyUnit(id, player, target) || RulebookAllowsAnyTarget(id, player.Id, command)), // P19: a rulebook modifier's any-target. // Mempo of the Amethyst Champion (issue #667): any player's unit, attacking or not. // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
-                        // Tokoru's Bear (oracle-l5r-10025, issue #299): "an attacking enemy card" -- not
-                        // just an attacking Personality (enemy-attacking above) but any card in an
-                        // attacking unit: the Personality himself or one of his attached Followers/
-                        // Items/Spells. "Attacking" is a property of the UNIT (its host Personality's
-                        // controller is the active player), so an attachment is judged by its host,
-                        // not by its own OwnerId (Cultist Infiltrator can sit on an enemy Personality).
-                        // Must also be at the current battlefield -- already required for every
-                        // Battle-timed target by the shared Require above, which resolves an
-                        // attachment through its own parent's location.
-                        "enemy-attacking-card" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
-                            && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
-                        "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
-                        // A Stain Cleansed: "an enemy card without attachments or an enemy [Personality's] unit" -- an enemy Personality (whose unit is priced whole) or an enemy attachment.
-                        "enemy-personality-or-attachment" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
-                        // Hida Mimori (issue #301): "a bowed enemy card" -- a card in a unit (the Personality
-                        // or one of its attached Followers/Items/Spells), enemy-owned and currently bowed.
-                        // The shared Battle-timing AtBattle Require above already resolves an attachment
-                        // through its own host's battlefield. The mirror image of own-bowed (Personality-only,
-                        // own) below.
-                        "enemy-bowed-card" => !own && target.Bowed && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
-                        "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
-                        // You Are Unworthy (oracle-l5r-9683, issue #460 batch 4): "an attachment with Force equal to or lower than your Paragon's Personal
-                        // Honor" -- the plain "attachment" category above, narrowed by a numeric compare against the chosen PERFORMER's own printed
-                        // PersonalHonor (Surety of Purpose's own performer-stat-vs-target-stat shape, read against an attachment's Force instead).
-                        "attachment-force-lte-performer-honor" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
-                            && Definition(target).Force <= Definition(Card(command.PerformerId!)).PersonalHonor,
-                        // Champion of Thunder: "any card in this unit" -- the reacting card's own
-                        // unit (source is Champion itself here), always in play by construction
-                        // (every member of a unit is either the host Personality or one of its own
-                        // attachments), so no further InPlay/ownership check is needed beyond the
-                        // blanket one already applied above.
-                        "own-unit-member" => UnitHostId(target) == UnitHostId(source!),
-                        // A Close Call's own Battle half: "target a Personality with an attachment" --
-                        // HasAttachments already exists for exactly this boolean (a count, not "any
-                        // specific kind"), reused verbatim.
-                        "personality-with-attachment" => personality && HasAttachments(target),
-                        "lobby" => personality && own && (!target.Bowed || Keyword(target, PromoEmperorItemsAbilities.LobbiesWithoutBowing)) && CardPersonalHonor(target) >= 1,
-                        "fewer-or-equal-followers-than-performer" => personality &&
-                            Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
-                        // Unexpected Support: the enemy-only counterpart to journeys-end-move's own
-                        // category above (which targets either side, per its own printed text) -- same
-                        // Follower-count comparison, just filtered to !own like every other paired
-                        // "X"/"enemy-X" Target category already in this switch.
-                        "enemy-fewer-or-equal-followers-than-performer" => personality && !own &&
-                            Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
-                        "lower-or-equal-honor-than-performer" => personality && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
-                        // Moving and Unmoving (oracle-l5r-5423, issue #460): "an enemy Personality with lower Force" -- lower-or-equal-honor-than-
-                        // performer's own shape, off CardForce against the performer instead of CardPersonalHonor against the source.
-                        "enemy-personality-force-lt-performer" => personality && !own && CardForce(target) < CardForce(Card(command.PerformerId!)),
-                        // The Shadow's Embrace pass (issue #476), batch 6. Bishamon's Tower: "an enemy card with lower Force and no attachments" -- an enemy Follower, or an enemy
-                        // Personality without attachments (enemy-card-without-attachments' reading), with Force strictly below the performer's.
-                        "enemy-card-force-lt-performer-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target))
-                            && CardForce(target) < CardForce(Card(command.PerformerId!)),
-                        // Fortress of Lidless Eyes' granted ability: "a card titled Fortress of Lidless Eyes" (anyone's, in play).
-                        "card-titled-fortress-of-lidless-eyes" => Definition(target).Name == FortressOfLidlessEyesTitle,
-                        // Forgotten Legacy pass (issue #467), batch 3. Consideration: "another of your target Personalities" -- any of the acting player's own, other than his performer.
-                        "own-personality-other-than-performer" => personality && own && target.Id != command.PerformerId,
-                        // Feint & Strike's optional second slot: an attachment in the first slot's enemy Personality's unit, listed only while the performing Commander has a Follower.
-                        "feint-strike-attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
-                            && SlotCards(command, "target").FirstOrDefault() is { } feintPrimary && target.AttachedTo == feintPrimary.Id
-                            && command.PerformerId is not null && Attachments(command.PerformerId).Any(a => Definition(a).Type == CardType.Follower),
-                        "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
-                        "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
-                        "personality-lower-honor-than-self" => personality && CardPersonalHonor(target) < CardPersonalHonor(source!),
-                        // Akodo Dairuko (issue #198): the same shape as -than-self above, restricted
-                        // to an enemy.
-                        "enemy-personality-lower-honor-than-self" => personality && !own && CardPersonalHonor(target) < CardPersonalHonor(source!),
-                        // Spirit of the Paragon's granted action: "an enemy Personality with either equal or lower Force, or equal or lower Personal Honor" than the Personality
-                        // holding it -- either comparison is enough, each read live.
-                        "enemy-personality-force-or-honor-lte-self" => personality && !own && (CardForce(target) <= CardForce(source!) || CardPersonalHonor(target) <= CardPersonalHonor(source!)),
-                        // Akodo Furu (issue #198): a bare Chi comparison against the source itself
-                        // (not a separately-chosen Performer, unlike enemy-personality-chi-lte-performer),
-                        // and not restricted to an enemy.
-                        "personality-chi-lte-self" => personality && PersonalityChi(target) <= PersonalityChi(source!),
-                        // Akodo Michitsu (issue #198) reuses the existing "enemy-attachment" category
-                        // above verbatim -- no new Target needed.
-                        // Akodo Tsudoken's own second Experienced printing (issue #198): own Personality,
-                        // Lion Clan OR carrying the Fallen keyword.
-                        "own-lion-or-fallen-personality" => own && personality && (HasClanAffiliation(target, "Lion") || Keyword(target, "Fallen")),
-                        // Ikoma Masumi (issue #198): the same Follower-or-unattached-Personality shape
-                        // the Ranged/Melee "attack" Target already uses, as a bare enemy-card check
-                        // (no Attack strength/kind involved here, just "without attachments").
-                        "enemy-card-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target)),
-                        // Emperor Edition remaining-cards pass (issue #492), group G: Sasumata's "an enemy card without a Weapon or Armor" and Kaiu House Guard's "an enemy card without attachments whose unit has lower total Force than this unit".
-                        "enemy-card-without-weapon-or-armor" => EnemyCardWithoutWeaponOrArmor(target, player.Id),
-                        "enemy-card-without-attachments-unit-force-lt-source-unit" => EnemyBareCardWhoseUnitHasLowerForce(target, source!, player.Id),
-                        // Fires of Turmoil (issue #295): the same Follower-or-unattached-Personality
-                        // shape as enemy-card-without-attachments above, minus its enemy restriction --
-                        // this card's own "Target a card without attachments" is printed with no
-                        // ownership qualifier at all.
-                        "unattached-unit-card" => type == CardType.Follower || personality && !HasAttachments(target),
-                        // Ikoma Tsukasa (issue #198): the same shape as above, but the "without
-                        // attachments" restriction is waived entirely while the performer's controller
-                        // controls any Terrain.
-                        "enemy-unit-card-terrain-conditional" => !own && (type == CardType.Follower || personality) &&
-                            (ControlsKeyword(player.Id, "Terrain") || !HasAttachments(target)),
-                        "enemy-personality-fewer-weapons-than-self" => personality && !own &&
-                            Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
-                        "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
-                        // Brawl (issue #304): a Region attached to any province (either player's), or a
-                        // Terrain in play. Neither restricts ownership.
-                        "region-or-terrain" => type == CardType.Region && target.Zone == Zone.Region
-                            || type == CardType.Strategy && target.Zone == Zone.Battlefield && Keyword(target, "Terrain"),
-                        // Province adjacency (Moto Gunso's shape: "...at the current battlefield and
-                        // at each adjacent battlefield"): the target's own province, not the current
-                        // one, must be adjacent to it. See AdjacentProvinces.
-                        "personality-at-adjacent-battlefield" => personality && target.Zone == Zone.Battlefield &&
-                            AdjacentBattlefields(_state.CurrentBattleProvince!.Value).Contains(target.ProvinceIndex ?? -1),
-                        // Compared against the chosen Performer (a separately-selected card), unlike
-                        // "-than-self" categories above which compare against the ability's own source.
-                        // "Equal or lower Chi" is CURRENT Chi (Mendon's reading, issue #336): printed plus modifiers plus Items, exactly as personality-chi-lte-self reads it.
-                        "enemy-personality-chi-lte-performer" => personality && !own && PersonalityChi(target) <= PersonalityChi(Card(command.PerformerId!)),
-                        // Volcano Tattoo (issue #190): "a card without attachments in his unit" -- the
-                        // same Follower-or-unattached-Personality shape the Ranged/Melee "attack" Target
-                        // already uses above, but compared against the unit's own Personality's Chi
-                        // (via PersonalityChi, which includes Item-attachment bonuses) rather than a
-                        // Force/strength check.
-                        // Issue #498 (Makito's reading): any card of the unit without attachments -- a Follower, an Item, a Spell... -- or the Personality when he has none.
-                        "enemy-unattached-unit-card-chi-lte-performer" => !own && IsUnitCardWithoutAttachments(target) &&
-                            PersonalityChi(Card(UnitHostId(target))) <= PersonalityChi(Card(command.PerformerId!)),
-                        "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
-                        // Bounty Hunter: "a target attachment or a target dishonorable Personality" --
-                        // an OR of two otherwise-unrelated existing categories.
-                        "attachment-or-dishonorable-personality" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
-                            || personality && target.Dishonorable,
-                        // Rumormonger: any Personality controlled by a player who controls at least one
-                        // Dishonorable Personality (not necessarily this target itself).
-                        "personality-controller-controls-dishonorable" => personality &&
-                            _state.Cards.Values.Any(c => c.OwnerId == target.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable),
-                        // Dragon Clan review (issue #207): Kitsuki Fujimura -- any Dishonorable
-                        // Personality, either side.
-                        "dishonorable-personality" => MatchesTargetStatus(target, TargetStatus.IsDishonorable),
-                        // Mirumoto Kouzei: an enemy Personality or Follower with Force at or below
-                        // the source's own current Force.
-                        "enemy-card-force-lte-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(source!),
-                        // Mirumoto Mitoshi: a Personality (either side) with strictly lower Force
-                        // than the source's own.
-                        "personality-force-lt-self" => personality && CardForce(target) < CardForce(source!),
-                        // Daigotsu Kanpeki - exp (issue #477 batch 6): "an enemy Personality with lower Force" than his own.
-                        "enemy-personality-force-lt-self" => personality && !own && CardForce(target) < CardForce(source!),
-                        // Strategic Sacrifice (issue #264): a card in a unit (either side) with Force
-                        // at or below the current battlefield's own province's strength -- "the
-                        // current battlefield's province" is always the Defender's own, the same
-                        // lookup false-ring-of-water-recruit's own Require already uses.
-                        "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
-                            CardForce(target) <= CurrentProvinceStrength(),
-                        // The Weakness of Man (issue #267): "Force is different from his [the
-                        // performer's] own BASE Force" -- the performer's side of the comparison is
-                        // its own printed Force (Definition(...).Force), not CardForce's live value, so
-                        // a Force-modifying effect on the performer never changes who is a legal target
-                        // mid-battle. The target's own side is its live Force, same as every other
-                        // Force-comparison Target category here. (personality-force-neq-own-base, the
-                        // target-vs-its-own-base comparison Asako Yorisada and The Weakness of Man's own
-                        // wiring actually use, is already registered below.)
-                        "personality-force-neq-performer-base" => personality && CardForce(target) != Definition(Card(command.PerformerId!)).Force,
-                        // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
-                        // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
-                        // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
-                        "enemy-force-non-cavalry" => !own && type is CardType.Personality or CardType.Follower && !Keyword(target, "Cavalry"),
-                        // Togashi Noboru (issue #216): an enemy Personality with strictly lower Chi
-                        // than his own -- the enemy-scoped counterpart to personality-force-lt-self.
-                        "enemy-personality-chi-lt-self" => personality && !own && PersonalityChi(target) < PersonalityChi(source!),
-                        // Togashi Hizumi (issue #216): "target him" -- the specific Personality this
-                        // action just bowed at Hizumi's own battlefield (OpenBowReactionWindow already
-                        // narrowed the candidate set to exactly that, keyed by location).
-                        "bow-reaction-candidate" => personality && _state.BowReactionCandidateIds.Contains(target.Id),
-                        // Tamori Yayu (issue #216): "one of Yayu's Spells" -- a Spell attached
-                        // specifically to the performer (no separate Performer field -- Yayu acts as
-                        // himself), restricted to Spells only, as the user's own clarification asks.
-                        "own-spell-attached-to-source" => type == CardType.Spell && target.Zone == Zone.Attached && target.AttachedTo == source!.Id,
-                        // Tamori Ruya (issue #216): "a Personality at the same location" as Ruya
-                        // herself (source) -- either side, unrelated to which personality was actually
-                        // bowed by the triggering action. "Location" is Home (associated with a
-                        // player, so only that SAME player's other cards qualify there) or a
-                        // battlefield (associated with a province, so either side's cards there do).
-                        "personality-at-source-location" => personality && SameLocation(target, source!),
-                        // Mirumoto Houken: a Personality (either side) with an attached Weapon-
-                        // keyword Item.
-                        "personality-with-weapon" => personality && Attachments(target.Id).Any(a => Keyword(a, "Weapon")),
-                        // Togashi Hiroto / Tamori Muzu: any enemy card at all (Personality, Follower,
-                        // or an attachment) -- broader than enemy-force (Personality/Follower only)
-                        // or enemy-attachment (attached only); combines with the shared
-                        // RequireNoAttachments flag above, which is already true by construction for
-                        // an attachment (one can never itself carry a further attachment).
-                        "enemy-card" => !own,
-                        // Togashi Korimi, Experienced: subtly different from "without attachments" --
-                        // a card with only BOWED attachments (or none at all) still qualifies.
-                        "enemy-card-without-unbowed-attachments" => !own && !Attachments(target.Id).Any(a => !a.Bowed),
-                        // Bonds of Coin / Gold and Steel (issue #336): "attachments with a (Gold Cost of) 0" -- the attachments of either side, judged by
-                        // their current Gold cost (a Gold cost penalty can take a card to 0).
-                        // Issue #336 fixture: one of the cards the deferred action would move (its source, performer or target, per its MoveSpec).
-                        "deferred-action-mover" => personality && _state.PendingNegatableAbility is { } moverAction && ActionMovers(moverAction).Contains(target.Id),
-                        "zero-cost-attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell && CardGoldCost(target) == 0,
-                        // Gold and Steel: "an enemy Personality with an equal or lower Gold Cost" than the chosen performing Personality.
-                        // Mastering the Elements (issue #420): "your Spell" -- one of the player's own Spells in play, attached to any of his Personalities, other than this card.
-                        "own-spell" => type == CardType.Spell && own && target.Zone == Zone.Attached && target.Id != source!.Id,
-                        // Superior Reach: "an enemy Personality without Weapons".
-                        "enemy-personality-without-weapons" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Weapon")),
-                        // Before the Dawn (issue #431).
-                        "enemy-personality-honor-lt-source-chi" => personality && !own && CardPersonalHonor(target) < PersonalityChi(source!),
-                        "enemy-personality-honor-lte-source-chi" => personality && !own && CardPersonalHonor(target) <= PersonalityChi(source!),
-                        "enemy-force-lte-province-strength" => type is CardType.Personality or CardType.Follower && !own
-                            && CardForce(target) <= CurrentProvinceStrength(),
-                        "personality-lower-force-than-source" => personality && CardForce(target) < CardForce(source!),
-                        "non-unique-personality" => personality && !Keyword(target, "Unique"),
-                        "enemy-personality-honor-lte-performer" => personality && !own && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
-                        "own-nonhuman-or-undead-personality" => personality && own && (Keyword(target, "Nonhuman") || Keyword(target, "Undead")),
-                        "other-unit" => type is CardType.Personality or CardType.Follower && target.Id != source!.Id,
-                        "personality-honor-lte-source-chi" => personality && CardPersonalHonor(target) <= PersonalityChi(source!),
-                        "enemy-personality-honor-lt-source" => personality && !own && CardPersonalHonor(target) < CardPersonalHonor(source!),
-                        "any-attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
-                        "enemy-personality-lower-force-or-unarmed" => personality && !own && (CardForce(target) < CardForce(source!) || !Attachments(target.Id).Any(a => Keyword(a, "Weapon"))),
-                        "card-in-dishonorable-unit" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && Card(UnitHostId(target)) is { } leader
-                            && Definition(leader).Type == CardType.Personality && MatchesTargetStatus(leader, TargetStatus.IsDishonorable),
-                        "enemy-personality-gold-cost-lte-performer" => personality && !own && CardGoldCost(target) <= CardGoldCost(Card(command.PerformerId!)),
-                        // Seeds of Decay pass (issue #453), batch 1.
-                        // Shifting Terrain: one of the reactor's own Personalities at the Terrain's battlefield, other than the held action's target, that the action accepts.
-                        "redirect-target-own-personality-at-source-battlefield" => own && personality && OpenReactionSubject() is { } terrainAction && target.Id != terrainAction.TargetId
-                            && source!.Zone == Zone.Battlefield && target.Zone == Zone.Battlefield && target.ProvinceIndex == source.ProvinceIndex && ActionAcceptsTarget(terrainAction, target.Id),
-                        // The Castle of Order: one of the reactor's own Ninja cards at the targeted Ninja's location, other than it, that the action accepts.
-                        "redirect-target-own-ninja-at-affected-location" => own && Keyword(target, "Ninja") && OpenReactionSubject() is { TargetId: { } affectedNinjaId } ninjaAction && target.Id != affectedNinjaId
-                            && SameLocation(target, Card(affectedNinjaId)) && ActionAcceptsTarget(ninjaAction, target.Id),
-                        // Chugo Seido (issue #492, group F): one of the reactor's own Samurai at the targeted Personality's location, other than it, that the action accepts.
-                        "redirect-target-own-samurai-at-affected-location" => own && personality && Keyword(target, "Samurai") && OpenReactionSubject() is { TargetId: { } affectedSamuraiId } samuraiAction && target.Id != affectedSamuraiId
-                            && SameLocation(target, Card(affectedSamuraiId)) && ActionAcceptsTarget(samuraiAction, target.Id),
-                        // Exchange of Letters: "another player's unbowed Personality".
-                        "enemy-unbowed-personality" => personality && !own && !target.Bowed,
-                        // Defensive Blockade: "an attacking Follower or Personality" -- a card of the Attacker's army at the battlefield (a Follower is attacking when its host is).
-                        "attacking-follower-or-personality" => (personality || type == CardType.Follower) && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
-                        // Shield Formation: "your defending Personality".
-                        "own-defending-personality" => personality && own && IsDefendingUnit(target),
-                        // Vengeful Dismissal: an enemy Personality with strictly lower current Chi than the chosen performer's.
-                        "enemy-personality-chi-lt-performer" => personality && !own && PersonalityChi(target) < PersonalityChi(Card(command.PerformerId!)),
-                        // Seeds of Decay pass (issue #453), batch 2.
-                        "attacking-personality" => personality && IsAttacking(target) && AtBattle(target),
-                        "holding-or-own-stronghold" => type == CardType.Holding || type == CardType.Stronghold && own,
-                        // Soshi Yoshihara - experienced (oracle-l5r-7373, Embers of War pass, issue #460 batch 2): "Target a Holding or
-                        // Personality" -- either side's, for the ActionLock ("its base abilities may not be used").
-                        "personality-or-holding" => personality || type == CardType.Holding,
-                        "personality-lower-base-honor-than-performer" => personality && Definition(target).PersonalHonor < Definition(Card(command.PerformerId!)).PersonalHonor,
-                        "last-action-performer" => personality && LastActionPerformer()?.Id == target.Id,
-                        // Seeds of Decay pass (issue #453), batch 4.
-                        // Tsuruchi Nobukatsu - exp: "a Personality at any location" (either player's; AtAnyLocation is the printed presence exemption, so the category is exempt from AtBattle above).
-                        "personality-at-any-location" => personality && (!actingAsBattle || AtAnyLocation(target)),
-                        // Daigotsu Yamato: "your Follower at any location" -- attached to another Personality of yours whose location qualifies while acting as Battle, and transferable to the source.
-                        "own-follower-at-any-location" => own && type == CardType.Follower && target.Zone == Zone.Attached && (!actingAsBattle || AtAnyLocation(Card(target.AttachedTo)))
-                            && source is not null && CanTransferTo(target, source),
-                        // Shinjo Katsuo: "your Follower" (in play, attached; at the current battlefield while acting as Battle -- the ordinary check above).
-                        "own-follower" => own && type == CardType.Follower && target.Zone == Zone.Attached,
-                        // Hiruma Sawai's three slots: a Personality with a Follower; a Personality of the same controller's, not the first; one of the first's Followers the second may attach.
-                        "personality-with-follower" => personality && Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
-                        "personality-same-controller-as-from" => personality && SlotCards(command, "from").FirstOrDefault() is { } from && from.Id != target.Id && from.OwnerId == target.OwnerId,
-                        "follower-of-from-transferable-to" => type == CardType.Follower && SlotCards(command, "from").FirstOrDefault() is { } host && target.AttachedTo == host.Id
-                            && SlotCards(command, "to").FirstOrDefault() is { } to && CanTransferTo(target, to),
-                        // Hachi's Revenge: "a non-Unique Holding" (either player's).
-                        "non-unique-holding" => type == CardType.Holding && !Keyword(target, "Unique"),
-                        // Second City Port: "a target Market or Port" (either player's Holding with either keyword).
-                        "market-or-port-holding" => type == CardType.Holding && (Keyword(target, "Market") || Keyword(target, "Port")),
-                        // Seeds of Decay pass (issue #453), batch 5
-                        // Master of Beasts: "Shadowlands Nonhumans" -- a Nonhuman Personality or attached Follower that is Shadowlands (Clan alignment or keyword).
-                        "shadowlands-nonhuman" => (personality || type == CardType.Follower && target.Zone == Zone.Attached) && Keyword(target, "Nonhuman") && MatchesTargetStatus(target, TargetStatus.IsShadowlands),
-                        // Peace of the Kami: "your Personality or Follower".
-                        "own-personality-or-follower" => own && (personality || type == CardType.Follower && target.Zone == Zone.Attached),
-                        // The Earth's Strength: "your Earth or Water Shugenja".
-                        "own-earth-or-water-shugenja" => own && personality && Keyword(target, "Shugenja") && (Keyword(target, "Earth") || Keyword(target, "Water")),
-                        // The Earth's Strength's Reaction: a defending Personality the deferred action would move (DeferredActionDefendingMovers).
-                        "deferred-action-defending-mover" => personality && _state.PendingNegatableAbility is { } defenderMoverAction && DeferredActionDefendingMovers(defenderMoverAction).Contains(target.Id, StringComparer.Ordinal),
-                        // Seeds of Decay pass (issue #453), batch 3.
-                        // Asako Chukage - exp: "Bow your target Ring" -- one of the acting player's own unbowed Rings in play (a Ring sits in Zone.Home once put into play).
-                        "own-unbowed-ring" => type == CardType.Ring && own && !target.Bowed,
-                        // Hida Kaiji: "an enemy card with lower Force" -- an enemy Personality or Follower (the cards in a unit with a Force of their own) strictly below his.
-                        "enemy-force-lt-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(source!),
-                        // Emperor Edition Personality pass (issue #477), batch 2. Hida Kisada: one of the reactor's own other Personalities at his location that the held action accepts as its target.
-                        "redirect-target-own-personality-at-source-location" => own && personality && target.Id != source!.Id && OpenReactionSubject() is { } kisadaAction && target.Id != kisadaAction.TargetId
-                            && SameLocation(target, source) && ActionAcceptsTarget(kisadaAction, target.Id),
-                        // Kuni Shinoda: "another Crab Clan Personality at Shinoda's battlefield" (a Battle-timed source at a battlefield; the target stands there too).
-                        "crab-personality-at-source-battlefield" => own && personality && target.Id != source!.Id && HasClanAffiliation(target, "Crab")
-                            && source.Zone == Zone.Battlefield && target.Zone == Zone.Battlefield && target.ProvinceIndex == source.ProvinceIndex,
-                        // Hiruma Nitani - exp: "an enemy card with the base Shadowlands keyword" -- any enemy card in a unit whose PRINTED keywords include every RequiredKeywords entry
-                        // (a granted keyword or a Shadowlands Clan alignment is not the base keyword).
-                        "enemy-card-with-printed-keyword" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
-                            && (ability.RequiredKeywords ?? []).All(k => PrintedKeyword(target, k)),
-                        // Utaku Hirononri: "a Stables or Cavalry card" -- any card in play carrying ANY of the RequiredKeywords (either side's), unlike the all-of categories.
-                        "card-with-any-required-keyword" => (ability.RequiredKeywords ?? []).Any(k => Keyword(target, k)),
-                        // Asako Jukko: "a Personality with 1 Force or greater".
-                        "personality-force-gte-one" => personality && CardForce(target) >= 1,
-                        // Asako Jukko's optional second switch: only the source card itself.
-                        "source-itself" => source is not null && target.Id == source.Id,
-                        // Shiba Iaimiko's optional second target: a card without attachments in the first slot's target's unit -- listed only while the printed condition can
-                        // hold once the -4F applies (that target's Force is at most 4, so "now 0", and the acting player controls a Shugenja).
-                        "iaimiko-collateral" => IsUnitCardWithoutAttachments(target) && SlotCards(command, "target").FirstOrDefault() is { } iaimikoPrimary
-                            && UnitHostId(target) == UnitHostId(iaimikoPrimary) && CardForce(iaimikoPrimary) <= 4 && ControlsKeyword(player.Id, "Shugenja"),
-                        // Honor and Treachery pass (issue #458).
-                        // Bayushi Irezu: "another target Scorpion Clan Personality you control" -- wherever he stands, other than Irezu himself.
-                        "own-scorpion-personality-other-than-source" => personality && own && target.Id != source!.Id && HasClanAffiliation(target, "Scorpion"),
-                        // Communion with Earth: "another of your Shugenja, who must be Earth" -- excludes the Spell's own current wielder.
-                        "own-earth-shugenja-other-than-wielder" => personality && own && Keyword(target, "Shugenja") && Keyword(target, "Earth") && target.Id != source!.AttachedTo,
-                        // Devoted Yojimbo: "a Follower or Personality in this army" -- either side of the controller's own army at the current battlefield
-                        // (a Follower's own "unit" is its host's; a Personality is its own unit).
-                        "own-follower-or-personality-in-army" => own && (personality || type == CardType.Follower && target.Zone == Zone.Attached)
-                            && AtBattle(Card(UnitHostId(target))),
-                        // Shiba Tsukimi: "a card in a unit" -- any side's Personality, or an attached Follower/Item/Spell.
-                        "any-unit-card" => personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
-                        // The Towers of the Yogo's granted ability: "an enemy Follower or Personality without Followers" -- a Personality with no attached Follower,
-                        // or any enemy Follower (a Follower cannot itself carry a Follower).
-                        "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
-                        // Set the Fields Aflame (The Shadow's Embrace pass, issue #476 batch 5): "a Region" -- attached to any province, either player's.
-                        "region" => type == CardType.Region && target.Zone == Zone.Region,
-                        // Emperor Edition Personality pass (issue #477), batch 3 (EmperorPersonalityBatch3.cs).
-                        "enemy-unit" => personality && !own,
-                        "enemy-card-or-unit-lower-than-source-unit" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
-                            && UnitTotalGoldCost(target, out _) < UnitTotalGoldCost(source!, out _),
-                        // Emperor Edition Personality pass (issue #477), batch 4 (EmperorPersonalityBatch4.cs). Shosuro Tanzaki: "another Personality"; Bayushi Nitoshi: "a different one of your
-                        // Personalities" (other than the slot's target), and "a dishonorable Personality or a card without attachments in a unit".
-                        "other-personality" => Batch4OtherPersonality(target, source),
-                        "own-personality-other-than-slot-target" => Batch4VictimOtherThanTarget(target, command, player.Id),
-                        "dishonorable-personality-or-unattached-unit-card" => Batch4DishonorableOrUnattachedUnitCard(target),
-                        // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
-                        "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
-                        // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
-                        _ => RegisteredTargetAllows(ability, command, player, source, target)
-                    }, "That card does not meet this ability's target or performer requirements.");
+                        if (!(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0))) return "This action targets a province, not a card.";
+                        var __valid10 = command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed;
+                        if (!__valid10) return "Choose one of the enemy's provinces.";
+                    }
+                    // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): "Target one or two provinces" -- the Defender's, the provinces a battlefield will sit at.
+                    else
+                    {
+                        if (ability.Target == EmperorStrongholdBatch1Abilities.HiddenFallsTarget) ValidateHiddenFallsTargets(command);
+                        else
+                        {
+                            if (ability.Target == EmperorP5HiddenAbilities.FaceDownProvinceCards) ValidatePettyTargets(command); // issue #503: Petty Squabbles (EmperorP5Hidden.cs)
+                                                                                                                                 // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "one or two of your provinces".
+                            else
+                            {
+                                if (ability.Target == EmperorRemainingEAbilities.OwnProvincesTarget) ValidateOwnProvinceSet(command, player);
+                                // Ring of Earth (issue #194): "give A province +3 or -3 strength" -- either side's own,
+                                // unlike enemy-province above -- so which player's province, not just which index, must be
+                                // named. TargetPlayerId already exists for "choose a player" (issue #210); reused here purely
+                                // as "whose province," alongside Province as the index.
+                                else
+                                {
+                                    if (ability.Target == "any-province")
+                                    {
+                                        if (!(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0))) return "This action targets a province, not a card.";
+                                        var __valid11 = command.TargetPlayerId is 0 or 1 && command.Province is int anyIdx && anyIdx is >= 0 and <= 3 && anyIdx < Player(command.TargetPlayerId.Value).Provinces.Count && !Player(command.TargetPlayerId.Value).Provinces[anyIdx].Destroyed;
+                                        if (!__valid11) return "Choose a province (yours or the enemy's).";
+                                    }
+                                    // "Choose a player" (issue #210): a player, not a card, is the target -- either player is
+                                    // always a legal choice (no restriction printed), so validation is just "is this a real
+                                    // player id at all."
+                                    else
+                                    {
+                                        if (ability.Target == "player")
+                                        {
+                                            if (!(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0))) return "This action targets a player, not a card.";
+                                            if (!(command.TargetPlayerId is 0 or 1)) return "Choose a player.";
+                                        }
+                                        else
+                                        {
+                                            // Togashi Mitsu, Inexperienced (issue #207 follow-up): "destroy zero or more Fire tokens
+                                            // on Mitsu. Ranged Attack with strength equal to the number of tokens destroyed" -- the
+                                            // one Attack whose own strength is a per-COMMAND variable (which/how many Fire tokens the
+                                            // player chooses to destroy right now), not a static per-ability-id/target/source formula
+                                            // AttackStrength's own switch can express. CardIds carries the chosen token ids here
+                                            // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
+                                            if (!(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power" or "ishibashi-attack"
+                                                // Emperor Edition mechanics group C (issue #501): the card an optional cost spends.
+                                                || MechCCarriesCostCard(id)
+                                                || Wave827CarriesCostCard(id)
+                                                // issue #503: the Spell The New Foundries discards from under it
+                                                || P5CarriesCostCard(id)
+                                                || SearchPlayCarriesCostCard(id)
+                                                || WlCarriesCostCard(id)
+                                                // Akodo Kamina: the hand card a discard cost option spends.
+                                                || AlternativeDiscard.CarriesCostCard(id)
+                                                || command.CardIds is null || command.CardIds.Length == 0)) return "This action does not select multiple cards.";
+                                            // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
+                                            // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
+                                            // core rules an Attack's targeting is its own step, "not required up front"): TargetId is the
+                                            // -4F target (a required enemy Personality, validated by the ordinary category switch below),
+                                            // CardIds carries the optional Attack target -- the established optional-second-selection
+                                            // idiom (Scorn the Weak, Strength in Terror). It is validated as any Attack target, including
+                                            // Kahoku's own static Follower-immunity exception (AttackTargeting.cs), and MAY be the very
+                                            // Personality the -4F just weakened, so the strength check sees that Force already reduced.
+                                            if (id == "kahoku-exp-attack")
+                                            {
+                                                var ids = command.CardIds ?? [];
+                                                if (!(ids.Length is 0 or 1)) return "Kahoku's Ranged Attack may target at most one card.";
+                                                if (ids.Length == 1) RequireLegalAttackTarget(id, ability, command, player, source, Card(ids[0]), command.TargetId, 4);
+                                            }
+                                            // Knowledge and Power (issue #353): "Destroy one or two of a target Personality's tokens" -- CardIds names which (token ids, on the TARGET),
+                                            // one or two different ones; none named means his first token, so the ability is always offered with a legal command.
+                                            if (id == "knowledge-and-power")
+                                            {
+                                                var kpTarget = command.TargetId is null ? throw new RuleViolation("Choose a target Personality.") : Card(command.TargetId);
+                                                var chosenTokens = command.CardIds ?? [];
+                                                if (!(chosenTokens.Length <= 2 && chosenTokens.Distinct().Count() == chosenTokens.Length && chosenTokens.All(tid => kpTarget.Tokens.Any(t => t.Id == tid)))) return "Choose one or two different tokens on the target Personality to destroy.";
+                                            }
+                                            if (id == "mitsu-fire-attack")
+                                            {
+                                                var tokenIds = command.CardIds ?? [];
+                                                if (!(tokenIds.Distinct().Count() == tokenIds.Length && tokenIds.All(tid => source!.Tokens.Any(t => t.Id == tid && t.Type == "Fire")))) return "Choose zero or more of Mitsu's own Fire tokens to destroy.";
+                                            }
+                                            // Scorn the Weak (oracle-l5r-9925, issue #287): "If his Force is now 0, ... you may
+                                            // target and dishonor a Personality" -- CardIds carries this optional second target (any
+                                            // Personality, either side, no further restriction printed), the same "not required to
+                                            // exist" idiom optional-dishonorable-personality already establishes for a single
+                                            // TargetId, just carried on CardIds since this ability already has a required primary
+                                            // TargetId. Only offered when the primary target's Force would actually reach 0 from
+                                            // this ability's own flat -5F (CardForce already floors at 0, so "now 0" reduces to a
+                                            // pre-effect Force of 5 or less).
+                                            if (id == "scorn-the-weak")
+                                            {
+                                                var ids = command.CardIds ?? [];
+                                                if (!(ids.Length is 0 or 1)) return "Scorn the Weak may target at most one additional Personality to dishonor.";
+                                                if (ids.Length == 1)
+                                                {
+                                                    if (!(CardForce(Card(command.TargetId!)) <= 5)) return "You may only target and dishonor a Personality when the enemy Personality's Force would reach 0.";
+                                                    if (!(Definition(Card(ids[0])).Type == CardType.Personality)) return "Target a Personality to dishonor.";
+                                                }
+                                            }
+                                            // Strength in Terror (oracle-l5r-7538, issue #287): "You may target and destroy one of
+                                            // the Personality's attachments" -- CardIds' own second-selection reuse again, restricted
+                                            // to one of the primary target's own attachments.
+                                            if (id == "strength-in-terror")
+                                            {
+                                                var ids = command.CardIds ?? [];
+                                                if (!(ids.Length is 0 or 1)) return "Strength in Terror may target at most one attachment to destroy.";
+                                                if (ids.Length == 1)
+                                                {
+                                                    var attachmentToDestroy = Card(ids[0]);
+                                                    if (!(attachmentToDestroy.Zone == Zone.Attached && attachmentToDestroy.AttachedTo == command.TargetId)) return "Target one of the Personality's own attachments.";
+                                                }
+                                            }
+                                            // Unexpected (oracle-l5r-9940, issue #287): "You may bow your Personality; if you did,
+                                            // draw a card" -- CardIds' own third reuse this wave: the performer's own id, when
+                                            // supplied, opts into the self-bow-for-a-draw.
+                                            if (id == "unexpected")
+                                            {
+                                                var ids = command.CardIds ?? [];
+                                                if (!(ids.Length is 0 or 1 && (ids.Length == 0 || ids[0] == command.PerformerId))) return "You may only bow your own performing Personality.";
+                                            }
+                                            // Visage of the Orochi (oracle-l5r-9168, issue #289): "You may target and bow an enemy
+                                            // card with lower Force and no attachments" -- CardIds' own established optional-second-
+                                            // selection idiom again, inlined here (rather than a new Target category) because the
+                                            // comparison is against the Performer's own POST-"Raise to 6" Force, not its live Force at
+                                            // validation time (the Set-Force effect itself has not executed yet) -- Math.Max(6,
+                                            // CardForce(performer)) predicts that outcome without needing to actually apply it early.
+                                            if (id == "visage-of-the-orochi")
+                                            {
+                                                var ids = command.CardIds ?? [];
+                                                if (!(ids.Length is 0 or 1)) return "Visage of the Orochi may target at most one enemy card to bow.";
+                                                if (ids.Length == 1)
+                                                {
+                                                    var bowTarget = Card(ids[0]);
+                                                    var raisedPerformerForce = Math.Max(6, CardForce(Card(command.PerformerId!)));
+                                                    if (!(bowTarget.OwnerId != player.Id && Definition(bowTarget).Type is CardType.Personality or CardType.Follower
+                                                        && CardForce(bowTarget) < raisedPerformerForce && !HasAttachments(bowTarget))) return "You may only target and bow an enemy card with lower Force than your Thunder Personality (after being raised to 6) and no attachments.";
+                                                }
+                                            }
+                                            if (ability.Target == "none") { if (!(command.TargetId is null)) return "This action has no target."; }
+                                            // Ranged/Melee Attack: unlike every other ability target, this one is not required to
+                                            // exist for the action to be legal -- a null TargetId always validates. When a TargetId
+                                            // is supplied, it must be a Follower or a Personality without Followers in the current
+                                            // enemy army with Force at or below the attack's (possibly conditional) strength.
+                                            else
+                                            {
+                                                if (ability.Target == "attack")
+                                                {
+                                                    // The legality rules (Follower-immunity and its explicit exceptions, per-kind immunity,
+                                                    // strength) live in RequireLegalAttackTarget (AttackTargeting.cs), shared with abilities that
+                                                    // carry their Attack target on CardIds instead of TargetId (Bayushi Kahoku - exp).
+                                                    // An Attack needs no target: none at all, a card, or -- where the ability says so -- the current battlefield's province.
+                                                    if (command.Province is not null)
+                                                    {
+                                                        if (!(ability.AttackTargetsProvince)) return "This Attack cannot target a province.";
+                                                        if (!(command.TargetId is null)) return "An Attack targets a card or a province, not both.";
+                                                        if (!(command.Province == _state.CurrentBattleProvince)) return "An Attack may only target the current battlefield's province.";
+                                                    }
+                                                    else if (command.TargetId is not null) RequireLegalAttackTarget(id, ability, command, player, source, Card(command.TargetId));
+                                                }
+                                                // Unimpeachable Name (oracle-l5r-8989): "You MAY target and rehonor a dishonorable
+                                                // Personality" -- an optional target, the same "not required to exist" shape as "attack"
+                                                // above (a null TargetId always validates; a supplied one must be a real Dishonorable
+                                                // Personality, either side, no ownership restriction printed).
+                                                else
+                                                {
+                                                    if (ability.Target == "optional-dishonorable-personality")
+                                                    {
+                                                        if (command.TargetId is not null)
+                                                        {
+                                                            var target = Card(command.TargetId);
+                                                            if (!(Definition(target).Type == CardType.Personality && target.Dishonorable)) return "Target a dishonorable Personality, or none.";
+                                                        }
+                                                    }
+                                                    // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): "a Dynasty card in a province", or none when no province holds one.
+                                                    else
+                                                    {
+                                                        if (ability.Target == EmperorRemainingAAbilities.ProvinceCardOrNone) ValidateRemAProvinceCardOrNone(command);
+                                                        // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
+                                                        // in play -- it sits in a discard pile without yet being marked dead.
+                                                        else
+                                                        {
+                                                            if (ability.Target == "discarded-personality")
+                                                            {
+                                                                var target = Card(command.TargetId);
+                                                                if (!(Definition(target).Type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.FateDiscard)) return "Target a discarded Personality.";
+                                                                if (id == "shunsuke-make-dead") { if (!(target.OwnerId != player.Id)) return "Target another player's discarded Personality."; }
+                                                            }
+                                                            else
+                                                            {
+                                                                var target = Card(command.TargetId); var type = Definition(target).Type;
+                                                                if (ability.Target == "hand") { if (!(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && target.Id != command.CardId)) return "Discard a card from your hand."; } // a card being played is not in the hand it discards from (issue #653)
+                                                                                                                                                                                                                                                                             // Hato-gurama (oracle-l5r-10115, issue #453 batch 5): "You may not choose this card to be discarded as a cost or effect of your actions if you have other cards in your hand."
+                                                                if (ability.Target == "hand") { if (!(Definition(target).Effect != "hato-gurama" || player.Hand.Count == 1)) return "Hato-gurama may not be chosen to be discarded while you have other cards in your hand."; }
+                                                                // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): "show a Strategy in your hand" -- another Strategy of the acting player's hand (the played card is not in it).
+                                                                else
+                                                                {
+                                                                    if (ability.Target == "own-other-strategy-in-hand")
+                                                                    { if (!(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && type == CardType.Strategy && target.Id != command.CardId)) return "Show another Strategy from your hand."; }
+                                                                    else
+                                                                    {
+                                                                        if (ability.Target == "spell-or-reserve-in-hand")
+                                                                        {
+                                                                            if (!(target.OwnerId == player.Id && (target.Zone == Zone.Hand || RulebookDiscardSource(id, player.Id, command.PerformerId, target)) && (type == CardType.Spell || Keyword(target, "Reserve")))) return "Choose a Spell, or a Reserve Fate card, from your hand."; // P19: or from the discard pile when a modifier allows it
+                                                                            if (!(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)))) return "This attachment will not attach to that Shugenja.";
+                                                                            if (!(AttachmentAllowed(target, Card(command.PerformerId!)))) return "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.";
+                                                                            // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
+                                                                            // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
+                                                                            // needed this check.
+                                                                            if (!(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)))) return $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.";
+                                                                        }
+                                                                        // Low Market's own Target category: broader than "spell-or-reserve-in-hand" above (any
+                                                                        // Item/Follower/Spell, matching the ordinary Equip() command's own type filter), reusing
+                                                                        // the same shared attach-legality helpers Equip() itself uses (AttachmentLegalTarget
+                                                                        // already folds in AttachRequiresKeyword/Excludes/Name AND a Follower's Honor
+                                                                        // Requirement; AttachmentAllowed is the Armor/Weapon-cap check).
+                                                                        else
+                                                                        {
+                                                                            if (ability.Target == "attachment-in-hand")
+                                                                            {
+                                                                                if (!(target.OwnerId == player.Id && target.Zone == Zone.Hand && type is CardType.Item or CardType.Follower or CardType.Spell)) return "Choose an Item, Follower, or Spell from your hand.";
+                                                                                if (!(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)))) return "This attachment will not attach to that Personality.";
+                                                                                if (!(AttachmentAllowed(target, Card(command.PerformerId!)))) return "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.";
+                                                                                if (!(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)))) return $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.";
+                                                                            }
+                                                                            // Moto Jun-Ni / Foothills Keep (issue #337): a card in a discard pile the ability's AttachSpec names (whose pile, which kinds).
+                                                                            // Everything else about attaching it is ValidateAttach, below.
+                                                                            else
+                                                                            {
+                                                                                if (ability.Target == "attachment-in-discard")
+                                                                                {
+                                                                                    var attachError = AttachTargetError(ability.Attach!, player.Id, target, source?.Id);
+                                                                                    if (!(attachError is null)) return attachError ?? "";
+                                                                                }
+                                                                                // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
+                                                                                // Fate card in hand or a face-up Dynasty card in one of their own provinces -- neither
+                                                                                // zone is "in play", so this needs its own branch, same shape as "hand" above. Face-up
+                                                                                // matches DiscardProvince's own existing rule for discarding a province card at all.
+                                                                                else
+                                                                                {
+                                                                                    if (ability.Target == "own-kharmic-card")
+                                                                                    {
+                                                                                        if (!(target.OwnerId == player.Id && Keyword(target, "Kharmic")
+                                                                                        && (target.Zone == Zone.Hand || target.Zone == Zone.Province && target.FaceUp))) return "Discard a Kharmic card you control, from your hand or a face-up province.";
+                                                                                    }
+                                                                                    // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
+                                                                                    // player's own Fate discard pile -- not in play, so this needs its own branch just like
+                                                                                    // "own-kharmic-card" above.
+                                                                                    // Kunji - exp (Gempukku pass, issue #461): the source card itself, in the dead pile.
+                                                                                    else
+                                                                                    {
+                                                                                        if (ability.Target == "source-if-dead")
+                                                                                        { if (!(source is not null && target.Id == source.Id && target.Zone == Zone.Dead)) return "Kunji must be in your dead pile."; }
+                                                                                        // Daigotsu Aya (Emperor Edition Personality pass, issue #477): "a Dark Virtue from your discard pile" -- any Dark Virtue Strategy in the player's own Fate discard pile.
+                                                                                        else
+                                                                                        {
+                                                                                            if (ability.Target == "own-dark-virtue-card-in-discard")
+                                                                                            { if (!(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard)) return "Choose a Dark Virtue from your Fate discard pile."; }
+                                                                                            // Shosuro Hawado - exp 2: "a card in a province" -- either player's, face-down or face-up.
+                                                                                            else
+                                                                                            {
+                                                                                                if (ability.Target == "card-in-province")
+                                                                                                { if (!(target.Zone == Zone.Province)) return "Choose a card in a province."; }
+                                                                                                // Nishimura (Emperor Edition Personality pass, issue #477 batch 6): "a Kiho or Weapon from your hand" -- a Kiho Strategy or a Weapon Item in the acting player's own hand.
+                                                                                                else
+                                                                                                {
+                                                                                                    if (ability.Target == "own-terrain-in-hand") // Plain of Gold (Emperor Edition Stronghold pass, issue #486 batch 2)
+                                                                                                    { if (!(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && type == CardType.Strategy && Keyword(target, "Terrain"))) return "Choose a Terrain in your hand."; }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        if (ability.Target == "own-hand-kiho-or-weapon")
+                                                                                                        { if (!(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && (Keyword(target, "Kiho") || Keyword(target, "Weapon")))) return "Choose a Kiho or a Weapon in your hand."; }
+                                                                                                        // Essence of Undeath: "your dead Personality".
+                                                                                                        else
+                                                                                                        {
+                                                                                                            if (ability.Target == "own-dead-personality")
+                                                                                                            { if (!(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Dead)) return "Choose one of your own dead Personalities."; }
+                                                                                                            // Goju Plot: "a Ninja Personality in your discard pile" -- dead, or merely discarded from a province (the two zones of one physical pile).
+                                                                                                            else
+                                                                                                            {
+                                                                                                                if (ability.Target == "own-ninja-personality-in-discard")
+                                                                                                                { if (!(target.OwnerId == player.Id && type == CardType.Personality && Keyword(target, "Ninja") && target.Zone is Zone.Dead or Zone.DynastyDiscard)) return "Choose a Ninja Personality in your discard pile."; }
+                                                                                                                // Jurojin's Blessing: "a non-Unique Strategy in your Fate discard pile".
+                                                                                                                else
+                                                                                                                {
+                                                                                                                    if (ability.Target == "own-nonunique-strategy-in-discard")
+                                                                                                                    { if (!(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard)) return "Choose a non-Unique Strategy card from your Fate discard pile."; }
+                                                                                                                    // Seeking the Truth (issue #467, batch 4): "a non-Unique Battle Strategy in your discard pile" -- a Strategy with a Battle (or Battle/Open) action.
+                                                                                                                    else
+                                                                                                                    {
+                                                                                                                        if (ability.Target == "own-nonunique-battle-strategy-in-discard")
+                                                                                                                        { if (!(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard && IsBattleStrategy(target))) return "Choose a non-Unique Battle Strategy from your Fate discard pile."; }
+                                                                                                                        // The Shadow's Embrace pass (issue #476), batch 4 -- Void Tattoo: "a Tattoo Strategy in your discard pile".
+                                                                                                                        else
+                                                                                                                        {
+                                                                                                                            if (ability.Target == "own-tattoo-strategy-in-discard")
+                                                                                                                            { if (!(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Tattoo") && target.Zone == Zone.FateDiscard)) return "Choose a Tattoo Strategy card from your Fate discard pile."; }
+                                                                                                                            else
+                                                                                                                            {
+                                                                                                                                if (ability.Target == "own-kiho-strategy-in-discard")
+                                                                                                                                { if (!(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard)) return "Choose a Kiho Strategy card from your Fate discard pile."; }
+                                                                                                                                // Daigotsu Bofana - exp (issue #333): "a Dark Virtue in your discard pile" -- a Strategy carrying the
+                                                                                                                                // keyword, in the player's own Fate discard pile, that has a Battle action still playable this turn (a card with
+                                                                                                                                // none would only waste the grant).
+                                                                                                                                else
+                                                                                                                                {
+                                                                                                                                    if (ability.Target == "own-dark-virtue-in-discard")
+                                                                                                                                    { if (!(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasUnspentAction(target, "Battle"))) return "Choose a Dark Virtue with a Battle action from your Fate discard pile."; }
+                                                                                                                                    // Akodo Tezuka (oracle-l5r-298, issue #449): "a Bushido Virtue in your discard pile" -- the same shape as Bofana's own Dark Virtue
+                                                                                                                                    // above, generalized to admit any of the card's Battle, Limited or Open actions (not Battle only), matching what her own grant
+                                                                                                                                    // (AdditionalActionGrant.AnyDiscardTiming) then makes playable.
+                                                                                                                                    else
+                                                                                                                                    {
+                                                                                                                                        if (ability.Target == "own-bushido-virtue-in-discard")
+                                                                                                                                        { if (!(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Bushido Virtue") && target.Zone == Zone.FateDiscard && HasUnspentAction(target, "Battle", "Limited", "Open", "BattleOrOpen"))) return "Choose a Bushido Virtue with a Battle, Limited or Open action from your Fate discard pile."; }
+                                                                                                                                        // Scholarly Hermit's own ability (issue #194): a Ring in the player's own Fate
+                                                                                                                                        // discard pile -- not in play, so this needs its own branch too.
+                                                                                                                                        else
+                                                                                                                                        {
+                                                                                                                                            if (ability.Target == "own-ring-in-discard")
+                                                                                                                                            { if (!(target.OwnerId == player.Id && Definition(target).Type == CardType.Ring && target.Zone == Zone.FateDiscard)) return "Choose a Ring from your Fate discard pile."; }
+                                                                                                                                            // Tranquil Garden (issue #264): the first Target spanning both an ordinary in-play
+                                                                                                                                            // card (either side, matching "a Ring in play" with no "your own" qualifier) and one
+                                                                                                                                            // sitting in the player's own Fate discard pile at once.
+                                                                                                                                            else
+                                                                                                                                            {
+                                                                                                                                                if (ability.Target == "ring-in-play-or-own-discard")
+                                                                                                                                                { if (!(Definition(target).Type == CardType.Ring && (InPlay(target) || target.OwnerId == player.Id && target.Zone == Zone.FateDiscard))) return "Choose a Ring in play or in your own Fate discard pile."; }
+                                                                                                                                                // Consuming Weakness (issue #295): "a target dead Personality in any discard pile" --
+                                                                                                                                                // Zone.Dead (this engine's own "discard pile" for a Personality specifically -- Zone.
+                                                                                                                                                // FateDiscard/DynastyDiscard are for Fate/Dynasty cards of every OTHER type), any owner,
+                                                                                                                                                // not in play, so this needs its own branch too.
+                                                                                                                                                else
+                                                                                                                                                {
+                                                                                                                                                    if (ability.Target == "dead-personality-any-discard")
+                                                                                                                                                    { if (!(type == CardType.Personality && target.Zone == Zone.Dead)) return "Choose a dead Personality in any discard pile."; }
+                                                                                                                                                    // Scavenging Party (issue #420): "your discarded Personality" -- a dead Personality is a discarded one too (Mendon).
+                                                                                                                                                    else
+                                                                                                                                                    {
+                                                                                                                                                        if (ability.Target == "own-discarded-personality")
+                                                                                                                                                        { if (!(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target))) return "Choose one of your own discarded Personalities."; }
+                                                                                                                                                        // The Forgotten Temple (issue #467 batch 2): "your discarded Nonhuman Personality" -- the same pile, narrowed by RequiredKeywords.
+                                                                                                                                                        else
+                                                                                                                                                        {
+                                                                                                                                                            if (ability.Target == "own-discarded-personality-with-keyword")
+                                                                                                                                                            { if (!(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target) && HasKeywords(target, ability.RequiredKeywords))) return "Choose one of your own discarded Personalities with the required keyword."; }
+                                                                                                                                                            // Kakita Yasunori (issue #431): "a card in your Fate discard pile".
+                                                                                                                                                            else
+                                                                                                                                                            {
+                                                                                                                                                                if (ability.Target == "own-fate-discard-card")
+                                                                                                                                                                { if (!(target.OwnerId == player.Id && target.Zone == Zone.FateDiscard)) return "Choose a card in your own Fate discard pile."; }
+                                                                                                                                                                else
+                                                                                                                                                                {
+                                                                                                                                                                    if (ability.Target == "own-dead-samurai")
+                                                                                                                                                                    { if (!(type == CardType.Personality && target.OwnerId == player.Id && target.Zone == Zone.Dead && Keyword(target, "Samurai"))) return "Choose one of your own dead Samurai."; }
+                                                                                                                                                                    // A Yojimbo's Duty (Forgotten Legacy pass, issue #467 batch 3): "your target discarded Courtier or Shugenja" -- a Personality of the acting player's in his discard
+                                                                                                                                                                    // pile (dead, or merely discarded: Scavenging Party's own IsDiscardedPersonality) carrying either keyword.
+                                                                                                                                                                    else
+                                                                                                                                                                    {
+                                                                                                                                                                        if (ability.Target == "own-discarded-courtier-or-shugenja")
+                                                                                                                                                                        { if (!(target.OwnerId == player.Id && IsDiscardedPersonality(target) && (Keyword(target, "Courtier") || Keyword(target, "Shugenja")))) return "Choose your own discarded Courtier or Shugenja."; }
+                                                                                                                                                                        // Your Clan Needs You! (issue #295): "your performing Personality in one of your
+                                                                                                                                                                        // provinces" -- a province card is never InPlay, so this needs its own branch too, the
+                                                                                                                                                                        // same shape own-kharmic-card/own-kiho-strategy-in-discard already use for a target
+                                                                                                                                                                        // outside the ordinary in-play zones.
+                                                                                                                                                                        else
+                                                                                                                                                                        {
+                                                                                                                                                                            if (ability.Target == "own-personality-in-province")
+                                                                                                                                                                            { if (!(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp)) return "Choose your own face-up Personality in a province."; }
+                                                                                                                                                                            // Shosuro Hawado (issue #301): "a Dynasty card in any discard pile" -- a Dynasty-deck card
+                                                                                                                                                                            // type (Personality, Holding, Event, Region, Celestial) sitting in EITHER player's Dynasty
+                                                                                                                                                                            // discard pile. Zone.Dead is this engine's own "discard pile" for a Personality once it has
+                                                                                                                                                                            // died (Zone.DynastyDiscard holds every other Dynasty type, plus a Personality merely
+                                                                                                                                                                            // discarded from a province, not yet dead); both are that same physical pile. Not in
+                                                                                                                                                                            // play, so it needs its own branch -- Consuming Weakness's dead-personality-any-discard
+                                                                                                                                                                            // (Zone.Dead only, Personalities only) is the narrower sibling.
+                                                                                                                                                                            else
+                                                                                                                                                                            {
+                                                                                                                                                                                if (ability.Target == "dynasty-card-in-any-discard")
+                                                                                                                                                                                { if (!(IsDynastyCardType(type) && target.Zone is Zone.DynastyDiscard or Zone.Dead)) return "Choose a Dynasty card in any discard pile."; }
+                                                                                                                                                                                // Fukuzo (issue #338): "a target Personality in any player's discard pile" -- a Personality merely discarded
+                                                                                                                                                                                // (Zone.DynastyDiscard) or dead (Zone.Dead), either player's: the same physical pile, and the same two zones the sibling
+                                                                                                                                                                                // categories above name. Not in play, so it needs its own branch.
+                                                                                                                                                                                else
+                                                                                                                                                                                {
+                                                                                                                                                                                    if (ability.Target == "personality-in-any-discard")
+                                                                                                                                                                                    { if (!(type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.Dead)) return "Choose a Personality in any discard pile."; }
+                                                                                                                                                                                    // Record of Failure (issue #622, IvoryPolitical.cs): "a dishonorably dead Personality" -- in a dead pile, dishonorable when he died.
+                                                                                                                                                                                    else
+                                                                                                                                                                                    {
+                                                                                                                                                                                        if (ability.Target == IvoryPoliticalAbilities.DishonorablyDeadPersonality)
+                                                                                                                                                                                        { if (!(type == CardType.Personality && IsDishonorablyDead(target))) return "Choose a dishonorably dead Personality."; }
+                                                                                                                                                                                        // Soshi Neiru (issue #301): "Air Spells" from the player's own hand -- equip-battle's
+                                                                                                                                                                                        // own spell-or-reserve-in-hand shape, narrowed by RequiredKeywords instead of hardcoding a
+                                                                                                                                                                                        // keyword, with the wielder fixed to the source card itself (no separate Performer).
+                                                                                                                                                                                        else
+                                                                                                                                                                                        {
+                                                                                                                                                                                            if (ability.Target == "spell-in-hand-with-keyword")
+                                                                                                                                                                                            {
+                                                                                                                                                                                                if (!(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell && HasKeywords(target, ability.RequiredKeywords))) return "Choose a Spell with the required keyword from your hand.";
+                                                                                                                                                                                                if (!(AttachmentLegalTarget(Definition(target), source!))) return "This Spell will not attach to that Shugenja.";
+                                                                                                                                                                                                if (!(AttachmentAllowed(target, source!))) return "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.";
+                                                                                                                                                                                                if (!(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name, ExperienceLevel(target)))) return $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.";
+                                                                                                                                                                                            }
+                                                                                                                                                                                            // Seeds of Decay pass (issue #453), batch 1. Requesting Reinforcements: "a face-up Scout Personality in your province" -- Your Clan Needs You!'s own
+                                                                                                                                                                                            // province-card shape, narrowed by RequiredKeywords.
+                                                                                                                                                                                            else
+                                                                                                                                                                                            {
+                                                                                                                                                                                                if (ability.Target == "own-personality-in-province-with-keyword")
+                                                                                                                                                                                                { if (!(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp && HasKeywords(target, ability.RequiredKeywords))) return "Choose your own face-up Personality with the required keyword in a province."; }
+                                                                                                                                                                                                // Courting Trouble (issue #453, batch 2): "another player's face-up Personality in or out of play" -- in play, face up in a province, or in a discard pile (face up by nature).
+                                                                                                                                                                                                else
+                                                                                                                                                                                                {
+                                                                                                                                                                                                    if (ability.Target == "enemy-face-up-personality-anywhere")
+                                                                                                                                                                                                    { if (!(target.OwnerId != player.Id && type == CardType.Personality && (InPlay(target) || target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard))) return "Choose another player's face-up Personality."; }
+                                                                                                                                                                                                    // Brotherhood Schism (issue #453, batch 2): "an Event in another player's discard pile".
+                                                                                                                                                                                                    else
+                                                                                                                                                                                                    {
+                                                                                                                                                                                                        if (ability.Target == "event-in-enemy-discard")
+                                                                                                                                                                                                        { if (!(target.OwnerId != player.Id && type == CardType.Event && target.Zone == Zone.DynastyDiscard)) return "Choose an Event in another player's discard pile."; }
+                                                                                                                                                                                                        // The Shadow's Embrace pass (issue #476), batch 6. The Moon's Imperative: "face-up Personalities in provinces" (either player's); The Sun's Aspiration: "cards in
+                                                                                                                                                                                                        // your discard piles" (the Fate and the Dynasty pile, a dead Personality included).
+                                                                                                                                                                                                        else
+                                                                                                                                                                                                        {
+                                                                                                                                                                                                            if (ability.Target == "face-up-personality-in-province")
+                                                                                                                                                                                                            { if (!(type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp)) return "Choose a face-up Personality in a province."; }
+                                                                                                                                                                                                            else
+                                                                                                                                                                                                            {
+                                                                                                                                                                                                                if (ability.Target == "own-card-in-discard")
+                                                                                                                                                                                                                { if (!(target.OwnerId == player.Id && target.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead)) return "Choose a card in your own discard piles."; }
+                                                                                                                                                                                                                // Forgotten Legacy pass (issue #467), batch 5. Wind of the Moon: "a face-up Personality out of play" -- face up in a province, or in a discard pile (face up by nature); either player's.
+                                                                                                                                                                                                                else
+                                                                                                                                                                                                                {
+                                                                                                                                                                                                                    if (ability.Target == "face-up-personality-out-of-play")
+                                                                                                                                                                                                                    { if (!(type == CardType.Personality && (target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard))) return "Choose a face-up Personality out of play."; }
+                                                                                                                                                                                                                    // The Shadow's Embrace pass (issue #476), batch 5. Celestial Sword of the Phoenix: "your honorably dead Phoenix Clan Personality" -- the Clan named by RequiredKeywords.
+                                                                                                                                                                                                                    else
+                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                        if (ability.Target == "own-honorably-dead-clan-personality")
+                                                                                                                                                                                                                        { if (!(IsOwnHonorablyDeadClanPersonality(target, player.Id, ability))) return "Choose one of your own honorably dead Personalities of that Clan."; }
+                                                                                                                                                                                                                        // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's Follower in a discard pile or in hand (ShadowsEmbraceBatch2.cs).
+                                                                                                                                                                                                                        else
+                                                                                                                                                                                                                        {
+                                                                                                                                                                                                                            if (IsShadowsEmbraceBatch2OutOfPlayTarget(ability.Target))
+                                                                                                                                                                                                                                ValidateShadowsEmbraceBatch2OutOfPlayTarget(ability.Target, player, target);
+                                                                                                                                                                                                                            // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address's "your non-Unique Personality with your Clan alignment in your discard pile".
+                                                                                                                                                                                                                            else
+                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                if (IsEmperorRemainingCOutOfPlayTarget(ability.Target))
+                                                                                                                                                                                                                                { if (!(EmperorRemainingCOutOfPlayTargetAllows(ability.Target, player, target))) return "Choose a non-Unique Personality with your Clan alignment in your discard pile."; }
+                                                                                                                                                                                                                                // Emperor Edition remaining-cards pass (issue #492), group E: the discard-pile and hand categories of the Guidance Celestials.
+                                                                                                                                                                                                                                else
+                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                    if (IsWlHoldingsOutOfPlayTarget(ability.Target)) // issue #674 (WlHoldings.cs): a Terrain in your discard pile; a face-down card in a province
+                                                                                                                                                                                                                                        ValidateWlHoldingsOutOfPlayTarget(ability.Target, player, target);
+                                                                                                                                                                                                                                    else
+                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                        if (IsP5ZoneOutOfPlayTarget(ability.Target)) // issue #503: The New Foundries' Spell in the hand
+                                                                                                                                                                                                                                            ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
+                                                                                                                                                                                                                                        else
+                                                                                                                                                                                                                                        {
+                                                                                                                                                                                                                                            if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
+                                                                                                                                                                                                                                                ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                                                                                                                                                                                                                                            else
+                                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                                if (IsWave821OutOfPlayTarget(ability.Target)) { if (!(Wave821OwnProvinceCardAllows(player, target))) return "Choose a card in one of your provinces."; } // issue #821: the Governor's Estate
+                                                                                                                                                                                                                                                else
+                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                    if (ability.Target == Wave735Abilities.SanctionTarget) { if (!(Wave735SanctionTargetAllows(target))) return "Choose a non-Loyal, face-up Personality in or out of play."; } // issue #735: Suikihime's Sanction
+                                                                                                                                                                                                                                                    else
+                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                        if (ability.Target == Wave742Abilities.BondsCard) { if (!(Wave742BondsTargetAllows(target))) return "Choose a Bonds of Hospitality in play."; } // issue #765: the granted discard names a Strategy kept in play
+                                                                                                                                                                                                                                                        else
+                                                                                                                                                                                                                                                        {
+                                                                                                                                                                                                                                                            if (IsEffectPrimitiveOutOfPlayTarget(ability.Target)) ValidateEffectPrimitiveOutOfPlayTarget(ability.Target, player, target); // issue #690 (P24, EffectPrimitivesCosts.cs): a card in any discard pile
+                                                                                                                                                                                                                                                                                                                                                                                          // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
+                                                                                                                                                                                                                                                            else
+                                                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                                                if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
+                                                                                                                                                                                                                                                                { if (!(WlItemsMiscOutOfPlayTargetAllows(player, target))) return "Choose a Battle Strategy from your discard pile."; }
+                                                                                                                                                                                                                                                                else
+                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                    if (Wave829IsOutOfPlayTarget(ability.Target)) { if (!(Wave829CrabCandidate(player.Id, target))) return "Choose a Crab Clan Personality of yours, face-up in a province or in your discard pile (not dead)."; }
+                                                                                                                                                                                                                                                                    else
+                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                        if (IsWave835OutOfPlayTarget(ability.Target)) { if (!(Wave835YojimboCandidate(player.Id, target))) return "Choose a Yojimbo Personality of yours in your discard pile (not dead)."; } // issue #835: Duty Over All Things
+                                                                                                                                                                                                                                                                        else
+                                                                                                                                                                                                                                                                        {
+                                                                                                                                                                                                                                                                            if (!(InPlay(target))) return "Target a card in play.";
+                                                                                                                                                                                                                                                                            // Deliberate exceptions to "every Battle-timing target must be at the current
+                                                                                                                                                                                                                                                                            // battlefield": "personality-at-adjacent-battlefield" (Moto Gunso's shape -- the
+                                                                                                                                                                                                                                                                            // whole point is a target away from the current battlefield) and "own-unbowed-farm"
+                                                                                                                                                                                                                                                                            // (Ashigaru Elite's cost-target, a Farm to bow, lives in Zone.Home) are exempt by
+                                                                                                                                                                                                                                                                            // their own dedicated Target category. Intervening Spirit / The Earth Flows (issue
+                                                                                                                                                                                                                                                                            // #264) reuse the ordinary "own-personality"/"personality" categories -- reused
+                                                                                                                                                                                                                                                                            // elsewhere with the normal AtBattle expectation (e.g. Ring of Water's own
+                                                                                                                                                                                                                                                                            // "move your target Personality home") -- so they are exempted by ability id
+                                                                                                                                                                                                                                                                            // instead: their whole point is reinforcing a Personality who is NOT there yet.
+                                                                                                                                                                                                                                                                            // actingAsBattle (issue #267): the same generalization as the blanket block above --
+                                                                                                                                                                                                                                                                            // a BattleOrOpen ability's Open half has no battlefield to validate a target
+                                                                                                                                                                                                                                                                            // against at all, so this Require applies only while genuinely acting as Battle.
+                                                                                                                                                                                                                                                                            // Brawl (issue #304): "a Region (at any province)" -- a Region sits in Zone.Region and is
+                                                                                                                                                                                                                                                                            // never AtBattle-eligible; a Terrain in play is always at the current battlefield anyway
+                                                                                                                                                                                                                                                                            // (it is discarded when its battle resolves), so exempting the whole category is exact.
+                                                                                                                                                                                                                                                                            // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
+                                                                                                                                                                                                                                                                            // -- own-personality-at-home is exempt for the same reason.
+                                                                                                                                                                                                                                                                            if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or TfGearAbilities.SpellForCopy /* issue #622: The Thunder Resounds names a Thunder Spell at any location */ or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
+                                                                                                                                                                                                                                                                                or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner" or EmperorRulingR1Abilities.EnemyPersonalityAtBattleOrHome
+                                                                                                                                                                                                                                                                                or "own-unbowed-ring" or WlStratGatesAbilities.OwnUnbowedAnyLocation /* issue #674: Boiling Point */ or PromoCelestialDAbilities.RingSharingTarget /* issue #830: All Within the World straightens a Ring, never in a unit */) && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
+                                                                                                                                                                                                                                                                                && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
+                                                                                                                                                                                                                                                                                    or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move" or "shinoda-move")) { if (!(AtBattle(target))) return "Target or performer must be at the current battlefield."; } // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
+                                                                                                                                                                                                                                                                            if (EngageTargetMustBeAtBattlefield(id, ability, target)) { if (!(AtBattle(target))) return "The target must be at the battlefield being engaged."; } // issues #838/#840: an Engage reaches only cards present at that battlefield
+                                                                                                                                                                                                                                                                            var personality = type == CardType.Personality;
+                                                                                                                                                                                                                                                                            var own = target.OwnerId == player.Id;
+                                                                                                                                                                                                                                                                            // TargetMustBe (P2): a target-status legality condition layered onto whichever category
+                                                                                                                                                                                                                                                                            // follows, exactly like RequireNoAttachments -- "target an enemy dishonorable Personality".
+                                                                                                                                                                                                                                                                            if (!(ability.TargetMustBe is null || MatchesTargetStatus(target, ability.TargetMustBe))) return $"The target must be {ability.TargetMustBe?.Describe()}.";
+                                                                                                                                                                                                                                                                            if (!(!StraightensOnly(id) || !StraightenRefused(target))) return $"{Definition(target).Name} cannot be straightened {(target.StraightenLockedTurn == _state.TurnNumber ? "this turn" : "until its hold is released")}.";
+                                                                                                                                                                                                                                                                            var __valid12 = (!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch
+                                                                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                                                                "shinden" => personality && !own && !target.Bowed,
+                                                                                                                                                                                                                                                                                "air" => personality && Keyword(target, "Air"),
+                                                                                                                                                                                                                                                                                "personality" => personality,
+                                                                                                                                                                                                                                                                                // Ashigaru Elite's cost-target: an unbowed Farm-keyword Holding the performer
+                                                                                                                                                                                                                                                                                // controls. Bowing it (in the execution switch) pays the cost; the effect
+                                                                                                                                                                                                                                                                                // itself is a counter increment, not applied to this target at all.
+                                                                                                                                                                                                                                                                                "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
+                                                                                                                                                                                                                                                                                // Yasuki Tsujiken (oracle-l5r-9469): "target a Holding" -- no ownership or
+                                                                                                                                                                                                                                                                                // bowed-state restriction on either of his own two abilities.
+                                                                                                                                                                                                                                                                                "any-holding" => type == CardType.Holding,
+                                                                                                                                                                                                                                                                                "own-holding" => type == CardType.Holding && own,
+                                                                                                                                                                                                                                                                                "holding-or-stronghold" => type is CardType.Holding or CardType.Stronghold,
+                                                                                                                                                                                                                                                                                // Blade of Champions: one of the reactor's own cards (the Blade included, judged bowed) that the held action accepts.
+                                                                                                                                                                                                                                                                                "redirect-target-own-card" => own && OpenReactionSubject() is { } redirectedAction
+                                                                                                                                                                                                                                                                                    && target.Id != redirectedAction.TargetId && RedirectTargetAccepted(redirectedAction, target.Id, source!),
+                                                                                                                                                                                                                                                                                // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another of the reactor's own Personalities than the one the held action targets.
+                                                                                                                                                                                                                                                                                "own-personality-other-than-held-target" => own && personality && OpenReactionSubject() is { TargetId: { } heldHenshinId } && target.Id != heldHenshinId,
+                                                                                                                                                                                                                                                                                // Hida Mochitoko: a Follower the held action would bow or destroy, as its target or as a cost it pays.
+                                                                                                                                                                                                                                                                                "held-action-follower" => OpenReactionSubject() is { } followerAction && MochitokoFollowers(source!, followerAction).Any(f => f.Id == target.Id),
+                                                                                                                                                                                                                                                                                // Asahina Munefusa (issue #301): "your Temple Holding" -- an own Holding carrying
+                                                                                                                                                                                                                                                                                // every RequiredKeywords entry (any bow state: straightening is the whole point).
+                                                                                                                                                                                                                                                                                // own-unbowed-farm above is the hardcoded Farm-only sibling.
+                                                                                                                                                                                                                                                                                "own-holding-with-keyword" => type == CardType.Holding && own && HasKeywords(target, ability.RequiredKeywords),
+                                                                                                                                                                                                                                                                                // Isawa Mitsuko (issue #301): "an Air Shugenja or a Holding" -- either side's. A
+                                                                                                                                                                                                                                                                                // Personality must carry BOTH Air and Shugenja (the existing "air" category is only
+                                                                                                                                                                                                                                                                                // the Air half).
+                                                                                                                                                                                                                                                                                "air-shugenja-or-holding" => type == CardType.Holding || personality && Keyword(target, "Air") && Keyword(target, "Shugenja"),
+                                                                                                                                                                                                                                                                                // Shosuro Rin (issue #301): "an honorable Personality" -- the plain negation of
+                                                                                                                                                                                                                                                                                // dishonorable-personality below, either side.
+                                                                                                                                                                                                                                                                                "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
+                                                                                                                                                                                                                                                                                "own-personality" => personality && own,
+                                                                                                                                                                                                                                                                                // Embers of War batch 6 (issue #460): Splintered Weapon's and Flanking Unit's Focus Effect transfer ("another of your Personalities") --
+                                                                                                                                                                                                                                                                                // own-earth-shugenja-other-than-wielder's shape (Communion with Earth) without the Shugenja/Earth restriction.
+                                                                                                                                                                                                                                                                                "own-personality-other-than-wielder" => personality && own && target.Id != source!.AttachedTo,
+                                                                                                                                                                                                                                                                                // Embers of War batch 6: Temple to the Elements ("your target Monk or Shugenja").
+                                                                                                                                                                                                                                                                                "own-monk-or-shugenja" => personality && own && (Keyword(target, "Monk") || Keyword(target, "Shugenja")),
+                                                                                                                                                                                                                                                                                // Embers of War batch 6: The Ancestral Sword of Hantei - exp ("target a card in a unit") reuses the existing any-unit-card category (Shiba
+                                                                                                                                                                                                                                                                                // Tsukimi, Honor and Treachery pass) unchanged -- see its own case below.
+                                                                                                                                                                                                                                                                                // Embers of War batch 6: Flanking Unit ("a target Personality at the current battlefield") -- either side's.
+                                                                                                                                                                                                                                                                                "personality-at-current-battlefield" => personality && AtBattle(target),
+                                                                                                                                                                                                                                                                                // A Fugitive Apprehended: an enemy card with no attachments whose Gold Cost is lower than the performing Personality's.
+                                                                                                                                                                                                                                                                                "enemy-bare-card-lower-gold-than-performer" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                                                                                                                                                                                                                                                                                    && !HasAttachments(target) && CardGoldCost(target) < CardGoldCost(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // ...and the Magistrate's optional second target: any enemy card, but only when the performer is a Magistrate.
+                                                                                                                                                                                                                                                                                "enemy-card-for-magistrate" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                                                                                                                                                                                                                                                                                    && command.PerformerId is not null && Keyword(Card(command.PerformerId), "Magistrate"),
+                                                                                                                                                                                                                                                                                // Dislodge the Foe: one of your Tacticians at a battlefield other than the current one (all of them at one; ValidatePerformersTogether).
+                                                                                                                                                                                                                                                                                "own-tactician-away-from-battle" => personality && own && Keyword(target, "Tactician") && target.Zone == Zone.Battlefield && target.ProvinceIndex != _state.CurrentBattleProvince,
+                                                                                                                                                                                                                                                                                // Dislodge the Foe: the enemy Personality who opposes the chosen Tacticians -- at the battlefield they stand at (any enemy Personality until one is chosen, so the default offer is judged from the first).
+                                                                                                                                                                                                                                                                                "enemy-personality-where-performers-stand" => personality && !own && (SlotCards(command, "tacticians").FirstOrDefault() is not { } standing
+                                                                                                                                                                                                                                                                                    || target.Zone == Zone.Battlefield && target.ProvinceIndex == standing.ProvinceIndex),
+                                                                                                                                                                                                                                                                                // Kyuden Kitsune: "your target Forest" -- an unbowed card of the acting player's with the keyword.
+                                                                                                                                                                                                                                                                                "own-unbowed-card-with-keyword" => own && !target.Bowed && HasKeywords(target, ability.RequiredKeywords),
+                                                                                                                                                                                                                                                                                // The Shadow's Embrace pass (issue #476), batch 1: Chuda Hitaka's "a non-Stronghold Jade card" -- any player's card in play with the required keywords
+                                                                                                                                                                                                                                                                                // other than a Stronghold (a Region is never one: no Region of the reference catalogue carries Jade, and a Region's own discard is its province's).
+                                                                                                                                                                                                                                                                                "non-stronghold-card-with-keyword" => type is not (CardType.Stronghold or CardType.Region) && HasKeywords(target, ability.RequiredKeywords),
+                                                                                                                                                                                                                                                                                // Great Sacrifice: "an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending".
+                                                                                                                                                                                                                                                                                "enemy-unit-within-performer-sacrifice" => personality && !own && UnitTotalForce(target) <= SacrificeReach(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Rage of the Spirits: an enemy Personality or Follower with Force lower than or equal to the performing Spirit's.
+                                                                                                                                                                                                                                                                                "enemy-force-lte-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Interference: "a target Stronghold" -- either player's.
+                                                                                                                                                                                                                                                                                "stronghold" => type == CardType.Stronghold,
+                                                                                                                                                                                                                                                                                // Taming the Beast: "your Nonhuman" -- a Personality or a Follower of the acting player's carrying the required keywords (any bow state: straightening it is the point).
+                                                                                                                                                                                                                                                                                "own-unit-card-with-keyword" => own && (personality || type == CardType.Follower) && HasKeywords(target, ability.RequiredKeywords),
+                                                                                                                                                                                                                                                                                // Gates of Chikushudo (issue #398): "your created Spirit Personality" -- a created card (a CreatedOnly scan or a created copy) in play, with the required keywords.
+                                                                                                                                                                                                                                                                                "own-created-personality" => personality && own && IsCreatedCard(target) && (ability.RequiredKeywords is null || HasKeywords(target, ability.RequiredKeywords)),
+                                                                                                                                                                                                                                                                                // The Tale of the Disgraced (issue #369): "your target unbowed Personality".
+                                                                                                                                                                                                                                                                                "own-unbowed-personality" => personality && own && !target.Bowed,
+                                                                                                                                                                                                                                                                                // The Wave Persists (issue #364): "target your Personality there" -- a Reaction has no Battle-timing location Require of its own.
+                                                                                                                                                                                                                                                                                "own-personality-at-battle" => personality && own && AtBattle(target),
+                                                                                                                                                                                                                                                                                // Stand as the Mountain (oracle-l5r-7459, issue #460 batch 4): "one or two of your performing Personalities with 7 or
+                                                                                                                                                                                                                                                                                // higher base Force" -- own-personality-at-battle narrowed by a printed-Force floor (the same "Force >= N" comparison
+                                                                                                                                                                                                                                                                                // Charge into Danger's own Slots-free bonus already reads, Definition(performer).Force >= 7).
+                                                                                                                                                                                                                                                                                "own-personality-at-battle-force-7-plus" => personality && own && AtBattle(target) && Definition(target).Force >= 7,
+                                                                                                                                                                                                                                                                                // Quick Recovery (issue #364): "a bowed card in his unit (which may be him)" -- the chosen performer or one of his attachments.
+                                                                                                                                                                                                                                                                                "bowed-card-in-performer-unit" => target.Bowed && UnitHostId(target) == command.PerformerId,
+                                                                                                                                                                                                                                                                                // Return to Action (issue #331): "target your Personality at home" -- own, in Zone.Home (a
+                                                                                                                                                                                                                                                                                // Personality out of play, at a battlefield or dead never qualifies), bowed or not: the card
+                                                                                                                                                                                                                                                                                // straightens him afterward, so a bowed one is a legal (and the best) target.
+                                                                                                                                                                                                                                                                                "own-personality-at-home" => personality && own && target.Zone == Zone.Home,
+                                                                                                                                                                                                                                                                                // Knowledge and Power (issue #353): "a target Personality's tokens" -- either side's, any Personality that has at least one token.
+                                                                                                                                                                                                                                                                                "personality-with-token" => personality && target.Tokens.Count > 0,
+                                                                                                                                                                                                                                                                                // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
+                                                                                                                                                                                                                                                                                // Personality controlled by the active player" -- "if it is not your turn" is
+                                                                                                                                                                                                                                                                                // checked separately below (a per-id Require, not part of this Target shape).
+                                                                                                                                                                                                                                                                                "unbowed-personality-controlled-by-active-player" => personality && !target.Bowed && target.OwnerId == _state.ActivePlayerId,
+                                                                                                                                                                                                                                                                                // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "a Personality controlled by the active player", any bow state.
+                                                                                                                                                                                                                                                                                "personality-controlled-by-active-player" => personality && target.OwnerId == _state.ActivePlayerId,
+                                                                                                                                                                                                                                                                                // Ritual Preparation (issue #192): "your target card in a unit" -- either
+                                                                                                                                                                                                                                                                                // half of a unit (the Personality herself, or an attached Follower), own,
+                                                                                                                                                                                                                                                                                // in play. Items/Spells are never described as "in a unit" (core rules:
+                                                                                                                                                                                                                                                                                // that phrase is reserved for Personality/Follower combat participants).
+                                                                                                                                                                                                                                                                                "own-unit-card" => own && (personality || type == CardType.Follower),
+                                                                                                                                                                                                                                                                                // Ring of Air (issue #194): "your target Personality or attachment" -- own
+                                                                                                                                                                                                                                                                                // only, either half of a unit (unlike own-unit-card elsewhere, this also
+                                                                                                                                                                                                                                                                                // includes Spells, since a Spell is straightenable just like any attachment).
+                                                                                                                                                                                                                                                                                "personality-or-attachment" => own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
+                                                                                                                                                                                                                                                                                // Generic "Choose your performing/target [Keyword(s)] Personality" -- for a
+                                                                                                                                                                                                                                                                                // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
+                                                                                                                                                                                                                                                                                // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeywords.
+                                                                                                                                                                                                                                                                                "own-personality-with-keyword" => personality && own && HasKeywords(target, ability.RequiredKeywords),
+                                                                                                                                                                                                                                                                                // Sanctuary of the Waves (issue #295): "target this Shugenja, or, if this
+                                                                                                                                                                                                                                                                                // Shugenja is Water, you may target another of your Personalities" -- the
+                                                                                                                                                                                                                                                                                // Target-side mirror of own-wielder-or-source-with-wielder-keyword's own
+                                                                                                                                                                                                                                                                                // Performer-side cost choice: the default candidate is always the wielder
+                                                                                                                                                                                                                                                                                // himself; a DIFFERENT own Personality only qualifies once the wielder's own
+                                                                                                                                                                                                                                                                                // keyword condition holds.
+                                                                                                                                                                                                                                                                                "own-wielder-or-personality-with-wielder-keyword" => own && personality &&
+                                                                                                                                                                                                                                                                                    (target.Id == Card(source!.AttachedTo!).Id || HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords)),
+                                                                                                                                                                                                                                                                                "enemy-personality" => personality && !own,
+                                                                                                                                                                                                                                                                                // Embers of War pass (issue #460, batch 4): an enemy-only sibling of personality-at-any-location (Tsuruchi Nobukatsu, issue #453 batch 4) -- the
+                                                                                                                                                                                                                                                                                // Target-side half of the AtAnyLocation gap oracle-l5r-5941/6727 were blocked on: every existing keyword-Performer "at any location" category
+                                                                                                                                                                                                                                                                                // (own-unbowed-personality-with-keyword-at-any-location) already exists, but no TARGET category let the chosen enemy Personality itself stand
+                                                                                                                                                                                                                                                                                // anywhere but the current battlefield while acting as Battle. Sheathing the Sword (oracle-l5r-6727) and Tactical Trap (oracle-l5r-7717) are its
+                                                                                                                                                                                                                                                                                // first two consumers.
+                                                                                                                                                                                                                                                                                "enemy-personality-at-any-location" => personality && !own && (!actingAsBattle || AtAnyLocation(target)),
+                                                                                                                                                                                                                                                                                // Forgotten Legacy pass (issue #467), batch 4. Intimidation: "another player's Personality not at the current battlefield" -- at home or at another
+                                                                                                                                                                                                                                                                                // unresolved battlefield (AtAnyLocation), never the current one (exempt from the AtBattle Require above, since that is the point).
+                                                                                                                                                                                                                                                                                "enemy-personality-not-at-battle" => personality && !own && AtAnyLocation(target) && !AtBattle(target),
+                                                                                                                                                                                                                                                                                // Steadfast Defense: "a Personality or Follower" (either side's; at the current battlefield while acting as Battle, the ordinary check above).
+                                                                                                                                                                                                                                                                                "personality-or-follower" => personality || type == CardType.Follower && target.Zone == Zone.Attached,
+                                                                                                                                                                                                                                                                                // Sundering Strike: "one of his attachments" -- attached to the card chosen for the ability's "target" slot (Hiruma Sawai's slot-relative shape).
+                                                                                                                                                                                                                                                                                "attachment-of-slot-target" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                                                                                                                                                                                                                                                                                    && SlotCards(command, "target").FirstOrDefault() is { } attachmentHost && target.AttachedTo == attachmentHost.Id,
+                                                                                                                                                                                                                                                                                // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs). Sudden Movement: "two Personalities controlled by the same player at
+                                                                                                                                                                                                                                                                                // different locations" -- the first has such a partner (personality-with-switch-partner); the second is the first one's partner: the same controller, at a
+                                                                                                                                                                                                                                                                                // location of its own (both exempt from the AtBattle Require above, since the point is a Personality elsewhere).
+                                                                                                                                                                                                                                                                                "personality-with-switch-partner" => personality && HasSwitchPartner(target),
+                                                                                                                                                                                                                                                                                "personality-same-controller-as-first-elsewhere" => personality && SwitchPartnerAllowed(command, target),
+                                                                                                                                                                                                                                                                                // Theological Indecision: "a Personality with 3 or higher Chi" (current Chi, the reading of every Chi-comparing category).
+                                                                                                                                                                                                                                                                                "personality-chi-3-plus" => personality && PersonalityChi(target) >= 3,
+                                                                                                                                                                                                                                                                                // Thuggish Techniques: "a Personality without attachments and with lower Force [than the performer], or a Follower".
+                                                                                                                                                                                                                                                                                "bare-personality-lower-force-than-performer-or-follower" => type == CardType.Follower && target.Zone == Zone.Attached
+                                                                                                                                                                                                                                                                                    || personality && !HasAttachments(target) && command.PerformerId is not null && CardForce(target) < CardForce(Card(command.PerformerId)),
+                                                                                                                                                                                                                                                                                // Watchers in the Dark: "a card in a unit there" on a Reaction (never acting as Battle, so the location is checked explicitly), either side's.
+                                                                                                                                                                                                                                                                                "unit-card-explicitly-at-battle" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && AtBattle(target),
+                                                                                                                                                                                                                                                                                // Thick Marsh (oracle-l5r-8445, issue #460 batch 4): its "bow an enemy card at the current battlefield" is a Reaction (Trigger
+                                                                                                                                                                                                                                                                                // own-enters-play), not a Battle-timed ability, so the generic actingAsBattle AtBattle enforcement below never applies to it --
+                                                                                                                                                                                                                                                                                // an explicit AtBattle check is required here instead (distinct from the plain "enemy-card" category, which several Battle-timed
+                                                                                                                                                                                                                                                                                // abilities rely on that generic enforcement for).
+                                                                                                                                                                                                                                                                                "enemy-card-explicitly-at-battle" => !own && AtBattle(target),
+                                                                                                                                                                                                                                                                                // Stuck in Rokugan (oracle-l5r-7593, issue #460 batch 4): "a Celestial" (either player's) currently in play -- Zone.Celestial,
+                                                                                                                                                                                                                                                                                // the same zone ResolveCelestial's own self-replacement discards from.
+                                                                                                                                                                                                                                                                                "in-play-celestial" => type == CardType.Celestial && target.Zone == Zone.Celestial,
+                                                                                                                                                                                                                                                                                // Forgotten Legacy pass (issue #467), batch 5. Ageless Shrine: "a Nonhuman or Samurai" (either player's), and "one of his attachments if he is
+                                                                                                                                                                                                                                                                                // Nonhuman" -- an attachment of the card chosen for the "target" slot.
+                                                                                                                                                                                                                                                                                "nonhuman-or-samurai-personality" => personality && (Keyword(target, "Nonhuman") || Keyword(target, "Samurai")),
+                                                                                                                                                                                                                                                                                "attachment-of-nonhuman-slot-target" => target.Zone == Zone.Attached && SlotCards(command, "target").FirstOrDefault() is { } agelessHost
+                                                                                                                                                                                                                                                                                    && target.AttachedTo == agelessHost.Id && Keyword(agelessHost, "Nonhuman"),
+                                                                                                                                                                                                                                                                                // Ryoshun's Guidance: another of the reactor's own non-Stronghold cards at the targeted card's location, that the held action accepts.
+                                                                                                                                                                                                                                                                                "redirect-target-own-non-stronghold-at-affected-location" => own && type != CardType.Stronghold && OpenReactionSubject() is { TargetId: { } ryoshunAffectedId } ryoshunAction
+                                                                                                                                                                                                                                                                                    && target.Id != ryoshunAffectedId && LocationOf(target) is { } ryoshunLocation && ryoshunLocation == LocationOf(Card(ryoshunAffectedId)) && ActionAcceptsTarget(ryoshunAction, target.Id),
+                                                                                                                                                                                                                                                                                // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs). Kuon's Legacy: "a card at his location" (his performer's: the same battlefield, or his
+                                                                                                                                                                                                                                                                                // controller's home). Grief: "a Personality controlled by the same player" whose Personality the last resolved action destroyed. I Cast Two Shadows: "your Personality
+                                                                                                                                                                                                                                                                                // in a Ninja unit" the last resolved action moved home from a battlefield.
+                                                                                                                                                                                                                                                                                "card-at-performer-location" => command.PerformerId is not null && ShadowsEmbraceLocation(target) is { } kuonLocation && kuonLocation == ShadowsEmbraceLocation(Card(command.PerformerId)),
+                                                                                                                                                                                                                                                                                "personality-of-player-last-action-destroyed" => personality && LastActionDestroyedPersonalityOf(target.OwnerId),
+                                                                                                                                                                                                                                                                                "own-personality-moved-home-in-ninja-unit" => personality && own && target.Zone == Zone.Home && LastActionMovedHomeFrom(target) is not null && InNinjaUnit(target),
+                                                                                                                                                                                                                                                                                "enemy-personality-without-armor" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Armor")),
+                                                                                                                                                                                                                                                                                "own-bowed" => personality && own && target.Bowed,
+                                                                                                                                                                                                                                                                                "own-opposed" => personality && own && Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                                                                                                                                                                                                                                                                                "enemy-force" => !own && type is CardType.Personality or CardType.Follower,
+                                                                                                                                                                                                                                                                                "enemy-follower" => !own && type == CardType.Follower,
+                                                                                                                                                                                                                                                                                // Never Safe: "an enemy Personality or Follower".
+                                                                                                                                                                                                                                                                                "enemy-personality-or-follower" => !own && type is CardType.Personality or CardType.Follower,
+                                                                                                                                                                                                                                                                                "any-card" => true,
+                                                                                                                                                                                                                                                                                "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
+                                                                                                                                                                                                                                                                                "defending" => personality && target.OwnerId != _state.ActivePlayerId,
+                                                                                                                                                                                                                                                                                "enemy-attacking" => personality && (!own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)) || FavorMempoAllowsAnyUnit(id, player, target) || RulebookAllowsAnyTarget(id, player.Id, command)), // P19: a rulebook modifier's any-target. // Mempo of the Amethyst Champion (issue #667): any player's unit, attacking or not. // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Tokoru's Bear (oracle-l5r-10025, issue #299): "an attacking enemy card" -- not
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // just an attacking Personality (enemy-attacking above) but any card in an
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // attacking unit: the Personality himself or one of his attached Followers/
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Items/Spells. "Attacking" is a property of the UNIT (its host Personality's
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // controller is the active player), so an attachment is judged by its host,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // not by its own OwnerId (Cultist Infiltrator can sit on an enemy Personality).
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Must also be at the current battlefield -- already required for every
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Battle-timed target by the shared Require above, which resolves an
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // attachment through its own parent's location.
+                                                                                                                                                                                                                                                                                "enemy-attacking-card" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                                                                                                                                                                                                                                                                                    && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
+                                                                                                                                                                                                                                                                                "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                                                                                                                                                                                                                                                                                // A Stain Cleansed: "an enemy card without attachments or an enemy [Personality's] unit" -- an enemy Personality (whose unit is priced whole) or an enemy attachment.
+                                                                                                                                                                                                                                                                                "enemy-personality-or-attachment" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
+                                                                                                                                                                                                                                                                                // Hida Mimori (issue #301): "a bowed enemy card" -- a card in a unit (the Personality
+                                                                                                                                                                                                                                                                                // or one of its attached Followers/Items/Spells), enemy-owned and currently bowed.
+                                                                                                                                                                                                                                                                                // The shared Battle-timing AtBattle Require above already resolves an attachment
+                                                                                                                                                                                                                                                                                // through its own host's battlefield. The mirror image of own-bowed (Personality-only,
+                                                                                                                                                                                                                                                                                // own) below.
+                                                                                                                                                                                                                                                                                "enemy-bowed-card" => !own && target.Bowed && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
+                                                                                                                                                                                                                                                                                "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                                                                                                                                                                                                                                                                                // You Are Unworthy (oracle-l5r-9683, issue #460 batch 4): "an attachment with Force equal to or lower than your Paragon's Personal
+                                                                                                                                                                                                                                                                                // Honor" -- the plain "attachment" category above, narrowed by a numeric compare against the chosen PERFORMER's own printed
+                                                                                                                                                                                                                                                                                // PersonalHonor (Surety of Purpose's own performer-stat-vs-target-stat shape, read against an attachment's Force instead).
+                                                                                                                                                                                                                                                                                "attachment-force-lte-performer-honor" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                                                                                                                                                                                                                                                                                    && Definition(target).Force <= Definition(Card(command.PerformerId!)).PersonalHonor,
+                                                                                                                                                                                                                                                                                // Champion of Thunder: "any card in this unit" -- the reacting card's own
+                                                                                                                                                                                                                                                                                // unit (source is Champion itself here), always in play by construction
+                                                                                                                                                                                                                                                                                // (every member of a unit is either the host Personality or one of its own
+                                                                                                                                                                                                                                                                                // attachments), so no further InPlay/ownership check is needed beyond the
+                                                                                                                                                                                                                                                                                // blanket one already applied above.
+                                                                                                                                                                                                                                                                                "own-unit-member" => UnitHostId(target) == UnitHostId(source!),
+                                                                                                                                                                                                                                                                                // A Close Call's own Battle half: "target a Personality with an attachment" --
+                                                                                                                                                                                                                                                                                // HasAttachments already exists for exactly this boolean (a count, not "any
+                                                                                                                                                                                                                                                                                // specific kind"), reused verbatim.
+                                                                                                                                                                                                                                                                                "personality-with-attachment" => personality && HasAttachments(target),
+                                                                                                                                                                                                                                                                                "lobby" => personality && own && (!target.Bowed || Keyword(target, PromoEmperorItemsAbilities.LobbiesWithoutBowing)) && CardPersonalHonor(target) >= 1,
+                                                                                                                                                                                                                                                                                "fewer-or-equal-followers-than-performer" => personality &&
+                                                                                                                                                                                                                                                                                    Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
+                                                                                                                                                                                                                                                                                // Unexpected Support: the enemy-only counterpart to journeys-end-move's own
+                                                                                                                                                                                                                                                                                // category above (which targets either side, per its own printed text) -- same
+                                                                                                                                                                                                                                                                                // Follower-count comparison, just filtered to !own like every other paired
+                                                                                                                                                                                                                                                                                // "X"/"enemy-X" Target category already in this switch.
+                                                                                                                                                                                                                                                                                "enemy-fewer-or-equal-followers-than-performer" => personality && !own &&
+                                                                                                                                                                                                                                                                                    Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
+                                                                                                                                                                                                                                                                                "lower-or-equal-honor-than-performer" => personality && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Moving and Unmoving (oracle-l5r-5423, issue #460): "an enemy Personality with lower Force" -- lower-or-equal-honor-than-
+                                                                                                                                                                                                                                                                                // performer's own shape, off CardForce against the performer instead of CardPersonalHonor against the source.
+                                                                                                                                                                                                                                                                                "enemy-personality-force-lt-performer" => personality && !own && CardForce(target) < CardForce(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // The Shadow's Embrace pass (issue #476), batch 6. Bishamon's Tower: "an enemy card with lower Force and no attachments" -- an enemy Follower, or an enemy
+                                                                                                                                                                                                                                                                                // Personality without attachments (enemy-card-without-attachments' reading), with Force strictly below the performer's.
+                                                                                                                                                                                                                                                                                "enemy-card-force-lt-performer-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target))
+                                                                                                                                                                                                                                                                                    && CardForce(target) < CardForce(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Fortress of Lidless Eyes' granted ability: "a card titled Fortress of Lidless Eyes" (anyone's, in play).
+                                                                                                                                                                                                                                                                                "card-titled-fortress-of-lidless-eyes" => Definition(target).Name == FortressOfLidlessEyesTitle,
+                                                                                                                                                                                                                                                                                // Forgotten Legacy pass (issue #467), batch 3. Consideration: "another of your target Personalities" -- any of the acting player's own, other than his performer.
+                                                                                                                                                                                                                                                                                "own-personality-other-than-performer" => personality && own && target.Id != command.PerformerId,
+                                                                                                                                                                                                                                                                                // Feint & Strike's optional second slot: an attachment in the first slot's enemy Personality's unit, listed only while the performing Commander has a Follower.
+                                                                                                                                                                                                                                                                                "feint-strike-attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                                                                                                                                                                                                                                                                                    && SlotCards(command, "target").FirstOrDefault() is { } feintPrimary && target.AttachedTo == feintPrimary.Id
+                                                                                                                                                                                                                                                                                    && command.PerformerId is not null && Attachments(command.PerformerId).Any(a => Definition(a).Type == CardType.Follower),
+                                                                                                                                                                                                                                                                                "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
+                                                                                                                                                                                                                                                                                "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
+                                                                                                                                                                                                                                                                                "personality-lower-honor-than-self" => personality && CardPersonalHonor(target) < CardPersonalHonor(source!),
+                                                                                                                                                                                                                                                                                // Akodo Dairuko (issue #198): the same shape as -than-self above, restricted
+                                                                                                                                                                                                                                                                                // to an enemy.
+                                                                                                                                                                                                                                                                                "enemy-personality-lower-honor-than-self" => personality && !own && CardPersonalHonor(target) < CardPersonalHonor(source!),
+                                                                                                                                                                                                                                                                                // Spirit of the Paragon's granted action: "an enemy Personality with either equal or lower Force, or equal or lower Personal Honor" than the Personality
+                                                                                                                                                                                                                                                                                // holding it -- either comparison is enough, each read live.
+                                                                                                                                                                                                                                                                                "enemy-personality-force-or-honor-lte-self" => personality && !own && (CardForce(target) <= CardForce(source!) || CardPersonalHonor(target) <= CardPersonalHonor(source!)),
+                                                                                                                                                                                                                                                                                // Akodo Furu (issue #198): a bare Chi comparison against the source itself
+                                                                                                                                                                                                                                                                                // (not a separately-chosen Performer, unlike enemy-personality-chi-lte-performer),
+                                                                                                                                                                                                                                                                                // and not restricted to an enemy.
+                                                                                                                                                                                                                                                                                "personality-chi-lte-self" => personality && PersonalityChi(target) <= PersonalityChi(source!),
+                                                                                                                                                                                                                                                                                // Akodo Michitsu (issue #198) reuses the existing "enemy-attachment" category
+                                                                                                                                                                                                                                                                                // above verbatim -- no new Target needed.
+                                                                                                                                                                                                                                                                                // Akodo Tsudoken's own second Experienced printing (issue #198): own Personality,
+                                                                                                                                                                                                                                                                                // Lion Clan OR carrying the Fallen keyword.
+                                                                                                                                                                                                                                                                                "own-lion-or-fallen-personality" => own && personality && (HasClanAffiliation(target, "Lion") || Keyword(target, "Fallen")),
+                                                                                                                                                                                                                                                                                // Ikoma Masumi (issue #198): the same Follower-or-unattached-Personality shape
+                                                                                                                                                                                                                                                                                // the Ranged/Melee "attack" Target already uses, as a bare enemy-card check
+                                                                                                                                                                                                                                                                                // (no Attack strength/kind involved here, just "without attachments").
+                                                                                                                                                                                                                                                                                "enemy-card-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target)),
+                                                                                                                                                                                                                                                                                // Emperor Edition remaining-cards pass (issue #492), group G: Sasumata's "an enemy card without a Weapon or Armor" and Kaiu House Guard's "an enemy card without attachments whose unit has lower total Force than this unit".
+                                                                                                                                                                                                                                                                                "enemy-card-without-weapon-or-armor" => EnemyCardWithoutWeaponOrArmor(target, player.Id),
+                                                                                                                                                                                                                                                                                "enemy-card-without-attachments-unit-force-lt-source-unit" => EnemyBareCardWhoseUnitHasLowerForce(target, source!, player.Id),
+                                                                                                                                                                                                                                                                                // Fires of Turmoil (issue #295): the same Follower-or-unattached-Personality
+                                                                                                                                                                                                                                                                                // shape as enemy-card-without-attachments above, minus its enemy restriction --
+                                                                                                                                                                                                                                                                                // this card's own "Target a card without attachments" is printed with no
+                                                                                                                                                                                                                                                                                // ownership qualifier at all.
+                                                                                                                                                                                                                                                                                "unattached-unit-card" => type == CardType.Follower || personality && !HasAttachments(target),
+                                                                                                                                                                                                                                                                                // Ikoma Tsukasa (issue #198): the same shape as above, but the "without
+                                                                                                                                                                                                                                                                                // attachments" restriction is waived entirely while the performer's controller
+                                                                                                                                                                                                                                                                                // controls any Terrain.
+                                                                                                                                                                                                                                                                                "enemy-unit-card-terrain-conditional" => !own && (type == CardType.Follower || personality) &&
+                                                                                                                                                                                                                                                                                    (ControlsKeyword(player.Id, "Terrain") || !HasAttachments(target)),
+                                                                                                                                                                                                                                                                                "enemy-personality-fewer-weapons-than-self" => personality && !own &&
+                                                                                                                                                                                                                                                                                    Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
+                                                                                                                                                                                                                                                                                "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
+                                                                                                                                                                                                                                                                                // Brawl (issue #304): a Region attached to any province (either player's), or a
+                                                                                                                                                                                                                                                                                // Terrain in play. Neither restricts ownership.
+                                                                                                                                                                                                                                                                                "region-or-terrain" => type == CardType.Region && target.Zone == Zone.Region
+                                                                                                                                                                                                                                                                                    || type == CardType.Strategy && target.Zone == Zone.Battlefield && Keyword(target, "Terrain"),
+                                                                                                                                                                                                                                                                                // Province adjacency (Moto Gunso's shape: "...at the current battlefield and
+                                                                                                                                                                                                                                                                                // at each adjacent battlefield"): the target's own province, not the current
+                                                                                                                                                                                                                                                                                // one, must be adjacent to it. See AdjacentProvinces.
+                                                                                                                                                                                                                                                                                "personality-at-adjacent-battlefield" => personality && target.Zone == Zone.Battlefield &&
+                                                                                                                                                                                                                                                                                    AdjacentBattlefields(_state.CurrentBattleProvince!.Value).Contains(target.ProvinceIndex ?? -1),
+                                                                                                                                                                                                                                                                                // Compared against the chosen Performer (a separately-selected card), unlike
+                                                                                                                                                                                                                                                                                // "-than-self" categories above which compare against the ability's own source.
+                                                                                                                                                                                                                                                                                // "Equal or lower Chi" is CURRENT Chi (Mendon's reading, issue #336): printed plus modifiers plus Items, exactly as personality-chi-lte-self reads it.
+                                                                                                                                                                                                                                                                                "enemy-personality-chi-lte-performer" => personality && !own && PersonalityChi(target) <= PersonalityChi(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Volcano Tattoo (issue #190): "a card without attachments in his unit" -- the
+                                                                                                                                                                                                                                                                                // same Follower-or-unattached-Personality shape the Ranged/Melee "attack" Target
+                                                                                                                                                                                                                                                                                // already uses above, but compared against the unit's own Personality's Chi
+                                                                                                                                                                                                                                                                                // (via PersonalityChi, which includes Item-attachment bonuses) rather than a
+                                                                                                                                                                                                                                                                                // Force/strength check.
+                                                                                                                                                                                                                                                                                // Issue #498 (Makito's reading): any card of the unit without attachments -- a Follower, an Item, a Spell... -- or the Personality when he has none.
+                                                                                                                                                                                                                                                                                "enemy-unattached-unit-card-chi-lte-performer" => !own && IsUnitCardWithoutAttachments(target) &&
+                                                                                                                                                                                                                                                                                    PersonalityChi(Card(UnitHostId(target))) <= PersonalityChi(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Bounty Hunter: "a target attachment or a target dishonorable Personality" --
+                                                                                                                                                                                                                                                                                // an OR of two otherwise-unrelated existing categories.
+                                                                                                                                                                                                                                                                                "attachment-or-dishonorable-personality" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                                                                                                                                                                                                                                                                                    || personality && target.Dishonorable,
+                                                                                                                                                                                                                                                                                // Rumormonger: any Personality controlled by a player who controls at least one
+                                                                                                                                                                                                                                                                                // Dishonorable Personality (not necessarily this target itself).
+                                                                                                                                                                                                                                                                                "personality-controller-controls-dishonorable" => personality &&
+                                                                                                                                                                                                                                                                                    _state.Cards.Values.Any(c => c.OwnerId == target.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable),
+                                                                                                                                                                                                                                                                                // Dragon Clan review (issue #207): Kitsuki Fujimura -- any Dishonorable
+                                                                                                                                                                                                                                                                                // Personality, either side.
+                                                                                                                                                                                                                                                                                "dishonorable-personality" => MatchesTargetStatus(target, TargetStatus.IsDishonorable),
+                                                                                                                                                                                                                                                                                // Mirumoto Kouzei: an enemy Personality or Follower with Force at or below
+                                                                                                                                                                                                                                                                                // the source's own current Force.
+                                                                                                                                                                                                                                                                                "enemy-card-force-lte-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(source!),
+                                                                                                                                                                                                                                                                                // Mirumoto Mitoshi: a Personality (either side) with strictly lower Force
+                                                                                                                                                                                                                                                                                // than the source's own.
+                                                                                                                                                                                                                                                                                "personality-force-lt-self" => personality && CardForce(target) < CardForce(source!),
+                                                                                                                                                                                                                                                                                // Daigotsu Kanpeki - exp (issue #477 batch 6): "an enemy Personality with lower Force" than his own.
+                                                                                                                                                                                                                                                                                "enemy-personality-force-lt-self" => personality && !own && CardForce(target) < CardForce(source!),
+                                                                                                                                                                                                                                                                                // Strategic Sacrifice (issue #264): a card in a unit (either side) with Force
+                                                                                                                                                                                                                                                                                // at or below the current battlefield's own province's strength -- "the
+                                                                                                                                                                                                                                                                                // current battlefield's province" is always the Defender's own, the same
+                                                                                                                                                                                                                                                                                // lookup false-ring-of-water-recruit's own Require already uses.
+                                                                                                                                                                                                                                                                                "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
+                                                                                                                                                                                                                                                                                    CardForce(target) <= CurrentProvinceStrength(),
+                                                                                                                                                                                                                                                                                // The Weakness of Man (issue #267): "Force is different from his [the
+                                                                                                                                                                                                                                                                                // performer's] own BASE Force" -- the performer's side of the comparison is
+                                                                                                                                                                                                                                                                                // its own printed Force (Definition(...).Force), not CardForce's live value, so
+                                                                                                                                                                                                                                                                                // a Force-modifying effect on the performer never changes who is a legal target
+                                                                                                                                                                                                                                                                                // mid-battle. The target's own side is its live Force, same as every other
+                                                                                                                                                                                                                                                                                // Force-comparison Target category here. (personality-force-neq-own-base, the
+                                                                                                                                                                                                                                                                                // target-vs-its-own-base comparison Asako Yorisada and The Weakness of Man's own
+                                                                                                                                                                                                                                                                                // wiring actually use, is already registered below.)
+                                                                                                                                                                                                                                                                                "personality-force-neq-performer-base" => personality && CardForce(target) != Definition(Card(command.PerformerId!)).Force,
+                                                                                                                                                                                                                                                                                // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
+                                                                                                                                                                                                                                                                                // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
+                                                                                                                                                                                                                                                                                // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
+                                                                                                                                                                                                                                                                                "enemy-force-non-cavalry" => !own && type is CardType.Personality or CardType.Follower && !Keyword(target, "Cavalry"),
+                                                                                                                                                                                                                                                                                // Togashi Noboru (issue #216): an enemy Personality with strictly lower Chi
+                                                                                                                                                                                                                                                                                // than his own -- the enemy-scoped counterpart to personality-force-lt-self.
+                                                                                                                                                                                                                                                                                "enemy-personality-chi-lt-self" => personality && !own && PersonalityChi(target) < PersonalityChi(source!),
+                                                                                                                                                                                                                                                                                // Togashi Hizumi (issue #216): "target him" -- the specific Personality this
+                                                                                                                                                                                                                                                                                // action just bowed at Hizumi's own battlefield (OpenBowReactionWindow already
+                                                                                                                                                                                                                                                                                // narrowed the candidate set to exactly that, keyed by location).
+                                                                                                                                                                                                                                                                                "bow-reaction-candidate" => personality && _state.BowReactionCandidateIds.Contains(target.Id),
+                                                                                                                                                                                                                                                                                // Tamori Yayu (issue #216): "one of Yayu's Spells" -- a Spell attached
+                                                                                                                                                                                                                                                                                // specifically to the performer (no separate Performer field -- Yayu acts as
+                                                                                                                                                                                                                                                                                // himself), restricted to Spells only, as the user's own clarification asks.
+                                                                                                                                                                                                                                                                                "own-spell-attached-to-source" => type == CardType.Spell && target.Zone == Zone.Attached && target.AttachedTo == source!.Id,
+                                                                                                                                                                                                                                                                                // Tamori Ruya (issue #216): "a Personality at the same location" as Ruya
+                                                                                                                                                                                                                                                                                // herself (source) -- either side, unrelated to which personality was actually
+                                                                                                                                                                                                                                                                                // bowed by the triggering action. "Location" is Home (associated with a
+                                                                                                                                                                                                                                                                                // player, so only that SAME player's other cards qualify there) or a
+                                                                                                                                                                                                                                                                                // battlefield (associated with a province, so either side's cards there do).
+                                                                                                                                                                                                                                                                                "personality-at-source-location" => personality && SameLocation(target, source!),
+                                                                                                                                                                                                                                                                                // Mirumoto Houken: a Personality (either side) with an attached Weapon-
+                                                                                                                                                                                                                                                                                // keyword Item.
+                                                                                                                                                                                                                                                                                "personality-with-weapon" => personality && Attachments(target.Id).Any(a => Keyword(a, "Weapon")),
+                                                                                                                                                                                                                                                                                // Togashi Hiroto / Tamori Muzu: any enemy card at all (Personality, Follower,
+                                                                                                                                                                                                                                                                                // or an attachment) -- broader than enemy-force (Personality/Follower only)
+                                                                                                                                                                                                                                                                                // or enemy-attachment (attached only); combines with the shared
+                                                                                                                                                                                                                                                                                // RequireNoAttachments flag above, which is already true by construction for
+                                                                                                                                                                                                                                                                                // an attachment (one can never itself carry a further attachment).
+                                                                                                                                                                                                                                                                                "enemy-card" => !own,
+                                                                                                                                                                                                                                                                                // Togashi Korimi, Experienced: subtly different from "without attachments" --
+                                                                                                                                                                                                                                                                                // a card with only BOWED attachments (or none at all) still qualifies.
+                                                                                                                                                                                                                                                                                "enemy-card-without-unbowed-attachments" => !own && !Attachments(target.Id).Any(a => !a.Bowed),
+                                                                                                                                                                                                                                                                                // Bonds of Coin / Gold and Steel (issue #336): "attachments with a (Gold Cost of) 0" -- the attachments of either side, judged by
+                                                                                                                                                                                                                                                                                // their current Gold cost (a Gold cost penalty can take a card to 0).
+                                                                                                                                                                                                                                                                                // Issue #336 fixture: one of the cards the deferred action would move (its source, performer or target, per its MoveSpec).
+                                                                                                                                                                                                                                                                                "deferred-action-mover" => personality && _state.PendingNegatableAbility is { } moverAction && ActionMovers(moverAction).Contains(target.Id),
+                                                                                                                                                                                                                                                                                "zero-cost-attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell && CardGoldCost(target) == 0,
+                                                                                                                                                                                                                                                                                // Gold and Steel: "an enemy Personality with an equal or lower Gold Cost" than the chosen performing Personality.
+                                                                                                                                                                                                                                                                                // Mastering the Elements (issue #420): "your Spell" -- one of the player's own Spells in play, attached to any of his Personalities, other than this card.
+                                                                                                                                                                                                                                                                                "own-spell" => type == CardType.Spell && own && target.Zone == Zone.Attached && target.Id != source!.Id,
+                                                                                                                                                                                                                                                                                // Superior Reach: "an enemy Personality without Weapons".
+                                                                                                                                                                                                                                                                                "enemy-personality-without-weapons" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Weapon")),
+                                                                                                                                                                                                                                                                                // Before the Dawn (issue #431).
+                                                                                                                                                                                                                                                                                "enemy-personality-honor-lt-source-chi" => personality && !own && CardPersonalHonor(target) < PersonalityChi(source!),
+                                                                                                                                                                                                                                                                                "enemy-personality-honor-lte-source-chi" => personality && !own && CardPersonalHonor(target) <= PersonalityChi(source!),
+                                                                                                                                                                                                                                                                                "enemy-force-lte-province-strength" => type is CardType.Personality or CardType.Follower && !own
+                                                                                                                                                                                                                                                                                    && CardForce(target) <= CurrentProvinceStrength(),
+                                                                                                                                                                                                                                                                                "personality-lower-force-than-source" => personality && CardForce(target) < CardForce(source!),
+                                                                                                                                                                                                                                                                                "non-unique-personality" => personality && !Keyword(target, "Unique"),
+                                                                                                                                                                                                                                                                                "enemy-personality-honor-lte-performer" => personality && !own && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                "own-nonhuman-or-undead-personality" => personality && own && (Keyword(target, "Nonhuman") || Keyword(target, "Undead")),
+                                                                                                                                                                                                                                                                                "other-unit" => type is CardType.Personality or CardType.Follower && target.Id != source!.Id,
+                                                                                                                                                                                                                                                                                "personality-honor-lte-source-chi" => personality && CardPersonalHonor(target) <= PersonalityChi(source!),
+                                                                                                                                                                                                                                                                                "enemy-personality-honor-lt-source" => personality && !own && CardPersonalHonor(target) < CardPersonalHonor(source!),
+                                                                                                                                                                                                                                                                                "any-attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                                                                                                                                                                                                                                                                                "enemy-personality-lower-force-or-unarmed" => personality && !own && (CardForce(target) < CardForce(source!) || !Attachments(target.Id).Any(a => Keyword(a, "Weapon"))),
+                                                                                                                                                                                                                                                                                "card-in-dishonorable-unit" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && Card(UnitHostId(target)) is { } leader
+                                                                                                                                                                                                                                                                                    && Definition(leader).Type == CardType.Personality && MatchesTargetStatus(leader, TargetStatus.IsDishonorable),
+                                                                                                                                                                                                                                                                                "enemy-personality-gold-cost-lte-performer" => personality && !own && CardGoldCost(target) <= CardGoldCost(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Seeds of Decay pass (issue #453), batch 1.
+                                                                                                                                                                                                                                                                                // Shifting Terrain: one of the reactor's own Personalities at the Terrain's battlefield, other than the held action's target, that the action accepts.
+                                                                                                                                                                                                                                                                                "redirect-target-own-personality-at-source-battlefield" => own && personality && OpenReactionSubject() is { } terrainAction && target.Id != terrainAction.TargetId
+                                                                                                                                                                                                                                                                                    && source!.Zone == Zone.Battlefield && target.Zone == Zone.Battlefield && target.ProvinceIndex == source.ProvinceIndex && ActionAcceptsTarget(terrainAction, target.Id),
+                                                                                                                                                                                                                                                                                // The Castle of Order: one of the reactor's own Ninja cards at the targeted Ninja's location, other than it, that the action accepts.
+                                                                                                                                                                                                                                                                                "redirect-target-own-ninja-at-affected-location" => own && Keyword(target, "Ninja") && OpenReactionSubject() is { TargetId: { } affectedNinjaId } ninjaAction && target.Id != affectedNinjaId
+                                                                                                                                                                                                                                                                                    && SameLocation(target, Card(affectedNinjaId)) && ActionAcceptsTarget(ninjaAction, target.Id),
+                                                                                                                                                                                                                                                                                // Chugo Seido (issue #492, group F): one of the reactor's own Samurai at the targeted Personality's location, other than it, that the action accepts.
+                                                                                                                                                                                                                                                                                "redirect-target-own-samurai-at-affected-location" => own && personality && Keyword(target, "Samurai") && OpenReactionSubject() is { TargetId: { } affectedSamuraiId } samuraiAction && target.Id != affectedSamuraiId
+                                                                                                                                                                                                                                                                                    && SameLocation(target, Card(affectedSamuraiId)) && ActionAcceptsTarget(samuraiAction, target.Id),
+                                                                                                                                                                                                                                                                                // Exchange of Letters: "another player's unbowed Personality".
+                                                                                                                                                                                                                                                                                "enemy-unbowed-personality" => personality && !own && !target.Bowed,
+                                                                                                                                                                                                                                                                                // Defensive Blockade: "an attacking Follower or Personality" -- a card of the Attacker's army at the battlefield (a Follower is attacking when its host is).
+                                                                                                                                                                                                                                                                                "attacking-follower-or-personality" => (personality || type == CardType.Follower) && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
+                                                                                                                                                                                                                                                                                // Shield Formation: "your defending Personality".
+                                                                                                                                                                                                                                                                                "own-defending-personality" => personality && own && IsDefendingUnit(target),
+                                                                                                                                                                                                                                                                                // Vengeful Dismissal: an enemy Personality with strictly lower current Chi than the chosen performer's.
+                                                                                                                                                                                                                                                                                "enemy-personality-chi-lt-performer" => personality && !own && PersonalityChi(target) < PersonalityChi(Card(command.PerformerId!)),
+                                                                                                                                                                                                                                                                                // Seeds of Decay pass (issue #453), batch 2.
+                                                                                                                                                                                                                                                                                "attacking-personality" => personality && IsAttacking(target) && AtBattle(target),
+                                                                                                                                                                                                                                                                                "holding-or-own-stronghold" => type == CardType.Holding || type == CardType.Stronghold && own,
+                                                                                                                                                                                                                                                                                // Soshi Yoshihara - experienced (oracle-l5r-7373, Embers of War pass, issue #460 batch 2): "Target a Holding or
+                                                                                                                                                                                                                                                                                // Personality" -- either side's, for the ActionLock ("its base abilities may not be used").
+                                                                                                                                                                                                                                                                                "personality-or-holding" => personality || type == CardType.Holding,
+                                                                                                                                                                                                                                                                                "personality-lower-base-honor-than-performer" => personality && Definition(target).PersonalHonor < Definition(Card(command.PerformerId!)).PersonalHonor,
+                                                                                                                                                                                                                                                                                "last-action-performer" => personality && LastActionPerformer()?.Id == target.Id,
+                                                                                                                                                                                                                                                                                // Seeds of Decay pass (issue #453), batch 4.
+                                                                                                                                                                                                                                                                                // Tsuruchi Nobukatsu - exp: "a Personality at any location" (either player's; AtAnyLocation is the printed presence exemption, so the category is exempt from AtBattle above).
+                                                                                                                                                                                                                                                                                "personality-at-any-location" => personality && (!actingAsBattle || AtAnyLocation(target)),
+                                                                                                                                                                                                                                                                                // Daigotsu Yamato: "your Follower at any location" -- attached to another Personality of yours whose location qualifies while acting as Battle, and transferable to the source.
+                                                                                                                                                                                                                                                                                "own-follower-at-any-location" => own && type == CardType.Follower && target.Zone == Zone.Attached && (!actingAsBattle || AtAnyLocation(Card(target.AttachedTo)))
+                                                                                                                                                                                                                                                                                    && source is not null && CanTransferTo(target, source),
+                                                                                                                                                                                                                                                                                // Shinjo Katsuo: "your Follower" (in play, attached; at the current battlefield while acting as Battle -- the ordinary check above).
+                                                                                                                                                                                                                                                                                "own-follower" => own && type == CardType.Follower && target.Zone == Zone.Attached,
+                                                                                                                                                                                                                                                                                // Hiruma Sawai's three slots: a Personality with a Follower; a Personality of the same controller's, not the first; one of the first's Followers the second may attach.
+                                                                                                                                                                                                                                                                                "personality-with-follower" => personality && Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
+                                                                                                                                                                                                                                                                                "personality-same-controller-as-from" => personality && SlotCards(command, "from").FirstOrDefault() is { } from && from.Id != target.Id && from.OwnerId == target.OwnerId,
+                                                                                                                                                                                                                                                                                "follower-of-from-transferable-to" => type == CardType.Follower && SlotCards(command, "from").FirstOrDefault() is { } host && target.AttachedTo == host.Id
+                                                                                                                                                                                                                                                                                    && SlotCards(command, "to").FirstOrDefault() is { } to && CanTransferTo(target, to),
+                                                                                                                                                                                                                                                                                // Hachi's Revenge: "a non-Unique Holding" (either player's).
+                                                                                                                                                                                                                                                                                "non-unique-holding" => type == CardType.Holding && !Keyword(target, "Unique"),
+                                                                                                                                                                                                                                                                                // Second City Port: "a target Market or Port" (either player's Holding with either keyword).
+                                                                                                                                                                                                                                                                                "market-or-port-holding" => type == CardType.Holding && (Keyword(target, "Market") || Keyword(target, "Port")),
+                                                                                                                                                                                                                                                                                // Seeds of Decay pass (issue #453), batch 5
+                                                                                                                                                                                                                                                                                // Master of Beasts: "Shadowlands Nonhumans" -- a Nonhuman Personality or attached Follower that is Shadowlands (Clan alignment or keyword).
+                                                                                                                                                                                                                                                                                "shadowlands-nonhuman" => (personality || type == CardType.Follower && target.Zone == Zone.Attached) && Keyword(target, "Nonhuman") && MatchesTargetStatus(target, TargetStatus.IsShadowlands),
+                                                                                                                                                                                                                                                                                // Peace of the Kami: "your Personality or Follower".
+                                                                                                                                                                                                                                                                                "own-personality-or-follower" => own && (personality || type == CardType.Follower && target.Zone == Zone.Attached),
+                                                                                                                                                                                                                                                                                // The Earth's Strength: "your Earth or Water Shugenja".
+                                                                                                                                                                                                                                                                                "own-earth-or-water-shugenja" => own && personality && Keyword(target, "Shugenja") && (Keyword(target, "Earth") || Keyword(target, "Water")),
+                                                                                                                                                                                                                                                                                // The Earth's Strength's Reaction: a defending Personality the deferred action would move (DeferredActionDefendingMovers).
+                                                                                                                                                                                                                                                                                "deferred-action-defending-mover" => personality && _state.PendingNegatableAbility is { } defenderMoverAction && DeferredActionDefendingMovers(defenderMoverAction).Contains(target.Id, StringComparer.Ordinal),
+                                                                                                                                                                                                                                                                                // Seeds of Decay pass (issue #453), batch 3.
+                                                                                                                                                                                                                                                                                // Asako Chukage - exp: "Bow your target Ring" -- one of the acting player's own unbowed Rings in play (a Ring sits in Zone.Home once put into play).
+                                                                                                                                                                                                                                                                                "own-unbowed-ring" => type == CardType.Ring && own && !target.Bowed,
+                                                                                                                                                                                                                                                                                // Hida Kaiji: "an enemy card with lower Force" -- an enemy Personality or Follower (the cards in a unit with a Force of their own) strictly below his.
+                                                                                                                                                                                                                                                                                "enemy-force-lt-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(source!),
+                                                                                                                                                                                                                                                                                // Emperor Edition Personality pass (issue #477), batch 2. Hida Kisada: one of the reactor's own other Personalities at his location that the held action accepts as its target.
+                                                                                                                                                                                                                                                                                "redirect-target-own-personality-at-source-location" => own && personality && target.Id != source!.Id && OpenReactionSubject() is { } kisadaAction && target.Id != kisadaAction.TargetId
+                                                                                                                                                                                                                                                                                    && SameLocation(target, source) && ActionAcceptsTarget(kisadaAction, target.Id),
+                                                                                                                                                                                                                                                                                // Kuni Shinoda: "another Crab Clan Personality at Shinoda's battlefield" (a Battle-timed source at a battlefield; the target stands there too).
+                                                                                                                                                                                                                                                                                "crab-personality-at-source-battlefield" => own && personality && target.Id != source!.Id && HasClanAffiliation(target, "Crab")
+                                                                                                                                                                                                                                                                                    && source.Zone == Zone.Battlefield && target.Zone == Zone.Battlefield && target.ProvinceIndex == source.ProvinceIndex,
+                                                                                                                                                                                                                                                                                // Hiruma Nitani - exp: "an enemy card with the base Shadowlands keyword" -- any enemy card in a unit whose PRINTED keywords include every RequiredKeywords entry
+                                                                                                                                                                                                                                                                                // (a granted keyword or a Shadowlands Clan alignment is not the base keyword).
+                                                                                                                                                                                                                                                                                "enemy-card-with-printed-keyword" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                                                                                                                                                                                                                                                                                    && (ability.RequiredKeywords ?? []).All(k => PrintedKeyword(target, k)),
+                                                                                                                                                                                                                                                                                // Utaku Hirononri: "a Stables or Cavalry card" -- any card in play carrying ANY of the RequiredKeywords (either side's), unlike the all-of categories.
+                                                                                                                                                                                                                                                                                "card-with-any-required-keyword" => (ability.RequiredKeywords ?? []).Any(k => Keyword(target, k)),
+                                                                                                                                                                                                                                                                                // Asako Jukko: "a Personality with 1 Force or greater".
+                                                                                                                                                                                                                                                                                "personality-force-gte-one" => personality && CardForce(target) >= 1,
+                                                                                                                                                                                                                                                                                // Asako Jukko's optional second switch: only the source card itself.
+                                                                                                                                                                                                                                                                                "source-itself" => source is not null && target.Id == source.Id,
+                                                                                                                                                                                                                                                                                // Shiba Iaimiko's optional second target: a card without attachments in the first slot's target's unit -- listed only while the printed condition can
+                                                                                                                                                                                                                                                                                // hold once the -4F applies (that target's Force is at most 4, so "now 0", and the acting player controls a Shugenja).
+                                                                                                                                                                                                                                                                                "iaimiko-collateral" => IsUnitCardWithoutAttachments(target) && SlotCards(command, "target").FirstOrDefault() is { } iaimikoPrimary
+                                                                                                                                                                                                                                                                                    && UnitHostId(target) == UnitHostId(iaimikoPrimary) && CardForce(iaimikoPrimary) <= 4 && ControlsKeyword(player.Id, "Shugenja"),
+                                                                                                                                                                                                                                                                                // Honor and Treachery pass (issue #458).
+                                                                                                                                                                                                                                                                                // Bayushi Irezu: "another target Scorpion Clan Personality you control" -- wherever he stands, other than Irezu himself.
+                                                                                                                                                                                                                                                                                "own-scorpion-personality-other-than-source" => personality && own && target.Id != source!.Id && HasClanAffiliation(target, "Scorpion"),
+                                                                                                                                                                                                                                                                                // Communion with Earth: "another of your Shugenja, who must be Earth" -- excludes the Spell's own current wielder.
+                                                                                                                                                                                                                                                                                "own-earth-shugenja-other-than-wielder" => personality && own && Keyword(target, "Shugenja") && Keyword(target, "Earth") && target.Id != source!.AttachedTo,
+                                                                                                                                                                                                                                                                                // Devoted Yojimbo: "a Follower or Personality in this army" -- either side of the controller's own army at the current battlefield
+                                                                                                                                                                                                                                                                                // (a Follower's own "unit" is its host's; a Personality is its own unit).
+                                                                                                                                                                                                                                                                                "own-follower-or-personality-in-army" => own && (personality || type == CardType.Follower && target.Zone == Zone.Attached)
+                                                                                                                                                                                                                                                                                    && AtBattle(Card(UnitHostId(target))),
+                                                                                                                                                                                                                                                                                // Shiba Tsukimi: "a card in a unit" -- any side's Personality, or an attached Follower/Item/Spell.
+                                                                                                                                                                                                                                                                                "any-unit-card" => personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                                                                                                                                                                                                                                                                                // The Towers of the Yogo's granted ability: "an enemy Follower or Personality without Followers" -- a Personality with no attached Follower,
+                                                                                                                                                                                                                                                                                // or any enemy Follower (a Follower cannot itself carry a Follower).
+                                                                                                                                                                                                                                                                                "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
+                                                                                                                                                                                                                                                                                // Set the Fields Aflame (The Shadow's Embrace pass, issue #476 batch 5): "a Region" -- attached to any province, either player's.
+                                                                                                                                                                                                                                                                                "region" => type == CardType.Region && target.Zone == Zone.Region,
+                                                                                                                                                                                                                                                                                // Emperor Edition Personality pass (issue #477), batch 3 (EmperorPersonalityBatch3.cs).
+                                                                                                                                                                                                                                                                                "enemy-unit" => personality && !own,
+                                                                                                                                                                                                                                                                                "enemy-card-or-unit-lower-than-source-unit" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                                                                                                                                                                                                                                                                                    && UnitTotalGoldCost(target, out _) < UnitTotalGoldCost(source!, out _),
+                                                                                                                                                                                                                                                                                // Emperor Edition Personality pass (issue #477), batch 4 (EmperorPersonalityBatch4.cs). Shosuro Tanzaki: "another Personality"; Bayushi Nitoshi: "a different one of your
+                                                                                                                                                                                                                                                                                // Personalities" (other than the slot's target), and "a dishonorable Personality or a card without attachments in a unit".
+                                                                                                                                                                                                                                                                                "other-personality" => Batch4OtherPersonality(target, source),
+                                                                                                                                                                                                                                                                                "own-personality-other-than-slot-target" => Batch4VictimOtherThanTarget(target, command, player.Id),
+                                                                                                                                                                                                                                                                                "dishonorable-personality-or-unattached-unit-card" => Batch4DishonorableOrUnattachedUnitCard(target),
+                                                                                                                                                                                                                                                                                // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
+                                                                                                                                                                                                                                                                                "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
+                                                                                                                                                                                                                                                                                // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
+                                                                                                                                                                                                                                                                                _ => RegisteredTargetAllows(ability, command, player, source, target)
+                                                                                                                                                                                                                                                                            };
+                                                                                                                                                                                                                                                                            if (!__valid12) return "That card does not meet this ability's target or performer requirements.";
+                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                }
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                        }
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                }
+                                                                                                                                                                                            }
+                                                                                                                                                                                        }
+                                                                                                                                                                                    }
+                                                                                                                                                                                }
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                }
+                                                                                                                                                            }
+                                                                                                                                                        }
+                                                                                                                                                    }
+                                                                                                                                                }
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         // A move to a destination the ability's own rule defines (issue #336).
         ValidateMove(command, ability);
         if (ability.ChoosesOwnProvince)
-            Require(command.Province is int ownProvince && player.Provinces.Any(p => p.Index == ownProvince && !p.Destroyed && p.CardId is not null), "Choose one of your provinces that holds a card.");
+        { var __valid13 = command.Province is int ownProvince && player.Provinces.Any(p => p.Index == ownProvince && !p.Destroyed && p.CardId is not null); if (!__valid13) return "Choose one of your provinces that holds a card."; }
         // Goju Yurishi - exp (issue #453, batch 3; TargetOfLastResort.cs): a card another player may only target when no other legal target exists -- judged for a
         // single target and for each slot candidate alike, before the slot probe returns.
         RequireNotTargetOfLastResort(command, ability, slotAbility);
         RequirePromoItemsNotProtected(command, ability, slotAbility); // The Emerald Armor, The Arcane Cloak of the Chameleons (PromoEmperorItems.cs)
         // One slot candidate has now been judged; everything below is about the whole action (its own checks and its price).
-        if (slotAbility is not null) return;
+        if (slotAbility is not null) { return null; }
         if (id == "red-hunger-attachments")
-            Require(SlotCards(command, "attachments").Sum(a => Definition(a).Type == CardType.Follower ? CardForce(a) : Definition(a).Force + StatModifier(a, "Force")) < CardForce(source!), "Their total Force must be lower than The Red Hunger's Force.");
+        { if (!(SlotCards(command, "attachments").Sum(a => Definition(a).Type == CardType.Follower ? CardForce(a) : Definition(a).Force + StatModifier(a, "Force")) < CardForce(source!))) return "Their total Force must be lower than The Red Hunger's Force."; }
         // Attach (issue #337): the wielder and the Equip legality of the attachment (see AttachAction.cs).
         // A multi-target attach (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Gyoken's Personality and attachment slots) is judged once, on the whole
         // selection -- not again for each slot's candidate, whose own check (ValidateSlotCard) carries the selections but no ability Slots.
@@ -7083,7 +7294,7 @@ public sealed partial class MatchEngine
             ValidateAttach(command, attachSpec, player, source);
         // A created attachment must be one the chosen Personality could be equipped with.
         if (ability.Creates is { } createdSpec) ValidateCreate(command, createdSpec, player);
-        else Require(command.CreatedCard is null, "This action creates no card.");
+        else { if (!(command.CreatedCard is null)) return "This action creates no card."; }
         // Shinden Shorai (oracle-l5r-6857, issue #301): "If it is not your first or second turn" -- the
         // player's OWN turn count (PlayerState.TurnsTaken counts only that player's turns, the same
         // counter border-first's own "your first turn" reads; the global MatchState.TurnNumber advances
@@ -7095,11 +7306,11 @@ public sealed partial class MatchEngine
         // costs": the Personality's full Gold cost, no Clan discount/allegiance route.
         if (id == "shinden-shorai-recruit")
         {
-            Require(player.TurnsTaken > 2, "Shinden Shorai cannot be used on your first or second turn.");
+            if (!(player.TurnsTaken > 2)) return "Shinden Shorai cannot be used on your first or second turn.";
             var recruit = Card(command.TargetId!);
-            Require(recruit.ProvinceIndex == source!.ProvinceIndex, "Choose the face-up Personality in this Region's own province.");
+            if (!(recruit.ProvinceIndex == source!.ProvinceIndex)) return "Choose the face-up Personality in this Region's own province.";
             var recruitQuote = QuotePurchase(player.Id, recruit.Id, ignoreHonorRequirementIfPersonalityClan: "Lion");
-            Require(recruitQuote.Error is null, recruitQuote.Error ?? "");
+            if (!(recruitQuote.Error is null)) return recruitQuote.Error ?? "";
         }
         RegisteredValidateLate(new ValidationHookContext(id, ability!, command, player, source));
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
@@ -7109,13 +7320,39 @@ public sealed partial class MatchEngine
         // The same AbilityCost prices the offered payment (AbilityActions), the client's GoldQuote and the
         // charge in ExecuteAbilityEffects, so validation can never disagree with what is then paid.
         ValidateAbilityPayment(command, player.Id);
+        return null;
     }
+
+    /// <summary>
+    /// "If opposed" moves (Michi, Takasho, Rikyou) may only be announced where an enemy unit stands at the battlefield. The same test is made again when the action resolves, but there it must not
+    /// refuse anything: resolution can run when a reaction window closes (the opponent's reaction may have removed the opposition in between), and a refused command there leaves the player's only
+    /// offered action, passing the window, refused for good (issue #967). So at resolution the move simply does nothing.
+    /// </summary>
+    private void RequireOpposedForConditionalMove(GameCommand command)
+    {
+        var message = command.AbilityId switch
+        {
+            "michi-move" => "Michi may only reinforce a battlefield where he would be opposed.",
+            "takasho-move" => "Takasho may only reinforce a battlefield with enemy units present.",
+            "rikyou-move" => "Rikyou may only reinforce a battlefield with enemy units present.",
+            _ => null
+        };
+        if (message is null || _state.CurrentBattleProvince is not int province) return;
+        Require(Army(1 - command.PlayerId, province).Any(), message);
+    }
+
+    private void FizzleMove(PlayerState player, CardInstance source) =>
+        Emit("abilityFizzled", $"{Definition(source).Name}'s move does nothing: there are no enemy units at the current battlefield.", player.Id, source.Id);
 
     private void UseAbility(GameCommand command)
     {
         // A multi-target action's first card target also rides in TargetId (issue #336), so everything written for a single target sees it.
+        if (HiddenCardNamed(command) is { } hidden) throw new RuleViolation(hidden); // before any rule that reads the named card (EE-Areas-of-the-game-072)
         command = NormalizeSlotCommand(command);
+        Require(command.CardId is null || !_state.Cards.TryGetValue(command.CardId, out var announcing) || !IsResolving(announcing), "This card is already being resolved.");
         ValidateAbility(command);
+        RequireOpposedForConditionalMove(command); // issue #967: the "if opposed" test is made when the action is announced
+        EnterResolutionArea(command); // issue #917 (ResolutionArea.cs): a Strategy or Ring from the hand leaves the hand for the resolution area as it is announced
         ControlReturnsOnAnnouncement(command); // issue #501 (EmperorMechB.cs): Shadow Dragon's "return control of him ... after the next time this game this ability is announced".
         NoteP1Announcement(command); // Issue #503 (EmperorP1.cs): Osote, Bakishi, Sanetomo.
         NoteTurnRuleAnnouncement(command); // P4 (TurnBoundaryRules.cs): a Limited action only a standing rule allowed spends that rule's use for the turn
@@ -7210,15 +7447,20 @@ public sealed partial class MatchEngine
     // offering either an out-of-play attach-as-Reaction candidate (Equip (Limited)'s own attach
     // mechanism, reused as a Reaction) or, failing that, an ordinary in-play watcher -- never both at
     // once, since the two halves live in mutually exclusive zones for any one card copy.
-    private (CardInstance Watcher, bool OutOfPlay)? FindBattleActionReactionCandidate(CardInstance performer)
+    // Issue #900: every Stormless Fury that can react to the Battle action is asked in turn (ReactionWatcherQueue.cs) -- each one in a hand, which attaches itself to the performing Thunder
+    // Shugenja, and then each one already attached to a Personality at the battlefield (one that attached during this window is excluded when its turn comes: it may not react against the action
+    // that just attached it). Before, only the first found was ever asked, and an attached one only when no hand copy was left.
+    private List<CardInstance> BattleActionReactionWatchers(CardInstance performer)
     {
-        var outOfPlay = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == performer.OwnerId && c.Zone == Zone.Hand
-            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves"));
-        if (outOfPlay is not null) return (outOfPlay, true);
-        var inPlay = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !BowedBarsAbilities(c) && !_state.BattleActionReaction1UsedCardIds.Contains(c.Id)
-            && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves"));
-        return inPlay is not null ? (inPlay, false) : null;
+        var inHand = _state.Cards.Values.Where(c => c.OwnerId == performer.OwnerId && c.Zone == Zone.Hand
+            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves")).OrderBy(c => c.Id, StringComparer.Ordinal);
+        var inPlay = _state.Cards.Values.Where(c => BattleActionWatcherInPlayEligible(c)).OrderBy(c => c.Id, StringComparer.Ordinal);
+        return inHand.Concat(inPlay).ToList();
     }
+
+    private bool BattleActionWatcherInPlayEligible(CardInstance c) => InPlay(c) && !BowedBarsAbilities(c) && !_state.BattleActionReaction1UsedCardIds.Contains(c.Id)
+        && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves");
+
     // Called from ExecuteAbilityEffects' own tail, the same spot OpenBowReactionWindow already
     // watches from -- only for an ability that is itself a genuine Battle action with an identifiable
     // performer (never for a Reaction's own resolution, already excluded by the caller).
@@ -7230,15 +7472,13 @@ public sealed partial class MatchEngine
         if (performer is null || Definition(performer).Type != CardType.Personality) return false;
         _state.BattleActionReactionPerformerId = performer.Id;
         _state.BattleActionReaction1UsedCardIds.Clear();
-        if (FindBattleActionReactionCandidate(performer) is not (CardInstance watcher, _))
+        var watchers = BattleActionReactionWatchers(performer);
+        if (watchers.Count == 0)
         {
             _state.BattleActionReactionPerformerId = null;
             return false;
         }
-        _state.PendingChoice = new("battleActionReaction", watcher.OwnerId, watcher.Id, "After the Battle action resolved: you may use this card's own reaction, or pass.", closesTo);
-        _state.ConsecutivePasses = 0;
-        _state.PriorityPlayerId = watcher.OwnerId;
-        Emit("reactionWindow", "Battle-action reaction window opened.", watcher.OwnerId, watcher.Id);
+        OpenWatcherTurns(watchers.Select(w => new WatcherTurn("battleActionReaction", w.Id, "After the Battle action resolved: you may use this card's own reaction, or pass.", null, null, closesTo)).ToList());
         return true;
     }
     // Stormless Fury's own out-of-play attach (Equip (Limited)'s own mechanism, reused as a Reaction):
@@ -7264,7 +7504,7 @@ public sealed partial class MatchEngine
     // ExecuteAbilityEffects below (an Attack deferred behind its reaction window).
     private void SpendHandPlayedCard(PlayerState player, CardInstance? source)
     {
-        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
+        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && PlayedFromHand(source)) DiscardFate(player, source);
     }
     // Issue #320: every Attack case in RunAbilityEffects' switch does `if (ResolveOrDeferAttack(...)) return;`,
     // so an Attack that opens the attackReaction window skips the tail that discards a hand-played
@@ -7294,8 +7534,9 @@ public sealed partial class MatchEngine
         var runningBefore = _runningCommand;
         _runningCommand = command;
         var p3BowedBefore = P3BowedPersonalityIds(); // Hida Defenders (issue #503): the Personalities bowed before the action
+        var kaitoResolving = Wave821BeginKaito(command); // issue #821: Chuda Kaito's +3 Gold Cost while his Spell's effects resolve
         try { RunAbilityEffects(command, consumedGrant); }
-        finally { _runningCommand = runningBefore; StampNegatedBy(command.PlayerId); } // issue #667 (PerformersSled.cs): who set each negation
+        finally { _runningCommand = runningBefore; StampNegatedBy(command.PlayerId); Wave821EndKaito(kaitoResolving); } // issue #667 (PerformersSled.cs): who set each negation
         if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); issued.BowedBefore = p3BowedBefore; }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
@@ -7403,7 +7644,7 @@ public sealed partial class MatchEngine
         if (ability.IssuesDuel)
         {
             PayAbilityCosts(ability, command, player, source); // Issue #503: a duel-issuing ability's declared costs (Ochiai's Bravery's "bow this card") are paid as any action's are, before its effect (the duel).
-            if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+            if (source is not null && Definition(source).Type == CardType.Strategy && PlayedFromHand(source)) DiscardFate(player, source);
             // A duel issued by a Reaction (An Insult Answered; issue #453, batch 2) sets the window it was played in aside, as any window a Reaction opens does (ReactionsAreActions.cs).
             if (ability.Timing == "Reaction") SuspendOpenWindow();
             // A Discipline card played from a discard pile is spent the same way: out of the pile the moment it is
@@ -7847,7 +8088,7 @@ public sealed partial class MatchEngine
                 if (!HasAttachments(target!) && ControlsKeyword(player.Id, "Courtier")) DestroyUnits([target!], false, player.Id);
                 break;
             case "takasho-move":
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Takasho may only reinforce a battlefield with enemy units present.");
+                if (!Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) { FizzleMove(player, source!); break; } // "if opposed": with no enemy unit left the action does nothing (issue #967)
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 GrantAdditionalAction(player.Id, [source!.Id]);
                 break;
@@ -9231,7 +9472,7 @@ public sealed partial class MatchEngine
                 break;
             case "kouzei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "michi-move":
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Michi may only reinforce a battlefield where he would be opposed.");
+                if (!Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) { FizzleMove(player, source!); break; } // "if opposed": with no enemy unit left the action does nothing (issue #967)
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 StraightenUnit(source!);
                 break;
@@ -9297,7 +9538,7 @@ public sealed partial class MatchEngine
                 break;
             case "obote-boost": ApplyModifier(source!, source!.Id, id, "Force", FocusValueOf(target!)); break;
             case "rikyou-move":
-                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Rikyou may only reinforce a battlefield with enemy units present.");
+                if (!Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) { FizzleMove(player, source!); break; } // "if opposed": with no enemy unit left the action does nothing (issue #967)
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 StraightenUnit(source!);
                 break;
@@ -9421,8 +9662,8 @@ public sealed partial class MatchEngine
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             case "training-look-show": BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, count: 2); return;
             case "banish-all-doubt-look":
-                if (source!.Zone == Zone.Hand) DiscardFate(player, source);
-                BeginLook(ability.Look!, source, player.Id, "ability", bowedBeforeAction); return;
+                if (PlayedFromHand(source)) DiscardFate(player, source);
+                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             // Battle Phase timing (issues #309/#310): the Engage window's consumers. Every claim only RECORDS the
             // request; who actually acts first is decided when the window closes (ResolveFirstOpportunity), so the
             // order claims are made in never matters and claims never stack.
@@ -10477,42 +10718,26 @@ public sealed partial class MatchEngine
         region.ProvinceIndex is int regionProvince && personality.ProvinceIndex is int battlefield && BattlefieldProvinceIndex(battlefield) is int battlefieldProvince && Math.Abs(regionProvince - battlefieldProvince) <= 1 && region.OwnerId != _state.ActivePlayerId;
     private string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-action-bowed-personality");
+    // Every watcher that can react to this action's bow gets its own window in turn (ReactionWatcherQueue.cs): Hizumi-type cards at a battlefield where a Personality bowed, Quagmire-type Regions
+    // next to one, and the acting player's Ruya-type cards. They used to be tie-broken to the first one found.
     private bool OpenBowReactionWindow(int actingPlayerId, HashSet<string> bowedBeforeAction, int closesTo)
     {
         var newlyBowed = _state.Cards.Values.Where(c => c.Bowed && !bowedBeforeAction.Contains(c.Id) && Definition(c).Type == CardType.Personality).ToArray();
         if (newlyBowed.Length == 0) return false;
         var atABattlefield = newlyBowed.Where(AtBattle).ToArray();
-        var hizumi = atABattlefield.Length > 0 ? _state.Cards.Values.FirstOrDefault(c => InPlay(c) && AtBattle(c) && BowedAtBattlefieldReactionAbility(c) is { } hizumiAbility && Unspent(c, hizumiAbility) && atABattlefield.Any(nb => nb.ProvinceIndex == c.ProvinceIndex)) : null;
-        if (hizumi is not null)
+        var turns = new List<WatcherTurn>();
+        if (atABattlefield.Length > 0)
         {
-            SuspendOpenWindow();
-            _state.BowReactionCandidateIds = atABattlefield.Where(nb => nb.ProvinceIndex == hizumi.ProvinceIndex).Select(c => c.Id).ToList();
-            _state.PendingChoice = new("bowReaction", hizumi.OwnerId, hizumi.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
-            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = hizumi.OwnerId;
-            Emit("reactionWindow", "Bow-reaction window opened.", hizumi.OwnerId, hizumi.Id);
-            return true;
+            foreach (var hizumi in _state.Cards.Values.Where(c => InPlay(c) && AtBattle(c) && BowedAtBattlefieldReactionAbility(c) is { } hizumiAbility && Unspent(c, hizumiAbility) && atABattlefield.Any(nb => nb.ProvinceIndex == c.ProvinceIndex)).OrderBy(c => c.Id, StringComparer.Ordinal))
+                turns.Add(new("bowReaction", hizumi.Id, "After the bow resolved: you may use this card's own reaction, or pass.", atABattlefield.Where(nb => nb.ProvinceIndex == hizumi.ProvinceIndex).Select(c => c.Id).ToArray(), null, closesTo));
+            foreach (var quagmire in _state.Cards.Values.Where(c => c.Zone == Zone.Region && !c.Bowed && BowedNearRegionReactionAbility(c) is { } quagmireAbility && Unspent(c, quagmireAbility) && atABattlefield.Any(nb => RegionIsNear(c, nb))).OrderBy(c => c.Id, StringComparer.Ordinal))
+                turns.Add(new("bowReaction", quagmire.Id, "After the bow resolved: you may use this card's own reaction, or pass.", atABattlefield.Where(nb => RegionIsNear(quagmire, nb)).Select(c => c.Id).ToArray(), null, closesTo));
         }
-        var quagmire = atABattlefield.Length > 0 ? _state.Cards.Values.FirstOrDefault(c => c.Zone == Zone.Region && !c.Bowed && BowedNearRegionReactionAbility(c) is { } quagmireAbility && Unspent(c, quagmireAbility)
-            && atABattlefield.Any(nb => RegionIsNear(c, nb))) : null;
-        if (quagmire is not null)
-        {
-            SuspendOpenWindow();
-            _state.BowReactionCandidateIds = atABattlefield.Where(nb => RegionIsNear(quagmire, nb)).Select(c => c.Id).ToList();
-            _state.PendingChoice = new("bowReaction", quagmire.OwnerId, quagmire.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
-            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = quagmire.OwnerId;
-            Emit("reactionWindow", "Bow-reaction window opened.", quagmire.OwnerId, quagmire.Id);
-            return true;
-        }
-        var ruya = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == actingPlayerId && InPlay(c) && OwnActionBowedPersonalityReactionAbility(c) is { } ruyaAbility && Unspent(c, ruyaAbility));
-        if (ruya is not null)
-        {
-            SuspendOpenWindow();
-            _state.PendingChoice = new("bowReaction", ruya.OwnerId, ruya.Id, "After your own action bowed a Personality: you may use this card's own reaction, or pass.", closesTo);
-            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = ruya.OwnerId;
-            Emit("reactionWindow", "Bow-reaction window opened.", ruya.OwnerId, ruya.Id);
-            return true;
-        }
-        return false;
+        foreach (var ruya in _state.Cards.Values.Where(c => c.OwnerId == actingPlayerId && InPlay(c) && OwnActionBowedPersonalityReactionAbility(c) is { } ruyaAbility && Unspent(c, ruyaAbility)).OrderBy(c => c.Id, StringComparer.Ordinal))
+            turns.Add(new("bowReaction", ruya.Id, "After your own action bowed a Personality: you may use this card's own reaction, or pass.", null, null, closesTo));
+        if (turns.Count == 0) return false;
+        OpenWatcherTurns(turns);
+        return true;
     }
     private string? MovedEnemyInfantryReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield");
@@ -10530,14 +10755,10 @@ public sealed partial class MatchEngine
         if (cardId is null || !_state.Cards.ContainsKey(cardId)) return false;
         var personality = Card(cardId);
         if (Definition(personality).Type != CardType.Personality || IsCavalryUnit(personality)) return false;
-        var legion = _state.Cards.Values.FirstOrDefault(c => c.Zone == Zone.Attached && c.ProvinceIndex == personality.ProvinceIndex
-            && c.OwnerId != personality.OwnerId && MovedEnemyInfantryReactionAbility(c) is { } legionAbility && Unspent(c, legionAbility));
-        if (legion is null) return false;
-        SuspendOpenWindow();
-        _state.MoveReactionTargetId = personality.Id;
-        _state.PendingChoice = new("moveReaction", legion.OwnerId, legion.Id, "After the resolution of an action that moved an enemy Infantry Personality to this card's battlefield: you may use this card's own reaction, or pass.", closesTo);
-        _state.ConsecutivePasses = 0; _state.PriorityPlayerId = legion.OwnerId;
-        Emit("reactionWindow", "Move-reaction window opened.", legion.OwnerId, legion.Id);
+        var legions = _state.Cards.Values.Where(c => c.Zone == Zone.Attached && c.ProvinceIndex == personality.ProvinceIndex
+            && c.OwnerId != personality.OwnerId && MovedEnemyInfantryReactionAbility(c) is { } legionAbility && Unspent(c, legionAbility)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        if (legions.Length == 0) return false;
+        OpenWatcherTurns(legions.Select(legion => new WatcherTurn("moveReaction", legion.Id, "After the resolution of an action that moved an enemy Infantry Personality to this card's battlefield: you may use this card's own reaction, or pass.", null, personality.Id, closesTo)).ToList());
         return true;
     }
     private string? SiblingFollowerBowedReactionAbility(CardInstance card) =>
@@ -10556,14 +10777,11 @@ public sealed partial class MatchEngine
     {
         var newlyBowedFollowers = _state.Cards.Values.Where(c => c.Bowed && !bowedBeforeAction.Contains(c.Id) && Definition(c).Type == CardType.Follower && c.Zone == Zone.Attached).ToArray();
         if (newlyBowedFollowers.Length == 0) return false;
-        var nikutai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && c.Zone == Zone.Attached && SiblingFollowerBowedReactionAbility(c) is { } nikutaiAbility && Unspent(c, nikutaiAbility)
-            && newlyBowedFollowers.Any(f => f.Id != c.Id && f.AttachedTo == c.AttachedTo));
-        if (nikutai is null) return false;
-        SuspendOpenWindow();
-        _state.NikutaiReactionTargetId = newlyBowedFollowers.First(f => f.Id != nikutai.Id && f.AttachedTo == nikutai.AttachedTo).Id;
-        _state.PendingChoice = new("nikutaiReaction", nikutai.OwnerId, nikutai.Id, "Even if this card is bowed, after a Follower in this unit bowed: you may straighten it, or pass.", closesTo);
-        _state.ConsecutivePasses = 0; _state.PriorityPlayerId = nikutai.OwnerId;
-        Emit("reactionWindow", "Nikutai reaction window opened.", nikutai.OwnerId, nikutai.Id);
+        var watchers = _state.Cards.Values.Where(c => InPlay(c) && c.Zone == Zone.Attached && SiblingFollowerBowedReactionAbility(c) is { } nikutaiAbility && Unspent(c, nikutaiAbility)
+            && newlyBowedFollowers.Any(f => f.Id != c.Id && f.AttachedTo == c.AttachedTo)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        if (watchers.Length == 0) return false;
+        OpenWatcherTurns(watchers.Select(nikutai => new WatcherTurn("nikutaiReaction", nikutai.Id, "Even if this card is bowed, after a Follower in this unit bowed: you may straighten it, or pass.", null,
+            newlyBowedFollowers.First(f => f.Id != nikutai.Id && f.AttachedTo == nikutai.AttachedTo).Id, closesTo)).ToList());
         return true;
     }
 
@@ -10727,6 +10945,7 @@ public sealed partial class MatchEngine
         // A timed hold (StraightenHolds.cs: Hibernation, Visitation, Bamboo Harvesters' "will not straighten before your second turn") refuses every attempt until it is released.
         else if (StraightenHeld(card))
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
+        else if (Wave827DefersStraighten(card)) { } // P'an Ku (issue #827): "P'an Ku may remain bowed" -- his controller is asked once the command is done
         else if (P4NegatesNextStraightening(card)) { } // Drawing on the Mountain (issue #503, EmperorP4Watches.cs): "Negate his next straightening this game."
         else
         {
@@ -10818,7 +11037,7 @@ public sealed partial class MatchEngine
     }
     private void DiscardFate(PlayerState player, CardInstance card)
     {
-        player.Hand.Remove(card.Id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
+        player.Hand.Remove(card.Id); LeaveResolutionArea(card); card.Zone = Zone.FateDiscard; card.FaceUp = true;
         Emit("fateDiscarded", $"{player.Name} discarded {Definition(card).Name}.", player.Id, card.Id);
     }
     // Removed from Game (core rules Glossary, issue #184): terminal and permanent -- unlike
@@ -10829,7 +11048,7 @@ public sealed partial class MatchEngine
     private void RemoveFromGame(CardInstance card)
     {
         if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
-        card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
+        LeaveResolutionArea(card); card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
         // Fukuzo's copies (issue #338, Mendon): they end only when he is reshuffled into the Dynasty deck (ToOwnerDeck) or removed from the game (here).
         // Copy-duration grants only: a permanent change of a removed card is still what a later copy from it reads (Fukuzo's own cost removes the donor
         // BEFORE the snapshot, which must still see the donor's permanent grants).
@@ -10857,9 +11076,8 @@ public sealed partial class MatchEngine
         {
             RemoveAttachmentGrants(wasAttachedTo, card.Id);
             card.AttachedTo = null; card.Bowed = false;
-            card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear();
         }
-        card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; card.AbilityUses.Clear();
+        card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; ResetCardState(card);
         Player(card.OwnerId).Hand.Add(card.Id); NoteCardIntoHand(card.OwnerId); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("returnedToHand", $"{Definition(card).Name} was returned to {Player(card.OwnerId).Name}'s hand.", card.OwnerId, card.Id);
         if (wasAttachedTo is not null && InPlay(wasAttachedTo) && Definition(wasAttachedTo).Type == CardType.Personality && PersonalityChi(wasAttachedTo) <= 0) DestroyUnits([wasAttachedTo], true);
@@ -10877,8 +11095,7 @@ public sealed partial class MatchEngine
         if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
-        card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
-        card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear(); card.AbilityUses.Clear();
+        card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; ResetCardState(card);
         card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck;
         var deck = dynasty ? owner.DynastyDeck : owner.FateDeck;
         if (position == "Bottom") deck.Add(card.Id); else deck.Insert(0, card.Id);
@@ -11070,9 +11287,11 @@ public sealed partial class MatchEngine
     // listing in MatchQueries) that needs a single command's own enabled/disabled state and reason.
     private string? AbilityRejection(GameCommand command)
     {
-        try { ValidateAbility(command); return null; }
-        catch (RuleViolation e) { return e.Message; }
+        return TryValidateAbility(command);
     }
+
+    // The listing/validation consistency check (issue #842): why the validator would refuse this command, exactly as UseAbility would see it, without executing it or touching the state.
+    internal string? AbilityRejectionForTest(GameCommand command) => AbilityRejection(NormalizeSlotCommand(command));
 
     private IEnumerable<ActionOption> AbilityActions(int playerId)
     {
@@ -11109,6 +11328,8 @@ public sealed partial class MatchEngine
         var inHonorChangeWindow = _state.PendingChoice?.Type == "honorChangeReaction"; // Mendon's R4 ruling (issue #492): only the Reactions that name an Honor change are on offer, and they are on offer nowhere else.
         // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): the window as its player ends his Dynasty Phase -- only the Reactions that name it are on offer, and only there.
         var inTwistOfFateWindow = _state.PendingChoice?.Type == "twistOfFateReaction";
+        var inDynastyBeginWindow = _state.PendingChoice?.Type == Wave821Abilities.DynastyWindow; // The Governor's Estate (issue #821): only its Reaction, and only there
+        var inHeavensWindow = _state.PendingChoice?.Type == Wave835Abilities.HeavensWindow; // The Heavens' Blessing (issue #835): only the payment for an owed card, and only there
         var inBeforeEventWindow = _state.PendingChoice?.Type == "p3BeforeEventReaction";
         var inP3EntryWindow = _state.PendingChoice?.Type == "p3EntryReaction"; // Easy Persuasion (issue #503): only the Reactions after a Personality entered play, and only there // Forging Destiny (issue #503): only the Reactions before an Event resolves, and only there
         foreach (var (source, id) in sources)
@@ -11124,6 +11345,8 @@ public sealed partial class MatchEngine
             if (inHonorChangeWindow ? !(honorChangeTrigger || id == HonorChangeReactions.UnimpeachableName) : honorChangeTrigger) continue;
             if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             if (inTwistOfFateWindow != IsTwistOfFateReaction(ability)) continue;
+            if (inDynastyBeginWindow != (ability.Timing == "Reaction" && ability.Trigger == Wave821Abilities.DynastyBegins)) continue;
+            if (inHeavensWindow != (ability.Timing == "Reaction" && ability.Trigger == Wave835Abilities.HeavensTrigger)) continue;
             if (inBeforeEventWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3Abilities.BeforeEventTrigger)) continue;
             if (inP3EntryWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3EntryAbilities.EntryTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
@@ -11132,7 +11355,7 @@ public sealed partial class MatchEngine
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inDynastyBeginWindow || inHeavensWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             var mechAAsBattle = MechAActsAsBattle(playerId, ability, source); // Beyond the Line (issue #501): a Limited or Open Recon ability used as a Battle action
             if (!phaseOk && !mechAAsBattle) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !TurnRuleLimitedAsOpen(playerId, source?.Id) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
@@ -11166,7 +11389,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-attacking-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && IsAttacking(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle-with-keyword" =>
-                    _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && (!(actingAsBattle || PerformerMustBeAtCurrentBattlefield(id)) || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-keyword-at-any-location" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtAnyLocation(c)) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-unit-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type is CardType.Personality or CardType.Follower && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
@@ -11242,6 +11465,17 @@ public sealed partial class MatchEngine
                 // Pure Intent, Rend the Soul (issue #498): "Choose your performing opposed Personality" had no listing twin, so the action was only ever listed disabled ("Choose a performing card").
                 "own-personality-opposed" => _state.CurrentBattleProvince is not int opposedProvince || !Army(1 - playerId, opposedProvince).Any() ? []
                     : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // Strength of the Divine, Visage of the Orochi (issue #830): the listing twin of "own-unbowed-personality-with-keyword-opposed" in the validation switch -- without it both were only ever listed disabled ("Choose a performing card").
+                "own-unbowed-personality-with-keyword-opposed" => _state.CurrentBattleProvince is not int keywordOpposedProvince || !Army(1 - playerId, keywordOpposedProvince).Any() ? []
+                    : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // Strong Defenses (multi-window audit, issue #830): the listing twin of the validation category above -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-defending-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDefendingUnit(c)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // Strength of Purity (single-action audit, issue #833): the listing twin of the validation category -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-personality-honor-3-plus-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && CardPersonalHonor(c) >= 3
+                    && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                // The Strength of the Spider (single-action audit, issue #833): the listing twin of the validation category above -- without it the action was only ever listed disabled ("Choose a performing card").
+                "own-unbowed-spider-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && HasClanAffiliation(c, "Spider") && AtBattle(c))
+                    .OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-base-force-7-plus" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Definition(c).Force >= 7
                     && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
@@ -11270,7 +11504,7 @@ public sealed partial class MatchEngine
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).
             string?[] shownChoices = id == "ishibashi-attack" ? IshibashiShowableCards(player).Cast<string?>().DefaultIfEmpty(null).ToArray()
-                : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? WlCostCardChoices(id, player, source) /* issue #674 */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
+                : MechCCostCardChoices(id, player, source) ?? Wave827CostCardChoices(id, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? WlCostCardChoices(id, player, source) /* issue #674 */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
             // "You may compare it against ..." (issue #492, ruling R5): one offered action per thing the player may compare against; the choice rides on the command.
             string?[] compareChoices = AttackCompareOptions(id) is { } compareOptions ? compareOptions.Select(o => (string?)o.Key).ToArray()
                 : (MechEChoiceOptions(id) ?? P2ChoiceOptions(id)) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray()
@@ -11279,141 +11513,142 @@ public sealed partial class MatchEngine
                 foreach (var costOption in costOptions)
                     foreach (var createChoice in createChoices)
                         foreach (var shownChoice in AlternativeDiscard.Choices(costOption, shownChoices, player, source))
-                            foreach (var compareChoice in compareChoices)
-                            {
-                                var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
-                                var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
-                                var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                                    CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
-                                // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
-                                if (ability.Slots is not null)
+                            foreach (var deckPosition in id == "goju-house-guard-return" ? new string?[] { "Top", "Bottom" } : new string?[] { null }) // the card asks where on its owner's Fate deck it goes (issue #833): one offered action per end, each carrying the choice
+                                foreach (var compareChoice in compareChoices)
                                 {
-                                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}"), source?.Id);
-                                    continue;
-                                }
-                                // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
-                                string?[] candidates = ability.Target switch
-                                {
-                                    "none" or "provinces" or "any-province" or "enemy-province" or "player" => new string?[] { null },
-                                    "own-army-personalities" => armyIds.Cast<string?>().ToArray(),
-                                    "hand" => player.Hand.ToArray(),
-                                    "own-terrain-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Strategy && Keyword(Card(h), "Terrain")).Cast<string?>().ToArray(),
-                                    "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Concat(RulebookEquipDiscardCandidates(playerId, id).Select(c => c.Id)).Cast<string?>().ToArray(), // P19: plus the discard pile when a modifier allows it
-                                    // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): another Strategy in the acting player's own hand.
-                                    "own-other-strategy-in-hand" => player.Hand.Where(h => h != source?.Id && Definition(Card(h)).Type == CardType.Strategy).Cast<string?>().ToArray(),
-                                    // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
-                                    // Spell, matching the ordinary Equip() command's own type filter).
-                                    "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
-                                    "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
-                                    "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    "own-discarded-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c)).Select(c => (string?)c.Id).ToArray(),
-                                    "own-discarded-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
-                                    "own-dead-samurai" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
-                                    "own-discarded-courtier-or-shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && IsDiscardedPersonality(c) && (Keyword(c, "Courtier") || Keyword(c, "Shugenja"))).Select(c => (string?)c.Id).ToArray(),
-                                    "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
-                                    // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
-                                    // hand or a face-up province, neither of which the in-play default reaches, so the
-                                    // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
-                                    "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
-                                    // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
-                                    // Kharmic had -- validated, but a target in a discard pile is never in the in-play
-                                    // default, so the ability was never offered. Each mirrors its own Require above.
-                                    "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    "source-if-dead" => source is { Zone: Zone.Dead } ? [source.Id] : [],
-                                    "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-                                    "own-dark-virtue-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 4: Void Tattoo's discard-pile target, mirroring its Require above.
-                                    "own-tattoo-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Tattoo") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentAction(c, "Battle")).Select(c => (string?)c.Id).ToArray(),
-                                    "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
-                                    // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
-                                    // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
-                                    "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    "personality-in-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
-                                    "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
-                                    // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
-                                    "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId, source?.Id).Select(c => (string?)c.Id).ToArray(),
-                                    // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
-                                    "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
-                                    // Seeds of Decay pass (issue #453), batch 2: the two out-of-play categories.
-                                    "enemy-face-up-personality-anywhere" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Personality && (InPlay(c) || c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
-                                    "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
-                                    // Forgotten Legacy pass (issue #467), batch 5: Wind of the Moon's out-of-play target.
-                                    "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's dead-pile target.
-                                    "own-honorably-dead-clan-personality" => _state.Cards.Values.Where(c => IsOwnHonorablyDeadClanPersonality(c, playerId, ability)).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's "a Follower in your discard pile".
-                                    "se2-own-follower-in-discard" => ShadowsEmbraceBatch2OwnFollowersInDiscard(playerId).Select(c => (string?)c.Id).ToArray(),
-                                    // The Shadow's Embrace pass (issue #476), batch 6: the two out-of-play categories.
-                                    "face-up-personality-in-province" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
-                                    "own-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
-                                    // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
-                                    EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
-                                    "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
-                                    _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? inPlay
-                                }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
-                                   // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
-                                   // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
-                                   // keeps only the ones with enemy units. Every other ability has exactly one (null).
-                                   // A move whose destination is a rule of the ability that the player chooses between (issue #336) offers one candidate
-                                   // per battlefield the rule lists; a move with nothing to choose (and no legal battlefield) offers the single null one.
-                                   // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
-                                   // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
-                                int?[] destinations = ability.ChoosesOwnProvince ? player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => (int?)p.Index).ToArray()
-                                    : ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, _state.Players.Max(pl => pl.Provinces.Count)).Select(i => (int?)i).ToArray() /* either owner's province: sized to the larger count (bot soak, issue #642) */
-                                    : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
-                                    : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
-                                    : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
-                                foreach (var provinceOwner in ability.Target is "any-province" or "player" ? new int?[] { 0, 1 } : new int?[] { null })
-                                {
-                                    var legal = new List<GameCommand>(); string? error = null;
-                                    var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
-                                    foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
+                                    var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => OwnProvinceTargetId(player, p)).ToArray(); // a face-down card by its place (issue #586)
+                                    var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
+                                    var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
+                                        CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, DeckPosition: deckPosition, CostOption: costOption?.Id, CreatedCard: createChoice?.Id, Choice: compareChoice);
+                                    // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
+                                    if (ability.Slots is not null)
                                     {
-                                        // The payment offered with each candidate is the engine's own suggestion from the ONE
-                                        // Gold quote for that candidate (issue #303) -- fixed, target-derived (Equip (Battle),
-                                        // Low Market, Your Clan Needs You!, Soshi Neiru, Shinden Shorai) or variable alike, never
-                                        // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
-                                        // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
-                                        // it always has.
-                                        var command = prototype with { TargetId = target, Province = destination, TargetPlayerId = provinceOwner };
-                                        var quote = QuoteAbilityGold(command);
-                                        command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
-                                        try { ValidateAbility(command); legal.Add(command); quotes.Add((command, quote)); }
-                                        catch (RuleViolation e) { error ??= e.Message; }
+                                        yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}"), source?.Id);
+                                        continue;
                                     }
-                                    var firstQuote = quotes.Count > 0 ? quotes[0].Quote : null;
-                                    // A target-derived cost differs per target, so every legal target ships its own quote and
-                                    // the client swaps between them without a round trip.
-                                    var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
-                                        ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                                    var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                                        + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
-                                        + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
-                                        + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
-                                    yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
-                                        legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
-                                        // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the
-                                        // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
-                                        // same field never means both; ActionOption.Type/Slots/NoTarget say which.
-                                        Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.ChoosesOwnProvince ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
-                                        Gold: firstQuote, TargetGold: targetQuotes,
-                                        // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
-                                        NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
-                                        AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label + (costOption.Verb == CostVerbs.Discard && shownChoice is not null ? ": " + Definition(Card(shownChoice)).Name : ""), ability.Label),
-                                        Movement: MovementPreview(id, ability, source, performer),
-                                        Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
+                                    // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
+                                    string?[] candidates = ability.Target switch
+                                    {
+                                        "none" or "provinces" or "any-province" or "enemy-province" or "player" => new string?[] { null },
+                                        "own-army-personalities" => armyIds.Cast<string?>().ToArray(),
+                                        "hand" => player.Hand.ToArray(),
+                                        "own-terrain-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Strategy && Keyword(Card(h), "Terrain")).Cast<string?>().ToArray(),
+                                        "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Concat(RulebookEquipDiscardCandidates(playerId, id).Select(c => c.Id)).Cast<string?>().ToArray(), // P19: plus the discard pile when a modifier allows it
+                                                                                                                                                                                                                                                                          // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): another Strategy in the acting player's own hand.
+                                        "own-other-strategy-in-hand" => player.Hand.Where(h => h != source?.Id && Definition(Card(h)).Type == CardType.Strategy).Cast<string?>().ToArray(),
+                                        // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
+                                        // Spell, matching the ordinary Equip() command's own type filter).
+                                        "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
+                                        "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
+                                        "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        "own-discarded-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c)).Select(c => (string?)c.Id).ToArray(),
+                                        "own-discarded-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                                        "own-dead-samurai" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
+                                        "own-discarded-courtier-or-shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && IsDiscardedPersonality(c) && (Keyword(c, "Courtier") || Keyword(c, "Shugenja"))).Select(c => (string?)c.Id).ToArray(),
+                                        "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
+                                        // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
+                                        // hand or a face-up province, neither of which the in-play default reaches, so the
+                                        // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
+                                        "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
+                                        // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
+                                        // Kharmic had -- validated, but a target in a discard pile is never in the in-play
+                                        // default, so the ability was never offered. Each mirrors its own Require above.
+                                        "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        "source-if-dead" => source is { Zone: Zone.Dead } ? [source.Id] : [],
+                                        "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+                                        "own-dark-virtue-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 4: Void Tattoo's discard-pile target, mirroring its Require above.
+                                        "own-tattoo-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Tattoo") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentAction(c, "Battle")).Select(c => (string?)c.Id).ToArray(),
+                                        "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
+                                        // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
+                                        // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
+                                        "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        "personality-in-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
+                                        "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
+                                        // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
+                                        "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId, source?.Id).Select(c => (string?)c.Id).ToArray(),
+                                        // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
+                                        "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                                        // Seeds of Decay pass (issue #453), batch 2: the two out-of-play categories.
+                                        "enemy-face-up-personality-anywhere" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Personality && (InPlay(c) || c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                                        "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
+                                        // Forgotten Legacy pass (issue #467), batch 5: Wind of the Moon's out-of-play target.
+                                        "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's dead-pile target.
+                                        "own-honorably-dead-clan-personality" => _state.Cards.Values.Where(c => IsOwnHonorablyDeadClanPersonality(c, playerId, ability)).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's "a Follower in your discard pile".
+                                        "se2-own-follower-in-discard" => ShadowsEmbraceBatch2OwnFollowersInDiscard(playerId).Select(c => (string?)c.Id).ToArray(),
+                                        // The Shadow's Embrace pass (issue #476), batch 6: the two out-of-play categories.
+                                        "face-up-personality-in-province" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
+                                        "own-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                        // Aramoro's Promise (Emperor Edition remaining-cards pass, group A, issue #492): every province card, or none.
+                                        EmperorRemainingAAbilities.ProvinceCardOrNone => RemAProvinceCardCandidates(),
+                                        "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
+                                        _ => EmperorRemainingECandidates(ability.Target, playerId) ?? P5ZoneCandidates(ability.Target, playerId) /* issue #503 */ ?? WlHoldingsCandidates(ability.Target, playerId) /* issue #674 */ ?? Wave735Candidates(ability.Target) /* issue #735 */ ?? Wave742Candidates(ability.Target) /* issue #765 */ ?? Wave821Candidates(ability.Target, playerId) /* issue #821 */ ?? Wave829Candidates(ability.Target, playerId) /* issue #829 */ ?? Wave835Candidates(ability.Target, playerId) /* issue #835 */ ?? inPlay
+                                    }; // issue #492, group E: the Guidance Celestials' out-of-play categories.
+                                       // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
+                                       // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
+                                       // keeps only the ones with enemy units. Every other ability has exactly one (null).
+                                       // A move whose destination is a rule of the ability that the player chooses between (issue #336) offers one candidate
+                                       // per battlefield the rule lists; a move with nothing to choose (and no legal battlefield) offers the single null one.
+                                       // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
+                                       // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
+                                    int?[] destinations = ability.ChoosesOwnProvince ? player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => (int?)p.Index).ToArray()
+                                        : ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, _state.Players.Max(pl => pl.Provinces.Count)).Select(i => (int?)i).ToArray() /* either owner's province: sized to the larger count (bot soak, issue #642) */
+                                        : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
+                                        : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
+                                        : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
+                                    foreach (var provinceOwner in ability.Target is "any-province" or "player" ? new int?[] { 0, 1 } : new int?[] { null })
+                                    {
+                                        var legal = new List<GameCommand>(); string? error = null;
+                                        var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
+                                        foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
+                                        {
+                                            // The payment offered with each candidate is the engine's own suggestion from the ONE
+                                            // Gold quote for that candidate (issue #303) -- fixed, target-derived (Equip (Battle),
+                                            // Low Market, Your Clan Needs You!, Soshi Neiru, Shinden Shorai) or variable alike, never
+                                            // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
+                                            // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
+                                            // it always has.
+                                            var command = prototype with { TargetId = target, Province = destination, TargetPlayerId = provinceOwner };
+                                            var quote = QuoteAbilityGold(command);
+                                            command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
+                                            if (TryValidateAbility(command) is { } refusal) error ??= refusal;
+                                            else { legal.Add(command); quotes.Add((command, quote)); }
+                                        }
+                                        var firstQuote = quotes.Count > 0 ? quotes[0].Quote : null;
+                                        // A target-derived cost differs per target, so every legal target ships its own quote and
+                                        // the client swaps between them without a round trip.
+                                        var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
+                                            ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
+                                        var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}") + (deckPosition is null ? "" : $" · {deckPosition.ToLowerInvariant()} of your Fate deck")
+                                            + (shownChoice is null ? "" : $" · {(costOption is { Verb: CostVerbs.Discard } ? "discards" : null) ?? MechCCostCardVerb(id) ?? Wave827CostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? WlCostCardVerb(id) /* issue #674 */ ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
+                                            + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId) ?? Wave9601ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
+                                            + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
+                                        yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
+                                            legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
+                                            // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the
+                                            // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
+                                            // same field never means both; ActionOption.Type/Slots/NoTarget say which.
+                                            Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                                : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                                : ability.ChoosesOwnProvince ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                                : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
+                                            Gold: firstQuote, TargetGold: targetQuotes,
+                                            // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
+                                            NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
+                                            AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label + (costOption.Verb == CostVerbs.Discard && shownChoice is not null ? ": " + Definition(Card(shownChoice)).Name : ""), ability.Label),
+                                            Movement: MovementPreview(id, ability, source, performer), MoveTo: ability.Move?.Destination,
+                                            Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
+                                    }
                                 }
-                            }
         }
     }
     private string AbilityOptionLabel(string id, AbilityDefinition ability, string? performer, CardInstance? source, CostOption? costOption = null) =>

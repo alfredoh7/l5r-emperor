@@ -596,7 +596,9 @@
         "Shugenja"
       ],
       "Focus": 0,
-      "Abilities": [],
+      "Abilities": [
+        "w859-kazushige-straighten"
+      ],
       "Effect": "force-while-defending-personality"
     },
     {
@@ -735,7 +737,9 @@
         "Tattooed"
       ],
       "Focus": 0,
-      "Abilities": [],
+      "Abilities": [
+        "w859-korimi-draw"
+      ],
       "Effect": "force-while-defending-personality"
     },
     {

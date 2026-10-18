@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix a reaction-window deadlock found by the #818 arena (issue #825, also #820): a held action whose Gold source is bowed or destroyed while its window is open is now aborted (nothing paid, nothing resolves) instead of making declineReaction fail for ever; payments suggested to a Reaction never reuse the held action's sources; the bot never negates its own held action. Also adds the L5R_ARENA_SPEC=818 arena switch and stall diagnostics.",
+  "validation": "Reproduced all 4 stalled arena games (+1 timeout) before the fix, all decided after it. Core 3476/3476, AI 146/146 (new: HeldPaymentBrokenAborts, NeverNegatesOwnAction). Full 440-game arena rerun result recorded in the PR.",
+  "remaining": "Cause analysis: the bot negated its own action with Yasuki Jinn-Kuen, paying with a Holding the held action had named; engine fault was that the window could not be closed afterwards; UI not involved.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/825",
+  "branch": "claude/825-reaction-window-deadlock",
+  "updated": "2026-10-11T07:46:50.293408+00:00"
+}

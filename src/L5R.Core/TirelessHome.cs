@@ -70,7 +70,7 @@ public sealed partial class MatchEngine
     private bool HomeWaivesSourceLocation(AbilityDefinition ability, CardInstance? source)
     {
         if (source is null || !InPlay(source)) return false;
-        if (!ability.Home && !Keyword(source, TirelessHomeAbilities.HomeKeyword)) return false;
+        if (!ability.Home && !Keyword(source, TirelessHomeAbilities.HomeKeyword) && !Wave821GrantsHome(source) /* issue #821: Tsumaro's Illusion */) return false;
         return _state.Cards.TryGetValue(UnitHostId(source), out var unit) && unit.Zone == Zone.Home;
     }
 
@@ -94,7 +94,7 @@ public sealed partial class MatchEngine
         // Tireless waives the bowed-source rule, never a cost: a bowed card cannot be bowed to pay "bow this card". Only an ability that carries the flag is judged here, so the older
         // per-id "even if bowed" abilities keep whatever their own wiring does.
         if (ability.Tireless && source is { Bowed: true }
-            && (ability.Costs ?? []).Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !(c.UnlessInHand && source.Zone == Zone.Hand) && !CostExempt(c, source)))
+            && (ability.Costs ?? []).Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !(c.UnlessInHand && PlayedFromHand(source)) && !CostExempt(c, source)))
             Require(false, $"{Definition(source).Name} is already bowed, so it cannot be bowed to pay this cost.");
         switch (id)
         {

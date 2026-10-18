@@ -1,7 +1,7 @@
 # Modified hand limits and local seat handoffs
 
-Issue [#463](https://github.com/alfredoh7/l5r-emperor/issues/463), review
-[PR #464](https://github.com/alfredoh7/l5r-emperor/pull/464). Based on main
+Issue [#463](https://github.com/l5r-emperor-dev/l5r-emperor/issues/463), review
+[PR #464](https://github.com/l5r-emperor-dev/l5r-emperor/pull/464). Based on main
 `de672f58`. This is an isolated review candidate; no merge is authorized.
 
 ## Behavior
@@ -73,7 +73,7 @@ packaged runtime/launcher behavior; Mendon's graphical and rules review remains 
 
 Game source: `2f3a9bbc55cc8b7d1342acd26ade66c4d263cd49`. Package revision 1 is
 tracked by `previews/interaction-fixes.json` and its published receipt. The private
-[versioned release](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr464-2f3a9bbc55-r1-windows)
+[versioned release](https://github.com/l5r-emperor-dev/l5r-emperor/releases/tag/preview-pr464-2f3a9bbc55-r1-windows)
 is marked Validation pending until the Windows package job passes. The publisher
 then marks it ready and posts the review request on PR #464. Follow the live
 release/PR for delivery status; this source document does not imply acceptance.

@@ -61,7 +61,11 @@ public partial class Main : Node
 
     public override void _Ready()
     {
+        CrashReports.Install(CrashContext); // issue #905: a local crash report for a runtime-level failure; nothing is sent
+        if (OS.GetCmdlineUserArgs().Contains("--write-crash-report")) { GD.Print("CRASH_REPORT: " + CrashReports.Write(new InvalidOperationException("crash report probe"))); SetProcess(false); SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); GetTree().Quit(); return; } // a check that the report can be written here
         GetWindow().MinSize = new Vector2I(1120, 700);
+        PreloadedDecks.Seed(new DeckFileStore(ProjectSettings.GlobalizePath("user://decks"))); // the shipped decks are in My Decks from the first launch (issue #810)
+        GetTree().TreeChanged += () => _tooltipsDirty = true;
         _session.Changed += () =>
         {
             // Capture every permitted snapshot, even when several packets arrive within one rendered frame.
@@ -80,6 +84,7 @@ public partial class Main : Node
         {
             if (arg.StartsWith("--capture=")) _capturePath = arg[10..];
             if (arg.StartsWith("--capture-mode=")) _captureMode = arg[15..];
+            if (arg.StartsWith("--perf=")) _perfScenario = arg[7..];
             if (arg.StartsWith("--profile=") && arg[10..].Length is > 0 and <= 32 && arg[10..].All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) _profile = arg[10..];
         }
         GetWindow().Mode = _captureMode.Contains("fullscreen", StringComparison.Ordinal) ? Window.ModeEnum.Fullscreen : Window.ModeEnum.Windowed;
@@ -101,6 +106,7 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if (_perfScenario is not null) { StartPerf(_perfScenario); return; }
         if (OS.GetCmdlineUserArgs().Contains("--gameplay-controls-review") || _captureMode is "gameplay-controls-review" or "gameplay-controls-choices-review" or "gameplay-controls-optional-review")
         {
             var startupCapture = _capturePath; _capturePath = null;
@@ -112,6 +118,7 @@ public partial class Main : Node
             var review = new InteractionReview(this, _captureMode, _capturePath);
             _capturePath = null; AddChild(review); return;
         }
+        if (OS.GetCmdlineUserArgs().Contains("--tutorial-review")) { StartTutorialReview(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--battle-values-review") || _captureMode == "battle-values-review")
         { StartBattleValuesReview(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode is "open-battlefield-review" or "open-battlefield-correction-review")
@@ -139,12 +146,14 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
+        if (_perfScenario is not null) ProcessPerf(delta);
         if (_transitionReview) { try { ProcessTransitionReview(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (MatchDuelOpen) { ProcessMatchDuel(delta); ProcessMatchDuelCapture(delta); return; }
         if (ProcessMatchDuelCapture(delta)) return;
         LayoutBattlefieldHeaders();
-        if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
+        if (MenuVisible || PracticeVisible && _capturePath is null) return;
+        PulseTutorialPointers(); LayoutTutorialCoach();
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -178,7 +187,10 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-direct-play", StringComparison.Ordinal)) { ProcessDirectPlayCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-table-click", StringComparison.Ordinal)) { ProcessTableClickCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-drag", StringComparison.Ordinal)) { ProcessDragCapture(delta); return; } // issue #993
         if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-card-motion", StringComparison.Ordinal)) { ProcessCardMotionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-province-target", StringComparison.Ordinal)) { ProcessProvinceTargetCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search", StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal)) { ProcessCreatedCopyCapture(delta); return; }
@@ -486,7 +498,7 @@ public partial class Main : Node
             if (key.Keycode == Key.Escape) _seatHandoff.QueueFree();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview || MatchDuelOpen) return;
+        else if (MenuVisible || PracticeVisible || _transitionReview || MatchDuelOpen) return;
         else if (key.Keycode == Key.Escape && _playProceed is not null) { ProceedCardPlay(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
@@ -506,7 +518,7 @@ public partial class Main : Node
         ObserveDecisionSession(_session.Snapshot);
         if (_transitionReview && _transitionRoom is not null) return;
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
-        if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
+        if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
             _opponentPaymentKey = null; _eitherOrKey = null; _eitherNoticeMatch = null; _eitherNotice = null;
@@ -529,6 +541,7 @@ public partial class Main : Node
         PrepareBattlePresentation();
         RenderBattleFeedback();
         RenderProvinceOrder();
+        SyncTutorialCoach();
         FitTableViewport();
         ObserveBattleResolution();
         FitBattleSequence();
@@ -578,7 +591,7 @@ public partial class Main : Node
         var previewFlip = _previewBowFlip == card.Id; if (previewFlip) _previewBowFlip = null;
         var previewBowed = _previewBows.Contains(card.Id) && !card.Bowed;
         if (previewBowed) card = card with { Bowed = true };
-        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = previewFlip ? !card.Bowed : Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone is Zone.Hand or Zone.Resolving ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = previewFlip ? !card.Bowed : Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
@@ -588,7 +601,7 @@ public partial class Main : Node
         }
         if (card.Zone is Zone.Region or Zone.Celestial) tile.ContextHelp = SupportContext(card);
         tile.CelestialMount = card.Zone == Zone.Celestial;
-        if (card.Zone != Zone.Hand) tile.ProjectToScreen = _tableSurface.ProjectCanvas;
+        if (card.Zone is not (Zone.Hand or Zone.Resolving)) tile.ProjectToScreen = _tableSurface.ProjectCanvas; // issue #917: a card in the resolution area is drawn flat, like the hand, never on the table plane
         BindStatTransition(tile);
         _tiles.Add(tile); return tile;
     }
@@ -596,17 +609,23 @@ public partial class Main : Node
     private void SelectCard(CardView card)
     {
         if (_shownOpen) ToggleShownCards(false);
-        if (_session.Busy || PresentationBusy || _playHeld) return;
+        if (_session.Busy || PresentationBusy || _playHeld || _endingDragPress) return;
         if (SelectEventCard(card) || SelectPendingCandidate(card) || SelectAlternativeCostCard(card)) return;
         if (SelectMultiCard(card)) return;
         if (SelectDiscardCard(card)) return;
+        if (SelectReactionSourceCard(card)) return; // issue #962: a reaction's card is clicked on the table
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
         if (MovementActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } destination)
         { ChooseMovementProvince(card.OwnerId, destination); return; }
         if (_chosen is { Type: "attack" or "assignDefense" } assignment)
         {
-            if (assignment.TargetIds?.Contains(card.Id) == true) { _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
+            if (assignment.TargetIds?.Contains(card.Id) == true)
+            {
+                // Issue #973: the unit being placed, clicked again while it already has a battlefield, goes back home (selecting another unit first and then its battlefield still reassigns).
+                if (_assignmentUnit == card.Id && _assignments.Remove(card.Id)) { _selected = card; RenderBoard(); RenderInspector(); Highlight(); return; }
+                _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return;
+            }
             if (card.Zone == Zone.Province && card.OwnerId == 1 - View.ActivePlayerId && card.ProvinceIndex is int province) { SelectProvince(card.OwnerId, province); return; }
             SetNotice("Choose one of your highlighted units, then a highlighted province. Cancel to inspect other cards."); return;
         }
@@ -617,13 +636,21 @@ public partial class Main : Node
         {
             ChooseTarget(card.Id); return;
         }
-        if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.TryGetValue(card.Id, out var selectPerformer))
-        { if (_chosen?.Command?.PerformerId != card.Id) selectPerformer(); return; }
-        if (_chosen is not null && card.OwnerId == View.ViewerId && HoldingPaymentMethod(card) is { } holdingMethod)
+        if (PerformerClicks() is { Count: > 0 } performerClicks && performerClicks.ContainsKey(card.Id))
+        { PickPerformer(card.Id); return; }
+        // Issue #973: an Attack that may be made with no target takes that choice from a click on the card that performs it, or on the card it belongs to.
+        if (AttackTargetActive && _chosen!.NoTarget && (card.Id == _chosen.Command!.PerformerId || card.Id == (_chosen.CardId ?? _chosen.Command.CardId)))
+        { ChooseAttackTarget(AttackChoice.NoTarget); return; }
+        // Issue #960: while a player is being chosen, either player's stronghold stands for that player (the clan plaque does the same).
+        if (StrongholdOwner(card) is int strongholdPlayer && ChoosePlayerTarget(strongholdPlayer)) return;
+        // Issue #958: while a province is being chosen, the Dynasty card or Region sitting in a province stands for that province (a card that is itself a legal target or performer was taken above).
+        if ((ProvinceTargetActive || MultiProvinceActive) && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } cardProvince)
+        { SelectProvince(card.OwnerId, cardProvince); return; }
+        if (_chosen is not null && card.OwnerId == View.ViewerId && ClickablePaymentMethods(card).Length > 0)
         {
             if (_chosen.Type == "chooseOpponentPayment" && QuoteFor(_chosen) is { } paymentQuote && AmountFor(_chosen, paymentQuote) == 0)
             { SetNotice("Choose how much Gold to pay before selecting sources."); return; }
-            ToggleHoldingPayment(holdingMethod, card.Id); return;
+            CycleCardPayment(card); return;
         }
         // Clicking another card that has its own flow (a playable hand card, a purchasable province card) abandons the current review and starts that card's.
         if (_chosen is not null && (OwnFlowAction(card) is not null || Actions.Any(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled)))
@@ -638,7 +665,9 @@ public partial class Main : Node
         var purchase = Actions.FirstOrDefault(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled);
         var multiSlot = card.ProvinceIndex is int index && card.Zone == Zone.Province &&
             ProvincePresentation.Slots(View.Players.Single(p => p.Id == card.OwnerId).Provinces.Single(p => p.Index == index)).Length > 1;
-        if (purchase is not null && !multiSlot) Choose(purchase); else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
+        if (purchase is not null && !multiSlot) Choose(purchase);
+        else if (StartInPlayAbility(card)) { } // issue #954: the first click on a card in play with one usable ability starts it; hovering inspects
+        else { BeginDirectPlay(card); RenderInspector(); RenderPhaseActions(); Highlight(); }
     }
 
     private void Highlight()
@@ -652,9 +681,11 @@ public partial class Main : Node
             selectedProvince = $"province:{eventCard.OwnerId}:{eventProvince}";
         _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
         var supportTargets = SupportDraftChoices().SelectMany(a => a.TargetIds ?? []).ToHashSet();
-        var performerClicks = PerformerClicks();
+        var performerClicks = PerformerClicks(); var reactionSources = ReactionSourceCardIds();
+        var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
+            tile.Pointed = tutorialPointed.Contains(tile.Card.Id);
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type == "forcedDiscard" && tile.Card.Id == _eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is { Type: "harshChoices", CardId: { } harshCard } && tile.Card.Id == harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
@@ -667,13 +698,15 @@ public partial class Main : Node
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;
             tile.DecisionSelected |= GenericDecisionActive && (tile.Card.Id == _decisionSelection?.Command?.TargetId || _decisionSelection?.DecisionCandidateIds?.Contains(tile.Card.Id) == true);
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
-            tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id);
+            tile.LegalTarget |= performerClicks.ContainsKey(tile.Card.Id) || reactionSources.Contains(tile.Card.Id);
             tile.LegalTarget |= AlternativeCostCards().Contains(tile.Card.Id); // a hand card a discard way to pay may spend (Akodo Kamina)
             tile.DecisionSelected |= _reviewingAlternativeCost && _decisionSelection?.Command?.CardIds?.Contains(tile.Card.Id) == true;
-            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
-            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
+            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id)) || MultiTargetActive && MultiOpenCardSlots(tile.Card.Id).Any(); // issue #969: every open group's candidates
+            if (StrongholdOwner(tile.Card) is int strongholdOwner) tile.LegalTarget |= PlayerTargetLegal(strongholdOwner);
+            tile.ChosenTarget = StrongholdOwner(tile.Card) is int chosenPlayer && PlayerTargetChosen(chosenPlayer) || _chosen?.Command?.TargetId == tile.Card.Id || ProvinceRefreshActive && _refreshSelected.Contains(tile.Card.Id) || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id) || _sources.Any(id => id.StartsWith(tile.Card.Id + "#", StringComparison.Ordinal)); tile.QueueRedraw(); // a payment token ("<card>#reaction") marks its card
         }
+        HighlightPlayers(); HighlightPiles();
         foreach (var (key, button) in _provinceButtons)
         {
             var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true
@@ -762,7 +795,7 @@ public partial class Main : Node
     // The engine's own figure (CardView.GoldProduced, which also covers a Personality that can bow for Gold while a cost is being paid: Yoritomo
     // Sakuma, issue #338). The client holds no production rule of its own (issue #578); payment sources come from the quote (PaymentMethods).
     private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? 0;
-    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
+    private CardView? FindCard(string id) => (View.ResolutionArea ?? []).Select(e => e.Card).Concat(View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold))).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.InfantryDeclaration => "Assign attackers", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
     private void SetNotice(string message) { _matchDuel?.Notify(message); _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
     public override void _ExitTree() => _session.Dispose();

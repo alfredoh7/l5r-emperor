@@ -30,6 +30,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 ROOT = Path(__file__).resolve().parents[2]
 DECK_POOL = ROOT / "content/deck-pool.json"
 EMPEROR_CATALOGUE = ROOT / "content/oracle/emperor-catalogue.json"
+SUPPLEMENTAL_CATALOGUE = ROOT / "content/oracle/emperor-supplemental-catalogue.json"  # issue #812
 PUBLISHED_DIR = ROOT / "content/published"
 OUTPUT = ROOT / "docs/CARD_INVENTORY.xlsx"
 
@@ -111,7 +112,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10551": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900/4118).",
     "oracle-l5r-5046": "Needs a keyword-conditional cost EXEMPTION (bow the performer unless it has a given keyword) -- distinct from every existing keyword-conditional EFFECT.",
     "oracle-l5r-10386": "Needs a dual-target selection with a relational constraint (\"not sharing a Clan alignment\"). The multi-target shape (issue #336) makes the two targets independent slots, each judged on its own; a constraint BETWEEN the two chosen targets is still not expressible.",
-    "oracle-l5r-10388": "Pierce the Tapestery (awaiting a ruling from Mendon on the seven-copy deck rule and the per-battle count): the mechanisms are merged. \"Up to seven copies\" is CardDefinition.DeckCopyLimit (issue #337, DeckWorkshop CopyLimit), \"two or more other Pierce the Tapestry played this battle\" is a P7 period counter (AddPeriodCount / PeriodCountOf with Period.Battle, PeriodWatches.cs; this card is its design example), and \"an additional Battle action to play a Pierce the Tapestry\" is P17's additional-action scope (AdditionalActionScope.cs). Not wired.",
     "oracle-l5r-10718": "Refreshed: the \"delayed post-destruction straighten\" is a delayed effect of a card that is no longer in play, which the store negates by rule (a card that left play has nothing to be affected); it needs a straighten of another card triggered by this card's destruction, plus the self-replacing Terrain variant (unchanged). NO LOCAL SCAN.",
     "oracle-l5r-10958": "Needs a \"Political\" Reaction timing (not built; the plain Ranged 1 Attack half is separately wirable).",
     "oracle-l5r-10960": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900).",
@@ -253,7 +253,6 @@ BLOCKERS: dict[str, str] = {
     # buildable -- a plain-Battle Siege Performer (already a common shape), a routine new
     # Force-vs-province-strength Target category, and the existing bow-or-straighten dual pattern --
     # and was left out of this dict entirely rather than documented as blocked.
-    "oracle-l5r-10522": "The Egg of P'an Ku - exp (awaiting a ruling from Mendon): the build pieces are merged. P22's CopyOfTarget with CreatedRemoval.NextTurnBegins removes the copy after the creator's next turn begins, and \"will not straighten, attack, or defend until after your next turn begins\" is a straighten hold plus P11 NoAttack/NoDefend with P4's owner-turn duration (docs/decisions/2026-10-06-690-p22-created-copies-grants.md lists this card); the second target is an ordinary slot. What is still open is Mendon's ruling: who controls the copy, where it enters, and how \"ignoring costs and restrictions\" treats a Unique target. Not wired; no missing engine primitive is known, but the pieces have not been exercised together.",
 
     # Batch F of the "Not blocked; deferred for scope" audit (issue #301) published twelve Personalities from this
     # rest-batch in personality-wave-22 -- Agasha Kodo (142), Asahina Munefusa (505), Asako Rikate (576), Bayushi Nori
@@ -403,7 +402,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10906": "Ningen's 'Treatise on the Nezumi' (Item): multiplayer-only, and excluded from the wirable-card wave plan (#742, docs/decisions/2026-10-07-wirable-card-wave-plan.md) by Mendon. Its ability makes two players invite each other to ally and assign into each other's armies, and the engine has no allies and only two players; the Multiplayer keyword itself has no rules effect (core rules). Not wired; revisit only if multiplayer is built.",
     "oracle-l5r-946": "Begone, Fool! (Strategy): multiplayer-only, and excluded from the wirable-card wave plan (#742, docs/decisions/2026-10-07-wirable-card-wave-plan.md) by Mendon. It targets an allying Personality, and the engine has no allies and only two players. Not published as a two-player no-op; revisit only if multiplayer is built.",
     "oracle-l5r-6065": "Prideful Allies (Strategy): multiplayer-only, and excluded from the wirable-card wave plan (#742, docs/decisions/2026-10-07-wirable-card-wave-plan.md) by Mendon. It targets an allying unit, and the engine has no allies and only two players. Not published as a two-player no-op; revisit only if multiplayer is built.",
-    "oracle-l5r-10550": "Unbearable Weight (Strategy; one of the 13 cards awaiting a ruling from Mendon): \"If this destroyed the target, his controller puts this Strategy in his hand\" puts a played Strategy into the other player's hand; whose card it is afterwards and which discard pile it goes to when he plays it is unruled. Naoharu's Gift (EmperorRemainingFEvents.cs, naoharu-take) is a precedent for a card resting in another player's hand (ownership moves, OriginalOwnerId returns it to its owner's pile when it leaves), but it is Event-only code. Also unruled: \"a Fate deck\" (any player's, or the performer's own). Discarding the top card of a Fate deck and using its Focus Value are merged (aberrations-boost, fires-of-turmoil). Not wired.",
 }
 
 
@@ -456,8 +454,9 @@ def load_sets() -> dict[str, str]:
     Promotional Ivory, Twenty Festivals) rather than an Emperor-era one. Such a card shows the earliest
     Emperor-era set it was printed in instead (issue #622)."""
     data = json.loads(EMPEROR_CATALOGUE.read_text(encoding="utf-8"))
+    supplemental = json.loads(SUPPLEMENTAL_CATALOGUE.read_text(encoding="utf-8"))["cards"] if SUPPLEMENTAL_CATALOGUE.is_file() else []
     sets: dict[str, str] = {}
-    for card in data["cards"]:
+    for card in [*data["cards"], *supplemental]:
         printings = card.get("printings") or []
         primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None) \
             or (printings[0] if printings else None)
@@ -471,6 +470,10 @@ def load_sets() -> dict[str, str]:
             sets[card["id"]] = ", ".join(card_sets)
     return sets
 
+
+# Wired cards whose audited action is wired and passes its window and effect tests, but whose printed text leaves a rules question the engine cannot settle
+# alone (issues #830/#833 audits). Hand-curated; shown in the Blocker column of a Wired card until the rules lead rules (the #833 questions were answered in #838: R-063 to R-066).
+WIRED_NOTES: dict[str, str] = {}
 
 # Hand-curated, same discipline as BLOCKERS: only for a card whose Set is not derivable from
 # emperor-catalogue.json at all (a created-only, Proxy-typed card absent from that catalogue --
@@ -498,7 +501,7 @@ def build(root: Path = ROOT) -> dict:
             types[0],
             ", ".join(card.get("clans") or []) or "Unaligned",
             "Wired" if card["id"] in wired_ids else "Unwired",
-            "" if card["id"] in wired_ids else (
+            WIRED_NOTES.get(card["id"], "") if card["id"] in wired_ids else (
                 BLOCKERS.get(card["id"]) or pass_blockers.get(card["id"], {}).get("note", "")),
         ))
     # A wired card absent from deck-pool.json entirely -- see load_published_cards' own doc comment.

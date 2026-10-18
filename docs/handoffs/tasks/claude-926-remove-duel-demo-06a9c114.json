@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Remove the Duel Demo from the app and archive it. The Play menu loses Duel Demo and gains a Tutorial entry (a placeholder page until the tutorial exists; TitleMenu.Tutorial is the hook). Removed: DuelDemoHost, its open/close handling and DuelDemoOpen checks, the three native probes that drove it (menu-duel, -stages, -guidance) and tools/check-duel-demo.sh, and the sandbox step of the match-duel probe. Kept because live games use it: all Core/AI/Server code (no file changed), the shared DuelScreen and MatchDuelHost, and the prepared-position fixtures (DuelDemoScenarios, MatchSession.StartDuelDemo). Docs and 179 MB of evidence moved to docs/archive/duel-demo with a README and a general archive procedure; tag archive/duel-demo holds the full tree.",
+  "validation": "check.sh with the native client passes; engine/AI/server files changed vs base: 0; all 14 match-duel variants (normal, reduced, skip, compact, wide, resize, lion, refusal, reaction, empty, open, aftermath, concede, tie) complete and report Passed on both the archive/duel-demo baseline and this branch, with the same two known old error kinds and one identical resize error in each; check-main-menu passes with the new Tutorial entry.",
+  "remaining": "The guidance and stage probes of the shared duel screen went with the demo host; rebuild them on MatchDuelHost if that screen changes again. The 20 Button mouse_entered/mouse_exited disconnect errors in the duel checks are old and untouched.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/926",
+  "branch": "claude/926-remove-duel-demo",
+  "updated": "2026-10-13T20:10:59.494672+00:00"
+}

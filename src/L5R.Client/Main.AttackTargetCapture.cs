@@ -154,6 +154,11 @@ public partial class Main
             CheckAttackConfirmation(); SupportRequire(_attackChoice == AttackChoice.NoTarget && View.Version == 0 && !IntentArrows().Any(), "Keyboard No target changed authority or left an arrow"); await SupportCapture("-no-target");
             await SupportClick(AttackCardFace(_attackCard)); CheckAttackConfirmation();
             SupportRequire(_chosen!.Command!.TargetId == _attackCard && _chosen.Command.Province is null && IntentArrows().Count() == 1 && View.Version == 0, "Card face did not produce a local card-target draft"); await SupportCapture("-card");
+            // Issue #973: the attacking card, clicked on the table, is the "No target" choice; the card target is restored for the checks that follow.
+            SelectCard(FindCard(_attackSource)!); await EventFrames(4);
+            SupportRequire(_attackChoice == AttackChoice.NoTarget && _chosen!.Command is { TargetId: null, Province: null }, "Clicking the attacking card did not choose No target");
+            ChooseAttackTarget(AttackChoice.Card, _attackCard); await EventFrames(4);
+            SupportRequire(_attackChoice == AttackChoice.Card && _chosen!.Command!.TargetId == _attackCard, "The card target was not restored");
             var savedZoom = _cameraZoom; var savedCenter = _cameraCenter;
             ZoomTable(1.7f, _tableViewport.GetGlobalTransform().AffineInverse() * ScreenCenter(_tiles.Single(t => t.Card.Id == _attackSource)));
             await EventFrames(20); CheckAttackTab("Ranged", _attackSource); await SupportCapture("-tab-close");
@@ -217,6 +222,9 @@ public partial class Main
                 var offered = Actions.Where(a => a.Enabled && a.CardId == _attackSource && a.Command?.AbilityId == "tensin-follower-attack").ToArray();
                 SupportRequire(offered.Length == 2 && offered.All(a => a.NoTarget && a.AlternativeCost is null), "Tensin fixture must expose both performing Followers with a fixed bow cost");
                 var firstPerformer = offered[0].Command!.PerformerId; Choose(offered[1]); await EventFrames(12);
+                // Issue #1004: with two performers the performer is asked first, alone; one click on its row moves on to the target.
+                SupportRequire(PerformerStepActive && !StabilizationButtons(_inspector).Any(b => b.Name == "AttackNoTarget"), "The performer should be asked before the attack target");
+                await SupportClick(StabilizationButtons(_inspector).Single(b => b.HasMeta("performer_row") && b.GetMeta("performer_row").AsString() == offered[1].Command!.PerformerId)); await EventFrames(8);
                 performer = _chosen!.Command!.PerformerId!;
                 await ToSignal(GetTree().CreateTimer(.75), SceneTreeTimer.SignalName.Timeout);
                 CheckAttackTab("Ranged", performer);

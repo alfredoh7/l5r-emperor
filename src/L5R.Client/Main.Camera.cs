@@ -58,7 +58,7 @@ public partial class Main
 
     private void FitTableViewport()
     {
-        const int left = 144;
+        var left = 144 + TutorialReserve;
         _tableViewport.Position = new Vector2(left, 148);
         // Leave the fitted mat clear of the resting hand, including the small
         // upward reach of its fan. Hover can still deliberately lift a hand card.
@@ -186,6 +186,7 @@ public partial class Main
         foreach (var child in _root.GetChildren())
             if (child is Control review && review.Name.ToString().EndsWith("ReviewControls", StringComparison.Ordinal) && review.IsVisibleInTree() && review.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_eventHandBar is { Visible: true } && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_coachPanel is { Visible: true } coach && coach.GetGlobalRect().HasPoint(viewportPoint)) return false; // the tutorial's note card floats over the table, so its button and scroll must receive their own clicks (issue #935)
         if (_proceedButton is { } proceed && IsInstanceValid(proceed) && proceed.Visible && proceed.GetGlobalRect().HasPoint(viewportPoint)) return false; // Issue #660: Proceed floats over the table
         if (_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         // The Fallen strips can overlap the projection. Check only the visible
@@ -221,7 +222,8 @@ public partial class Main
         // focus checks and ordinary game input routing remain in force.
         if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
         { GetViewport().SetInputAsHandled(); return; }
-        if (_tableSurface is null || MenuVisible || DuelDemoOpen || _transitionReview || MatchDuelOpen) return;
+        if (_tableSurface is null || MenuVisible || _transitionReview || MatchDuelOpen) return;
+        if (_dragging && @event is InputEventKey { Pressed: true, Keycode: Key.Escape }) { CancelDrag(); GetViewport().SetInputAsHandled(); return; } // issue #993
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.
@@ -232,6 +234,7 @@ public partial class Main
             _tableSurface.Canvas.PushInput(released, true);
         if (@event is InputEventMouseButton mouse)
         {
+            if (!mouse.Pressed && mouse.ButtonIndex == MouseButton.Left && FinishDrag(mouse)) { GetViewport().SetInputAsHandled(); return; } // issue #993: a drag's release is a drop, never also a click
             if (!mouse.Pressed && _cameraDragging && mouse.ButtonIndex == _cameraDragButton)
             {
                 _cameraDragging = false; GetViewport().SetInputAsHandled(); return;
@@ -258,7 +261,7 @@ public partial class Main
                 _cameraGlide = false; _cameraDragging = true; _cameraDragButton = mouse.ButtonIndex;
                 ReleaseTableFocus(); HideTableTooltip(); _tableSurface.ExitMouse(); GetViewport().SetInputAsHandled();
             }
-            else { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); }
+            else { BeginDragCandidate(hovered, mouse); _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); }
         }
         else if (@event is InputEventMouseMotion motion && _cameraDragging)
         {
@@ -275,6 +278,7 @@ public partial class Main
         else if (@event is InputEventMouseMotion pointer)
         {
             _lastTableMouse = pointer.Position;
+            if (TableDragMotion(pointer)) { GetViewport().SetInputAsHandled(); return; } // issue #993
             if (PointerOnTable(pointer.Position)) { _tableSurface.ForwardMouse(pointer); GetViewport().SetInputAsHandled(); }
             else { _tableSurface.ExitMouse(); HideTableTooltip(); }
         }
@@ -328,6 +332,7 @@ public partial class Main
         if (IsInstanceValid(_tableTooltip)) { _tableTooltip!.QueueFree(); _tableTooltip = null; }
         _tableHover = null; _tableHoverTime = 0;
     }
+    private bool _tooltipsDirty = true; private double _tooltipPrepareClock;
     private void PrepareTableTooltips(Node node)
     {
         if (node is Control control && !string.IsNullOrEmpty(control.TooltipText))
@@ -344,7 +349,9 @@ public partial class Main
         // Token explanations use the same bounded overlay as card previews, so
         // native tooltips and the projected viewport cannot compete for the hover.
         if (token is not null) { _syncTablePointer = false; _tableSurface.ExitMouse(); }
-        PrepareTableTooltips(_world);
+        // Issue #875: the walk moves every Control's native tooltip text into metadata, which only matters once a node is added or its text is set; run it when the tree changes and a few times a second, not every frame.
+        _tooltipPrepareClock -= delta;
+        if (_tooltipsDirty || _tooltipPrepareClock <= 0) { PrepareTableTooltips(_world); _tooltipsDirty = false; _tooltipPrepareClock = .2; }
         if (token is null && _syncTablePointer && !_cameraDragging && PointerOnTable(_lastTableMouse))
         {
             _syncTablePointer = false;

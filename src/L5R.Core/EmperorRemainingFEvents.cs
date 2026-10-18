@@ -233,7 +233,7 @@ public sealed partial class MatchEngine
                     if (command.Choice == "yes" && P2CardIntoHandBlocked(player.Id)) { } // issue #503: The Scorpion Wall is Finished -- the gift is not put into his hand and stays with its giver
                     else if (command.Choice == "yes")
                     {
-                        giver.Hand.Remove(shown.Id); player.Hand.Add(shown.Id); shown.OriginalOwnerId ??= giver.Id; shown.OwnerId = player.Id; // his to play; it returns to its owner's pile when it leaves his hand
+                        TransferGift(giver, player, shown); // issue #821 (GiftOffer.cs): the gift step Ikoma Satoru shares
                         Emit("eventResolved", $"{Definition(card).Name}: {player.Name} put the gift in their hand.", player.Id, shown.Id);
                         GainHonor(giver.Id, Definition(shown).Focus, Definition(card).Name, card);
                     }

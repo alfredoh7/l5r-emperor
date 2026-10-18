@@ -59,11 +59,12 @@ public static class CardPaper
     }
     public static void SetLight(float time, bool animate, bool tableLamps = true)
     {
-        foreach (var material in new[] { Table, Reading, FixedTable })
-        {
-            material.SetShaderParameter("table_light_strength", tableLamps ? 1f : 0f);
-            material.SetShaderParameter("candle_phase", time);
-            material.SetShaderParameter("candle_motion", animate && material == Table ? 1 : 0);
-        }
+        SetLight(Table, time, animate, tableLamps); SetLight(Reading, time, false, tableLamps); SetLight(FixedTable, time, false, tableLamps);
+    }
+    private static void SetLight(ShaderMaterial material, float time, bool motion, bool tableLamps)
+    {
+        material.SetShaderParameter(ShaderParameters.TableLightStrength, tableLamps ? 1f : 0f);
+        material.SetShaderParameter(ShaderParameters.CandlePhase, time);
+        material.SetShaderParameter(ShaderParameters.CandleMotion, motion ? 1 : 0);
     }
 }

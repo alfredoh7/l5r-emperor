@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire eleven cards on Mendon's 2026-10-11 rulings (R-054..R-062): Well-Tended Farm, One Koku, Shrine to the Heavens, Stone of Remembrance, Cross-Clan Wedding, Minor Blackmail, The Onyx Championship, Caught Unawares, The Duty of the Crab, Benten's Blessing, Jizo's Mercy. New: a Sleep-style multi-select for Benten's Blessing, the Stone's card-tear animation, a zero-count deck-minimum rule, and several small primitives (see the decision doc). Art pack catalogue-art-issue829-20261011-r1 (4655 images).",
+  "validation": "Core full run 3501/3502 (the one failure was a pinned \"Jizo is blocked\" check, which was updated; reran promo-emperor-holdings 26/26 and wave-829 15/15 afterwards, not the whole suite again); AI 148/148; python tools unittest 193 OK plus collaboration/hooks/quality; Server 9/9, Client.Transport 21/21, Client.Collection 61 assertions; dotnet build L5R.slnx; Godot import and smoke clean; comment-swallow lint clean; format check: no whitespace findings",
+  "remaining": "Native check of the multi-select panel (Benten's Blessing) and the card-tear animation; Mendon's ten readings in docs/decisions/2026-10-11-farm-wedding-koku-batch.md; the art pack release must be published before main's receipt resolves",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/829",
+  "branch": "claude/829-farm-wedding-koku-batch",
+  "updated": "2026-10-11T19:02:26.912831+00:00"
+}

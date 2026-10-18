@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "PlayInvariantTests: 8 seeded games played by random enabled choices; at every step the waiting player has an enabled option, Reaction windows are passable, every listed-enabled option is accepted, and replay equals the live game mid-game and at the end.",
+  "validation": "bash tools/check.sh --skip-client passed",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/855",
+  "branch": "claude/855-invariant-tests",
+  "updated": "2026-10-12T02:54:01.022929+00:00"
+}

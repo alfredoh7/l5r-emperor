@@ -267,8 +267,7 @@ public sealed partial class MatchEngine
                 var emeraldAlternative = emerald && Definition(other).Type == CardType.Personality && SameLocation(other, host);
                 var cloakAlternative = cloak && InPlay(other) && other.OwnerId == host.OwnerId && UnitHostId(other) != host.Id && SameLocation(Card(UnitHostId(other)), host);
                 if (!emeraldAlternative && !cloakAlternative) continue;
-                try { ValidateAbility(command with { TargetId = other.Id }, slotAbility); }
-                catch (RuleViolation) { continue; }
+                if (TryValidateAbility(command with { TargetId = other.Id }, slotAbility) is not null) continue;
                 throw new RuleViolation($"{Definition(target).Name} may not be targeted by another player's action while another legal target ({Definition(other).Name}) is available.");
             }
         }

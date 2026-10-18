@@ -308,7 +308,7 @@ public sealed partial class MatchEngine
 
     // AbilitySourceZoneAllows' hook: Tsubute's second way to pay is used from its player's hand. Null for every other ability.
     private bool? P5SourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        ReferenceEquals(ability, AbilityCatalog.All[EmperorP5Abilities.TsubuteHand]) ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) : null;
+        ReferenceEquals(ability, AbilityCatalog.All[EmperorP5Abilities.TsubuteHand]) ? SourceInHand(source, player) : null;
 
     private bool P5TargetAllows(string target, GameCommand command, PlayerState player, CardInstance? source, CardInstance card)
     {
@@ -440,7 +440,6 @@ public sealed partial class MatchEngine
                 break;
             case EmperorP5Abilities.BiteEnter:
             case EmperorP5Abilities.EconEnter:
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card is put into play from your hand.");
                 break;
             case EmperorP5Abilities.BiteDiscard:
                 Require(BitesOfWinterInPlay() > 0, "No card titled The Bite of Winter is in play.");

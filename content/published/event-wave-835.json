@@ -1,0 +1,53 @@
+{
+  "Profile": "event-wave-835",
+  "Rules": "Emperor Edition core rules; reviewed period printings; issue #835.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10262",
+      "Name": "Revelations",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, show the top five cards of your Dynasty deck. Choose another player who may discard one of the cards, put the rest back in any order, and refill this Province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10262.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w835-revelations"
+    },
+    {
+      "Id": "oracle-l5r-10423",
+      "Name": "The Empire's Foe Exposed",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target two Unique Personalities in play, exactly one of which is yours. Your Personality challenges the other Personality. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10423.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "w835-foe"
+    }
+  ],
+  "Decks": []
+}

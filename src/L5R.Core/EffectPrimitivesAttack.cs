@@ -23,7 +23,9 @@ public enum AttackTargetScope
     /// <summary>The current enemy army, or an enemy card in the Defender's home.</summary>
     DefenderHome,
     /// <summary>An enemy card in play at any home or battlefield.</summary>
-    AnyLocation
+    AnyLocation,
+    /// <summary>An enemy card in another player's home (issue #821, Ikoma Satoru: "targeting a Follower or Personality without Followers in his home"); no battle is needed.</summary>
+    EnemyHome
 }
 
 /// <summary>What an Attack's strength is compared with.</summary>
@@ -49,6 +51,7 @@ public sealed partial class MatchEngine
     {
         AttackTargetScope.DefenderHome => InDefendersHome(target),
         AttackTargetScope.AnyLocation => UnitOf(target) is { Zone: Zone.Home or Zone.Battlefield },
+        AttackTargetScope.EnemyHome => UnitOf(target) is { Zone: Zone.Home }, // issue #821
         _ => false
     };
 

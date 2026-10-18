@@ -64,11 +64,9 @@ public sealed partial class MatchEngine
                 break;
             // Serenity in Air: a Kata is put into play from the hand, and its Battle/Open action is taken only while it is in play (KataCards.cs, Skipping the Puddle).
             case "serenity-air-enter":
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
                 break;
             case "serenity-air-straighten":
             case "serenity-air-straighten-open":
-                Require(source!.Zone == Zone.Home, "Serenity in Air must be in play.");
                 break;
             // Void Tattoo: "discard a card unless your Personality is Void" -- the discarding entry is taken by a performer who is not Void.
             case "void-tattoo-return":
@@ -81,7 +79,6 @@ public sealed partial class MatchEngine
                 break;
             // Unstable Ground: "If there is no Terrain in play at the current battlefield" -- and it is played from the hand.
             case "unstable-ground-destroy":
-                Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "Unstable Ground is played from your hand.");
                 Require(!TerrainAtCurrentBattlefield() || MarshallingFieldsWaiverAvailable(player.Id), "There is already a Terrain in play at the current battlefield."); // The Marshalling Fields (issue #501)
                 break;
         }
@@ -187,7 +184,7 @@ public sealed partial class MatchEngine
             // Unstable Ground: the Scout was bowed as the cost; the target is destroyed and the Terrain enters play at the battlefield.
             case "unstable-ground-destroy":
                 DestroyTargetCard(target!, player.Id);
-                if (TerrainAtCurrentBattlefield() && source!.Zone == Zone.Hand) SpendMarshallingFieldsWaiver(player.Id, source); // The Marshalling Fields (issue #501): the restriction was ignored
+                if (TerrainAtCurrentBattlefield() && PlayedFromHand(source)) SpendMarshallingFieldsWaiver(player.Id, source); // The Marshalling Fields (issue #501): the restriction was ignored
                 PutTerrainIntoPlay(player, source!);
                 return false;
             // Void Tattoo: the discard (unless Void) and the removal were the costs.
@@ -308,13 +305,13 @@ public sealed partial class MatchEngine
 
     // The Terrains whose own ability puts them into play: never played through the generic playStrategy Terrain rule (MatchQueries, PlayStrategy).
     // Deep Snows (issue #503) is put into play by its Reaction; The Eternal Rainbows (issue #622, TfStrategiesB.cs) names a target.
-    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter || Wave736Abilities.IsTerrainPlayAbility(a) || Wave737Abilities.IsTerrainPlayAbility(a) || Wave738Abilities.IsTerrainPlayAbility(a)) || TfStrategiesBTerrainThroughAbility(card) || WlStratACTerrainThroughAbility(card);
+    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter || Wave736Abilities.IsTerrainPlayAbility(a) || Wave737Abilities.IsTerrainPlayAbility(a) || Wave738Abilities.IsTerrainPlayAbility(a) || Wave835Abilities.IsTerrainPlayAbility(a)) || TfStrategiesBTerrainThroughAbility(card) || WlStratACTerrainThroughAbility(card);
 
     // "Put this card into play there": PlayStrategy's own Terrain placement, from the hand to the current battlefield.
     private void PutTerrainIntoPlay(PlayerState player, CardInstance terrain)
     {
-        if (terrain.Zone != Zone.Hand || _state.CurrentBattleProvince is not int province) return;
-        player.Hand.Remove(terrain.Id);
+        if (!PlayedFromHand(terrain) || _state.CurrentBattleProvince is not int province) return;
+        player.Hand.Remove(terrain.Id); LeaveResolutionArea(terrain);
         terrain.Zone = Zone.Battlefield; terrain.ProvinceIndex = province; terrain.FaceUp = true;
         player.TerrainPlayedThisBattle = true; // Ring of Water's own recruitment condition
         Emit("terrainPlayed", $"{player.Name} put {Definition(terrain).Name} into play as Terrain at this battlefield.", player.Id, terrain.Id);

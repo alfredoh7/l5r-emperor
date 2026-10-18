@@ -41,12 +41,13 @@ public sealed partial class MatchEngine
             NikutaiReactionTargetId = _state.NikutaiReactionTargetId,
             ReactionWindowTargetId = _state.ReactionWindowTargetId,
             ReactionWindowRemaining = _state.ReactionWindowRemaining,
+            WatcherQueue = _state.WatcherQueue,
         });
         _state.PendingChoice = null;
         _state.PendingNegatableAbility = null; _state.DeferredActionNegated = false; _state.NegatedEffects = [];
         _state.PendingOutOfPlayActionReaction = null; _state.HonorLossReductionPlayerId = null; _state.ForcedDiscardContinuation = null; _state.ForcedDiscardResume = null;
         _state.BowReactionCandidateIds = []; _state.MoveReactionTargetId = null; _state.NikutaiReactionTargetId = null;
-        _state.ReactionWindowTargetId = null; _state.ReactionWindowRemaining = [];
+        _state.ReactionWindowTargetId = null; _state.ReactionWindowRemaining = []; _state.WatcherQueue = [];
     }
 
     private SuspendedWindow RestoreSuspendedWindow(bool handOn)
@@ -58,7 +59,8 @@ public sealed partial class MatchEngine
         _state.PendingOutOfPlayActionReaction = window.OutOfPlayActionReaction; _state.HonorLossReductionPlayerId = window.HonorLossReductionPlayerId;
         _state.ForcedDiscardContinuation = window.ForcedDiscardContinuation; _state.ForcedDiscardResume = window.ForcedDiscardResume; _state.BowReactionCandidateIds = window.BowReactionCandidateIds;
         _state.MoveReactionTargetId = window.MoveReactionTargetId; _state.NikutaiReactionTargetId = window.NikutaiReactionTargetId;
-        _state.ReactionWindowTargetId = window.ReactionWindowTargetId; _state.ReactionWindowRemaining = window.ReactionWindowRemaining;
+        _state.ReactionWindowTargetId = window.ReactionWindowTargetId; _state.ReactionWindowRemaining = window.ReactionWindowRemaining; _state.WatcherQueue = window.WatcherQueue;
+        if (window.LastResolvedAction is not null) _state.LastResolvedAction = window.LastResolvedAction; // issue #898: the action this window is about, not the Reaction that was just played in it
         _state.ConsecutivePasses = handOn ? 0 : window.ConsecutivePasses;
         _state.PriorityPlayerId = handOn ? 1 - window.ReactingPlayerId : window.ReactingPlayerId;
         return window;
@@ -71,6 +73,10 @@ public sealed partial class MatchEngine
         return RestoreSuspendedWindow(handOn: false);
     }
 
+    // Set while a Reaction that waited behind a window of its own resolves inside the window it was played in (ResolveDeferredActionInItsWindow): what it negates of the held action.
+    private List<NegatedEffect>? _reactionNegationSink;
+    private bool _reactionNegatedHeldAction;
+
     // The deferred action's resolution (ResolveDeferredAction), inside the window a Reaction was played in when it is one: with the negations of the window that
     // just closed, and the window's own given back afterwards.
     private void ResolveDeferredActionInItsWindow(GameCommand deferred)
@@ -79,9 +85,20 @@ public sealed partial class MatchEngine
         var outer = ContinueSuspendedReaction(deferred);
         _state.DeferredActionNegated = negated; _state.NegatedEffects = negations;
         var suspended = _state.SuspendedWindows.Count;
+        // What the Reaction itself negates (the whole held action, or some of its effects) belongs to the window it was played in: a window held open against the Reaction
+        // (Inexorable declined, a counter-reaction passed) must not give that window back as it was before the Reaction resolved (issue #833). NegateDeferredAction and
+        // NegateEffects report into this sink while the Reaction resolves.
+        var (priorSink, priorHeld) = (_reactionNegationSink, _reactionNegatedHeldAction);
+        _reactionNegationSink = outer is null ? null : []; _reactionNegatedHeldAction = false;
         ResolveDeferredAction(deferred);
+        var (sink, heldNegated) = (_reactionNegationSink, _reactionNegatedHeldAction);
+        (_reactionNegationSink, _reactionNegatedHeldAction) = (priorSink, priorHeld);
         if (_state.SuspendedWindows.Count > suspended) { _state.SuspendedWindows[^1].ActionNegated = outer?.ActionNegated ?? false; _state.SuspendedWindows[^1].NegatedEffects = outer?.NegatedEffects ?? []; }
-        else { _state.DeferredActionNegated = outer?.ActionNegated ?? false; _state.NegatedEffects = outer?.NegatedEffects ?? []; }
+        else
+        {
+            _state.DeferredActionNegated = (outer?.ActionNegated ?? false) || heldNegated;
+            _state.NegatedEffects = [.. outer?.NegatedEffects ?? [], .. sink ?? []];
+        }
     }
 
     // Nothing the Reaction started is waiting any more: its window is open again, the opportunity handed to the other player.

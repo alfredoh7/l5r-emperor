@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Shared change (client UI flow). Table clicks, phase 4 (part a). While a province is being chosen (a 'target a province' ability or a province slot), clicking the Dynasty card or Region sitting in a province chooses that province; before, it answered 'That card is not a legal target'. A card that is itself a legal target or performer keeps priority. Table-click check gains a Shrine to Nimuro step. Client only. The pending-decision province types (testedLandProvince, yourClanNeedsYouProvince, searchRegionProvince) build on #951's EventProvinceChoice and wait until it lands.",
+  "validation": "Native: tools/check-table-click-ui.sh passes with the new step; check-province-target-ui, check-multi-targets-ui, check-direct-play-ui, check-attack-targets-ui, check-movement-ui, check-interactions pass. check-card-deselection is flaky and unrelated: it failed twice and passed once on this branch, and fails the same way on main without this change (real-input timing in its last hand-then-board click). Previously noted failures unchanged: action-lock-ui, battle-sequence-ui, support-cards, persistent-home. Native UI checks are not run in CI.",
+  "remaining": "Phases 5 to 10 of the table-click plan, and generalising #951's province pending choices once it merges (its Context and handoff check currently fails, and it is another session's PR).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/958",
+  "branch": "claude/958-table-click-province-cards",
+  "updated": "2026-10-14T23:38:43.641427+00:00"
+}

@@ -10,6 +10,16 @@
       "source_url": "https://oracleofthevoid.com/#cardid=9085",
       "reason": "Explicitly reviewed spelling difference: the supplied Unicorn Maidens list omits the hyphen in Liu-Xeung. Exact family, given-name parts and Experienced 1 agree. Original input remains unchanged.",
       "reviewed_on": "2026-09-06"
+    },
+    {
+      "source_name": "Pierce the Tapestery",
+      "source_experience": null,
+      "source_version_notation": "unspecified",
+      "card_id": "oracle-l5r-10388",
+      "canonical_name": "Pierce the Tapestry",
+      "source_url": "https://oracleofthevoid.com/#cardid=10388",
+      "reason": "Oracle of the Void's own misspelling of Pierce the Tapestry: a list that copies Oracle's title still names this card. The local name is spelled correctly (content/oracle/name-corrections.json).",
+      "reviewed_on": "2026-10-11"
     }
   ]
 }

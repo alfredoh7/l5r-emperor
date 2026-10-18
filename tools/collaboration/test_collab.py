@@ -1,11 +1,13 @@
 """Adversarial checks plus UI/rules rehearsals against real temporary Git repos."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -354,6 +356,26 @@ class GitRehearsals(unittest.TestCase):
             report=c.context(self.root)
         self.assertEqual(report['overlapping_prs'][0]['number'],7)
         self.assertEqual(report['overlapping_prs'][0]['files'],['src/L5R.Client/CardTile.cs'])
+
+    def test_stale_board_token_cannot_trigger_board_access(self):
+        self.git('remote','add','origin',f'https://github.com/{CFG["repository"]}.git')
+        real_git = c.git
+        def fake_git(root, *args):
+            return '' if args[:2] == ('fetch', 'origin') else real_git(root, *args)
+        def fake_gh(args, root):
+            return 'alfredoh7' if args[:2] == ['api', 'user'] else '[]'
+        def forbidden_board():
+            self.fail('Retired board must never be contacted, even with a stale token')
+        env = {'L5R_BOARD_TOKEN': 'retired-secret', 'L5R_BOARD_URL': 'https://untrusted.invalid'}
+        with patch.dict(os.environ, env), \
+                patch.dict(sys.modules, {'board': SimpleNamespace(context=forbidden_board)}), \
+                patch.object(c, 'git', side_effect=fake_git), patch.object(c, 'gh', side_effect=fake_gh):
+            for offline in (False, True):
+                report = c.context(self.root, offline=offline)
+                self.assertEqual(report['coordination'], {'system': 'github', 'repository': CFG['repository']})
+                self.assertNotIn('board', report)
+                self.assertNotIn('retired-secret', json.dumps(report))
+        self.assertEqual(self.git('status', '--porcelain'), '')
 
     def test_two_lanes_push_independently_and_combine_cleanly(self):
         origin=Path(self.tmp.name)/'origin.git'

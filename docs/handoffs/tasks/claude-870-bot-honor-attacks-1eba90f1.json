@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bot: Honor the user loses is weighed by Honor tier (25/12/4 per Honor), Honor gain is worth 35 more to a high-Honor deck, and an Attack that cannot destroy its target is valued only for the rest of its action (exempt when the kill swings the battle from losing to winning). Docs in BOT_LOGIC.md.",
+  "validation": "honor-aware tests 5/5. Arena (new vs prior bot, seed 870, 144 games, Lion/Crane presets + Crane Dominance + Dragon Destruction): new 73, prior 71 (p=0.93). Crab Control and Unicorn Maidens are not playable in the arena. Full AI suite and CI per the PR.",
+  "remaining": "None; merge rule met (equal or better arena result). The rules rarely fire in the arena decks, so the win count is a no-regression check, not proof of improvement.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/870",
+  "branch": "claude/870-bot-honor-attacks",
+  "updated": "2026-10-12T05:35:28.540026+00:00"
+}

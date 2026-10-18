@@ -62,7 +62,7 @@ public sealed partial class MatchEngine
     private static bool PromoNeverSuggested(PaymentToken token) => token.AbilityId == PromoPaymentSourceAbilities.ProfitsReduce || WlNeverSuggested(token);
 
     // A source that costs its owner a card or an optional Reaction; a suggestion prefers any payment without one (Near Miss discarded, Profits discarded, the Pouch bowed).
-    private static int PromoOptionalSourceCount(string[] ids) => ids.Count(id => IsPaymentToken(id) && PromoPaymentKindOf(id) is PromoPaymentSourceAbilities.PouchKind or PromoPaymentSourceAbilities.NearMissKind or PromoPaymentSourceAbilities.ProfitsGoldKind);
+    private static int PromoOptionalSourceCount(string[] ids) => ids.Count(id => IsPaymentToken(id) && PromoPaymentKindOf(id) is PromoPaymentSourceAbilities.PouchKind or PromoPaymentSourceAbilities.NearMissKind or PromoPaymentSourceAbilities.ProfitsGoldKind or Wave829Abilities.KokuKind);
 
     private bool PromoPaymentUsable(CardInstance card, string abilityId, bool reaction)
     {
@@ -177,7 +177,6 @@ public sealed partial class MatchEngine
 
     private void ValidatePromoPaymentSources(string id, CardInstance? source, PlayerState player)
     {
-        if (id == PromoPaymentSourceAbilities.ProfitsEnter) Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card is put into play from your hand.");
     }
 
     private bool? RunPromoPaymentSources(string id, GameCommand command, PlayerState player, CardInstance? source)

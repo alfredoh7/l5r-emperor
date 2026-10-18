@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Action resolution area (Phase 1, Strategies and Rings): a played card leaves the hand for Zone.Resolving at announcement, public to both seats via MatchView.ResolutionArea and the cardResolving event; hand counts, forced/random discards and the card's own Reactions no longer see it; AI index and client tray/motion updated; decision doc accepted.",
+  "validation": "bash tools/check.sh --skip-client passed after the final merge of origin/main (Core 4549+ cases incl. 10 new resolution-area cases, AI, Server, transport 23/23, python); dotnet build src/L5R.Client 0 errors; reaction probe union before/after identical (61 findings); check_format clean. No native graphical check of the new strip was run.",
+  "remaining": "Native visual check of the resolution-area strip (placement above the hand tray, hand to area to discard flight, opponent view) is Mendon's; the Attack/Duel stopgap (#320) is intentionally unchanged; an older client cannot read the Resolving zone string (same-build shipping).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/917",
+  "branch": "claude/917-resolution-area",
+  "updated": "2026-10-13T20:19:55.078955+00:00"
+}

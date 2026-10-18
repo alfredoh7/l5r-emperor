@@ -105,7 +105,7 @@ public partial class Main
                 _decisionActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
             return true;
         }
-        var options = Actions.Where(a => a.Type is not ("declineReaction" or "concede" or "wait" or "orderSeppuku")).ToArray();
+        var options = Actions.Where(a => a.Type is not ("declineReaction" or "concede" or "wait" or "orderSeppuku") && (a.Enabled || a.Type is not ("useAbility" or "playStrategy" or "equip"))).ToArray();
         if (options.Length > 0)
         {
             _inspector.AddChild(Palette.Text("Choose a reaction", 18, Palette.Gold));
@@ -178,6 +178,33 @@ public partial class Main
         if (option.Command?.TargetPlayerId is { } player)
             label += player == View.ViewerId ? " · you" : " · your opponent";
         return label;
+    }
+
+    // Issue #962: during a reaction window the card a reaction belongs to is clicked on the table. A click prepares the reaction (the "Play Reaction" press commits it); in the announce and order steps
+    // of a window both players hold a Reaction for, a click announces, retracts or orders the card's one Reaction. Passing, declining and "Done announcing" stay as buttons.
+    private static bool IsReactionOrderingOption(ActionOption a) => a.Type is "reactionAnnounce" or "reactionUnannounce" or "reactionOrder";
+
+    private bool ReactionSourcesClickable => ReactionFlowOwnsControls && _chosen is null && View.PriorityPlayerId == View.ViewerId && DecisionCanSubmit;
+
+    private ActionOption[] ReactionOrderingOptions(string cardId) => Actions.Where(a => a.Enabled && a.CardId == cardId && a.Command is not null && IsReactionOrderingOption(a)).ToArray();
+
+    private HashSet<string> ReactionSourceCardIds() => !ReactionSourcesClickable ? [] : Actions.Where(a => a.Enabled && a.CardId is not null && a.Command is not null
+        && (IsReactionOrderingOption(a) || a.Type is "useAbility" or "playStrategy" or "equip")).Select(a => a.CardId!).ToHashSet(StringComparer.Ordinal);
+
+    private bool SelectReactionSourceCard(CardView card)
+    {
+        if (!ReactionSourcesClickable) return false;
+        var ordering = ReactionOrderingOptions(card.Id);
+        if (ordering.Length > 0)
+        {
+            if (ordering.Length > 1) { SetNotice("This card has more than one choice in this window. Use the list on the right."); return true; }
+            _ = Submit(ordering[0].Command!); return true;
+        }
+        var choices = PlayChoices(card);
+        if (choices.Length == 0) return false;
+        if (choices.Length > 1) { SetNotice("This card has more than one reaction available. Choose one in the list on the right."); _selected = card; RenderInspector(); Highlight(); return true; }
+        StartPlay(choices[0]);
+        return true;
     }
 
     private void SelectReactionSource(ActionOption option)

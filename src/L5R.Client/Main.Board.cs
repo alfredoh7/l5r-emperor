@@ -45,6 +45,7 @@ public partial class Main
             tile.RestAngle = Math.Clamp(offset * .028f, -.13f, .13f);
             Place(_hand, tile, start + i * step, Math.Abs(offset) * 1.4f - 1, HandCardSide, HandCardSide);
         }
+        AddResolutionArea();
         foreach (var tile in _tiles) _currentBows[tile.Card.Id] = tile.Card.Bowed;
         RenderClanHud(); RenderPiles(); ApplyTableCamera();
         EndTableMotion(motion);
@@ -244,6 +245,7 @@ public partial class Main
             Place(area, button, 0, -28, width, PlaneHeight(CardHeight) + 28); _provinceButtons[(owner.Id, province.Index)] = button;
             var slots = ProvincePresentation.Slots(province);
             AddProvincePlacard(area, owner, province, width);
+            AddProvinceModifierMarker(area, owner, province, width);
             var x = (width - slots.Length * 164) / 2;
             // A Region is attached to the Dynasty card in its province the way a Follower or Item is to a Personality: it sits underneath, showing a strip above the card (Mendon, 2026-10).
             if (province.Region is { } region)
@@ -270,6 +272,18 @@ public partial class Main
                 x += 164;
             }
         }
+    }
+
+    // A changed province strength, persistently shown with its province: the strength box with the engine's net change from the printed strength (every source: Willing Spirits, Regions, timed effects, ...) and, for
+    // a province Dark Experiments marked, the Gold Production coin, each only while its modifier is non-zero. A destroyed province is skipped by the caller, and a province gained later is a new one the engine never marks. The viewer's own provinces carry it below the threshold frame (nearer the viewer); the opponent's above the province (farther away).
+    private void AddProvinceModifierMarker(Control area, PlayerView owner, ProvinceView province, float width)
+    {
+        var production = province.DarkExperimentsMarked ? DarkExperimentsMark.Production : 0;
+        if (production == 0 && province.StrengthModifier == 0) return;
+        var marker = new ProvinceModifierMarker(production, province.StrengthModifier, province.StrengthNotes);
+        var y = owner.Id == View.ViewerId ? PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + 6 : -(province.Region is null ? 0 : RegionStrip) - marker.Size.Y - 6;
+        Place(area, marker, (width - marker.Size.X) / 2, y, marker.Size.X, marker.Size.Y);
+        marker.SetMeta("province_modifier", true);
     }
 
     private void AddBattlefields()

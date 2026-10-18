@@ -272,8 +272,7 @@ public sealed partial class MatchEngine
         {
             var owner = Player(card.OwnerId);
             var dynasty = IsDynastyCardType(Definition(card).Type);
-            card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck; card.FaceUp = false; card.ProvinceIndex = null; card.Bowed = false; card.Dishonorable = false;
-            card.Tokens.Clear(); card.Modifiers.Clear(); card.AbilityUses.Clear();
+            card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck; card.FaceUp = false; card.ProvinceIndex = null; ResetCardState(card);
             (dynasty ? owner.DynastyDeck : owner.FateDeck).Add(card.Id);
             touched.Add((owner.Id, dynasty ? SearchDeck.Dynasty : SearchDeck.Fate));
             Emit("toDeck", $"{Definition(card).Name} was shuffled into {owner.Name}'s {(dynasty ? "Dynasty" : "Fate")} deck ({Definition(source).Name}).", owner.Id, card.Id);
@@ -326,7 +325,7 @@ public sealed partial class MatchEngine
         var cost = SearchRecruitCost(search, card);
         var paying = new PaymentSubject(card, PaymentKind.Recruit);
         var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} cost {CardGoldCost(card)} − {SearchSpecOf(search).RecruitDiscount} ({Definition(Card(search.SourceCardId)).Name})",
-            null, PaymentOptions(playerId, cost, paying));
+            null, PaymentOptions(playerId, cost, paying), Sources: PaymentSourcesFor(playerId, paying));
         yield return new("chooseSearchPayment", $"Pay {cost} Gold: put {Definition(card).Name} into play {(SearchEntersBowed(search) ? "bowed" : "unbowed")}", quote.Payments.Length > 0, quote.Payments.Length > 0 ? null : "You cannot pay for it.",
             new GameCommand("chooseSearchPayment", playerId, _state.Version, SourceIds: quote.Payments.FirstOrDefault()?.SourceIds), card.Id, Gold: quote);
         yield return new("chooseSearchPayment", $"Decline: {Definition(card).Name} stays in the deck", true, null, new GameCommand("chooseSearchPayment", playerId, _state.Version, Choice: "decline"), card.Id);

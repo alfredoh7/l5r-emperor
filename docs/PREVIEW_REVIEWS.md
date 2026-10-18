@@ -6,11 +6,11 @@ do not ask either person to operate branches or build tools merely to playtest.
 Alfredo delegates human preview/playability review to Mendon. This does not imply
 Mendon's acceptance or replace the existing checks/review requirements for merging.
 
-Current delivery candidate: [Approved Top Cards and updated UI review for Windows](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-659e015f0e-r2-windows).
+Current delivery candidate: [Approved Top Cards and updated UI review for Windows](https://github.com/l5r-emperor-dev/l5r-emperor/releases/tag/preview-pr434-659e015f0e-r2-windows).
 This pins combined PR #434 at `659e015f`, including Alfredo's approved Top Cards
 correction (`58456f72`), ghost-copy markers, revised Multiple Targets/Battle Progress,
 Table Visibility and Opponent Payment. [Current delivery evidence](handoffs/2026-09-23-approved-ui-windows-review.md).
-The older [9f8ef9f5 package](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-9f8ef9f5a5-r1-windows)
+The older [9f8ef9f5 package](https://github.com/l5r-emperor-dev/l5r-emperor/releases/tag/preview-pr434-9f8ef9f5a5-r1-windows)
 predates the final Top Cards correction; retain it only as historical evidence.
 Packages remain immutable; publication does not merge the candidate.
 
@@ -54,7 +54,7 @@ Windows computer, download into a **new** version-specific folder outside his so
 checkout. For example (substitute values from the notification, not arbitrary text):
 
 ```powershell
-gh release download RELEASE_TAG --repo alfredoh7/l5r-emperor --pattern ASSET_NAME --dir DOWNLOAD_FOLDER
+gh release download RELEASE_TAG --repo l5r-emperor-dev/l5r-emperor --pattern ASSET_NAME --dir DOWNLOAD_FOLDER
 Get-FileHash -Algorithm SHA256 -LiteralPath ZIP_PATH
 # Verify that the full hash equals the notification's SHA-256 before extracting.
 Expand-Archive -LiteralPath ZIP_PATH -DestinationPath NEW_REVIEW_FOLDER

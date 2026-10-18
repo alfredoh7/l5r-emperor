@@ -105,3 +105,17 @@ interpretation this register's decision docs already settled.
 - [Foothold of the Mad (#766)](2026-10-08-foothold-of-the-mad.md) — Mendon's ruling: counts as 39 Honor for going first, then 0, silently; Madness tokens are -1F tokens while it is in play; wired with its Honor-loss immunity, Fallen discount and two Limited abilities
 - [Force cap primitive and Asako Kaitoko - exp (#768)](2026-10-08-force-cap-and-kaitoko.md) — a live maximum-Force rule (lowers, never raises, lapses with its source, negated by Force-penalty negations and immunities) and the card that uses it, with its keyword-conditioned target bar
 - [Bayushi Kachiko (#778)](2026-10-09-bayushi-kachiko.md) — Mendon's broad reading of "attacks": the first assignment to, or move into, an attacking army costs the target's controller 2 Honor; wired with her -1F term
+
+- [Practice bot battle policy](2026-10-09-bot-battle-policy.md) — accepted (owner spec): pass when the battle is decided, attack/bow target priorities, send-home rule, first-action reactions and the Border Keep refresh.
+- [Kalani's Landing (#816)](2026-10-10-kalanis-landing.md) — Mendon's ruling (R-041): a card in play with a non-zero Gold Cost is targeted after any announced action and gets -2 Gold Cost until end of turn, once per turn; wired with its attachment-production rule and the new "after each phase begins" channel.
+- [Six cards Mendon's rulings unblocked (#821)](2026-10-10-six-ruled-cards.md) — rulings R-042 to R-048: the Governor's Estate creates an Imperial Estate Holding, Hida Kaiji and Isawa Ryuzo (same-side army assignment rules), Chuda Kaito's +3 Gold Cost, Ikoma Satoru and the shared gift step (also Sadahako's Artistry), Isawa Tsumaro's Home Engage and Illusion grant.
+- [Kokujin, P'an Ku, Zansho, Chiyurei's Axe and the Koan cards (#827)](2026-10-11-koan-panku-kokujin.md) — rulings R-049 to R-053: Kokujin's sacrifice question after a won duel, P'an Ku's remain-bowed control link and seppuku bar, Zansho's own Follower, the Axe's automatic lower-Force comparison, the Koan Spell limit/bow waiver/Robes unit protection
+
+- [Farm, Wedding, Koku and eight more (#829)](2026-10-11-farm-wedding-koku-batch.md) — accepted: eleven cards wired on rulings R-054 to R-062; ten readings for Mendon are listed.
+- [Twelve cards on Mendon's rulings (#835)](2026-10-11-twelve-ruled-cards.md) — accepted: rulings R-067 to R-079: the Egg of P'an Ku, Blood of Isawa's Tribe, A Cleansing Breath, Duty Over All Things, Imperial Deployment, Merchant Patronage, Pierce the Tapestry, The Heavens' Blessing, Unbearable Weight, Warded Premises, Revelations and The Empire's Foe Exposed.
+
+- [A bowed Personality may use his unbowed attachments' abilities](2026-10-12-bowed-host-attachment-abilities.md) — accepted ruling R-080, from the Comprehensive Rules clarification of 2013-06-05.
+
+- [No deck counts; generic hidden-card refusals](2026-10-13-no-deck-counts.md) — current Dynasty/Fate deck sizes are hidden from both seats (protocol 4); a request naming a hidden card gets one fixed error.
+
+- [Action resolution area (#917)](2026-10-13-action-resolution-area.md) — accepted and built (Phase 1, Strategies and Rings): a played card leaves the hand for Zone.Resolving at announcement, public to both seats, shown in MatchView.ResolutionArea; the Attack/Duel stopgap stays.

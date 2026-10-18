@@ -26,13 +26,17 @@ public static partial class TrainingOpponent
             }
         }
         if (a.AlternativeCost is { } alternative && command.CostOption is null) command = command with { CostOption = alternative.Id };
-        if (a.Type == "useAbility" && a.Provinces is { Length: > 0 } provinces && command.Province is null) command = command with { Province = provinces[0] };
+        if (a.Type == "useAbility" && a.Provinces is { Length: > 0 } provinces && command.Province is null)
+            // Issue #788: units are only moved into a battlefield the enemy holds (the weakest opposition first); any other destination is a last resort.
+            command = command with { Province = a.Movement is null || !x.Memory.UseBattlePolicy ? provinces[0] : provinces.OrderBy(p => EnemyForceAt(x, p) == 0).ThenBy(p => EnemyForceAt(x, p)).ThenBy(p => p).First() };
+        // Issue #1003: a cut to a Province's strength goes to the Province under attack, whoever's it would otherwise be offered first.
+        if (x.Odds is { IsAttacker: true } && AttackedProvince(x) is int attacked && LowersAttackedProvince(x, a, command)) command = command with { Province = attacked, TargetPlayerId = x.Opponent.Id };
         return command;
     }
 
     private static int ChoosePlayer(Ctx x, AbilityIntent intent)
     {
-        if (intent.HonorGain && intent.HonorLoss) return x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor) ? x.Self.Id : x.Opponent.Id;
+        if (intent.HonorGain && intent.HonorLoss) return WantsOwnGain(x) ? x.Self.Id : x.Opponent.Id;
         if (intent.HonorGain) return x.Self.Id;
         if (intent.HonorLoss || intent.Side == TargetSide.Enemy || intent.Rank >= EffectRank.Penalize) return x.Opponent.Id;
         return x.Self.Id;
@@ -89,12 +93,14 @@ public static partial class TrainingOpponent
     }
 
     /// <summary>Mendon's attack rule (issue #642): see <see cref="AttackPlanner"/>. Units are the unbowed Personalities that may be assigned, each counted with its attached Followers.</summary>
-    private static Dictionary<string, int>? PlanAttack(Ctx x, CardView[] units, int[] provinces)
+    private static Dictionary<string, int>? PlanAttack(Ctx x, CardView[] units, int[] provinces, CardView[]? alreadyAssigned = null)
     {
-        var unitForces = units.Select(c => new AttackPlanner.Unit(c.Id, ArmyForce(x.Self.Home.Where(h => h.Id == c.Id || h.AttachedTo == c.Id)))).ToArray();
+        // Issue #946: the Personalities already sent in the Infantry Maneuvers Segment are part of the army the Cavalry joins.
+        var unitForces = units.Concat(alreadyAssigned ?? []).Select(c => new AttackPlanner.Unit(c.Id, ArmyForce(x.Self.Home.Concat(x.Self.Army).Where(h => h.Id == c.Id || h.AttachedTo == c.Id)))).ToArray();
         var targets = x.Opponent.Provinces.Where(p => !p.Destroyed && provinces.Contains(p.Index)).Select(p => new AttackPlanner.Target(p.Index, p.Strength)).ToArray();
         // The opponent's Honor victory is coming (Mendon's rule, playtest 2026-10): the bot attacks as many Provinces as it can beat, whatever the enemy army could do in reply.
-        return AttackPlanner.Plan(unitForces, targets, HonorRace(x) ? 0 : ArmyForce(x.Opponent.Home));
+        var spec = x.Memory.UseSpec818;
+        return AttackPlanner.Plan(unitForces, targets, HonorRace(x) ? 0 : ArmyForce(x.Opponent.Home), spec ? HandForceBonuses(x) : null, spec);
     }
 
     /// <summary>The opponent already holds the Honor it needs and will win it at the start of its next turn, so the bot cannot afford a cautious attack.</summary>

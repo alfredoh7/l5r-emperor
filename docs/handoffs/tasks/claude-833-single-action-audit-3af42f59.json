@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Audited all 1,306 single-action/reaction cards: generic four-window probe (1,061 Battle/Open/Limited abilities, run in CI) plus hand-built window+effect scenarios for the 275 the generic table could not settle and all 245 single Reactions. Fixed 12 defects: Strength of Purity and The Strength of the Spider (performer never listed), Unsettling Gathering (default paid 0 Gold), The Inevitable Grasp of Conquest (province choice not own-only), Goju House Guard (unplayable, no deck-end option), Iuchi Karasu (illegal default pair), Suikihime/Wateru/Hawado-style entry Reactions listed enabled then refused, Rokku (silent no-op), Grateful Reward (accepted a performer at home), Legion of the Bat and Nikutai (reaction windows listed nothing), Colonist's Mark (empty window), and a held-action negation lost when a counter-window was handed back (Inexorable, Caught in the Act). Five rules questions recorded in docs/CARD_INVENTORY.xlsx (Rata, Soul's Sacrifice, Mastering the Elements, The Bestial Ones, Fallow Lands).",
+  "validation": "bash tools/check.sh --skip-client green (all Core/AI shards, bot-soak); new suites single-audit-1..8, single-reaction-1..6 and the single-window generic probe pass",
+  "remaining": "Five rules rulings needed (see CARD_INVENTORY.xlsx Blocker column). Payment-source Reactions are tested through payment APIs; some fixtures use training cards; Asahina Keigo is never suggested as a payment source (works via hand-built command).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/833",
+  "branch": "claude/833-single-action-audit",
+  "updated": "2026-10-11T23:47:29.110972+00:00"
+}

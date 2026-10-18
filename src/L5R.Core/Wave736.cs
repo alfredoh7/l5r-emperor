@@ -21,9 +21,10 @@ namespace L5R.Core;
 //   Tankoji                   "Battle, bow: Actions from cards in a target Personality's unit may not target cards in this unit."   w736-tankoji-bar (a P11 target bar on the wielder's unit)
 //   Yoritomo Naoto - exp      "Battle: Target an enemy Personality: Actions he or his Followers perform must target Naoto, if legal. You may take an additional Battle action."   w736-naoto-taunt (a P11 forced rule)
 //
-// Not wired, with a blocker note (tools/content/pe_wave_736_blockers.json): A Cleansing Breath ("centers himself" has no definition in the repository), Asako Kaitoko - exp (a maximum Force: no stat cap exists),
-// Isawa Ryuzo ("will not attack or defend in the same army": P11's pair rule judges the battlefield, not the army), P'an Ku - exp (control with a timed return and a seppuku bar), Koan's Jingasa (a Spell limit by
-// attachment count and a cost waiver on the host's Spells), Hida Kaiji - exp (an assignment rule over the army) and Bonds of Hospitality (a straighten bar tied to a card in play and a granted discard).
+// Issue #835: A Cleansing Breath was wired afterwards in Wave835.cs, on Mendon's rulings of 2026-10-11 (docs/decisions/2026-10-11-twelve-ruled-cards.md); the "not wired" note here is the state when this wave merged.
+// Not wired, with a blocker note (tools/content/pe_wave_736_blockers.json; Isawa Ryuzo and Hida Kaiji - exp were wired in Wave821.cs, issue #821, once Mendon ruled the army-assignment primitive): A Cleansing Breath ("centers himself" has no definition in the repository), Asako Kaitoko - exp (a maximum Force: no stat cap exists),
+// P'an Ku - exp (control with a timed return and a seppuku bar), Koan's Jingasa (a Spell limit by
+// attachment count and a cost waiver on the host's Spells) and Bonds of Hospitality (a straighten bar tied to a card in play and a granted discard).
 public static class Wave736Abilities
 {
     public const string BowTransfer = "w736-bow-transfer", PathPeace = "w736-path-peace", HarborPlay = "w736-harbor-play", OracleRefill = "w736-oracle-refill", OracleDraw = "w736-oracle-draw",

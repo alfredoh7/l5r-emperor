@@ -115,8 +115,7 @@ public partial class Main
                 var cost = _captureMode.Contains("free") ? 0 : 2;
                 var option = Actions.Single(a => a.Type == "equip" && a.CardId == fixture.Source && a.Enabled);
                 Check(option.TargetIds!.Contains(fixture.Target), "Expected target missing from quoted group");
-                Check(_playPrompt is not null, "Selecting the equipment did not ask to confirm play");
-                await StabilizationClick(StabilizationButton("Confirm play")); // direct play: confirm first, then choose the target and pay
+                Check(_playPrompt is null && _chosen is { Type: "equip" }, "Selecting the equipment did not begin the equip (issue #952: an action that needs a target goes straight to choosing it)");
                 ChooseTarget(fixture.Target!); await EventFrames();
                 if (cost > 0 && QuoteFor(_chosen!) is { Payments.Length: > 0 } quote) { GoldClickHoldings(quote.Payments[0].SourceIds); await EventFrames(3); } // the player bows holdings to pay (#731)
                 var button = ReviewedCommitButton();
