@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Tutorial lesson 1 is now Lion (you, first) against Crane, rebuilt from a single paged script source (tools/tutorial/lesson1_source.py) that also generates the build-prompt document; Copper Mine economy, Crane recruits Doji Atsumichi on its own turn, Straighten-phase hold before Events, tutorial camera centers the cards on the cloth, Ring of Fire reads as printing 18 text on the printing 1 scan (R-086).",
+  "validation": "tutorial tests 10/10; bash tools/check.sh --skip-client passed; bash tools/check-tutorial.sh passed (146 steps, Honor 10, mid-lesson exit); python unittest tools/tutorial and tools/content printing readings pass; screenshots at 1920x1080 checked.",
+  "remaining": "Presentation directions in the build prompt (paused showcases, slowed reveals, flame-and-sword icon, pointing at parts of a card or phase bar) are not built; native Windows playtest not done; Mendon's human acceptance of the lesson text and flow pending.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/935",
+  "branch": "claude/935-tutorial-script-prompt",
+  "updated": "2026-10-18T09:46:59.333240+00:00"
+}

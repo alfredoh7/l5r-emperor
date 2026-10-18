@@ -91898,7 +91898,7 @@
     {
       "automation_status": "unsupported",
       "clans": [],
-      "current_oracle_text": "Play after you win a duel during a battle, if your Personality did not enter the duel with higher Chi than the other. You may discard this Ring from your hand to use its ability without cost.\nFire Battle, :bow:: Target an enemy card without attachments. After this battle resolves, if you lost the battle, destroy the target.",
+      "current_oracle_text": "After the resolution of a battle at a province, if you destroyed one or more provinces or enemy cards in that resolution: You may put this card into play from your hand.\nBattle: :bow: or discard it from your hand, destroy your performing Personality, and target an enemy Personality with equal or lower Chi: Destroy him.",
       "current_primary_printing_id": "19",
       "deck_types": [
         "Fate"

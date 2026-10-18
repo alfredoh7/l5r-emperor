@@ -3046,6 +3046,7 @@ public sealed partial class MatchEngine
         foreach (var infiltrator in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "cultist-infiltrator").ToArray())
             CreateToken(Card(infiltrator.AttachedTo!), "Cultist", infiltrator.Id, "Chi", -1);
         _w827StraightenPhase = false;
+        if (_tutorialHoldEvents) { _tutorialHoldEvents = false; _tutorialEventsPlayer = player; return; } // the tutorial's table stops on the Straighten phase (TutorialBeginTurn)
         EventsPhase(player);
     }
     private void EventsPhase(PlayerState player)

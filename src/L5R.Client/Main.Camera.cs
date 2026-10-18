@@ -147,7 +147,7 @@ public partial class Main
         if (_cameraFitted)
         {
             _cameraZoom = FitZoom;
-            _cameraCenter = new Vector2(WorldWidth / 2, _worldHeight / 2);
+            _cameraCenter = TutorialContentCenter() ?? new Vector2(WorldWidth / 2, _worldHeight / 2);
         }
         else
         {

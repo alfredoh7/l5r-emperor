@@ -21,6 +21,28 @@ public partial class Main
         EnterTable();
     }
 
+    /// <summary>
+    /// The fitted camera normally centres the whole mat, which keeps room at the right for Celestials, Rings and removed piles. The lesson's table starts empty on that side,
+    /// so with the coach column taking the left the cards looked pushed off the cloth. While a lesson is showing, centre the cards that are actually on the table instead.
+    /// </summary>
+    private Vector2? TutorialContentCenter()
+    {
+        if (!TutorialActive || _world is null) return null;
+        var toWorld = _world.GetGlobalTransform().AffineInverse();
+        Rect2? bounds = null;
+        foreach (var tile in _tiles)
+        {
+            if (!IsInstanceValid(tile) || !tile.IsVisibleInTree() || tile.Size.X < 1) continue;
+            var transform = tile.GetGlobalTransform();
+            foreach (var corner in new[] { Vector2.Zero, new Vector2(tile.Size.X, 0), tile.Size, new Vector2(0, tile.Size.Y) })
+            {
+                var point = toWorld * (transform * corner);
+                bounds = bounds is { } b ? b.Expand(point) : new Rect2(point, Vector2.Zero);
+            }
+        }
+        return bounds?.GetCenter();
+    }
+
     /// <summary>Cards the lesson is talking about right now; the table draws a soft pulse on them.</summary>
     private HashSet<string> TutorialPointed() => _session.Tutorial is { Finished: false } lesson ? [.. lesson.Coach.HighlightCardIds] : [];
 
@@ -87,6 +109,7 @@ public partial class Main
         for (var i = 0; i < 6; i++) await CoverageFrames();
         if (OS.GetCmdlineUserArgs().Contains("--tutorial-ui-check")) { await CheckTutorialUi(); return; }
         if (step is not null && !await PlayTutorialTo(step)) { GD.PushError($"TUTORIAL_REVIEW: step '{step}' was not reached."); GetTree().Quit(1); return; }
+        await WaitTutorialRest();
         for (var i = 0; i < 12; i++) await CoverageFrames();
         if (OS.GetCmdlineUserArgs().Contains("--tutorial-dump") || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--tutorial-script=")))
         {
@@ -125,6 +148,12 @@ public partial class Main
             if (tile is null) { GD.Print("TUTORIAL_UI no province tile " + arg); return; }
             SelectCard(tile.Card);
         }
+        else if (verb == "option") // the purchase review's mode picker (Clan discount, full cost, ...)
+        {
+            var picker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().FirstOrDefault() ?? throw new InvalidOperationException("no option picker for " + arg);
+            var index = Enumerable.Range(0, picker.ItemCount).First(i => picker.GetItemText(i).Contains(arg, StringComparison.OrdinalIgnoreCase));
+            picker.Select(index); picker.EmitSignal(OptionButton.SignalName.ItemSelected, (long)index);
+        }
         else if (verb == "menuleave") // the table's hamburger menu, its "Leave tutorial…" entry, and the confirmation
         {
             ShowTableMenu(); for (var i = 0; i < 4; i++) await CoverageFrames();
@@ -152,25 +181,35 @@ public partial class Main
         for (var i = 0; i < 8; i++) await CoverageFrames();
     }
 
+    /// <summary>A player waits for a card or battle presentation to finish before the table takes a click; so do the lab's scripts.</summary>
+    private async Task WaitTutorialRest()
+    {
+        for (var wait = 0; wait < 160 && (PresentationBusy || PlayShowcaseBusy || _session.Busy); wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
+        for (var i = 0; i < 4; i++) await CoverageFrames();
+    }
+
     /// <summary>What a player clicks at each action step of lesson 1. A change to the table's controls that breaks one of these breaks the check below.</summary>
     private static readonly Dictionary<string, string> TutorialUiScripts = new()
     {
-        ["border-refresh"] = "select:Border Keep;click:First-turn province refresh;selectprovince:0/1;selectprovince:0/2;selectprovince:0/3;click:Confirm",
+        ["border-refresh"] = "select:Border Keep;selectprovince:0/1;selectprovince:0/2;selectprovince:0/3;click:Confirm",
         ["pass-action"] = "click:Pass action",
         ["decline-attack"] = "click:Decline to attack",
         ["buy-farm"] = "select:Small Farm;click:Recruit",
-        ["buy-uehara"] = "select:Akodo Uehara;select:Shinden Asahina;select:Border Keep;click:Recruit",
+        ["buy-uehara"] = "select:Akodo Uehara;option:Clan discount;select:Halls of Memory;click:Recruit",
+        ["buy-mine"] = "select:Copper Mine;select:Border Keep;click:Recruit",
         ["end-dynasty"] = "click:End Dynasty Phase",
         ["tell-tale"] = "select:Tell the Tale;click:Confirm play",
-        ["equip-follower"] = "select:Veteran Skirmishers;click:Confirm play;click:Akodo Uehara;select:Bamboo Harvesters;click:Attach",
-        ["equip-item"] = "select:Light Armor;click:Confirm play;click:Akodo Uehara;select:Border Keep;click:Attach",
+        ["equip-follower"] = "select:Veteran Skirmishers;click:Akodo Uehara;select:Border Keep;click:Attach",
+        ["equip-item"] = "select:Light Armor;click:Akodo Uehara;select:Copper Mine;click:Attach",
         ["pass-turn-two"] = "click:Pass action",
         ["declare-attack"] = "click:Declare an attack",
         ["assign-attacker"] = "select:Akodo Uehara;selectprovince:1/0;click:Confirm assignments",
         ["pick-battle"] = "click:Fight at province 1",
-        ["battle-action"] = "select:Crushing Strength;click:Confirm play;click:Akodo Uehara;click:Play Crushing Strength",
+        ["pass-for-bot"] = "click:Pass battle action",
+        ["defensive-stance"] = "select:Defensive Stance;click:Akodo Uehara;click:Play Defensive Stance",
+        ["tactician"] = "select:Akodo Uehara;click:Tactical Advantage;click:Truce;click:Use ability",
         ["pass-battle"] = "click:Pass battle action",
-        ["ring-reaction"] = "wait:6;click:Skip Reaction",
+        ["ring-reaction"] = "select:Ring of Fire;click:Play Reaction",
     };
 
     /// <summary>Plays lesson 1 start to finish with the controls a player uses: the coach's button for notes, the table's own buttons and cards for every move.</summary>
@@ -179,7 +218,7 @@ public partial class Main
         try
         {
             var seen = new List<string>();
-            for (var guard = 0; guard < 120 && _session.Tutorial is { Finished: false } lesson; guard++)
+            for (var guard = 0; guard < 400 && _session.Tutorial is { Finished: false } lesson; guard++)
             {
                 var coach = lesson.Coach; seen.Add(coach.StepId);
                 if (coach.Button is not null)
@@ -191,6 +230,7 @@ public partial class Main
                     continue;
                 }
                 if (!TutorialUiScripts.TryGetValue(coach.StepId, out var script)) throw new InvalidOperationException($"{coach.StepId}: no UI script for this step.");
+                await WaitTutorialRest();
                 foreach (var token in script.Split(';')) await RunTutorialUiToken(token);
                 for (var wait = 0; wait < 60 && _session.Tutorial is { Finished: false } still && still.Coach.StepId == coach.StepId; wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
                 if (_session.Tutorial is { Finished: false } after && after.Coach.StepId == coach.StepId)
@@ -209,18 +249,19 @@ public partial class Main
         catch (Exception e) { GD.PushError("TUTORIAL_UI_CHECK failed: " + e.Message); GetTree().Quit(1); }
     }
 
-    /// <summary>Plays the lesson as a player would, through the session's own submit path, until the named step is showing.</summary>
+    /// <summary>Plays the lesson as a player would, through the table's own cards and buttons, until the named step is showing.</summary>
     private async Task<bool> PlayTutorialTo(string stepId)
     {
-        for (var guard = 0; guard < 300 && _session.Tutorial is { Finished: false } lesson; guard++)
+        for (var guard = 0; guard < 400 && _session.Tutorial is { Finished: false } lesson; guard++)
         {
             if (lesson.Coach.StepId == stepId) return true;
             if (lesson.Coach.Button is not null) { _session.TutorialContinue(); await CoverageFrames(); continue; }
-            var offered = Actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type != "concede");
-            if (offered?.Command is not { } command) return false;
-            if (lesson.Coach.StepId == "border-refresh")
-                command = command with { CardIds = new[] { 1, 2, 3 }.Select(i => Self.Provinces[i].Card!.Id).ToArray() };
-            await Submit(command); await CoverageFrames();
+            if (!TutorialUiScripts.TryGetValue(lesson.Coach.StepId, out var script)) return false;
+            var before = lesson.Coach.StepId;
+            await WaitTutorialRest();
+            foreach (var token in script.Split(';')) await RunTutorialUiToken(token);
+            for (var wait = 0; wait < 60 && _session.Tutorial is { Finished: false } still && still.Coach.StepId == before; wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
+            if (_session.Tutorial is { Finished: false } after && after.Coach.StepId == before) { GD.Print($"TUTORIAL_UI the step {before} did not advance. {TutorialControls()} notice={_status.Text}"); return false; }
         }
         return _session.Tutorial?.Coach.StepId == stepId;
     }

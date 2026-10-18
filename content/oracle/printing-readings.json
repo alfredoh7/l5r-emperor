@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "readings": [
+    {
+      "card_id": "oracle-l5r-6335",
+      "name": "Ring of Fire",
+      "text_printing_id": "18",
+      "text_printing_set": "Promotional–Emperor",
+      "scan_printing_id": "1",
+      "scan_printing_set": "Emperor Edition",
+      "scan_number": "243",
+      "reason": "Oracle of the Void's current text for Ring of Fire is the Twenty Festivals reading (printing 19), which does not match the Emperor Edition scan (printing 1). The scan reads as the Promotional–Emperor text (printing 18). Mendon (2026-10-18, issue #935): use printing 18's text with printing 1's scan everywhere. The published card (content/published/ring-wave-1.json) already did; the catalogue copies now agree.",
+      "decided_by": "mdornbrook",
+      "reviewed_on": "2026-10-18"
+    }
+  ]
+}
