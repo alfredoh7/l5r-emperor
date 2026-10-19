@@ -165,6 +165,7 @@ public static partial class TrainingOpponent
                 var ruled = !(x.Memory.UseBattlePolicy || x.Memory.UseHonorAware && intent.IsAttack) ? null : intent.IsAttack ? PickAttackTarget(x, legal, x.Card(command.CardId))
                     : intent.Rank == EffectRank.Bow && intent.Side == TargetSide.Enemy ? PickBowTarget(x, legal, command.AbilityId) : null;
                 var target = ruled ?? known.Card ?? PickCard(x, legal, intent, action.Label);
+                if (target is not null && target.OwnerId == self.Id && BattlePolicy.SendsHome(command.AbilityId)) target = CostliestOwnUnit(x, legal, target); // Mendon 2026-10-18 (Block Supply Lines): save the unit worth the most printed Gold
                 if (target is not null) command = WithTarget(command, action, target.Id);
                 else if (command.TargetId is null) command = WithTarget(command, action, legal[0]);
                 if (command is null) return null;

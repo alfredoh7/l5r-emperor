@@ -24,12 +24,25 @@ internal static class BattlePolicyTests
         ("Equip (item 1): an attachment is valued by its best Battle ability in strategy order, and the granted additional action is always used", EquipAttachmentPriority),
         ("Trade attacks: a battle won outright is worth making without razing, a tie only when the defenders are worth clearly more, attachments and Personalities count", TradeAttacks),
         ("Trade attacks: the bot declares and assigns such an attack, and not when the rule is off or the defence is too strong", TradeAttackChoice),
+        ("Issue #1019: sending one of its own units home to save it (Block Supply Lines), the bot saves the unit with the highest printed Gold cost counting its attachments, not the bare one", SupplyLinesSavesCostliest),
     ];
 
     internal static CardView Home(string id, int owner, int force, int gold, string? attachedTo = null, CardType? type = null)
     {
         var def = type is null ? Person() with { GoldCost = gold } : CardCatalog.Cards.Values.First(d => d.Type == type) with { GoldCost = gold };
         return new CardView(id, def, owner, Zone.Home, true, false, null, attachedTo, force);
+    }
+
+    private static void SupplyLinesSavesCostliest()
+    {
+        // Two attackers of Force 3 lose to 12. own-main is bare (2 Gold); own-rich is 2 Gold with a 5-Gold attachment, so it is worth more.
+        var main = Unit("own-main", 0, 3, def: Person() with { GoldCost = 2 });
+        var rich = Unit("own-rich", 0, 3, def: Person() with { GoldCost = 2 });
+        var view = Battle(3, 12, 7, true, [rich]);
+        view = view with { Players = [view.Players[0] with { Army = [main, rich], Home = [Home("own-gear", 0, 0, 5, attachedTo: "own-rich", type: CardType.Item)] }, view.Players[1]] };
+        var use = Use(view, "block-supply", "own-main") with { TargetIds = ["own-main", "own-rich"] };
+        var command = TrainingOpponent.Choose(view, [Pass(view), use]).Command;
+        Check(command?.AbilityId == "block-supply" && command.TargetId == "own-rich", "it sends home the unit with the attachment (got " + (command?.AbilityId ?? command?.Type) + " " + command?.TargetId + ")");
     }
 
     private static void OutcomeLadder()
