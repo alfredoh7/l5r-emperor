@@ -86,7 +86,7 @@ public sealed partial class MatchEngine
                 GainHonor(target!.OwnerId, -1, Definition(source!).Name, source);
                 return false;
             case WlHoldingsAbilities.FudoistMadness:
-                DestroyToken(target!, target!.Tokens.First(t => t.Type == WlHoldingsAbilities.MadnessToken));
+                if (target!.Tokens.FirstOrDefault(t => t.Type == WlHoldingsAbilities.MadnessToken) is { } madness) DestroyToken(target, madness); // issue #1030: it may be gone by the time the action resolves
                 return false;
             case WlHoldingsAbilities.GreenLakeOwnTurn:
             case WlHoldingsAbilities.GreenLakeOtherTurn:

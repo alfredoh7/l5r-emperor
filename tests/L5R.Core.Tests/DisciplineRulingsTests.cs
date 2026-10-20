@@ -15,6 +15,7 @@ internal static class DisciplineRulingsTests
     {
         (string Name, Action Test)[] tests = [
             ("strategy-wave-23 published shape: the three Discipline cards as printed (Focus, the Discipline cost as GoldCost), each ability on the Discipline flag; the two 'Limited, 1 Gold' actions carry an explicit own cost; Mercantile Conflict is published in strategy-wave-110", PublishedShape),
+            ("Issue #1030: Knowledge and Power resolving after Perplexing Guests discarded its target does nothing instead of throwing: costs paid, no token created, no exception", TargetDiscardedInTheWindow),
             ("Additive Discipline cost (Knowledge and Power): from the discard pile ONE combined quote of 2 (Discipline 1 first, then the action's own 1), two payments in that order, the card removed from the game; the sources' order is irrelevant", AdditiveQuoteAndPayment),
             ("Additive Discipline cost: Gold does not carry over -- one source covering the total is refused; the play is offered only when BOTH parts are payable (else disabled), and a shortfall of either part is rejected", BothPartsMustBePayable),
             ("From HAND only the action's own cost applies (Knowledge and Power 1; Two Steady Breaths 1, not 3); the Discipline cost is never charged there and the card goes to the Fate discard pile", HandPlayPaysOnlyTheOwnCost),
@@ -96,6 +97,30 @@ internal static class DisciplineRulingsTests
     }
 
     // ---- the additive cost -------------------------------------------------------------------------------------
+    private static void TargetDiscardedInTheWindow()
+    {
+        foreach (var named in new[] { false, true })
+        {
+            var s = ActionTable();
+            var kp = Add(s, KnowledgeAndPower, 0, Zone.Hand);
+            var victim = Add(s, "training-lion-samurai", 1, Zone.Home);
+            AddToken(victim, "tok-a");
+            Add(s, "oracle-l5r-5928", 1, Zone.Hand); // Perplexing Guests: after another player's action targets his Personality, discard him
+            var e = MatchEngine.FromTestState(s);
+            var goldBefore = Producers(s).Count(id => !e.State.Cards[id].Bowed);
+            Accept(e, named ? Use(e, kp, Kp, victim.Id, offerSources(e, kp), ["tok-a"]) : Offer(e, kp, Kp)!.Command!);
+            Accept(e, e.QueryActions(1).First(a => a.Enabled && a.Command?.AbilityId == "p5-perplexing-guests-discard").Command!);
+            Eq(e.State.Cards[victim.Id].Zone, Zone.DynastyDiscard, "the target was discarded in the window");
+            for (var guard = 0; e.State.PendingChoice?.Type == "beforeActionReaction" && guard < 6; guard++)
+                Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Enabled && a.Type == "declineReaction").Command!); // used to throw ArgumentOutOfRange / InvalidOperation here
+            Check(e.State.PendingChoice is null, "the window closed and the action finished");
+            Eq(e.State.Cards[victim.Id].Tokens.Count, 0, "no token was created on the discarded card");
+            Check(e.State.Cards[kp.Id].Zone != Zone.Hand, "the Strategy was played: its costs stay paid");
+            Check(Producers(s).Count(id => !e.State.Cards[id].Bowed) < goldBefore, "the Gold was paid");
+        }
+        string[] offerSources(MatchEngine e, CardInstance card) => Offer(e, card, Kp)!.Command!.SourceIds!;
+    }
+
     private static void AdditiveQuoteAndPayment()
     {
         MatchEngine Table(out CardInstance kp, out CardInstance target)

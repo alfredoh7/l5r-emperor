@@ -8141,8 +8141,11 @@ public sealed partial class MatchEngine
                 {
                     // Champion of Thunder's "negate the action's effects on this card" reaches the whole action, tokens included.
                     if (NegatesEffect(target!, "all")) break;
-                    var destroyed = command.CardIds is { Length: > 0 } named ? named : [target!.Tokens[0].Id];
-                    foreach (var tokenId in destroyed) DestroyToken(target!, target!.Tokens.First(t => t.Id == tokenId));
+                    // Issue #1030: the tokens are read as the action resolves. A reaction in its window (Perplexing Guests discarding the target) may have taken them: only tokens still there are destroyed,
+                    // and the target gets as many +1F tokens as were destroyed, so none at all when nothing was left.
+                    var present = target!.Tokens.Select(t => t.Id).ToHashSet(StringComparer.Ordinal);
+                    var destroyed = (command.CardIds is { Length: > 0 } named ? named : target.Tokens.Take(1).Select(t => t.Id)).Where(present.Contains).ToArray();
+                    foreach (var tokenId in destroyed) DestroyToken(target, target.Tokens.First(t => t.Id == tokenId));
                     for (var n = 0; n < destroyed.Length; n++) CreateToken(target!, "Force", id, "Force", 1);
                     break;
                 }
@@ -8265,8 +8268,8 @@ public sealed partial class MatchEngine
                 break;
             case "shiro-shiba-melee": if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return; break;
             case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
-            case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
-            case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
+            case "training-move-token": if (target!.Tokens.Count > 0) MoveToken(target, target.Tokens[0], Card(command.PerformerId!)); break; // issue #1030: nothing to move once the target lost its tokens
+            case "training-destroy-token": if (target!.Tokens.Count > 0) DestroyToken(target, target.Tokens[0]); break;
             case "monastery-fire-token": CreateToken(target!, "Fire", id, "Force", 1); break;
             case "monastery-fire-attack":
                 {
@@ -8292,7 +8295,7 @@ public sealed partial class MatchEngine
                 break;
             case "mitsu-fire-attack":
                 {
-                    var tokenIds = command.CardIds ?? [];
+                    var tokenIds = (command.CardIds ?? []).Where(tid => source!.Tokens.Any(t => t.Id == tid)).ToArray(); // issue #1030: only the Fire tokens still there count (a reaction in the window may have taken them)
                     foreach (var tid in tokenIds) DestroyToken(source!, source!.Tokens.First(t => t.Id == tid));
                     if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant, tokenIds.Length)) return;
                     break;
@@ -8671,7 +8674,8 @@ public sealed partial class MatchEngine
             case "kano-token": CreateToken(source!, "Master", id); break;
             case "kano-destroy-token":
 
-                DestroyToken(source!, source!.Tokens.First(t => t.Type == "Master"));
+                if (source!.Tokens.FirstOrDefault(t => t.Type == "Master") is not { } master) break; // issue #1030: no Master token left to destroy, so no extra actions
+                DestroyToken(source, master);
                 GrantAdditionalAction(player.Id, null); GrantAdditionalAction(player.Id, null);
                 break;
             case "michitsu-destroy": DestroyAttachment(target!); break;

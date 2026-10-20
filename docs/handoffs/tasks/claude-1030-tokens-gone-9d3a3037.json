@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Token-destroying abilities no longer throw when the tokens are gone as the action resolves (Perplexing Guests discarding the target in the reaction window): Knowledge and Power, Fudoist Advisor, Mitsu's Fire Attack, Kano, training-move/destroy-token.",
+  "validation": "New Knowledge and Power and Fudoist Advisor regressions fail without the change (ArgumentOutOfRange / InvalidOperation) and pass with it; soak seed 107 now finishes with no exception; bash tools/check.sh --skip-client all passed.",
+  "remaining": "Mitsu and Kano guards are untested (no way found to remove their own tokens in a window). A general 'target left play' rule is not implemented (needs a ruling).",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1030",
+  "branch": "claude/1030-tokens-gone",
+  "updated": "2026-10-20T21:52:50.333202+00:00"
+}
