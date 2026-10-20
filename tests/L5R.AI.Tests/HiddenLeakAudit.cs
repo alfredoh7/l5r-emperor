@@ -14,9 +14,9 @@ internal sealed class HiddenLeakAudit
 
     /// <summary>
     /// Events that name a card because the rules make that public: an announced Reaction ("X will play Y" is said aloud, and "does not play Y after all" follows it), a card a player
-    /// shows or gives away, a Province card revealed, and the "before this battle resolves" effect of a card already announced. The card counts as seen from then on.
+    /// shows or gives away, a card found by a search that the player must now play ("must take an additional Battle action to play X"), a Province card revealed, and the "before this battle resolves" effect of a card already announced. The card counts as seen from then on.
     /// </summary>
-    private static readonly HashSet<string> PublicByRule = new(StringComparer.Ordinal) { "reactionAnnounced", "reactionSkipped", "eventChose", "beforeBattleEffect", "provinceRevealed" };
+    private static readonly HashSet<string> PublicByRule = new(StringComparer.Ordinal) { "reactionAnnounced", "reactionSkipped", "eventChose", "beforeBattleEffect", "provinceRevealed", "searchPlayOwed" };
 
     /// <summary>Records what each seat can see now and returns a description of each leak found since the last call.</summary>
     public List<string> Check(MatchEngine game)
