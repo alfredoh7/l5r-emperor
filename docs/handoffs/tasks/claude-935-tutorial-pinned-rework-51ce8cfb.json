@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Playtest fixes on the pinned Lion/Crane tutorial: table centred on cards and piles and kept fitted as it grows; step 11 says 7 Honor; step 12 counts the placard Honor up to 40 and back with the fan swelling (display only); step 23 Gold payment meter moved clear of the coach column; a selected/focused attachment no longer rises over its Personality (all play, not only the tutorial).",
-  "validation": "tools/check.sh --skip-client passed; tutorial tests 9/9; tools/check-tutorial.sh walked 59 steps + Back; tools/check-attach-order-ui.sh passed with a new still-selected scenario that fails (1379 px over the Personality) without the CardTile fix; changed-C# format check passed; native captures of steps 9, 12, 23, 37 reviewed at 1672x941. Not yet human playtested after these fixes.",
-  "remaining": "Mendon to replay the tutorial and confirm the five fixes.",
+  "summary": "Playtest fixes on the pinned Lion/Crane tutorial: table centred on cards and piles and kept fitted as it grows; the room/cloth now re-aims after a window resize (affected all play: the hall viewport kept the old window size until a pan); step 11 says 7 Honor; step 12 counts the placard Honor up to 40 and back (display only); step 23 Gold payment meter clear of the coach column; step 27 drops the 'watch for it on Crane's second turn' aside; a selected/focused attachment no longer rises over its Personality.",
+  "validation": "tools/check.sh --skip-client passed (before the resize fix; the later change is client-only); tutorial tests 9/9; check-tutorial.sh 59 steps + Back; check-attach-order-ui.sh passed with a new still-selected scenario that fails without the CardTile fix; check-war-room-live.sh 7/7 (one earlier run hit an intermittent arrow-key pan failure that also occurs without this change); check-war-room-motion.sh not run (ffmpeg not installed); changed-C# format passed; native captures after resize 1440x900->2000x1250 and 1900x1200->1100x700 reviewed. Not yet human playtested.",
+  "remaining": "Mendon to replay the tutorial, including a window resize.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/935",
   "branch": "claude/935-tutorial-pinned-rework",
-  "updated": "2026-10-20T22:08:45.500605+00:00"
+  "updated": "2026-10-20T22:28:53.638763+00:00"
 }
