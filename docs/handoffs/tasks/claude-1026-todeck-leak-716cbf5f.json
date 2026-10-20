@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "toDeck no longer names a card the opponent has not seen: a face-down Province card, hand card or deck card goes to the deck as 'A card' with no card id (Wave739 RefillProvince leak).",
+  "validation": "New Wave739 MiwaSearch check fails before the fix and passes after; bash tools/check.sh --skip-client all passed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1026",
+  "branch": "claude/1026-toDeck-leak",
+  "updated": "2026-10-20T21:01:09.933452+00:00"
+}

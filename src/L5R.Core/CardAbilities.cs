@@ -11095,11 +11095,12 @@ public sealed partial class MatchEngine
         if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
+        var hiddenFromOpponent = !CardIdentityVisibleTo(card, 1 - card.OwnerId); // issue #1026: a face-down Province card, a hand card or a deck card stays unnamed in the shared event log
         card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; ResetCardState(card);
         card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck;
         var deck = dynasty ? owner.DynastyDeck : owner.FateDeck;
         if (position == "Bottom") deck.Add(card.Id); else deck.Insert(0, card.Id);
-        Emit("toDeck", $"{Definition(card).Name} was placed on the {position.ToLowerInvariant()} of {owner.Name}'s {(dynasty ? "Dynasty" : "Fate")} deck.", card.OwnerId, card.Id);
+        Emit("toDeck", $"{(hiddenFromOpponent ? "A card" : Definition(card).Name)} was placed on the {position.ToLowerInvariant()} of {owner.Name}'s {(dynasty ? "Dynasty" : "Fate")} deck.", card.OwnerId, hiddenFromOpponent ? null : card.Id);
     }
     // Aberrations (issue #192): "Discard the top card of a Fate deck" -- unlike Draw() (top card to
     // hand), this removes it straight to the discard pile (a public zone, so no hidden-identity
