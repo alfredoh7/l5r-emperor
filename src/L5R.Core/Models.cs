@@ -1408,7 +1408,16 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Engine-selected preview cards for a complete pending answer; private candidates are only offered to the decider.
     string[]? DecisionCandidateIds = null, string? DecisionLabel = null,
     // The destination rule of an ability that moves cards (MoveSpec.Home / CurrentBattlefield, or a rule that needs a chosen battlefield); null for every other action. Lets a client offer a drag without reading card text.
-    string? MoveTo = null);
+    string? MoveTo = null)
+{
+    /// <summary>
+    /// Issue #1028: true when this option's own fields say the player must supply more than a confirm (a target, a province choice list, a slot, a movement or attack choice, an
+    /// alternative cost, or a Gold payment), so a client must not submit <see cref="Command"/> as it stands. A client adds only what it alone knows (which of several variants
+    /// to play); it does not keep its own list of Core's fields. <c>ActionOptionInputTests</c> fails when a field is added to this record without being classified there.
+    /// </summary>
+    public bool RequiresInput() => TargetIds is { Length: > 0 } || Slots is not null || Movement is not null || Attack is not null || AlternativeCost is not null
+        || Gold is { Cost: > 0 } || Gold is { Kind: GoldCostKind.Variable } || TargetGold is not null || Command?.CardIds is not null;
+}
 /// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
 /// it identifies the card to mark, not a new legality or damage calculation.</summary>
 public sealed record AttackCueView(string Kind, string SourceId);

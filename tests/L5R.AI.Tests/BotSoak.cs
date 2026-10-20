@@ -47,6 +47,8 @@ internal static class BotSoak
         catch (Exception e) { result.Findings.Add(new("exception", seed, 0, "-", "-", "CreateCustomMatch", "Engine threw creating a Ready match: " + e.Message)); return result; }
         var recent = new Queue<string>();
         var contexts = new[] { new BotContext(), new BotContext() }; // one memory per seat, as a client keeps
+        var leakAudit = new HiddenLeakAudit(); // issue #1027: nothing a seat is shown may name a card it has never seen
+        try { leakAudit.Check(game); } catch (Exception) { /* a view the engine cannot build is reported by the main loop */ } // what the seats see before the first command (setup reveals) counts as seen
         var retries = 0;
         void Note(string s) { recent.Enqueue(s); if (recent.Count > 20) recent.Dequeue(); }
         MatchView Peek() => game.GetView(0);
@@ -97,6 +99,8 @@ internal static class BotSoak
             }
             retries = 0;
             Slot(result, id).Accepted++;
+            try { foreach (var leak in leakAudit.Check(game)) result.Findings.Add(new("leak", seed, v0.TurnNumber, phase, pending, id, leak, recent.ToArray())); }
+            catch (Exception e) { result.Findings.Add(new("exception", seed, v0.TurnNumber, phase, pending, "leak-audit", $"The hidden-information audit threw {e.GetType().Name}: {e.Message}", recent.ToArray())); }
         }
         var last = Peek();
         result.Findings.Add(new("cap", seed, last.TurnNumber, last.Phase.ToString(), last.PendingChoice?.Type ?? "-", "decision-cap", $"No result after {DecisionCap} decisions (loop or stall). Pending " + JsonSerializer.Serialize(game.State.PendingChoice) + "; priority " + game.State.PriorityPlayerId + "; seat0 " + string.Join(",", game.QueryActions(0).Select(x => x.Type + ":" + x.Enabled + ":" + x.Reason + ":" + x.Command?.AbilityId)) + "; seat1 " + string.Join(",", game.QueryActions(1).Select(x => x.Type + ":" + x.Enabled + ":" + x.Reason + ":" + x.Command?.AbilityId)), recent.ToArray()));
@@ -128,7 +132,7 @@ internal static class BotSoak
 
     public static string Markdown(SoakSummary s, ulong firstSeed)
     {
-        var sb = new StringBuilder(); var cats = new[] { "stall", "illegal", "cap", "exception", "setup", "rejected", "slow" };
+        var sb = new StringBuilder(); var cats = new[] { "stall", "illegal", "cap", "exception", "setup", "leak", "rejected", "slow" };
         sb.AppendLine("# Bot soak report").AppendLine();
         sb.AppendLine($"Seeds {firstSeed}..{firstSeed + (ulong)s.Requested - 1}; played {s.Played}/{s.Requested} (skipped {s.Skipped} for wall time); finished {s.Finished}; {s.Seconds:0.0}s.").AppendLine();
         sb.AppendLine("## Findings by category").AppendLine();
@@ -190,7 +194,7 @@ internal static class BotSoak
             var matches = heavy ? int.Parse(Env("L5R_SOAK_MATCHES")!) : 12;
             var budget = heavy ? TimeSpan.FromHours(2) : TimeSpan.FromMinutes(2);
             var summary = Run(seed, matches, budget, heavy ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60), parallel: Env("L5R_SOAK_PARALLEL") != "0");
-            Console.WriteLine($"  soak: {summary.Played}/{summary.Requested} matches, {summary.Finished} finished, {summary.Seconds:0.0}s; findings " + string.Join(", ", new[] { "stall", "illegal", "cap", "exception", "setup", "rejected", "slow" }.Select(c => $"{c}={summary.Findings.Count(f => f.Category == c)}")) + $"; {summary.NeverOffered.Length} wired abilities never offered");
+            Console.WriteLine($"  soak: {summary.Played}/{summary.Requested} matches, {summary.Finished} finished, {summary.Seconds:0.0}s; findings " + string.Join(", ", new[] { "stall", "illegal", "cap", "exception", "setup", "leak", "rejected", "slow" }.Select(c => $"{c}={summary.Findings.Count(f => f.Category == c)}")) + $"; {summary.NeverOffered.Length} wired abilities never offered");
             if (report is not null) WriteReport(summary, seed, report);
             if (heavy) return; // heavy mode reports and never fails on findings
             var failures = summary.Findings.Where(f => f.Category is not ("rejected" or "slow")).ToList(); // "rejected": the engine offered an action it then refused and the bot chose again (an action-list gap, listed in the report)

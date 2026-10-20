@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bot soak now audits hidden information: after every command, nothing either seat is shown (events, pending prompt) may name a card that seat has never seen. Rule-public announcements are allowlisted. 150-match run on top of #1026: 0 leaks; it found an unrelated engine exception (#1030).",
+  "validation": "150 soak matches (seeds 1-150): leak 0 after the allowlist; before #1026, 3 real toDeck leaks were reported (fixed in #1029); default soak passes.",
+  "remaining": "Events and prompts without a CardId are not covered; seed 107 exception tracked in #1030.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1027",
+  "branch": "claude/1027-hidden-leak-audit",
+  "updated": "2026-10-20T21:34:54.861830+00:00"
+}
