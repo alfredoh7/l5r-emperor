@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "ActionOption.RequiresInput() in Core now says which option fields need player input; the client's NeedsFurtherInput uses it, and a Core test fails when a field is added without being classified. Deleted the dead client opponent-payment source list (RenderOpponentSources) and its card-list fallback.",
+  "validation": "bash tools/check.sh (full, including the Godot client build) all passed; new action-option-input suite ran.",
+  "remaining": "None; ready for review. Smells left out of scope are listed on the issue.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1028",
+  "branch": "claude/1028-core-declares-input",
+  "updated": "2026-10-20T21:29:12.318256+00:00"
+}

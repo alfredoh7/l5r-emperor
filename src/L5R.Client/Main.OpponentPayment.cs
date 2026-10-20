@@ -138,45 +138,4 @@ public partial class Main
         }
         _inspector.AddChild(new HSeparator());
     }
-
-    private void RenderOpponentSources(int required)
-    {
-        var header = new HBoxContainer(); _inspector.AddChild(header);
-        var title = Palette.Text("Sources to bow", 20); title.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; header.AddChild(title);
-        var payments = PaymentsFor(QuoteFor(_chosen!)!, required);
-        if (payments.Length > 1)
-        {
-            var suggestions = new OptionButton { FitToLongestItem = false, ClipText = true, CustomMinimumSize = new(152, 34) };
-            for (var i = 0; i < payments.Length; i++) suggestions.AddItem(i == 0 ? "Suggested" : "Alternative " + i);
-            suggestions.AccessibilityName = "Choose engine-suggested payment sources";
-            suggestions.Selected = Array.FindIndex(payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
-            suggestions.ItemSelected += i =>
-            {
-                if (!DecisionCanSubmit) return;
-                _sources.Clear(); foreach (var id in payments[(int)i].SourceIds) _sources.Add(id);
-                RenderInspector(); Highlight();
-            };
-            var style = SidebarSkin.Surface(true); style.ContentMarginLeft = style.ContentMarginRight = 10;
-            style.ContentMarginTop = style.ContentMarginBottom = 4; suggestions.AddThemeStyleboxOverride("normal", style);
-            suggestions.AddThemeFontSizeOverride("font_size", 15); header.AddChild(suggestions);
-        }
-        var scroll = new ScrollContainer { CustomMinimumSize = new(0, 171), VerticalScrollMode = ScrollContainer.ScrollMode.Disabled, FollowFocus = true };
-        var grid = new HBoxContainer(); grid.AddThemeConstantOverride("separation", 8); scroll.AddChild(grid); _inspector.AddChild(scroll);
-        foreach (var card in Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => Production(c, Self) > 0).OrderByDescending(c => _sources.Contains(c.Id)).ThenBy(c => c.Bowed))
-        {
-            var face = new PaymentSourceFace(card, Production(card, Self), _sources.Contains(card.Id)) { Disabled = card.Bowed || !DecisionCanSubmit };
-            face.Pressed += () =>
-            {
-                if (!DecisionCanSubmit || card.Bowed) return;
-                if (!_sources.Add(card.Id)) _sources.Remove(card.Id);
-                RenderInspector(); Highlight();
-                _inspector.FindChildren("*", "Button", true, false).OfType<PaymentSourceFace>().FirstOrDefault(b => b.Card.Id == card.Id)?.CallDeferred(Control.MethodName.GrabFocus);
-            };
-            grid.AddChild(face);
-        }
-        var produced = SelectedProduction();
-        _decisionActions.AddChild(Palette.Wrapped($"{produced} produced / {required} required" +
-            (produced > required ? $" · {produced - required} excess lost" : produced < required ? " · Choose more ready sources" : " · Exact payment"), 17,
-            produced < required ? Palette.Error : Palette.Gold));
-    }
 }

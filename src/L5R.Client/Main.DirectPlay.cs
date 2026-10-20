@@ -88,9 +88,8 @@ public partial class Main
     private bool NeedsFurtherInput(PlayChoice choice)
     {
         var option = choice.Option;
-        return NeedsPlayerPick(choice) || NeedsTargetPick(option) || option.TargetIds is { Length: > 0 } || option.Slots is not null || IsProvinceTarget(option) || option.Movement is not null
-            || HasAttackTargets(option) || option.Attack is not null || option.AlternativeCost is not null || option.Gold is { Cost: > 0 } || option.Gold is { Kind: GoldCostKind.Variable }
-            || option.TargetGold is not null || choice.Variants.Select(v => v.Command?.PerformerId).Distinct().Count() > 1 || option.Command?.CardIds is not null;
+        return option.RequiresInput() || NeedsPlayerPick(choice) || NeedsTargetPick(option) || IsProvinceTarget(option) || HasAttackTargets(option)
+            || choice.Variants.Select(v => v.Command?.PerformerId).Distinct().Count() > 1; // Core's own fields first (ActionOption.RequiresInput); only what the client alone knows after
     }
 
     private bool RenderPlayPrompt()
