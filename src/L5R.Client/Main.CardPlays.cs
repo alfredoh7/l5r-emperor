@@ -128,7 +128,7 @@ public partial class Main
     /// face-down slot of that player's reveal. Not under reduced motion.</summary>
     private CardFlip? CoverForFlip(CardView card, int who, HashSet<(int Player, int Province, int Slot)> claimed)
     {
-        if (!_preferences.FlipDynastyCards || _reducedMotion || CardTile.Artwork(card.Definition!) is not { } face) return null;
+        if (!(_preferences.FlipDynastyCards || TutorialActive) || _reducedMotion || CardTile.Artwork(card.Definition!) is not { } face) return null;
         if (_motionView is not { } prior || prior.ViewerId != View.ViewerId || prior.Players.FirstOrDefault(p => p.Id == who) is not { } before) return null;
         var hidden = before.Provinces.Where(p => !p.Destroyed)
             .SelectMany(p => ProvincePresentation.Slots(p).Where(s => s.Card is { Definition: null }).Select(s => (Province: p.Index, Slot: s.Index, Card: s.Card!)))
@@ -142,7 +142,8 @@ public partial class Main
         var tile = _tiles.FirstOrDefault(t => IsInstanceValid(t) && t.Card.Id == place.Card.Id);
         if (tile is null) return null;
         claimed.Add((who, place.Province, place.Slot));
-        var cover = new CardFlip { From = tile.FaceCornersOnViewport().Select(p => p / _root.Scale.X).ToArray(), Face = face, Back = TablePile.DynastyBack };
+        var slow = TutorialSlow; // the tutorial can ask for a reveal at a quarter of the speed
+        var cover = new CardFlip { From = tile.FaceCornersOnViewport().Select(p => p / _root.Scale.X).ToArray(), Face = face, Back = TablePile.DynastyBack, Turn = .5 * slow, Linger = .45 * slow };
         _root.AddChild(cover);
         return cover;
     }
@@ -199,7 +200,8 @@ public partial class Main
         _playCurrent = stage;
 
         var waiting = _playQueue.Count > 0 && !paused;
-        var hold = (beat.Discarded ? CardPlayTiming.Hold : CardPlayTiming.BoardHold) * (waiting ? CardPlayTiming.QueuedHoldScale : 1);
+        var slow = TutorialSlow; // the tutorial can ask for a card to be shown for four times as long
+        var hold = (beat.Discarded ? CardPlayTiming.Hold : CardPlayTiming.BoardHold) * (waiting ? CardPlayTiming.QueuedHoldScale : 1) * slow;
         var tween = stage.CreateTween();
         if (_reducedMotion)
         {
@@ -213,15 +215,15 @@ public partial class Main
                 })));
                 return;
             }
-            tween.TweenInterval(Math.Max(.2, CardPlayTiming.ReducedHold * (waiting ? CardPlayTiming.QueuedHoldScale : 1) - .3));
+            tween.TweenInterval(Math.Max(.2, CardPlayTiming.ReducedHold * (waiting ? CardPlayTiming.QueuedHoldScale : 1) * slow - .3));
             tween.TweenProperty(stage, "modulate:a", 0.0, .15);
         }
         else
         {
             face.Scale = new Vector2(.7f, .7f);
             tween.SetParallel(true);
-            tween.TweenProperty(stage, "modulate:a", 1.0, CardPlayTiming.Intro);
-            tween.TweenProperty(face, "scale", Vector2.One, CardPlayTiming.Intro).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+            tween.TweenProperty(stage, "modulate:a", 1.0, CardPlayTiming.Intro * slow);
+            tween.TweenProperty(face, "scale", Vector2.One, CardPlayTiming.Intro * slow).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
             tween.SetParallel(false);
             // The outro is built when the hold ends so the pile's final position is read then, not when the card arrived.
             if (paused) tween.TweenCallback(Callable.From(() => HoldCardPlay(stage, height, () => PlayCardOutro(stage, face, caption, beat))));

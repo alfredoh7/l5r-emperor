@@ -175,7 +175,7 @@ public partial class Main : Node
         if (ProcessMatchDuelCapture(delta)) return;
         LayoutBattlefieldHeaders();
         if (MenuVisible || PracticeVisible && _capturePath is null) return;
-        PulseTutorialPointers(); LayoutTutorialCoach();
+        PulseTutorialPointers(delta); LayoutTutorialCoach();
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -702,7 +702,7 @@ public partial class Main : Node
         var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
-            tile.Pointed = tutorialPointed.Contains(tile.Card.Id);
+            tile.Pointed = tutorialPointed.Contains(tile.Card.Id); ApplyTutorialDeal(tile);
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type == "forcedDiscard" && tile.Card.Id == _eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is { Type: "harshChoices", CardId: { } harshCard } && tile.Card.Id == harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;

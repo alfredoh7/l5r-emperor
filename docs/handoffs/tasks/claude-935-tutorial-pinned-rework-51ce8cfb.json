@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rebuilt the tutorial as Mendon's 59-step script: pinned Lion vs pinned Crane, first turn and a half. Engine gains tutorial-only phase holds (Straighten/Events/End); runner plays Crane only when a step asks; Back button replays recorded inputs; phase/battle/hand glow, Show flow, slow province deal and 4x reveals; generated build prompt retired.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests -- --filter tutorial: 9/9; bash tools/check.sh --skip-client: passed; bash tools/check-tutorial.sh: 59 steps through real controls plus Back checks, passed on this Windows box (not human playtested)",
+  "remaining": "Human playtest of look/pacing (slow reveal, glow strength); script numbers differ from the pasted script where the engine disagrees (Kenshi 3 Force, Light Armor 2 Gold) - see docs/decisions/2026-10-20-tutorial-pinned-lion-crane.md; Copper Mine is not in the pinned Lion list.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/935",
+  "branch": "claude/935-tutorial-pinned-rework",
+  "updated": "2026-10-20T20:45:32.583459+00:00"
+}

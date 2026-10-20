@@ -1,34 +1,49 @@
 namespace L5R.Core;
 
 /// <summary>What the coach panel shows for the current step (issue #935). Highlights are card ids to point at; the panel never decides anything.</summary>
-public sealed record TutorialCoach(string StepId, string Title, string Body, string? Button, string[] HighlightCardIds, int Step, int Steps, bool Finished, string? Instruction = null);
+/// <param name="Glow">Parts of the screen to light up (see <see cref="TutorialGlow"/>).</param>
+/// <param name="ShowDefinitionId">A card to show large in the middle of the table while the note is read (the "Show" flow).</param>
+/// <param name="Slow">The presentations this step starts (province reveals, a played card) run at a quarter of their usual speed.</param>
+/// <param name="ProvincesOnTable">False while the opening notes are read: the provinces are laid out at the step that introduces them.</param>
+public sealed record TutorialCoach(string StepId, string Title, string Body, string? Button, string[] HighlightCardIds, int Step, int Steps, bool Finished, string? Instruction = null,
+    string[]? Glow = null, string? ShowDefinitionId = null, bool Slow = false, bool ProvincesOnTable = true, bool CanGoBack = false, string? ExitLabel = null);
 
-/// <summary>One beat of a lesson. A narration step has a <see cref="Button"/> and waits for it; an action step has an <see cref="Allow"/> and waits for the player to make that move.
+/// <summary>Parts of the screen a note can light up.</summary>
+public static class TutorialGlow
+{
+    public const string PhaseBar = "phase-bar", BattleBar = "battle-bar", Hand = "hand";
+}
+
+/// <summary>One beat of the lesson. A narration step has a <see cref="Button"/> and waits for it; an action step has an <see cref="Allow"/> and waits for the player to make that move.
 /// Everything else the engine would offer is shown as unavailable, so a click the lesson does not want never reaches the engine.</summary>
 internal sealed class TutorialStep
 {
     public required string Id { get; init; }
     public required string Title { get; init; }
     public required string Body { get; init; }
-    /// <summary>Narration: the label of the button that moves on (also run <see cref="OnContinue"/>). Null for an action step.</summary>
+    /// <summary>Narration: the label of the button that moves on. Null for an action step.</summary>
     public string? Button { get; init; }
-    public Action<MatchEngine>? OnContinue { get; init; }
+    /// <summary>What happens to the table when the step is done (its button is pressed, or its move is made): a hold is lifted, the opponent plays its part.</summary>
+    public Action<TutorialContext>? Then { get; init; }
     /// <summary>Action step: which engine options stay available (type, ability, card), judged from the option's command.</summary>
     public Func<TutorialLookup, GameCommand, bool>? Allow { get; init; }
-    /// <summary>Action step: the parameters the lesson requires on the command itself (the cards chosen for a province refresh, the unit equipped), checked when it is submitted.</summary>
+    /// <summary>Action step: the parameters the lesson requires on the command itself (the unit equipped, the Gold sources), checked when it is submitted.</summary>
     public Func<TutorialLookup, GameCommand, bool>? Accept { get; init; }
     /// <summary>Action step: exactly what to do for the lesson to move on, shown apart from the explanation. There is no button until it is done.</summary>
     public string? Instruction { get; init; }
     public string RefusalHint { get; init; } = "Follow the highlighted step first.";
     public Func<TutorialLookup, IEnumerable<string>>? Highlight { get; init; }
-    /// <summary>Action step: the only cards the move may target (the three face-up provinces for the Border Keep), so the table offers just those.</summary>
+    /// <summary>Action step: the only cards the move may target, so the table offers just those.</summary>
     public Func<TutorialLookup, IEnumerable<string>>? Targets { get; init; }
     /// <summary>Action step: the only provinces an attack or defence may name.</summary>
     public int[]? OnlyProvinces { get; init; }
+    public string[]? Glow { get; init; }
+    public string? ShowDefinitionId { get; init; }
+    public bool Slow { get; init; }
     public bool IsAction => Allow is not null;
 }
 
-/// <summary>Resolves "the Border Keep" and "Akodo Uehara" in a running lesson to card ids, for step predicates and highlights.</summary>
+/// <summary>Resolves "the Border Keep" and "Matsu Hachiro" in a running lesson to card ids, for step predicates and highlights.</summary>
 internal sealed class TutorialLookup(MatchEngine engine)
 {
     public string DefinitionOf(string? cardId) => cardId is null ? "" : engine.TutorialDefinitionOf(cardId);
@@ -39,25 +54,55 @@ internal sealed class TutorialLookup(MatchEngine engine)
     public string? Province(int owner, int index) => engine.TutorialProvinceCardId(owner, index);
 }
 
+/// <summary>What a step may do to the table when it is done. The opponent only ever plays when a step asks it to, so the lesson can stop between its moves.</summary>
+internal sealed class TutorialContext(TutorialRunner runner)
+{
+    public MatchEngine Engine => runner.Engine;
+    public MatchState State => runner.Engine.TutorialState;
+    /// <summary>Stop at the start of this phase of this player's turn (see <see cref="MatchEngine.TutorialHoldAt"/>).</summary>
+    public void HoldAt(Phase phase, int playerId) => Engine.TutorialHoldAt(phase, playerId);
+    public void Resume() => Engine.TutorialResume();
+    public void StartTurn() => Engine.TutorialBeginTurn();
+    public void Draw(int count) => Engine.TutorialDraw(TutorialRunner.Seat, count);
+    /// <summary>Makes the one engine option of this type that is open to you, for the moves the lesson narrates but does not ask you to click (Proclaiming).</summary>
+    public void Auto(string type)
+    {
+        var option = Engine.QueryActions(TutorialRunner.Seat).FirstOrDefault(a => a.Enabled && a.Type == type && a.Command is not null)
+            ?? throw new InvalidOperationException($"The lesson expected a '{type}' option.");
+        var result = Engine.Execute(option.Command!);
+        if (!result.Accepted) throw new InvalidOperationException($"The lesson's '{type}' was refused: {result.Error}");
+    }
+    /// <summary>The opponent plays its script until <paramref name="stop"/> holds or a decision is yours.</summary>
+    public void Foe(Func<MatchState, bool>? stop = null) => runner.PlayFoe(stop, scripted: true);
+}
+
 /// <summary>Plays a scripted lesson over the real engine (issue #935). The engine stays the only authority on legality: the runner narrows what is offered, plays the practice opponent's side of the script,
-/// and moves the coach panel along. Offline only, and the lesson's table is never used for a room.</summary>
+/// and moves the coach panel along. Offline only, and the lesson's table is never used for a room.
+/// Everything the player does (a button, a move) is kept, so <see cref="Back"/> can rebuild the table and play it again up to the step before: the engine is deterministic, so that is the scene as it was.</summary>
 public sealed class TutorialRunner
 {
     public const int Seat = 0;
     private readonly MatchEngine _engine;
     private readonly TutorialStep[] _steps;
     private readonly TutorialLookup _lookup;
+    private readonly TutorialContext _context;
+    private readonly List<GameCommand?> _inputs = [];
     private int _index;
     private int? _attackedProvince;
 
-    private TutorialRunner(MatchEngine engine, TutorialStep[] steps) { _engine = engine; _steps = steps; _lookup = new(engine); Settle(); }
+    private TutorialRunner(MatchEngine engine, TutorialStep[] steps)
+    {
+        _engine = engine; _steps = steps; _lookup = new(engine); _context = new(this);
+        PlayFoe(null, scripted: false);
+    }
 
-    /// <summary>Lesson 1: cards and card types.</summary>
-    public static TutorialRunner StartLessonOne() { var engine = MatchEngine.CreateTutorial(); return new(engine, TutorialLessonOne.Steps); }
+    /// <summary>The lesson: Lion (you) against Crane on the pinned decks, the first turn and a half.</summary>
+    public static TutorialRunner Start() => new(MatchEngine.CreateTutorial(), TutorialLessonOne.Steps);
 
     public MatchEngine Engine => _engine;
     public bool Finished => _index >= _steps.Length;
     public string? Refusal { get; private set; }
+    public bool CanGoBack => _inputs.Count > 0;
 
     private TutorialStep? Current => Finished ? null : _steps[_index];
 
@@ -66,7 +111,8 @@ public sealed class TutorialRunner
         get
         {
             if (Current is not { } step) return new("done", "Lesson complete", "", null, [], _steps.Length, _steps.Length, true);
-            return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false, step.Instruction);
+            return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false, step.Instruction,
+                step.Glow, step.ShowDefinitionId, step.Slow, _index >= TutorialLessonOne.ProvincesStep, CanGoBack);
         }
     }
 
@@ -74,7 +120,7 @@ public sealed class TutorialRunner
     public ActionOption[] Actions()
     {
         var offered = _engine.QueryActions(Seat);
-        if (Current is not { IsAction: true } step || _engine.PriorityPlayerId != Seat)
+        if (Current is not { IsAction: true } step || _engine.PriorityPlayerId != Seat || _engine.TutorialHeld)
             return offered.Select(a => a with { Enabled = false, Reason = "Read the tutorial note, then press its button." }).ToArray();
         var targets = step.Targets?.Invoke(_lookup).ToHashSet();
         return offered.Select(a => a.Enabled && a.Command is { } command && step.Allow!(_lookup, command)
@@ -98,7 +144,8 @@ public sealed class TutorialRunner
         var result = _engine.Execute(command);
         if (!result.Accepted) { Refusal = result.Error; return result; }
         if (command.Type == "attack") _attackedProvince = command.Assignments is { Count: > 0 } assignments ? assignments.Values.First() : command.Province;
-        _index++; Settle();
+        _inputs.Add(command);
+        Advance(step);
         return result;
     }
 
@@ -106,29 +153,56 @@ public sealed class TutorialRunner
     public bool Continue()
     {
         if (Current is not { IsAction: false } step) return false;
-        step.OnContinue?.Invoke(_engine);
-        _index++; Settle();
+        _inputs.Add(null);
+        Advance(step);
         return true;
     }
 
-    /// <summary>Plays the opponent's side of the script, and your own passes while it is the opponent's turn, until a decision is yours.</summary>
-    private void Settle()
+    private void Advance(TutorialStep step)
+    {
+        step.Then?.Invoke(_context);
+        _index++;
+        PlayFoe(null, scripted: false);
+    }
+
+    /// <summary>The table as it was before the player's last button or move: the lesson is started again and played to there. Null at the very first step.</summary>
+    public TutorialRunner? Back()
+    {
+        if (_inputs.Count == 0) return null;
+        var replay = Start();
+        foreach (var input in _inputs.Take(_inputs.Count - 1))
+        {
+            if (input is null) { if (!replay.Continue()) throw new InvalidOperationException("The lesson could not be replayed."); }
+            else if (!replay.Execute(input).Accepted) throw new InvalidOperationException("The lesson could not be replayed: " + replay.Refusal);
+        }
+        return replay;
+    }
+
+    /// <summary>Plays the opponent's side, and declines your reactions on its turn, until a decision is yours. Unscripted (after every step) it only answers: passes, defends the province you
+    /// attacked and plays its reactions on your turn, and never starts anything on its own turn, so the lesson can stop between the moves it narrates.</summary>
+    internal void PlayFoe(Func<MatchState, bool>? stop, bool scripted)
     {
         for (var guard = 0; guard < 80 && _engine.WinnerId is null; guard++)
         {
+            if (_engine.TutorialHeld || stop?.Invoke(_engine.TutorialState) == true) return;
             var seat = _engine.PriorityPlayerId;
             var options = _engine.QueryActions(seat).Where(a => a.Enabled && a.Command is not null).ToArray();
             ActionOption? pick;
-            if (seat != Seat) pick = FoeChoice(options);
-            else if (_engine.GetView(Seat).ActivePlayerId != Seat) pick = options.FirstOrDefault(a => a.Type == "declineReaction") ?? options.FirstOrDefault(a => a.Type == "pass");
-            else return;
+            if (seat == Seat) pick = options.FirstOrDefault(a => a.Type == "declineReaction") is { } decline && _engine.TutorialState.ActivePlayerId != Seat ? decline : null;
+            else
+            {
+                var onItsOwnTurn = _engine.TutorialState.ActivePlayerId != Seat;
+                var attacking = _engine.TutorialState.Phase != Phase.Action; // its own Attack and Dynasty phases are the lesson's to narrate
+                if (!scripted && (onItsOwnTurn && attacking || _engine.TutorialState.Phase == Phase.Battle)) return; // and so is the first action of a battle
+                pick = FoeChoice(options, scripted);
+            }
             if (pick is null || !_engine.Execute(pick.Command!).Accepted) return;
         }
     }
 
-    /// <summary>The practice opponent's script: it declines reactions, defends the province you attacked, recruits Doji Atsumichi, bows your Personality with him and
-    /// destroys your Follower with Never Afraid, and otherwise passes (or ends its Dynasty phase). It never does anything else, so the lesson meets exactly these plays.</summary>
-    private ActionOption? FoeChoice(ActionOption[] options)
+    /// <summary>The practice opponent's script: it declines reactions, passes, defends the province you attacked with whom it has, and, when the lesson asks, recruits (Daidoji Kenshi with the Clan Discount,
+    /// the farms) and destroys your Follower with Never Afraid. It never does anything else, so the lesson meets exactly these plays.</summary>
+    private ActionOption? FoeChoice(ActionOption[] options, bool scripted)
     {
         bool Plays(ActionOption a, string ability) => a.Type == "useAbility" && a.Command!.AbilityId == ability;
         ActionOption? Targeting(string ability, string definition)
@@ -138,12 +212,12 @@ public sealed class TutorialRunner
             var target = targets.FirstOrDefault(id => _lookup.DefinitionOf(id) == definition);
             return target is null ? null : option with { Command = option.Command! with { TargetId = target } };
         }
+        ActionOption? Buys(string definition, bool discount) => options.FirstOrDefault(a => a.Type == "purchase" && a.Command!.ClanDiscount == discount && _lookup.Is(a.Command.CardId, definition));
         return options.FirstOrDefault(a => a.Type == "declineReaction")
             ?? options.FirstOrDefault(a => a.Type == "assignDefense" && _attackedProvince is int attacked && (a.Command!.Assignments?.Values.Contains(attacked) ?? a.Command.Province == attacked))
-            ?? options.FirstOrDefault(a => a.Type == "purchase" && a.Command!.ClanDiscount && _lookup.Is(a.Command.CardId, TutorialCards.DojiAtsumichi))
-            ?? Targeting("atsumichi-bow", TutorialCards.AkodoUehara)
-            ?? Targeting("never-afraid", TutorialCards.VeteranSkirmishers)
+            ?? (scripted ? Targeting("never-afraid", TutorialCards.VeteranSkirmishers) : null)
+            ?? (scripted ? Buys(TutorialCards.DaidojiKenshi, true) ?? Buys(TutorialCards.SmallFarm, false) ?? Buys(TutorialCards.LargeFarm, false) : null)
             ?? options.FirstOrDefault(a => a.Type == "pass")
-            ?? options.FirstOrDefault(a => a.Type == "endDynasty");
+            ?? (scripted ? options.FirstOrDefault(a => a.Type == "endDynasty") : null);
     }
 }

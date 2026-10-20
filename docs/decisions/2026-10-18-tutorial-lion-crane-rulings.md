@@ -1,5 +1,7 @@
 # Tutorial: Lion against Crane, and Ring of Fire's reading (issue #935)
 
+> **Superseded in part by [2026-10-20](2026-10-20-tutorial-pinned-lion-crane.md):** the tutorial is now the pinned Lion against the pinned Crane, and the generated build prompt is retired. Rulings 3-5 still stand.
+
 Mendon (`mdornbrook`), 2026-10-18, answering the discrepancy list raised while turning the Lesson 1 script into a build prompt.
 
 ## Rulings
