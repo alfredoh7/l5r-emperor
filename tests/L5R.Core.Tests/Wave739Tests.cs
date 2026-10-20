@@ -232,6 +232,10 @@ internal static class Wave739Tests
         Check(now.DefinitionId == Miwa && now.FaceUp && now.Zone == Zone.Province, "the Shugenja found refills the Province face up");
         Check(e.State.Cards[provinceCardBefore.Id].Zone == Zone.DynastyDeck || e.State.Players[0].DynastyDeck.Contains(provinceCardBefore.Id), "the face-down refill went back into the Dynasty deck");
         Check(e.State.Wave739Refills is null, "nothing is left remembered");
+        // Issue #1026: the displaced refill was face down, so the opponent's view must not name it (its printed name or its card id) in the toDeck event.
+        var displacedName = CardCatalog.Get(provinceCardBefore.DefinitionId).Name;
+        Check(!e.GetView(1).Events.Any(ev => ev.Type == "toDeck" && (ev.CardId == provinceCardBefore.Id || ev.Message.Contains(displacedName, StringComparison.Ordinal))),
+            "the opponent's events do not identify the face-down card that went back to the deck");
         _ = found; _ = topFaceDown;
         // Nothing to find: the Province keeps its ordinary face-down refill.
         var t = Table(Phase.Action, 0);
