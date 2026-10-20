@@ -83,6 +83,7 @@ public sealed class TutorialRunner
 {
     public const int Seat = 0;
     private readonly MatchEngine _engine;
+    private readonly TutorialLesson _lesson;
     private readonly TutorialStep[] _steps;
     private readonly TutorialLookup _lookup;
     private readonly TutorialContext _context;
@@ -90,14 +91,18 @@ public sealed class TutorialRunner
     private int _index;
     private int? _attackedProvince;
 
-    private TutorialRunner(MatchEngine engine, TutorialStep[] steps)
+    private TutorialRunner(TutorialLesson lesson)
     {
-        _engine = engine; _steps = steps; _lookup = new(engine); _context = new(this);
+        _lesson = lesson; _engine = MatchEngine.CreateTutorial(lesson.Setup); _steps = lesson.Steps; _lookup = new(_engine); _context = new(this);
         PlayFoe(null, scripted: false);
     }
 
-    /// <summary>The lesson: Lion (you) against Crane on the pinned decks, the first turn and a half.</summary>
-    public static TutorialRunner Start() => new(MatchEngine.CreateTutorial(), TutorialLessonOne.Steps);
+    /// <summary>The first lesson: Lion (you) against Crane on the pinned decks, the first turn and a half.</summary>
+    public static TutorialRunner Start() => new(TutorialLessons.Default);
+    internal static TutorialRunner Start(TutorialLesson lesson) => new(lesson);
+    public static TutorialRunner Start(string lessonId) => new(TutorialLessons.Get(lessonId));
+
+    public string LessonId => _lesson.Id;
 
     public MatchEngine Engine => _engine;
     public bool Finished => _index >= _steps.Length;
@@ -112,7 +117,7 @@ public sealed class TutorialRunner
         {
             if (Current is not { } step) return new("done", "Lesson complete", "", null, [], _steps.Length, _steps.Length, true);
             return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false, step.Instruction,
-                step.Glow, step.ShowDefinitionId, step.Slow, _index >= TutorialLessonOne.ProvincesStep, CanGoBack);
+                step.Glow, step.ShowDefinitionId, step.Slow, _index >= _lesson.ProvincesStep, CanGoBack);
         }
     }
 
@@ -169,7 +174,7 @@ public sealed class TutorialRunner
     public TutorialRunner? Back()
     {
         if (_inputs.Count == 0) return null;
-        var replay = Start();
+        var replay = Start(_lesson);
         foreach (var input in _inputs.Take(_inputs.Count - 1))
         {
             if (input is null) { if (!replay.Continue()) throw new InvalidOperationException("The lesson could not be replayed."); }
@@ -213,10 +218,11 @@ public sealed class TutorialRunner
             return target is null ? null : option with { Command = option.Command! with { TargetId = target } };
         }
         ActionOption? Buys(string definition, bool discount) => options.FirstOrDefault(a => a.Type == "purchase" && a.Command!.ClanDiscount == discount && _lookup.Is(a.Command.CardId, definition));
+        var script = _lesson.Foe;
         return options.FirstOrDefault(a => a.Type == "declineReaction")
             ?? options.FirstOrDefault(a => a.Type == "assignDefense" && _attackedProvince is int attacked && (a.Command!.Assignments?.Values.Contains(attacked) ?? a.Command.Province == attacked))
-            ?? (scripted ? Targeting("never-afraid", TutorialCards.VeteranSkirmishers) : null)
-            ?? (scripted ? Buys(TutorialCards.DaidojiKenshi, true) ?? Buys(TutorialCards.SmallFarm, false) ?? Buys(TutorialCards.LargeFarm, false) : null)
+            ?? (scripted ? script.Abilities.Select(x => Targeting(x.Ability, x.Target)).FirstOrDefault(o => o is not null) : null)
+            ?? (scripted ? script.RecruitWithDiscount.Select(d => Buys(d, true)).Concat(script.Recruit.Select(d => Buys(d, false))).FirstOrDefault(o => o is not null) : null)
             ?? options.FirstOrDefault(a => a.Type == "pass")
             ?? (scripted ? options.FirstOrDefault(a => a.Type == "endDynasty") : null);
     }

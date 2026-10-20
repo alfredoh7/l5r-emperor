@@ -143,6 +143,19 @@ internal static class TutorialLessonOne
         Note("congratulations", "Congratulations", "Congratulations, you now know the basics of how to play a turn and how to fight a battle. Remember, if you destroy an opponent's last Province, you win the game!", button: "End Tutorial"),
     ];
 
-    /// <summary>The step that lays out the Provinces: the notes before it are read on an empty cloth.</summary>
-    public static readonly int ProvincesStep = Array.FindIndex(Steps, s => s.Id == "provinces");
+    /// <summary>Lion (you) against Crane on the pinned decks. Lion's Dynasty deck opens on its four provinces, then the card the first purchase refills with (turn two's Events phase reveals it);
+    /// its Fate deck on the six-card opening hand, then the card drawn at the end of turn one. Crane's Dynasty deck opens on its four provinces and its Fate deck on the one card its End phase draws.
+    /// Lion's Border Keep and Stronghold make the 5 Gold of turn one; Crane, second, starts with the bowed Bamboo Harvesters.</summary>
+    private static readonly TutorialSetup Table = new(
+        new("Lion", TutorialCards.YourStronghold, [TutorialCards.IkomaSugo, TutorialCards.CopperMine, TutorialCards.MatsuHachiro, TutorialCards.GoldMine, TutorialCards.SmallFarm],
+            [TutorialCards.LightArmor, TutorialCards.VeteranSkirmishers, TutorialCards.BlockSupplyLines, TutorialCards.Incapacitated, TutorialCards.PreparedForDeath, TutorialCards.DefensiveStance, TutorialCards.PaidOff],
+            [new(TutorialCards.BorderKeep)]),
+        new("Crane", TutorialCards.FoeStronghold, [TutorialCards.DaidojiTsunehiko, TutorialCards.DaidojiKenshi, TutorialCards.SmallFarm, TutorialCards.LargeFarm], [TutorialCards.NeverAfraid],
+            [new(TutorialCards.BorderKeep), new(TutorialCards.BambooHarvesters, Bowed: true)]));
+
+    /// <summary>Crane recruits Daidoji Kenshi with the Clan Discount, then the farms, and destroys your Follower with Never Afraid.</summary>
+    private static readonly TutorialFoeScript FoePlays = new([TutorialCards.DaidojiKenshi], [TutorialCards.SmallFarm, TutorialCards.LargeFarm], [("never-afraid", TutorialCards.VeteranSkirmishers)]);
+
+    /// <summary>The first lesson: the provinces are laid out at the step that introduces them (step 5).</summary>
+    public static readonly TutorialLesson Lesson = new("first-turn", "The first turn and a half", Table, Steps, FoePlays, ProvincesStep: Array.FindIndex(Steps, s => s.Id == "provinces"));
 }

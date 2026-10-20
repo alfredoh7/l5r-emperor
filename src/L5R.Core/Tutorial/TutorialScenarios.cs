@@ -6,10 +6,10 @@ public sealed partial class MatchEngine
     /// Lion (you) and Crane (the bot) on the pinned profile's decks, with the cards the lesson meets put on top in the order it needs them. The match is built the way
     /// <see cref="CreatePublished"/> builds one, but stops before the first turn: both Fate hands are empty and every province is still face down.
     /// Lion starts with more Honor (7 against 6) and goes first, as it would in a real match; Crane, the second player, starts with the bowed Bamboo Harvesters.</summary>
-    public static MatchEngine CreateTutorial()
+    internal static MatchEngine CreateTutorial(TutorialSetup setup)
     {
         const ulong seed = 935;
-        var state = new MatchState { Players = [new() { Id = 0, Name = "You", Clan = "Lion" }, new() { Id = 1, Name = "Opponent", Clan = "Crane" }] };
+        var state = new MatchState { Players = [new() { Id = 0, Name = "You", Clan = setup.You.Clan }, new() { Id = 1, Name = "Opponent", Clan = setup.Foe.Clan }] };
         var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
         {
@@ -17,22 +17,19 @@ public sealed partial class MatchEngine
             var card = new CardInstance { Id = ids[nextId++], DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
             state.Cards.Add(card.Id, card); return card;
         }
-
-        var you = state.Players[0]; var foe = state.Players[1];
-        you.Honor = CardCatalog.Get(TutorialCards.YourStronghold).StartingHonor; foe.Honor = CardCatalog.Get(TutorialCards.FoeStronghold).StartingHonor;
-        you.StrongholdId = Add(0, TutorialCards.YourStronghold, Zone.Stronghold, true).Id; foe.StrongholdId = Add(1, TutorialCards.FoeStronghold, Zone.Stronghold, true).Id;
-        Add(0, TutorialCards.BorderKeep, Zone.Home, true); Add(1, TutorialCards.BorderKeep, Zone.Home, true);
-        Add(1, TutorialCards.BambooHarvesters, Zone.Home, true, true); // the second player's extra Holding: it enters play bowed and will not straighten before that player's second turn
-        foreach (var id in TutorialCards.Deck(TutorialCards.YourDynasty, "Lion", dynasty: true)) you.DynastyDeck.Add(Add(0, id, Zone.DynastyDeck).Id);
-        foreach (var id in TutorialCards.Deck(TutorialCards.YourFate, "Lion", dynasty: false)) you.FateDeck.Add(Add(0, id, Zone.FateDeck).Id);
-        foreach (var id in TutorialCards.Deck(TutorialCards.FoeDynasty, "Crane", dynasty: true)) foe.DynastyDeck.Add(Add(1, id, Zone.DynastyDeck).Id);
-        foreach (var id in TutorialCards.Deck(TutorialCards.FoeFate, "Crane", dynasty: false)) foe.FateDeck.Add(Add(1, id, Zone.FateDeck).Id);
-        foreach (var player in state.Players)
+        var sides = new[] { setup.You, setup.Foe };
+        for (var seat = 0; seat < 2; seat++)
         {
-            var strength = CardCatalog.Get(state.Cards[player.StrongholdId].DefinitionId).ProvinceStrength;
+            var side = sides[seat]; var player = state.Players[seat];
+            player.Honor = side.Honor ?? CardCatalog.Get(side.StrongholdId).StartingHonor;
+            player.StrongholdId = Add(seat, side.StrongholdId, Zone.Stronghold, true).Id;
+            foreach (var home in side.Home) Add(seat, home.DefinitionId, Zone.Home, true, home.Bowed);
+            foreach (var id in TutorialCards.Deck(side.DynastyTop, side, dynasty: true)) player.DynastyDeck.Add(Add(seat, id, Zone.DynastyDeck).Id);
+            foreach (var id in TutorialCards.Deck(side.FateTop, side, dynasty: false)) player.FateDeck.Add(Add(seat, id, Zone.FateDeck).Id);
+            var strength = CardCatalog.Get(side.StrongholdId).ProvinceStrength;
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = strength, PrintedStrength = strength }).ToList();
         }
-        state.ActivePlayerId = 0; state.PriorityPlayerId = 0; state.TurnNumber = 1; // your first turn is turn 1
+        state.ActivePlayerId = setup.FirstPlayer; state.PriorityPlayerId = setup.FirstPlayer; state.TurnNumber = 1;
         OrderCardsById(state);
         var engine = new MatchEngine(state, seed, TutorialScenario);
         foreach (var player in state.Players) foreach (var province in player.Provinces) engine.Refill(player, province);

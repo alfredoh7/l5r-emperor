@@ -2,9 +2,13 @@
 
 Play → Tutorial teaches the game by playing it, offline: you are the **pinned Lion deck** against the **pinned Crane deck** (`content/published/lion-crane-v1.json`), for the first turn and a half of a game (59 steps, ending on your destroyed Province). Illegal clicks are locked out.
 
+## Lessons
+
+Every lesson is a `TutorialLesson` (`TutorialLesson.cs`): a `TutorialSetup` (each side's clan, Stronghold, deck tops, Honor and cards at home, plus who goes first), its steps, and a `TutorialFoeScript` saying what the opponent does when a step lets it play (which Personalities it recruits with the Clan Discount, what else it recruits, which abilities it uses on which target). `TutorialLessons.All` lists them; nothing is locked. To add one, write its setup and steps and list it there. The lessons still to write are in [TUTORIAL_CURRICULUM.md](TUTORIAL_CURRICULUM.md).
+
 ## How it works
 
-- **The real engine plays the lesson.** `MatchEngine.CreateTutorial()` builds a prepared table (the pinned Lion and Crane decks, with the cards the lesson meets put on top in the order it needs them: `TutorialCards.cs`) and stops before the first turn. Nothing in the rules changed.
+- **The real engine plays the lesson.** `MatchEngine.CreateTutorial(setup)` builds a prepared table (each side's pinned deck, with the cards the lesson meets put on top in the order it needs them) and stops before the first turn. Nothing in the rules changed.
   Lion has the higher starting Honor (7 against 6), so you go first; Crane, second, starts with the bowed Bamboo Harvesters.
 - **The engine can be asked to stop.** `TutorialHoldAt(phase, player)` makes the engine stop when it has just reached the Straighten phase (after its cards straightened), the Events phase (after the Provinces were revealed) or the End phase (before the draw). `TutorialResume()` carries on. Tutorial-only; no rules change.
 - **The words are in the script.** `src/L5R.Core/Tutorial/TutorialLessonOne.cs` is an ordered list of steps. A *note* has a button; a *move* names the one move it waits for (`Allow`), optionally the parameters it must have (`Accept`: the Gold sources, the unit equipped) and the provinces the table may offer (`OnlyProvinces`).
