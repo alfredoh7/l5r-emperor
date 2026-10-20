@@ -358,7 +358,7 @@ public partial class Main
 
     private int SelectedProduction() => _chosen is not null && QuoteFor(_chosen) is { Sources: { } methods }
         ? methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced)
-        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self)); // opponent-payment panel: its own card list
+        : 0; // Core's quote names every source and what it produces; the client keeps no card list of its own (issue #1028)
 
     private void RenderAssignments()
     {
