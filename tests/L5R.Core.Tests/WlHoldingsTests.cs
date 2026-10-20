@@ -33,6 +33,7 @@ internal static class WlHoldingsTests
         ("Bamboo Harvesters - exp2: a payment source that produces its Wealth tokens, bows, and gains a +1 Gold Production Wealth token each time it is used; never suggested with no Gold to add", BambooHarvesters),
         ("Border Keep - exp2: Limited, once or twice during your first turn only, cycle your province cards to the bottom of the deck, refilling face-up", BorderKeepRefresh),
         ("Exquisite Silk Works: Limited, a dishonorable Personality's controller loses 1 Honor -- not an honorable Personality; unbowed, no cost", SilkWorksShame),
+        ("Issue #1030: Fudoist Advisor resolving after its target (the Madness holder) was discarded in the window destroys nothing and does not throw", MadnessTokenGoneInTheWindow),
         ("Fudoist Advisor: Limited, bow it to destroy a Madness token on a card in play -- not a card with none; Temple of Madness: Limited, bow it to give a target card a Madness token", MadnessTokens),
         ("Glassworks: your Items have +1F, conveyed to the wielder, for each Glassworks you control -- not another player's Items", GlassworksForce),
         ("Green Lake Dojo: Open, give a target Personality Cavalry for the turn; bow and destroy it on your own turn, bow only on another player's", GreenLakeDojo),
@@ -253,6 +254,23 @@ internal static class WlHoldingsTests
     }
 
     // ---- the Madness tokens ------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // Issue #1030: the Madness token is gone (its holder was discarded in the reaction window) when the action resolves: nothing is destroyed and nothing throws.
+    private static void MadnessTokenGoneInTheWindow()
+    {
+        var s = Table();
+        var advisor = Add(s, FudoistAdvisor, 0, Zone.Home);
+        var marked = Add(s, Lion, 1, Zone.Home);
+        marked.Tokens.Add(new("t-madness-1", "Madness", "test"));
+        Add(s, "oracle-l5r-5928", 1, Zone.Hand); // Perplexing Guests
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Offer(e, 0, "wl-fudoist-advisor-destroy-madness", advisor.Id, marked.Id));
+        Accept(e, e.QueryActions(1).First(a => a.Enabled && a.Command?.AbilityId == "p5-perplexing-guests-discard").Command!);
+        Eq(e.State.Cards[marked.Id].Zone, Zone.DynastyDiscard, "the holder was discarded in the window");
+        for (var guard = 0; e.State.PendingChoice?.Type == "beforeActionReaction" && guard < 6; guard++)
+            Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Enabled && a.Type == "declineReaction").Command!);
+        Check(e.State.PendingChoice is null && e.State.Cards[advisor.Id].Bowed, "the action finished and the Advisor stays bowed as the cost");
+    }
 
     private static void MadnessTokens()
     {
