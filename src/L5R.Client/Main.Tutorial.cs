@@ -39,7 +39,7 @@ public partial class Main
 
     /// <summary>
     /// The fitted camera normally centres the whole mat, which keeps room at the right for Celestials, Rings and removed piles. The lesson's table starts empty on that side,
-    /// so with the coach column taking the left the cards looked pushed off the cloth. While a lesson is showing, centre the cards that are actually on the table instead.
+    /// so with the coach column taking the left the cards looked pushed off the cloth. While a lesson is showing, centre the cards and piles that are actually on the table instead.
     /// </summary>
     private Vector2? TutorialContentCenter()
     {
@@ -55,6 +55,11 @@ public partial class Main
                 var point = toWorld * (transform * corner);
                 bounds = bounds is { } b ? b.Expand(point) : new Rect2(point, Vector2.Zero);
             }
+        }
+        foreach (var pile in TablePiles) // the decks and discard piles are drawn by the pile layer, not as card tiles; without them your Fate deck ran under the side panel
+        {
+            var rect = new Rect2(pile.Position, pile.Size);
+            bounds = bounds is { } b ? b.Merge(rect) : rect;
         }
         return bounds?.GetCenter();
     }
@@ -80,8 +85,13 @@ public partial class Main
         _coachPanel.Show(); LayoutTutorialCoach();
     }
 
+    /// <summary>The Gold payment meter sits above the left end of the hand; while the coach column is showing it moves clear of it, so the paid amount stays in view.</summary>
+    private void PlaceGoldMeter() =>
+        _goldMeter.Position = new Vector2(Math.Max(_hand.Position.X + 8, _coachPanel is { Visible: true } ? 16 + TutorialColumnWidth + 16 : 0), _hand.Position.Y - 74);
+
     private void LayoutTutorialCoach()
     {
+        PlaceGoldMeter();
         if (_coachPanel is not { Visible: true } panel) return;
         panel.SetReady(!PresentationBusy && !PlayShowcaseBusy && !_session.Busy && !TutorialDealing);
         var height = Math.Max(300, GetViewport().GetVisibleRect().Size.Y / _root.Scale.Y - TutorialColumnTop - 196);
@@ -106,7 +116,7 @@ public partial class Main
     private void PulseTutorialPointers(double delta)
     {
         if (!TutorialActive) return;
-        ProcessTutorialDeal(delta); UpdateTutorialDealFades();
+        ProcessTutorialDeal(delta); UpdateTutorialDealFades(); AnimateTutorialHonor(delta);
         if (_reducedMotion) return;
         foreach (var tile in _tiles) if (tile.Pointed && IsInstanceValid(tile)) tile.QueueRedraw();
     }

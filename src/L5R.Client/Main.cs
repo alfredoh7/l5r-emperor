@@ -403,7 +403,7 @@ public partial class Main : Node
         if (_board is null) return;
         FitTableViewport();
         _hand.Position = new Vector2(250, 1060 - HandCardSide); _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
-        _goldMeter.Position = new Vector2(_hand.Position.X + 8, _hand.Position.Y - 74);
+        PlaceGoldMeter();
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         FitShownCards();

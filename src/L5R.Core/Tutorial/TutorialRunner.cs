@@ -12,6 +12,8 @@ public sealed record TutorialCoach(string StepId, string Title, string Body, str
 public static class TutorialGlow
 {
     public const string PhaseBar = "phase-bar", BattleBar = "battle-bar", Hand = "hand";
+    /// <summary>Your Family Honor on your placard; the table also counts it up toward an Honor Victory and back while the note is read (display only).</summary>
+    public const string Honor = "honor";
 }
 
 /// <summary>One beat of the lesson. A narration step has a <see cref="Button"/> and waits for it; an action step has an <see cref="Allow"/> and waits for the player to make that move.
