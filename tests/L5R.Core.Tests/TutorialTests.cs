@@ -14,6 +14,7 @@ internal static class TutorialTests
         ("The lesson stops on the Straighten phase and on the revealed Events phase, and carries on only when the note's button is pressed", HoldsAtPhases),
         ("Crane recruits Daidoji Kenshi with the Clan Discount from its Stronghold, then the farms, and does nothing until the lesson lets it", CraneTurn),
         ("A lesson brings its own table: stronghold, Honor, cards at home, deck tops and who goes first all come from its setup, and every lesson stands alone", LessonsBringTheirOwnTable),
+        ("The menu lists every lesson of the curriculum: ids are unique, each has a brief, every built lesson is listed and the first is built", CurriculumIsListed),
         ("Back rebuilds the table as it was before the last button or move, at every step of the lesson", BackUndoesTheLastStep),
     ]);
 
@@ -240,6 +241,15 @@ internal static class TutorialTests
         Expect(runner.Continue() && runner.Coach.StepId == "crane-farms", "on to the explanation of the farms");
         Expect(runner.Continue() && S() is { ActivePlayerId: 0, Phase: Phase.Action } && S().Players[1].Hand.Count == 1, "Crane ended its turn, drew Never Afraid, and your second Action phase begins");
         Expect(S().Players[0].Provinces[2].CardId is { } refilled && S().Cards[refilled] is { DefinitionId: TutorialCards.SmallFarm, FaceUp: true }, "your second Events phase revealed the Small Farm");
+    }
+
+    private static void CurriculumIsListed()
+    {
+        var entries = TutorialCurriculum.All.ToArray();
+        Expect(entries.Select(e => e.Id).Distinct().Count() == entries.Length && entries.Select(e => e.Number).Distinct().Count() == entries.Length, "curriculum ids and numbers are unique");
+        Expect(entries.All(e => e.Title.Length > 0 && e.Brief.Length > 20 && e.Staging.Length > 0), "every entry says what it covers and how it starts");
+        foreach (var lesson in TutorialLessons.All) Expect(entries.Any(e => e.Id == lesson.Id), $"the built lesson {lesson.Id} has a place in the curriculum");
+        Expect(entries.Single(e => e.Number == "1.1").Built && entries.Count(e => !e.Built) == entries.Length - TutorialLessons.All.Length, "only the lessons that exist are built; the rest are placeholders");
     }
 
     private static void LessonsBringTheirOwnTable()

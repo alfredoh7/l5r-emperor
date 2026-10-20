@@ -4,7 +4,7 @@ Play → Tutorial teaches the game by playing it, offline: you are the **pinned 
 
 ## Lessons
 
-Every lesson is a `TutorialLesson` (`TutorialLesson.cs`): a `TutorialSetup` (each side's clan, Stronghold, deck tops, Honor and cards at home, plus who goes first), its steps, and a `TutorialFoeScript` saying what the opponent does when a step lets it play (which Personalities it recruits with the Clan Discount, what else it recruits, which abilities it uses on which target). `TutorialLessons.All` lists them; nothing is locked. To add one, write its setup and steps and list it there. The lessons still to write are in [TUTORIAL_CURRICULUM.md](TUTORIAL_CURRICULUM.md).
+Every lesson is a `TutorialLesson` (`TutorialLesson.cs`): a `TutorialSetup` (each side's clan, Stronghold, deck tops, Honor and cards at home, plus who goes first), its steps, and a `TutorialFoeScript` saying what the opponent does when a step lets it play (which Personalities it recruits with the Clan Discount, what else it recruits, which abilities it uses on which target). `TutorialLessons.All` lists them; nothing is locked. The Play → Tutorial menu lists every entry of `TutorialCurriculum` by track (the readable copy and the task checklist, #1035, are in the curriculum doc); an entry whose lesson is not built is a dimmed placeholder showing its brief. To add one, write its setup and steps and list it there. The lessons still to write are in [TUTORIAL_CURRICULUM.md](TUTORIAL_CURRICULUM.md).
 
 ## How it works
 

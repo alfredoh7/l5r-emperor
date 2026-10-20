@@ -21,7 +21,7 @@ public partial class Main
             Preferences = _preferences,
             StartMatch = seat => { _table.PrefetchWarRoom(); StartFromMenu(seat); },
             PracticeSetup = () => { _table.PrefetchWarRoom(); ShowPracticeSetup(); },
-            Tutorial = () => { _table.PrefetchWarRoom(); StartTutorial(); },
+            Tutorial = lessonId => { _table.PrefetchWarRoom(); StartTutorial(lessonId); },
             PrivateMatch = () => { _table.PrefetchWarRoom(); _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
             DeckBuilder = () => DeckBuilderDialog.Show(this),

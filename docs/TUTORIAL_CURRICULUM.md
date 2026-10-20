@@ -1,5 +1,7 @@
 # Tutorial curriculum (issue #935)
 
+**Where to pick this up:** the tracking issue is [#1035](https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035), a checklist with one task issue per lesson (each with what it covers and how it starts). Play → Tutorial lists every lesson below; built ones start, the rest are dimmed placeholders that show what they will cover. The menu's own list is `src/L5R.Core/Tutorial/TutorialCurriculum.cs`: when you add a lesson, give it the same id there and in `TutorialLessons.All`.
+
 The combined list of everything the tutorials must cover: Mendon's two lists, deduplicated, with the breakouts and additions agreed in discussion (2026-10-20). **Everything is unlocked from the start**; the menu groups lessons by track and marks a suggested start, it never locks one. Each lesson stands alone, so each brings its own table (`TutorialSetup`: decks, Stronghold, Honor, cards at home, deck tops, who goes first; see [TUTORIAL.md](TUTORIAL.md)) and opens with a one-screen "you need to know" recap of the vocabulary it assumes.
 
 Budget per lesson: 15-30 steps, 3-5 minutes of play, headless play-through of 2 seconds or less. Stage the position instead of playing up to it. Teach one idea; split when a lesson wants more. "Source": **M** = on Mendon's list, **S** = suggested in review and not yet accepted.
