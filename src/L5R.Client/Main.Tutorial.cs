@@ -161,7 +161,7 @@ public partial class Main
         return $"phase=[{Buttons(_phaseActions)}] decision=[{Buttons(_decisionActions)}] inspector=[{Buttons(_inspector)}]";
     }
 
-    /// <summary>One thing a player does at the table, through the real controls: select:&lt;card&gt;, selectprovince:&lt;owner&gt;/&lt;index&gt;, click:&lt;button text&gt;, wait:&lt;seconds&gt;.</summary>
+    /// <summary>One thing a player does at the table, through the real controls: select:&lt;card&gt;, selectprovince:&lt;owner&gt;/&lt;index&gt;, click:&lt;button text&gt;, resize:&lt;width&gt;x&lt;height&gt;, wait:&lt;seconds&gt;.</summary>
     private async Task RunTutorialUiToken(string token)
     {
         var (verb, arg) = token.Split(':', 2) is [var v, var a] ? (v, a) : (token, "");
@@ -208,6 +208,12 @@ public partial class Main
             GetViewport().PushInput(new InputEventMouseMotion { Position = at, GlobalPosition = at });
             foreach (var pressed in new[] { true, false })
                 GetViewport().PushInput(new InputEventMouseButton { Position = at, GlobalPosition = at, ButtonIndex = MouseButton.Left, Pressed = pressed, ButtonMask = pressed ? MouseButtonMask.Left : 0 });
+        }
+        else if (verb == "resize") // the window resized by its owner, e.g. resize:2000x1300
+        {
+            var size = arg.Split('x').Select(int.Parse).ToArray();
+            GetWindow().Size = new Vector2I(size[0], size[1]);
+            for (var i = 0; i < 20; i++) await CoverageFrames();
         }
         else if (verb == "wait") await ToSignal(GetTree().CreateTimer(double.Parse(arg)), SceneTreeTimer.SignalName.Timeout);
         else if (verb == "click")

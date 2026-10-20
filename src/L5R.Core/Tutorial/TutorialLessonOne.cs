@@ -79,7 +79,7 @@ internal static class TutorialLessonOne
             highlight: Own(TutorialCards.MatsuHachiro), glow: Bar),
         Do("end-dynasty", "Ending your turn", "You're out of Gold, so it's time to end your turn.", "Click End Dynasty Phase.", Move("endDynasty"), glow: Bar),
         Note("end-phase", "End phase", "This is the end of your turn. You draw a card and play moves to your opponent.", then: c => c.Resume(), glow: Bar),
-        Note("crane-straighten", "Crane's turn", "It's now the Crane player's turn. Normally, cards straighten. Bamboo Harvesters can't straighten on its controller's first turn, so watch for it on Crane's second turn.",
+        Note("crane-straighten", "Crane's turn", "It's now the Crane player's turn. Normally, cards straighten. Bamboo Harvesters can't straighten on its controller's first turn.",
             then: c => { c.HoldAt(Phase.Events, 1); c.Resume(); }, highlight: Foe(TutorialCards.BambooHarvesters), glow: Bar),
         Note("crane-events", "Crane's Events phase", "The Crane player also has some Holdings and Personalities in their Provinces. Let's see what they are.", then: c => c.Resume(), highlight: FoeProvinces(0, 1, 2, 3), glow: Bar, slow: true),
         Note("crane-passed", "Crane passes", "The Crane player passed their first Action. It is your turn to play or pass.", glow: Bar),
