@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Rebuilt the tutorial as Mendon's 59-step script: pinned Lion vs pinned Crane, first turn and a half. Engine gains tutorial-only phase holds (Straighten/Events/End); runner plays Crane only when a step asks; Back button replays recorded inputs; phase/battle/hand glow, Show flow, slow province deal and 4x reveals; generated build prompt retired.",
-  "validation": "dotnet run --project tests/L5R.Core.Tests -- --filter tutorial: 9/9; bash tools/check.sh --skip-client: passed; bash tools/check-tutorial.sh: 59 steps through real controls plus Back checks, passed on this Windows box (not human playtested)",
-  "remaining": "Human playtest of look/pacing (slow reveal, glow strength); script numbers differ from the pasted script where the engine disagrees (Kenshi 3 Force, Light Armor 2 Gold) - see docs/decisions/2026-10-20-tutorial-pinned-lion-crane.md; Copper Mine is not in the pinned Lion list.",
+  "summary": "Playtest fixes on the pinned Lion/Crane tutorial: table centred on cards and piles and kept fitted as it grows; step 11 says 7 Honor; step 12 counts the placard Honor up to 40 and back with the fan swelling (display only); step 23 Gold payment meter moved clear of the coach column; a selected/focused attachment no longer rises over its Personality (all play, not only the tutorial).",
+  "validation": "tools/check.sh --skip-client passed; tutorial tests 9/9; tools/check-tutorial.sh walked 59 steps + Back; tools/check-attach-order-ui.sh passed with a new still-selected scenario that fails (1379 px over the Personality) without the CardTile fix; changed-C# format check passed; native captures of steps 9, 12, 23, 37 reviewed at 1672x941. Not yet human playtested after these fixes.",
+  "remaining": "Mendon to replay the tutorial and confirm the five fixes.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/935",
   "branch": "claude/935-tutorial-pinned-rework",
-  "updated": "2026-10-20T20:45:32.583459+00:00"
+  "updated": "2026-10-20T22:08:45.500605+00:00"
 }
