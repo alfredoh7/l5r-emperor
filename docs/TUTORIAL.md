@@ -17,6 +17,13 @@ Every lesson is a `TutorialLesson` (`TutorialLesson.cs`): a `TutorialSetup` (eac
 - **Back.** The runner keeps every button and move you made. `Back()` starts the lesson again and plays all but the last of them: the engine is deterministic, so that is the scene as it was. The coach panel's *Back* button does this.
 - **The client only presents it.** `MatchSession.StartTutorial` hands the table the runner's options; `TutorialCoachPanel` shows the note in a column at the left of the table; `CardTile.Pointed` pulses on the cards the note names; `TutorialGlowFrame` (`Main.TutorialStage.cs`) pulses around a part of the screen; the Show flow, the slow Province layout and the four-times-slower reveals are in `Main.TutorialStage.cs` and `Main.CardPlays.cs`. The Title menu entry is `TitleMenu.Tutorial`.
 
+## The Events, Regions and Celestials lesson (issue #1074)
+
+`TutorialLessonDynasty.cs`, lesson id `dynasty-deck`: you play the Unicorn Maidens against Mantis Manipulation (stronghold, Honor, cards at home and deck tops come from its `TutorialSetup`; the rest of each deck is filler).
+It uses two more tutorial-only stops in the engine: `TutorialHoldReveal(player, province, after)` stops the Events phase before a province's card is turned over (`after: false`) or with it face up and not yet resolved (`after: true`), and a revealed Celestial that
+enters play outside the Events phase (Border Keep's refresh) honours the same stop. The Mantis player's Border Keep refresh is played by the script (`TutorialContext.FoeBorderKeep`). Dark Experiments may name any Mantis Province but the leftmost, where a
+Mantis Region attaches later in the lesson (a Region attaching to a Dark Experiments Province is destroyed).
+
 ## Writing or changing the lesson
 
 1. Pick cards from `TutorialCards.cs` (add constants there; the test checks every number the text quotes against the catalogue and the engine).

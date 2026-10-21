@@ -77,7 +77,11 @@ public sealed partial class MatchEngine
             {
                 // A refill after a Celestial leaves can itself come up face up and be a Celestial: keep going until the province holds none.
                 for (var guard = 0; guard < 4 && province.CardId is string id && _state.Cards.TryGetValue(id, out var card) && card.FaceUp && card.Zone == Zone.Province && Definition(card).Type == CardType.Celestial; guard++)
+                {
+                    var (revealedIn, revealed) = (province, card);
+                    if (TutorialRevealHold(player.Id, province.Index, after: true, () => { ResolveCelestial(player, revealedIn, revealed); EnterRevealedCelestials(); })) return; // tutorial only: show the revealed Celestial before it enters play
                     ResolveCelestial(player, province, card);
+                }
             }
     }
 }

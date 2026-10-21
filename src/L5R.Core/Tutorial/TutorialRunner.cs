@@ -66,6 +66,18 @@ internal sealed class TutorialContext(TutorialRunner runner)
     public void Resume() => Engine.TutorialResume();
     public void StartTurn() => Engine.TutorialBeginTurn();
     public void Draw(int count) => Engine.TutorialDraw(TutorialRunner.Seat, count);
+    /// <summary>Stop the Events phase at one of this player's provinces: before its card is turned face up, or (<paramref name="after"/>) with it face up and not yet resolved (see <see cref="MatchEngine.TutorialHoldReveal"/>).</summary>
+    public void HoldReveal(int playerId, int province, bool after) => Engine.TutorialHoldReveal(playerId, province, after);
+    /// <summary>The opponent uses its Border Keep's first-turn Limited action on these provinces (they are put at the bottom of its deck and refilled face up).</summary>
+    public void FoeBorderKeep(params int[] provinces)
+    {
+        var foe = 1 - TutorialRunner.Seat;
+        var option = Engine.QueryActions(foe).FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.Command?.AbilityId == "border-first" && a.Command is not null)
+            ?? throw new InvalidOperationException("The lesson expected the opponent's Border Keep first-turn action to be open.");
+        var ids = provinces.Select(i => Engine.TutorialProvinceCardId(foe, i) ?? throw new InvalidOperationException($"Province {i + 1} is empty.")).ToArray();
+        var result = Engine.Execute(option.Command! with { CardIds = ids });
+        if (!result.Accepted) throw new InvalidOperationException("The opponent's Border Keep was refused: " + result.Error);
+    }
     /// <summary>Makes the one engine option of this type that is open to you, for the moves the lesson narrates but does not ask you to click (Proclaiming).</summary>
     public void Auto(string type)
     {

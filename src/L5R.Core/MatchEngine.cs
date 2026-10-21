@@ -3081,17 +3081,15 @@ public sealed partial class MatchEngine
                 if (HandleOtosanUchiProvinceReveal(player, province)) return;
                 continue;
             }
-            _state.EventsRevealNext = province.Index + 1;
             var card = Card(province.CardId!);
+            if (!card.FaceUp && TutorialRevealHold(player.Id, province.Index, after: false, () => ContinueEventsReveal(player))) return; // tutorial only: stop before this province is revealed
+            _state.EventsRevealNext = province.Index + 1;
             if (!card.FaceUp)
             {
                 card.FaceUp = true;
                 Emit("provinceRevealed", $"{player.Name} revealed {Definition(card).Name} in province {province.Index + 1}.", player.Id, card.Id);
-                if (Definition(card).Type == CardType.Event) { if (ResolveEvent(player, province, card)) return; }
-                else if (Definition(card).Type == CardType.Region) { if (ResolveRegion(player, province, card)) return; }
-                else if (Definition(card).Type == CardType.Celestial) { if (ResolveCelestialCore(player, province, card, pauseReveal: true)) return; } // P6: the entry decisions pause the reveal
-                // Tested Land (Seeds of Decay, issue #453): "After a Holding is revealed in this Province, discard it and this Region." (SeedsOfDecayBatch4.cs)
-                else if (Definition(card).Type == CardType.Holding) DiscardRevealedHoldingOnTestedLand(player, province, card);
+                if (TutorialRevealHold(player.Id, province.Index, after: true, () => { if (!ResolveRevealedCard(player, province, card)) ContinueEventsReveal(player); })) return; // tutorial only: stop with the card face up, before it resolves
+                if (ResolveRevealedCard(player, province, card)) return;
             }
             // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
             // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck
@@ -3107,6 +3105,17 @@ public sealed partial class MatchEngine
         if (P3AfterEventsPhase(player)) return; // Daigotsu Miki (issue #503): "After your Events Phase"
         if (TutorialHold(Phase.Events, player.Id, () => SetPhase(Phase.Action, player.Id))) return; // the tutorial's table can stop with the Events phase revealed
         SetPhase(Phase.Action, player.Id);
+    }
+    // What revealing a card in the Events Phase does, by type; true when the resolution deferred to a player decision (the caller stops the reveal loop).
+    private bool ResolveRevealedCard(PlayerState player, ProvinceState province, CardInstance card)
+    {
+        var type = Definition(card).Type;
+        if (type == CardType.Event) return ResolveEvent(player, province, card);
+        if (type == CardType.Region) return ResolveRegion(player, province, card);
+        if (type == CardType.Celestial) return ResolveCelestialCore(player, province, card, pauseReveal: true); // P6: the entry decisions pause the reveal
+        // Tested Land (Seeds of Decay, issue #453): "After a Holding is revealed in this Province, discard it and this Region." (SeedsOfDecayBatch4.cs)
+        if (type == CardType.Holding) DiscardRevealedHoldingOnTestedLand(player, province, card);
+        return false;
     }
     // An Event (core rules Glossary): removed from its province and resolved immediately upon reveal --
     // before refilling -- then discarded, unless its own printed text is an ongoing effect (Suspicions'
