@@ -69,10 +69,10 @@
           "historical_text_status": "needs_era_review"
         },
         {
-          "card_id": "oracle-l5r-2867",
-          "name": "Gold Mine",
+          "card_id": "oracle-l5r-1497",
+          "name": "Copper Mine",
           "quantity": 3,
-          "source_url": "https://oracleofthevoid.com/#cardid=2867",
+          "source_url": "https://oracleofthevoid.com/#cardid=1497",
           "automation_status": "unsupported",
           "historical_text_status": "needs_era_review"
         },
@@ -336,10 +336,10 @@
           "historical_text_status": "needs_era_review"
         },
         {
-          "card_id": "oracle-l5r-2867",
-          "name": "Gold Mine",
+          "card_id": "oracle-l5r-1497",
+          "name": "Copper Mine",
           "quantity": 3,
-          "source_url": "https://oracleofthevoid.com/#cardid=2867",
+          "source_url": "https://oracleofthevoid.com/#cardid=1497",
           "automation_status": "unsupported",
           "historical_text_status": "needs_era_review"
         },

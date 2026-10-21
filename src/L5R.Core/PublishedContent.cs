@@ -34,12 +34,12 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadVanillaWave()
     {
         var snapshot = Load("L5R.Published.vanilla-wave-1.json", "vanilla-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 63)
+        if (snapshot.Cards.Length != 63)
             throw new InvalidOperationException("Unexpected vanilla-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Effect != "none" || card.Text.Length != 0 || card.Abilities is null || card.Abilities.Length != 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Effect != "none" || card.Text.Length != 0 || card.Abilities is null || card.Abilities.Length != 0)
                 throw new InvalidOperationException($"vanilla-wave-1 card is not ability-free: {card.Id}");
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(Snapshot.Cards.Select(c=>c.Id)).Any())
+        if (snapshot.Cards.Select(c => c.Id).Intersect(Snapshot.Cards.Select(c => c.Id)).Any())
             throw new InvalidOperationException("vanilla-wave-1 duplicates a card already in the pinned Lion/Crane pool.");
         return snapshot;
     }
@@ -52,13 +52,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrongholdWave()
     {
         var snapshot = Load("L5R.Published.stronghold-wave-1.json", "stronghold-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected stronghold-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Stronghold || card.Text.Length == 0)
                 throw new InvalidOperationException($"stronghold-wave-1 card is not a textful Stronghold: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("stronghold-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -70,13 +70,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrongholdWave2()
     {
         var snapshot = Load("L5R.Published.stronghold-wave-2.json", "stronghold-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected stronghold-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Stronghold || card.Text.Length == 0)
                 throw new InvalidOperationException($"stronghold-wave-2 card is not a textful Stronghold: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("stronghold-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -88,13 +88,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrongholdWave3()
     {
         var snapshot = Load("L5R.Published.stronghold-wave-3.json", "stronghold-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected stronghold-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Stronghold || card.Text.Length == 0)
                 throw new InvalidOperationException($"stronghold-wave-3 card is not a textful Stronghold: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("stronghold-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -106,13 +106,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave1()
     {
         var snapshot = Load("L5R.Published.personality-wave-1.json", "personality-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-1 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -124,13 +124,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave2()
     {
         var snapshot = Load("L5R.Published.personality-wave-2.json", "personality-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-2 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -142,13 +142,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave3()
     {
         var snapshot = Load("L5R.Published.personality-wave-3.json", "personality-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-3 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -160,13 +160,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave1()
     {
         var snapshot = Load("L5R.Published.follower-wave-1.json", "follower-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-1 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -178,13 +178,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave4()
     {
         var snapshot = Load("L5R.Published.personality-wave-4.json", "personality-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-4 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-4 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -198,13 +198,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave5()
     {
         var snapshot = Load("L5R.Published.personality-wave-5.json", "personality-wave-5", requireDecks: false);
-        if(snapshot.Cards.Length != 5)
+        if (snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-5 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-5 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-5 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -219,13 +219,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave1()
     {
         var snapshot = Load("L5R.Published.strategy-wave-1.json", "strategy-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected strategy-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-1 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -240,13 +240,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave2()
     {
         var snapshot = Load("L5R.Published.follower-wave-2.json", "follower-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 11)
+        if (snapshot.Cards.Length != 11)
             throw new InvalidOperationException("Unexpected follower-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-2 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -261,13 +261,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave3()
     {
         var snapshot = Load("L5R.Published.follower-wave-3.json", "follower-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 28)
+        if (snapshot.Cards.Length != 28)
             throw new InvalidOperationException("Unexpected follower-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-3 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -281,13 +281,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave4()
     {
         var snapshot = Load("L5R.Published.follower-wave-4.json", "follower-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected follower-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-4 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-4 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -299,13 +299,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave5()
     {
         var snapshot = Load("L5R.Published.follower-wave-5.json", "follower-wave-5", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-5 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-5 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-5 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -320,13 +320,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadItemWave1()
     {
         var snapshot = Load("L5R.Published.item-wave-1.json", "item-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected item-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Item || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Item || card.Text.Length == 0)
                 throw new InvalidOperationException($"item-wave-1 card is not a textful Item: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("item-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -340,13 +340,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave2()
     {
         var snapshot = Load("L5R.Published.strategy-wave-2.json", "strategy-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-2 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -360,13 +360,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave6()
     {
         var snapshot = Load("L5R.Published.personality-wave-6.json", "personality-wave-6", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected personality-wave-6 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-6 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-6 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -378,13 +378,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave6()
     {
         var snapshot = Load("L5R.Published.follower-wave-6.json", "follower-wave-6", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-6 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-6 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-6 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -398,13 +398,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave7()
     {
         var snapshot = Load("L5R.Published.personality-wave-7.json", "personality-wave-7", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-7 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-7 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-7 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -416,13 +416,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave8()
     {
         var snapshot = Load("L5R.Published.personality-wave-8.json", "personality-wave-8", requireDecks: false);
-        if(snapshot.Cards.Length != 17)
+        if (snapshot.Cards.Length != 17)
             throw new InvalidOperationException("Unexpected personality-wave-8 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-8 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-8 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -435,13 +435,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave3()
     {
         var snapshot = Load("L5R.Published.strategy-wave-3.json", "strategy-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-3 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -454,13 +454,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave7()
     {
         var snapshot = Load("L5R.Published.follower-wave-7.json", "follower-wave-7", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-7 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-7 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-7 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -473,13 +473,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave8()
     {
         var snapshot = Load("L5R.Published.follower-wave-8.json", "follower-wave-8", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected follower-wave-8 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-8 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-8 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -492,13 +492,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadItemWave2()
     {
         var snapshot = Load("L5R.Published.item-wave-2.json", "item-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected item-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Item || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Item || card.Text.Length == 0)
                 throw new InvalidOperationException($"item-wave-2 card is not a textful Item: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("item-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -511,13 +511,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave4()
     {
         var snapshot = Load("L5R.Published.strategy-wave-4.json", "strategy-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-4 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-4 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -531,13 +531,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave5()
     {
         var snapshot = Load("L5R.Published.strategy-wave-5.json", "strategy-wave-5", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected strategy-wave-5 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-5 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-5 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -551,13 +551,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave9()
     {
         var snapshot = Load("L5R.Published.personality-wave-9.json", "personality-wave-9", requireDecks: false);
-        if(snapshot.Cards.Length != 34)
+        if (snapshot.Cards.Length != 34)
             throw new InvalidOperationException("Unexpected personality-wave-9 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-9 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-9 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -570,13 +570,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave10()
     {
         var snapshot = Load("L5R.Published.personality-wave-10.json", "personality-wave-10", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected personality-wave-10 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-10 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-10 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -588,13 +588,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave11()
     {
         var snapshot = Load("L5R.Published.personality-wave-11.json", "personality-wave-11", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-11 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-11 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-11 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -608,13 +608,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave12()
     {
         var snapshot = Load("L5R.Published.personality-wave-12.json", "personality-wave-12", requireDecks: false);
-        if(snapshot.Cards.Length != 6)
+        if (snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected personality-wave-12 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-12 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-12 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -628,13 +628,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave13()
     {
         var snapshot = Load("L5R.Published.personality-wave-13.json", "personality-wave-13", requireDecks: false);
-        if(snapshot.Cards.Length != 5)
+        if (snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-13 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-13 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-13 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -654,13 +654,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadRingWave1()
     {
         var snapshot = Load("L5R.Published.ring-wave-1.json", "ring-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 7)
+        if (snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected ring-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Ring)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Ring)
                 throw new InvalidOperationException($"ring-wave-1 card is not a Ring: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("ring-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -676,13 +676,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave14()
     {
         var snapshot = Load("L5R.Published.personality-wave-14.json", "personality-wave-14", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-14 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-14 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-14 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -696,13 +696,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave9()
     {
         var snapshot = Load("L5R.Published.follower-wave-9.json", "follower-wave-9", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-9 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-9 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-9 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -719,13 +719,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave15()
     {
         var snapshot = Load("L5R.Published.personality-wave-15.json", "personality-wave-15", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-15 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-15 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-15 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -743,13 +743,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave16()
     {
         var snapshot = Load("L5R.Published.personality-wave-16.json", "personality-wave-16", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-16 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-16 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-16 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -766,13 +766,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadEventWave1()
     {
         var snapshot = Load("L5R.Published.event-wave-1.json", "event-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected event-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Event || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Event || card.Text.Length == 0)
                 throw new InvalidOperationException($"event-wave-1 card is not a textful Event: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("event-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -789,13 +789,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadRegionWave1()
     {
         var snapshot = Load("L5R.Published.region-wave-1.json", "region-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected region-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Region || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Region || card.Text.Length == 0)
                 throw new InvalidOperationException($"region-wave-1 card is not a textful Region: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("region-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -812,13 +812,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadCelestialWave1()
     {
         var snapshot = Load("L5R.Published.celestial-wave-1.json", "celestial-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected celestial-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Celestial || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Celestial || card.Text.Length == 0)
                 throw new InvalidOperationException($"celestial-wave-1 card is not a textful Celestial: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("celestial-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -836,13 +836,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave1()
     {
         var snapshot = Load("L5R.Published.spell-wave-1.json", "spell-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected spell-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell || card.Text.Length == 0)
                 throw new InvalidOperationException($"spell-wave-1 card is not a textful Spell: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("spell-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -861,13 +861,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave17()
     {
         var snapshot = Load("L5R.Published.personality-wave-17.json", "personality-wave-17", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-17 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-17 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-17 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -891,13 +891,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadEventWave2()
     {
         var snapshot = Load("L5R.Published.event-wave-2.json", "event-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 5)
+        if (snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected event-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Event || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Event || card.Text.Length == 0)
                 throw new InvalidOperationException($"event-wave-2 card is not a textful Event: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("event-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -917,13 +917,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave6()
     {
         var snapshot = Load("L5R.Published.strategy-wave-6.json", "strategy-wave-6", requireDecks: false);
-        if(snapshot.Cards.Length != 5)
+        if (snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected strategy-wave-6 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-6 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-6 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -942,13 +942,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave18()
     {
         var snapshot = Load("L5R.Published.personality-wave-18.json", "personality-wave-18", requireDecks: false);
-        if(snapshot.Cards.Length != 10)
+        if (snapshot.Cards.Length != 10)
             throw new InvalidOperationException("Unexpected personality-wave-18 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-18 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-18 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -962,13 +962,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadHoldingWave1()
     {
         var snapshot = Load("L5R.Published.holding-wave-1.json", "holding-wave-1", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected holding-wave-1 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Holding || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Holding || card.Text.Length == 0)
                 throw new InvalidOperationException($"holding-wave-1 card is not a textful Holding: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("holding-wave-1 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -982,13 +982,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadItemWave3()
     {
         var snapshot = Load("L5R.Published.item-wave-3.json", "item-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected item-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Item || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Item || card.Text.Length == 0)
                 throw new InvalidOperationException($"item-wave-3 card is not a textful Item: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("item-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1003,13 +1003,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadRegionWave2()
     {
         var snapshot = Load("L5R.Published.region-wave-2.json", "region-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected region-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Region || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Region || card.Text.Length == 0)
                 throw new InvalidOperationException($"region-wave-2 card is not a textful Region: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("region-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1024,13 +1024,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave2()
     {
         var snapshot = Load("L5R.Published.spell-wave-2.json", "spell-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected spell-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell || card.Text.Length == 0)
                 throw new InvalidOperationException($"spell-wave-2 card is not a textful Spell: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("spell-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1044,13 +1044,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave7()
     {
         var snapshot = Load("L5R.Published.strategy-wave-7.json", "strategy-wave-7", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-7 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-7 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-7 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1062,13 +1062,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave8()
     {
         var snapshot = Load("L5R.Published.strategy-wave-8.json", "strategy-wave-8", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-8 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-8 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-8 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1080,13 +1080,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave9()
     {
         var snapshot = Load("L5R.Published.strategy-wave-9.json", "strategy-wave-9", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-9 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-9 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-9 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1100,13 +1100,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave10()
     {
         var snapshot = Load("L5R.Published.follower-wave-10.json", "follower-wave-10", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected follower-wave-10 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-10 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-10 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1123,13 +1123,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave10()
     {
         var snapshot = Load("L5R.Published.strategy-wave-10.json", "strategy-wave-10", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-10 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-10 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-10 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1142,13 +1142,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave3()
     {
         var snapshot = Load("L5R.Published.spell-wave-3.json", "spell-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell || card.Text.Length == 0)
                 throw new InvalidOperationException($"spell-wave-3 card is not a textful Spell: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("spell-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1161,13 +1161,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave19()
     {
         var snapshot = Load("L5R.Published.personality-wave-19.json", "personality-wave-19", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-19 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-19 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-19 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1180,13 +1180,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave11()
     {
         var snapshot = Load("L5R.Published.follower-wave-11.json", "follower-wave-11", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected follower-wave-11 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-11 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-11 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1200,13 +1200,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave11()
     {
         var snapshot = Load("L5R.Published.strategy-wave-11.json", "strategy-wave-11", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-11 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-11 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-11 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1225,13 +1225,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave12()
     {
         var snapshot = Load("L5R.Published.follower-wave-12.json", "follower-wave-12", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected follower-wave-12 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-12 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-12 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1249,13 +1249,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave12()
     {
         var snapshot = Load("L5R.Published.strategy-wave-12.json", "strategy-wave-12", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected strategy-wave-12 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-12 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-12 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1272,13 +1272,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave13()
     {
         var snapshot = Load("L5R.Published.follower-wave-13.json", "follower-wave-13", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-13 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-13 card is not a textful Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-13 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1293,13 +1293,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave20()
     {
         var snapshot = Load("L5R.Published.personality-wave-20.json", "personality-wave-20", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-20 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-20 card is not a textful Personality: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("personality-wave-20 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1319,13 +1319,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave14()
     {
         var snapshot = Load("L5R.Published.follower-wave-14.json", "follower-wave-14", requireDecks: false);
-        if(snapshot.Cards.Length != 6)
+        if (snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected follower-wave-14 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower)
                 throw new InvalidOperationException($"follower-wave-14 card is not a Follower: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("follower-wave-14 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1351,13 +1351,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave13()
     {
         var snapshot = Load("L5R.Published.strategy-wave-13.json", "strategy-wave-13", requireDecks: false);
-        if(snapshot.Cards.Length != 7)
+        if (snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected strategy-wave-13 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-13 card is not a textful Strategy: {card.Id}");
-        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others).Any())
             throw new InvalidOperationException("strategy-wave-13 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1387,13 +1387,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave14()
     {
         var snapshot = Load("L5R.Published.strategy-wave-14.json", "strategy-wave-14", requireDecks: false);
-        if(snapshot.Cards.Length != 7)
+        if (snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected strategy-wave-14 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-14 card is not a textful Strategy: {card.Id}");
-        var others14 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others14).Any())
+        var others14 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others14).Any())
             throw new InvalidOperationException("strategy-wave-14 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1424,13 +1424,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave15()
     {
         var snapshot = Load("L5R.Published.strategy-wave-15.json", "strategy-wave-15", requireDecks: false);
-        if(snapshot.Cards.Length != 7)
+        if (snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected strategy-wave-15 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-15 card is not a textful Strategy: {card.Id}");
-        var others15 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others15).Any())
+        var others15 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others15).Any())
             throw new InvalidOperationException("strategy-wave-15 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1444,13 +1444,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave4()
     {
         var snapshot = Load("L5R.Published.spell-wave-4.json", "spell-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell || card.Text.Length == 0)
                 throw new InvalidOperationException($"spell-wave-4 card is not a textful Spell: {card.Id}");
-        var others4 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others4).Any())
+        var others4 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others4).Any())
             throw new InvalidOperationException("spell-wave-4 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1465,13 +1465,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadRingWave2()
     {
         var snapshot = Load("L5R.Published.ring-wave-2.json", "ring-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected ring-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Ring || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Ring || card.Text.Length == 0)
                 throw new InvalidOperationException($"ring-wave-2 card is not a textful Ring: {card.Id}");
-        var othersRing2 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersRing2).Any())
+        var othersRing2 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersRing2).Any())
             throw new InvalidOperationException("ring-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1498,13 +1498,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave21()
     {
         var snapshot = Load("L5R.Published.personality-wave-21.json", "personality-wave-21", requireDecks: false);
-        if(snapshot.Cards.Length != 11)
+        if (snapshot.Cards.Length != 11)
             throw new InvalidOperationException("Unexpected personality-wave-21 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-21 card is not a textful Personality: {card.Id}");
-        var others21 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others21).Any())
+        var others21 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others21).Any())
             throw new InvalidOperationException("personality-wave-21 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1524,13 +1524,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave22()
     {
         var snapshot = Load("L5R.Published.personality-wave-22.json", "personality-wave-22", requireDecks: false);
-        if(snapshot.Cards.Length != 12)
+        if (snapshot.Cards.Length != 12)
             throw new InvalidOperationException("Unexpected personality-wave-22 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-22 card is not a textful Personality: {card.Id}");
-        var others22 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others22).Any())
+        var others22 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others22).Any())
             throw new InvalidOperationException("personality-wave-22 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1545,13 +1545,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadRegionWave3()
     {
         var snapshot = Load("L5R.Published.region-wave-3.json", "region-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected region-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Region || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Region || card.Text.Length == 0)
                 throw new InvalidOperationException($"region-wave-3 card is not a textful Region: {card.Id}");
-        var othersRegion3 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersRegion3).Any())
+        var othersRegion3 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersRegion3).Any())
             throw new InvalidOperationException("region-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1567,13 +1567,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave16()
     {
         var snapshot = Load("L5R.Published.strategy-wave-16.json", "strategy-wave-16", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-16 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-16 card is not a textful Strategy: {card.Id}");
-        var others16 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others16).Any())
+        var others16 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others16).Any())
             throw new InvalidOperationException("strategy-wave-16 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1591,13 +1591,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave23()
     {
         var snapshot = Load("L5R.Published.personality-wave-23.json", "personality-wave-23", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-23 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-23 card is not a textful Personality: {card.Id}");
-        var others23 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others23).Any())
+        var others23 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others23).Any())
             throw new InvalidOperationException("personality-wave-23 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1615,13 +1615,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave24()
     {
         var snapshot = Load("L5R.Published.personality-wave-24.json", "personality-wave-24", requireDecks: false);
-        if(snapshot.Cards.Length != 6)
+        if (snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected personality-wave-24 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-24 card is not a textful Personality: {card.Id}");
-        var others24 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others24).Any())
+        var others24 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others24).Any())
             throw new InvalidOperationException("personality-wave-24 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1632,13 +1632,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave25()
     {
         var snapshot = Load("L5R.Published.personality-wave-25.json", "personality-wave-25", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-25 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-25 card is not a textful Personality: {card.Id}");
-        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersNew).Any())
+        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersNew).Any())
             throw new InvalidOperationException("personality-wave-25 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1649,13 +1649,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave26()
     {
         var snapshot = Load("L5R.Published.personality-wave-26.json", "personality-wave-26", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-26 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-26 card is not a textful Personality: {card.Id}");
-        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave24.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersNew).Any())
+        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave24.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersNew).Any())
             throw new InvalidOperationException("personality-wave-26 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1666,13 +1666,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave15()
     {
         var snapshot = Load("L5R.Published.follower-wave-15.json", "follower-wave-15", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-15 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-15 card is not a textful Follower: {card.Id}");
-        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(PersonalityWave24.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersNew).Any())
+        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(PersonalityWave24.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersNew).Any())
             throw new InvalidOperationException("follower-wave-15 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1683,13 +1683,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave18()
     {
         var snapshot = Load("L5R.Published.strategy-wave-18.json", "strategy-wave-18", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-18 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-18 card is not a textful Strategy: {card.Id}");
-        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(PersonalityWave24.Cards).Concat(FollowerWave15.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersNew).Any())
+        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(PersonalityWave24.Cards).Concat(FollowerWave15.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersNew).Any())
             throw new InvalidOperationException("strategy-wave-18 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1705,13 +1705,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadEventWave3()
     {
         var snapshot = Load("L5R.Published.event-wave-3.json", "event-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected event-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Event || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Event || card.Text.Length == 0)
                 throw new InvalidOperationException($"event-wave-3 card is not a textful Event: {card.Id}");
-        var othersEvent3 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersEvent3).Any())
+        var othersEvent3 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersEvent3).Any())
             throw new InvalidOperationException("event-wave-3 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1727,13 +1727,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave27()
     {
         var snapshot = Load("L5R.Published.personality-wave-27.json", "personality-wave-27", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-27 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-27 card is not a textful Personality: {card.Id}");
-        var others27 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(others27).Any())
+        var others27 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(others27).Any())
             throw new InvalidOperationException("personality-wave-27 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1744,13 +1744,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadEventWave4()
     {
         var snapshot = Load("L5R.Published.event-wave-4.json", "event-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected event-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Event || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Event || card.Text.Length == 0)
                 throw new InvalidOperationException($"event-wave-4 card is not a textful Event: {card.Id}");
-        var othersEventWave4 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersEventWave4).Any())
+        var othersEventWave4 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersEventWave4).Any())
             throw new InvalidOperationException("event-wave-4 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1761,13 +1761,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave28()
     {
         var snapshot = Load("L5R.Published.personality-wave-28.json", "personality-wave-28", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-28 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-28 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave28 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave28).Any())
+        var othersPersonalityWave28 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave28).Any())
             throw new InvalidOperationException("personality-wave-28 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1778,13 +1778,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave17()
     {
         var snapshot = Load("L5R.Published.strategy-wave-17.json", "strategy-wave-17", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-17 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-17 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave17 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave17).Any())
+        var othersStrategyWave17 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave17).Any())
             throw new InvalidOperationException("strategy-wave-17 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1795,13 +1795,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadHoldingWave2()
     {
         var snapshot = Load("L5R.Published.holding-wave-2.json", "holding-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected holding-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Holding || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Holding || card.Text.Length == 0)
                 throw new InvalidOperationException($"holding-wave-2 card is not a textful Holding: {card.Id}");
-        var othersHoldingWave2 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersHoldingWave2).Any())
+        var othersHoldingWave2 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersHoldingWave2).Any())
             throw new InvalidOperationException("holding-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1812,13 +1812,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave29()
     {
         var snapshot = Load("L5R.Published.personality-wave-29.json", "personality-wave-29", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-29 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-29 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave29 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave29).Any())
+        var othersPersonalityWave29 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave29).Any())
             throw new InvalidOperationException("personality-wave-29 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1829,13 +1829,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave31()
     {
         var snapshot = Load("L5R.Published.personality-wave-31.json", "personality-wave-31", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-31 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-31 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave31 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave31).Any())
+        var othersPersonalityWave31 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave31).Any())
             throw new InvalidOperationException("personality-wave-31 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1846,13 +1846,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave17()
     {
         var snapshot = Load("L5R.Published.follower-wave-17.json", "follower-wave-17", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-17 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower || card.Text.Length == 0)
                 throw new InvalidOperationException($"follower-wave-17 card is not a textful Follower: {card.Id}");
-        var othersFollowerWave17 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersFollowerWave17).Any())
+        var othersFollowerWave17 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersFollowerWave17).Any())
             throw new InvalidOperationException("follower-wave-17 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1863,13 +1863,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave33()
     {
         var snapshot = Load("L5R.Published.personality-wave-33.json", "personality-wave-33", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-33 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-33 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave33 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave33).Any())
+        var othersPersonalityWave33 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave33).Any())
             throw new InvalidOperationException("personality-wave-33 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1880,13 +1880,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave22()
     {
         var snapshot = Load("L5R.Published.strategy-wave-22.json", "strategy-wave-22", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-22 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-22 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave22 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave22).Any())
+        var othersStrategyWave22 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave22).Any())
             throw new InvalidOperationException("strategy-wave-22 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1897,13 +1897,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave32()
     {
         var snapshot = Load("L5R.Published.personality-wave-32.json", "personality-wave-32", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-32 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-32 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave32 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave32).Any())
+        var othersPersonalityWave32 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave32).Any())
             throw new InvalidOperationException("personality-wave-32 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1914,13 +1914,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave21()
     {
         var snapshot = Load("L5R.Published.strategy-wave-21.json", "strategy-wave-21", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-21 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-21 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave21 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave32.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave21).Any())
+        var othersStrategyWave21 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave32.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave21).Any())
             throw new InvalidOperationException("strategy-wave-21 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1931,13 +1931,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrongholdWave5()
     {
         var snapshot = Load("L5R.Published.stronghold-wave-5.json", "stronghold-wave-5", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected stronghold-wave-5 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Stronghold || card.Text.Length == 0)
                 throw new InvalidOperationException($"stronghold-wave-5 card is not a textful Stronghold: {card.Id}");
-        var othersStrongholdWave5 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrongholdWave5).Any())
+        var othersStrongholdWave5 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrongholdWave5).Any())
             throw new InvalidOperationException("stronghold-wave-5 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1948,13 +1948,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave30()
     {
         var snapshot = Load("L5R.Published.personality-wave-30.json", "personality-wave-30", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-30 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-30 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave30 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave30).Any())
+        var othersPersonalityWave30 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave30).Any())
             throw new InvalidOperationException("personality-wave-30 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1965,13 +1965,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadItemWave4()
     {
         var snapshot = Load("L5R.Published.item-wave-4.json", "item-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected item-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Item || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Item || card.Text.Length == 0)
                 throw new InvalidOperationException($"item-wave-4 card is not a textful Item: {card.Id}");
-        var othersItemWave4 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave30.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersItemWave4).Any())
+        var othersItemWave4 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave30.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersItemWave4).Any())
             throw new InvalidOperationException("item-wave-4 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1982,13 +1982,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave27()
     {
         var snapshot = Load("L5R.Published.strategy-wave-27.json", "strategy-wave-27", requireDecks: false);
-        if(snapshot.Cards.Length != 6)
+        if (snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected strategy-wave-27 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-27 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave27 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave27).Any())
+        var othersStrategyWave27 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave27).Any())
             throw new InvalidOperationException("strategy-wave-27 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -1999,13 +1999,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave28()
     {
         var snapshot = Load("L5R.Published.strategy-wave-28.json", "strategy-wave-28", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-28 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-28 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave28 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave28).Any())
+        var othersStrategyWave28 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave28).Any())
             throw new InvalidOperationException("strategy-wave-28 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -2016,13 +2016,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave9()
     {
         var snapshot = Load("L5R.Published.spell-wave-9.json", "spell-wave-9", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-9 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell || card.Text.Length == 0)
                 throw new InvalidOperationException($"spell-wave-9 card is not a textful Spell: {card.Id}");
-        var othersSpellWave9 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersSpellWave9).Any())
+        var othersSpellWave9 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersSpellWave9).Any())
             throw new InvalidOperationException("spell-wave-9 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -2033,13 +2033,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave38()
     {
         var snapshot = Load("L5R.Published.personality-wave-38.json", "personality-wave-38", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-38 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality || card.Text.Length == 0)
                 throw new InvalidOperationException($"personality-wave-38 card is not a textful Personality: {card.Id}");
-        var othersPersonalityWave38 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave38).Any())
+        var othersPersonalityWave38 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersPersonalityWave38).Any())
             throw new InvalidOperationException("personality-wave-38 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -2050,13 +2050,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrongholdWave8()
     {
         var snapshot = Load("L5R.Published.stronghold-wave-8.json", "stronghold-wave-8", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected stronghold-wave-8 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Stronghold || card.Text.Length == 0)
                 throw new InvalidOperationException($"stronghold-wave-8 card is not a textful Stronghold: {card.Id}");
-        var othersStrongholdWave8 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Concat(PersonalityWave38.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrongholdWave8).Any())
+        var othersStrongholdWave8 = Snapshot.Cards.Concat(Snapshot.Cards).Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Concat(PersonalityWave38.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrongholdWave8).Any())
             throw new InvalidOperationException("stronghold-wave-8 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -2067,13 +2067,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave23()
     {
         var snapshot = Load("L5R.Published.strategy-wave-23.json", "strategy-wave-23", requireDecks: false);
-        if(snapshot.Cards.Length != 3)
+        if (snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-23 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-23 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave23 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave23).Any())
+        var othersStrategyWave23 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave23).Any())
             throw new InvalidOperationException("strategy-wave-23 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -2084,13 +2084,13 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave29()
     {
         var snapshot = Load("L5R.Published.strategy-wave-29.json", "strategy-wave-29", requireDecks: false);
-        if(snapshot.Cards.Length != 4)
+        if (snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected strategy-wave-29 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy || card.Text.Length == 0)
                 throw new InvalidOperationException($"strategy-wave-29 card is not a textful Strategy: {card.Id}");
-        var othersStrategyWave29 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrongholdWave8.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Concat(PersonalityWave38.Cards).Concat(StrongholdWave5.Cards).Concat(StrategyWave23.Cards).Concat(PersonalityWave32.Cards).Concat(StrategyWave21.Cards).Concat(StrategyWave28.Cards).Select(c=>c.Id);
-        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave29).Any())
+        var othersStrategyWave29 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrongholdWave8.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Concat(PersonalityWave38.Cards).Concat(StrongholdWave5.Cards).Concat(StrategyWave23.Cards).Concat(PersonalityWave32.Cards).Concat(StrategyWave21.Cards).Concat(StrategyWave28.Cards).Select(c => c.Id);
+        if (snapshot.Cards.Select(c => c.Id).Intersect(othersStrategyWave29).Any())
             throw new InvalidOperationException("strategy-wave-29 duplicates a card already published elsewhere.");
         return snapshot;
     }
@@ -2101,10 +2101,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadItemWave5()
     {
         var snapshot = Load("L5R.Published.item-wave-5.json", "item-wave-5", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected item-wave-5 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Item || card.Text.Length == 0 || !card.CreatedOnly)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Item || card.Text.Length == 0 || !card.CreatedOnly)
                 throw new InvalidOperationException($"item-wave-5 card is not a textful created-only Item: {card.Id}");
         return snapshot;
     }
@@ -2115,10 +2115,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave10()
     {
         var snapshot = Load("L5R.Published.spell-wave-10.json", "spell-wave-10", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-10 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell || card.Text.Length == 0)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell || card.Text.Length == 0)
                 throw new InvalidOperationException($"spell-wave-10 card is not a textful Spell: {card.Id}");
         return snapshot;
     }
@@ -2129,10 +2129,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave39()
     {
         var snapshot = Load("L5R.Published.personality-wave-39.json", "personality-wave-39", requireDecks: false);
-        if(snapshot.Cards.Length != 5)
+        if (snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-39 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality)
                 throw new InvalidOperationException($"personality-wave-39 card is not a Personality: {card.Id}");
         return snapshot;
     }
@@ -2143,10 +2143,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave18()
     {
         var snapshot = Load("L5R.Published.follower-wave-18.json", "follower-wave-18", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-18 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower)
                 throw new InvalidOperationException($"follower-wave-18 card is not a Follower: {card.Id}");
         return snapshot;
     }
@@ -2157,10 +2157,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadItemWave6()
     {
         var snapshot = Load("L5R.Published.item-wave-6.json", "item-wave-6", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected item-wave-6 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Item)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Item)
                 throw new InvalidOperationException($"item-wave-6 card is not a Item: {card.Id}");
         return snapshot;
     }
@@ -2171,10 +2171,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadHoldingWave3()
     {
         var snapshot = Load("L5R.Published.holding-wave-3.json", "holding-wave-3", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected holding-wave-3 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Holding)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Holding)
                 throw new InvalidOperationException($"holding-wave-3 card is not a Holding: {card.Id}");
         return snapshot;
     }
@@ -2185,10 +2185,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave40()
     {
         var snapshot = Load("L5R.Published.personality-wave-40.json", "personality-wave-40", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-40 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality)
                 throw new InvalidOperationException($"personality-wave-40 card is not a Personality: {card.Id}");
         return snapshot;
     }
@@ -2199,10 +2199,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadCelestialWave2()
     {
         var snapshot = Load("L5R.Published.celestial-wave-2.json", "celestial-wave-2", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected celestial-wave-2 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Celestial)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Celestial)
                 throw new InvalidOperationException($"celestial-wave-2 card is not a Celestial: {card.Id}");
         return snapshot;
     }
@@ -2213,10 +2213,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave31()
     {
         var snapshot = Load("L5R.Published.strategy-wave-31.json", "strategy-wave-31", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-31 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy)
                 throw new InvalidOperationException($"strategy-wave-31 card is not a Strategy: {card.Id}");
         return snapshot;
     }
@@ -2227,10 +2227,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadFollowerWave19()
     {
         var snapshot = Load("L5R.Published.follower-wave-19.json", "follower-wave-19", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-19 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Follower)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Follower)
                 throw new InvalidOperationException($"follower-wave-19 card is not a Follower: {card.Id}");
         return snapshot;
     }
@@ -2241,10 +2241,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadSpellWave11()
     {
         var snapshot = Load("L5R.Published.spell-wave-11.json", "spell-wave-11", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-11 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Spell)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Spell)
                 throw new InvalidOperationException($"spell-wave-11 card is not a Spell: {card.Id}");
         return snapshot;
     }
@@ -2255,10 +2255,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadHoldingWave4()
     {
         var snapshot = Load("L5R.Published.holding-wave-4.json", "holding-wave-4", requireDecks: false);
-        if(snapshot.Cards.Length != 2)
+        if (snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected holding-wave-4 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Holding)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Holding)
                 throw new InvalidOperationException($"holding-wave-4 card is not a Holding: {card.Id}");
         return snapshot;
     }
@@ -2269,10 +2269,10 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadStrategyWave32()
     {
         var snapshot = Load("L5R.Published.strategy-wave-32.json", "strategy-wave-32", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-32 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Strategy)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Strategy)
                 throw new InvalidOperationException($"strategy-wave-32 card is not a Strategy: {card.Id}");
         return snapshot;
     }
@@ -2283,34 +2283,35 @@ public static partial class PublishedContent
     private static PublishedSnapshot LoadPersonalityWave41()
     {
         var snapshot = Load("L5R.Published.personality-wave-41.json", "personality-wave-41", requireDecks: false);
-        if(snapshot.Cards.Length != 1)
+        if (snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-41 card count.");
-        foreach(var card in snapshot.Cards)
-            if(card.Type != CardType.Personality)
+        foreach (var card in snapshot.Cards)
+            if (card.Type != CardType.Personality)
                 throw new InvalidOperationException($"personality-wave-41 card is not a Personality: {card.Id}");
         return snapshot;
     }
 
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
-        if(Loaded.TryGetValue(resourceName, out var existing)) return existing;
+        if (Loaded.TryGetValue(resourceName, out var existing)) return existing;
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Published content is missing: {resourceName}");
         var snapshot = JsonSerializer.Deserialize<PublishedSnapshot>(stream)!;
-        if(snapshot.Profile != profile || (requireDecks && snapshot.Decks.Length != 2))
+        if (snapshot.Profile != profile || (requireDecks && snapshot.Decks.Length != 2))
             throw new InvalidOperationException($"Unexpected published content snapshot: {resourceName}");
-        var cards=snapshot.Cards.ToDictionary(c=>c.Id);
-        foreach(var card in snapshot.Cards)
+        var cards = snapshot.Cards.ToDictionary(c => c.Id);
+        foreach (var card in snapshot.Cards)
         {
-            if(card.ScenarioOnly || card.Abilities is null || card.Keywords is null ||
-                card.Abilities.Any(id=>!AbilityCatalog.All.ContainsKey(id)))
+            if (card.ScenarioOnly || card.Abilities is null || card.Keywords is null ||
+                card.Abilities.Any(id => !AbilityCatalog.All.ContainsKey(id)))
                 throw new InvalidOperationException($"Unimplemented published definition: {card.Id}");
         }
-        foreach(var deck in snapshot.Decks)
-            if(deck.Dynasty.Length!=40 || deck.Fate.Length!=40 ||
-               deck.Dynasty.Concat(deck.Fate).Append(deck.StrongholdId).Any(id=>!cards.ContainsKey(id)))
+        foreach (var deck in snapshot.Decks)
+            // The live deck may name a card another wave defines (Copper Mine, issue #1091); CardCatalog.Build checks that every deck id resolves once all waves are loaded.
+            if (deck.Dynasty.Length != 40 || deck.Fate.Length != 40 || !cards.ContainsKey(deck.StrongholdId) ||
+               (profile != Scenario && deck.Dynasty.Concat(deck.Fate).Any(id => !cards.ContainsKey(id))))
                 throw new InvalidOperationException("Published deck is incomplete.");
-            else if(deck.Dynasty.Concat(deck.Fate).Any(id=>cards[id].CreatedOnly))
+            else if (deck.Dynasty.Concat(deck.Fate).Any(id => cards.TryGetValue(id, out var card) && card.CreatedOnly))
                 throw new InvalidOperationException("A published deck lists a card that may not be included in decks.");
         Loaded.Add(resourceName, snapshot);
         return snapshot;

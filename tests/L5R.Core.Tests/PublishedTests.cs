@@ -18,6 +18,7 @@ internal static class PublishedTests
             ("Published discovery orders new types ordinally and wave numbers numerically", WaveDiscoveryNewOrder),
             ("CatalogueDecks/live: Lion and Crane retain 40/40 decks", () => CatalogueDecks(PublishedContent.Snapshot)),
             ("CatalogueDecks/frozen: Lion and Crane test fixture retains 40/40 decks", () => CatalogueDecks(PublishedContent.TestSnapshot)),
+            ("Pinned live decks run three Copper Mines each and no Gold Mine (the frozen test fixture keeps Gold Mine)", PinnedCopperMines),
             ("Published setup pins Lion first turn, Honor, province strengths and Crane Bamboo", Setup),
             ("Published Bamboo stays bowed on Crane first turn and straightens on second", BambooTiming),
             ("Border Keep first-turn and once-per-game refresh are independent", Border),
@@ -91,6 +92,17 @@ internal static class PublishedTests
     private static void Pass(MatchEngine e) => Accept(e, new("pass", e.State.PriorityPlayerId, e.Version));
     private static CardInstance Card(MatchEngine e, string id) => e.State.Cards[id];
     private static CardView ViewCard(MatchEngine e, string id) => e.GetView(0).Players.SelectMany(p => p.Home.Concat(p.Army)).Single(c => c.Id == id);
+    private static void PinnedCopperMines()
+    {
+        foreach (var deck in PublishedContent.Snapshot.Decks)
+        {
+            var all = deck.Dynasty.Concat(deck.Fate).ToArray();
+            Eq(all.Count(id => id == "oracle-l5r-1497"), 3); Eq(all.Count(id => id == "oracle-l5r-2867"), 0);
+            Check(CardCatalog.Get("oracle-l5r-1497").Name == "Copper Mine", "the catalogue resolves the live deck's Copper Mine");
+        }
+        foreach (var deck in PublishedContent.TestSnapshot.Decks) Eq(deck.Dynasty.Count(id => id == "oracle-l5r-2867"), 3);
+    }
+
     private static void Catalogue()
     {
         var published = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly).ToArray();

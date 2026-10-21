@@ -193,7 +193,7 @@ internal static class TutorialTests
         Expect(view.Players[0].Honor == 7 && view.Players[1].Honor == 6, "7 Honor against 6");
         Expect(S().Players[0].Hand.Count == 0 && S().Players[1].Hand.Count == 0, "nobody has a hand yet");
         string[] Provinces(int player) => S().Players[player].Provinces.Select(p => S().Cards[p.CardId!].DefinitionId).ToArray();
-        Expect(Provinces(0).SequenceEqual([TutorialCards.IkomaSugo, TutorialCards.CopperMine, TutorialCards.MatsuHachiro, TutorialCards.GoldMine]), "your provinces: Ikoma Sugo, Copper Mine, Matsu Hachiro, Gold Mine");
+        Expect(Provinces(0).SequenceEqual([TutorialCards.IkomaSugo, TutorialCards.CopperMine, TutorialCards.MatsuHachiro, TutorialCards.CopperMine]), "your provinces: Ikoma Sugo, Copper Mine, Matsu Hachiro, Copper Mine");
         Expect(Provinces(1).SequenceEqual([TutorialCards.DaidojiTsunehiko, TutorialCards.DaidojiKenshi, TutorialCards.SmallFarm, TutorialCards.LargeFarm]), "Crane's provinces: Tsunehiko, Kenshi, Small Farm, Large Farm");
         Expect(S().Players.SelectMany(p => p.Provinces).All(p => !S().Cards[p.CardId!].FaceUp), "every province is face down");
         Expect(S().Cards.Values.Any(c => c is { OwnerId: 1, DefinitionId: TutorialCards.BambooHarvesters, Bowed: true }), "Crane has the bowed Bamboo Harvesters");

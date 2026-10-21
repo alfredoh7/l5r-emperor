@@ -42,6 +42,7 @@ public static class TutorialCurriculum
             new("deck-builder", "Deck Builder Overview", "How to use the Deck Builder"),
             new("deck-anatomy", "Anatomy of a Deck", "What is required and what is good practice"),
             new("using-your-deck", "Using Your Designed Deck", ""),
+            new("using-settings", "Using Settings", ""),
         ]),
     ];
 
