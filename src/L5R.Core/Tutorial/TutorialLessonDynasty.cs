@@ -25,8 +25,21 @@ internal static class TutorialLessonDynasty
 
     private static TutorialStep Do(string id, string title, string body, string instruction, Func<TutorialLookup, GameCommand, bool> allow, Func<TutorialLookup, GameCommand, bool>? accept = null,
         string? hint = null, Action<TutorialContext>? then = null, Func<TutorialLookup, IEnumerable<string>>? highlight = null, string[]? glow = null, int[]? onlyProvinces = null, bool slow = false) =>
-        new() { Id = id, Title = title, Body = body, Instruction = instruction, Allow = allow, Accept = accept, RefusalHint = hint ?? "Do the move the lesson asks for.", Then = then, Highlight = highlight, Glow = glow,
-            OnlyProvinces = onlyProvinces, Slow = slow };
+        new()
+        {
+            Id = id,
+            Title = title,
+            Body = body,
+            Instruction = instruction,
+            Allow = allow,
+            Accept = accept,
+            RefusalHint = hint ?? "Do the move the lesson asks for.",
+            Then = then,
+            Highlight = highlight,
+            Glow = glow,
+            OnlyProvinces = onlyProvinces,
+            Slow = slow
+        };
 
     private static readonly string[] Bar = [TutorialGlow.PhaseBar];
 
