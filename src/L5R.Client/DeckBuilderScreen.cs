@@ -70,7 +70,7 @@ public partial class DeckBuilderScreen : Control
         _byId = Data.Cards.ToDictionary(c => c.Id);
         _pool = Data.Cards.Select(c => new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, c.Definition?.Keywords?.ToArray() ?? c.Keywords, c.Playable, c.Definition?.CreatedOnly ?? false, c.Definition?.DeckCopyLimit, c.Definition is null ? 0 : DeckWorkshop.FateMinimumReductionOf(c.Definition), c.Definition is not null && DeckWorkshop.StrategyCopyRuleOf(c.Definition), c.Definition is not null && DeckWorkshop.BattleStrategyOf(c.Definition), c.Definition is null || DeckWorkshop.CountsTowardMinimumOf(c.Definition))).ToArray();
         Draft = NewDraft();
-        Store = new DeckFileStore(StorageDirectory ?? ProjectSettings.GlobalizePath("user://decks")); if (StorageDirectory is null) PreloadedDecks.Seed(Store);
+        Store = StorageDirectory is null ? PreloadedDecks.OpenStore() : new DeckFileStore(StorageDirectory);
         var bg = new TextureRect { Texture = GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png"), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore }; AddChild(bg); bg.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(_lines); _lines.Draw += DrawFrames;
         AddChild(_canvas); foreach (var c in new[] { _header, _setupStrip, _left, _toolbar, _setupTools, _deckFooter, _library, _viewStrip }) _canvas.AddChild(c);

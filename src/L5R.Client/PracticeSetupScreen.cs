@@ -27,7 +27,7 @@ public partial class PracticeSetupScreen : Control
     public override void _Ready()
     {
         Theme = SidebarSkin.Theme(); MouseFilter = MouseFilterEnum.Stop;
-        _store = new DeckFileStore(StorageDirectory ?? ProjectSettings.GlobalizePath("user://decks")); if (StorageDirectory is null) PreloadedDecks.Seed(_store);
+        _store = StorageDirectory is null ? PreloadedDecks.OpenStore() : new DeckFileStore(StorageDirectory);
         Choices = [Preset("Crane"), Preset("Lion")];
         RestoreSelection();
         var black = new ColorRect { Color = new Color("05090d"), MouseFilter = MouseFilterEnum.Ignore }; AddChild(black); black.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);

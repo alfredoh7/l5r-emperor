@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Practice decks are editable .txt files in Documents\\L5R Emperor\\Decks (old user://decks decks copied across once, fallback to the old folder). Every shipped deck, now including Pinned Lion and Pinned Crane generated from the pinned presets, is also an embedded read-only entry in preloaded-decks.json; the .txt copies are seeded once each and never overwritten. New 'Restore shipped decks' button in My decks puts a missing or edited original back. The tutorial still plays only its own embedded TutorialCards and never reads the deck folder.",
+  "validation": "check.sh --skip-client passed (deck-workshop test now expects 13 embedded decks and that the embedded Pinned Lion/Crane equal the pinned presets); check-practice-setup.sh and check-deck-builder.sh passed natively. Those checks use fixture folders, so the real Documents folder, the user://decks migration and the Restore dialog were not exercised natively. No visual playthrough.",
+  "remaining": "Not run against the real Documents folder or the Restore dialog. The tutorial does not yet load decks from the embedded files; it keeps its own ordered TutorialCards lists.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1097",
+  "branch": "claude/1097-deck-txt-and-embedded",
+  "updated": "2026-10-21T14:09:01.118777+00:00"
+}
