@@ -10,17 +10,22 @@ public static class PreloadedDecks
     private const string Path = "res://Content/preloaded-decks.json";
     /// <summary>The nine decks that shipped before the marker listed names; an older marker means exactly these were offered.</summary>
     private static readonly string[] OriginallyShipped = ["Crab Control", "Crane Dominance", "Dragon Destruction", "Mantis Manipulation", "Phoenix Talons", "Scorpion Lethargy", "Scottish Lion Deck", "Spider Conquer", "Unicorn Maidens"];
-    private sealed record Entry(string Name, string Text);
+    private sealed record Entry(string Name, string Text, string? Seed = null);
     private static string? _directory;
 
     /// <summary>The decks that ship with the game, read from the read-only copy embedded in the package. The tutorial and Restore use these; the editable .txt files in the deck folder are only ever copies of them.</summary>
-    public static (string Name, string Text)[] Embedded()
+    public static (string Name, string Text)[] Embedded() => Entries().Select(d => (d.Name, d.Text)).ToArray();
+
+    /// <summary>The embedded decks that are also written to the deck folder as editable .txt files. The others (the pinned Lion and Crane the tutorial and the pinned profile rely on) stay embedded only.</summary>
+    public static (string Name, string Text)[] Shipped() => Entries().Where(d => d.Seed != "false").Select(d => (d.Name, d.Text)).ToArray();
+
+    private static Entry[] Entries()
     {
         try
         {
             using var file = Godot.FileAccess.Open(Path, Godot.FileAccess.ModeFlags.Read);
             if (file is null) return [];
-            return (JsonSerializer.Deserialize<Entry[]>(file.GetAsText(), new JsonSerializerOptions(JsonSerializerDefaults.Web)) ?? []).Select(d => (d.Name, d.Text)).ToArray();
+            return JsonSerializer.Deserialize<Entry[]>(file.GetAsText(), new JsonSerializerOptions(JsonSerializerDefaults.Web)) ?? [];
         }
         catch (Exception e) when (e is IOException or JsonException) { GD.PushWarning("Embedded decks could not be read: " + e.Message); return []; }
     }
@@ -48,14 +53,14 @@ public static class PreloadedDecks
 
     /// <summary>The shipped decks whose .txt is missing or no longer matches the embedded original.</summary>
     public static string[] Restorable(DeckFileStore store) =>
-        Embedded().Where(d => { var file = store.PathFor(d.Name); return !File.Exists(file) || File.ReadAllText(file) != d.Text; }).Select(d => d.Name).ToArray();
+        Shipped().Where(d => { var file = store.PathFor(d.Name); return !File.Exists(file) || File.ReadAllText(file) != d.Text; }).Select(d => d.Name).ToArray();
 
     /// <summary>Rewrites the named shipped decks from the embedded originals; returns how many were written.</summary>
     public static int Restore(DeckFileStore store, IEnumerable<string> names)
     {
         var wanted = new HashSet<string>(names, StringComparer.OrdinalIgnoreCase); var written = 0;
         Directory.CreateDirectory(store.DirectoryPath);
-        foreach (var (name, text) in Embedded()) if (wanted.Contains(name)) { File.WriteAllText(store.PathFor(name), text); written++; }
+        foreach (var (name, text) in Shipped()) if (wanted.Contains(name)) { File.WriteAllText(store.PathFor(name), text); written++; }
         return written;
     }
 
@@ -63,7 +68,7 @@ public static class PreloadedDecks
     {
         try
         {
-            store.Preload(Embedded(), ProjectSettings.GlobalizePath("user://preloaded-decks.seen"), OriginallyShipped);
+            store.Preload(Shipped(), ProjectSettings.GlobalizePath("user://preloaded-decks.seen"), OriginallyShipped);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException) { GD.PushWarning("Preloaded decks could not be written: " + e.Message); }
     }
