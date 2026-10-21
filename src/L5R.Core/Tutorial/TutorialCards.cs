@@ -1,32 +1,34 @@
 namespace L5R.Core;
 
-/// <summary>Every card the tutorial's table is built from, by catalogue id, in one place so a lesson's script and its table cannot drift apart. Decks are listed top first.</summary>
+/// <summary>Every card the tutorial's table is built from, by catalogue id, in one place so the script and its table cannot drift apart.
+/// The decks are the pinned Lion and Crane decks (<c>content/published/lion-crane-v1.json</c>) with the cards the lesson meets put on top, in the order they will be met.</summary>
 internal static class TutorialCards
 {
-    // The pinned profile's own pairing, from the Lion side: you are Lion (Halls of Memory: 3 Gold, 7 starting Family Honor, province strength 7) against Crane (Shinden Asahina: 4 Gold, 6 Honor, strength 6).
-    // Lion has the higher Honor, so you go first; Crane, second, starts with the bowed Bamboo Harvesters, exactly as in a real match.
+    // Lion (you): Halls of Memory, 3 Gold, 7 starting Honor, province strength 7. Crane: Shinden Asahina, 4 Gold, 6 Honor, strength 6. Lion has more Honor, so you go first.
     public const string YourStronghold = "oracle-l5r-2949";
     public const string FoeStronghold = "oracle-l5r-6855";
     public const string BorderKeep = "oracle-l5r-1106";
     public const string BambooHarvesters = "oracle-l5r-679";
 
-    public const string WillingSpirits = "oracle-l5r-9337"; // the Event
-    public const string MatsuHana = "oracle-l5r-4916", IkomaHakige = "oracle-l5r-3607", KitsuAkai = "oracle-l5r-4371"; // the three Personalities the first Events phase reveals: 9 Gold (7 with the Clan Discount), Honor Requirement 12 and 8 Gold, 10 Gold
-    public const string FallowLands = "oracle-l5r-9865", MegumisGuidance = "oracle-l5r-10028"; // the Region and the Celestial revealed on turn two
-    public const string SmallFarm = "oracle-l5r-7303", AkodoUehara = "oracle-l5r-305", CopperMine = "oracle-l5r-1497", LargeFarm = "oracle-l5r-4664";
-    public const string DojiAtsumichi = "oracle-l5r-2060"; // the defender: 8 Gold, 6 with the Crane Clan Discount, which Shinden Asahina (4) and the Border Keep (2) make exactly
+    public const string IkomaSugo = "oracle-l5r-3641", MatsuHachiro = "oracle-l5r-4915", CopperMine = "oracle-l5r-1497", GoldMine = "oracle-l5r-2867", SmallFarm = "oracle-l5r-7303", LargeFarm = "oracle-l5r-4664";
+    public const string DaidojiTsunehiko = "oracle-l5r-9812", DaidojiKenshi = "oracle-l5r-1645";
+    public const string LightArmor = "oracle-l5r-10118", VeteranSkirmishers = "oracle-l5r-9147", BlockSupplyLines = "oracle-l5r-1045", Incapacitated = "oracle-l5r-3730",
+        PreparedForDeath = "oracle-l5r-6051", DefensiveStance = "oracle-l5r-10368", PaidOff = "oracle-l5r-5861", NeverAfraid = "oracle-l5r-9916";
 
-    public const string TellTheTale = "oracle-l5r-7862", Truce = "oracle-l5r-10401", VeteranSkirmishers = "oracle-l5r-9147", LightArmor = "oracle-l5r-10118",
-        EmbersFinalFire = "oracle-l5r-2309", RingOfFire = "oracle-l5r-6335", DefensiveStance = "oracle-l5r-10368", NeverAfraid = "oracle-l5r-9916";
-
-    /// <summary>Provinces 1-4 at setup, then the refill for the Event's province (the Region), then the three cards the Border Keep brings face up (a Holding, the Personality, the Clan Holding),
-    /// then the Celestial (the refill after the first purchase) and two spares for the other purchases' refills.</summary>
-    public static readonly string[] YourDynasty = [WillingSpirits, MatsuHana, IkomaHakige, KitsuAkai, FallowLands, SmallFarm, AkodoUehara, CopperMine, MegumisGuidance, LargeFarm, SmallFarm];
-    public static readonly string[] DynastyFiller = [LargeFarm, SmallFarm];
-    /// <summary>The six cards of the "forgotten" opening draw (limited action, reaction, follower, item, spell, ring), then the card drawn at the end of turn one.</summary>
-    public static readonly string[] YourFate = [TellTheTale, Truce, VeteranSkirmishers, LightArmor, EmbersFinalFire, RingOfFire, DefensiveStance];
-    public static readonly string[] FateFiller = [VeteranSkirmishers, LightArmor];
-    /// <summary>Crane's Dynasty deck opens on Doji Atsumichi (province 1); its Fate deck opens on the one card its End-phase draw will give it.</summary>
-    public static readonly string[] FoeDynasty = [DojiAtsumichi, SmallFarm, LargeFarm];
+    /// <summary>Lion's Dynasty deck, top first: provinces 1-4 at setup, then the card the first purchase's province is refilled with (turn two's Events phase reveals it).</summary>
+    public static readonly string[] YourDynasty = [IkomaSugo, CopperMine, MatsuHachiro, GoldMine, SmallFarm];
+    /// <summary>Lion's Fate deck, top first: the six-card opening hand, then the card drawn at the end of turn one.</summary>
+    public static readonly string[] YourFate = [LightArmor, VeteranSkirmishers, BlockSupplyLines, Incapacitated, PreparedForDeath, DefensiveStance, PaidOff];
+    /// <summary>Crane's Dynasty deck, top first: its four provinces. Its Fate deck opens on the one card its End-phase draw will give it.</summary>
+    public static readonly string[] FoeDynasty = [DaidojiTsunehiko, DaidojiKenshi, SmallFarm, LargeFarm];
     public static readonly string[] FoeFate = [NeverAfraid];
+
+    /// <summary>A forty-card deck: the lesson's cards on top, then the rest of the pinned deck in its own order. A card the pinned deck does not hold (Copper Mine) displaces the last card.</summary>
+    internal static string[] Deck(string[] top, string clan, bool dynasty)
+    {
+        var pinned = PublishedContent.Snapshot.Decks.Single(d => d.Clan == clan);
+        var rest = (dynasty ? pinned.Dynasty : pinned.Fate).ToList();
+        foreach (var id in top) rest.Remove(id);
+        return [.. top.Concat(rest).Take(40)];
+    }
 }

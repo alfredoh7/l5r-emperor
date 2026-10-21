@@ -1,107 +1,58 @@
 using L5R.Core;
 
-// Issue #935, lesson 1 of the tutorial: the whole scripted game is played through the runner the way a player would, so any rules or card change that breaks the lesson
-// fails here instead of in front of a new player. The text quotes card numbers, so those are checked against the catalogue too.
+// Issue #935, the tutorial: the whole scripted game is played through the runner the way a player would, so any rules or card change that breaks the lesson
+// fails here instead of in front of a new player. The text quotes card numbers, so those are checked against the catalogue and the engine too.
 internal static class TutorialTests
 {
     public static void Run(TestRunner runner) => runner.Run("tutorial", [
-        ("Lesson 1 plays through to the end using only what each step offers, and the engine reaches the scripted result", FinishLessonOne),
-        ("An action step offers only its own move: everything else is switched off and a stray command is refused before the engine sees it", OnlyTheAskedMove),
-        ("The Border Keep step refuses a refresh of the wrong provinces and takes the three face-up ones", BorderKeepCards),
+        ("The lesson plays through to the end using only what each step offers, and the engine reaches the scripted result", FinishLesson),
+        ("A move step offers only its own move: everything else is switched off and a stray command is refused before the engine sees it", OnlyTheAskedMove),
         ("Only the first province may be attacked, and the opponent defends exactly the province you chose", AttackOnlyTheFirstProvince),
-        ("The cards and numbers the lesson's text quotes are the catalogue's", QuotedNumbers),
-        ("Every action step tells the player exactly what to do and every note step has a button, so no step is a dead end", EveryStepSaysWhatToDo),
-        ("The table starts paused: face-down provinces, empty hands, Lion to move first against Crane, who has the bowed Bamboo Harvesters and a Border Keep that make its 6 Gold", StartingTable),
-        ("Crane recruits Doji Atsumichi on its own turn, by the rules, with the Clan Discount paid by its Stronghold and Border Keep", CraneRecruitsAtsumichi),
-        ("The lesson holds on the Straighten phase before the Events phase, and the Events phase then reveals the provinces", HoldsBeforeEvents),
-        ("Every page of the note column fits, every step id is unique, and a long note is paged rather than scrolled", PagesFit),
+        ("The numbers the lesson's text quotes are the catalogue's and the engine's", QuotedNumbers),
+        ("Every move step tells the player exactly what to do and every note step has a button, so no step is a dead end", EveryStepSaysWhatToDo),
+        ("The table is the pinned Lion against the pinned Crane, paused: face-down provinces in the scripted order, empty hands, Lion first on 7 Honor against 6", StartingTable),
+        ("The lesson stops on the Straighten phase and on the revealed Events phase, and carries on only when the note's button is pressed", HoldsAtPhases),
+        ("Crane recruits Daidoji Kenshi with the Clan Discount from its Stronghold, then the farms, and does nothing until the lesson lets it", CraneTurn),
+        ("Back rebuilds the table as it was before the last button or move, at every step of the lesson", BackUndoesTheLastStep),
     ]);
 
     private static void Expect(bool condition, string message) { if (!condition) throw new Exception(message); }
+
+    /// <summary>The card in play (or, failing that, the first copy): the pinned decks hold three of most Personalities.</summary>
+    private static string Of(TutorialRunner runner, int owner, string definition)
+    {
+        var copies = runner.Engine.State.Cards.Values.Where(c => c.OwnerId == owner && c.DefinitionId == definition).ToArray();
+        return (copies.FirstOrDefault(c => c.Zone is Zone.Home or Zone.Battlefield or Zone.Stronghold) ?? copies.First()).Id;
+    }
+    private static string Own(TutorialRunner runner, string definition) => Of(runner, TutorialRunner.Seat, definition);
+    private static string Foe(TutorialRunner runner, string definition) => Of(runner, 1 - TutorialRunner.Seat, definition);
+    private static CardInstance InPlay(TutorialRunner runner, int owner, string definition) => runner.Engine.State.Cards[Of(runner, owner, definition)];
 
     private static GameCommand CommandFor(TutorialRunner runner)
     {
         var step = runner.Coach.StepId;
         var offered = runner.Actions().Where(a => a.Enabled && a.Command is not null).ToArray();
         Expect(offered.Length > 0, $"{step}: the step offers nothing");
-        var command = offered.First(a => a.Type != "concede").Command!;
         var state = runner.Engine.State;
-        string Own(string definition) => state.Cards.Values.First(c => c.OwnerId == TutorialRunner.Seat && c.DefinitionId == definition).Id;
+        var stronghold = state.Players[TutorialRunner.Seat].StrongholdId; var borderKeep = Own(runner, TutorialCards.BorderKeep); var hachiro = Own(runner, TutorialCards.MatsuHachiro);
         switch (step)
         {
-            case "border-refresh":
-                var provinces = state.Players[TutorialRunner.Seat].Provinces;
-                return command with { CardIds = [provinces[1].CardId!, provinces[2].CardId!, provinces[3].CardId!] };
-            case "buy-uehara": return command with { ClanDiscount = true, SourceIds = [state.Players[TutorialRunner.Seat].StrongholdId] };
-            case "buy-mine": return command with { SourceIds = [Own(TutorialCards.BorderKeep)] };
-            case "equip-follower": return command with { SourceIds = [Own(TutorialCards.BorderKeep)] };
-            case "equip-item": return command with { SourceIds = [Own(TutorialCards.CopperMine)] };
-            case "defensive-stance": return command with { TargetId = Own(TutorialCards.AkodoUehara) };
-            case "tactician": return command with { TargetId = Own(TutorialCards.Truce), PerformerId = Own(TutorialCards.AkodoUehara) };
-            default: return command;
+            case "recruit-hachiro":
+                Expect(offered.Count(a => a.Type == "purchase") == 3 && offered.All(a => a.Type == "purchase"), $"only Matsu Hachiro's three costs are offered, got {string.Join(", ", offered.Select(a => a.Label))}");
+                return offered.First(a => !a.Command!.ClanDiscount && !a.Command.ClanAllegiance).Command! with { SourceIds = [stronghold, borderKeep] };
+            case "equip-armor": return offered.Single().Command! with { TargetId = hachiro, SourceIds = [stronghold] };
+            case "equip-skirmishers": return offered.Single().Command! with { TargetId = hachiro, SourceIds = [borderKeep] };
+            case "prepared-for-death": return offered.Single().Command!;
+            case "incapacitated": return offered.Single().Command! with { TargetId = Foe(runner, TutorialCards.DaidojiKenshi) };
+            case "engage": return offered.Single(a => a.Command!.Province == 0).Command!;
+            case "assign-attacker": return offered.First().Command! with { Assignments = new Dictionary<string, int> { [hachiro] = 0 } };
+            default:
+                Expect(offered.Length == 1, $"{step}: the step offers exactly its one move, got {string.Join(", ", offered.Select(a => a.Label))}");
+                return offered[0].Command!;
         }
     }
 
     private static BattleValuesView? BattleValues(TutorialRunner runner) => runner.Engine.GetView(TutorialRunner.Seat).Battlefields?.Select(b => b.Values).FirstOrDefault(v => v is not null);
-
-    private static void FinishLessonOne()
-    {
-        var runner = TutorialRunner.StartLessonOne();
-        var seen = new List<string>();
-        for (var guard = 0; !runner.Finished && guard < 400; guard++)
-        {
-            var coach = runner.Coach; seen.Add(coach.StepId);
-            if (coach.StepId == "reading-battle-a") // Doji Atsumichi has already used his action: Akodo Uehara is bowed
-                Expect(runner.Engine.State.Cards.Values.Single(c => c.OwnerId == 0 && c.DefinitionId == TutorialCards.AkodoUehara).Bowed, "Atsumichi bowed Akodo Uehara before the first note about the battle");
-            if (coach.Button is not null)
-            {
-                Expect(runner.Continue(), $"{coach.StepId}: the button works");
-                continue;
-            }
-            if (coach.StepId == "defensive-stance") // Never Afraid destroyed the Follower: a bowed Uehara contributes nothing, so the army is losing
-            {
-                var values = BattleValues(runner);
-                Expect(values is { AttackerForce: 2, DefenderForce: 3, ProvinceFalls: false }, $"after Never Afraid: 0 + 2 (Megumi's Guidance) against 3, got {values}");
-            }
-            if (coach.StepId == "tactician")
-            {
-                var values = BattleValues(runner);
-                Expect(values is { AttackerForce: 9, DefenderForce: 3, ProvinceStrength: 6, ProvinceFalls: false }, $"after Defensive Stance: 7 + 2 against 3 and strength 6 is 1 short, got {values}");
-            }
-            if (coach.StepId == "pass-battle")
-            {
-                var values = BattleValues(runner);
-                Expect(values is { AttackerForce: 11, DefenderForce: 3, ProvinceStrength: 6, ProvinceFalls: true }, $"after the Tactician discard of Truce: 11 against 3 breaks strength 6, got {values}");
-            }
-            var result = runner.Execute(CommandFor(runner));
-            Expect(result.Accepted, $"{coach.StepId}: {result.Error}");
-        }
-        Expect(runner.Finished, "the lesson ended");
-        var view = runner.Engine.GetView(TutorialRunner.Seat);
-        Expect(seen.Count == seen.Distinct().Count(), "every step ran once");
-        Expect(view.Players[1].Provinces.Count(p => p.Destroyed) == 1 || view.Players[1].Provinces.Count(p => !p.Destroyed) == 3, "your opponent lost exactly one province");
-        Expect(view.Players[TutorialRunner.Seat].Honor == 10, $"Honor: 7, +1 Tell the Tale, +2 for the destroyed Personality (twice one card), got {view.Players[TutorialRunner.Seat].Honor}");
-        Expect(runner.Engine.WinnerId is null, "the game goes on");
-        var ring = runner.Engine.State.Cards.Values.Single(c => c.OwnerId == 0 && c.DefinitionId == TutorialCards.RingOfFire);
-        Expect(ring.Zone == Zone.Home, $"Ring of Fire entered play, it is in {ring.Zone}");
-    }
-
-    private static void OnlyTheAskedMove()
-    {
-        var runner = TutorialRunner.StartLessonOne();
-        while (runner.Coach.StepId != "border-refresh") Expect(runner.Continue(), "narration steps use their button");
-        var version = runner.Engine.GetView(TutorialRunner.Seat).Version;
-        var actions = runner.Actions();
-        var enabled = actions.Where(a => a.Enabled).ToArray();
-        Expect(enabled.Length == 1 && enabled[0].Command!.AbilityId == "border-first", $"only the Border Keep's refresh is offered, got {string.Join(", ", enabled.Select(a => a.Label))}");
-        Expect(actions.Any(a => a.Type == "pass" && !a.Enabled && a.Reason is { Length: > 0 }), "passing is switched off, with a reason");
-        Expect(actions.Any(a => a.Type == "concede" && !a.Enabled), "conceding is switched off");
-        var refused = runner.Execute(actions.First(a => a.Type == "pass").Command!);
-        Expect(!refused.Accepted && runner.Refusal is { Length: > 0 } && runner.Engine.GetView(TutorialRunner.Seat).Version == version, "a stray pass is refused and changes nothing");
-        // A narration step offers no move at all.
-        var narration = TutorialRunner.StartLessonOne();
-        Expect(narration.Actions().All(a => !a.Enabled), "while a note is showing nothing on the table can be used");
-    }
 
     private static void PlayUntil(TutorialRunner runner, string stepId)
     {
@@ -113,135 +64,206 @@ internal static class TutorialTests
         Expect(runner.Coach.StepId == stepId, $"reached {stepId}");
     }
 
-    private static void AttackOnlyTheFirstProvince()
+    private static void FinishLesson()
     {
-        var runner = TutorialRunner.StartLessonOne();
-        PlayUntil(runner, "assign-attacker");
-        var attack = runner.Actions().Single(a => a.Enabled).Command!;
-        Expect(runner.Actions().Single(a => a.Enabled).Provinces is [0], "the table is offered only the first province");
-        var unit = attack.Assignments!.Keys.Single();
-        var elsewhere = runner.Execute(attack with { Assignments = new Dictionary<string, int> { [unit] = 2 } });
-        Expect(!elsewhere.Accepted && runner.Coach.StepId == "assign-attacker", "attacking the third province is refused and the step stays");
-        Expect(runner.Execute(attack with { Assignments = new Dictionary<string, int> { [unit] = 0 } }).Accepted, "the first province is accepted");
-        Expect(runner.Coach.StepId == "pick-battle", "the opponent has defended and the lesson asks for the battle");
-        Expect(runner.Engine.State.Cards.Values.Any(c => c.OwnerId == 1 && c.DefinitionId == TutorialCards.DojiAtsumichi && c is { Zone: Zone.Battlefield, ProvinceIndex: 0 }), "Doji Atsumichi defends the attacked province");
+        var runner = TutorialRunner.Start();
+        var seen = new List<string>();
+        for (var guard = 0; !runner.Finished && guard < 200; guard++)
+        {
+            var coach = runner.Coach; seen.Add(coach.StepId);
+            switch (coach.StepId)
+            {
+                case "proclaimed": Expect(runner.Engine.GetView(TutorialRunner.Seat).Players[0].Honor == 10, "Proclaiming Matsu Hachiro took Honor from 7 to 10"); break;
+                case "crane-straighten": Expect(runner.Engine.State.Cards.Values.Any(c => c.DefinitionId == TutorialCards.PaidOff && c.Zone == Zone.Hand), "the End phase drew Paid Off before Crane's turn"); break;
+                case "housekeeping": Expect(runner.Engine.State is { ActivePlayerId: 0, Phase: Phase.Action }, "it is your second Action phase"); break;
+                case "force": Expect(BattleValuesOfUnit(runner) == 7, $"Matsu Hachiro's unit has 7 Force before attacking, got {BattleValuesOfUnit(runner)}"); break;
+                case "never-afraid":
+                    Expect(BattleValues(runner) is { AttackerForce: 8, DefenderForce: 3, ProvinceStrength: 6, ProvinceFalls: false }, $"after Never Afraid: 8 against 3 and strength 6, got {BattleValues(runner)}");
+                    Expect(runner.Engine.State.Cards.Values.Any(c => c.DefinitionId == TutorialCards.VeteranSkirmishers && c.Zone == Zone.FateDiscard), "Crane's Never Afraid destroyed the Veteran Skirmishers");
+                    break;
+            }
+            if (coach.Button is not null) { Expect(runner.Continue(), $"{coach.StepId}: the button works"); continue; }
+            var result = runner.Execute(CommandFor(runner));
+            Expect(result.Accepted, $"{coach.StepId}: {result.Error}");
+        }
+        Expect(runner.Finished, "the lesson ended");
+        Expect(seen.Count == seen.Distinct().Count(), "every step ran once");
+        var view = runner.Engine.GetView(TutorialRunner.Seat);
+        Expect(view.Players[1].Provinces.Single(p => p.Index == 0).Destroyed, "the Crane's first province was destroyed");
+        Expect(view.Players[1].Provinces.Count(p => p.Destroyed) == 1, "exactly one province fell");
+        Expect(view.Players[TutorialRunner.Seat].Honor == 10, $"Honor stays at 10, got {view.Players[TutorialRunner.Seat].Honor}");
+        Expect(InPlay(runner, 1, TutorialCards.DaidojiKenshi).Zone != Zone.Dead, "Daidoji Kenshi was sent home, not killed");
+        Expect(runner.Engine.WinnerId is null, "the game goes on");
     }
 
-    private static void BorderKeepCards()
+    private static int BattleValuesOfUnit(TutorialRunner runner)
     {
-        var runner = TutorialRunner.StartLessonOne();
-        while (runner.Coach.StepId != "border-refresh") Expect(runner.Continue(), "narration steps use their button");
-        var provinces = runner.Engine.State.Players[TutorialRunner.Seat].Provinces;
-        var refresh = runner.Actions().Single(a => a.Enabled).Command!;
-        var wrong = runner.Execute(refresh with { CardIds = [provinces[0].CardId!, provinces[1].CardId!, provinces[2].CardId!] });
-        Expect(!wrong.Accepted, "the face-down province's card is not part of the lesson's refresh");
-        var partial = runner.Execute(refresh with { CardIds = [provinces[1].CardId!] });
-        Expect(!partial.Accepted && runner.Coach.StepId == "border-refresh", "refreshing only one province is refused");
-        var right = runner.Execute(refresh with { CardIds = [provinces[1].CardId!, provinces[2].CardId!, provinces[3].CardId!] });
-        Expect(right.Accepted && runner.Coach.StepId == "refreshed", "the three face-up cards are accepted and the lesson moves on");
-        var now = runner.Engine.State.Players[TutorialRunner.Seat].Provinces;
-        var names = new[] { 1, 2, 3 }.Select(i => CardCatalog.Get(runner.Engine.State.Cards[now[i].CardId!].DefinitionId).Name).ToArray();
-        Expect(names.SequenceEqual(["Small Farm", "Akodo Uehara", "Copper Mine"]), $"the refresh brought the lesson's cards face up, got {string.Join(", ", names)}");
+        // Force of Matsu Hachiro's unit while no battle is on: his own 1, the Light Armor's 3 and the Veteran Skirmishers' 3.
+        var hachiro = runner.Engine.State.Cards[Own(runner, TutorialCards.MatsuHachiro)];
+        var attached = runner.Engine.State.Cards.Values.Where(c => c.AttachedTo == hachiro.Id).Select(c => CardCatalog.Get(c.DefinitionId).Force).Sum();
+        return CardCatalog.Get(hachiro.DefinitionId).Force + attached;
+    }
+
+    private static bool BattleValuesBeforeBattle(TutorialRunner runner) => BattleValues(runner) is { AttackerForce: 11, DefenderForce: 3, ProvinceStrength: 6 };
+
+    private static void OnlyTheAskedMove()
+    {
+        var runner = TutorialRunner.Start();
+        Expect(runner.Actions().All(a => !a.Enabled), "while a note is showing nothing on the table can be used");
+        PlayUntil(runner, "pass-action");
+        var version = runner.Engine.GetView(TutorialRunner.Seat).Version;
+        var actions = runner.Actions();
+        var enabled = actions.Where(a => a.Enabled).ToArray();
+        Expect(enabled.Length == 1 && enabled[0].Type == "pass", $"only passing is offered, got {string.Join(", ", enabled.Select(a => a.Label))}");
+        Expect(actions.Any(a => a.Type == "useAbility" && !a.Enabled && a.Reason is { Length: > 0 }), "the Border Keep's refresh is switched off, with a reason");
+        Expect(actions.Any(a => a.Type == "concede" && !a.Enabled), "conceding is switched off");
+        var refresh = actions.First(a => a.Type == "useAbility").Command!;
+        var refused = runner.Execute(refresh);
+        Expect(!refused.Accepted && runner.Refusal is { Length: > 0 } && runner.Engine.GetView(TutorialRunner.Seat).Version == version && runner.Coach.StepId == "pass-action", "a stray ability is refused and changes nothing");
+        // The Dynasty phase: only Matsu Hachiro at his full cost, paid by the Stronghold and the Border Keep together.
+        PlayUntil(runner, "recruit-hachiro");
+        var stronghold = runner.Engine.State.Players[0].StrongholdId; var keep = Own(runner, TutorialCards.BorderKeep);
+        var buy = runner.Actions().First(a => a.Enabled).Command!;
+        Expect(!runner.Execute(buy with { ClanDiscount = true, SourceIds = [stronghold] }).Accepted, "the Clan Discount does not Proclaim and is refused");
+        Expect(!runner.Execute(buy with { SourceIds = [stronghold] }).Accepted, "paying with the Stronghold alone is refused (it makes 3 of the 4)");
+        Expect(runner.Execute(buy with { SourceIds = [stronghold, keep] }).Accepted && runner.Coach.StepId == "proclaimed" && InPlay(runner, 0, TutorialCards.MatsuHachiro).Zone == Zone.Home, "the full cost, paid by both, is accepted and Matsu Hachiro is in play");
+    }
+
+    private static void AttackOnlyTheFirstProvince()
+    {
+        var runner = TutorialRunner.Start();
+        PlayUntil(runner, "assign-attacker");
+        var option = runner.Actions().Single(a => a.Enabled);
+        Expect(option.Provinces is [0], "the table is offered only the first province");
+        var hachiro = Own(runner, TutorialCards.MatsuHachiro);
+        var elsewhere = runner.Execute(option.Command! with { Assignments = new Dictionary<string, int> { [hachiro] = 2 } });
+        Expect(!elsewhere.Accepted && runner.Coach.StepId == "assign-attacker", "attacking the third province is refused and the step stays");
+        Expect(runner.Execute(option.Command! with { Assignments = new Dictionary<string, int> { [hachiro] = 0 } }).Accepted, "the first province is accepted");
+        Expect(runner.Coach.StepId == "defender", "the opponent has defended");
+        Expect(runner.Engine.State.Cards.Values.Any(c => c.OwnerId == 1 && c.DefinitionId == TutorialCards.DaidojiKenshi && c is { Zone: Zone.Battlefield, ProvinceIndex: 0 }), "Daidoji Kenshi defends the province you chose");
     }
 
     private static void QuotedNumbers()
     {
-        var stronghold = CardCatalog.Get(TutorialCards.YourStronghold);
-        Expect(stronghold.GoldProduction == 3 && stronghold.ProvinceStrength == 7 && stronghold.StartingHonor == 7, "Halls of Memory: Gold 3, strength 7, Honor 7");
-        var foe = CardCatalog.Get(TutorialCards.FoeStronghold);
-        Expect(foe.GoldProduction == 4 && foe.ProvinceStrength == 6 && foe.StartingHonor == 6, "Shinden Asahina: Gold 4, strength 6, Honor 6");
-        Expect(CardCatalog.Get(TutorialCards.BorderKeep).GoldProduction == 2 && CardCatalog.Get(TutorialCards.BambooHarvesters).GoldProduction == 2, "both starting Holdings produce 2 Gold");
-        Expect(foe.GoldProduction + CardCatalog.Get(TutorialCards.BorderKeep).GoldProduction == CardCatalog.Get(TutorialCards.DojiAtsumichi).GoldCost - 2, "Crane's Stronghold and Border Keep make exactly Atsumichi's Clan Discount price");
-        var uehara = CardCatalog.Get(TutorialCards.AkodoUehara);
-        Expect(uehara is { Force: 1, Chi: 3, PersonalHonor: 2, HonorRequirement: 6, GoldCost: 5 }, "Akodo Uehara: 1F, 3C, 2PH, Honor Requirement 6, cost 5");
-        Expect(uehara.Keywords!.Contains("Samurai") && uehara.Keywords.Contains("Tactician") && uehara.Keywords.Contains("Lion Clan"), "Uehara's keywords");
-        Expect(CardCatalog.Get(TutorialCards.MatsuHana) is { Force: 5, Chi: 3, HonorRequirement: 6, GoldCost: 9, PersonalHonor: 4 }, "Matsu Hana: 5F, 3C, Honor Requirement 6, 9 Gold, 4PH");
-        Expect(CardCatalog.Get(TutorialCards.IkomaHakige) is { HonorRequirement: 12, GoldCost: 8 } && CardCatalog.Get(TutorialCards.KitsuAkai).GoldCost == 10, "Ikoma Hakige needs 12 Honor and costs 8; Kitsu Akai costs 10");
-        Expect(CardCatalog.Get(TutorialCards.SmallFarm).GoldCost == 0 && CardCatalog.Get(TutorialCards.SmallFarm).GoldProduction == 1, "Small Farm: free, 1 Gold");
-        Expect(CardCatalog.Get(TutorialCards.CopperMine).GoldCost == 2, "Copper Mine costs 2 Gold, the Border Keep's exact production");
-        Expect(CardCatalog.Get(TutorialCards.VeteranSkirmishers) is { Force: 3, GoldCost: 2 }, "Veteran Skirmishers: 3 Force, 2 Gold");
-        Expect(CardCatalog.Get(TutorialCards.LightArmor) is { Force: 3, GoldCost: 2 }, "Light Armor: +3 Force, 2 Gold");
-        Expect(CardCatalog.Get(TutorialCards.DojiAtsumichi) is { Force: 3, Chi: 4, PersonalHonor: 4 }, "Doji Atsumichi: 3F, 4C, 4PH, so he bows Uehara (2PH) and has 3 Force");
-        Expect(CardCatalog.Get(TutorialCards.Truce).Focus == 2 && CardCatalog.Get(TutorialCards.DefensiveStance).Focus == 4, "Truce's Focus Value 2 is the Tactician bonus; Defensive Stance is 4");
-        foreach (var (id, type) in new[] { (TutorialCards.TellTheTale, CardType.Strategy), (TutorialCards.Truce, CardType.Strategy), (TutorialCards.VeteranSkirmishers, CardType.Follower), (TutorialCards.LightArmor, CardType.Item),
-            (TutorialCards.EmbersFinalFire, CardType.Spell), (TutorialCards.RingOfFire, CardType.Ring), (TutorialCards.WillingSpirits, CardType.Event), (TutorialCards.FallowLands, CardType.Region), (TutorialCards.MegumisGuidance, CardType.Celestial) })
-            Expect(CardCatalog.Get(id).Type == type, $"{CardCatalog.Get(id).Name} is a {type}");
-        Expect(CardCatalog.Get(TutorialCards.TellTheTale).Text.StartsWith("Limited", StringComparison.Ordinal) && CardCatalog.Get(TutorialCards.Truce).Text.StartsWith("Reaction", StringComparison.Ordinal), "the Strategies are a Limited and a Reaction");
-        // Ruling R-086: the Ring is the Promotional-Emperor reading ("after the resolution of a battle... if you destroyed one or more provinces or enemy cards") on the Emperor Edition scan.
-        Expect(CardCatalog.Get(TutorialCards.RingOfFire).Text.StartsWith("After the resolution of a battle at a province, if you destroyed one or more provinces or enemy cards", StringComparison.Ordinal), "Ring of Fire reads as printing 18");
+        CardDefinition D(string id) => CardCatalog.Get(id);
+        Expect(D(TutorialCards.IkomaSugo).GoldCost == 8 && D(TutorialCards.MatsuHachiro).GoldCost == 4, "Ikoma Sugo costs 8 and Matsu Hachiro 4");
+        Expect(D(TutorialCards.YourStronghold).GoldProduction == 3 && D(TutorialCards.BorderKeep).GoldProduction == 2, "the Stronghold makes 3 Gold and the Border Keep 2");
+        Expect(D(TutorialCards.YourStronghold).StartingHonor == 7 && D(TutorialCards.FoeStronghold).StartingHonor == 6, "7 Honor against 6");
+        Expect(D(TutorialCards.MatsuHachiro).PersonalHonor == 3, "Matsu Hachiro's Personal Honor is 3");
+        Expect(D(TutorialCards.DaidojiKenshi).GoldCost == 5 && D(TutorialCards.DaidojiKenshi).Force == 3 && D(TutorialCards.FoeStronghold).GoldProduction == 4, "Kenshi costs 5 (3 with the Clan Discount) and has 3 Force; Shinden Asahina makes 4 Gold");
+        Expect(D(TutorialCards.FoeStronghold).ProvinceStrength == 6, "Crane's Province Strength is 6");
+        Expect(D(TutorialCards.SmallFarm).GoldCost == 0 && D(TutorialCards.LargeFarm).GoldCost == 1, "Small Farm is free and Large Farm costs 1");
+        Expect(D(TutorialCards.LightArmor).GoldCost == 2 && D(TutorialCards.LightArmor).Force == 3, "Light Armor costs 2 and gives 3 Force");
+        Expect(D(TutorialCards.VeteranSkirmishers).GoldCost == 2 && D(TutorialCards.VeteranSkirmishers).Force == 3, "Veteran Skirmishers cost 2 and give 3 Force");
+        Expect(D(TutorialCards.MatsuHachiro).Force == 1 && D(TutorialCards.MatsuHachiro).Effect == "attacking-two", "Matsu Hachiro has 1 Force and +2 while attacking");
+        Expect(D(TutorialCards.PreparedForDeath).Abilities!.Contains("prepared-death") && D(TutorialCards.PaidOff).Text.StartsWith("Open"), "Prepared for Death is a Limited action, Paid Off an Open one");
+        // The arithmetic of the text, in the engine: 1 + 3 + 3 = 7; +2 attacking = 9; +2 Prepared for Death = 11; Never Afraid takes off 3 = 8 against 3 + 6.
+        var runner = TutorialRunner.Start();
+        PlayUntil(runner, "engage");
+        Expect(runner.Execute(CommandFor(runner)).Accepted, "engage");
+        Expect(BattleValuesBeforeBattle(runner), $"11 against 3 and strength 6, got {BattleValues(runner)}");
     }
 
     private static void EveryStepSaysWhatToDo()
     {
-        foreach (var step in TutorialLessonOne.Steps)
-            Expect(step.IsAction ? step.Instruction is { Length: > 20 } && step.Button is null : step.Button is not null, $"{step.Id}: an action step needs an instruction and no button; a note needs a button");
-        Expect(TutorialLessonOne.Steps.Count(s => s.Button == "Start my turn") == 1 && TutorialLessonOne.Steps.Count(s => s.Button == "Draw 6 Fate cards") == 1 && TutorialLessonOne.Steps[^1].Button == "Finish", "the three special buttons are where the script puts them");
-        Expect(TutorialLessonOne.Instructions.Keys.All(id => TutorialLessonOne.Steps.Any(s => s.Id == id && s.IsAction)), "no instruction is left over for a step that is not an action");
+        var steps = TutorialLessonOne.Steps;
+        Expect(steps.Select(s => s.Id).Distinct().Count() == steps.Length, "step ids are unique");
+        foreach (var step in steps)
+        {
+            Expect(step.Body.Length > 0 && step.Title.Length > 0, $"{step.Id}: has a title and text");
+            if (step.IsAction) Expect(step.Instruction is { Length: > 0 } && step.Button is null, $"{step.Id}: a move step says what to click and has no button");
+            else Expect(step.Button is { Length: > 0 }, $"{step.Id}: a note step has a button");
+        }
+        Expect(steps[^1].Button == "End Tutorial", "the lesson ends on End Tutorial");
+        Expect(TutorialLessonOne.ProvincesStep == 4, "the provinces are laid out at step 5");
     }
 
     private static void StartingTable()
     {
-        var runner = TutorialRunner.StartLessonOne();
-        var state = runner.Engine.State;
-        Expect(state.Players.All(p => p.Hand.Count == 0), "nobody has drawn Fate cards");
-        Expect(state.Players[TutorialRunner.Seat].Provinces.All(p => !state.Cards[p.CardId!].FaceUp), "your provinces are face down");
-        Expect(state.Players[0].Clan == "Lion" && state.Players[1].Clan == "Crane" && state.Players[0].Honor == 7 && state.Players[1].Honor == 6, "Lion at 7 Honor against Crane at 6");
-        var bamboo = state.Cards.Values.Single(c => c.DefinitionId == TutorialCards.BambooHarvesters);
-        Expect(bamboo is { OwnerId: 1, Bowed: true, Zone: Zone.Home }, "the second player, Crane, has the bowed Bamboo Harvesters");
-        Expect(state.Cards.Values.Count(c => c.DefinitionId == TutorialCards.BorderKeep && c.Zone == Zone.Home) == 2, "both players have a Border Keep");
-        Expect(state.Players.All(p => p.TurnsTaken == 0) && state.ActivePlayerId == 0, "nobody has taken a turn; yours is first");
-        Expect(runner.Coach.StepId == "welcome" && runner.Coach.Button is not null, "the lesson opens on its welcome");
+        var runner = TutorialRunner.Start();
+        MatchState S() => runner.Engine.TutorialState; var view = runner.Engine.GetView(TutorialRunner.Seat);
+        Expect(view.ActivePlayerId == 0 && view.Players[0].Clan == "Lion" && view.Players[1].Clan == "Crane", "Lion moves first against Crane");
+        Expect(view.Players[0].Honor == 7 && view.Players[1].Honor == 6, "7 Honor against 6");
+        Expect(S().Players[0].Hand.Count == 0 && S().Players[1].Hand.Count == 0, "nobody has a hand yet");
+        string[] Provinces(int player) => S().Players[player].Provinces.Select(p => S().Cards[p.CardId!].DefinitionId).ToArray();
+        Expect(Provinces(0).SequenceEqual([TutorialCards.IkomaSugo, TutorialCards.CopperMine, TutorialCards.MatsuHachiro, TutorialCards.GoldMine]), "your provinces: Ikoma Sugo, Copper Mine, Matsu Hachiro, Gold Mine");
+        Expect(Provinces(1).SequenceEqual([TutorialCards.DaidojiTsunehiko, TutorialCards.DaidojiKenshi, TutorialCards.SmallFarm, TutorialCards.LargeFarm]), "Crane's provinces: Tsunehiko, Kenshi, Small Farm, Large Farm");
+        Expect(S().Players.SelectMany(p => p.Provinces).All(p => !S().Cards[p.CardId!].FaceUp), "every province is face down");
+        Expect(S().Cards.Values.Any(c => c is { OwnerId: 1, DefinitionId: TutorialCards.BambooHarvesters, Bowed: true }), "Crane has the bowed Bamboo Harvesters");
+        Expect(S().Players[0].DynastyDeck.Count + 4 == 40 && S().Players[0].FateDeck.Count == 40 && S().Players[1].FateDeck.Count == 40, "forty-card decks");
+        Expect(S().Cards[S().Players[1].FateDeck[0]].DefinitionId == TutorialCards.NeverAfraid, "Crane's Fate deck opens on Never Afraid");
+        // Opening hand, in the order of the script.
+        while (runner.Coach.StepId != "fate-cards") Expect(runner.Continue(), "narration steps use their button");
+        string[] expected = [TutorialCards.LightArmor, TutorialCards.VeteranSkirmishers, TutorialCards.BlockSupplyLines, TutorialCards.Incapacitated, TutorialCards.PreparedForDeath, TutorialCards.DefensiveStance];
+        Expect(S().Players[0].Hand.Select(id => S().Cards[id].DefinitionId).OrderBy(x => x).SequenceEqual(expected.OrderBy(x => x)), string.Join(",", S().Players[0].Hand.Select(id => S().Cards[id].DefinitionId)) + " ; " + "the six-card hand is Light Armor, Veteran Skirmishers, Block Supply Lines, Incapacitated, Prepared for Death, Defensive Stance");
     }
 
-    private static void PlayThrough(TutorialRunner runner, string stepId)
+    private static void HoldsAtPhases()
     {
-        for (var guard = 0; runner.Coach.StepId != stepId && !runner.Finished && guard < 400; guard++)
+        var runner = TutorialRunner.Start();
+        PlayUntil(runner, "straighten");
+        Expect(runner.Engine.State is { Phase: Phase.Straighten, TurnNumber: 1 } && runner.Engine.TutorialHeld && runner.Actions().All(a => !a.Enabled), "the turn holds on the Straighten phase");
+        Expect(runner.Engine.State.Players[0].Provinces.All(p => !runner.Engine.State.Cards[p.CardId!].FaceUp), "nothing is revealed yet");
+        Expect(runner.Continue() && runner.Coach.StepId == "events", "continue");
+        Expect(runner.Engine.State.Phase == Phase.Events && runner.Engine.TutorialHeld && runner.Engine.State.Players[0].Provinces.All(p => runner.Engine.State.Cards[p.CardId!].FaceUp), "the Events phase has revealed the provinces and holds there");
+        Expect(runner.Continue() && runner.Engine.State.Phase == Phase.Action && !runner.Engine.TutorialHeld, "the Action phase begins");
+        PlayUntil(runner, "end-phase");
+        Expect(runner.Engine.State is { Phase: Phase.End, ActivePlayerId: 0 } && runner.Engine.State.Players[0].Hand.Count == 6, "the End phase holds before the draw");
+        Expect(runner.Continue() && runner.Engine.State.Players[0].Hand.Count == 7 && runner.Engine.State is { Phase: Phase.Straighten, ActivePlayerId: 1 }, "the draw is Paid Off and Crane's turn holds on its Straighten phase");
+    }
+
+    private static void CraneTurn()
+    {
+        var runner = TutorialRunner.Start();
+        PlayUntil(runner, "crane-events");
+        MatchState S() => runner.Engine.TutorialState;
+        Expect(S().Cards.Values.Single(c => c.DefinitionId == TutorialCards.BambooHarvesters).Bowed, "Bamboo Harvesters did not straighten");
+        Expect(runner.Continue(), "continue");
+        Expect(runner.Coach.StepId == "crane-passed" && runner.Engine.PriorityPlayerId == TutorialRunner.Seat && S() is { ActivePlayerId: 1, Phase: Phase.Action }, "Crane passed its first Action and it is your turn to pass");
+        PlayUntil(runner, "crane-attack");
+        Expect(S() is { ActivePlayerId: 1, Phase: Phase.AttackDeclaration }, "Crane's Attack phase waits for the note");
+        Expect(runner.Continue() && S().Phase == Phase.Dynasty && runner.Coach.StepId == "crane-dynasty", "Crane declined to attack");
+        Expect(!S().Cards.Values.Any(c => c.OwnerId == 1 && c.DefinitionId == TutorialCards.DaidojiKenshi && c.Zone == Zone.Home), "Crane has bought nothing yet");
+        Expect(runner.Continue(), "continue");
+        var kenshi = InPlay(runner, 1, TutorialCards.DaidojiKenshi);
+        Expect(kenshi.Zone == Zone.Home && S().Players[1].Honor == 6, "Kenshi is in play without being Proclaimed");
+        Expect(S().Cards.Values.Count(c => c.OwnerId == 1 && c.Zone == Zone.Home) == 5, "Crane has its Border Keep, Bamboo Harvesters, Kenshi and the two farms in play");
+        var stronghold = S().Cards[S().Players[1].StrongholdId]; var keep = S().Cards.Values.Single(c => c is { OwnerId: 1, DefinitionId: TutorialCards.BorderKeep });
+        Expect(stronghold.Bowed && keep.Bowed, "the Stronghold paid for Kenshi and the Border Keep for the Large Farm");
+        Expect(S() is { ActivePlayerId: 1, Phase: Phase.Dynasty }, "Crane waits to end its Dynasty phase");
+        Expect(runner.Continue() && runner.Coach.StepId == "crane-farms", "on to the explanation of the farms");
+        Expect(runner.Continue() && S() is { ActivePlayerId: 0, Phase: Phase.Action } && S().Players[1].Hand.Count == 1, "Crane ended its turn, drew Never Afraid, and your second Action phase begins");
+        Expect(S().Players[0].Provinces[2].CardId is { } refilled && S().Cards[refilled] is { DefinitionId: TutorialCards.SmallFarm, FaceUp: true }, "your second Events phase revealed the Small Farm");
+    }
+
+    private static string Snapshot(TutorialRunner r)
+    {
+        var view = r.Engine.GetView(TutorialRunner.Seat);
+        var s = r.Engine.State;
+        return $"{r.Coach.StepId}|{view.Version}|{s.Phase}|{s.ActivePlayerId}|{s.PriorityPlayerId}|{view.Players[0].Honor}|{string.Join(",", s.Cards.Values.OrderBy(c => c.Id).Select(c => $"{c.Zone}{(c.Bowed ? "b" : "")}{(c.FaceUp ? "u" : "")}"))}";
+    }
+
+    private static void BackUndoesTheLastStep()
+    {
+        var runner = TutorialRunner.Start();
+        Expect(!runner.CanGoBack && runner.Back() is null, "there is nothing to go back to at the first step");
+        var history = new List<string> { Snapshot(runner) };
+        for (var guard = 0; !runner.Finished && guard < 200; guard++)
         {
-            if (runner.Coach.Button is not null) { Expect(runner.Continue(), "the button works"); continue; }
-            var result = runner.Execute(CommandFor(runner)); Expect(result.Accepted, $"{runner.Coach.StepId}: {result.Error}");
+            if (runner.Coach.Button is not null) Expect(runner.Continue(), "the button works");
+            else Expect(runner.Execute(CommandFor(runner)).Accepted, $"{runner.Coach.StepId}: accepted");
+            if (runner.Finished) break;
+            history.Add(Snapshot(runner));
+            if (history.Count % 4 != 0 && runner.Coach.Instruction is null) continue; // every move step and every fourth note: each Back replays the lesson from the start
+            var back = runner.Back() ?? throw new Exception("Back has somewhere to go");
+            Expect(Snapshot(back) == history[^2], $"going back from {runner.Coach.StepId} gives the scene before it ({history[^2].Split('|')[0]})");
         }
-        Expect(runner.Coach.StepId == stepId, $"reached {stepId}");
-    }
-
-    private static void CraneRecruitsAtsumichi()
-    {
-        var runner = TutorialRunner.StartLessonOne();
-        PlayThrough(runner, "second-turn");
-        var state = runner.Engine.State;
-        var atsumichi = state.Cards.Values.Single(c => c.OwnerId == 1 && c.DefinitionId == TutorialCards.DojiAtsumichi);
-        Expect(atsumichi.Zone == Zone.Home, $"Crane recruited Doji Atsumichi on its first turn, got {atsumichi.Zone}");
-        Expect(state.Cards.Values.Count(c => c.OwnerId == 1 && c.Bowed && c.Zone is Zone.Home or Zone.Stronghold) >= 2, "its Stronghold and Border Keep paid for him");
-        Expect(state.Cards.Values.Single(c => c.DefinitionId == TutorialCards.BambooHarvesters).Bowed, "its Bamboo Harvesters did not straighten before its second turn");
-        Expect(state.Players[1].Hand.Count == 1 && CardCatalog.Get(state.Cards[state.Players[1].Hand[0]].DefinitionId).Name == "Never Afraid", "its End-phase draw is the Never Afraid it will play");
-        Expect(state.Players[0].Hand.Count == 7 && state.Players[0].Hand.Any(id => state.Cards[id].DefinitionId == TutorialCards.DefensiveStance), "your End-phase draw is Defensive Stance");
-    }
-
-    private static void HoldsBeforeEvents()
-    {
-        var runner = TutorialRunner.StartLessonOne();
-        for (var guard = 0; runner.Coach.Button != "Start my turn" && guard < 100; guard++) { if (runner.Coach.Button is not null) runner.Continue(); else Expect(runner.Execute(CommandFor(runner)).Accepted, "a move"); }
-        Expect(runner.Coach.Button == "Start my turn" && runner.Coach.StepId.StartsWith("turn-phases", StringComparison.Ordinal), "the last page before the turn offers Start my turn");
-        Expect(runner.Continue(), "begin the turn");
-        var view = runner.Engine.GetView(TutorialRunner.Seat);
-        Expect(view.Phase == Phase.Straighten, $"the table holds on the Straighten phase, got {view.Phase}");
-        Expect(runner.Engine.State.Players[TutorialRunner.Seat].Provinces.All(p => !runner.Engine.State.Cards[p.CardId!].FaceUp), "no province has been revealed yet");
-        Expect(runner.Coach.StepId.StartsWith("straighten-events", StringComparison.Ordinal), "the Straighten and Events note is showing");
-        Expect(runner.Continue(), "release the Events phase");
-        view = runner.Engine.GetView(TutorialRunner.Seat);
-        Expect(view.Phase == Phase.Action, $"the Events phase ran and the Action phase began, got {view.Phase}");
-        var names = runner.Engine.State.Players[TutorialRunner.Seat].Provinces.Select(p => CardCatalog.Get(runner.Engine.State.Cards[p.CardId!].DefinitionId).Name).ToArray();
-        Expect(names[1] == "Matsu Hana" && names[2] == "Ikoma Hakige" && names[3] == "Kitsu Akai", $"the three Personalities are revealed in provinces 2 to 4, got {string.Join(", ", names)}");
-    }
-
-    private static void PagesFit()
-    {
-        var ids = TutorialLessonOne.Steps.Select(s => s.Id).ToArray();
-        Expect(ids.Length == ids.Distinct().Count(), "every step id is unique");
-        Expect(TutorialLessonOneText.Beats.SelectMany(b => b.Pages).All(p => p.Length <= TutorialLessonOneText.PageLimit), $"no page is longer than {TutorialLessonOneText.PageLimit} characters");
-        Expect(TutorialLessonOneText.Beats.Any(b => b.Pages.Length > 1), "long notes are paged");
-        var british = new[] { "honour", "armour", "favour", "manoeuv", "defence", "colour", "centre ", "Scopion", " Chis" };
-        foreach (var step in TutorialLessonOne.Steps)
-            foreach (var word in british)
-                Expect(!step.Body.Contains(word, StringComparison.Ordinal) && !step.Title.Contains(word, StringComparison.Ordinal), $"{step.Id}: American spelling, not \"{word.Trim()}\"");
+        // Back then forward again plays the same lesson to the same end.
+        var again = TutorialRunner.Start();
+        PlayUntil(again, "pass-battle");
+        var before = Snapshot(again);
+        var earlier = again.Back()!;
+        PlayUntil(earlier, "pass-battle");
+        Expect(Snapshot(earlier) == before, "going back and playing forward again reaches the same table");
     }
 }

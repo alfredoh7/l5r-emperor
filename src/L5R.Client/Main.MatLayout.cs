@@ -243,9 +243,9 @@ public partial class Main
         // Keep a player's camera steady while ink and cards change positions.
         // An overview stays fitted when the contextual Home area appears or grows,
         // so a newly gained Favor cannot appear behind the sidebar. A manually
-        // positioned camera remains under player control.
+        // positioned camera remains under player control. The tutorial never lets go of the fitted view: its table grows as the lesson brings cards in, and nobody has panned it.
         var persistentChanged = oldPersistentExtent.DistanceTo(new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1))) > 1;
-        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && Math.Abs(oldRegionExtent - _regionLayoutExtent) < 1 && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
+        if (_tableLayoutSeen && _cameraFitted && !TutorialActive && !persistentChanged && Math.Abs(oldRegionExtent - _regionLayoutExtent) < 1 && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }

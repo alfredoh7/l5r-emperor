@@ -2910,6 +2910,11 @@ public sealed partial class MatchEngine
         var player = Player(_state.ActivePlayerId);
         SetPhase(Phase.End, player.Id);
         if (player.DishonorLossPending) { Win(1 - player.Id, "Dishonor defeat at the beginning of the End Phase"); return; }
+        if (TutorialHold(Phase.End, player.Id, () => ContinueEndPhase(player))) return; // the tutorial's table can stop at the start of the End phase
+        ContinueEndPhase(player);
+    }
+    private void ContinueEndPhase(PlayerState player)
+    {
         ResolvePendingEndPhaseDraws(); // Eternal Victory Dojo (Stronghold pass, issue #486 batch 1): "Draw a card after the next End Phase begins."
         if (_state.WinnerId is not null) return;
         DrawTurnRuleEndTurnCards(player); // P4 (TurnBoundaryRules.cs): a standing rule's extra end-of-turn draw, judged before the End Phase's own draw
@@ -3046,7 +3051,7 @@ public sealed partial class MatchEngine
         foreach (var infiltrator in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "cultist-infiltrator").ToArray())
             CreateToken(Card(infiltrator.AttachedTo!), "Cultist", infiltrator.Id, "Chi", -1);
         _w827StraightenPhase = false;
-        if (_tutorialHoldEvents) { _tutorialHoldEvents = false; _tutorialEventsPlayer = player; return; } // the tutorial's table stops on the Straighten phase (TutorialBeginTurn)
+        if (TutorialHold(Phase.Straighten, player.Id, () => EventsPhase(player))) return; // the tutorial's table can stop on the Straighten phase
         EventsPhase(player);
     }
     private void EventsPhase(PlayerState player)
@@ -3100,6 +3105,7 @@ public sealed partial class MatchEngine
         // previous turn triggers here too.
         ResolveOngoingEvents(player);
         if (P3AfterEventsPhase(player)) return; // Daigotsu Miki (issue #503): "After your Events Phase"
+        if (TutorialHold(Phase.Events, player.Id, () => SetPhase(Phase.Action, player.Id))) return; // the tutorial's table can stop with the Events phase revealed
         SetPhase(Phase.Action, player.Id);
     }
     // An Event (core rules Glossary): removed from its province and resolved immediately upon reveal --

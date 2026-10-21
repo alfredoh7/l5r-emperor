@@ -46,7 +46,7 @@ public partial class Main
             }
         return differing > 0;
     }
-    private async Task AttachScenario(string name, bool bowedHero, bool earlierAttachment, int owner = 0)
+    private async Task AttachScenario(string name, bool bowedHero, bool earlierAttachment, int owner = 0, bool selected = false)
     {
         var state = MatchEngine.CreatePublishedTestMatch(42).State;
         state.Phase = Phase.Action; state.ActivePlayerId = state.PriorityPlayerId = owner; state.PendingChoice = null;
@@ -61,6 +61,7 @@ public partial class Main
         var equip = offered.FirstOrDefault(a => a.Enabled && a.Type == "equip" && a.CardId == item.Id)
             ?? throw new InvalidOperationException(name + ": no enabled equip action: " + string.Join(", ", offered.Where(a => a.Enabled).Select(a => a.Type)));
         await _session.Submit((equip.Command ?? throw new InvalidOperationException("equip has no command")) with { TargetId = hero.Id });
+        if (selected) { _selected = FindCard(item.Id); Render(); } // the card a player clicked to equip stays selected on the table afterwards
         var checkedFrames = 0;
         for (var frame = 0; frame < 60; frame++)
         {
@@ -88,11 +89,12 @@ public partial class Main
             await AttachScenario("plain", false, false);
             await AttachScenario("bowed", true, false);
             await AttachScenario("second", false, true);
+            await AttachScenario("selected", false, false, selected: true);
             _preferences.ReducedMotion = true; ApplyPreferences(false);
             await AttachScenario("reduced", false, false);
             _preferences.ReducedMotion = false; ApplyPreferences(false);
             await AttachScenario("opponent", false, false, owner: 1);
-            GD.Print("ATTACH_ORDER_PASS: the attached card changes no pixel of its Personality's face in any frame after attaching (plain, bowed, second attachment, reduced motion)");
+            GD.Print("ATTACH_ORDER_PASS: the attached card changes no pixel of its Personality's face in any frame after attaching (plain, bowed, second attachment, still selected, reduced motion)");
             GetTree().Quit();
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }

@@ -127,7 +127,8 @@ public partial class CardTile : Button
         var inspecting = (Hovered || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
         var targetLift = inspecting ? Card.Zone is Zone.Hand or Zone.Resolving ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone is Zone.Hand or Zone.Resolving ? 1.22f : 1.06f : 1f;
-        ZIndex = Hovered ? 70 : HasFocus() ? 20 : IsSelected ? 10 : 0;
+        // An attachment lies under its Personality: selecting or focusing it must not lift it over the very card it is attached to (only a deliberate hover does).
+        ZIndex = Hovered ? 70 : Card.AttachedTo is not null ? 0 : HasFocus() ? 20 : IsSelected ? 10 : 0;
         if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
         _bowAngle = ReducedMotion ? _bowDestination : Mathf.MoveToward(_bowAngle, _bowDestination, (float)delta * Mathf.Pi * 3);
         // Reduced motion preserves visible feedback and makes its transition immediate.

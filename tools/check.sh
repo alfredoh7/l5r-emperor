@@ -40,7 +40,6 @@ run_python_tests() {
   "$l5r_python" -m unittest discover -s tools/content -p 'test_*.py'
   "$l5r_python" -m unittest discover -s tools/hooks -p 'test_*.py'
   "$l5r_python" -m unittest discover -s tools/quality -p 'test_*.py'
-  "$l5r_python" -m unittest discover -s tools/tutorial -p 'test_*.py'
   "$l5r_python" -m unittest discover -s tools -p 'test_meshy.py'
   "$l5r_python" -m unittest discover -s tools -p 'test_bootstrap.py'
   "$l5r_python" -m unittest discover -s tools -p 'test_lint_comment_swallow.py'

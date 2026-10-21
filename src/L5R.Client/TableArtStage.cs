@@ -81,8 +81,12 @@ public partial class TableArtStage : Node3D
         if (_hallContainer is not null) { _hallContainer.Visible = IsVisibleInTree(); _hallDirty = true; }
     }
 
+    private Vector2I _hallCameraSize;
     private void RenderHallIfStale()
     {
+        // The hall aims its camera at its own viewport's size. A window resize can apply the camera before the stretched viewport has taken its new size,
+        // which left the room (and its cloth) drawn for the old window under the cards until a pan redrew it. Re-aim whenever the size it was aimed for changes.
+        if (_hallPort is not null && _warRoom is not null && _hallPort.Size != _hallCameraSize) { _hallCameraSize = _hallPort.Size; _applyCamera?.Invoke(_warRoom); _hallDirty = true; }
         if (!_hallDirty || _hallPort is null || _hallContainer is null || !_hallContainer.IsVisibleInTree()) return;
         _hallDirty = false;
         _hallPort.RenderTargetUpdateMode = SubViewport.UpdateMode.Once;

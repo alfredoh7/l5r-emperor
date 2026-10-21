@@ -103,9 +103,20 @@ public sealed partial class MatchSession : IDisposable
     public void StartTutorial()
     {
         Generation++; Disconnect();
-        _tutorial = TutorialRunner.StartLessonOne(); _engine = _tutorial.Engine; _preparedReview = true;
+        _tutorial = TutorialRunner.Start(); _engine = _tutorial.Engine; _preparedReview = true;
         MatchKey = Guid.NewGuid().ToString("N"); _localSeat = _practiceNameSeat = TutorialRunner.Seat;
         RefreshLocal();
+    }
+
+    /// <summary>The coach's Back button: the table as it was before the last button or move (the lesson is played again up to there; the engine is deterministic).</summary>
+    public bool TutorialBack()
+    {
+        if (_tutorial?.Back() is not { } earlier) return false;
+        Generation++;
+        _tutorial = earlier; _engine = earlier.Engine; _preparedReview = true;
+        MatchKey = Guid.NewGuid().ToString("N");
+        RefreshLocal();
+        return true;
     }
 
     /// <summary>Ends the lesson wherever it is and drops its table.</summary>

@@ -41,6 +41,7 @@ public partial class CardFlip : Control
         var t = _clock < 0 ? 0f : Math.Clamp((float)(_clock / Turn), 0, 1);
         var angle = t * Mathf.Pi;
         var width = Mathf.Abs(Mathf.Cos(angle));
+        if (width < .02f) return; // edge-on: a polygon with no width cannot be triangulated (and nothing would show)
         var lift = Mathf.Sin(angle) * .07f;
         var corners = new[] { (0f, 0f), (1f, 0f), (1f, 1f), (0f, 1f) }
             .Select(c => At(.5f + (c.Item1 - .5f) * width * (1 + lift), .5f + (c.Item2 - .5f) * (1 + lift))).ToArray();

@@ -175,7 +175,7 @@ public partial class Main : Node
         if (ProcessMatchDuelCapture(delta)) return;
         LayoutBattlefieldHeaders();
         if (MenuVisible || PracticeVisible && _capturePath is null) return;
-        PulseTutorialPointers(); LayoutTutorialCoach();
+        PulseTutorialPointers(delta); LayoutTutorialCoach();
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -403,7 +403,7 @@ public partial class Main : Node
         if (_board is null) return;
         FitTableViewport();
         _hand.Position = new Vector2(250, 1060 - HandCardSide); _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
-        _goldMeter.Position = new Vector2(_hand.Position.X + 8, _hand.Position.Y - 74);
+        PlaceGoldMeter();
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         FitShownCards();
@@ -702,7 +702,7 @@ public partial class Main : Node
         var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
-            tile.Pointed = tutorialPointed.Contains(tile.Card.Id);
+            tile.Pointed = tutorialPointed.Contains(tile.Card.Id); ApplyTutorialDeal(tile);
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type == "forcedDiscard" && tile.Card.Id == _eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is { Type: "harshChoices", CardId: { } harshCard } && tile.Card.Id == harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
