@@ -13,7 +13,7 @@
  },
  {
   "name": "Mantis Manipulation",
-  "text": "Legality: Emperor\n\nBamboo Harvesters\nBorder Keep\nKoshin Keep\n3 Advanced Intelligence\nBuried Treasures\n3 Colonial Harbor\n3 Disrupting Communication\n3 Hiruma Sniper\nKitsune Hisano - exp\n3 Kobune Port\n3 Moshi Madoka\nMoshi Madoka - exp\n3 No Hiding Place\n3 Requesting Reinforcements\n3 Running Battle\n3 Scouting the Pass\n3 Seaside Bazaar\n3 Second City Port\n3 Seeking the Truth\n3 Sheltered Port\n3 Small Farm\n3 Sniping\n3 Spirit of the Scout\n3 Strategic Strike\n3 Surrounded!\n3 Torch's Flame Flickers\nTraveling Peddler\nTsuruchi House Guard\n3 Tsuruchi Shigekazu\n3 Tsuruchi Tomaru\nTsuruchi Tomaru - exp\n3 Tsuruchi Yashiro\n3 Wasteland Scout\n3 Watchers in the Dark\n3 Yoritomo Haruhiko\nYoritomo Hiromi\n3 Yoritomo Nakoshi\n"
+  "text": "Legality: Emperor\n\nBamboo Harvesters\nBorder Keep\nKoshin Keep\n3 Advanced Intelligence\nBuried Treasures\n3 Colonial Harbor\n3 Disrupting Communication\n3 Hiruma Sniper\nKitsune Hisano - exp\n3 Kobune Port\n3 Moshi Madoka\nMoshi Madoka - exp\n3 No Hiding Place\n3 Requesting Reinforcements\n3 Running Battle\n3 Scouting the Pass\n3 Seaside Bazaar\n3 Second City Port\n3 Seeking the Truth\n3 Sheltered Port\n3 Small Farm\n3 Sniping\n3 Spirit of the Scout\n3 Strategic Strike\n3 Surrounded!\n3 Torch's Flame Flickers\nTraveling Peddler\nTsuruchi House Guard\n3 Tsuruchi Shigekazu\n3 Tsuruchi Tomaru\nTsuruchi Tomaru - exp\n3 Tsuruchi Yashiro\n3 Wasteland Scout\n3 Watchers in the Dark\n3 Yoritomo Haruhiko\nYoritomo Hiromi\n3 Yoritomo Nakoshi\nShinden Shorai\nPlains of Otosan Uchi\nSuitengu's Blessing\nYoritomo's Guidance - exp\nBoastful Proclamation\n"
  },
  {
   "name": "Phoenix Talons",
@@ -42,5 +42,23 @@
  {
   "name": "Lion Legacy",
   "text": "Legality: Emperor\n\nBamboo Harvesters\nBorder Keep\nEternal Victory Dojo\nA Game of Dice\n3 Akodo Furu\n3 Akodo Kamina\n3 Akodo Makotai\n3 Akodo Michitsu\n3 Akodo Regulars\n3 Akodo Suoh\n3 Akodo Uehara\n3 Broken Alliance\nCelestial Sword of the Lion - exp\n3 Chrysanthemum Blossom\n3 Consideration\n3 Copper Mine\nCreating Order\n3 Defensive Stance\nEbisu's Honesty\n3 Elite Training\n3 Focus\n3 Ikoma Ayumu\n3 Incapacitated\n3 Large Farm\n3 Merchant Atoll\n3 Military Promotion\n3 Prosperous Village\nRing of the Void\nShrine to Nimuro\n3 Small Farm\n4 Tactical Assault\n4 Tactical Trap\n3 The Honor of the Lion\nThe Quartermaster's Depot\nTraveling Peddler\nWilling Spirits\n"
+ },
+ {
+  "name": "Pinned Lion",
+  "text": "Legality: Emperor\n\nHalls of Memory\nBorder Keep\nBamboo Harvesters\n3 Small Farm\n3 Large Farm\n3 Remote Village\n3 Marketplace\n3 Copper Mine\nProsperous Village\n3 Akodo Kisho\n3 Ikoma Natsu\n3 Ikoma Sido\n3 Ikoma Shika\n3 Kitsu Sorano\n3 Matsu Hachiro\n3 Ikoma Sugo\n3 Kitsu Kouki\n3 Light Armor\n3 Pure Strike Blade\n3 Native Guide\n3 Rank & File\n3 Veteran Skirmishers\n3 Prepared for Death\n3 Paid Off\n3 Costly Feud\n3 Incapacitated\n3 Block Supply Lines\n3 Defensive Stance\n3 Crushing Strength\n2 Never Afraid\n2 Focus\n",
+  "seed": "false"
+ },
+ {
+  "name": "Pinned Crane",
+  "text": "Legality: Emperor\n\nShinden Asahina\nBorder Keep\nBamboo Harvesters\n3 Small Farm\n3 Large Farm\n3 Remote Village\n3 Marketplace\n3 Copper Mine\nProsperous Village\n3 Asahina Konomi\n3 Asahina Yasutora\n3 Daidoji Kenshi\n3 Daidoji Tsunehiko\n3 Doji Atsumichi\n3 Asahina Nanae\n3 Daidoji Soken\n3 Doji Shunya\n3 Light Armor\n3 Pure Strike Blade\n3 Native Guide\n3 Rank & File\n3 Veteran Skirmishers\n3 Prepared for Death\n3 Paid Off\n3 Costly Feud\n3 Incapacitated\n3 Block Supply Lines\n3 Defensive Stance\n3 Crushing Strength\n2 Never Afraid\n2 Focus\n",
+  "seed": "false"
+ },
+ {
+  "name": "Classic Lion",
+  "text": "Legality: Emperor\n\nHalls of Memory\nBorder Keep\nBamboo Harvesters\n3 Small Farm\n3 Large Farm\n3 Remote Village\n3 Marketplace\n3 Copper Mine\nProsperous Village\n3 Akodo Kisho\n3 Ikoma Natsu\n3 Ikoma Sido\n3 Ikoma Shika\n3 Kitsu Sorano\n3 Matsu Hachiro\n3 Ikoma Sugo\n3 Kitsu Kouki\n3 Light Armor\n3 Pure Strike Blade\n3 Native Guide\n3 Rank & File\n3 Veteran Skirmishers\n3 Prepared for Death\n3 Paid Off\n3 Costly Feud\n3 Incapacitated\n3 Block Supply Lines\n3 Defensive Stance\n3 Crushing Strength\n2 Never Afraid\n3 Back to the Front\n"
+ },
+ {
+  "name": "Classic Crane",
+  "text": "Legality: Emperor\n\nShinden Asahina\nBorder Keep\nBamboo Harvesters\n3 Small Farm\n3 Large Farm\n3 Remote Village\n3 Marketplace\n3 Copper Mine\nProsperous Village\n3 Asahina Konomi\n3 Asahina Yasutora\n3 Daidoji Kenshi\n3 Daidoji Tsunehiko\n3 Doji Atsumichi\n3 Asahina Nanae\n3 Daidoji Soken\n3 Doji Shunya\n3 Light Armor\n3 Pure Strike Blade\n3 Native Guide\n3 Rank & File\n3 Veteran Skirmishers\n3 Prepared for Death\n3 Paid Off\n3 Costly Feud\n3 Incapacitated\n3 Block Supply Lines\n3 Defensive Stance\n3 Crushing Strength\n2 Never Afraid\n3 Unorthodox Attack\n"
  }
 ]

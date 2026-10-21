@@ -43,7 +43,17 @@ public partial class DeckBuilderScreen
             catch (Exception e) { box.AddChild(Palette.Wrapped("Needs repair: " + e.Message, 18, new Color("e8a896"))); var repair = new HBoxContainer(); repair.AddThemeConstantOverride("separation", 12); box.AddChild(repair); repair.AddChild(CatalogueArt.Button("Troubleshoot", () => { if (!TryTroubleshoot(path)) Notice("Nothing to suggest: " + e.Message); })); repair.AddChild(CatalogueArt.Button("Open folder", () => OS.ShellOpen(Store.DirectoryPath))); repair.AddChild(CatalogueArt.Button("Delete Deck", () => ConfirmDelete(path, Path.GetFileNameWithoutExtension(path)))); }
         }
         Put(_library, CatalogueArt.Button("Open deck folder", () => { Directory.CreateDirectory(Store.DirectoryPath); OS.ShellOpen(Store.DirectoryPath); }), 20, _library.Size.Y - 44, 220, 38);
+        Put(_library, CatalogueArt.Button("Restore shipped decks", ConfirmRestoreShipped), 250, _library.Size.Y - 44, 260, 38);
         Put(_library, CatalogueArt.Button("Back to menu", () => Closed?.Invoke()), _library.Size.X - 230, _library.Size.Y - 44, 210, 38);
+    }
+    // The shipped decks also exist as read-only copies inside the game (and the tutorial plays only those); this puts a missing or edited one back in the deck folder.
+    private void ConfirmRestoreShipped()
+    {
+        string[] names; try { names = PreloadedDecks.Restorable(Store); } catch (Exception e) { Notice("Could not check the shipped decks: " + e.Message); return; }
+        if (names.Length == 0) { Notice("Every shipped deck is already in the deck folder, unchanged."); return; }
+        var dialog = new ConfirmationDialog { Title = "Restore shipped decks?", DialogText = $"Put back the original {names.Length} shipped deck(s): {string.Join(", ", names)}.\n\nA changed deck is replaced by the original. Save your edits under another name first if you want to keep them.", Theme = Theme }; AddChild(dialog); dialog.GetOkButton().Text = "Restore";
+        dialog.Confirmed += () => { dialog.QueueFree(); try { PreloadedDecks.Restore(Store, names); BuildDeckList(); } catch (Exception e) { Notice("Could not restore the shipped decks: " + e.Message); } };
+        dialog.Canceled += dialog.QueueFree; dialog.PopupCentered();
     }
     public string? SavedPath => _currentPath;
     public void OpenPracticeDeck(Deck deck, string name)
