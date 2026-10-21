@@ -308,6 +308,8 @@ internal static class EmperorP6Tests
         var before = e.ProvinceStrengthForTest(0, 1);
         var options = EventChoices(e, 1);
         Eq(options.Length, 8, "any province of either player");
+        Eq(options[0].Choice!.Split(':')[0], "0", "the opponent's provinces are listed first");
+        Eq(options[^1].Choice!.Split(':')[0], "1", "the chooser's own provinces are listed last");
         Accept(e, options.Single(c => c.Choice == "0:1"));
         Eq(StrengthNextTurn(e, 0, 1), before - 2, "permanently -2 strength (it outlasts the turn)");
         Check(e.State.Players[0].Provinces[1].DarkExperimentsMarked, "the province is marked");
