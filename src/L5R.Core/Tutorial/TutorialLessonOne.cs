@@ -157,5 +157,5 @@ internal static class TutorialLessonOne
     private static readonly TutorialFoeScript FoePlays = new([TutorialCards.DaidojiKenshi], [TutorialCards.SmallFarm, TutorialCards.LargeFarm], [("never-afraid", TutorialCards.VeteranSkirmishers)]);
 
     /// <summary>The first lesson: the provinces are laid out at the step that introduces them (step 5).</summary>
-    public static readonly TutorialLesson Lesson = new("first-turn", "The first turn and a half", Table, Steps, FoePlays, ProvincesStep: Array.FindIndex(Steps, s => s.Id == "provinces"));
+    public static readonly TutorialLesson Lesson = new("first-turn", "The Basics", Table, Steps, FoePlays, ProvincesStep: Array.FindIndex(Steps, s => s.Id == "provinces"));
 }

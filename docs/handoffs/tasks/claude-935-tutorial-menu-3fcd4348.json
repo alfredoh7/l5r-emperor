@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Play > Tutorial now opens a track list and a lesson list for the whole curriculum (38 lessons); built lessons start, the rest are dimmed placeholders that show their brief on focus. Added TutorialCurriculum data, menu capture modes, tracking issue #1035 with one task issue per unbuilt lesson (37).",
-  "validation": "tutorial tests 11/11 (new: curriculum listed); bash tools/check.sh --skip-client passed; menu pages captured natively and inspected (tracks, and the 8-lesson track fits above the message)",
-  "remaining": "No new lessons built; dimmed placeholder colour is subtle and not human-reviewed; lessons are not locked but unbuilt ones do nothing when clicked.",
+  "summary": "Tutorial menu reset to Mendon's three-track list: Playing the Game (The Basics, built), Getting Started (13 placeholders), Building a Deck (4); titles with hover subtitles; old 37 task issues closed and 17 new ones opened under #1035.",
+  "validation": "Tutorial tests 11/11, tools/check.sh --skip-client; native menu captures of the track pages inspected (13-entry page compacted to fit). Not re-run: the 59-step UI walk; no human playtest.",
+  "remaining": "The 17 lessons are for Mendon to write (#1035). Card Library and Using Your Designed Deck have no subtitle yet.",
   "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035",
   "branch": "claude/935-tutorial-menu",
-  "updated": "2026-10-20T22:29:05.992847+00:00"
+  "updated": "2026-10-21T10:42:50.025148+00:00"
 }

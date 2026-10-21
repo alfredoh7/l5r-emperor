@@ -143,19 +143,21 @@ public partial class TitleMenu : Control
     public void ShowTutorialTrack(Core.TutorialTrack track)
     {
         Clear("tutorial-track");
+        var compact = track.Entries.Length > 8;   // a long track packs its rows and moves the message line below them
+        if (compact) { Entries.AddThemeConstantOverride("separation", 0); _message.Position = new Vector2(1056, 880); }
         foreach (var entry in track.Entries)
         {
             var lesson = entry;
-            var button = Entry($"{entry.Number}  {entry.Title}", () => { if (lesson.Built && Tutorial is { } start) start(lesson.Id); }, 22);
-            button.CustomMinimumSize = new Vector2(0, 38);
-            button.TooltipText = entry.Brief;
+            var button = Entry(entry.Title, () => { if (lesson.Built && Tutorial is { } start) start(lesson.Id); }, compact ? 17 : 22);
+            button.CustomMinimumSize = new Vector2(0, compact ? 24 : 38);
+            button.TooltipText = entry.Subtitle;
             if (!entry.Built)
             {
                 button.AddThemeColorOverride("font_color", new Color("8a8170")); button.AddThemeColorOverride("font_hover_color", new Color("a89f88")); button.AddThemeColorOverride("font_focus_color", new Color("a89f88"));
             }
-            button.FocusEntered += () => _message.Text = lesson.Built ? lesson.Brief : "Not built yet. " + lesson.Brief;
+            button.FocusEntered += () => _message.Text = lesson.Built ? lesson.Subtitle : ("Not built yet. " + lesson.Subtitle).Trim();
         }
-        Entry("Back", ShowTutorialTracks, 22).CustomMinimumSize = new Vector2(0, 38);
+        Entry("Back", ShowTutorialTracks, compact ? 17 : 22).CustomMinimumSize = new Vector2(0, compact ? 24 : 38);
         _message.Text = "Dimmed lessons are placeholders: they are not built yet.";
         FocusFirst();
     }

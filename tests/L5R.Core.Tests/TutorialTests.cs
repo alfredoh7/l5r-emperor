@@ -246,10 +246,10 @@ internal static class TutorialTests
     private static void CurriculumIsListed()
     {
         var entries = TutorialCurriculum.All.ToArray();
-        Expect(entries.Select(e => e.Id).Distinct().Count() == entries.Length && entries.Select(e => e.Number).Distinct().Count() == entries.Length, "curriculum ids and numbers are unique");
-        Expect(entries.All(e => e.Title.Length > 0 && e.Brief.Length > 20 && e.Staging.Length > 0), "every entry says what it covers and how it starts");
+        Expect(entries.Select(e => e.Id).Distinct().Count() == entries.Length, "curriculum ids are unique");
+        Expect(entries.All(e => e.Title.Length > 0 && !e.Title.Contains(':')), "every entry has a title, and the subtitle after the colon is its own field");
         foreach (var lesson in TutorialLessons.All) Expect(entries.Any(e => e.Id == lesson.Id), $"the built lesson {lesson.Id} has a place in the curriculum");
-        Expect(entries.Single(e => e.Number == "1.1").Built && entries.Count(e => !e.Built) == entries.Length - TutorialLessons.All.Length, "only the lessons that exist are built; the rest are placeholders");
+        Expect(entries.Single(e => e.Id == "first-turn").Built && entries.Count(e => !e.Built) == entries.Length - TutorialLessons.All.Length, "only the lessons that exist are built; the rest are placeholders");
     }
 
     private static void LessonsBringTheirOwnTable()
