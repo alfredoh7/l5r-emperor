@@ -20,7 +20,7 @@ public static class TutorialCurriculum
         [
             new("first-turn", "The Basics", "Take a first turn as Lion against Crane: the phases, recruiting, Proclaim, equipping, attacking and destroying a province."),
         ]),
-        new("getting-started", "Getting Started",
+        new("getting-started", "Level Up Your Play",
         [
             new("dynasty-deck", "Events, Regions, and Celestials", "The rest of the Dynasty Deck"),
             new("recruiting", "Recruiting Personalities", "Clan Alignment, Honor Requirement, Recruitment Effects, Overlays"),

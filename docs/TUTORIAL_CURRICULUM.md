@@ -1,6 +1,6 @@
 # Tutorial curriculum (issue #935)
 
-**Where to pick this up:** the tracking issue is [#1035](https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035), a checklist with one task issue per lesson. Play → Tutorial lists every lesson below; a built one starts, the rest are dimmed placeholders. Hovering or focusing an entry shows its subtitle (the part after the colon below). A long list (Getting Started) scrolls with the mouse wheel or by dragging the bar at its right. The menu's own list is `src/L5R.Core/Tutorial/TutorialCurriculum.cs`: when you add a lesson, give it the same id there and in `TutorialLessons.All`.
+**Where to pick this up:** the tracking issue is [#1035](https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035), a checklist with one task issue per lesson. Play → Tutorial lists every lesson below; a built one starts, the rest are dimmed placeholders. Hovering or focusing an entry shows its subtitle (the part after the colon below). A long list (Level Up Your Play) scrolls with the mouse wheel or by dragging the bar at its right. The menu's own list is `src/L5R.Core/Tutorial/TutorialCurriculum.cs`: when you add a lesson, give it the same id there and in `TutorialLessons.All`.
 
 The list was reset on 2026-10-21 by Mendon: the earlier 38-entry draft was dropped and only the first lesson kept; this is the new framework. **Everything is unlocked from the start.** Each lesson stands alone, so each brings its own table (`TutorialSetup`: decks, Stronghold, Honor, cards at home, deck tops, who goes first; see [TUTORIAL.md](TUTORIAL.md)). Budget: 15-30 steps, 3-5 minutes of play, headless play-through of 2 seconds or less; stage the position instead of playing up to it.
 
@@ -12,7 +12,7 @@ A track with a single built lesson has no list: choosing it starts the lesson.
 |---|---|---|
 | The Basics (`first-turn`) | Take a first turn as Lion against Crane: the phases, recruiting, Proclaim, equipping, attacking and destroying a province. | built (PR #1025) |
 
-## Getting Started
+## Level Up Your Play
 
 | Lesson (id) | Subtitle |
 |---|---|

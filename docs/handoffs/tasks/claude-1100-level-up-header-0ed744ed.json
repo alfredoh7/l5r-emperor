@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rename the tutorial menu header 'Getting Started' to 'Level Up Your Play' (text only).",
+  "validation": "Tutorial tests pass; text-only change.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035",
+  "branch": "claude/1100-level-up-header",
+  "updated": "2026-10-21T23:43:34.199963+00:00"
+}
