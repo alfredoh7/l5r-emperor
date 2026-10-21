@@ -2307,10 +2307,11 @@ public static partial class PublishedContent
                 throw new InvalidOperationException($"Unimplemented published definition: {card.Id}");
         }
         foreach(var deck in snapshot.Decks)
-            if(deck.Dynasty.Length!=40 || deck.Fate.Length!=40 ||
-               deck.Dynasty.Concat(deck.Fate).Append(deck.StrongholdId).Any(id=>!cards.ContainsKey(id)))
+            // The live deck may name a card another wave defines (Copper Mine, issue #1091); CardCatalog.Build checks that every deck id resolves once all waves are loaded.
+            if(deck.Dynasty.Length!=40 || deck.Fate.Length!=40 || !cards.ContainsKey(deck.StrongholdId) ||
+               (profile!=Scenario && deck.Dynasty.Concat(deck.Fate).Any(id=>!cards.ContainsKey(id))))
                 throw new InvalidOperationException("Published deck is incomplete.");
-            else if(deck.Dynasty.Concat(deck.Fate).Any(id=>cards[id].CreatedOnly))
+            else if(deck.Dynasty.Concat(deck.Fate).Any(id=>cards.TryGetValue(id,out var card) && card.CreatedOnly))
                 throw new InvalidOperationException("A published deck lists a card that may not be included in decks.");
         Loaded.Add(resourceName, snapshot);
         return snapshot;

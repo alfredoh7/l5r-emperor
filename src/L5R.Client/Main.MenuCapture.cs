@@ -62,6 +62,41 @@ public partial class Main
             if (_menuProbeStep == 8) { MenuAssert(menu.Page == "main", "Options returns to main menu"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock = 0; return; }
             if (_menuProbeStep == 9) { MenuAssert(menu.Page == "quit", "quit requires confirmation"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); _menuProbeStep++; }
         }
+        if (_captureMode == "menu-tutorial-scroll")
+        {
+            void Motion(Vector2 at) => Input.ParseInputEvent(new InputEventMouseMotion { Position = at, GlobalPosition = at });
+            void Button(Vector2 at, MouseButton button, bool pressed) => Input.ParseInputEvent(new InputEventMouseButton { Position = at, GlobalPosition = at, ButtonIndex = button, Pressed = pressed, Factor = 1 });
+            var scroll = menu.TrackScroll;
+            if (_menuProbeStep == 1) { menu.ShowTutorialTracks(); Click(menu.Entries.GetChildren().OfType<Button>().Single(b => b.Text == "GETTING STARTED")); _menuProbeStep = 30; _captureClock = 0; return; }
+            if (_menuProbeStep == 30)
+            {
+                scroll = menu.TrackScroll!; var bar = scroll.GetVScrollBar();
+                MenuAssert(menu.Page == "tutorial-track" && bar.MaxValue > bar.Page && scroll.ScrollVertical == 0, "Getting Started opens a list taller than its view, at the top");
+                var at = scroll.GetGlobalRect().GetCenter(); Motion(at); Button(at, MouseButton.WheelDown, true); Button(at, MouseButton.WheelDown, false);
+                _menuProbeStep = 31; _captureClock = 0; return;
+            }
+            if (_menuProbeStep == 31)
+            {
+                scroll = menu.TrackScroll!; var bar = scroll.GetVScrollBar();
+                MenuAssert(scroll.ScrollVertical > 0, $"the mouse wheel scrolls the list (now {scroll.ScrollVertical})");
+                var before = scroll.ScrollVertical; _menuProbeVersion = before;
+                var rect = bar.GetGlobalRect(); var grabberHeight = rect.Size.Y * (float)(bar.Page / bar.MaxValue); var grabberY = rect.Position.Y + (rect.Size.Y - grabberHeight) * (float)(bar.Value / (bar.MaxValue - bar.Page)) + grabberHeight / 2; var x = rect.GetCenter().X;
+                Motion(new Vector2(x, grabberY)); Button(new Vector2(x, grabberY), MouseButton.Left, true); Motion(new Vector2(x, grabberY + 60)); Button(new Vector2(x, grabberY + 60), MouseButton.Left, false);
+                _menuProbeStep = 32; _captureClock = 0; return;
+            }
+            if (_menuProbeStep == 32)
+            {
+                scroll = menu.TrackScroll!;
+                MenuAssert(scroll.ScrollVertical > _menuProbeVersion, $"dragging the scroll bar scrolls the list ({_menuProbeVersion} to {scroll.ScrollVertical})");
+                MenuAssert(menu.Entries.GetChildren().OfType<Button>().Count() == 13, "all thirteen lessons are in the list");
+                _menuProbeStep = 33; _captureClock = 0; return;
+            }
+        }
+        if (_captureMode == "menu-tutorial-direct")
+        {
+            if (_menuProbeStep == 1) { menu.ShowTutorialTracks(); Click(menu.Entries.GetChildren().OfType<Button>().Single(b => b.Text == "PLAYING THE GAME")); _menuProbeStep = 30; _captureClock = 0; return; }
+            if (_menuProbeStep == 30) { MenuAssert(!MenuVisible && _session.Snapshot is not null, "Playing the Game starts the Basics lesson directly, with no list between"); _menuProbeStep = 31; }
+        }
         if (_captureMode == "menu-name-input")
         {
             if (_menuProbeStep == 1)

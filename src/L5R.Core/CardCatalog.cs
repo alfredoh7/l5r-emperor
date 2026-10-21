@@ -403,9 +403,13 @@ public static class CardCatalog
         // there per policy -- cards are never removed except by explicit direction), so adding it here
         // would only risk a duplicate-key conflict, never add real coverage.
         // Wave discovery preserves the frozen prefix and appends new waves deterministically.
-        return cards
+        var all = cards
             .Concat(PublishedContent.Snapshot.Cards)
             .Concat(PublishedContent.Waves.SelectMany(wave => wave.Cards))
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
+        foreach (var deck in PublishedContent.Snapshot.Decks.Concat(PublishedContent.TestSnapshot.Decks))
+            if (deck.Dynasty.Concat(deck.Fate).Append(deck.StrongholdId).FirstOrDefault(id => !all.ContainsKey(id)) is { } missing)
+                throw new InvalidOperationException($"A published deck names a card no wave defines: {missing}");
+        return all;
     }
 }

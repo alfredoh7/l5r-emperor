@@ -1,0 +1,8 @@
+# Pinned Lion and Crane decks run Copper Mine, not Gold Mine
+
+Status: accepted, 2026-10-21, by explicit request from Mendon. Lane: rules. Issue: #1091.
+
+- Both pinned decks (`content/published/lion-crane-v1.json`, the live deck) swap their three Gold Mines (oracle-l5r-2867, 2 Gold, 3 for a Dragon player) for three Copper Mines (oracle-l5r-1497, 2 Gold, 3 for a Lion player). Lion therefore gets the bonus on its Copper Mines; Crane plays them as plain 2-Gold Holdings.
+- Copper Mine's definition stays in `holding-wave-48` and Gold Mine's stays in `lion-crane-v1.json`'s `Cards`: no definition moved, so no manifest or source receipt changed. The loader no longer requires a live deck id to be defined in the same file; `CardCatalog.Build` instead checks that every id of the live and frozen decks resolves once all waves are loaded.
+- The frozen test deck (`lion-crane-test-v1.json`) keeps Gold Mine, per `2026-09-09-test-live-deck-split.md`. `content/candidates/lion-crane-v0.json` (the deck lists the packaging tool reads) now names Copper Mine, and `tools/content/package_published.py` accepts a deck card defined by another wave, so regenerating `lion-crane-v1.json` reproduces the swapped file byte for byte (checked). The tool now writes real JPEGs (as the wave packagers do) instead of copying WebP data under a `.jpg` name, so the card images it writes are byte-identical to the committed ones: no image changes (the WebP copies only looked smaller).
+- The tutorial's fourth Lion province is now a second Copper Mine (it was Gold Mine), the only change to the lesson's table. `Lion deck.txt` and `Crane deck.txt` (local, untracked) were updated to match.

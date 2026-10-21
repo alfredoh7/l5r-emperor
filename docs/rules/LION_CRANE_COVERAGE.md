@@ -31,7 +31,7 @@ The `lion-crane-v1` playtest implements the saved candidate compositions: **40 D
 | [Doji Shunya](https://oracleofthevoid.com/#cardid=2158) | Emperor Edition · 1 | shunya-honor |
 | [Doji Tatsuki](https://oracleofthevoid.com/#cardid=2166) | Emperor Edition · 1 | Printed stats and keywords; no activated ability |
 | [Focus](https://oracleofthevoid.com/#cardid=2619) | Emperor Edition · 1 | Focus 5; no activated ability |
-| [Gold Mine](https://oracleofthevoid.com/#cardid=2867) | Emperor Edition · 1 | 2 Gold per bow/payment; dragon-gold |
+| [Copper Mine](https://oracleofthevoid.com/#cardid=1497) | War of Honor · 16 (holding-wave-48) | 2 Gold per bow/payment, 3 for a Lion Clan player; lion-gold. Replaced Gold Mine in both pinned decks (#1091) |
 | [Halls of Memory](https://oracleofthevoid.com/#cardid=2949) | Emperor Edition · 1 | 3 Gold per bow/payment; halls-memory |
 | [Ikoma Shika](https://oracleofthevoid.com/#cardid=3636) | Emperor Edition · 1 | Printed stats and keywords; no activated ability |
 | [Ikoma Sido](https://oracleofthevoid.com/#cardid=3640) | Embers of War · 1 | Printed stats and keywords; no activated ability |

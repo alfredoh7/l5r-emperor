@@ -147,7 +147,7 @@ internal static class TutorialLessonOne
     /// its Fate deck on the six-card opening hand, then the card drawn at the end of turn one. Crane's Dynasty deck opens on its four provinces and its Fate deck on the one card its End phase draws.
     /// Lion's Border Keep and Stronghold make the 5 Gold of turn one; Crane, second, starts with the bowed Bamboo Harvesters.</summary>
     private static readonly TutorialSetup Table = new(
-        new("Lion", TutorialCards.YourStronghold, [TutorialCards.IkomaSugo, TutorialCards.CopperMine, TutorialCards.MatsuHachiro, TutorialCards.GoldMine, TutorialCards.SmallFarm],
+        new("Lion", TutorialCards.YourStronghold, [TutorialCards.IkomaSugo, TutorialCards.CopperMine, TutorialCards.MatsuHachiro, TutorialCards.CopperMine, TutorialCards.SmallFarm],
             [TutorialCards.LightArmor, TutorialCards.VeteranSkirmishers, TutorialCards.BlockSupplyLines, TutorialCards.Incapacitated, TutorialCards.PreparedForDeath, TutorialCards.DefensiveStance, TutorialCards.PaidOff],
             [new(TutorialCards.BorderKeep)]),
         new("Crane", TutorialCards.FoeStronghold, [TutorialCards.DaidojiTsunehiko, TutorialCards.DaidojiKenshi, TutorialCards.SmallFarm, TutorialCards.LargeFarm], [TutorialCards.NeverAfraid],

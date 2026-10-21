@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Pinned Lion/Crane decks run 3 Copper Mine instead of Gold Mine (live deck, candidates, packaging tool now accepts cross-wave deck cards and writes real JPEGs, tutorial table, docs). Tutorial menu: Playing the Game starts The Basics directly; long track lists use the standard menu font and scroll (wheel or drag); new Using Settings placeholder (#1092).",
+  "validation": "tools/check.sh --skip-client passed; tutorial tests 11/11; native tutorial UI walk 59 steps; native menu input check (wheel and scroll-bar drag scroll, direct start) and screenshots inspected; regenerating lion-crane-v1.json reproduces the committed file byte for byte. No human playtest.",
+  "remaining": "None for this change; tutorials in #1035 are for Mendon to write.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1091",
+  "branch": "claude/1091-copper-mines",
+  "updated": "2026-10-21T12:01:27.277871+00:00"
+}

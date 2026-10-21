@@ -17,6 +17,9 @@ public partial class TitleMenu : Control
     public Control Canvas { get; private set; } = null!;
     public VBoxContainer Entries { get; private set; } = null!;
     private Label _message = null!;
+    /// <summary>The scrolling lesson list of a long tutorial track (null on every other page); its Back button stays fixed below it.</summary>
+    public ScrollContainer? TrackScroll { get; private set; }
+    private Button? _trackBack;
     private float _time, _emphasis = 1;
     public int SelectedEntry { get; private set; }
     public float? ReviewTime;
@@ -56,12 +59,19 @@ public partial class TitleMenu : Control
     }
     private void Clear(string page)
     {
+        if (TrackScroll is not null)
+        {
+            TrackScroll.RemoveChild(Entries); Canvas.AddChild(Entries);
+            Canvas.RemoveChild(TrackScroll); TrackScroll.QueueFree(); TrackScroll = null;
+            if (_trackBack is not null) { Canvas.RemoveChild(_trackBack); _trackBack.QueueFree(); _trackBack = null; }
+        }
         Page = page; Palette.Clear(Entries);
-        Entries.Position = page == "main" ? new Vector2(1094, 363) : page.StartsWith("tutorial") ? new Vector2(1056, 340) : new Vector2(1056, 351);
+        Entries.Position = page == "main" ? new Vector2(1094, 363) : new Vector2(1056, 351);
         Entries.Size = new Vector2(page == "main" ? 380 : 414, 0);
-        Entries.AddThemeConstantOverride("separation", page == "options" ? 6 : page.StartsWith("tutorial") ? 3 : 8);
+        Entries.CustomMinimumSize = Vector2.Zero;
+        Entries.AddThemeConstantOverride("separation", page == "options" ? 6 : 8);
         AtmosphereMaterial.SetShaderParameter("submenu", page != "main");
-        _message.Position = page == "main" ? new Vector2(1056, 862) : page.StartsWith("tutorial") ? new Vector2(1056, 800) : new Vector2(1056, 777);
+        _message.Position = page == "main" ? new Vector2(1056, 862) : new Vector2(1056, 777);
         _message.Size = page.StartsWith("tutorial") ? new Vector2(414, 100) : new Vector2(414, 54);
         _message.Text = "";
     }
@@ -132,32 +142,47 @@ public partial class TitleMenu : Control
         Clear("tutorial");
         foreach (var track in Core.TutorialCurriculum.Tracks)
         {
-            var built = track.Entries.Count(e => e.Built);
-            var button = Entry(track.Title, () => ShowTutorialTrack(track), 22); button.CustomMinimumSize = new Vector2(0, 38);
-            button.FocusEntered += () => _message.Text = $"{built} of {track.Entries.Length} lessons built.";
+            var open = track;
+            var button = Entry(track.Title, () => OpenTutorialTrack(open));
+            button.FocusEntered += () => _message.Text = track.Entries.Length == 1 ? track.Entries[0].Subtitle : $"{track.Entries.Count(e => e.Built)} of {track.Entries.Length} lessons built.";
         }
-        Entry("Back", ShowPlay, 22).CustomMinimumSize = new Vector2(0, 38);
+        Entry("Back", ShowPlay);
         _message.Text = "Choose a track. Every lesson is open from the start.";
         FocusFirst();
+    }
+    /// <summary>A track holding one built lesson starts it straight away; any other opens its list.</summary>
+    private void OpenTutorialTrack(Core.TutorialTrack track)
+    {
+        if (track.Entries is [{ Built: true } only] && Tutorial is { } start) start(only.Id);
+        else ShowTutorialTrack(track);
     }
     public void ShowTutorialTrack(Core.TutorialTrack track)
     {
         Clear("tutorial-track");
-        var compact = track.Entries.Length > 8;   // a long track packs its rows and moves the message line below them
-        if (compact) { Entries.AddThemeConstantOverride("separation", 0); _message.Position = new Vector2(1056, 880); }
+        // The lessons scroll (mouse wheel, or drag the bar); Back stays fixed below them.
+        var scroll = new ScrollContainer { Position = new Vector2(1056, 351), Size = new Vector2(430, 342), HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, FollowFocus = true };
+        var bar = scroll.GetVScrollBar();
+        bar.CustomMinimumSize = new Vector2(12, 0);
+        bar.AddThemeStyleboxOverride("scroll", new StyleBoxFlat { BgColor = new Color(0.87f, 0.82f, 0.69f, 0.12f), CornerRadiusTopLeft = 6, CornerRadiusTopRight = 6, CornerRadiusBottomLeft = 6, CornerRadiusBottomRight = 6 });
+        foreach (var (name, color) in new[] { ("grabber", new Color("a89f88")), ("grabber_highlight", new Color("dfd1af")), ("grabber_pressed", new Color("f8d590")) })
+            bar.AddThemeStyleboxOverride(name, new StyleBoxFlat { BgColor = color, CornerRadiusTopLeft = 6, CornerRadiusTopRight = 6, CornerRadiusBottomLeft = 6, CornerRadiusBottomRight = 6 });
+        Canvas.RemoveChild(Entries); scroll.AddChild(Entries); Canvas.AddChild(scroll); TrackScroll = scroll;
+        Entries.Position = Vector2.Zero; Entries.CustomMinimumSize = new Vector2(408, 0);
         foreach (var entry in track.Entries)
         {
             var lesson = entry;
-            var button = Entry(entry.Title, () => { if (lesson.Built && Tutorial is { } start) start(lesson.Id); }, compact ? 17 : 22);
-            button.CustomMinimumSize = new Vector2(0, compact ? 24 : 38);
+            var button = Entry(entry.Title, () => { if (lesson.Built && Tutorial is { } start) start(lesson.Id); });
             button.TooltipText = entry.Subtitle;
+            var describe = lesson.Built ? lesson.Subtitle : ("Not built yet. " + lesson.Subtitle).Trim();
             if (!entry.Built)
             {
                 button.AddThemeColorOverride("font_color", new Color("8a8170")); button.AddThemeColorOverride("font_hover_color", new Color("a89f88")); button.AddThemeColorOverride("font_focus_color", new Color("a89f88"));
             }
-            button.FocusEntered += () => _message.Text = lesson.Built ? lesson.Subtitle : ("Not built yet. " + lesson.Subtitle).Trim();
+            button.FocusEntered += () => _message.Text = describe;
+            button.MouseEntered += () => _message.Text = describe;
         }
-        Entry("Back", ShowTutorialTracks, compact ? 17 : 22).CustomMinimumSize = new Vector2(0, compact ? 24 : 38);
+        var back = Entry("Back", ShowTutorialTracks); Entries.RemoveChild(back); Canvas.AddChild(back);
+        back.Position = new Vector2(1056, 701); back.Size = new Vector2(414, 62); _trackBack = back;
         _message.Text = "Dimmed lessons are placeholders: they are not built yet.";
         FocusFirst();
     }
