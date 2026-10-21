@@ -16,7 +16,7 @@ A track with a single built lesson has no list: choosing it starts the lesson.
 
 | Lesson (id) | Subtitle |
 |---|---|
-| Events, Regions, and Celestials (`dynasty-deck`) | The rest of the Dynasty Deck |
+| Events, Regions, and Celestials (`dynasty-deck`) | The rest of the Dynasty Deck: Unicorn Maidens against Mantis Manipulation, one turn each. Dark Experiments, Natural Aviary, Ebisu's Honesty and the Mantis Border Keep refresh (built, issue #1074). |
 | Recruiting Personalities (`recruiting`) | Clan Alignment, Honor Requirement, Recruitment Effects, Overlays |
 | Spells and Shugenja (`spells`) | Attaching and using spells in the Action and Battle Phases |
 | Attachments (`attachments`) | Using actions on attachments |

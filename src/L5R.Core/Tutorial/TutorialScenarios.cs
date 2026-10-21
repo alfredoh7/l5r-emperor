@@ -45,6 +45,15 @@ public sealed partial class MatchEngine
     /// <summary>The lesson asks the engine to stop where a phase has just been reached (Straighten after its cards straightened, Events after the provinces were revealed, End before the draw),
     /// so the note can talk about that moment. Tutorial-only; no rules change. <see cref="TutorialResume"/> carries on from there.</summary>
     internal void TutorialHoldAt(Phase phase, int playerId) => _tutorialHolds.Add((phase, playerId));
+    private readonly HashSet<(int PlayerId, int Province, bool After)> _tutorialRevealHolds = [];
+    /// <summary>The lesson asks the Events phase to stop at one province: <paramref name="after"/> false stops before the card is turned face up, true stops with it face up and not yet resolved
+    /// (so a note can show it first). Tutorial-only; no rules change. <see cref="TutorialResume"/> carries on from there.</summary>
+    internal void TutorialHoldReveal(int playerId, int province, bool after) => _tutorialRevealHolds.Add((playerId, province, after));
+    private bool TutorialRevealHold(int playerId, int province, bool after, Action resume)
+    {
+        if (!_tutorialRevealHolds.Remove((playerId, province, after))) return false;
+        _tutorialResume = resume; return true;
+    }
     internal bool TutorialHeld => _tutorialResume is not null;
     /// <summary>The live state, for the script's own reads (<see cref="State"/> is a full copy). Never mutate it.</summary>
     internal MatchState TutorialState => _state;

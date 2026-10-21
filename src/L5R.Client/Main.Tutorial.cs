@@ -128,9 +128,10 @@ public partial class Main
     {
         var capture = _capturePath; _capturePath = null;
         var step = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--tutorial-step="))?["--tutorial-step=".Length..];
-        StartTutorial();
+        var lesson = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--tutorial-lesson="))?["--tutorial-lesson=".Length..];
+        StartTutorial(lesson);
         Callable.From(() => { _ = RunTutorialReview(step, capture); }).CallDeferred();
-        GD.Print("TUTORIAL_REVIEW_READY: lesson 1 on the real engine.");
+        GD.Print($"TUTORIAL_REVIEW_READY: lesson {lesson ?? "1"} on the real engine.");
     }
 
     private async Task RunTutorialReview(string? step, string? capture)
@@ -249,6 +250,9 @@ public partial class Main
         ["engage"] = "click:Fight at province 1",
         ["incapacitated"] = "select:Incapacitated;click:Daidoji Kenshi;click:Play Incapacitated",
         ["pass-battle"] = "click:Pass battle action",
+        // Events, Regions and Celestials (issue #1074): its own moves; Pass action and Decline to attack are the same buttons as above.
+        ["choose-province"] = "selectprovince:1/2;click:Confirm choice",
+        ["buy-village"] = "select:Prosperous Village;select:Plains of the Maiden;select:Border Keep;click:Recruit",
     };
 
 
@@ -291,10 +295,43 @@ public partial class Main
             await PlayTutorialTo("recruit-hachiro");
             await RunTutorialUiToken("menuleave"); for (var i = 0; i < 6; i++) await CoverageFrames();
             if (_session.Tutorial is not null || !MenuVisible) throw new InvalidOperationException("Leaving the tutorial from the table menu did not return to the main menu.");
-            GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {honor}; left mid-lesson through the table menu");
+            var dynastySteps = await CheckTutorialDynastyUi();
+            GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {honor}; left mid-lesson through the table menu; Events, Regions and Celestials: {dynastySteps} steps");
             GetTree().Quit();
         }
         catch (Exception e) { GD.PushError("TUTORIAL_UI_CHECK failed: " + e.Message); GetTree().Quit(1); }
+    }
+
+    /// <summary>Plays the Events, Regions and Celestials lesson (issue #1074) start to finish with the controls a player uses, and checks what each stop shows on the table.</summary>
+    private async Task<int> CheckTutorialDynastyUi()
+    {
+        StartTutorial("dynasty-deck"); for (var i = 0; i < 6; i++) await CoverageFrames();
+        var seen = new List<string>();
+        for (var guard = 0; guard < 200 && _session.Tutorial is { Finished: false } lesson; guard++)
+        {
+            var coach = lesson.Coach; seen.Add(coach.StepId);
+            if (coach.StepId == "choose-province")
+            {
+                if (!EventProvinceChoiceActive) throw new InvalidOperationException("Dark Experiments' Province choice is not offered on the table.");
+                if (_tiles.Count(t => t.Card.Zone == Zone.Province && t.Card.OwnerId == 1 && EventProvinceOption(1, t.Card.ProvinceIndex ?? -1) is not null) != 3) throw new InvalidOperationException("The Mantis player's Provinces 2 to 4 should be the choices.");
+            }
+            if (coach.Button is not null)
+            {
+                var before = coach.StepId;
+                await RunTutorialUiToken("mouse:coach"); await CoverageFrames(); await CoverageFrames();
+                if (_session.Tutorial is { Finished: false } moved && moved.Coach.StepId == before) throw new InvalidOperationException($"{before}: a real click on the coach's button did nothing.");
+                continue;
+            }
+            if (!TutorialUiScripts.TryGetValue(coach.StepId, out var script)) throw new InvalidOperationException($"{coach.StepId}: no UI script for this step.");
+            await WaitTutorialRest();
+            foreach (var token in script.Split(';')) await RunTutorialUiToken(token);
+            for (var wait = 0; wait < 60 && _session.Tutorial is { Finished: false } still && still.Coach.StepId == coach.StepId; wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
+            if (_session.Tutorial is { Finished: false } after && after.Coach.StepId == coach.StepId)
+                throw new InvalidOperationException($"{coach.StepId}: the step did not advance. {TutorialControls()} notice={_status.Text}");
+        }
+        if (_session.Tutorial is { Finished: false }) throw new InvalidOperationException("The Events, Regions and Celestials lesson did not finish.");
+        if (!MenuVisible) throw new InvalidOperationException("Back to Menu did not return to the main menu.");
+        return seen.Count;
     }
 
     /// <summary>Plays the lesson as a player would, through the table's own cards and buttons, until the named step is showing.</summary>

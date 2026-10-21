@@ -15,6 +15,14 @@ internal static class TutorialCards
     public const string LightArmor = "oracle-l5r-10118", VeteranSkirmishers = "oracle-l5r-9147", BlockSupplyLines = "oracle-l5r-1045", Incapacitated = "oracle-l5r-3730",
         PreparedForDeath = "oracle-l5r-6051", DefensiveStance = "oracle-l5r-10368", PaidOff = "oracle-l5r-5861", NeverAfraid = "oracle-l5r-9916";
 
+    // The Events, Regions and Celestials lesson (issue #1074): Unicorn Maidens (you) against Mantis Manipulation.
+    // Plains of the Maiden: 5 Gold, 5 starting Honor, province strength 7. Koshin Keep: 4 Gold, 2 starting Honor, province strength 7. Unicorn has more Honor, so you go first.
+    public const string UnicornStronghold = "oracle-l5r-5982", MantisStronghold = "oracle-l5r-4541";
+    public const string DarkExperiments = "oracle-l5r-10029", NaturalAviary = "oracle-l5r-9866", EbisusHonesty = "oracle-l5r-2276", ProsperousVillage = "oracle-l5r-6086";
+    public const string ShindenShorai = "oracle-l5r-6857", YoritomosGuidance = "oracle-l5r-9662", KobunePort = "oracle-l5r-4496", ShelteredPort = "oracle-l5r-9799",
+        PlainsOfOtosanUchi = "oracle-l5r-5979", SuitengusBlessing = "oracle-l5r-9948", BoastfulProclamation = "oracle-l5r-1086";
+    public const string SneakAttack = "oracle-l5r-7311", SoundOfThunder = "oracle-l5r-8347", WallOfHonor = "oracle-l5r-9198", PureIntent = "oracle-l5r-9922", Sniping = "oracle-l5r-7312";
+
     /// <summary>A forty-card deck: the lesson's cards on top, then the rest of the side's deck in its own order. A card the deck does not hold displaces the last card.</summary>
     internal static string[] Deck(string[] top, TutorialSide side, bool dynasty)
     {
