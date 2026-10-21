@@ -71,7 +71,7 @@ public partial class Main
             if (_menuProbeStep == 30)
             {
                 scroll = menu.TrackScroll!; var bar = scroll.GetVScrollBar();
-                MenuAssert(menu.Page == "tutorial-track" && bar.MaxValue > bar.Page && scroll.ScrollVertical == 0, "Getting Started opens a list taller than its view, at the top");
+                MenuAssert(menu.Page == "tutorial-track" && bar.MaxValue > bar.Page && scroll.ScrollVertical == 0, "Level Up Your Play opens a list taller than its view, at the top");
                 var at = scroll.GetGlobalRect().GetCenter(); Motion(at); Button(at, MouseButton.WheelDown, true); Button(at, MouseButton.WheelDown, false);
                 _menuProbeStep = 31; _captureClock = 0; return;
             }
