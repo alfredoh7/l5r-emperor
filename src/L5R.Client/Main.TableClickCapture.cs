@@ -188,6 +188,12 @@ public partial class Main
                 var otherOwner = int.Parse(Actions.First(a => a.Enabled && a.Type == "eventChoice" && a.Provinces is { Length: 1 } && a.Provinces[0] == otherIndex && a.Command?.Choice != pick.Command.Choice).Command!.Choice!.Split(':')[0]);
                 SelectProvince(otherOwner, otherIndex); await EventFrames(4);
                 SupportRequire(EventProvinceChosen(otherOwner, otherIndex) && !EventProvinceChosen(pickOwner, pickIndex), "Clicking another province did not move the choice");
+                var listed = Actions.Where(a => a.Enabled && a.Type == "eventChoice" && a.Provinces is { Length: 1 }).Select(a => int.Parse(a.Command!.Choice!.Split(':')[0])).ToList();
+                SupportRequire(listed.Count > 0 && listed.TakeWhile(o => o != View.ViewerId).Count() == listed.Count(o => o != View.ViewerId), "Dark Experiments did not list the opponent's provinces before the player's");
+                SupportRequire(!DecisionButton("Confirm choice").Disabled, "Confirm choice stayed disabled after a province was chosen");
+                await SupportClick(DecisionButton("Confirm choice")); await WaitDecisionPresentation(); await EventFrames(8);
+                SupportRequire(engine.State.Players[otherOwner].Provinces[otherIndex].DarkExperimentsMarked, "Confirm choice did not mark the clicked province");
+                SupportRequire(engine.State.Players.SelectMany(p => p.Provinces).Count(q => q.DarkExperimentsMarked) == 1, "Dark Experiments marked more than the clicked province");
             }
 
             GD.Print("TABLE_CLICK_PASS: a card in play with one usable ability starts it on the first click and its target is clicked on the table; an ability with nothing to choose opens for its final Confirm; a Celestial starts its ability from its tile; an ability with several possible performers is performed by clicking one; a province is chosen by clicking its card; a Reaction is announced and retracted by clicking its card; a target in a discard pile and an action played from it are chosen from the pile; an assigned unit goes home when clicked again; Dark Experiments' province is chosen by clicking the province or its card; a card with no usable ability is only selected; nothing starts out of turn.");

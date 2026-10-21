@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dark Experiments' province choice lists the opponent's provinces first, then the chooser's (Core candidate order). Native table-click check extended: opponent-first order, click a province then Confirm choice marks exactly that province.",
+  "validation": "check.sh --skip-client passed (new order assertions in the Dark Experiments case); tools/check-table-click-ui.sh passed natively with the Confirm step. Both ran on the pre-rebase tree; this branch is the same patch on current origin/main, CI re-runs Core. No visual playthrough.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1094",
+  "branch": "claude/1094-dark-experiments-order",
+  "updated": "2026-10-21T12:26:39.030164+00:00"
+}

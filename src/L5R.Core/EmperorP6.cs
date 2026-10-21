@@ -326,7 +326,7 @@ public sealed partial class MatchEngine
                 return true;
             case DarkExperimentsEffect:
                 {
-                    var candidates = _state.Players.SelectMany(p => p.Provinces.Where(q => !q.Destroyed).Select(q => $"{p.Id}:{q.Index}")).ToList();
+                    var candidates = _state.Players.OrderBy(p => p.Id == player.Id).SelectMany(p => p.Provinces.Where(q => !q.Destroyed).Select(q => $"{p.Id}:{q.Index}")).ToList();
                     if (candidates.Count == 0) { FinishRevealedEvent(card); return true; }
                     OpenEventChoice(new PendingEventChoice
                     {
