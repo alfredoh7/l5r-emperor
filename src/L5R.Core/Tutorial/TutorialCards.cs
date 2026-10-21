@@ -15,18 +15,10 @@ internal static class TutorialCards
     public const string LightArmor = "oracle-l5r-10118", VeteranSkirmishers = "oracle-l5r-9147", BlockSupplyLines = "oracle-l5r-1045", Incapacitated = "oracle-l5r-3730",
         PreparedForDeath = "oracle-l5r-6051", DefensiveStance = "oracle-l5r-10368", PaidOff = "oracle-l5r-5861", NeverAfraid = "oracle-l5r-9916";
 
-    /// <summary>Lion's Dynasty deck, top first: provinces 1-4 at setup, then the card the first purchase's province is refilled with (turn two's Events phase reveals it).</summary>
-    public static readonly string[] YourDynasty = [IkomaSugo, CopperMine, MatsuHachiro, GoldMine, SmallFarm];
-    /// <summary>Lion's Fate deck, top first: the six-card opening hand, then the card drawn at the end of turn one.</summary>
-    public static readonly string[] YourFate = [LightArmor, VeteranSkirmishers, BlockSupplyLines, Incapacitated, PreparedForDeath, DefensiveStance, PaidOff];
-    /// <summary>Crane's Dynasty deck, top first: its four provinces. Its Fate deck opens on the one card its End-phase draw will give it.</summary>
-    public static readonly string[] FoeDynasty = [DaidojiTsunehiko, DaidojiKenshi, SmallFarm, LargeFarm];
-    public static readonly string[] FoeFate = [NeverAfraid];
-
-    /// <summary>A forty-card deck: the lesson's cards on top, then the rest of the pinned deck in its own order. A card the pinned deck does not hold (Copper Mine) displaces the last card.</summary>
-    internal static string[] Deck(string[] top, string clan, bool dynasty)
+    /// <summary>A forty-card deck: the lesson's cards on top, then the rest of the side's deck in its own order. A card the deck does not hold (Copper Mine) displaces the last card.</summary>
+    internal static string[] Deck(string[] top, TutorialSide side, bool dynasty)
     {
-        var pinned = PublishedContent.Snapshot.Decks.Single(d => d.Clan == clan);
+        var pinned = side.Deck ?? PublishedContent.Snapshot.Decks.Single(d => d.Clan == side.Clan);
         var rest = (dynasty ? pinned.Dynasty : pinned.Fate).ToList();
         foreach (var id in top) rest.Remove(id);
         return [.. top.Concat(rest).Take(40)];

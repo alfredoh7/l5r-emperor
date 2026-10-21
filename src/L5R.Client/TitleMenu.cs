@@ -5,8 +5,8 @@ namespace L5R.Client;
 public partial class TitleMenu : Control
 {
     public Action PracticeSetup = () => { };
-    /// <summary>Starts the tutorial once there is one; until then the menu entry says so (the tutorial is being built).</summary>
-    public Action? Tutorial;
+    /// <summary>Starts the lesson with this id. The menu lists every lesson of the curriculum; one not built yet is a placeholder.</summary>
+    public Action<string>? Tutorial;
     public Action<int> StartMatch = _ => { };
     public Action PrivateMatch = () => { }, Library = () => { }, DeckBuilder = () => { }, Resume = () => { }, PreferencesChanged = () => { };
     public Func<bool> CanResume = () => false;
@@ -57,11 +57,12 @@ public partial class TitleMenu : Control
     private void Clear(string page)
     {
         Page = page; Palette.Clear(Entries);
-        Entries.Position = page == "main" ? new Vector2(1094, 363) : new Vector2(1056, 351);
+        Entries.Position = page == "main" ? new Vector2(1094, 363) : page.StartsWith("tutorial") ? new Vector2(1056, 340) : new Vector2(1056, 351);
         Entries.Size = new Vector2(page == "main" ? 380 : 414, 0);
-        Entries.AddThemeConstantOverride("separation", page == "options" ? 6 : 8);
+        Entries.AddThemeConstantOverride("separation", page == "options" ? 6 : page.StartsWith("tutorial") ? 3 : 8);
         AtmosphereMaterial.SetShaderParameter("submenu", page != "main");
-        _message.Position = page == "main" ? new Vector2(1056, 862) : new Vector2(1056, 777);
+        _message.Position = page == "main" ? new Vector2(1056, 862) : page.StartsWith("tutorial") ? new Vector2(1056, 800) : new Vector2(1056, 777);
+        _message.Size = page.StartsWith("tutorial") ? new Vector2(414, 100) : new Vector2(414, 54);
         _message.Text = "";
     }
     private Button Entry(string text, Action action, int fontSize = 52)
@@ -120,17 +121,45 @@ public partial class TitleMenu : Control
         Clear("play");
         if (CanResume()) Entry("Return to table", Resume, 44);
         Entry("Practice", PracticeSetup);
-        Entry("Tutorial", BeginTutorial, 43);
+        Entry("Tutorial", ShowTutorialTracks, 43);
         Entry("Back", ShowMain, 43);
         _message.Text = "Choose saved decks or presets for a match against the practice opponent.";
         FocusFirst();
     }
-    private void BeginTutorial()
+    /// <summary>The tutorial menu: the tracks of the curriculum, then the lessons of one. Every lesson is listed and none is locked; one that is not built yet is dimmed and shows what it will cover.</summary>
+    public void ShowTutorialTracks()
     {
-        if (Tutorial is { } start) { start(); return; }
         Clear("tutorial");
-        Entries.AddChild(Palette.Wrapped("The tutorial is being built. It will teach the game one step at a time.", 25));
-        Entry("Back", ShowPlay, 43); FocusFirst();
+        foreach (var track in Core.TutorialCurriculum.Tracks)
+        {
+            var built = track.Entries.Count(e => e.Built);
+            var button = Entry(track.Title, () => ShowTutorialTrack(track), 22); button.CustomMinimumSize = new Vector2(0, 38);
+            button.FocusEntered += () => _message.Text = $"{built} of {track.Entries.Length} lessons built.";
+        }
+        Entry("Back", ShowPlay, 22).CustomMinimumSize = new Vector2(0, 38);
+        _message.Text = "Choose a track. Every lesson is open from the start.";
+        FocusFirst();
+    }
+    public void ShowTutorialTrack(Core.TutorialTrack track)
+    {
+        Clear("tutorial-track");
+        var compact = track.Entries.Length > 8;   // a long track packs its rows and moves the message line below them
+        if (compact) { Entries.AddThemeConstantOverride("separation", 0); _message.Position = new Vector2(1056, 880); }
+        foreach (var entry in track.Entries)
+        {
+            var lesson = entry;
+            var button = Entry(entry.Title, () => { if (lesson.Built && Tutorial is { } start) start(lesson.Id); }, compact ? 17 : 22);
+            button.CustomMinimumSize = new Vector2(0, compact ? 24 : 38);
+            button.TooltipText = entry.Subtitle;
+            if (!entry.Built)
+            {
+                button.AddThemeColorOverride("font_color", new Color("8a8170")); button.AddThemeColorOverride("font_hover_color", new Color("a89f88")); button.AddThemeColorOverride("font_focus_color", new Color("a89f88"));
+            }
+            button.FocusEntered += () => _message.Text = lesson.Built ? lesson.Subtitle : ("Not built yet. " + lesson.Subtitle).Trim();
+        }
+        Entry("Back", ShowTutorialTracks, compact ? 17 : 22).CustomMinimumSize = new Vector2(0, compact ? 24 : 38);
+        _message.Text = "Dimmed lessons are placeholders: they are not built yet.";
+        FocusFirst();
     }
     private void Begin(int seat)
     {

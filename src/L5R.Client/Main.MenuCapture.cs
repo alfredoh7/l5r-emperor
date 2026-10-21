@@ -19,6 +19,8 @@ public partial class Main
             MenuAssert(Mathf.IsEqualApprox(_preferences.LanternStrength, .85f), "new menu defaults to approved 85 percent lighting");
             if (_captureMode == "menu-options") menu.ShowOptions();
             if (_captureMode == "menu-play") menu.ShowPlay();
+            if (_captureMode == "menu-tutorial") menu.ShowTutorialTracks();
+            if (_captureMode == "menu-tutorial-track") menu.ShowTutorialTrack(L5R.Core.TutorialCurriculum.Tracks[1]);
             if (_captureMode == "menu-selection") menu.Entries.GetChild<Button>(4).GrabFocus();
             if (_captureMode is "menu-name" or "menu-name-input") menu.ShowName(1);
             if (_captureMode == "menu-library") LibraryDialog.Show(this);

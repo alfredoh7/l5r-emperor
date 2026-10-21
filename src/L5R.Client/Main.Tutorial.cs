@@ -11,11 +11,11 @@ public partial class Main
     /// <summary>The coach card owns a column at the left of the table while a lesson is showing; the table is fitted to the room that is left, so nothing is covered.</summary>
     private float TutorialReserve => _coachPanel is { Visible: true } ? 176 : 0;
 
-    private void StartTutorial()
+    private void StartTutorial(string? lessonId = null)
     {
         ResetTutorialTable();
         _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
-        _session.StartTutorial();
+        _session.StartTutorial(lessonId);
         EnterTable();
     }
 

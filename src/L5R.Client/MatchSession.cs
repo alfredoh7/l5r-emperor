@@ -100,10 +100,10 @@ public sealed partial class MatchSession : IDisposable
     /// <summary>The scripted lesson being played offline (issue #935), or null. While it runs, what the table offers and accepts is the lesson's, and the opponent's side is played by its script.</summary>
     public TutorialRunner? Tutorial => _tutorial;
 
-    public void StartTutorial()
+    public void StartTutorial(string? lessonId = null)
     {
         Generation++; Disconnect();
-        _tutorial = TutorialRunner.Start(); _engine = _tutorial.Engine; _preparedReview = true;
+        _tutorial = lessonId is null ? TutorialRunner.Start() : TutorialRunner.Start(lessonId); _engine = _tutorial.Engine; _preparedReview = true;
         MatchKey = Guid.NewGuid().ToString("N"); _localSeat = _practiceNameSeat = TutorialRunner.Seat;
         RefreshLocal();
     }

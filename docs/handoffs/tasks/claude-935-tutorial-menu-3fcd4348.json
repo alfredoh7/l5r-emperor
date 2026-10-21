@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Tutorial menu reset to Mendon's three-track list: Playing the Game (The Basics, built), Getting Started (13 placeholders), Building a Deck (4); titles with hover subtitles; old 37 task issues closed and 17 new ones opened under #1035.",
+  "validation": "Tutorial tests 11/11, tools/check.sh --skip-client; native menu captures of the track pages inspected (13-entry page compacted to fit). Not re-run: the 59-step UI walk; no human playtest.",
+  "remaining": "The 17 lessons are for Mendon to write (#1035). Card Library and Using Your Designed Deck have no subtitle yet.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035",
+  "branch": "claude/935-tutorial-menu",
+  "updated": "2026-10-21T10:42:50.025148+00:00"
+}

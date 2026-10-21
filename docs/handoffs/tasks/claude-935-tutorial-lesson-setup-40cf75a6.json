@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Tutorial lessons now bring their own table: TutorialSetup (clan, Stronghold, deck tops, Honor, cards at home, first player), TutorialFoeScript and TutorialLesson, TutorialLessons.All; the first lesson is the first user, unchanged for players. Added docs/TUTORIAL_CURRICULUM.md listing every lesson still to write.",
+  "validation": "tutorial tests 10/10 (new: lesson brings its own table); bash tools/check.sh --skip-client passed; bash tools/check-tutorial.sh 59 steps + Back passed",
+  "remaining": "No new lessons built; curriculum open questions in docs/TUTORIAL_CURRICULUM.md; menu does not yet list lessons.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/935",
+  "branch": "claude/935-tutorial-lesson-setup",
+  "updated": "2026-10-20T21:30:02.369503+00:00"
+}

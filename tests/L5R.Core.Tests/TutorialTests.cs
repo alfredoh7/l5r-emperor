@@ -13,6 +13,8 @@ internal static class TutorialTests
         ("The table is the pinned Lion against the pinned Crane, paused: face-down provinces in the scripted order, empty hands, Lion first on 7 Honor against 6", StartingTable),
         ("The lesson stops on the Straighten phase and on the revealed Events phase, and carries on only when the note's button is pressed", HoldsAtPhases),
         ("Crane recruits Daidoji Kenshi with the Clan Discount from its Stronghold, then the farms, and does nothing until the lesson lets it", CraneTurn),
+        ("A lesson brings its own table: stronghold, Honor, cards at home, deck tops and who goes first all come from its setup, and every lesson stands alone", LessonsBringTheirOwnTable),
+        ("The menu lists every lesson of the curriculum: ids are unique, each has a brief, every built lesson is listed and the first is built", CurriculumIsListed),
         ("Back rebuilds the table as it was before the last button or move, at every step of the lesson", BackUndoesTheLastStep),
     ]);
 
@@ -117,7 +119,7 @@ internal static class TutorialTests
         Expect(enabled.Length == 1 && enabled[0].Type == "pass", $"only passing is offered, got {string.Join(", ", enabled.Select(a => a.Label))}");
         Expect(actions.Any(a => a.Type == "useAbility" && !a.Enabled && a.Reason is { Length: > 0 }), "the Border Keep's refresh is switched off, with a reason");
         Expect(actions.Any(a => a.Type == "concede" && !a.Enabled), "conceding is switched off");
-        var refresh = actions.First(a => a.Type == "useAbility").Command!;
+        var refresh = actions.First(a => a.Type == "useAbility" && a.Command is not null).Command!;
         var refused = runner.Execute(refresh);
         Expect(!refused.Accepted && runner.Refusal is { Length: > 0 } && runner.Engine.GetView(TutorialRunner.Seat).Version == version && runner.Coach.StepId == "pass-action", "a stray ability is refused and changes nothing");
         // The Dynasty phase: only Matsu Hachiro at his full cost, paid by the Stronghold and the Border Keep together.
@@ -166,16 +168,21 @@ internal static class TutorialTests
 
     private static void EveryStepSaysWhatToDo()
     {
-        var steps = TutorialLessonOne.Steps;
-        Expect(steps.Select(s => s.Id).Distinct().Count() == steps.Length, "step ids are unique");
-        foreach (var step in steps)
+        Expect(TutorialLessons.All.Select(l => l.Id).Distinct().Count() == TutorialLessons.All.Length, "lesson ids are unique");
+        foreach (var lesson in TutorialLessons.All)
         {
-            Expect(step.Body.Length > 0 && step.Title.Length > 0, $"{step.Id}: has a title and text");
-            if (step.IsAction) Expect(step.Instruction is { Length: > 0 } && step.Button is null, $"{step.Id}: a move step says what to click and has no button");
-            else Expect(step.Button is { Length: > 0 }, $"{step.Id}: a note step has a button");
+            var steps = lesson.Steps;
+            Expect(steps.Select(s => s.Id).Distinct().Count() == steps.Length, $"{lesson.Id}: step ids are unique");
+            foreach (var step in steps)
+            {
+                Expect(step.Body.Length > 0 && step.Title.Length > 0, $"{lesson.Id}/{step.Id}: has a title and text");
+                if (step.IsAction) Expect(step.Instruction is { Length: > 0 } && step.Button is null, $"{lesson.Id}/{step.Id}: a move step says what to click and has no button");
+                else Expect(step.Button is { Length: > 0 }, $"{lesson.Id}/{step.Id}: a note step has a button");
+            }
+            Expect(TutorialRunner.Start(lesson.Id).Engine.TutorialState.Players.All(p => p.Provinces.Count == 4), $"{lesson.Id}: its table builds from its own setup");
         }
-        Expect(steps[^1].Button == "End Tutorial", "the lesson ends on End Tutorial");
-        Expect(TutorialLessonOne.ProvincesStep == 4, "the provinces are laid out at step 5");
+        Expect(TutorialLessonOne.Steps[^1].Button == "End Tutorial", "the lesson ends on End Tutorial");
+        Expect(TutorialLessonOne.Lesson.ProvincesStep == 4, "the provinces are laid out at step 5");
     }
 
     private static void StartingTable()
@@ -234,6 +241,40 @@ internal static class TutorialTests
         Expect(runner.Continue() && runner.Coach.StepId == "crane-farms", "on to the explanation of the farms");
         Expect(runner.Continue() && S() is { ActivePlayerId: 0, Phase: Phase.Action } && S().Players[1].Hand.Count == 1, "Crane ended its turn, drew Never Afraid, and your second Action phase begins");
         Expect(S().Players[0].Provinces[2].CardId is { } refilled && S().Cards[refilled] is { DefinitionId: TutorialCards.SmallFarm, FaceUp: true }, "your second Events phase revealed the Small Farm");
+    }
+
+    private static void CurriculumIsListed()
+    {
+        var entries = TutorialCurriculum.All.ToArray();
+        Expect(entries.Select(e => e.Id).Distinct().Count() == entries.Length, "curriculum ids are unique");
+        Expect(entries.All(e => e.Title.Length > 0 && !e.Title.Contains(':')), "every entry has a title, and the subtitle after the colon is its own field");
+        foreach (var lesson in TutorialLessons.All) Expect(entries.Any(e => e.Id == lesson.Id), $"the built lesson {lesson.Id} has a place in the curriculum");
+        Expect(entries.Single(e => e.Id == "first-turn").Built && entries.Count(e => !e.Built) == entries.Length - TutorialLessons.All.Length, "only the lessons that exist are built; the rest are placeholders");
+    }
+
+    private static void LessonsBringTheirOwnTable()
+    {
+        // A table nothing like the first lesson's: you are Crane on 3 Honor with a bowed Holding, Lion goes first, and the decks open on cards of the lesson's choosing.
+        var lesson = new TutorialLesson("test-table", "Test table",
+            new TutorialSetup(
+                new("Crane", TutorialCards.FoeStronghold, [TutorialCards.DaidojiKenshi, TutorialCards.CopperMine], [TutorialCards.NeverAfraid, TutorialCards.PaidOff], [new(TutorialCards.BambooHarvesters, Bowed: true)], Honor: 3),
+                new("Lion", TutorialCards.YourStronghold, [TutorialCards.IkomaSugo], [TutorialCards.LightArmor], [new(TutorialCards.BorderKeep)]),
+                FirstPlayer: 1),
+            [new TutorialStep { Id = "only", Title = "Only", Body = "Only", Button = "Continue" }], TutorialFoeScript.Passive);
+        var runner = TutorialRunner.Start(lesson);
+        var state = runner.Engine.TutorialState;
+        Expect(runner.LessonId == "test-table" && runner.Coach.StepId == "only", "the runner plays the lesson it was given");
+        Expect(state.Players[0].Clan == "Crane" && state.Players[1].Clan == "Lion" && state.Players[0].Honor == 3 && state.Players[1].Honor == 7, "clans and Honor come from the setup (the Stronghold's own Honor unless one is given)");
+        Expect(state.ActivePlayerId == 1 && state.PriorityPlayerId == 1, "the setup chooses who goes first");
+        Expect(state.Cards.Values.Any(c => c is { OwnerId: 0, DefinitionId: TutorialCards.BambooHarvesters, Zone: Zone.Home, Bowed: true }) && !state.Cards.Values.Any(c => c.OwnerId == 1 && c.Zone == Zone.Home && c.Bowed), "cards at home start where the setup puts them");
+        string[] Provinces(int p) => state.Players[p].Provinces.Select(x => state.Cards[x.CardId!].DefinitionId).ToArray();
+        Expect(Provinces(0)[0] == TutorialCards.DaidojiKenshi && Provinces(0)[1] == TutorialCards.CopperMine && Provinces(1)[0] == TutorialCards.IkomaSugo, "the Dynasty tops fill the provinces, a catalogue card outside the deck included");
+        Expect(state.Players[0].DynastyDeck.Count + 4 == 40 && state.Players[0].FateDeck.Count == 40 && state.Cards[state.Players[0].FateDeck[0]].DefinitionId == TutorialCards.NeverAfraid, "forty cards each, the Fate top as asked");
+        Expect(runner.Continue() && runner.Finished, "and a lesson of one note finishes");
+        // Every card any lesson names is one the engine's catalogue has.
+        foreach (var each in TutorialLessons.All)
+            foreach (var side in new[] { each.Setup.You, each.Setup.Foe })
+                foreach (var id in side.DynastyTop.Concat(side.FateTop).Append(side.StrongholdId).Concat(side.Home.Select(h => h.DefinitionId))) _ = CardCatalog.Get(id);
     }
 
     private static string Snapshot(TutorialRunner r)
