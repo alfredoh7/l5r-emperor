@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Windows validation of the #1103 context-switch fixes: whitespace-format ContextStressProbe.cs so the 'Changed C# formatting' check passes, plus this handoff for the 'Context and handoff' check. No behaviour change.",
+  "validation": "Windows 11: bash tools/check-context-switch.sh passed (duel-leave-practice, online-then-practice, random 40 steps; exit 0). python tools/quality/check_format.py clean. Automated, not a human playtest.",
+  "remaining": "None for the Windows follow-up; see #1103 for the reproduction on main and the longer random runs.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1103",
+  "branch": "claude/1103-context-switch-windows",
+  "updated": "2026-10-22T22:51:14.537643+00:00"
+}
