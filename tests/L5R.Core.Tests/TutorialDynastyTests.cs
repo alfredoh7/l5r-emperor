@@ -104,7 +104,7 @@ internal static class TutorialDynastyTests
                     Expect(InZone(runner, 1, TutorialCards.YoritomosGuidance, Zone.Celestial), "Yoritomo's Guidance is in play");
                     break;
                 case "one-celestial":
-                    Expect(DefinitionIn(runner, FoeProvince(runner, 1)) == TutorialCards.SuitengusBlessing && coach.ShowDefinitionId == TutorialCards.SuitengusBlessing, "Suitengu's Blessing is revealed and shown");
+                    Expect(DefinitionIn(runner, FoeProvince(runner, 1)) == TutorialCards.SuitengusBlessing && coach.HighlightCardIds.Length == 1, "Suitengu's Blessing is revealed and pointed at");
                     Expect(InZone(runner, 1, TutorialCards.YoritomosGuidance, Zone.Celestial), "Yoritomo's Guidance is still in play while the new Celestial is shown");
                     break;
                 case "replaced":
@@ -168,6 +168,7 @@ internal static class TutorialDynastyTests
         Expect(runner.Continue(), "Border Keep is used");
         state = runner.Engine.State;
         Expect(runner.Engine.TutorialHeld, "the engine stops with Suitengu's Blessing revealed");
+        Expect(runner.Coach.AnimateOnly is [var only] && only == TutorialCards.SuitengusBlessing, "only Suitengu's Blessing animates while the step talks about it");
         Expect(new[] { 0, 1, 3 }.All(i => state.Cards[FoeProvince(runner, i).CardId!].FaceUp) && !state.Cards[FoeProvince(runner, 2).CardId!].FaceUp == false, "three Provinces were refilled face up and Kobune Port stayed where it was");
         Expect(InZone(runner, 1, TutorialCards.ShelteredPort, Zone.DynastyDeck), "the Sheltered Port went to the bottom of the deck");
         Expect(state.Players[1].DynastyDeck.TakeLast(3).Select(id => state.Cards[id].DefinitionId).Count(d => d == TutorialCards.ShelteredPort || d == TutorialCards.SmallFarm) == 3, "the three cards put away are at the bottom of the Dynasty deck");
@@ -194,6 +195,7 @@ internal static class TutorialDynastyTests
         Expect(steps.Select(s => s.Id).Distinct().Count() == steps.Length, "step ids are unique");
         foreach (var step in steps) Expect(step.IsAction ? step.Instruction is { Length: > 0 } && step.Button is null : step.Button is { Length: > 0 }, $"{step.Id}: a move says what to click, a note has a button");
         Expect(steps[^1].Button == "Back to Menu", "the last step returns to the menu");
+        Expect(TutorialCurriculum.TrackOf(Lesson)?.Title == "Level Up Your Play" && TutorialCurriculum.TrackOf("first-turn")?.Entries.Length == 1, "the lesson belongs to Level Up Your Play, so the menu returns there");
     }
 
     private static void BackUndoesTheLastStep()

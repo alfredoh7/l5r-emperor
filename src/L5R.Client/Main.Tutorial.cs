@@ -102,15 +102,16 @@ public partial class Main
     /// <summary>Leaves the lesson at any point (the table menu's Concede while a lesson is running) and returns to the menu.</summary>
     private void LeaveTutorial()
     {
+        var lessonId = _session.Tutorial?.LessonId;
         _session.LeaveTutorial(); _coachPanel?.Hide(); SyncTutorialGlow([]); SyncTutorialShow(null);
         _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear();
-        ShowMainMenu();
+        ShowMainMenu(); _titleMenu?.ShowTutorialFor(lessonId);
     }
 
     private void TutorialContinue()
     {
         _session.TutorialContinue();
-        if (_session.Tutorial is { Finished: true }) { _coachPanel?.Hide(); ShowMainMenu(); }
+        if (_session.Tutorial is { Finished: true } done) { _coachPanel?.Hide(); ShowMainMenu(); _titleMenu?.ShowTutorialFor(done.LessonId); }
     }
 
     private void PulseTutorialPointers(double delta)
@@ -281,6 +282,7 @@ public partial class Main
                     throw new InvalidOperationException($"{coach.StepId}: the step did not advance. {TutorialControls()} notice={_status.Text}");
             }
             if (_session.Tutorial is { Finished: false }) throw new InvalidOperationException("The lesson did not finish.");
+            if (!MenuVisible || _titleMenu?.Page != "tutorial") throw new InvalidOperationException("End Tutorial did not return to the tutorial menu.");
             var honor = View.Players[0].Honor;
             // Back: a note's Back returns to the note before it, and a move's Back to the scene before the move (the move is undone).
             StartTutorial(); for (var i = 0; i < 6; i++) await CoverageFrames();
@@ -294,7 +296,7 @@ public partial class Main
             StartTutorial(); for (var i = 0; i < 6; i++) await CoverageFrames();
             await PlayTutorialTo("recruit-hachiro");
             await RunTutorialUiToken("menuleave"); for (var i = 0; i < 6; i++) await CoverageFrames();
-            if (_session.Tutorial is not null || !MenuVisible) throw new InvalidOperationException("Leaving the tutorial from the table menu did not return to the main menu.");
+            if (_session.Tutorial is not null || !MenuVisible || _titleMenu?.Page != "tutorial") throw new InvalidOperationException("Leaving the tutorial from the table menu did not return to the tutorial menu.");
             var dynastySteps = await CheckTutorialDynastyUi();
             GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {honor}; left mid-lesson through the table menu; Events, Regions and Celestials: {dynastySteps} steps");
             GetTree().Quit();
@@ -330,7 +332,7 @@ public partial class Main
                 throw new InvalidOperationException($"{coach.StepId}: the step did not advance. {TutorialControls()} notice={_status.Text}");
         }
         if (_session.Tutorial is { Finished: false }) throw new InvalidOperationException("The Events, Regions and Celestials lesson did not finish.");
-        if (!MenuVisible) throw new InvalidOperationException("Back to Menu did not return to the main menu.");
+        if (!MenuVisible || _titleMenu?.Page != "tutorial-track") throw new InvalidOperationException("Back to Menu did not return to the Level Up Your Play list.");
         return seen.Count;
     }
 

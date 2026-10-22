@@ -43,3 +43,7 @@ godot --path src/L5R.Client -- --tutorial-review --tutorial-ui-check            
 ## Not done yet
 
 Only the first turn and a half. The Rings/keyword notes of the earlier lesson are gone. A final lesson that unlocks the table and plays out a full game against the bot is not built.
+
+## Where a finished lesson returns to
+
+A lesson that ends (its last button) or is left from the table menu returns to the menu list it was started from: lessons of Level Up Your Play (or Building a Deck) return to that track's list, and The Basics, a track of one lesson, returns to the Tutorial track list. `TutorialCurriculum.TrackOf` decides it; every new lesson inherits the behaviour by being listed in the curriculum. A step's `animateOnly` limits which cards' reveal animations play while it is showing (the Events lesson's Celestial step animates only Suitengu's Blessing).

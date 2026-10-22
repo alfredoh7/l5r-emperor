@@ -4,9 +4,10 @@ namespace L5R.Core;
 /// <param name="Glow">Parts of the screen to light up (see <see cref="TutorialGlow"/>).</param>
 /// <param name="ShowDefinitionId">A card to show large in the middle of the table while the note is read (the "Show" flow).</param>
 /// <param name="Slow">The presentations this step starts (province reveals, a played card) run at a quarter of their usual speed.</param>
+/// <param name="AnimateOnly">When set, the only cards (by definition id) whose reveal and entering-play animations this step shows; the others reveal quietly (they are explained in a later step).</param>
 /// <param name="ProvincesOnTable">False while the opening notes are read: the provinces are laid out at the step that introduces them.</param>
 public sealed record TutorialCoach(string StepId, string Title, string Body, string? Button, string[] HighlightCardIds, int Step, int Steps, bool Finished, string? Instruction = null,
-    string[]? Glow = null, string? ShowDefinitionId = null, bool Slow = false, bool ProvincesOnTable = true, bool CanGoBack = false, string? ExitLabel = null);
+    string[]? Glow = null, string? ShowDefinitionId = null, bool Slow = false, bool ProvincesOnTable = true, bool CanGoBack = false, string? ExitLabel = null, string[]? AnimateOnly = null);
 
 /// <summary>Parts of the screen a note can light up.</summary>
 public static class TutorialGlow
@@ -42,6 +43,8 @@ internal sealed class TutorialStep
     public string[]? Glow { get; init; }
     public string? ShowDefinitionId { get; init; }
     public bool Slow { get; init; }
+    /// <summary>Definition ids of the only cards whose reveal animations play when this step shows (see <see cref="TutorialCoach.AnimateOnly"/>).</summary>
+    public string[]? AnimateOnly { get; init; }
     public bool IsAction => Allow is not null;
 }
 
@@ -131,7 +134,7 @@ public sealed class TutorialRunner
         {
             if (Current is not { } step) return new("done", "Lesson complete", "", null, [], _steps.Length, _steps.Length, true);
             return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false, step.Instruction,
-                step.Glow, step.ShowDefinitionId, step.Slow, _index >= _lesson.ProvincesStep, CanGoBack);
+                step.Glow, step.ShowDefinitionId, step.Slow, _index >= _lesson.ProvincesStep, CanGoBack, AnimateOnly: step.AnimateOnly);
         }
     }
 

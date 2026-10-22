@@ -67,7 +67,7 @@ public partial class Main
             void Motion(Vector2 at) => Input.ParseInputEvent(new InputEventMouseMotion { Position = at, GlobalPosition = at });
             void Button(Vector2 at, MouseButton button, bool pressed) => Input.ParseInputEvent(new InputEventMouseButton { Position = at, GlobalPosition = at, ButtonIndex = button, Pressed = pressed, Factor = 1 });
             var scroll = menu.TrackScroll;
-            if (_menuProbeStep == 1) { menu.ShowTutorialTracks(); Click(menu.Entries.GetChildren().OfType<Button>().Single(b => b.Text == "GETTING STARTED")); _menuProbeStep = 30; _captureClock = 0; return; }
+            if (_menuProbeStep == 1) { menu.ShowTutorialTracks(); Click(menu.Entries.GetChildren().OfType<Button>().Single(b => b.Text == "LEVEL UP YOUR PLAY")); _menuProbeStep = 30; _captureClock = 0; return; }
             if (_menuProbeStep == 30)
             {
                 scroll = menu.TrackScroll!; var bar = scroll.GetVScrollBar();

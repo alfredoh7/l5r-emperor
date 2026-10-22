@@ -115,6 +115,14 @@ public partial class Main
             if (!discarded && !CardPlayTiming.ShowBoardAbilities) continue;
             beats[id] = new(card, e.Message, discarded); order.Add(id);
         }
+        // A lesson step can limit the reveal animations to the cards it talks about; the others reveal quietly and are explained at their own step.
+        var only = _session.Tutorial is { Finished: false } lesson ? lesson.Coach.AnimateOnly : null;
+        if (only is not null)
+            foreach (var id in order.Where(id => !only.Contains(beats[id].Card.Definition?.Id)).ToArray())
+            {
+                if (beats[id].Cover is { } quiet && IsInstanceValid(quiet)) quiet.QueueFree();
+                order.Remove(id);
+            }
         foreach (var id in order)
         {
             if (beats[id].Discarded) _showcasedPlays.Add(id);

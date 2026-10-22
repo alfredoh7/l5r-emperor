@@ -53,7 +53,7 @@ internal static class TutorialLessonOne
         Note("first-player", "Who goes first", "You are the Lion Clan and have 7 starting Honor. The player with the highest Honor goes first. Crane has 6, so you will go first.",
             highlight: All(Own(TutorialCards.YourStronghold), Foe(TutorialCards.FoeStronghold))),
         Note("honor-victory", "Honor Victory", "If you ever start your turn with 40 or more Honor, you win an Honor Victory.", glow: [TutorialGlow.Honor]),
-        Note("dishonor", "Dishonor", "If your Honor ever falls to -20 or lower, you lose at the beginning of your next End phase, even if you recover first. Your opponent wins."),
+        Note("dishonor", "Dishonor", "If your Honor ever falls to -20 or lower, you lose at the beginning of your next End phase, even if you recover first. Your opponent wins.", glow: [TutorialGlow.Honor]),
         Note("enlightenment", "Enlightenment Victory", "If you ever start your turn controlling all five Rings, you win. This is pretty rare."),
         Note("sequence", "The sequence of play", "On your turn, you will flow through the sequence of play. It's listed at the top of the screen.", then: c => { c.HoldAt(Phase.Straighten, 0); c.StartTurn(); }, glow: Bar),
         Note("straighten", "Straighten phase", "First, we straighten bowed cards. Bowed cards are turned 90 degrees to the side and may not use the actions printed on them. They are straightened by rotating them back into their upright position. Notice that the Crane player has a bowed card, Bamboo Harvesters.",
@@ -140,7 +140,7 @@ internal static class TutorialLessonOne
         Do("pass-battle", "Sent home", "Daidoji Kenshi has been \"sent home\". Home is the generic space in your tableau that is not at a battlefield. Without a Personality in the fight, or a way to get one back, the Crane must pass.",
             "Click Pass battle action to proceed to the battle's resolution.", Move("pass"), glow: [TutorialGlow.BattleBar]),
         Note("resolved", "Resolution", "You now have enough Force to destroy the Province. The card is discarded and the Crane's Provinces move closer together to signify the loss of the Province.", glow: [TutorialGlow.BattleBar]),
-        Note("congratulations", "Congratulations", "Congratulations, you now know the basics of how to play a turn and how to fight a battle. Remember, if you destroy an opponent's last Province, you win the game!", button: "End Tutorial"),
+        Note("congratulations", "Congratulations", "Congratulations, you now know the basics of how to play a turn and how to fight a battle. Remember, if you destroy an opponent's last Province, you win the game! Play through Level Up Your Play in order to learn how to play every card in the game.", button: "End Tutorial"),
     ];
 
     /// <summary>Lion (you) against Crane on the pinned decks. Lion's Dynasty deck opens on its four provinces, then the card the first purchase refills with (turn two's Events phase reveals it);
