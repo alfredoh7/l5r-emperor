@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Tutorial updates: Dishonor note counts Honor down to -20; finished/left lessons return to their own track menu (Level Up Your Play / tutorial list); Basics ends pointing to Level Up Your Play; Events step 18 animates only Suitengu's Blessing; menu capture probe fixed for the renamed header.",
+  "validation": "check.sh --skip-client passed; check-tutorial.sh (59 + 22 steps, menu page asserted) passed; check-main-menu.sh passed. Animations not watched live by me.",
+  "remaining": "Human playthrough to judge the step 18 animation and the -20 count.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1035",
+  "branch": "claude/1101-tutorial-updates",
+  "updated": "2026-10-22T16:38:11.624706+00:00"
+}

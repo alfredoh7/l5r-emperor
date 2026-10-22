@@ -20,8 +20,8 @@ internal static class TutorialLessonDynasty
         && definitions.All(d => sources.Any(id => look.Is(id, d)));
 
     private static TutorialStep Note(string id, string title, string body, Action<TutorialContext>? then = null, string button = "Continue", Func<TutorialLookup, IEnumerable<string>>? highlight = null,
-        string[]? glow = null, string? show = null, bool slow = false) =>
-        new() { Id = id, Title = title, Body = body, Button = button, Then = then, Highlight = highlight, Glow = glow, ShowDefinitionId = show, Slow = slow };
+        string[]? glow = null, string? show = null, bool slow = false, string[]? animateOnly = null) =>
+        new() { Id = id, Title = title, Body = body, Button = button, Then = then, Highlight = highlight, Glow = glow, ShowDefinitionId = show, Slow = slow, AnimateOnly = animateOnly };
 
     private static TutorialStep Do(string id, string title, string body, string instruction, Func<TutorialLookup, GameCommand, bool> allow, Func<TutorialLookup, GameCommand, bool>? accept = null,
         string? hint = null, Action<TutorialContext>? then = null, Func<TutorialLookup, IEnumerable<string>>? highlight = null, string[]? glow = null, int[]? onlyProvinces = null, bool slow = false) =>
@@ -91,7 +91,7 @@ internal static class TutorialLessonDynasty
         Note("border-keep", "Border Keep", "However, the Mantis player is clever and wants to use the Limited action on their Border Keep, usable on their first turn, to see more cards.",
             then: c => { c.Resume(); c.HoldReveal(1, 1, after: true); c.FoeBorderKeep(0, 1, 3); }, highlight: Foe(TutorialCards.BorderKeep), glow: Bar, slow: true),
         Note("one-celestial", "One Celestial at a time", "Suitengu's Blessing was just revealed in the next Province. A player may only have one Celestial in play at a time, and Celestials enter play immediately when revealed.",
-            then: c => c.Resume(), show: TutorialCards.SuitengusBlessing, glow: Bar),
+            then: c => c.Resume(), highlight: Foe(TutorialCards.SuitengusBlessing), glow: Bar, animateOnly: [TutorialCards.SuitengusBlessing]),
         Note("replaced", "Replaced", "This causes Yoritomo's Guidance to be discarded. It is replaced with Suitengu's Blessing.", highlight: Foe(TutorialCards.SuitengusBlessing), glow: Bar),
         Note("boastful", "Not yet", "In the final Province the Mantis player revealed Boastful Proclamation. Notice that it is currently the Action phase in the turn tracker. Events and Regions only enter play during the Events phase, so Boastful Proclamation will not resolve until the Mantis player's next Events phase.",
             highlight: Foe(TutorialCards.BoastfulProclamation), glow: Bar),

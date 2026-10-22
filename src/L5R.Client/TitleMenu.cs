@@ -150,6 +150,12 @@ public partial class TitleMenu : Control
         _message.Text = "Choose a track. Every lesson is open from the start.";
         FocusFirst();
     }
+    /// <summary>Back from a lesson: the list of the lesson's track, or the track list when the track is a single lesson that starts straight away.</summary>
+    public void ShowTutorialFor(string? lessonId)
+    {
+        if (lessonId is not null && Core.TutorialCurriculum.TrackOf(lessonId) is { Entries.Length: > 1 } track) ShowTutorialTrack(track);
+        else ShowTutorialTracks();
+    }
     /// <summary>A track holding one built lesson starts it straight away; any other opens its list.</summary>
     private void OpenTutorialTrack(Core.TutorialTrack track)
     {

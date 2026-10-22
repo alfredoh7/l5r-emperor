@@ -47,4 +47,7 @@ public static class TutorialCurriculum
     ];
 
     public static IEnumerable<TutorialEntry> All => Tracks.SelectMany(t => t.Entries);
+
+    /// <summary>The track a lesson belongs to: where the menu returns to when the lesson ends or is left.</summary>
+    public static TutorialTrack? TrackOf(string lessonId) => Tracks.FirstOrDefault(t => t.Entries.Any(e => e.Id == lessonId));
 }
