@@ -28,11 +28,7 @@ public partial class Main
                 {
                     // Core validates before the active session is disconnected.
                     _session.StartCustomPractice(your, opponent); _session.AllowIdleBattlePasses();
-                    _turnBloomGate.Reset(); _turnBloom.Cancel(); ResetStatHistory();
-                    _presentationSnapshot = null; _battlePresentationStage = 0; _motionView = null; _cameraGlide = false;
-                    _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
-                    _selected = null; _selectedHomeReminder = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear();
-                    _autoOpponent = true; ClosePracticeSetup(); EnterTable();
+                    ResetMatchPresentation(); _autoOpponent = true; ClosePracticeSetup(); EnterTable();
                 }
                 catch (ArgumentException e) { var (dialog, body) = Dialog("Deck needs attention", 660, 380); body.AddChild(Palette.Wrapped(e.Message, 22)); }
             }

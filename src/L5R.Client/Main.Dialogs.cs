@@ -60,11 +60,14 @@ public partial class Main
             {
                 await _session.CreateOrJoin(address.Text, room.Text, published.ButtonPressed);
                 SetNotice($"Room {_session.Seat!.RoomCode} · share this code with your opponent.");
-                dialog.QueueFree(); _selected = null; _chosen = null;
+                if (IsInstanceValid(dialog)) dialog.QueueFree();
+                _selected = null; _chosen = null;
             }
+            // Closed while connecting (issue #1103): the player has moved on, so there is nothing left to tell.
+            catch (Exception e) when (!IsInstanceValid(dialog)) { if (e is OperationCanceledException) SetNotice(e.Message); }
             catch (Exception e) { status.Text = e.Message; connect.Disabled = false; }
         }, true); body.AddChild(connect);
-        if (_savedSeat is not null) body.AddChild(SidebarSkin.Button($"Reconnect to {_savedSeat.RoomCode}", async () => { if (await Reconnect()) dialog.QueueFree(); }));
+        if (_savedSeat is not null) body.AddChild(SidebarSkin.Button($"Reconnect to {_savedSeat.RoomCode}", async () => { if (await Reconnect() && IsInstanceValid(dialog)) dialog.QueueFree(); }));
         body.AddChild(Palette.Wrapped("Your player seat is saved locally for reconnecting. Remote play requires an HTTPS server; hosting is not provisioned by this prototype.", 13, Palette.Muted));
     }
 

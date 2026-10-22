@@ -86,12 +86,17 @@ public partial class Main
     }
     private void StartFromMenu(int seat)
     {
-        _turnBloomGate.Reset();
-        _turnBloom.Cancel();
-        ResetStatHistory();
+        ResetMatchPresentation();
+        _session.StartPractice(false, true, seat); _session.AllowIdleBattlePasses(); EnterTable();
+    }
+    /// <summary>Forgets what the table was showing or meant to do for the previous match, including a duel kept for Resume, before a new match is shown (issue #1103).</summary>
+    private void ResetMatchPresentation()
+    {
+        if (MatchDuelOpen) { RestoreMatchTable(); DisposeMatchDuel(); }
+        _turnBloomGate.Reset(); _turnBloom.Cancel(); ResetStatHistory();
         _presentationSnapshot = null; _battlePresentationStage = 0; _motionView = null; _cameraGlide = false;
         _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
-        _selected = null; _selectedHomeReminder = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear();
-        _session.StartPractice(false, true, seat); _session.AllowIdleBattlePasses(); EnterTable();
+        _selected = null; _selectedHomeReminder = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
+        _autoProclaimCardId = null;
     }
 }
