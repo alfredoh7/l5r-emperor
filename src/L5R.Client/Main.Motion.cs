@@ -35,8 +35,10 @@ public partial class Main
            View.Version <= _motionView.Version || _reducedMotion) return null;
         return new(_motionView, _tiles.Where(IsInstanceValid).GroupBy(t => t.Card.Id)
             .ToDictionary(g => g.Key, g => g.First().FaceCornersOnViewport().Select(p => p / _root.Scale.X).ToArray()),
-            _tiles.Where(t => IsInstanceValid(t) && _world.IsAncestorOf(t)).ToDictionary(t => t.Card.Id,
-                t => _world.GetGlobalTransform().AffineInverse() * t.GlobalPosition),
+            // Face-down province cards are named by their place, so a province holding two (Plains of Otosan Uchi) shows two tiles with one id. A plain ToDictionary threw on them
+            // before the board was rebuilt, and every later frame threw again: a frozen table (issue #1103).
+            _tiles.Where(t => IsInstanceValid(t) && _world.IsAncestorOf(t)).GroupBy(t => t.Card.Id).ToDictionary(g => g.Key,
+                g => _world.GetGlobalTransform().AffineInverse() * g.First().GlobalPosition),
             TablePiles.ToDictionary(p => (p.OwnerId, p.PileZone), p => (PileCorners(p), p.ShownCount,
                 _world.GetGlobalTransform().AffineInverse() * p.GlobalPosition)));
     }

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Windows follow-up for #1103. (1) Whitespace-format ContextStressProbe.cs and add this handoff so the 'Changed C# formatting' and 'Context and handoff' checks pass. (2) Fix a frozen table found by the probe (seed 33, step 68): Main.BeginTableMotion built a dictionary of tiles by card id with ToDictionary, but a province holding two face-down cards (Plains of Otosan Uchi) shows two tiles with the same id hidden-p{owner}-province{n}; the throw happened before the board was rebuilt so every later frame threw again. It now groups by id like the line above it.",
+  "validation": "Windows 11: check-context-switch.sh passed on the macOS branch (seeds 10, 14, 6); duel-leave-practice fails on origin/main with the probe copied in (6 failures); seed 33 reproduced the duplicate-key error from step 68 (73 errors) and, with the fix, passes 75 steps with 0 errors; check_format clean. Automated, not a human playtest.",
+  "remaining": "Seed 21 (150 steps) did not finish inside a 540 s timeout; no errors in the 95 steps it did run. No permanent unit test for the duplicate id: the board code needs Godot.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1103",
+  "branch": "claude/1103-context-switch-windows",
+  "updated": "2026-10-22T23:19:09.118013+00:00"
+}
