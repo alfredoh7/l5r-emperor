@@ -28,8 +28,18 @@ internal static class TableLink
             {
                 var captured = tile;
                 Action enter = () => Light(control, true), exit = () => Light(control, false);
-                captured.MouseEntered += enter; captured.MouseExited += exit;
-                control.TreeExiting += () => { if (GodotObject.IsInstanceValid(captured)) { captured.MouseEntered -= enter; captured.MouseExited -= exit; } };
+                // TreeExiting also fires when the control is only moved (a duel reparents the table), so unlink once and link again if it comes back.
+                var linked = false;
+                void Link(bool on)
+                {
+                    if (on == linked || !GodotObject.IsInstanceValid(captured)) return;
+                    if (on) { captured.MouseEntered += enter; captured.MouseExited += exit; }
+                    else { captured.MouseEntered -= enter; captured.MouseExited -= exit; }
+                    linked = on;
+                }
+                Link(true);
+                control.TreeExiting += () => Link(false);
+                control.TreeEntered += () => Link(true);
             }
     }
 

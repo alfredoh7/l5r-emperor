@@ -13,8 +13,7 @@ public partial class Main
 
     private void StartTutorial(string? lessonId = null)
     {
-        ResetTutorialTable();
-        _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
+        ResetMatchPresentation(); ResetTutorialTable();
         _session.StartTutorial(lessonId);
         EnterTable();
     }

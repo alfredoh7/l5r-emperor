@@ -547,7 +547,8 @@ public partial class Main : Node
             _eventSidebar.Visible = false; _eventHandBar.Visible = false; _eventDiscardId = null;
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
             _matSections.Sync([], true, "disconnected");
-            Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
+            foreach (var flight in _flights.Where(IsInstanceValid)) flight.Finish(); _flights.Clear(); // issue #1103: flights aim at the tiles freed below
+            Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions); _tiles.Clear();
             return;
         }
         if (RouteMatchDuel()) return;

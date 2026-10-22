@@ -92,7 +92,7 @@ public partial class Main
             case 2:
                 var courtesy = _session.Snapshot!.View.Players[0].Hand.Single(c => c.Definition!.Id == "oracle-l5r-7996");
                 Native(screen!.CardClickPoint(courtesy.Id)); break;
-            case 3: Require(screen!.SelectedInspectionId is not null, "real hand selection after the introductions"); Native(screen.LandingClickPoint); break;
+            case 3: Require(screen!.SelectedInspectionId is not null, $"real hand selection after the introductions (locked {screen.InputLocked}, busy {screen.PresentationBusy}, priority {_session.Snapshot!.View.PriorityPlayerId}, hover {GetViewport().GuiGetHoveredControl()?.GetPath()})"); Native(screen.LandingClickPoint); break;
             case 4:
                 if (_matchProbeSeatStep == 0) { Require(_session.Snapshot!.View.Version == 3, "focus placement submits one command"); Shot("focus"); Press("Menu"); _matchProbeSeatStep++; return true; }
                 if (_matchProbeSeatStep == 1) { Press("Switch seat"); _matchProbeSeatStep++; return true; }

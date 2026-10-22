@@ -86,7 +86,7 @@ public sealed partial class MatchSession : IDisposable
     /// on screen. Reached only through the --capture-mode=gold-* harness, never from a menu or a room.</summary>
     public void StartShowcase(string kind)
     {
-        Disconnect();
+        Generation++; Disconnect();
         _engine = MatchEngine.CreateGoldPaymentShowcase(kind);
         _preparedReview = false;
         MatchKey = Guid.NewGuid().ToString("N");
@@ -155,7 +155,8 @@ public sealed partial class MatchSession : IDisposable
         // Construct and validate before disconnecting/replacing a running session.
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
         var engine = MatchEngine.CreateCustomMatch(seed, yourDeck, opponentDeck);
-        Disconnect(); _engine = engine; _preparedReview = false; MatchKey = Guid.NewGuid().ToString("N"); _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
+        // A new match: the table drops what it queued or kept (an unfinished duel) for the last one (issue #1103).
+        Generation++; Disconnect(); _engine = engine; _preparedReview = false; MatchKey = Guid.NewGuid().ToString("N"); _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
     }
 
     public void FollowPracticePriority()
@@ -286,6 +287,7 @@ public sealed partial class MatchSession : IDisposable
     public async Task CreateOrJoin(string baseUrl, string? roomCode, bool published = false)
     {
         var uri = ValidateServer(baseUrl);
+        var generation = Generation;
         using var client = new HttpClient { BaseAddress = uri, Timeout = TimeSpan.FromSeconds(12) };
         var path = string.IsNullOrWhiteSpace(roomCode) ? (published ? "rooms?scenario=" + PublishedContent.Scenario : "rooms") : $"rooms/{Uri.EscapeDataString(roomCode.Trim().ToUpperInvariant())}/join";
         using var response = await client.PostAsync(path, null);
@@ -293,6 +295,8 @@ public sealed partial class MatchSession : IDisposable
             throw new InvalidOperationException("Could not enter the room. Check the server address and room code.");
         var seat = await response.Content.ReadFromJsonAsync<RoomSeat>(Json) ?? throw new InvalidOperationException("The server sent an invalid room response.");
         SeatCreated?.Invoke(seat, uri.ToString());
+        // The seat is saved for Reconnect, but a match started while the server answered keeps the table (issue #1103).
+        if (Generation != generation) throw new OperationCanceledException("A new match started while connecting. Your seat is saved; use Reconnect to join it.");
         await Connect(uri, seat);
     }
 
