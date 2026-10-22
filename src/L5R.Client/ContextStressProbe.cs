@@ -99,12 +99,12 @@ public partial class ContextStressProbe : Node
         switch (action)
         {
             case "practice":
-            {
-                var your = RandomDeck(); var theirs = RandomDeck();
-                GD.Print($"STRESS_DECKS {your.Name} vs {theirs.Name}");
-                await StartPractice(your.Deck, theirs.Deck, _rng.Next(2) == 0);
-                break;
-            }
+                {
+                    var your = RandomDeck(); var theirs = RandomDeck();
+                    GD.Print($"STRESS_DECKS {your.Name} vs {theirs.Name}");
+                    await StartPractice(your.Deck, theirs.Deck, _rng.Next(2) == 0);
+                    break;
+                }
             case "menu": Call("ShowMainMenu"); break;
             case "resume": if (Session.Snapshot is not null) Call("EnterTable"); break;
             case "deckbuilder":
@@ -119,51 +119,51 @@ public partial class ContextStressProbe : Node
                 foreach (var button in Descendants<Button>(GetTree().Root).Where(b => b.Text == "Deck Builder" && b.IsVisibleInTree()).Take(1)) button.EmitSignal(BaseButton.SignalName.Pressed);
                 await Dwell(_dwells[_rng.Next(Math.Min(5, _dwells.Length))]); Escape(); await Dwell(-1); Escape(); break;
             case "practice-edit":
-            {
-                Call("ShowPracticeSetup"); await Dwell(-1);
-                if (Descendants<PracticeSetupScreen>(_main).FirstOrDefault() is not { } screen) return;
-                typeof(PracticeSetupScreen).GetMethod("Edit", Private)!.Invoke(screen, [null]);
-                await Dwell(_dwells[_rng.Next(Math.Min(5, _dwells.Length))]); Escape(); await Dwell(-1);
-                typeof(PracticeSetupScreen).GetMethod("Start", Private)!.Invoke(screen, []);
-                await Dwell(-1); AcceptConfirm(); break;
-            }
+                {
+                    Call("ShowPracticeSetup"); await Dwell(-1);
+                    if (Descendants<PracticeSetupScreen>(_main).FirstOrDefault() is not { } screen) return;
+                    typeof(PracticeSetupScreen).GetMethod("Edit", Private)!.Invoke(screen, [null]);
+                    await Dwell(_dwells[_rng.Next(Math.Min(5, _dwells.Length))]); Escape(); await Dwell(-1);
+                    typeof(PracticeSetupScreen).GetMethod("Start", Private)!.Invoke(screen, []);
+                    await Dwell(-1); AcceptConfirm(); break;
+                }
             case "tutorial": Call("StartTutorial", new object?[] { null }); break;
             case "leave-tutorial": if (Session.Tutorial is not null) Call("LeaveTutorial"); break;
             case "duel-leave-practice":
-            {
-                // A duel kept for Resume must not come back over the next Practice (it reopened on "Opponent's move" and never returned).
-                Session.StartDuelDemo("steel", 205, 0);
-                var flow = typeof(Main).GetField("_matchDuelFlow", Private)!.GetValue(_main)!;
-                flow.GetType().GetMethod("Observe")!.Invoke(flow, [Session.Snapshot]);
-                Call("EnterTable"); _ = Session.BeginDuelDemo();
-                for (var t = 0; t < 200 && Field<object?>("_matchDuel") is null; t++) await Dwell(.05);
-                Require(Field<object?>("_matchDuel") is not null, "the prepared duel never opened");
-                await Dwell(Math.Min(6, _dwells[_rng.Next(_dwells.Length)]));
-                Call("ConfirmLeaveMatchDuel"); await Dwell(-1); AcceptConfirm(); await Dwell(-1);
-                Require(!DuelOpen, "leaving the duel did not close it");
-                await StartPractice(CustomPractice.Preset("Crane"), CustomPractice.Preset("Lion"), false);
-                await Dwell(8);
-                GD.Print($"STRESS_AFTER_NEW_PRACTICE duelOpen={DuelOpen} {Describe()} played={_played}");
-                Require(!DuelOpen, "the previous match's duel reopened over the new Practice");
-                Require(Session.Snapshot is { View.Version: > 2 }, $"the new Practice did not progress ({Describe()})");
-                if (_failures > 0) Screenshot("duel-leave-practice-failure");
-                break;
-            }
+                {
+                    // A duel kept for Resume must not come back over the next Practice (it reopened on "Opponent's move" and never returned).
+                    Session.StartDuelDemo("steel", 205, 0);
+                    var flow = typeof(Main).GetField("_matchDuelFlow", Private)!.GetValue(_main)!;
+                    flow.GetType().GetMethod("Observe")!.Invoke(flow, [Session.Snapshot]);
+                    Call("EnterTable"); _ = Session.BeginDuelDemo();
+                    for (var t = 0; t < 200 && Field<object?>("_matchDuel") is null; t++) await Dwell(.05);
+                    Require(Field<object?>("_matchDuel") is not null, "the prepared duel never opened");
+                    await Dwell(Math.Min(6, _dwells[_rng.Next(_dwells.Length)]));
+                    Call("ConfirmLeaveMatchDuel"); await Dwell(-1); AcceptConfirm(); await Dwell(-1);
+                    Require(!DuelOpen, "leaving the duel did not close it");
+                    await StartPractice(CustomPractice.Preset("Crane"), CustomPractice.Preset("Lion"), false);
+                    await Dwell(8);
+                    GD.Print($"STRESS_AFTER_NEW_PRACTICE duelOpen={DuelOpen} {Describe()} played={_played}");
+                    Require(!DuelOpen, "the previous match's duel reopened over the new Practice");
+                    Require(Session.Snapshot is { View.Version: > 2 }, $"the new Practice did not progress ({Describe()})");
+                    if (_failures > 0) Screenshot("duel-leave-practice-failure");
+                    break;
+                }
             case "online-then-practice":
-            {
-                // Enter a private match, close the dialog and start Practice before the server answers: the Practice must survive and nothing may touch the freed dialog.
-                if (OS.GetEnvironment("L5R_STRESS_SERVER") is not { Length: > 0 } server) { GD.Print("STRESS_NOTE online-then-practice needs L5R_STRESS_SERVER"); return; }
-                Call("ShowOnline"); await Dwell(-1);
-                var dialog = Descendants<AcceptDialog>(_main).Last(d => d.Title == "Private match");
-                Descendants<LineEdit>(dialog).First().Text = server;
-                Descendants<Button>(dialog).First(b => b.Text == "Enter private match").EmitSignal(BaseButton.SignalName.Pressed);
-                dialog.EmitSignal(AcceptDialog.SignalName.Confirmed);
-                await StartPractice(CustomPractice.Preset("Crane"), CustomPractice.Preset("Lion"), true);
-                await Dwell(6);
-                GD.Print($"STRESS_AFTER_CONNECT online={Session.Online} {Describe()} played={_played}");
-                Require(!Session.Online && Session.Snapshot is { View.Version: > 0 }, $"the late connect replaced the Practice ({Describe()}, online={Session.Online})");
-                break;
-            }
+                {
+                    // Enter a private match, close the dialog and start Practice before the server answers: the Practice must survive and nothing may touch the freed dialog.
+                    if (OS.GetEnvironment("L5R_STRESS_SERVER") is not { Length: > 0 } server) { GD.Print("STRESS_NOTE online-then-practice needs L5R_STRESS_SERVER"); return; }
+                    Call("ShowOnline"); await Dwell(-1);
+                    var dialog = Descendants<AcceptDialog>(_main).Last(d => d.Title == "Private match");
+                    Descendants<LineEdit>(dialog).First().Text = server;
+                    Descendants<Button>(dialog).First(b => b.Text == "Enter private match").EmitSignal(BaseButton.SignalName.Pressed);
+                    dialog.EmitSignal(AcceptDialog.SignalName.Confirmed);
+                    await StartPractice(CustomPractice.Preset("Crane"), CustomPractice.Preset("Lion"), true);
+                    await Dwell(6);
+                    GD.Print($"STRESS_AFTER_CONNECT online={Session.Online} {Describe()} played={_played}");
+                    Require(!Session.Online && Session.Snapshot is { View.Version: > 0 }, $"the late connect replaced the Practice ({Describe()}, online={Session.Online})");
+                    break;
+                }
         }
     }
 }

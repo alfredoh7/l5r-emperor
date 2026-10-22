@@ -91,6 +91,17 @@ Fix:
 - **F3:** `Render()`'s no-snapshot branch now finishes `_flights` and clears `_tiles` along with the freed board children.
 - **F4:** folded into the shared reset in F1.2.
 
+### Found while validating: duel checks red on `main`
+
+`check-duel-match` and `check-duel-followups` failed on `main` before this change, and both failures are context-switch faults:
+
+- **F5, `TableLink.cs:32`:** sidebar ↔ table hover links unhooked a tile's handlers on the control's `TreeExiting`. That signal also fires when a duel reparents the table, so the next exit unhooked them again and Godot logged "Attempt to disconnect a nonexistent connection" for every linked button. The links now unhook once and rehook on `TreeEntered`.
+- **F6, `WarRoomStage.cs:65`:** a window resize while a duel had the table out of the tree aimed the hall camera with no viewport (`NullReferenceException`). `SetTableCamera` now skips while out of the tree; the hall re-aims on its next size change (#935).
+
+With both fixes, duel-match passes 14/14 variants and duel-followups 13/13. Their "real hand selection after the introductions" step failed intermittently (once in "normal" on `main`, once in "compact"), with no input gate blocking the click. It then passed 6/6 standalone and in both full runs. The failure message now records the lock, busy, priority and hover state, so the next flake can be diagnosed.
+
+`check-persistent-home` also fails on `main`: its `Choose` lookup became ambiguous (fixed here), and its Reserve payment step is stale or reveals a real change (#1105, not part of this PR).
+
 ### Scope and risk
 
 - All changes are client-side (`L5R.Client`). No rules, network-protocol or engine changes.

@@ -62,6 +62,8 @@ public partial class WarRoomStage : Node3D
     public void SetTableCamera(Vector2 screenCenter, float density, Vector2 center, float zoom,
         Vector2 boardSize, Vector2 extent, Vector2 leftLamp, Vector2 rightLamp)
     {
+        // A duel moves the table out of the tree for a moment; a resize then has no viewport to aim at. The hall re-aims when its size next changes (TableArtStage).
+        if (!IsInsideTree()) return;
         var size = GetViewport().GetVisibleRect().Size;
         var units = extent.X / MatWidth;
         var cosine = Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch);

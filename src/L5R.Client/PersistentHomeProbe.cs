@@ -14,7 +14,8 @@ public partial class PersistentHomeProbe : Node
     private static readonly BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
     private T Field<T>(string key) => (T)typeof(Main).GetField(key, Private)!.GetValue(_main)!;
     private void Set(string key, object? value) => typeof(Main).GetField(key, Private)!.SetValue(_main, value);
-    private object? Call(string key, params object?[] values) => typeof(Main).GetMethod(key, Private)!.Invoke(_main, values);
+    // Overloads (Choose has two) are told apart by argument count.
+    private object? Call(string key, params object?[] values) => typeof(Main).GetMethods(Private).Single(m => m.Name == key && m.GetParameters().Length == values.Length).Invoke(_main, values);
     private MatchEngine Engine => (MatchEngine)typeof(MatchSession).GetField("_engine", Private)!.GetValue(_session)!;
     private List<HomeReminder> Reminders => Field<List<HomeReminder>>("_homeReminders");
     private List<CardTile> Tiles => Field<List<CardTile>>("_tiles");
