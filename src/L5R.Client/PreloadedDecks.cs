@@ -30,12 +30,18 @@ public static class PreloadedDecks
         catch (Exception e) when (e is IOException or JsonException) { GD.PushWarning("Embedded decks could not be read: " + e.Message); return []; }
     }
 
-    /// <summary>The folder of editable practice decks: Documents\L5R Emperor\Decks, visible to the player and usable by other tools. Decks kept in the old hidden user://decks folder are copied across once (never overwritten);
+    /// <summary>The folder of editable practice decks: Documents\L5R Emperor\Decks (or L5R_DECKS_DIR), visible to the player and usable by other tools. Decks kept in the old hidden user://decks folder are copied across once (never overwritten);
     /// when Documents cannot be written the old folder stays in use.</summary>
     public static string DeckDirectory()
     {
         if (_directory is not null) return _directory;
         var legacy = ProjectSettings.GlobalizePath("user://decks");
+        // L5R_DECKS_DIR puts the folder anywhere the player wants (a development checkout keeps it out of a synced Documents folder); nothing is copied into it.
+        if (System.Environment.GetEnvironmentVariable("L5R_DECKS_DIR") is { Length: > 0 } custom)
+        {
+            try { Directory.CreateDirectory(custom); return _directory = System.IO.Path.GetFullPath(custom); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { GD.PushWarning("L5R_DECKS_DIR could not be used: " + e.Message); }
+        }
         try
         {
             var documents = OS.GetSystemDir(OS.SystemDir.Documents);
