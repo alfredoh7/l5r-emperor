@@ -162,7 +162,7 @@ public partial class TitleMenu : Control
         if (track.Entries is [{ Built: true } only] && Tutorial is { } start) start(only.Id);
         else ShowTutorialTrack(track);
     }
-    public void ShowTutorialTrack(Core.TutorialTrack track)
+    public void ShowTutorialTrack(Core.TutorialTrack track, string? unbuiltLessonId = null)
     {
         Clear("tutorial-track");
         // The lessons scroll (mouse wheel, or drag the bar); Back stays fixed below them.
@@ -191,6 +191,9 @@ public partial class TitleMenu : Control
         back.Position = new Vector2(1056, 701); back.Size = new Vector2(414, 62); _trackBack = back;
         _message.Text = "Dimmed lessons are placeholders: they are not built yet.";
         FocusFirst();
+        // Next Tutorial on a lesson whose successor is a placeholder lands on it, so the menu says it is not built yet and what it will cover.
+        if (unbuiltLessonId is not null && Array.FindIndex(track.Entries, e => e.Id == unbuiltLessonId) is >= 0 and var at && Entries.GetChild(at) is Control waiting)
+            Callable.From(() => { if (IsInstanceValid(waiting) && waiting.IsVisibleInTree()) waiting.GrabFocus(); }).CallDeferred();
     }
     private void Begin(int seat)
     {

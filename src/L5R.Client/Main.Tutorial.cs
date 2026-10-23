@@ -75,7 +75,7 @@ public partial class Main
         }
         if (_coachPanel is null)
         {
-            _coachPanel = new TutorialCoachPanel { Continue = TutorialContinue, Back = TutorialBack };
+            _coachPanel = new TutorialCoachPanel { Continue = TutorialContinue, Back = TutorialBack, NextTutorial = TutorialNext };
             _root.AddChild(_coachPanel);
         }
         var coach = lesson.Coach;
@@ -113,9 +113,34 @@ public partial class Main
         if (_session.Tutorial is { Finished: true } done) { _coachPanel?.Hide(); ShowMainMenu(); _titleMenu?.ShowTutorialFor(done.LessonId); }
     }
 
+    /// <summary>The last note's Next Tutorial: starts the lesson the curriculum lists next. One that is not built yet (a placeholder) opens its track's list instead, which says so.</summary>
+    private void TutorialNext(string lessonId)
+    {
+        if (_session.Tutorial is not { Finished: false } || PresentationBusy || PlayShowcaseBusy) return;
+        if (CardLessonBuilt(lessonId)) { _coachPanel?.Hide(); StartTutorial(lessonId); return; }
+        TutorialContinue();
+        if (TutorialCurriculum.TrackOf(lessonId) is { } track) _titleMenu?.ShowTutorialTrack(track, lessonId);
+    }
+    private static bool CardLessonBuilt(string lessonId) => TutorialCurriculum.All.FirstOrDefault(e => e.Id == lessonId)?.Built == true;
+
+    // A note that swells a printed part (the Gold Cost coin, the Honor Requirement box) on the cards it points at: four seconds from when the note first shows.
+    private string? _tutorialEmphasisStep; private ulong _tutorialEmphasisStarted;
+    private void ApplyTutorialEmphasis(CardTile tile)
+    {
+        if (_session.Tutorial is not { Finished: false } lesson || lesson.Coach is not { Emphasis: { } part } coach || !tile.Pointed)
+        {
+            tile.Emphasize(null, 0);
+            if (_session.Tutorial?.Coach.Emphasis is null) _tutorialEmphasisStep = null; // coming back to the same note starts the swell again
+            return;
+        }
+        if (_tutorialEmphasisStep != coach.StepId) { _tutorialEmphasisStep = coach.StepId; _tutorialEmphasisStarted = Time.GetTicksMsec(); }
+        tile.Emphasize(part, _tutorialEmphasisStarted);
+    }
+
     private void PulseTutorialPointers(double delta)
     {
         if (!TutorialActive) return;
+        foreach (var tile in _tiles) if (IsInstanceValid(tile)) tile.TickEmphasis();
         ProcessTutorialDeal(delta); UpdateTutorialDealFades(); AnimateTutorialHonor(delta);
         if (_reducedMotion) return;
         foreach (var tile in _tiles) if (tile.Pointed && IsInstanceValid(tile)) tile.QueueRedraw();
@@ -201,9 +226,15 @@ public partial class Main
             if (_session.Tutorial?.Coach.StepId != arg) throw new InvalidOperationException($"Back landed on {_session.Tutorial?.Coach.StepId}, not {arg}.");
             await WaitTutorialRest();
         }
-        else if (verb == "mouse") // a real pointer click at the centre of the coach's button, through the GUI input path
+        else if (verb == "confirm") // the Confirm of the dialog with this title
         {
-            var button = _coachPanel?.FindChild("TutorialContinue", true, false) as Button ?? throw new InvalidOperationException("no coach button");
+            await ToSignal(GetTree().CreateTimer(.3), SceneTreeTimer.SignalName.Timeout);
+            var dialog = GetChildren().OfType<ConfirmationDialog>().FirstOrDefault(d => d.Title == arg) ?? throw new InvalidOperationException($"no '{arg}' confirmation is showing");
+            dialog.EmitSignal(ConfirmationDialog.SignalName.Confirmed);
+        }
+        else if (verb == "mouse") // a real pointer click at the centre of the coach's button (mouse:next is the Next Tutorial beside it), through the GUI input path
+        {
+            var button = _coachPanel?.FindChild(arg == "next" ? "TutorialNext" : "TutorialContinue", true, false) as Button ?? throw new InvalidOperationException("no coach button");
             for (var wait = 0; wait < 80 && !button.IsVisibleInTree(); wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout); // the button waits out card and battle presentations
             var at = button.GetGlobalRect().GetCenter();
             GetViewport().PushInput(new InputEventMouseMotion { Position = at, GlobalPosition = at });
@@ -215,6 +246,11 @@ public partial class Main
             var size = arg.Split('x').Select(int.Parse).ToArray();
             GetWindow().Size = new Vector2I(size[0], size[1]);
             for (var i = 0; i < 20; i++) await CoverageFrames();
+        }
+        else if (verb == "swell") // restarts the note's four-second swell and waits this long into it, for a picture of it
+        {
+            _tutorialEmphasisStarted = Time.GetTicksMsec(); Render();
+            await ToSignal(GetTree().CreateTimer(double.Parse(arg)), SceneTreeTimer.SignalName.Timeout);
         }
         else if (verb == "wait") await ToSignal(GetTree().CreateTimer(double.Parse(arg)), SceneTreeTimer.SignalName.Timeout);
         else if (verb == "click")
@@ -253,6 +289,12 @@ public partial class Main
         // Events, Regions and Celestials (issue #1074): its own moves; Pass action and Decline to attack are the same buttons as above.
         ["choose-province"] = "selectprovince:1/2;click:Confirm choice",
         ["buy-village"] = "select:Prosperous Village;select:Plains of the Maiden;select:Border Keep;click:Recruit",
+        // Recruiting Personalities (issue #1075): the picker's Proclaim mode, the Clan Discount it defaults to afterwards, an Overlay, and the discard that ends the recruiting.
+        ["proclaim-baiko"] = "selectprovince:0/3;option:Proclaim;select:Yasuki Palaces;select:Border Keep;click:Recruit",
+        ["recruit-tanimura"] = "selectprovince:0/0;select:Bamboo Harvesters;select:Iron Mine;select:Small Farm;click:Recruit",
+        ["overlay"] = "selectprovince:0/2;click:Overlay",
+        ["discard-sachina"] = "selectprovince:0/1;click:Discard;confirm:Discard this province card?",
+        ["pass-turn"] = "click:End Dynasty Phase",
     };
 
 
@@ -297,7 +339,8 @@ public partial class Main
             await RunTutorialUiToken("menuleave"); for (var i = 0; i < 6; i++) await CoverageFrames();
             if (_session.Tutorial is not null || !MenuVisible || _titleMenu?.Page != "tutorial") throw new InvalidOperationException("Leaving the tutorial from the table menu did not return to the tutorial menu.");
             var dynastySteps = await CheckTutorialDynastyUi();
-            GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {honor}; left mid-lesson through the table menu; Events, Regions and Celestials: {dynastySteps} steps");
+            var recruitingSteps = await CheckTutorialRecruitingUi();
+            GD.Print($"TUTORIAL_UI_CHECK: completed {seen.Count} steps; Honor {honor}; left mid-lesson through the table menu; Events, Regions and Celestials: {dynastySteps} steps; Recruiting Personalities: {recruitingSteps} steps");
             GetTree().Quit();
         }
         catch (Exception e) { GD.PushError("TUTORIAL_UI_CHECK failed: " + e.Message); GetTree().Quit(1); }
@@ -332,6 +375,56 @@ public partial class Main
         }
         if (_session.Tutorial is { Finished: false }) throw new InvalidOperationException("The Events, Regions and Celestials lesson did not finish.");
         if (!MenuVisible || _titleMenu?.Page != "tutorial-track") throw new InvalidOperationException("Back to Menu did not return to the Level Up Your Play list.");
+        return seen.Count;
+    }
+
+    /// <summary>Plays Recruiting Personalities (issue #1075) start to finish with the controls a player uses: the swell on each Gold Cost and Honor Requirement, Sachina's greyed-out recruit and why, the Proclaim picker, the Overlay,
+    /// the discard and its confirmation, and the Next Tutorial on the last note of the lesson before it.</summary>
+    private async Task<int> CheckTutorialRecruitingUi()
+    {
+        StartTutorial("dynasty-deck"); for (var i = 0; i < 6; i++) await CoverageFrames();
+        if (!await PlayTutorialTo("done")) throw new InvalidOperationException("Events, Regions and Celestials did not reach its last note.");
+        await WaitTutorialRest();
+        if (_session.Tutorial?.Coach.NextLessonId != "recruiting") throw new InvalidOperationException("The last note of Events, Regions and Celestials does not offer Recruiting Personalities next.");
+        await RunTutorialUiToken("mouse:next");
+        for (var wait = 0; wait < 40 && _session.Tutorial?.LessonId != "recruiting"; wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
+        if (_session.Tutorial?.LessonId != "recruiting" || MenuVisible) throw new InvalidOperationException("Next Tutorial did not start Recruiting Personalities.");
+        for (var i = 0; i < 6; i++) await CoverageFrames();
+        var seen = new List<string>();
+        for (var guard = 0; guard < 200 && _session.Tutorial is { Finished: false } lesson; guard++)
+        {
+            var coach = lesson.Coach; seen.Add(coach.StepId);
+            if (coach.StepId is "cost" or "honor-requirement" or "crane-turn")
+            {
+                await WaitTutorialRest(); await CoverageFrames();
+                var expected = coach.StepId == "crane-turn" ? 3 : 4;
+                var swelling = _tiles.Count(t => IsInstanceValid(t) && t.EmphasisActive);
+                if (swelling != expected) throw new InvalidOperationException($"{coach.StepId}: {swelling} cards are swelling a printed part, not {expected}.");
+            }
+            if (coach.StepId == "loyal")
+            {
+                await RunTutorialUiToken("selectprovince:0/1"); await WaitTutorialRest();
+                var recruit = _inspector.FindChildren("*", "Button", true, false).OfType<Button>().FirstOrDefault(b => b.Text.Contains("Review payment"));
+                if (recruit is null || !recruit.Disabled || !recruit.TooltipText.Contains("Loyal")) throw new InvalidOperationException("Sachina's recruit is not shown disabled with Loyal as the reason.");
+                if (_session.Tutorial?.Coach.StepId != "loyal") throw new InvalidOperationException("Selecting Sachina moved the lesson on.");
+            }
+            if (coach.StepId == "done" && _coachPanel!.FindChild("TutorialNext", true, false) is not Control { Visible: true }) throw new InvalidOperationException("The last note has no Next Tutorial button.");
+            if (coach.Button is not null)
+            {
+                var before = coach.StepId;
+                await RunTutorialUiToken("mouse:coach"); await CoverageFrames(); await CoverageFrames();
+                if (_session.Tutorial is { Finished: false } moved && moved.Coach.StepId == before) throw new InvalidOperationException($"{before}: a real click on the coach's button did nothing.");
+                continue;
+            }
+            if (!TutorialUiScripts.TryGetValue(coach.StepId, out var script)) throw new InvalidOperationException($"{coach.StepId}: no UI script for this step.");
+            await WaitTutorialRest();
+            foreach (var token in script.Split(';')) await RunTutorialUiToken(token);
+            for (var wait = 0; wait < 60 && _session.Tutorial is { Finished: false } still && still.Coach.StepId == coach.StepId; wait++) await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
+            if (_session.Tutorial is { Finished: false } after && after.Coach.StepId == coach.StepId)
+                throw new InvalidOperationException($"{coach.StepId}: the step did not advance. {TutorialControls()} notice={_status.Text}");
+        }
+        if (_session.Tutorial is { Finished: false }) throw new InvalidOperationException("Recruiting Personalities did not finish.");
+        if (!MenuVisible || _titleMenu?.Page != "tutorial-track") throw new InvalidOperationException("Tutorial Menu did not return to the Level Up Your Play list.");
         return seen.Count;
     }
 

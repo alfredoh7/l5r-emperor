@@ -703,7 +703,7 @@ public partial class Main : Node
         var tutorialPointed = TutorialPointed();
         foreach (var tile in _tiles)
         {
-            tile.Pointed = tutorialPointed.Contains(tile.Card.Id); ApplyTutorialDeal(tile);
+            tile.Pointed = tutorialPointed.Contains(tile.Card.Id); ApplyTutorialDeal(tile); ApplyTutorialEmphasis(tile);
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type == "forcedDiscard" && tile.Card.Id == _eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is { Type: "harshChoices", CardId: { } harshCard } && tile.Card.Id == harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;

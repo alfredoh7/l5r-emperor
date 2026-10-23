@@ -9,6 +9,37 @@ public partial class CardTile : Button
     public bool Highlighted { get; set; }
     /// <summary>The tutorial's pointer (issue #935): a soft gold pulse around the card the lesson is talking about. Never selects or enables anything.</summary>
     public bool Pointed { get; set; }
+    // ---- A printed part of the card the tutorial swells and shrinks back (issue #1075) -------------------------------------------------------------------------------------------
+    // Where the Gold Cost coin and the Honor Requirement box sit on a Personality's printed face, as fractions of the scan (centre, half width, half height).
+    private static readonly Dictionary<string, (float U, float V, float HalfW, float HalfH)> EmphasisParts = new()
+    {
+        [TutorialEmphasis.Cost] = (.486f, .605f, .075f, .052f),
+        [TutorialEmphasis.HonorRequirement] = (.369f, .600f, .056f, .046f),
+    };
+    public const double EmphasisSeconds = 4;
+    private string? _emphasis; private ulong _emphasisStart; private bool _emphasisWasActive;
+    /// <summary>Starts (or, with null, ends) the swell of one printed part; every tile of one note shares the start time so a rebuilt tile carries on where it was.</summary>
+    public void Emphasize(string? part, ulong startedMsec) { if (_emphasis == part && _emphasisStart == startedMsec) return; _emphasis = part; _emphasisStart = startedMsec; QueueRedraw(); }
+    private double EmphasisAge => (Time.GetTicksMsec() - _emphasisStart) / 1000.0;
+    public bool EmphasisActive => _emphasis is not null && EmphasisAge < EmphasisSeconds;
+    /// <summary>Called every frame by the tutorial: keeps the swell drawing while it lasts and clears it once it is over.</summary>
+    public void TickEmphasis() { var active = EmphasisActive; if (active || _emphasisWasActive) QueueRedraw(); _emphasisWasActive = active; }
+    private void DrawEmphasis(Texture2D texture)
+    {
+        if (!EmphasisActive || !EmphasisParts.TryGetValue(_emphasis!, out var part)) return;
+        var face = FaceSize();
+        Vector2 At(float u, float v) => ProjectFacePoint(new Vector2(u * face.X, v * face.Y), face);
+        var grow = ReducedMotion ? 1f : 1f + 2.2f * MathF.Sin(MathF.PI * (float)(EmphasisAge / EmphasisSeconds)); // up for two seconds, back down for two
+        var halfW = part.HalfW * grow; var halfH = part.HalfH * grow;
+        var corners = new[] { At(part.U - halfW, part.V - halfH), At(part.U + halfW, part.V - halfH), At(part.U + halfW, part.V + halfH), At(part.U - halfW, part.V + halfH) };
+        if (!ReducedMotion)
+        {
+            DrawColoredPolygon(corners.Select(c => c + new Vector2(2, 3)).ToArray(), new Color(0, 0, 0, .35f));
+            var uv = new[] { new Vector2(part.U - part.HalfW, part.V - part.HalfH), new Vector2(part.U + part.HalfW, part.V - part.HalfH), new Vector2(part.U + part.HalfW, part.V + part.HalfH), new Vector2(part.U - part.HalfW, part.V + part.HalfH) };
+            DrawColoredPolygon(corners, Colors.White, uv, texture);
+        }
+        DrawPolyline(corners.Append(corners[0]).ToArray(), Palette.Gold, ReducedMotion ? 3f : 2.5f, true);
+    }
     public bool QuietSelection { get; set; }
     public bool LegalTarget { get; set; }
     public bool ChosenTarget { get; set; }
@@ -228,6 +259,7 @@ public partial class CardTile : Button
         DrawColoredPolygon(corners, Colors.White, new Vector2[] { Vector2.Zero, Vector2.Right, Vector2.One, Vector2.Down }, texture);
         DrawInteractionEdge();
         DrawStatInlays();
+        DrawEmphasis(texture);
         DrawPublicStatus();
         DrawDishonorMarker();
         if (DecisionSelected) DrawDiscardSelection();

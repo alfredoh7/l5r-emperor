@@ -23,6 +23,12 @@ internal static class TutorialCards
         PlainsOfOtosanUchi = "oracle-l5r-5979", SuitengusBlessing = "oracle-l5r-9948", BoastfulProclamation = "oracle-l5r-1086";
     public const string SneakAttack = "oracle-l5r-7311", SoundOfThunder = "oracle-l5r-8347", WallOfHonor = "oracle-l5r-9198", PureIntent = "oracle-l5r-9922", Sniping = "oracle-l5r-7312";
 
+    // The Recruiting Personalities lesson (issue #1075): Crab Control (you) against Classic Crane.
+    // Yasuki Palaces (exp): 5 Gold, 1 less when paying for a Personality; strength 7. Shinden Asahina is Crane's Stronghold (FoeStronghold).
+    public const string YasukiPalaces = "oracle-l5r-9459", IronMine = "oracle-l5r-3808", Marketplace = "oracle-l5r-4840", Pillowbook = "oracle-l5r-5958";
+    public const string YasukiBaiko = "oracle-l5r-10044", YasukiTanimura = "oracle-l5r-9464", YasukiTsujiken = "oracle-l5r-9469", YasukiTsujikenExp = "oracle-l5r-10045",
+        YoritomoSachina = "oracle-l5r-9623", UtakuMai = "oracle-l5r-9086";
+
     /// <summary>A forty-card deck: the lesson's cards on top, then the rest of the side's deck in its own order. A card the deck does not hold displaces the last card.</summary>
     internal static string[] Deck(string[] top, TutorialSide side, bool dynasty)
     {

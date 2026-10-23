@@ -6,8 +6,17 @@ namespace L5R.Core;
 /// <param name="Slow">The presentations this step starts (province reveals, a played card) run at a quarter of their usual speed.</param>
 /// <param name="AnimateOnly">When set, the only cards (by definition id) whose reveal and entering-play animations this step shows; the others reveal quietly (they are explained in a later step).</param>
 /// <param name="ProvincesOnTable">False while the opening notes are read: the provinces are laid out at the step that introduces them.</param>
+/// <param name="Emphasis">A printed part of every highlighted card to swell and shrink back over four seconds (see <see cref="TutorialEmphasis"/>).</param>
+/// <param name="NextLessonId">On a lesson's last note: the lesson the curriculum lists next, offered beside the button back to the menu (its title is <paramref name="NextTitle"/>).</param>
 public sealed record TutorialCoach(string StepId, string Title, string Body, string? Button, string[] HighlightCardIds, int Step, int Steps, bool Finished, string? Instruction = null,
-    string[]? Glow = null, string? ShowDefinitionId = null, bool Slow = false, bool ProvincesOnTable = true, bool CanGoBack = false, string? ExitLabel = null, string[]? AnimateOnly = null);
+    string[]? Glow = null, string? ShowDefinitionId = null, bool Slow = false, bool ProvincesOnTable = true, bool CanGoBack = false, string? ExitLabel = null, string[]? AnimateOnly = null,
+    string? Emphasis = null, string? NextLessonId = null, string? NextTitle = null);
+
+/// <summary>Printed parts of a card a note can swell: the Gold Cost coin and the Honor Requirement box.</summary>
+public static class TutorialEmphasis
+{
+    public const string Cost = "cost", HonorRequirement = "honor-requirement";
+}
 
 /// <summary>Parts of the screen a note can light up.</summary>
 public static class TutorialGlow
@@ -45,6 +54,7 @@ internal sealed class TutorialStep
     public bool Slow { get; init; }
     /// <summary>Definition ids of the only cards whose reveal animations play when this step shows (see <see cref="TutorialCoach.AnimateOnly"/>).</summary>
     public string[]? AnimateOnly { get; init; }
+    public string? Emphasis { get; init; }
     public bool IsAction => Allow is not null;
 }
 
@@ -107,6 +117,7 @@ public sealed class TutorialRunner
     private readonly List<GameCommand?> _inputs = [];
     private int _index;
     private int? _attackedProvince;
+    private readonly HashSet<FoePurchase> _bought = [];
 
     private TutorialRunner(TutorialLesson lesson)
     {
@@ -133,8 +144,9 @@ public sealed class TutorialRunner
         get
         {
             if (Current is not { } step) return new("done", "Lesson complete", "", null, [], _steps.Length, _steps.Length, true);
+            var next = _index == _steps.Length - 1 ? TutorialCurriculum.After(_lesson.Id) : null;
             return new(step.Id, step.Title, step.Body, step.Button, step.Highlight?.Invoke(_lookup).ToArray() ?? [], _index + 1, _steps.Length, false, step.Instruction,
-                step.Glow, step.ShowDefinitionId, step.Slow, _index >= _lesson.ProvincesStep, CanGoBack, AnimateOnly: step.AnimateOnly);
+                step.Glow, step.ShowDefinitionId, step.Slow, _index >= _lesson.ProvincesStep, CanGoBack, AnimateOnly: step.AnimateOnly, Emphasis: step.Emphasis, NextLessonId: next?.Id, NextTitle: next?.Title);
         }
     }
 
@@ -143,7 +155,7 @@ public sealed class TutorialRunner
     {
         var offered = _engine.QueryActions(Seat);
         if (Current is not { IsAction: true } step || _engine.PriorityPlayerId != Seat || _engine.TutorialHeld)
-            return offered.Select(a => a with { Enabled = false, Reason = "Read the tutorial note, then press its button." }).ToArray();
+            return offered.Select(a => a with { Enabled = false, Reason = a.Enabled ? "Read the tutorial note, then press its button." : a.Reason }).ToArray(); // an option the engine itself refuses keeps its own reason (Sachina: Loyal)
         var targets = step.Targets?.Invoke(_lookup).ToHashSet();
         return offered.Select(a => a.Enabled && a.Command is { } command && step.Allow!(_lookup, command)
             ? a with
@@ -234,12 +246,22 @@ public sealed class TutorialRunner
             var target = targets.FirstOrDefault(id => _lookup.DefinitionOf(id) == definition);
             return target is null ? null : option with { Command = option.Command! with { TargetId = target } };
         }
+        ActionOption? Scripted(FoePurchase buy)
+        {
+            var option = options.FirstOrDefault(a => a.Type == "purchase" && _lookup.Is(a.Command!.CardId, buy.DefinitionId) && a.Command.ClanDiscount == buy.ClanDiscount && a.Command.ClanAllegiance == buy.ClanAllegiance);
+            if (option is null) return null;
+            var sources = buy.PaidBy.SelectMany(d => _lookup.Foe(d, Zone.Home, Zone.Stronghold).Take(1)).ToArray();
+            return option with { Command = option.Command! with { SourceIds = sources } };
+        }
         ActionOption? Buys(string definition, bool discount) => options.FirstOrDefault(a => a.Type == "purchase" && a.Command!.ClanDiscount == discount && _lookup.Is(a.Command.CardId, definition));
         var script = _lesson.Foe;
-        return options.FirstOrDefault(a => a.Type == "declineReaction")
+        return (scripted && script.Purchases is { } plan ? options.FirstOrDefault(a => a.Type == "proclaim" && plan.Any(p => p.Proclaim)) : null) // a Proclaim the script asks for comes before declining the window it opens
+            ?? options.FirstOrDefault(a => a.Type == "declineReaction")
             ?? options.FirstOrDefault(a => a.Type == "assignDefense" && _attackedProvince is int attacked && (a.Command!.Assignments?.Values.Contains(attacked) ?? a.Command.Province == attacked))
             ?? (scripted ? script.Abilities.Select(x => Targeting(x.Ability, x.Target)).FirstOrDefault(o => o is not null) : null)
-            ?? (scripted ? script.RecruitWithDiscount.Select(d => Buys(d, true)).Concat(script.Recruit.Select(d => Buys(d, false))).FirstOrDefault(o => o is not null) : null)
+            ?? (scripted && script.Purchases is { } purchases ? purchases.Where(p => !_bought.Contains(p)).Select(p => { var o = Scripted(p); if (o is not null) _bought.Add(p); return o; }).FirstOrDefault(o => o is not null) : null)
+            ?? (scripted && script.Purchases is null ? script.RecruitWithDiscount.Select(d => Buys(d, true)).Concat(script.Recruit.Select(d => Buys(d, false))).FirstOrDefault(o => o is not null) : null)
+            ?? (scripted && script.Purchases is not null && script.Purchases.All(_bought.Contains) ? script.Discard?.Select(d => options.FirstOrDefault(a => a.Type == "discardProvince" && _lookup.Is(a.Command!.CardId, d))).FirstOrDefault(o => o is not null) : null)
             ?? options.FirstOrDefault(a => a.Type == "pass")
             ?? (scripted ? options.FirstOrDefault(a => a.Type == "endDynasty") : null);
     }

@@ -140,7 +140,7 @@ internal static class TutorialLessonOne
         Do("pass-battle", "Sent home", "Daidoji Kenshi has been \"sent home\". Home is the generic space in your tableau that is not at a battlefield. Without a Personality in the fight, or a way to get one back, the Crane must pass.",
             "Click Pass battle action to proceed to the battle's resolution.", Move("pass"), glow: [TutorialGlow.BattleBar]),
         Note("resolved", "Resolution", "You now have enough Force to destroy the Province. The card is discarded and the Crane's Provinces move closer together to signify the loss of the Province.", glow: [TutorialGlow.BattleBar]),
-        Note("congratulations", "Congratulations", "Congratulations, you now know the basics of how to play a turn and how to fight a battle. Remember, if you destroy an opponent's last Province, you win the game! Play through Level Up Your Play in order to learn how to play every card in the game.", button: "End Tutorial"),
+        Note("congratulations", "Congratulations", "Congratulations, you now know the basics of how to play a turn and how to fight a battle. Remember, if you destroy an opponent's last Province, you win the game! Play through Level Up Your Play in order to learn how to play every card in the game. Select the Next Tutorial to continue learning.", button: "Tutorial Menu"),
     ];
 
     /// <summary>Lion (you) against Crane on the pinned decks. Lion's Dynasty deck opens on its four provinces, then the card the first purchase refills with (turn two's Events phase reveals it);

@@ -97,7 +97,7 @@ internal static class TutorialLessonDynasty
             highlight: Foe(TutorialCards.BoastfulProclamation), glow: Bar),
         Note("one-region", "One Region per Province", "Bad luck for the Mantis player: each Province can only have one Region attached, and you may not swap them once they're attached. Regions, like Events, only attach during the Events phase. Plains of Otosan Uchi will either be discarded during the Dynasty phase or, if the Mantis player does nothing, during their next Events phase when it fails to attach.",
             highlight: Foe(TutorialCards.PlainsOfOtosanUchi, TutorialCards.ShindenShorai), glow: Bar),
-        Note("done", "Congratulations", "Congratulations, you've completed the tutorial on the remaining types of Dynasty cards!", button: "Back to Menu"),
+        Note("done", "Congratulations", "Congratulations, you've completed the tutorial on the remaining types of Dynasty cards! Select the Next Tutorial to continue learning.", button: "Tutorial Menu"),
     ];
 
     /// <summary>A deck of exactly these cards on top, then filler to forty so the draws never run dry.</summary>

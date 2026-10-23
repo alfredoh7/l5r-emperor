@@ -194,7 +194,7 @@ internal static class TutorialDynastyTests
         Expect(steps.Length is >= 15 and <= 30, $"the lesson is between 15 and 30 steps, got {steps.Length}");
         Expect(steps.Select(s => s.Id).Distinct().Count() == steps.Length, "step ids are unique");
         foreach (var step in steps) Expect(step.IsAction ? step.Instruction is { Length: > 0 } && step.Button is null : step.Button is { Length: > 0 }, $"{step.Id}: a move says what to click, a note has a button");
-        Expect(steps[^1].Button == "Back to Menu", "the last step returns to the menu");
+        Expect(steps[^1].Button == "Tutorial Menu" && steps[^1].Body.EndsWith("Select the Next Tutorial to continue learning."), "the last step returns to the menu and points at the Next Tutorial");
         Expect(TutorialCurriculum.TrackOf(Lesson)?.Title == "Level Up Your Play" && TutorialCurriculum.TrackOf("first-turn")?.Entries.Length == 1, "the lesson belongs to Level Up Your Play, so the menu returns there");
     }
 

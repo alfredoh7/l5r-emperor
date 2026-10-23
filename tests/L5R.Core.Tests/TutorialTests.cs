@@ -181,7 +181,7 @@ internal static class TutorialTests
             }
             Expect(TutorialRunner.Start(lesson.Id).Engine.TutorialState.Players.All(p => p.Provinces.Count == 4), $"{lesson.Id}: its table builds from its own setup");
         }
-        Expect(TutorialLessonOne.Steps[^1].Button == "End Tutorial", "the lesson ends on End Tutorial");
+        Expect(TutorialLessonOne.Steps[^1].Button == "Tutorial Menu" && TutorialLessonOne.Steps[^1].Body.EndsWith("Select the Next Tutorial to continue learning."), "the lesson ends on Tutorial Menu, beside the Next Tutorial it tells you to select");
         Expect(TutorialLessonOne.Lesson.ProvincesStep == 4, "the provinces are laid out at step 5");
     }
 

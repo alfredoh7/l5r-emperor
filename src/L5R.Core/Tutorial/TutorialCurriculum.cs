@@ -48,6 +48,13 @@ public static class TutorialCurriculum
 
     public static IEnumerable<TutorialEntry> All => Tracks.SelectMany(t => t.Entries);
 
+    /// <summary>The entry the curriculum lists after this lesson (the next track's first when it is a track's last), or null after the final one.</summary>
+    public static TutorialEntry? After(string lessonId)
+    {
+        var all = All.ToArray(); var at = Array.FindIndex(all, e => e.Id == lessonId);
+        return at >= 0 && at + 1 < all.Length ? all[at + 1] : null;
+    }
+
     /// <summary>The track a lesson belongs to: where the menu returns to when the lesson ends or is left.</summary>
     public static TutorialTrack? TrackOf(string lessonId) => Tracks.FirstOrDefault(t => t.Entries.Any(e => e.Id == lessonId));
 }
