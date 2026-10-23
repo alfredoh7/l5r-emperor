@@ -69,7 +69,7 @@ public partial class ClanPlaque : Control
         };
         _design.RemoveChild(name); _design.AddChild(nameClip); nameClip.AddChild(name); name.Position = Vector2.Zero;
         AddIcon(0, new Rect2(108, 74, 28, 23)); _honorFan = (TextureRect)_design.GetChild(_design.GetChildCount() - 1); _honorFan.PivotOffset = _honorFan.Size / 2;
-        _honorValue = Text(honor.ToString(), honor is > 99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 70, 31, 28)); _honor = honor;
+        _honorValue = Text(honor.ToString(), honor is > 99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 70, 31, 28));
         AddSprite(StrongholdCoin, new Rect2(179, 69, 28, 28)); // the Gold Production coin printed on strongholds, as in the gold flow
         var goldValue = Text(gold.ToString(), gold > 99 ? 15 : 21, new Color("17110b"), new Rect2(178, 68, 30, 29));
         goldValue.HorizontalAlignment = HorizontalAlignment.Center;
@@ -114,16 +114,8 @@ public partial class ClanPlaque : Control
 
     private readonly TextureRect _honorFan;
     private readonly Label _honorValue;
-    private readonly int _honor;
     /// <summary>The Family Honor fan and count, on screen; the tutorial lights it up.</summary>
     public Rect2 HonorGlobalRect => _honorFan.GetGlobalRect().Merge(_honorValue.GetGlobalRect());
-    /// <summary>Shows a different Honor for a moment (the tutorial counting toward an Honor Victory); null puts the real value back. Display only.</summary>
-    public void ShowHonor(int? shown, float fanScale = 1)
-    {
-        var value = shown ?? _honor;
-        _honorValue.Text = value.ToString(); _honorValue.AddThemeFontSizeOverride("font_size", value is > 99 or < -9 ? 18 : 21);
-        _honorFan.Scale = Vector2.One * fanScale;
-    }
     private void FitDesign()
     {
         var scale = Math.Min(Size.X / DesignWidth, Size.Y / DesignHeight);

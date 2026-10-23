@@ -22,7 +22,7 @@ public static class TutorialEmphasis
 public static class TutorialGlow
 {
     public const string PhaseBar = "phase-bar", BattleBar = "battle-bar", Hand = "hand";
-    /// <summary>Your Family Honor on your placard; the table also counts it up toward an Honor Victory and back while the note is read (display only).</summary>
+    /// <summary>Your Family Honor on your placard.</summary>
     public const string Honor = "honor";
 }
 
