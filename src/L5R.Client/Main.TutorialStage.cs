@@ -61,33 +61,6 @@ public partial class Main
         }
     }
 
-    // ---- Counting toward an Honor Victory -----------------------------------------------------------------------------------------------------------------------------------------
-    // While a note lights up your Honor, the placard counts it up to 40 (the Dishonor note: down to -20) and back again, the fan swelling as it goes. Display only: the engine's Honor never changes.
-    private const double HonorClimb = 2.4, HonorHold = .8, HonorCycle = (HonorClimb + HonorHold) * 2;
-    private const int HonorGoal = 40, DishonorGoal = -20;
-    private double _tutorialHonorClock = -1;
-
-    private void AnimateTutorialHonor(double delta)
-    {
-        var counting = _session.Tutorial is { Finished: false } lesson && lesson.Coach.Glow?.Contains(TutorialGlow.Honor) == true;
-        var plaque = _clanPlaques.GetValueOrDefault(View.ViewerId);
-        if (!counting)
-        {
-            if (_tutorialHonorClock >= 0 && plaque is not null && IsInstanceValid(plaque)) plaque.ShowHonor(null);
-            _tutorialHonorClock = -1; return;
-        }
-        if (plaque is null || !IsInstanceValid(plaque)) return;
-        _tutorialHonorClock = (Math.Max(_tutorialHonorClock, 0) + delta) % HonorCycle;
-        var start = View.Players.Single(p => p.Id == View.ViewerId).Honor;
-        var goal = _session.Tutorial?.Coach.StepId == "dishonor" ? DishonorGoal : HonorGoal;
-        var t = _tutorialHonorClock;
-        // up, hold at the goal, down, hold at the start
-        var rise = t < HonorClimb ? t / HonorClimb : t < HonorClimb + HonorHold ? 1 : t < HonorClimb * 2 + HonorHold ? 1 - (t - HonorClimb - HonorHold) / HonorClimb : 0;
-        var eased = rise * rise * (3 - 2 * rise);
-        var moving = rise is > 0 and < 1;
-        plaque.ShowHonor((int)Math.Round(start + (goal - start) * eased), _reducedMotion || !moving ? 1 : 1.18f + .06f * MathF.Sin((float)t * 14));
-    }
-
     // ---- The Show flow: a card held large in the middle of the table while its note is read ----------------------------------------------------------------------------------------
     private Control? _tutorialShow;
     private string? _tutorialShowId;

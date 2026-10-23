@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Remove the tutorial's Honor counting animation (the placard counting up to 40 / down to -20 and back, with the swelling fan) from every lesson; the Honor glow on the placard stays",
+  "validation": "Client builds; native tools/check-tutorial.sh passes all three lessons (59/22/25 steps); check_format clean. No human playtest.",
+  "remaining": "None; ready for review. Lesson 1's Honor Victory and Dishonor notes keep their text and glow but no longer animate the number.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1075",
+  "branch": "claude/1075-remove-honor-count",
+  "updated": "2026-10-23T19:35:02.590199+00:00"
+}

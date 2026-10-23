@@ -141,7 +141,7 @@ public partial class Main
     {
         if (!TutorialActive) return;
         foreach (var tile in _tiles) if (IsInstanceValid(tile)) tile.TickEmphasis();
-        ProcessTutorialDeal(delta); UpdateTutorialDealFades(); AnimateTutorialHonor(delta);
+        ProcessTutorialDeal(delta); UpdateTutorialDealFades();
         if (_reducedMotion) return;
         foreach (var tile in _tiles) if (tile.Pointed && IsInstanceValid(tile)) tile.QueueRedraw();
     }
