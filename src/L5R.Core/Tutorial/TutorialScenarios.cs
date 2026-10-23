@@ -23,15 +23,21 @@ public sealed partial class MatchEngine
             var side = sides[seat]; var player = state.Players[seat];
             player.Honor = side.Honor ?? CardCatalog.Get(side.StrongholdId).StartingHonor;
             player.StrongholdId = Add(seat, side.StrongholdId, Zone.Stronghold, true).Id;
-            foreach (var home in side.Home) Add(seat, home.DefinitionId, Zone.Home, true, home.Bowed);
+            foreach (var home in side.Home)
+            {
+                var placed = Add(seat, home.DefinitionId, Zone.Home, true, home.Bowed);
+                foreach (var attachment in home.Attachments ?? []) { var worn = Add(seat, attachment, Zone.Attached, true); worn.AttachedTo = placed.Id; }
+                if (home.ChiToken != 0) placed.Tokens.Add(new CardToken("token-tutorial-" + placed.Id, "Poison", "Tutorial", "Chi", home.ChiToken));
+            }
             foreach (var id in TutorialCards.Deck(side.DynastyTop, side, dynasty: true)) player.DynastyDeck.Add(Add(seat, id, Zone.DynastyDeck).Id);
             foreach (var id in TutorialCards.Deck(side.FateTop, side, dynasty: false)) player.FateDeck.Add(Add(seat, id, Zone.FateDeck).Id);
             var strength = CardCatalog.Get(side.StrongholdId).ProvinceStrength;
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = strength, PrintedStrength = strength }).ToList();
         }
-        state.ActivePlayerId = setup.FirstPlayer; state.PriorityPlayerId = setup.FirstPlayer; state.TurnNumber = 1;
+        state.ActivePlayerId = setup.FirstPlayer; state.PriorityPlayerId = setup.FirstPlayer; state.TurnNumber = 1 + 2 * setup.TurnsTaken;
+        foreach (var player in state.Players) player.TurnsTaken = setup.TurnsTaken;
         OrderCardsById(state);
-        var engine = new MatchEngine(state, seed, TutorialScenario);
+        var engine = new MatchEngine(state, seed, TutorialScenario) { _tutorialNoEndDraw = setup.NoEndDraw };
         foreach (var player in state.Players) foreach (var province in player.Provinces) engine.Refill(player, province);
         engine.Emit("tutorialSetup", "Tutorial table: every province is face down and nobody has drawn Fate cards yet.");
         return engine;
@@ -39,6 +45,7 @@ public sealed partial class MatchEngine
 
     public const string TutorialScenario = "tutorial-v2";
 
+    private bool _tutorialNoEndDraw;
     private readonly HashSet<(Phase Phase, int PlayerId)> _tutorialHolds = [];
     private Action? _tutorialResume;
 

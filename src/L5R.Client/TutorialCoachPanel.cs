@@ -11,6 +11,8 @@ public partial class TutorialCoachPanel : PanelContainer
     private Control? _buttons;
     public Action? Continue { get; set; }
     public Action? Back { get; set; }
+    /// <summary>The last note of a lesson that has a lesson after it offers it beside the way back to the menu; this starts it by id.</summary>
+    public Action<string>? NextTutorial { get; set; }
     /// <summary>The note's buttons are only shown while the table is at rest, so they can never be pressed in the middle of a card or battle presentation.</summary>
     public void SetReady(bool ready) { if (_buttons is not null && _buttons.Visible != ready) _buttons.Visible = ready; }
     public string StepId { get; private set; } = "";
@@ -39,7 +41,8 @@ public partial class TutorialCoachPanel : PanelContainer
             _body.AddChild(Palette.Wrapped("The next note appears when you have done this.", 14, Palette.Muted));
         }
         if (coach.Button is null && !coach.CanGoBack) return;
-        var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore }; row.AddThemeConstantOverride("separation", 8); _buttons = row; _body.AddChild(row);
+        var column = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore }; column.AddThemeConstantOverride("separation", 8); _buttons = column; _body.AddChild(column);
+        var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore }; row.AddThemeConstantOverride("separation", 8); column.AddChild(row);
         if (coach.CanGoBack)
         {
             var back = SidebarSkin.Button("Back", () => Back?.Invoke(), false); back.CustomMinimumSize = new Vector2(96, 44); back.Name = "TutorialBack";
@@ -47,8 +50,14 @@ public partial class TutorialCoachPanel : PanelContainer
         }
         if (coach.Button is { } label)
         {
-            var button = _button = SidebarSkin.Button(label, () => Continue?.Invoke(), true); button.CustomMinimumSize = new Vector2(0, 44); button.SizeFlagsHorizontal = SizeFlags.ExpandFill; row.AddChild(button);
+            var next = coach.NextLessonId;
+            var button = _button = SidebarSkin.Button(label, () => Continue?.Invoke(), next is null); button.CustomMinimumSize = new Vector2(0, 44); button.SizeFlagsHorizontal = SizeFlags.ExpandFill; row.AddChild(button);
             button.Name = "TutorialContinue";
+            if (next is not null)
+            {
+                var follow = SidebarSkin.Button("Next Tutorial", () => NextTutorial?.Invoke(next), true); follow.CustomMinimumSize = new Vector2(0, 44); follow.Name = "TutorialNext";
+                follow.TooltipText = coach.NextTitle is { } title ? "Continue with " + title + "." : "Continue with the next tutorial."; column.AddChild(follow);
+            }
         }
     }
 }

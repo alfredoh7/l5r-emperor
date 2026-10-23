@@ -2918,7 +2918,7 @@ public sealed partial class MatchEngine
         ResolvePendingEndPhaseDraws(); // Eternal Victory Dojo (Stronghold pass, issue #486 batch 1): "Draw a card after the next End Phase begins."
         if (_state.WinnerId is not null) return;
         DrawTurnRuleEndTurnCards(player); // P4 (TurnBoundaryRules.cs): a standing rule's extra end-of-turn draw, judged before the End Phase's own draw
-        Draw(player);
+        if (!_tutorialNoEndDraw) Draw(player); // a tutorial table that keeps hands as the lesson set them (TutorialSetup.NoEndDraw)
         // Ingenuity (issue #453, batch 2): "draw an additional card during your next End Phase".
         DrawExtraEndPhaseCards(player);
         var maxHand = MaxHandSize(player.Id);

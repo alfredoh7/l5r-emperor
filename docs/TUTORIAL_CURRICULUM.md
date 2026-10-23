@@ -17,7 +17,7 @@ A track with a single built lesson has no list: choosing it starts the lesson.
 | Lesson (id) | Subtitle |
 |---|---|
 | Events, Regions, and Celestials (`dynasty-deck`) | The rest of the Dynasty Deck: Unicorn Maidens against Mantis Manipulation, one turn each. Dark Experiments, Natural Aviary, Ebisu's Honesty and the Mantis Border Keep refresh (built, issue #1074). |
-| Recruiting Personalities (`recruiting`) | Clan Alignment, Honor Requirement, Recruitment Effects, Overlays |
+| Recruiting Personalities (`recruiting`) | Clan Alignment, Honor Requirement, Recruitment Effects, Overlays: Crab Control against Classic Crane at the Dynasty phase. Gold Cost and Honor Requirement (each swells on the cards for four seconds), a Loyal card that will not join, Proclaim, the Clan Discount, an Overlay, then the Crane showing Clan Allegiance against an Honor Requirement (built, issue #1075). |
 | Spells and Shugenja (`spells`) | Attaching and using spells in the Action and Battle Phases |
 | Attachments (`attachments`) | Using actions on attachments |
 | Keywords (`keywords`) | Functional vs Non-functional Keywords |
@@ -41,3 +41,5 @@ A track with a single built lesson has no list: choosing it starts the lesson.
 | Using Settings (`using-settings`) | |
 
 The Building a Deck lessons that teach a screen (Card Library, Deck Builder Overview) run in the app rather than in a match; how they are presented (coach column or guided tour) is not decided.
+
+Every built lesson ends on a note with a **Tutorial Menu** button and a **Next Tutorial** button (the entry the list above shows next, across tracks), and says "Select the Next Tutorial to continue learning." Next Tutorial on a lesson whose successor is not built yet opens that track's list with the placeholder selected.
