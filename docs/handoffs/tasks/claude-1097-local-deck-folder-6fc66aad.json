@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Editable practice decks can live outside Documents: the game honors L5R_DECKS_DIR, and tools/env.sh sets it to .l5r-local/Decks when a checkout has that git-excluded folder. Default behaviour (Documents\\L5R Emperor\\Decks) is unchanged for players.",
+  "validation": "Client builds and Refresh smoke check passed; with the launcher environment the game wrote a missing deck into .l5r-local/Decks and nothing into OneDrive; an explicit L5R_DECKS_DIR creates its folder; 15 decks copied and hash-verified before the OneDrive copy was removed. No automated test: it needs a running Godot.",
+  "remaining": "None for this change. Legacy checkouts under the OneDrive Desktop\\Claude folder still hold unfinished work and were not deleted (needs the owner's decision).",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1097",
+  "branch": "claude/1097-local-deck-folder",
+  "updated": "2026-10-23T22:33:41.911164+00:00"
+}
