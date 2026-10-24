@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Recruiting Personalities: the Gold Cost / Honor Requirement swell now repeats for as long as its note shows; dropped the offset shadow copy that made step 20's Crane cards look doubled.",
+  "validation": "tools/check-tutorial.sh passed (59/22/25 steps; swell count holds after the first cycle); native captures of step 20 at 6s show one box per Crane card. Not human-playtested.",
+  "remaining": "Doubling could not be reproduced in stills; Mendon to confirm step 20 looks right.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1075",
+  "branch": "claude/1075-repeat-swell",
+  "updated": "2026-10-24T07:53:48.489698+00:00"
+}

@@ -18,10 +18,10 @@ public partial class CardTile : Button
     };
     public const double EmphasisSeconds = 4;
     private string? _emphasis; private ulong _emphasisStart; private bool _emphasisWasActive;
-    /// <summary>Starts (or, with null, ends) the swell of one printed part; every tile of one note shares the start time so a rebuilt tile carries on where it was.</summary>
+    /// <summary>Starts (or, with null, ends) the swell of one printed part; every tile of one note shares the start time so a rebuilt tile carries on where it was. It repeats until the note is left.</summary>
     public void Emphasize(string? part, ulong startedMsec) { if (_emphasis == part && _emphasisStart == startedMsec) return; _emphasis = part; _emphasisStart = startedMsec; QueueRedraw(); }
     private double EmphasisAge => (Time.GetTicksMsec() - _emphasisStart) / 1000.0;
-    public bool EmphasisActive => _emphasis is not null && EmphasisAge < EmphasisSeconds;
+    public bool EmphasisActive => _emphasis is not null; // repeats for as long as the note is showing
     /// <summary>Called every frame by the tutorial: keeps the swell drawing while it lasts and clears it once it is over.</summary>
     public void TickEmphasis() { var active = EmphasisActive; if (active || _emphasisWasActive) QueueRedraw(); _emphasisWasActive = active; }
     private void DrawEmphasis(Texture2D texture)
@@ -29,12 +29,11 @@ public partial class CardTile : Button
         if (!EmphasisActive || !EmphasisParts.TryGetValue(_emphasis!, out var part)) return;
         var face = FaceSize();
         Vector2 At(float u, float v) => ProjectFacePoint(new Vector2(u * face.X, v * face.Y), face);
-        var grow = ReducedMotion ? 1f : 1f + 2.2f * MathF.Sin(MathF.PI * (float)(EmphasisAge / EmphasisSeconds)); // up for two seconds, back down for two
+        var grow = ReducedMotion ? 1f : 1f + 2.2f * MathF.Sin(MathF.PI * (float)(EmphasisAge % EmphasisSeconds / EmphasisSeconds)); // up for two seconds, back down for two, again and again
         var halfW = part.HalfW * grow; var halfH = part.HalfH * grow;
         var corners = new[] { At(part.U - halfW, part.V - halfH), At(part.U + halfW, part.V - halfH), At(part.U + halfW, part.V + halfH), At(part.U - halfW, part.V + halfH) };
         if (!ReducedMotion)
         {
-            DrawColoredPolygon(corners.Select(c => c + new Vector2(2, 3)).ToArray(), new Color(0, 0, 0, .35f));
             var uv = new[] { new Vector2(part.U - part.HalfW, part.V - part.HalfH), new Vector2(part.U + part.HalfW, part.V - part.HalfH), new Vector2(part.U + part.HalfW, part.V + part.HalfH), new Vector2(part.U - part.HalfW, part.V + part.HalfH) };
             DrawColoredPolygon(corners, Colors.White, uv, texture);
         }

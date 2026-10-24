@@ -123,7 +123,7 @@ public partial class Main
     }
     private static bool CardLessonBuilt(string lessonId) => TutorialCurriculum.All.FirstOrDefault(e => e.Id == lessonId)?.Built == true;
 
-    // A note that swells a printed part (the Gold Cost coin, the Honor Requirement box) on the cards it points at: four seconds from when the note first shows.
+    // A note that swells a printed part (the Gold Cost coin, the Honor Requirement box) on the cards it points at, a four-second swell that repeats while the note shows.
     private string? _tutorialEmphasisStep; private ulong _tutorialEmphasisStarted;
     private void ApplyTutorialEmphasis(CardTile tile)
     {
