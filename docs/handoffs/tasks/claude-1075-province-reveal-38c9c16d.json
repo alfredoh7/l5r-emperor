@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Province reveal flip: the cover now follows its live tile every frame and hides the face-up tile while it turns, so each flipped card is one card in place at any window size (was offset/doubled when the table re-fit after the cover was made).",
+  "validation": "tools/check-tutorial.sh passed. Native captures of the Crane reveal at 1672x941, 1024x768, 1280x720, 2560x1080 before/after: before, backs offset from the faces; after, one aligned card per slot. Not human-playtested.",
+  "remaining": "Mendon to confirm step 20.",
+  "issue": "https://github.com/l5r-emperor-dev/l5r-emperor/issues/1075",
+  "branch": "claude/1075-province-reveal",
+  "updated": "2026-10-24T14:09:42.018074+00:00"
+}

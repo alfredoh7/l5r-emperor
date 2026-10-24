@@ -7,7 +7,10 @@ namespace L5R.Client;
 /// face-up before calling <see cref="Done"/>. It only draws permitted textures; the engine has already revealed the card.</summary>
 public partial class CardFlip : Control
 {
-    public required Vector2[] From { get; init; }
+    public required Vector2[] From { get; set; }
+    /// <summary>The card's tile on the table as it is now: the table can re-fit (a new camera, another window size) after the cover is made, so the cover follows the tile each frame and hides it while it turns, rather than showing the face beside the cover.</summary>
+    public Func<CardTile?>? Locate { get; init; }
+    private CardTile? _hidden;
     public required Texture2D Face { get; init; }
     public required Texture2D Back { get; init; }
     public Action? Done { get; set; }
@@ -25,10 +28,24 @@ public partial class CardFlip : Control
 
     public override void _Process(double delta)
     {
+        Follow();
         if (_clock < 0) return;
         _clock += delta; QueueRedraw();
         if (_clock >= Turn + Linger) { var done = Done; Done = null; done?.Invoke(); }
     }
+
+    private void Follow()
+    {
+        if (Locate?.Invoke() is not { } tile || !IsInstanceValid(tile)) return;
+        if (_hidden != tile) { Restore(); _hidden = tile; }
+        tile.Visible = false;
+        var scale = (GetParent() as Control)?.Scale.X ?? 1f; // the table's own mapping: viewport pixels over the root's density
+        From = tile.FaceCornersOnViewport().Select(p => p / scale).ToArray();
+        QueueRedraw();
+    }
+
+    private void Restore() { if (_hidden is not null && IsInstanceValid(_hidden)) _hidden.Visible = true; _hidden = null; }
+    public override void _ExitTree() => Restore();
 
     private Vector2 At(float u, float v)
     {

@@ -151,7 +151,7 @@ public partial class Main
         if (tile is null) return null;
         claimed.Add((who, place.Province, place.Slot));
         var slow = TutorialSlow; // the tutorial can ask for a reveal at a quarter of the speed
-        var cover = new CardFlip { From = tile.FaceCornersOnViewport().Select(p => p / _root.Scale.X).ToArray(), Face = face, Back = TablePile.DynastyBack, Turn = .5 * slow, Linger = .45 * slow };
+        var cover = new CardFlip { From = tile.FaceCornersOnViewport().Select(p => p / _root.Scale.X).ToArray(), Face = face, Back = TablePile.DynastyBack, Locate = () => _tiles.FirstOrDefault(t => IsInstanceValid(t) && t.Card.Id == card.Id) ?? _tiles.FirstOrDefault(t => IsInstanceValid(t) && t.Card.Id == place.Card.Id), Turn = .5 * slow, Linger = .45 * slow };
         _root.AddChild(cover);
         return cover;
     }
